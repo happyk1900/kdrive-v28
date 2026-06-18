@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>K-Drive - Điện Thờ Phong Thủy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+        body { background-color: #000; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Space Grotesk', sans-serif; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; overscroll-behavior: none; }
+        input, select { user-select: auto !important; -webkit-user-select: auto !important; touch-action: auto !important; pointer-events: auto !important; }
+
+        .kdrive-bg-target { width: 100%; height: 100%; object-fit: fill; position: absolute; z-index: 1; opacity: 0.8; filter: blur(3px) brightness(0.6); }
+        .hexagon-forcefield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; opacity: 1; }
+        #hexCanvas { width: 100%; height: 100%; display: block; }
+
+        /* BƯỚC ĐỆM CHỐNG LENS: ẤN TOÀN MÀN HÌNH ĐỂ MỞ ĐIỆN THỜ */
+        .thantai-preview-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 5, 10, 0.8); backdrop-filter: blur(8px); z-index: 45000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 1; transition: opacity 0.4s; -webkit-touch-callout: none !important; user-select: none !important; }
+        .big-thantai-img { width: 300px; max-width: 85vw; filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8)); animation: levitateGod 3s ease-in-out infinite; cursor: pointer; pointer-events: none; }
+        @keyframes levitateGod { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)); } }
+        .summon-text { margin-top: 30px; font-family: 'Share Tech Mono', monospace; font-size: 16px; color: #ffd700; text-shadow: 0 0 10px #ffd700; letter-spacing: 2px; pointer-events: none; animation: pulseAlpha 1.5s infinite; }
+        @keyframes pulseAlpha { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px #ffd700); } 50% { opacity: 0.7; filter: drop-shadow(0 0 20px #ffd700); } }
+
+        /* ĐIỆN THỜ KHUNG KIM LOẠI KÉP & BÁT QUÁI */
+        .altar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,5,10,0.85); backdrop-filter: blur(8px); z-index: 50000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.4s cubic-bezier(0.1, 0.8, 0.3, 1); }
+        .altar-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .altar-panel { 
+            background: linear-gradient(135deg, rgba(5,15,25,0.98), rgba(0,5,10,0.95)); 
+            border: 2px solid #ffd700; 
+            box-shadow: 0 0 20px rgba(255,215,0,0.4), inset 0 0 30px rgba(255,215,0,0.15), inset 0 0 5px rgba(255,215,0,0.5); 
+            width: 92%; max-width: 380px; 
+            padding: 20px; 
+            position: relative; 
+            max-height: 85vh; 
+            overflow-y: auto; overflow-x: hidden;
+            clip-path: polygon(15px 0%, calc(100% - 15px) 0%, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0% calc(100% - 15px), 0% 15px);
+        }
+        .altar-panel::-webkit-scrollbar { width: 4px; }
+        .altar-panel::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 4px; }
+        
+        .altar-panel::after { 
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            width: 280px; height: 280px; 
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/07/Bagua_Taijitu.svg');
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            opacity: 0.12; pointer-events: none; z-index: 0; filter: invert(1) sepia(1) saturate(5) hue-rotate(350deg); 
+        }
+        .altar-panel > * { position: relative; z-index: 1; }
+        
+        .altar-panel::before { content: 'GENESIS ALTAR'; position: absolute; top: -10px; left: 25px; background: #030a0d; padding: 0 10px; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #ffd700; letter-spacing: 2px; z-index: 2;}
+        .altar-title { font-family: 'Share Tech Mono', monospace; color: #ffd700; font-size: 15px; margin-bottom: 10px; border-bottom: 1px dashed rgba(255,215,0,0.3); padding-bottom: 5px; text-shadow: 0 0 5px #ffd700; }
+        .altar-info { font-family: 'Space Grotesk', sans-serif; font-size: 12px; color: #a0e7e5; line-height: 1.4; margin-bottom: 10px; }
+        .altar-info .highlight { color: #fff; font-weight: bold; }
+        
+        .input-box { margin-bottom: 8px; display: flex; flex-direction: column; transition: 0.3s; }
+        .input-box label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #ffd700; margin-bottom: 6px; text-transform: uppercase; }
+        .input-box input, .input-box select { background: rgba(0,0,0,0.5); border: 1px solid rgba(0,229,255,0.3); padding: 10px; color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 13px; border-radius: 4px; outline: none; transition: 0.3s;}
+        .input-box input:focus, .input-box select:focus { border-color: #00e5ff; box-shadow: 0 0 8px rgba(0,229,255,0.3); }
+        
+        .compass-wrapper { width: 80px; height: 80px; margin: 2px auto; background: rgba(0,10,15,0.8); position: relative; cursor: crosshair; overflow: hidden; transition: 0.3s; clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%); border: 2px solid rgba(0,229,255,0.4); box-shadow: 0 0 15px rgba(0,229,255,0.2), inset 0 0 10px rgba(0,229,255,0.2); }
+        .compass-wrapper.scanning { border-color: #00ff88; box-shadow: 0 0 20px rgba(0,255,136,0.6), inset 0 0 15px rgba(0,255,136,0.4); }
+        .compass-dial { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 0.1s ease-out; }
+        .compass-dial span { position: absolute; font-family: 'Share Tech Mono', monospace; font-weight: bold; color: #ffd700; font-size: 11px; text-shadow: 0 0 5px #ffd700; }
+        .dir-n { top: 2px; left: 50%; transform: translateX(-50%); color: #ff3333 !important; text-shadow: 0 0 5px #ff3333 !important; }
+        .dir-s { bottom: 2px; left: 50%; transform: translateX(-50%); }
+        .dir-e { top: 50%; right: 4px; transform: translateY(-50%); }
+        .dir-w { top: 50%; left: 4px; transform: translateY(-50%); }
+        .compass-pointer { position: absolute; top: 50%; left: 50%; width: 3px; height: 35px; background: #ff3333; transform: translate(-50%, -100%); box-shadow: 0 0 8px #ff3333; clip-path: polygon(50% 0%, 100% 100%, 0% 100%); z-index: 2; pointer-events: none; }
+        .compass-status { text-align: center; color: #00e5ff; font-family: 'Share Tech Mono', monospace; font-size: 10px; margin-top: 5px; font-weight: bold; cursor: pointer; text-shadow: 0 0 5px rgba(0,229,255,0.5); }
+
+        .poker-table-hologram { width: 100%; height: 80px; margin: 10px 0 5px 0; position: relative; display: flex; justify-content: center; align-items: center; }
+        .table-surface { width: 180px; height: 60px; border: 2px solid rgba(0, 229, 255, 0.4); border-radius: 30px; background: rgba(0, 229, 255, 0.05); box-shadow: inset 0 0 15px rgba(0,229,255,0.1), 0 0 10px rgba(0,229,255,0.1); position: relative; }
+        .table-surface::after { content: 'K-DRIVE'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Share Tech Mono', monospace; font-size: 14px; color: rgba(0, 229, 255, 0.2); letter-spacing: 3px; pointer-events: none; }
+        .seat { position: absolute; width: 20px; height: 20px; background: rgba(0, 10, 15, 0.9); border: 1px solid #00e5ff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; font-family: 'Share Tech Mono', monospace; color: #00e5ff; cursor: pointer; box-shadow: 0 0 5px rgba(0, 229, 255, 0.5); transition: 0.2s; z-index: 2; transform: translate(-50%, -50%); }
+        .seat.selected { background: #ffd700; border-color: #ffd700; color: #000; font-weight: bold; box-shadow: 0 0 15px #ffd700; transform: translate(-50%, -50%) scale(1.15); }
+        .s1 { left: 25%; top: 100%; } .s2 { left: 0%; top: 50%; } .s3 { left: 20%; top: 0%; } .s4 { left: 40%; top: 0%; } .s5 { left: 60%; top: 0%; } .s6 { left: 80%; top: 0%; } .s7 { left: 100%; top: 50%; } .s8 { left: 75%; top: 100%; } .s9 { left: 50%; top: 100%; }
+        .seat-status { text-align: center; color: #00e5ff; font-family: 'Share Tech Mono', monospace; font-size: 11px; margin-top: 8px; font-weight: bold; text-shadow: 0 0 5px rgba(0,229,255,0.5); }
+
+        .login-btn-submit { padding: 12px 25px; background: linear-gradient(90deg, #00b35e, #00ff88); color: #000; font-weight: 800; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; width: 100%; font-family: 'Space Grotesk', sans-serif; box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); transition: all 0.3s; }
+        .login-btn-submit:hover { box-shadow: 0 0 25px rgba(0, 255, 136, 0.8); transform: scale(1.02); }
+        
+        .close-btn { position: absolute; top: -15px; right: -15px; width: 36px; height: 36px; background: #000; border: 2px solid #ff3333; border-radius: 50%; color: #ff3333; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; z-index: 35001; box-shadow: 0 0 15px rgba(255, 51, 51, 0.5); transition: 0.3s;}
+        .close-btn:hover { transform: scale(1.1); background: #ff3333; color: #000; }
+        .btn-back-home { position: absolute; top: 20px; left: 20px; color: #00ff88; font-weight: bold; text-shadow: 0 0 10px #00ff88; cursor: pointer; z-index: 60000; font-family: 'Share Tech Mono', monospace; font-size: 14px; text-decoration: underline; }
+
+        .incense-container { display: flex; justify-content: center; gap: 20px; margin: 10px 0; height: 35px; position: relative; }
+        .laser-stick { width: 3px; height: 100%; background: rgba(255,51,51,0.2); transition: 0.5s; position: relative; border-radius: 2px; }
+        .laser-stick.ignited { background: #ff3333; box-shadow: 0 0 12px #ff3333, 0 0 25px #ff3333; animation: burnDown 10s linear forwards; }
+        @keyframes burnDown { 100% { height: 10%; opacity: 0.5; } }
+    </style>
+</head>
+<body>
+    <img src="https://i.postimg.cc/J4xHjMr7/1.webp" class="kdrive-bg-target">
+    <div class="hexagon-forcefield" id="hexShield"><canvas id="hexCanvas"></canvas></div>
+    
+    <div class="btn-back-home" onclick="window.location.href='index.html'">[ 🔙 VỀ SẢNH CHÍNH ]</div>
+
+    <div id="thantaiPreviewOverlay" class="thantai-preview-overlay" onclick="openAltarForm()">
+        <img src="https://github.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/blob/main/ban%20tho%20ong%20dia.png?raw=true" class="big-thantai-img">
+        <div class="summon-text">[ CHẠM ĐỂ THỈNH THẦN ]</div>
+    </div>
+
+    <div class="altar-overlay" id="altarOverlay">
+        <div class="altar-panel">
+            <div class="close-btn" onclick="window.location.href='index.html'">X</div>
+            <div class="altar-title">> LUNAR MONITOR / ĐIỆN THỜ</div>
+            
+            <div class="altar-info">
+                • Thiên thời: <span class="highlight" id="lblLunar">Đang tính toán...</span><br>
+                • Thời khắc: <span class="highlight" id="lblZodiac">Đang định vị...</span><br>
+                • Phân tích AI: <span class="highlight" style="color:#00ff88;" id="lblBuff">Đang quét...</span>
+            </div>
+
+            <div id="altarStage1_PhongThuy">
+                <div class="input-box">
+                    <label>1. Địa lợi (Hướng Bắc Thực)</label>
+                    <div class="compass-wrapper" onclick="toggleCompass()">
+                        <div id="compassDial" class="compass-dial"><span class="dir-n">B</span><span class="dir-e">Đ</span><span class="dir-s">N</span><span class="dir-w">T</span></div>
+                        <div class="compass-pointer"></div>
+                    </div>
+                    <div class="compass-status" id="compassStatus" onclick="toggleCompass()">[ CHẠM ĐỂ QUÉT - LẮC SỐ 8 NẾU KẸT ]</div>
+                    <input type="hidden" id="inpFacing" value="Chưa đồng bộ">
+                </div>
+
+                <div class="input-box">
+                    <label>2. Vị trí ghế (Table Position)</label>
+                    <div class="poker-table-hologram">
+                        <div class="table-surface">
+                            <span class="seat s1" onclick="selectSeat(1)">1</span><span class="seat s2" onclick="selectSeat(2)">2</span>
+                            <span class="seat s3" onclick="selectSeat(3)">3</span><span class="seat s4" onclick="selectSeat(4)">4</span>
+                            <span class="seat s5" onclick="selectSeat(5)">5</span><span class="seat s6" onclick="selectSeat(6)">6</span>
+                            <span class="seat s7" onclick="selectSeat(7)">7</span><span class="seat s8" onclick="selectSeat(8)">8</span>
+                            <span class="seat s9" onclick="selectSeat(9)">9</span>
+                        </div>
+                    </div>
+                    <div class="seat-status" id="seatStatus">[ CHẠM VÀO SƠ ĐỒ ĐỂ CHỌN GHẾ ]</div>
+                    <input type="hidden" id="inpPosition" value="Chưa đồng bộ">
+                </div>
+            </div>
+
+            <div id="btnDoiBanWrapper" style="display: none; text-align: center; margin: 10px 0;">
+                <button class="login-btn-submit" style="background: rgba(0, 229, 255, 0.1); border: 1px dashed #00e5ff; color: #00e5ff; padding: 10px; font-size: 12px; box-shadow: none;" onclick="startChangeTable()">[ 🔄 XÁC NHẬN PHONG THỦY ]</button>
+            </div>
+
+            <div id="altarStage1_TaiChinh" style="display: flex; gap: 10px; margin-top: 5px;">
+                <div class="input-box" style="flex: 1; margin-bottom: 0;">
+                    <label>3. SỐ MẠNG</label>
+                    <select id="inpLives" style="padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,229,255,0.3); color: #fff; font-family: 'Space Grotesk', sans-serif; border-radius: 4px; outline: none; font-size: 12px;">
+                        <option value="Mạng 1">Mạng 1</option>
+                        <option value="Mạng 2">Mạng 2</option>
+                        <option value="Mạng 3">Mạng 3</option>
+                        <option value="Mạng 4">Mạng 4</option>
+                        <option value="Mạng 5">Mạng 5</option>
+                    </select>
+                </div>
+                <div class="input-box" style="flex: 1.5; margin-bottom: 0;">
+                    <label>4. TIỀN VỐN</label>
+                    <input type="text" id="inpBuyIn" placeholder="VD: 10,000" style="padding: 8px;" oninput="formatCurrency(this)">
+                </div>
+            </div>
+
+            <div id="altarStage2" style="display: none;">
+                <div class="input-box" style="margin-top: 15px;">
+                    <label style="color: #00ff88; border-bottom: 1px dashed #00ff88; padding-bottom: 5px;">5. KẾT THÚC (ÂM HAY DƯƠNG BAO NHIÊU)</label>
+                    <input type="text" id="inpLoss" placeholder="VD: +5,000 hoặc -5,000" style="padding: 10px; font-weight: bold; color: #00ff88; border-color: #00ff88;" oninput="formatCurrency(this)">
+                </div>
+            </div>
+
+            <div class="incense-container" id="incenseBox">
+                <div class="laser-stick" id="inc1"></div><div class="laser-stick" id="inc2"></div><div class="laser-stick" id="inc3"></div>
+            </div>
+
+            <button class="login-btn-submit" id="btnThapNhang" style="background: linear-gradient(90deg, #cc7a00, #ff9900);" onclick="executeRitual()">[ THẮP NHANG & XUẤT TRẬN ]</button>
+        </div>
+    </div>
+
+    <script>
+        const RITUAL_API_URL = "https://script.google.com/macros/s/AKfycbzCFY9erioL9YUCjhMf76YJWYORTaV6ADVEGh7wsQcdX8XeIJAST0VtQqd9xMz_8UgO/exec";
+        let currentUsername = sessionStorage.getItem('kdrive_username');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('kdrive_session') !== 'active') {
+                window.location.href = 'index.html'; // Đuổi về sảnh nếu chưa đăng nhập
+                return;
+            }
+            initHexGrid(); renderCanvas();
+        });
+
+        const hexCanvas = document.getElementById('hexCanvas'); const hexCtx = hexCanvas.getContext('2d'); let hexGrid = []; let canvasW = 0, canvasH = 0;
+        function initHexGrid() { hexCanvas.width = window.innerWidth; hexCanvas.height = window.innerHeight; canvasW = hexCanvas.width; canvasH = hexCanvas.height; hexGrid = []; let r = 24; let h3 = Math.sqrt(3) * r; let cols = Math.ceil(canvasW / h3) + 1; let rows = Math.ceil(canvasH / (r*1.5)) + 1; for(let row=0; row<rows; row++) { for(let col=0; col<cols; col++) { hexGrid.push({x: col * h3 + (row%2===1 ? h3/2 : 0), y: row * r*1.5, energy: 0}); } } }
+        window.addEventListener('resize', initHexGrid);
+        function renderCanvas() { hexCtx.clearRect(0, 0, canvasW, canvasH); hexCtx.lineWidth = 1.2; for(let hex of hexGrid) { hex.energy = Math.random() * 0.9; hex.energy *= 0.88; let alpha = 0.12 + hex.energy; if(alpha>1) alpha=1; hexCtx.strokeStyle = `rgba(0,255,136,${alpha})`; hexCtx.fillStyle = alpha > 0.22 ? `rgba(0,255,136,${(alpha-0.15)*0.3})` : 'transparent'; hexCtx.beginPath(); for (let i=0; i<6; i++) { let a = Math.PI/180*(60*i-30); hexCtx.lineTo(hex.x + 20*Math.cos(a), hex.y + 20*Math.sin(a)); } hexCtx.closePath(); hexCtx.stroke(); if(hexCtx.fillStyle!=='transparent') hexCtx.fill(); } requestAnimationFrame(renderCanvas); }
+
+        function formatCurrency(input) { let isNegative = input.value.startsWith('-'); let isPositive = input.value.startsWith('+'); let val = input.value.replace(/[^0-9]/g, ''); if(val === '') { input.value = isNegative ? '-' : (isPositive ? '+' : ''); return; } let formatted = parseInt(val, 10).toLocaleString('en-US'); if (isNegative) formatted = '-' + formatted; if (isPositive) formatted = '+' + formatted; input.value = formatted; }
+
+        function checkAltarState() {
+            const savedSession = localStorage.getItem('kdrive_altar_session_' + currentUsername);
+            let btn = document.getElementById('btnThapNhang');
+            let boxIncense = document.getElementById('incenseBox');
+            if(savedSession) {
+                document.getElementById('altarStage1_PhongThuy').style.opacity = '0.4'; document.getElementById('altarStage1_PhongThuy').style.pointerEvents = 'none'; document.getElementById('altarStage1_TaiChinh').style.opacity = '0.4'; document.getElementById('altarStage1_TaiChinh').style.pointerEvents = 'none';
+                document.getElementById('altarStage2').style.display = 'block'; document.getElementById('btnDoiBanWrapper').style.display = 'block'; boxIncense.style.display = 'none'; 
+                btn.innerHTML = "[ TẠ LỄ & LƯU SỔ SINH TỬ ]"; btn.onclick = finishRitual; btn.style.background = "linear-gradient(90deg, #00b3e6, #00e5ff)"; btn.style.color = "#000";
+            } else {
+                document.getElementById('altarStage1_PhongThuy').style.opacity = '1'; document.getElementById('altarStage1_PhongThuy').style.pointerEvents = 'auto'; document.getElementById('altarStage1_TaiChinh').style.opacity = '1'; document.getElementById('altarStage1_TaiChinh').style.pointerEvents = 'auto';
+                document.getElementById('altarStage2').style.display = 'none'; document.getElementById('btnDoiBanWrapper').style.display = 'none'; boxIncense.style.display = 'flex'; 
+                document.getElementById('inc1').classList.remove('ignited'); document.getElementById('inc2').classList.remove('ignited'); document.getElementById('inc3').classList.remove('ignited');
+                btn.innerHTML = "[ THẮP NHANG & XUẤT TRẬN ]"; btn.onclick = executeRitual; btn.style.background = "linear-gradient(90deg, #cc7a00, #ff9900)"; btn.style.color = "#000";
+            }
+        }
+
+        function startChangeTable() {
+            document.getElementById('altarStage1_PhongThuy').style.opacity = '1'; document.getElementById('altarStage1_PhongThuy').style.pointerEvents = 'auto'; document.getElementById('altarStage2').style.display = 'none'; document.getElementById('btnDoiBanWrapper').style.display = 'none';
+            let btn = document.getElementById('btnThapNhang'); btn.innerHTML = "[ XÁC NHẬN PHONG THỦY ]"; btn.onclick = saveNewTable; btn.style.background = "linear-gradient(90deg, #ccaa00, #ffd700)"; btn.style.color = "#000";
+        }
+
+        function saveNewTable() {
+            let sessionData = JSON.parse(localStorage.getItem('kdrive_altar_session_' + currentUsername));
+            if(sessionData) {
+                let newFacing = document.getElementById('inpFacing').value; let newPosition = document.getElementById('inpPosition').value;
+                if (newFacing !== "Chưa đồng bộ") { sessionData.facing += " ➔ " + newFacing; } if (newPosition !== "Chưa đồng bộ") { sessionData.position += " ➔ " + newPosition; }
+                localStorage.setItem('kdrive_altar_session_' + currentUsername, JSON.stringify(sessionData));
+                document.getElementById('inpFacing').value = "Chưa đồng bộ"; document.getElementById('inpPosition').value = "Chưa đồng bộ";
+                document.getElementById('compassStatus').innerText = "[ ĐÃ CỘNG DỒN LỊCH SỬ ]"; document.getElementById('seatStatus').innerText = "[ ĐÃ CỘNG DỒN VỊ TRÍ ]";
+                let btn = document.getElementById('btnThapNhang'); btn.innerHTML = "[ CẬP NHẬT THÀNH CÔNG ✓ ]"; btn.style.background = "#00ff88"; btn.style.color = "#000";
+                setTimeout(() => { checkAltarState(); }, 1500);
+            }
+        }
+
+        function openAltarForm() {
+            const preview = document.getElementById('thantaiPreviewOverlay'); preview.style.display = 'none';
+            const altar = document.getElementById('altarOverlay');
+            let d = new Date(); let lunarFormatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', {day: '2-digit', month: '2-digit'});
+            document.getElementById('lblLunar').innerText = "Ngày " + lunarFormatter.format(d) + " [Âm Lịch]";
+            let zInfo = getZodiacHour(); document.getElementById('lblZodiac').innerText = zInfo.z; document.getElementById('lblBuff').innerText = zInfo.b;
+            checkAltarState(); altar.classList.add('active');
+        }
+
+        function getZodiacHour() {
+            const hrs = new Date().getHours();
+            if(hrs >= 23 || hrs < 1) return {z: "Giờ Tý (Chuột)", b: "Tâm điểm bóng tối. Tránh All-in."}; if(hrs >= 1 && hrs < 3) return {z: "Giờ Sửu (Trâu)", b: "Năng lượng bền bỉ. Chơi chậm."}; if(hrs >= 3 && hrs < 5) return {z: "Giờ Dần (Hổ)", b: "Hoang dã. Sẵn sàng ép sân."}; if(hrs >= 5 && hrs < 7) return {z: "Giờ Mão (Mèo)", b: "Linh hoạt. Phù hợp rình rập."}; if(hrs >= 7 && hrs < 9) return {z: "Giờ Thìn (Rồng)", b: "Quyền lực. Tăng tỷ lệ Bluff."}; if(hrs >= 9 && hrs < 11) return {z: "Giờ Tỵ (Rắn)", b: "Hiểm độc. Setup bẫy Check-raise."}; if(hrs >= 11 && hrs < 13) return {z: "Giờ Ngọ (Ngựa)", b: "Tốc độ. Lối chơi càn lướt."}; if(hrs >= 13 && hrs < 15) return {z: "Giờ Mùi (Dê)", b: "Ôn hòa. Giữ Pot nhỏ."}; if(hrs >= 15 && hrs < 17) return {z: "Giờ Thân (Khỉ)", b: "Đột biến. Đánh lừa phán đoán."}; if(hrs >= 17 && hrs < 19) return {z: "Giờ Dậu (Gà)", b: "Cảnh giác. Quan sát Sizing."}; if(hrs >= 19 && hrs < 21) return {z: "Giờ Tuất (Chó)", b: "Phòng thủ. Bảo vệ Blind."}; return {z: "Giờ Hợi (Heo)", b: "Tĩnh lặng. Kín đáo thu hoạch."};
+        }
+
+        let isCompassActive = false; let currentHeading = 0;
+        function toggleCompass() {
+            const statusEl = document.getElementById('compassStatus'); const wrapperEl = document.querySelector('.compass-wrapper');
+            if(isCompassActive) {
+                isCompassActive = false; window.removeEventListener('deviceorientationabsolute', handleOrientation); window.removeEventListener('deviceorientation', handleOrientation);
+                wrapperEl.classList.remove('scanning'); let finalDir = getDirectionString(currentHeading);
+                statusEl.innerText = "[ ĐÃ KHÓA: " + finalDir + " ]"; statusEl.style.color = "#ffd700"; document.getElementById('inpFacing').value = finalDir;
+                if(navigator.vibrate) navigator.vibrate([50, 50, 100]);
+            } else {
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') { DeviceOrientationEvent.requestPermission().then(permissionState => { if (permissionState === 'granted') { startCompassHardware(); } else { alert("BOO cần quyền la bàn!"); } }).catch(console.error); } else { startCompassHardware(); }
+            }
+        }
+        function startCompassHardware() {
+            isCompassActive = true; document.querySelector('.compass-wrapper').classList.add('scanning');
+            document.getElementById('compassStatus').innerText = "[ ĐANG QUÉT TIÊN THIÊN... ]"; document.getElementById('compassStatus').style.color = "#00ff88";
+            if ('ondeviceorientationabsolute' in window) { window.addEventListener('deviceorientationabsolute', handleOrientation); } else { window.addEventListener('deviceorientation', handleOrientation); }
+        }
+        function handleOrientation(event) {
+            let alpha = event.alpha; if(event.webkitCompassHeading) { alpha = event.webkitCompassHeading; } else if (event.absolute || 'ondeviceorientationabsolute' in window) { alpha = 360 - alpha; } else { alpha = 360 - alpha; } 
+            currentHeading = alpha; document.getElementById('compassDial').style.transform = `rotate(${-alpha}deg)`;
+        }
+        function getDirectionString(angle) {
+            if (angle >= 337.5 || angle < 22.5) return "CHÍNH BẮC (Rình Rập)"; if (angle >= 22.5 && angle < 67.5) return "ĐÔNG BẮC (Cẩn Trọng)"; if (angle >= 67.5 && angle < 112.5) return "CHÍNH ĐÔNG (Tấn Công)"; if (angle >= 112.5 && angle < 157.5) return "ĐÔNG NAM (Tài Lộc)"; if (angle >= 157.5 && angle < 202.5) return "CHÍNH NAM (Đỉnh Cao)"; if (angle >= 202.5 && angle < 247.5) return "TÂY NAM (Phòng Thủ)"; if (angle >= 247.5 && angle < 292.5) return "CHÍNH TÂY (Sát Phạt)"; return "TÂY BẮC (Thống Trị)";
+        }
+
+        function selectSeat(seatNum) {
+            document.querySelectorAll('.seat').forEach(el => el.classList.remove('selected')); event.target.classList.add('selected');
+            document.getElementById('seatStatus').innerText = `[ ĐÃ KHÓA: GHẾ SỐ ${seatNum} ]`; document.getElementById('seatStatus').style.color = "#ffd700"; document.getElementById('inpPosition').value = `Ghế ${seatNum}`;
+            if(navigator.vibrate) navigator.vibrate([50]);
+        }
+
+        function executeRitual() {
+            const btn = document.getElementById('btnThapNhang');
+            if(document.getElementById('inpFacing').value === 'Chưa đồng bộ' || !document.getElementById('inpBuyIn').value) {
+                btn.innerText = "[ ĐIỀN THIẾU THÔNG TIN ]"; btn.style.background = "#ff3333";
+                setTimeout(() => { btn.innerText = "[ THẮP NHANG & XUẤT TRẬN ]"; btn.style.background = "linear-gradient(90deg, #cc7a00, #ff9900)"; }, 1500); return;
+            }
+            btn.disabled = true; btn.innerText = "[ ĐANG KẾT NỐI TÂM LINH... ]";
+            const sessionData = { lunarDate: document.getElementById('lblLunar').innerText, zodiacHour: document.getElementById('lblZodiac').innerText, facing: document.getElementById('inpFacing').value, position: document.getElementById('inpPosition').value, buyIn: document.getElementById('inpLives').value + " - Vốn: " + document.getElementById('inpBuyIn').value, aiEvaluation: "Buff: " + document.getElementById('lblBuff').innerText };
+            localStorage.setItem('kdrive_altar_session_' + currentUsername, JSON.stringify(sessionData));
+            document.getElementById('inc1').classList.add('ignited'); document.getElementById('inc2').classList.add('ignited'); document.getElementById('inc3').classList.add('ignited');
+            if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            btn.innerText = "[ ĐÃ THỈNH THẦN ✓ ]"; btn.style.background = "#00ff88"; btn.style.color = "#000";
+            setTimeout(() => { window.location.href = 'index.html'; }, 2200); // Thắp xong cho về thẳng sảnh chính
+        }
+
+        function finishRitual() {
+            let lossVal = document.getElementById('inpLoss').value;
+            if(!lossVal) { alert('Hãy nhập số tiền Kết thúc Âm hay Dương!'); return; }
+            const btn = document.getElementById('btnThapNhang'); btn.disabled = true; btn.innerText = "[ ĐANG GHI SỔ SINH TỬ... ]";
+            let sessionData = JSON.parse(localStorage.getItem('kdrive_altar_session_' + currentUsername)); sessionData.loss = lossVal; 
+            fetch(RITUAL_API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sessionData) })
+            .then(() => {
+                localStorage.removeItem('kdrive_altar_session_' + currentUsername);
+                if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                btn.innerText = "[ ĐÃ KHÓA SỔ THÀNH CÔNG ✓ ]"; btn.style.background = "#00ff88"; btn.style.color = "#000";
+                setTimeout(() => { window.location.href = 'index.html'; }, 2200); // Chốt sổ xong cho về sảnh chính
+            }).catch(err => { btn.disabled = false; btn.innerText = "[ LỖI KẾT NỐI - THỬ LẠI ]"; btn.style.background = "#ff3333"; });
+        }
+    </script>
+</body>
+</html>
