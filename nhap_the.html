@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>K-Drive: Giao Thức Nhập Thể V4.2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #000; color: #00e5ff; font-family: 'Space Grotesk', sans-serif; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+        /* CẢNH 0: MÀN HÌNH KHÓA CHIA ĐÔI VIỀN NÚT BẤM */
+        #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; background: #020202; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        #boot-screen::after { content: ''; position: absolute; top: -10%; left: 0; width: 100%; height: 2px; background: rgba(255, 51, 51, 0.4); box-shadow: 0 0 15px #ff3333; animation: scanLine 3s linear infinite; pointer-events: none; }
+        @keyframes scanLine { 0% { top: -10%; } 100% { top: 110%; } }
+
+        .boot-text-container { font-family: 'Share Tech Mono', monospace; font-size: 15px; text-align: center; width: 90%; max-width: 380px; }
+        .sys-title { color: #ffd700; font-weight: bold; font-size: 19px; text-shadow: 0 0 8px rgba(255,215,0,0.6); display: block; margin-bottom: 12px; letter-spacing: 1px; }
+        .sys-content { color: #a0e7e5; line-height: 1.6; display: block; }
+
+        .btn-group { display: flex; gap: 15px; margin-top: 35px; width: 100%; justify-content: center; }
+        .btn-half { flex: 1; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; padding: 15px 5px; text-align: center; border-radius: 2px; cursor: pointer; transition: 0.3s; letter-spacing: 1px; text-transform: uppercase; }
+        
+        .btn-half.red { color: #ff3333; border: 1px solid rgba(255,51,51,0.4); box-shadow: inset 0 0 5px rgba(255,51,51,0.1); }
+        .btn-half.red:active { transform: scale(0.95); background: rgba(255,51,51,0.2); }
+        .btn-half.red:hover { border-color: #ff3333; box-shadow: 0 0 15px rgba(255,51,51,0.4), inset 0 0 10px rgba(255,51,51,0.2); }
+        
+        .btn-half.green { color: #00e5ff; border: 1px solid rgba(0,229,255,0.4); box-shadow: inset 0 0 5px rgba(0,229,255,0.1); animation: breatheGlow 2s infinite alternate; }
+        .btn-half.green:active { transform: scale(0.95); background: rgba(0,229,255,0.2); }
+        @keyframes breatheGlow { 0% { box-shadow: inset 0 0 5px rgba(0,229,255,0.1); border-color: rgba(0,229,255,0.4); } 100% { box-shadow: inset 0 0 15px rgba(0,229,255,0.6); border-color: #00e5ff; } }
+
+        /* HIỆU ỨNG SẬP NGUỒN GLITCH */
+        .glitch-out { animation: severeGlitch 0.3s forwards; }
+        @keyframes severeGlitch { 
+            0% { transform: translate(0); filter: drop-shadow(0 0 0 red); } 
+            20% { transform: translate(-10px, 5px) skewX(20deg); filter: drop-shadow(10px 0 0 red) drop-shadow(-10px 0 0 cyan); opacity: 0.8; }
+            40% { transform: translate(10px, -5px) skewX(-20deg); filter: drop-shadow(-10px 0 0 red); opacity: 0.5; }
+            60% { transform: scale(1.1) translate(0); opacity: 0; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        /* NỀN MA TRẬN */
+        #matrixCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0; transition: opacity 1s; }
+        #matrixCanvas.active { opacity: 0.85; }
+
+        /* KHUNG CHỨA BẢNG LED HUD */
+        .hud-wrapper { position: relative; z-index: 10; width: 92%; max-width: 420px; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.95); transition: all 0.4s cubic-bezier(0.1, 0.8, 0.3, 1); pointer-events: none; }
+        .hud-wrapper.visible { opacity: 1; transform: scale(1); pointer-events: auto; }
+
+        .led-panel { background: rgba(0, 10, 15, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(0, 229, 255, 0.3); box-shadow: 0 0 20px rgba(0, 229, 255, 0.1), inset 0 0 15px rgba(0, 229, 255, 0.05); padding: 25px; width: 100%; margin-bottom: 25px; position: relative; }
+        .led-panel::before, .led-panel::after { content: ''; position: absolute; width: 15px; height: 15px; border-color: #00e5ff; border-style: solid; }
+        .led-panel::before { top: -2px; left: -2px; border-width: 2px 0 0 2px; }
+        .led-panel::after { bottom: -2px; right: -2px; border-width: 0 2px 2px 0; }
+
+        .led-panel.cyan { border-color: rgba(0, 229, 255, 0.4); }
+        .led-panel.green { border-color: rgba(0, 255, 136, 0.4); box-shadow: 0 0 20px rgba(0, 255, 136, 0.15); }
+        .led-panel.green::before, .led-panel.green::after { border-color: #00ff88; }
+        .led-panel.gold { border-color: rgba(255, 215, 0, 0.4); box-shadow: 0 0 20px rgba(255, 215, 0, 0.15); }
+        .led-panel.gold::before, .led-panel.gold::after { border-color: #ffd700; }
+
+        .text-content { font-family: 'Share Tech Mono', monospace; font-size: 15px; color: #a0e7e5; line-height: 1.8; min-height: 80px; }
+        .text-content .val { font-weight: bold; color: #fff; }
+        .text-content .status-ok { color: #00ff88; font-weight: bold; text-shadow: 0 0 5px rgba(0,255,136,0.5); }
+
+        /* NÚT BẤM TRONG HUD HỆ THỐNG */
+        .btn-led { background: rgba(0,0,0,0.6); border: 1px solid #00e5ff; color: #00e5ff; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; padding: 15px; letter-spacing: 1.5px; cursor: pointer; transition: 0.3s; width: 100%; text-transform: uppercase; text-shadow: 0 0 5px currentColor; position: relative; overflow: hidden; opacity: 0; display: none; }
+        .btn-led.visible { opacity: 1; display: block; animation: pulseGlow 2s infinite alternate; }
+        .btn-led:active { transform: scale(0.95); background: rgba(0,229,255,0.2); }
+
+        .btn-led.cyan { border-color: #00e5ff; color: #00e5ff; }
+        .btn-led.green { border-color: #00ff88; color: #00ff88; animation: none; box-shadow: 0 0 15px rgba(0,255,136,0.4); }
+        .btn-led.gold { border-color: #ffd700; color: #ffd700; }
+        .btn-led.gold.visible { animation: goldGlow 1.5s infinite alternate; }
+
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 5px currentColor; } 100% { box-shadow: 0 0 20px currentColor, inset 0 0 10px currentColor; } }
+        @keyframes goldGlow { 0% { box-shadow: 0 0 5px #ffd700; } 100% { box-shadow: 0 0 25px #ffd700, inset 0 0 8px #ffd700; } }
+
+        /* AVATAR KAI RIPE (Màn 4) */
+        .avatar-box { text-align: center; margin-bottom: -20px; z-index: 12; position: relative; opacity: 0; transition: opacity 1s; display: none; }
+        .avatar-box.visible { opacity: 1; display: block; }
+        .avatar-img { width: 125px; filter: drop-shadow(0 0 20px rgba(255,215,0,0.6)); animation: floatImg 3s ease-in-out infinite; }
+        @keyframes floatImg { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    </style>
+</head>
+<body>
+
+    <div id="boot-screen">
+        <div class="boot-text-container" id="bootText">
+            <span class="sys-title">> SYSTEM WARNING:</span>
+            <span class="sys-content">Cần kết nối cơ thể sinh học để khởi động chương trình.</span>
+            
+            <div class="btn-group">
+                <div class="btn-half red" onclick="goHome()">[ I'M NOT READY ]</div>
+                <div class="btn-half green" onclick="triggerScene1()">[ I'M READY ]</div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="matrixCanvas"></canvas>
+
+    <div class="avatar-box" id="avatarBox">
+        <img src="https://github.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/blob/main/f6870b94-3184-4fbc-ba1e-c7655780107d-removebg-preview.png?raw=true" class="avatar-img" alt="Kai Ripe">
+    </div>
+
+    <div class="hud-wrapper" id="hudWrapper">
+        <div class="led-panel cyan" id="mainPanel">
+            <div class="text-content" id="typedText"></div>
+        </div>
+        <button class="btn-led cyan" id="mainBtn" onclick="handleButtonClick()"></button>
+    </div>
+
+    <script>
+        // --- 1. HỆ THỐNG ÂM THANH SẮC BÉN ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            if (type === 'glitch') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'bassdrop') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(80, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 1.2);
+                gain.gain.setValueAtTime(1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.2);
+                osc.start(); osc.stop(audioCtx.currentTime + 1.2);
+            } else if (type === 'type') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(850 + Math.random()*150, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } else if (type === 'beep_success') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+            } else if (type === 'click') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+            }
+        }
+
+        // --- 2. HIỆU ỨNG MA TRẬN ĐỔ ĐỘNG LẬP TRÌNH ---
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const chars = '01♠♦♥♣KAI_RIPE_8_CLASSIC'.split('');
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+        for(let x = 0; x < columns; x++) drops[x] = Math.random() * -100;
+        let matrixColor = '#008899';
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = matrixColor;
+            ctx.font = fontSize + 'px "Share Tech Mono"';
+            for(let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.95) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 50);
+
+        // --- 3. BIẾN ĐIỀU HƯỚNG & HỆ THỐNG DOM ---
+        let currentScene = 0;
+        let simInterval; 
+        const hudWrapper = document.getElementById('hudWrapper');
+        const mainPanel = document.getElementById('mainPanel');
+        const typedText = document.getElementById('typedText');
+        const mainBtn = document.getElementById('mainBtn');
+        const avatarBox = document.getElementById('avatarBox');
+
+        // --- 4. HÀM HIỆU ỨNG GÕ CHỮ ---
+        function typeWriter(htmlString, callback) {
+            typedText.innerHTML = ''; 
+            let i = 0;
+            let isTag = false;
+            let textBuffer = '';
+
+            function typeNext() {
+                if (i < htmlString.length) {
+                    textBuffer += htmlString.charAt(i);
+                    typedText.innerHTML = textBuffer;
+                    
+                    if (htmlString.charAt(i) === '<') isTag = true;
+                    if (htmlString.charAt(i) === '>') isTag = false;
+
+                    if (!isTag && i % 2 === 0) playSound('type');
+                    
+                    i++;
+                    setTimeout(typeNext, isTag ? 0 : 15); 
+                } else {
+                    if (callback) callback();
+                }
+            }
+            typeNext();
+        }
+
+        // --- HÀNH ĐỘNG HỦY GIAO THỨC (NÚT ĐỎ) ---
+        function goHome() {
+            playSound('click');
+            window.location.href = "index.html"; 
+        }
+
+        // --- CLICK 1: ĐỒNG Ý KÍCH HOẠT (SẬP NGUỒN) ---
+        function triggerScene1() {
+            if (currentScene !== 0) return;
+            currentScene = 1;
+            
+            playSound('glitch');
+            document.getElementById('bootText').classList.add('glitch-out');
+            
+            setTimeout(() => {
+                document.getElementById('boot-screen').style.background = 'rgba(0,0,0,0)';
+                playSound('bassdrop');
+            }, 300);
+
+            setTimeout(() => {
+                document.getElementById('boot-screen').style.display = 'none';
+                document.getElementById('matrixCanvas').classList.add('active');
+                
+                mainPanel.className = 'led-panel cyan';
+                hudWrapper.classList.add('visible');
+                
+                const scene1HTML = `<span class="sys-title">> DEVICE LINK REQUIRED:</span><br>
+                <span class="sys-content">Cần kết nối thiết bị trung gian.</span>`;
+                
+                typeWriter(scene1HTML, () => {
+                    mainBtn.className = 'btn-led cyan visible';
+                    mainBtn.innerHTML = '[ SCAN DEVICES ]';
+                });
+            }, 1200);
+        }
+
+        // --- XỬ LÝ NÚT BẤM CHUNG CHO CÁC MÀN HUD KẾ TIẾP ---
+        function handleButtonClick() {
+            playSound('click');
+            
+            if (currentScene === 1) {
+                // CLICK 2: BẮT ĐẦU QUÉT KẾT NỐI SẮP ĐẶT
+                currentScene = 2;
+                mainBtn.innerHTML = '[ LINKING DEVICES... ]';
+                mainBtn.style.animation = 'none';
+                mainBtn.style.opacity = '0.5';
+
+                setTimeout(() => {
+                    playSound('beep_success');
+                    if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    mainBtn.className = 'btn-led green visible';
+                    mainBtn.innerHTML = '[ CONNECTED ✓ ]';
+                    mainBtn.style.opacity = '1';
+                    
+                    // Tự động đóng bảng LED sau 1.2 giây để chuyển sang nhận dữ liệu sức khỏe
+                    setTimeout(() => {
+                        triggerScene2();
+                    }, 1200);
+                }, 1500);
+
+            } else if (currentScene === 3) {
+                // CLICK 3: HOÀN TẤT, BẤM VÀO ĐOẠN KIỂM TRA PHẢN XẠ TRỰC TIẾP
+                window.location.href = "kiem_tra_giac_quan.html";
+            }
+        }
+
+        // --- TỰ ĐỘNG: QUÉT VÀ HIỂN THỊ CHỈ SỐ THẬT (MÀN 3) ---
+        function triggerScene2() {
+            hudWrapper.classList.remove('visible'); 
+            mainBtn.classList.remove('visible');
+            
+            setTimeout(() => {
+                matrixColor = '#00ff44'; // Đổi mưa ma trận sang màu lục
+                mainPanel.className = 'led-panel green';
+                hudWrapper.classList.add('visible');
+                
+                const dataHTML = `<span class="sys-title">> DATA EXTRACTION IN PROGRESS...</span><br>
+                <span class="sys-content">A.I BOO đang nhận dữ liệu từ thiết bị trung gian...</span><br><br>
+                * [HR] Nhịp tim thực thời: <span id="simHR" class="val">92</span><span class="val"> BPM</span><br>
+                * [HRV] Biến thiên nhịp tim: <span id="simHRV" class="val">65</span><span class="val"> ms</span><br>
+                * [STR] Mức độ Stress: <span class="val">42/100</span><br>
+                * [SLEEP] Giấc ngủ đêm qua: <span class="val">85/100</span><br>
+                * [ENERGY] Năng lượng cơ thể: <span class="val">78%</span><br>
+                * [STEPS] Vận động trong ngày: <span class="val">6,420 bước</span><br><br>
+                <span id="syncStatus" class="sys-content"></span>`;
+
+                typeWriter(dataHTML, () => {
+                    // Kích hoạt bộ tạo nhịp số thực nhảy tự động ngẫu nhiên
+                    simInterval = setInterval(() => {
+                        document.getElementById('simHR').innerText = Math.floor(Math.random() * 5) + 88;
+                        document.getElementById('simHRV').innerText = Math.floor(Math.random() * 4) + 62;
+                    }, 700);
+
+                    // Sau 3 giây hiện thông báo hoàn tất đồng bộ, dừng nhảy số
+                    setTimeout(() => {
+                        clearInterval(simInterval);
+                        document.getElementById('syncStatus').innerHTML = `<span class="status-ok">> SYSTEM SYNC COMPLETE.</span>`;
+                        
+                        // Chờ tiếp 1 giây để người dùng đọc trạng thái rồi tự động đẩy qua màn thức tỉnh
+                        setTimeout(() => {
+                            triggerScene3();
+                        }, 1000);
+                    }, 3000);
+                });
+            }, 500);
+        }
+
+        // --- TỰ ĐỘNG: GIAO THỨC THỨC TỈNH CYBORG KAI RIPE (MÀN 4) ---
+        function triggerScene3() {
+            currentScene = 3;
+            hudWrapper.classList.remove('visible');
+            
+            setTimeout(() => {
+                matrixColor = '#ffaa00'; // Đổi mưa ma trận sang Vàng hoàng kim thực chiến
+                avatarBox.classList.add('visible');
+                mainPanel.className = 'led-panel gold';
+                hudWrapper.classList.add('visible');
+                
+                const finalHTML = `<span class="sys-title">> NEURAL LINK ESTABLISHED:</span><br>
+                <span class="sys-content">Hoàn tất nhập thể.<br>Kiểm tra phản xạ thần kinh...</span>`;
+                
+                typeWriter(finalHTML, () => {
+                    mainBtn.className = 'btn-led gold visible';
+                    mainBtn.innerHTML = '[ INITIATE TEST ]';
+                });
+            }, 600);
+        }
+    </script>
+</body>
+</html>
