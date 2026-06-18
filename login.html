@@ -1,22 +1,43 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/happyk1900/Kai-Ripe/main/t%C3%A1ch%20r%E1%BB%93i.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>K-Drive: Trạm Kiểm Soát</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* TOÀN BỘ CSS GIAO DIỆN CŨ ĐƯỢC GIỮ NGUYÊN 100% */
+        /* TOÀN BỘ CSS HIỆU ỨNG VÀ THIẾT KẾ ĐƯỢC GIỮ NGUYÊN 1:1 */
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: none; }
         body { background-color: #000; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Space Grotesk', sans-serif; }
         @keyframes screenStrikeShake { 0%, 100% { transform: scale(1) rotate(0deg); } 10%, 30%, 50%, 70%, 90% { transform: translate(-6px, 5px) scale(1.03) rotate(-1deg); } 20%, 40%, 60%, 80% { transform: translate(6px, -5px) scale(1.03) rotate(1deg); } }
         .shake-active { animation: screenStrikeShake 0.6s cubic-bezier(.36,.07,.19,.97) both; filter: contrast(1.5) brightness(1.2); }
         .kdrive-image-wrapper { position: relative; width: 100vw; height: 100vh; max-width: 430px; background-color: #000; overflow: hidden; }
         .kdrive-bg-target { width: 100%; height: 100%; object-fit: fill; position: absolute; z-index: 1; transition: opacity 0.3s; opacity: 1; }
+        
         .global-radar { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; overflow: hidden; }
         .radar-line { width: 100%; height: 2px; background: rgba(0, 255, 136, 0.5); box-shadow: 0 0 20px rgba(0, 255, 136, 1); position: absolute; top: -10px; animation: globalScan 8s linear infinite; }
         @keyframes globalScan { 0% { top: -10px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
+        /* CSS MÀN HÌNH CHỜ K-INFO (ẢNH 1) */
+        .central-hud-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 190px; z-index: 90; pointer-events: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.4s ease; opacity: 1; }
+        .glass-layer { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(0, 255, 136, 0.4); border-radius: 14px; z-index: 1; pointer-events: none; }
+        .hud-text.main { position: relative; font-size: 34px; font-weight: 700; color: #ffd700; letter-spacing: 5px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.8); z-index: 2; pointer-events: none; margin-top: -10px; text-align: center; width: 100%; display: inline-block; overflow: hidden;}
+        .hud-text.main::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent); animation: quantumShine 3.5s infinite; transform: skewX(-20deg); }
+        @keyframes quantumShine { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+        
+        .hud-action-btn { position: absolute; color: #fff; font-size: 13px; font-weight: 600; text-transform: uppercase; cursor: pointer; border-bottom: 1px solid #fff; transition: 0.3s; z-index: 95; }
+        .hud-action-btn:hover { color: #00ff88; border-bottom-color: #00ff88; transform: scale(1.05); text-shadow: 0 0 8px #00ff88; }
+        .hud-action-btn.top-left { top: 18px; left: 18px; } 
+        .hud-action-btn.bottom-right { bottom: 18px; right: 18px; }
+        
+        .hud-warning-text { position: absolute; bottom: 42px; left: 0; width: 100%; text-align: center; font-size: 11px; font-weight: 700; color: #ff9900; z-index: 2; opacity: 0; }
+        .hud-warning-active { opacity: 1; animation: blinkWarning 0.6s infinite; }
+        @keyframes blinkWarning { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* CSS CÁC BẢNG POPUP (ẢNH 2) */
         .gateway-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, rgba(0, 15, 5, 0.95), rgba(0, 5, 2, 0.95)); backdrop-filter: blur(25px); border: 1px solid rgba(0, 255, 136, 0.7); border-radius: 16px; padding: 25px 15px; z-index: 99999; display: none; flex-direction: column; align-items: center; box-shadow: 0 0 50px rgba(0, 255, 136, 0.2), inset 0 0 20px rgba(0, 255, 136, 0.1); width: 90%; max-width: 350px; }
         .gateway-popup h2 { color: #ffd700; font-size: 20px; letter-spacing: 2px; margin-bottom: 15px; text-shadow: 0 0 15px rgba(255,215,0,0.6); text-transform: uppercase; }
         
@@ -41,7 +62,6 @@
         .remember-checkbox:checked::after { content: '✔'; position: absolute; top: -2px; left: 2px; color: #00ff88; font-size: 12px; }
         .change-pass-link { font-size: 12px; color: #ff9900; font-weight: 600; text-decoration: underline; cursor: pointer; }
 
-        /* INFO TABS CSS */
         .info-tabs-container { display: flex; width: 100%; border-bottom: 1px solid rgba(0, 255, 136, 0.2); margin-bottom: 15px; z-index: 5; }
         .info-tab-btn { flex: 1; padding: 10px 5px; font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700; color: rgba(255, 255, 255, 0.4); background: transparent; border: none; cursor: pointer; text-transform: uppercase; transition: all 0.3s ease; text-align: center; border-bottom: 2px solid transparent; margin-bottom: -1px; }
         .info-tab-btn.tab-active { color: #00ff88; border-bottom: 2px solid #00ff88; background: linear-gradient(0deg, rgba(0,255,136,0.1) 0%, transparent 100%); text-shadow: 0 0 8px rgba(0,255,136,0.5); }
@@ -55,6 +75,8 @@
         .ninja-levitate { animation: levitate 3s ease-in-out infinite; filter: drop-shadow(0 0 15px rgba(0,255,136,0.6)); }
         .bio-scroll-area { max-height: 48vh; overflow-y: auto; width: 100%; padding-right: 5px; margin-top: 5px; text-align: left; }
         .info-block { border-left: 2px solid #00e5ff; padding-left: 12px; margin-bottom: 18px; }
+        
+        body.popups-active .central-hud-container { pointer-events: none !important; opacity: 0 !important; transform: translate(-50%, -50%) scale(0.9); }
     </style>
 </head>
 <body>
@@ -63,7 +85,16 @@
         <div class="global-radar"><div class="radar-line"></div></div>
         <img src="https://i.postimg.cc/J4xHjMr7/1.webp" class="kdrive-bg-target" id="kdriveBg">
 
-        <div class="gateway-popup" id="loginPanelContainer" style="display: flex;">
+        <div id="protocolGuide" class="central-hud-container">
+            <div class="glass-layer"></div>
+            <div class="hud-action-btn top-left" onclick="showLoginPanel()">[ ĐĂNG NHẬP ]</div>
+            <div class="hud-action-btn bottom-right" onclick="showNinjaInfo()">[ INFO ]</div>
+            <div class="hud-text main">K-INFO</div>
+            <div id="hudGuardWarning" class="hud-warning-text"></div>
+        </div>
+
+        <div class="gateway-popup" id="loginPanelContainer">
+            <div class="close-btn" onclick="closeLoginPanel()">X</div>
             
             <div id="panel-login" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
                 <h2>TRẠM KIỂM SOÁT</h2>
@@ -195,7 +226,14 @@
     </div>
 
     <script>
-        // --- 1. CẤU HÌNH API LINK & DEVICE ID ---
+        // --- KÍCH HOẠT SERVICE WORKER PWA ---
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+            .then(() => console.log('K-Drive SW Active'))
+            .catch(err => console.log('SW Error:', err));
+        }
+
+        // --- CẤU HÌNH API LINK & DEVICE ID MỚI XỊN ---
         const API_URL = "https://script.google.com/macros/s/AKfycbwW0dxu_uuNCPHIBvX3Vbvfj5XfDMF8X_ZyCCPH4sOM2xH6vyGCkJ0bZtNdzs9pJzw/exec";
         
         if (!localStorage.getItem('kdrive_device_id')) {
@@ -203,25 +241,31 @@
         }
         const DEVICE_ID = localStorage.getItem('kdrive_device_id');
 
-        // --- 2. HIỆU ỨNG ÂM THANH ---
+        // --- HIỆU ỨNG ÂM THANH NỀN ---
         const AudioContext = window.AudioContext || window.webkitAudioContext; let actx;
         function initAudio() { if(!actx) actx = new AudioContext(); if(actx.state==='suspended') actx.resume(); }
         document.body.addEventListener('touchstart', initAudio, {once:true});
         function playCyberSound() { try { initAudio(); const osc = actx.createOscillator(); const gain = actx.createGain(); osc.connect(gain); gain.connect(actx.destination); osc.type = 'triangle'; const now = actx.currentTime; osc.frequency.setValueAtTime(1500, now); osc.frequency.exponentialRampToValueAtTime(400, now + 0.12); gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15); osc.start(now); osc.stop(now + 0.15); } catch(e){} }
         function playWhoosh() { if(!actx) return; let osc = actx.createOscillator(); let gain = actx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(300, actx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, actx.currentTime + 1.2); osc.connect(gain); gain.connect(actx.destination); gain.gain.setValueAtTime(0.15, actx.currentTime); gain.gain.linearRampToValueAtTime(0, actx.currentTime + 1.2); osc.start(); osc.stop(actx.currentTime + 1.2); }
 
-        // --- 3. LOGIC GIAO DIỆN (UI CONTROLS) ---
-        const EYE_OPEN = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
-        const EYE_CLOSED = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
-        function togglePass(inputId, iconEl) { let inp = document.getElementById(inputId); if(inp.type === 'password') { inp.type = 'text'; iconEl.innerHTML = EYE_CLOSED; } else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } }
-        function switchPanel(panelName) { try { playCyberSound(); } catch(e){} document.getElementById('panel-login').style.display = 'none'; document.getElementById('panel-register').style.display = 'none'; document.getElementById('panel-otp').style.display = 'none'; document.getElementById('panel-forgot').style.display = 'none'; document.getElementById('panel-' + panelName).style.display = 'flex'; }
-        function openChangePassPanel() { document.getElementById('changePassPanel').style.display = 'flex'; }
-        function closeChangePassPanel() { document.getElementById('changePassPanel').style.display = 'none'; }
-        function showNinjaInfo() { document.getElementById('ninjaPopup').style.display = 'flex'; }
-        function closeNinjaInfo() { document.getElementById('ninjaPopup').style.display = 'none'; }
-        function switchInfoTab(tabIndex) { document.getElementById('btnTab1').classList.remove('tab-active'); document.getElementById('btnTab2').classList.remove('tab-active'); document.getElementById('paneTab1').classList.remove('content-active'); document.getElementById('paneTab2').classList.remove('content-active'); document.getElementById('btnTab' + tabIndex).classList.add('tab-active'); document.getElementById('paneTab' + tabIndex).classList.add('content-active'); }
+        // --- CÁC HÀM ẨN/HIỆN QUẢN LÝ GIAO DIỆN PHỐI HỢP ĐA TẦNG ---
+        function lockInteraction() { document.body.classList.add('popups-active'); }
+        function unlockInteraction() { document.body.classList.remove('popups-active'); }
 
-        // --- 4. VALIDATION BẢO MẬT ---
+        function showLoginPanel() { try { playCyberSound(); } catch(e){} document.getElementById('loginPanelContainer').style.display = 'flex'; switchPanel('login'); lockInteraction(); }
+        function closeLoginPanel() { try { playCyberSound(); } catch(e){} document.getElementById('loginPanelContainer').style.display = 'none'; unlockInteraction(); }
+        
+        function showNinjaInfo() { try { playCyberSound(); } catch(e){} document.getElementById('ninjaPopup').style.display = 'flex'; switchInfoTab(1); lockInteraction(); }
+        function closeNinjaInfo() { try { playCyberSound(); } catch(e){} document.getElementById('ninjaPopup').style.display = 'none'; unlockInteraction(); }
+        
+        function openChangePassPanel() { try { playCyberSound(); } catch(e){} document.getElementById('changePassPanel').style.display = 'flex'; }
+        function closeChangePassPanel() { try { playCyberSound(); } catch(e){} document.getElementById('changePassPanel').style.display = 'none'; }
+        
+        function switchPanel(panelName) { document.getElementById('panel-login').style.display = 'none'; document.getElementById('panel-register').style.display = 'none'; document.getElementById('panel-otp').style.display = 'none'; document.getElementById('panel-forgot').style.display = 'none'; document.getElementById('panel-' + panelName).style.display = 'flex'; }
+        function switchInfoTab(tabIndex) { document.getElementById('btnTab1').classList.remove('tab-active'); document.getElementById('btnTab2').classList.remove('tab-active'); document.getElementById('paneTab1').classList.remove('content-active'); document.getElementById('paneTab2').classList.remove('content-active'); document.getElementById('btnTab' + tabIndex).classList.add('tab-active'); document.getElementById('paneTab' + tabIndex).classList.add('content-active'); }
+        function togglePass(inputId, iconEl) { let inp = document.getElementById(inputId); if(inp.type === 'password') { inp.type = 'text'; iconEl.innerHTML = EYE_CLOSED; } else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } }
+
+        // --- PHẦN VALIDATION AN NINH MẬT MÃ ---
         function isValidUsername(str) { return /^[a-zA-Z0-9]{6,15}$/.test(str); }
         function isValidPassword(str) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(str); }
         function validateLive(type) {
@@ -242,7 +286,7 @@
             }
         }
 
-        // --- 5. LÕI KẾT NỐI API (JSONP) ---
+        // --- CƠ CHẾ GỌI JSONP API (ĐÃ KHỚP TIẾNG ANH CHO ANH) ---
         function callAPI(action, params, callbackName, onSuccess, onError) {
             let finalUrl = API_URL + "?action=" + action + "&deviceId=" + DEVICE_ID;
             for (let key in params) { finalUrl += "&" + key + "=" + encodeURIComponent(params[key]); }
@@ -257,7 +301,7 @@
             script.onerror = function() { onError("LỖI MẠNG!"); }; document.body.appendChild(script);
         }
 
-        // --- 6. CÁC HÀM XỬ LÝ DỮ LIỆU ĐĂNG NHẬP ---
+        // --- XỬ LÝ ĐĂNG NHẬP CHÍNH THỨC ---
         function submitLogin() {
             try { playCyberSound(); } catch(e) {} 
             var acc = document.getElementById('accInput').value.trim(); 
@@ -279,6 +323,7 @@
             );
         }
 
+        // --- CÁC HÀM PHỤ TRỢ KHÁC (HỒ SƠ, OTP, QUÊN MÃ) ---
         let tempRegData = {}; let countdownInterval = null;
         function processRegistration() {
             try { playCyberSound(); } catch(e){} 
@@ -292,7 +337,6 @@
             if(pass !== passConf) { document.getElementById('regPassConf').classList.add('error'); setTimeout(()=>document.getElementById('regPassConf').classList.remove('error'), 500); statusEl.innerHTML = "[LỖI]: MẬT MÃ KHÔNG KHỚP!"; return; } 
             
             statusEl.innerHTML = "BOO ĐANG QUÉT..."; 
-            // Đồng bộ tên biến chuẩn hóa để gửi API
             tempRegData = {Username: user, Password: pass, Email: email, Phone: phone, Nickname: alias, ReferralCode: refCode};
             setTimeout(() => { switchPanel('otp'); startOTPCountdown(); }, 800); 
         }
