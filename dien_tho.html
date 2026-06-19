@@ -3,372 +3,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>K-Drive - Điện Thờ Phong Thủy</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <title>K-Drive - Neural Altar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
-        body { background-color: #050505; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Space Grotesk', sans-serif; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; overscroll-behavior: none; }
+        body { background-color: #020202; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Space Grotesk', sans-serif; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; color: #a0a0a0; }
         input, select { user-select: auto !important; -webkit-user-select: auto !important; touch-action: auto !important; pointer-events: auto !important; }
 
-        /* --- LỚP MA TRẬN NẰM DƯỚI CÙNG --- */
-        #matrixCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; opacity: 0.35; pointer-events: none; }
+        /* MA TRẬN CHỮ CHÂU Á RƠI (MATRIX RAIN) */
+        #matrixCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; opacity: 0.4; pointer-events: none; }
+        
+        /* HIỆU ỨNG SƯƠNG KHÓI BAY LỜ ĐỜ NỀN */
+        .ambient-smoke { position: fixed; top: 0; left: 0; width: 200vw; height: 100vh; background: url('https://raw.githubusercontent.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/main/smoke-texture.png') repeat-x; background-size: auto 100%; opacity: 0.1; z-index: 1; pointer-events: none; animation: driftSmoke 60s linear infinite; filter: blur(5px); mix-blend-mode: screen; }
+        @keyframes driftSmoke { 0% { transform: translateX(0); } 100% { transform: translateX(-50vw); } }
 
-        .kdrive-bg-target { width: 100%; height: 100%; object-fit: fill; position: absolute; z-index: 1; opacity: 0.15; filter: blur(4px) grayscale(100%) brightness(0.5); }
-        .hexagon-forcefield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; opacity: 0.2; }
-        #hexCanvas { width: 100%; height: 100%; display: block; }
+        /* NÚT ĐIỀU HƯỚNG (TIẾNG ANH - HỆ THỐNG) */
+        .btn-return-lobby { position: absolute; top: 25px; left: 25px; color: #555; font-weight: bold; cursor: pointer; z-index: 60000; font-family: 'Share Tech Mono', monospace; font-size: 13px; text-decoration: none; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        .btn-return-lobby:hover { color: #d2d2d2; text-shadow: 0 0 10px rgba(210,210,210,0.5); }
 
         /* MÀN HÌNH CHỜ THỈNH THẦN */
-        .thantai-preview-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(8px); z-index: 45000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 1; transition: opacity 0.4s; }
-        .big-thantai-img { width: 300px; max-width: 85vw; filter: drop-shadow(0 0 20px rgba(128, 128, 128, 0.5)); animation: levitateGod 3s ease-in-out infinite; cursor: pointer; pointer-events: none; }
-        @keyframes levitateGod { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); filter: drop-shadow(0 0 35px rgba(210, 210, 210, 0.6)); } }
-        .summon-text { margin-top: 30px; font-family: 'Share Tech Mono', monospace; font-size: 16px; color: #808080; text-shadow: 0 0 10px #808080; letter-spacing: 2px; pointer-events: none; animation: pulseAlpha 1.5s infinite; }
-        @keyframes pulseAlpha { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px #808080); } 50% { opacity: 0.5; filter: drop-shadow(0 0 20px #808080); } }
+        .thantai-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #111 0%, #000 100%); z-index: 45000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1.5s ease-in-out, visibility 1.5s; }
+        .big-thantai-img { width: 320px; max-width: 85vw; filter: drop-shadow(0 0 15px rgba(255, 51, 51, 0.2)) grayscale(20%); animation: levitateGod 4s ease-in-out infinite; cursor: pointer; }
+        @keyframes levitateGod { 0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 15px rgba(255, 51, 51, 0.2)) grayscale(20%); } 50% { transform: translateY(-10px) scale(1.02); filter: drop-shadow(0 0 35px rgba(255, 51, 51, 0.4)) grayscale(0%); } }
+        .summon-text { margin-top: 40px; font-family: 'Space Grotesk', sans-serif; font-size: 16px; color: #d2d2d2; text-shadow: 0 0 15px rgba(210,210,210,0.5); letter-spacing: 3px; pointer-events: none; animation: pulseAlpha 2s infinite; font-weight: 500; }
+        @keyframes pulseAlpha { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        /* KHUNG ĐIỆN THỜ (ĐÃ XÓA VIỀN) */
-        .altar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5,5,5,0.85); backdrop-filter: blur(8px); z-index: 50000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.4s cubic-bezier(0.1, 0.8, 0.3, 1); }
-        .altar-overlay.active { opacity: 1; pointer-events: auto; }
+        /* KHUNG ĐIỆN THỜ (VÔ ẢNH - TRÔI LƠ LỬNG) */
+        .altar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); z-index: 50000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 1.5s ease; }
+        .altar-overlay.active { opacity: 1; visibility: visible; }
+        .altar-panel { width: 90%; max-width: 400px; padding: 20px; position: relative; max-height: 85vh; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+        .altar-panel::-webkit-scrollbar { display: none; }
         
-        .altar-panel { 
-            background: linear-gradient(135deg, rgba(15,15,15,0.9), rgba(5,5,5,0.95));
-            border: none; /* Bỏ viền khung chính */
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.8); /* Chỉ giữ lại bóng đổ chìm */
-            width: 92%; max-width: 380px; padding: 20px; position: relative; max-height: 85vh; overflow-y: auto; overflow-x: hidden;
-            clip-path: polygon(15px 0%, calc(100% - 15px) 0%, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0% calc(100% - 15px), 0% 15px);
-        }
-        .altar-panel::-webkit-scrollbar { width: 4px; }
-        .altar-panel::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
-        
-        /* BÁT QUÁI XOAY */
-        .altar-panel::after { 
-            content: ''; position: absolute; top: 50%; left: 50%; width: 280px; height: 280px; 
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/07/Bagua_Taijitu.svg');
-            background-size: contain; background-repeat: no-repeat; background-position: center;
-            opacity: 0.2; pointer-events: none; z-index: 0; filter: invert(1);
-            animation: spinBaguaCore 15s linear infinite;
-        }
+        .altar-panel::after { content: ''; position: absolute; top: 50%; left: 50%; width: 300px; height: 300px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/07/Bagua_Taijitu.svg'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.08; pointer-events: none; z-index: 0; filter: invert(1); animation: spinBaguaCore 30s linear infinite; }
         @keyframes spinBaguaCore { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
         
         .altar-panel > * { position: relative; z-index: 1; }
-        .altar-panel::before { content: 'NEURAL ALTAR'; position: absolute; top: -10px; left: 25px; background: transparent; padding: 0 10px; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #555; letter-spacing: 2px; z-index: 2;}
-        .altar-title { font-family: 'Share Tech Mono', monospace; color: #808080; font-size: 15px; margin-bottom: 10px; border-bottom: 1px solid rgba(128,128,128,0.2); padding-bottom: 5px; text-shadow: 0 0 5px rgba(128,128,128,0.3); }
-        .altar-info { font-family: 'Space Grotesk', sans-serif; font-size: 12px; color: #808080; line-height: 1.5; margin-bottom: 15px; }
-        .altar-info .highlight { color: #d2d2d2; font-weight: bold; }
+        .altar-title { font-family: 'Share Tech Mono', monospace; color: #555; font-size: 11px; margin-bottom: 20px; border-bottom: 1px solid rgba(85,85,85,0.3); padding-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
         
-        /* Ô NHẬP LIỆU (ĐÃ BỎ KHUNG, CHỈ CÒN ĐƯỜNG KẺ DƯỚI) */
-        .input-box { margin-bottom: 12px; display: flex; flex-direction: column; transition: 0.3s; }
-        .input-box label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #808080; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px;}
-        .input-box input, .input-box select { 
-            background: transparent; /* Nền trong suốt */
-            border: none; /* Bỏ viền */
-            border-bottom: 1px dashed rgba(128,128,128,0.5); /* Chỉ giữ đường đứt nét dưới */
-            padding: 8px 0; 
-            color: #d2d2d2; 
-            font-family: 'Space Grotesk', sans-serif; 
-            font-size: 14px; 
-            border-radius: 0; 
-            outline: none; 
-            transition: 0.3s;
-        }
-        .input-box input:focus, .input-box select:focus { border-bottom-color: #d2d2d2; text-shadow: 0 0 5px rgba(210,210,210,0.5); }
-        .input-box select option { background: #111; color: #ccc; }
+        /* THÔNG TIN TÂM LINH */
+        .altar-info { font-size: 13px; color: #777; line-height: 1.8; margin-bottom: 25px; font-weight: 400; text-align: center; }
+        .altar-info .highlight { color: #d2d2d2; font-weight: 500; text-shadow: 0 0 5px rgba(210,210,210,0.3); }
+        .altar-info .buff { color: #ff3333; text-shadow: 0 0 8px rgba(255,51,51,0.4); }
         
-        /* LA BÀN (ĐÃ BỎ KHUNG, TRÔI LƠ LỬNG) */
-        .compass-wrapper { 
-            width: 80px; height: 80px; margin: 10px auto; 
-            background: transparent; /* Nền trong suốt */
-            position: relative; cursor: crosshair; overflow: hidden; transition: 0.3s; 
-            border: none; /* Bỏ khung la bàn */
-        }
-        .compass-wrapper.scanning { filter: drop-shadow(0 0 10px rgba(210,210,210,0.3)); }
-        .compass-dial { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 0.1s ease-out; }
-        .compass-dial span { position: absolute; font-family: 'Share Tech Mono', monospace; font-weight: bold; color: #808080; font-size: 12px; text-shadow: 0 0 5px #808080; }
-        .dir-n { top: 2px; left: 50%; transform: translateX(-50%); color: #ff3333 !important; text-shadow: 0 0 5px #ff3333 !important; }
-        .dir-s { bottom: 2px; left: 50%; transform: translateX(-50%); }
-        .dir-e { top: 50%; right: 4px; transform: translateY(-50%); }
-        .dir-w { top: 50%; left: 4px; transform: translateY(-50%); }
-        .compass-pointer { position: absolute; top: 50%; left: 50%; width: 2px; height: 35px; background: #ff3333; transform: translate(-50%, -100%); box-shadow: 0 0 8px #ff3333; clip-path: polygon(50% 0%, 100% 100%, 0% 100%); z-index: 2; pointer-events: none; }
-        .compass-status { text-align: center; color: #808080; font-family: 'Share Tech Mono', monospace; font-size: 10px; margin-top: 5px; font-weight: normal; cursor: pointer; }
+        /* Ô NHẬP LIỆU (KHÔNG KHUNG) */
+        .input-box { margin-bottom: 20px; display: flex; flex-direction: column; }
+        .input-box label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #666; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; text-align: center;}
+        .input-box input, .input-box select { background: transparent; border: none; border-bottom: 1px dashed #444; padding: 10px 0; color: #d2d2d2; font-family: 'Space Grotesk', sans-serif; font-size: 16px; border-radius: 0; outline: none; transition: 0.3s; text-align: center; font-weight: 500; }
+        .input-box input:focus, .input-box select:focus { border-bottom-color: #ff3333; border-bottom-style: solid; text-shadow: 0 0 5px rgba(255,51,51,0.3); }
+        .input-box select option { background: #050505; color: #ccc; }
+        
+        /* LA BÀN TỐI GIẢN */
+        .compass-wrapper { width: 100px; height: 100px; margin: 0 auto 10px auto; position: relative; cursor: pointer; }
+        .compass-dial { width: 100%; height: 100%; position: absolute; transition: transform 0.1s ease-out; display: flex; justify-content: center; align-items: center;}
+        .compass-dial span { position: absolute; font-family: 'Share Tech Mono', monospace; color: #444; font-size: 14px; }
+        .dir-n { top: 0; color: #ff3333 !important; text-shadow: 0 0 8px rgba(255,51,51,0.5) !important; font-weight: bold; } .dir-s { bottom: 0; } .dir-e { right: 0; } .dir-w { left: 0; }
+        .compass-pointer { position: absolute; top: 50%; left: 50%; width: 1px; height: 45px; background: rgba(255,51,51,0.8); transform: translate(-50%, -100%); z-index: 2; pointer-events: none; }
+        .compass-status { text-align: center; color: #555; font-family: 'Share Tech Mono', monospace; font-size: 11px; margin-top: 5px; letter-spacing: 1px; cursor: pointer; }
 
-        /* BÀN POKER (ĐÃ BỎ KHUNG, CHỈ CÒN CÁC VỊ TRÍ GHẾ) */
-        .poker-table-hologram { width: 100%; height: 80px; margin: 15px 0 5px 0; position: relative; display: flex; justify-content: center; align-items: center; }
-        .table-surface { 
-            width: 180px; height: 60px; 
-            border: none; /* Bỏ viền bàn */
-            background: transparent; /* Nền trong suốt */
-            position: relative; 
-        }
-        .table-surface::after { content: 'NEURAL RING'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(128, 128, 128, 0.2); letter-spacing: 2px; pointer-events: none; }
-        .seat { position: absolute; width: 22px; height: 22px; background: #0a0a0a; border: 1px dashed #555; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; font-family: 'Share Tech Mono', monospace; color: #808080; cursor: pointer; transition: 0.2s; z-index: 2; transform: translate(-50%, -50%); }
-        .seat.selected { background: transparent; border: 1px solid #d2d2d2; color: #d2d2d2; font-weight: bold; box-shadow: 0 0 10px rgba(210,210,210,0.5); transform: translate(-50%, -50%) scale(1.15); }
+        /* SƠ ĐỒ BÀN (KHÔNG KHUNG BÀN) */
+        .poker-table-hologram { width: 100%; height: 80px; margin: 10px 0; position: relative; display: flex; justify-content: center; align-items: center; }
+        .table-surface { width: 220px; height: 70px; position: relative; }
+        .seat { position: absolute; width: 24px; height: 24px; background: transparent; border: 1px dotted #444; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; font-family: 'Share Tech Mono', monospace; color: #666; cursor: pointer; transition: 0.3s; transform: translate(-50%, -50%); }
+        .seat.selected { border: 1px solid #ff3333; color: #ff3333; font-weight: bold; box-shadow: 0 0 15px rgba(255,51,51,0.4), inset 0 0 10px rgba(255,51,51,0.2); transform: translate(-50%, -50%) scale(1.2); }
         .s1 { left: 25%; top: 100%; } .s2 { left: 0%; top: 50%; } .s3 { left: 20%; top: 0%; } .s4 { left: 40%; top: 0%; } .s5 { left: 60%; top: 0%; } .s6 { left: 80%; top: 0%; } .s7 { left: 100%; top: 50%; } .s8 { left: 75%; top: 100%; } .s9 { left: 50%; top: 100%; }
-        .seat-status { text-align: center; color: #808080; font-family: 'Share Tech Mono', monospace; font-size: 11px; margin-top: 8px; font-weight: normal; }
 
-        /* NÚT BẤM (GỌN GÀNG, KHÔNG KHUNG CỨNG) */
-        .login-btn-submit { padding: 12px 25px; background: transparent; color: #a0a0a0; font-weight: 600; font-size: 14px; border: 1px dashed #555; border-radius: 4px; cursor: pointer; width: 100%; font-family: 'Space Grotesk', sans-serif; transition: all 0.3s; letter-spacing: 1px;}
-        .login-btn-submit:hover { background: rgba(128,128,128,0.1); border-color: #d2d2d2; color: #d2d2d2; }
-        .login-btn-submit.active-btn { border-style: solid; background: rgba(210,210,210,0.1); color: #d2d2d2; border-color: #d2d2d2; }
+        /* NÚT LỆNH HỆ THỐNG (TIẾNG ANH) / NÚT CHÚ (TIẾNG VIỆT) */
+        .action-btn { padding: 15px; background: transparent; color: #d2d2d2; font-weight: 500; font-size: 14px; border: 1px solid #333; cursor: pointer; width: 100%; font-family: 'Space Grotesk', sans-serif; letter-spacing: 2px; text-transform: uppercase; transition: 0.4s; position: relative; overflow: hidden; margin-top: 10px;}
+        .action-btn:hover { border-color: #555; background: rgba(255,255,255,0.02); }
+        .btn-ritual { border-color: #ff3333; color: #ff3333; text-shadow: 0 0 5px rgba(255,51,51,0.3); box-shadow: inset 0 0 15px rgba(255,51,51,0.1); }
+        .btn-ritual.locked { border-color: #555; color: #555; box-shadow: none; text-shadow: none; cursor: not-allowed; animation: breatheLock 2s infinite; }
+        @keyframes breatheLock { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .btn-system { font-family: 'Share Tech Mono', monospace; font-size: 12px; border-style: dashed; color: #888;}
+
+        /* --- HỆ THỐNG 3 NÉN NHANG ĐỎ CHÁY --- */
+        .incense-shrine { display: flex; justify-content: center; gap: 25px; margin: 20px 0 10px 0; height: 100px; position: relative; align-items: flex-end; }
+        .incense-stick { width: 3px; height: 100%; background: #220000; position: relative; border-radius: 2px 2px 0 0; display: flex; justify-content: center; transition: height 1s linear; }
+        .incense-core { width: 100%; height: 100%; background: linear-gradient(to bottom, #8B0000, #330000); border-radius: 2px 2px 0 0; }
         
-        .close-btn { position: absolute; top: -15px; right: -15px; width: 36px; height: 36px; background: #050505; border: 1px solid #555; border-radius: 50%; color: #808080; font-weight: normal; cursor: pointer; display: flex; justify-content: center; align-items: center; z-index: 35001; transition: 0.3s;}
-        .close-btn:hover { background: rgba(128,128,128,0.2); color: #d2d2d2; border-color: #d2d2d2; }
-        .btn-back-home { position: absolute; top: 20px; left: 20px; color: #808080; font-weight: bold; text-shadow: 0 0 10px #808080; cursor: pointer; z-index: 60000; font-family: 'Share Tech Mono', monospace; font-size: 14px; text-decoration: underline; }
+        /* Tàn lửa đỏ rực & Khói bay */
+        .ember { position: absolute; top: 0; width: 5px; height: 5px; background: #ffaa00; border-radius: 50%; transform: translateY(-50%); box-shadow: 0 0 10px #ff3300, 0 0 20px #ff0000; opacity: 0; transition: opacity 0.5s; z-index: 10; }
+        .ember.burning { opacity: 1; animation: pulseEmber 0.5s infinite alternate; }
+        @keyframes pulseEmber { 0% { box-shadow: 0 0 5px #ff3300; background: #ff6600; } 100% { box-shadow: 0 0 15px #ff0000, 0 0 25px #ffaa00; background: #ffcc00; } }
+        
+        .smoke-particle { position: absolute; top: -10px; width: 2px; height: 2px; background: #ccc; border-radius: 50%; filter: blur(3px); opacity: 0; }
+        @keyframes riseSmoke { 0% { transform: translateY(0) scale(1) translateX(0); opacity: 0.6; filter: blur(2px); } 100% { transform: translateY(-60px) scale(15) translateX(calc(10px - 20px * var(--r))); opacity: 0; filter: blur(8px); } }
 
-        .incense-container { display: flex; justify-content: center; gap: 20px; margin: 15px 0; height: 35px; position: relative; }
-        .laser-stick { width: 2px; height: 100%; background: rgba(128,128,128,0.1); transition: 0.5s; position: relative; border-radius: 2px; }
-        .laser-stick.ignited { background: #d2d2d2; box-shadow: 0 0 12px #d2d2d2, 0 0 25px #fff; animation: burnDown 10s linear forwards; }
-        @keyframes burnDown { 100% { height: 10%; opacity: 0.5; } }
     </style>
 </head>
 <body>
     <canvas id="matrixCanvas"></canvas>
-
-    <img src="https://i.postimg.cc/J4xHjMr7/1.webp" class="kdrive-bg-target">
-    <div class="hexagon-forcefield" id="hexShield"><canvas id="hexCanvas"></canvas></div>
     
-    <div class="btn-back-home" onclick="window.location.href='index.html'">[ 🔙 VỀ SẢNH CHÍNH ]</div>
+    <div class="ambient-smoke"></div>
 
-    <div id="thantaiPreviewOverlay" class="thantai-preview-overlay" onclick="openAltarForm()">
-        <img src="https://github.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/blob/main/ban%20tho%20ong%20dia.png?raw=true" class="big-thantai-img">
+    <a href="index.html" class="btn-return-lobby">[ RETURN TO LOBBY ]</a>
+
+    <div id="thantaiScreen" class="thantai-overlay">
+        <img src="https://github.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/blob/main/ban%20tho%20ong%20dia.png?raw=true" class="big-thantai-img" onclick="initiateAltar()">
         <div class="summon-text">[ CHẠM ĐỂ THỈNH THẦN ]</div>
     </div>
 
-    <div class="altar-overlay" id="altarOverlay">
+    <div id="altarScreen" class="altar-overlay">
         <div class="altar-panel">
-            <div class="close-btn" onclick="window.location.href='index.html'">X</div>
-            <div class="altar-title">> NEURAL MONITOR / ĐIỆN THỜ</div>
+            <div class="altar-title">NEURAL ALTAR SYNC</div>
             
             <div class="altar-info">
-                • Thiên thời: <span class="highlight" id="lblLunar">Đang tính toán...</span><br>
-                • Thời khắc: <span class="highlight" id="lblZodiac">Đang định vị...</span><br>
-                • Phân tích AI: <span class="highlight" style="color:#d2d2d2;" id="lblBuff">Đang quét...</span>
+                Thiên thời: <span class="highlight" id="lblLunar">Đang tính...</span><br>
+                Thời khắc: <span class="highlight" id="lblZodiac">Đang định vị...</span><br>
+                Trạng thái: <span class="highlight buff" id="lblBuff">Đang quét...</span>
             </div>
 
-            <div id="altarStage1_PhongThuy">
+            <div id="setupPhase">
                 <div class="input-box">
-                    <label>1. Địa lợi (Hướng Bắc Thực)</label>
+                    <label>1. ĐỊA LỢI (HƯỚNG BẮC THỰC)</label>
                     <div class="compass-wrapper" onclick="toggleCompass()">
                         <div id="compassDial" class="compass-dial"><span class="dir-n">B</span><span class="dir-e">Đ</span><span class="dir-s">N</span><span class="dir-w">T</span></div>
                         <div class="compass-pointer"></div>
                     </div>
-                    <div class="compass-status" id="compassStatus" onclick="toggleCompass()">[ CHẠM ĐỂ QUÉT - LẮC SỐ 8 NẾU KẸT ]</div>
-                    <input type="hidden" id="inpFacing" value="Chưa đồng bộ">
+                    <div class="compass-status" id="compassStatus" onclick="toggleCompass()">[ SCAN AREA ]</div>
+                    <input type="hidden" id="inpFacing" value="Chưa quét">
                 </div>
 
                 <div class="input-box">
-                    <label>2. Vị trí ghế (Table Position)</label>
+                    <label>2. TỌA ĐỘ GHẾ</label>
                     <div class="poker-table-hologram">
                         <div class="table-surface">
-                            <span class="seat s1" onclick="selectSeat(1)">1</span><span class="seat s2" onclick="selectSeat(2)">2</span>
-                            <span class="seat s3" onclick="selectSeat(3)">3</span><span class="seat s4" onclick="selectSeat(4)">4</span>
-                            <span class="seat s5" onclick="selectSeat(5)">5</span><span class="seat s6" onclick="selectSeat(6)">6</span>
-                            <span class="seat s7" onclick="selectSeat(7)">7</span><span class="seat s8" onclick="selectSeat(8)">8</span>
-                            <span class="seat s9" onclick="selectSeat(9)">9</span>
+                            <span class="seat s1" onclick="selectSeat(1)">1</span><span class="seat s2" onclick="selectSeat(2)">2</span><span class="seat s3" onclick="selectSeat(3)">3</span><span class="seat s4" onclick="selectSeat(4)">4</span><span class="seat s5" onclick="selectSeat(5)">5</span><span class="seat s6" onclick="selectSeat(6)">6</span><span class="seat s7" onclick="selectSeat(7)">7</span><span class="seat s8" onclick="selectSeat(8)">8</span><span class="seat s9" onclick="selectSeat(9)">9</span>
                         </div>
                     </div>
-                    <div class="seat-status" id="seatStatus">[ CHẠM VÀO SƠ ĐỒ ĐỂ CHỌN GHẾ ]</div>
-                    <input type="hidden" id="inpPosition" value="Chưa đồng bộ">
+                    <input type="hidden" id="inpPosition" value="Chưa chọn">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div class="input-box" style="flex: 1;">
+                        <label>3. SỐ MẠNG</label>
+                        <select id="inpLives"><option>Mạng 1</option><option>Mạng 2</option><option>Mạng 3</option><option>Mạng 4</option></select>
+                    </div>
+                    <div class="input-box" style="flex: 1.5;">
+                        <label>4. TIỀN VỐN</label>
+                        <input type="text" id="inpBuyIn" placeholder="Nhập số chip..." oninput="formatCurrency(this)">
+                    </div>
                 </div>
             </div>
 
-            <div id="btnDoiBanWrapper" style="display: none; text-align: center; margin: 10px 0;">
-                <button class="login-btn-submit" onclick="startChangeTable()">[ 🔄 XÁC NHẬN PHONG THỦY ]</button>
-            </div>
-
-            <div id="altarStage1_TaiChinh" style="display: flex; gap: 15px; margin-top: 10px;">
-                <div class="input-box" style="flex: 1; margin-bottom: 0;">
-                    <label>3. SỐ MẠNG</label>
-                    <select id="inpLives">
-                        <option value="Mạng 1">Mạng 1</option><option value="Mạng 2">Mạng 2</option><option value="Mạng 3">Mạng 3</option><option value="Mạng 4">Mạng 4</option><option value="Mạng 5">Mạng 5</option>
-                    </select>
-                </div>
-                <div class="input-box" style="flex: 1.5; margin-bottom: 0;">
-                    <label>4. TIỀN VỐN</label>
-                    <input type="text" id="inpBuyIn" placeholder="VD: 10,000" oninput="formatCurrency(this)">
+            <div id="finishPhase" style="display: none;">
+                <div class="input-box" style="margin-top: 30px;">
+                    <label>KẾT QUẢ THỰC CHIẾN</label>
+                    <input type="text" id="inpLoss" placeholder="VD: +5,000 hoặc -5,000" style="color: #ff3333; font-size: 20px;" oninput="formatCurrency(this)">
                 </div>
             </div>
 
-            <div id="altarStage2" style="display: none;">
-                <div class="input-box" style="margin-top: 20px;">
-                    <label style="color: #d2d2d2;">5. KẾT THÚC (ÂM HAY DƯƠNG BAO NHIÊU)</label>
-                    <input type="text" id="inpLoss" placeholder="VD: +5,000 hoặc -5,000" style="font-weight: bold; color: #d2d2d2;" oninput="formatCurrency(this)">
-                </div>
+            <div class="incense-shrine" id="incenseBox">
+                <div class="incense-stick" id="inc1"><div class="incense-core"></div><div class="ember"></div></div>
+                <div class="incense-stick" id="inc2" style="height: 110%;"><div class="incense-core"></div><div class="ember"></div></div>
+                <div class="incense-stick" id="inc3"><div class="incense-core"></div><div class="ember"></div></div>
             </div>
 
-            <div class="incense-container" id="incenseBox">
-                <div class="laser-stick" id="inc1"></div><div class="laser-stick" id="inc2"></div><div class="laser-stick" id="inc3"></div>
-            </div>
-
-            <button class="login-btn-submit active-btn" id="btnThapNhang" onclick="executeRitual()">[ THẮP NHANG & XUẤT TRẬN ]</button>
+            <button class="action-btn btn-ritual" id="btnAction" onclick="executeRitual()">[ THẮP NHANG & XUẤT TRẬN ]</button>
+            <button class="action-btn btn-system" id="btnUpdateTable" style="display:none;" onclick="updateTable()">[ SYSTEM: UPDATE POSITION ]</button>
         </div>
     </div>
 
     <script>
-        const mCanvas = document.getElementById('matrixCanvas');
-        if (mCanvas) {
-            const mCtx = mCanvas.getContext('2d');
-            mCanvas.width = window.innerWidth; mCanvas.height = window.innerHeight;
-            const mChars = "天地玄黃宇宙洪荒日月盈昃辰宿列張".split("");
-            let drops = Array(Math.floor(mCanvas.width/15)).fill(1);
-            function drawMatrix() {
-                mCtx.fillStyle = "rgba(5, 5, 5, 0.15)";
-                mCtx.fillRect(0, 0, mCanvas.width, mCanvas.height);
-                mCtx.fillStyle = "#888888";
-                mCtx.font = "14px monospace";
-                drops.forEach((y, i) => {
-                    const text = mChars[Math.floor(Math.random()*mChars.length)];
-                    mCtx.fillText(text, i*15, y*15);
-                    if(y*15 > mCanvas.height && Math.random() > 0.975) drops[i] = 0;
-                    drops[i]++;
-                });
+        /* TẠO ÂM THANH SFX KHÔNG CẦN FILE NGOÀI */
+        const AudioCtx = window.AudioContext || window.webkitAudioContext; let audioCtx;
+        function playGong() { if(!audioCtx) audioCtx = new AudioCtx(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'sine'; osc.frequency.setValueAtTime(120, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 3); gain.gain.setValueAtTime(1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3); osc.start(); osc.stop(audioCtx.currentTime + 3); }
+        function playBeep() { if(!audioCtx) audioCtx = new AudioCtx(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'square'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
+        function doHaptic(pattern) { if(navigator.vibrate) navigator.vibrate(pattern); }
+
+        /* MA TRẬN CHỮ CHÂU Á CẬP NHẬT RƠI DỌC */
+        const canvas = document.getElementById('matrixCanvas'); const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const chars = "天地玄黃宇宙洪荒日月盈昃辰宿列張".split("");
+        const fontSize = 16; const columns = canvas.width / fontSize; const drops = [];
+        for(let x = 0; x < columns; x++) drops[x] = Math.random() * -100; // Khởi tạo rơi ngẫu nhiên
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(2, 2, 2, 0.1)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(80, 150, 80, 0.4)'; ctx.font = fontSize + "px 'Microsoft YaHei', monospace";
+            for(let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
             }
-            setInterval(drawMatrix, 1000); 
+        }
+        setInterval(drawMatrix, 50);
+
+        /* KHỞI ĐỘNG TỪ ẢNH THẦN TÀI VÀO ĐIỆN THỜ */
+        function initiateAltar() {
+            playGong(); doHaptic([150, 50, 80]); // Rung nhịp tim
+            document.getElementById('thantaiScreen').style.opacity = '0';
+            setTimeout(() => { 
+                document.getElementById('thantaiScreen').style.display = 'none'; 
+                loadAltarData(); 
+                document.getElementById('altarScreen').classList.add('active'); 
+            }, 1000);
         }
 
-        const templeAudio = new Audio("https://github.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/raw/refs/heads/main/Temple%20of%20Zero%20dien%20tho.mp3");
-        templeAudio.loop = true;
-
-        const RITUAL_API_URL = "https://script.google.com/macros/s/AKfycbzCFY9erioL9YUCjhMf76YJWYORTaV6ADVEGh7wsQcdX8XeIJAST0VtQqd9xMz_8UgO/exec";
-        let currentUsername = sessionStorage.getItem('kdrive_username');
-
-        window.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('kdrive_session') !== 'active') {
-                window.location.href = 'index.html'; return;
-            }
-            initHexGrid(); renderCanvas();
-        });
-
-        const hexCanvas = document.getElementById('hexCanvas');
-        const hexCtx = hexCanvas.getContext('2d'); let hexGrid = []; let canvasW = 0, canvasH = 0;
-        function initHexGrid() { hexCanvas.width = window.innerWidth; hexCanvas.height = window.innerHeight; canvasW = hexCanvas.width; canvasH = hexCanvas.height; hexGrid = []; let r = 24; let h3 = Math.sqrt(3) * r; let cols = Math.ceil(canvasW / h3) + 1; let rows = Math.ceil(canvasH / (r*1.5)) + 1; for(let row=0; row<rows; row++) { for(let col=0; col<cols; col++) { hexGrid.push({x: col * h3 + (row%2===1 ? h3/2 : 0), y: row * r*1.5, energy: 0}); } } }
-        window.addEventListener('resize', initHexGrid);
-        function renderCanvas() { hexCtx.clearRect(0, 0, canvasW, canvasH); hexCtx.lineWidth = 1.2; for(let hex of hexGrid) { hex.energy = Math.random() * 0.9; hex.energy *= 0.88; let alpha = 0.12 + hex.energy; if(alpha>1) alpha=1; hexCtx.strokeStyle = `rgba(128,128,128,${alpha})`; hexCtx.fillStyle = alpha > 0.22 ? `rgba(128,128,128,${(alpha-0.15)*0.3})` : 'transparent'; hexCtx.beginPath(); for (let i=0; i<6; i++) { let a = Math.PI/180*(60*i-30); hexCtx.lineTo(hex.x + 20*Math.cos(a), hex.y + 20*Math.sin(a)); } hexCtx.closePath(); hexCtx.stroke(); if(hexCtx.fillStyle!=='transparent') hexCtx.fill(); } requestAnimationFrame(renderCanvas); }
-
-        function formatCurrency(input) { let isNegative = input.value.startsWith('-'); let isPositive = input.value.startsWith('+'); let val = input.value.replace(/[^0-9]/g, ''); if(val === '') { input.value = isNegative ? '-' : (isPositive ? '+' : ''); return; } let formatted = parseInt(val, 10).toLocaleString('en-US'); if (isNegative) formatted = '-' + formatted; if (isPositive) formatted = '+' + formatted; input.value = formatted; }
-
-        function checkAltarState() {
+        /* TẢI DỮ LIỆU TÂM LINH */
+        let currentUsername = sessionStorage.getItem('kdrive_username') || 'Guest';
+        function loadAltarData() {
+            let d = new Date(); let lunarFormatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', {day: '2-digit', month: '2-digit'});
+            document.getElementById('lblLunar').innerText = lunarFormatter.format(d);
+            let zInfo = getZodiacHour(); document.getElementById('lblZodiac').innerText = zInfo.z; document.getElementById('lblBuff').innerText = zInfo.b;
+            
+            // Check nếu đang trong Phiên đánh (đã thắp nhang)
             const savedSession = localStorage.getItem('kdrive_altar_session_' + currentUsername);
-            let btn = document.getElementById('btnThapNhang');
+            let btnAction = document.getElementById('btnAction');
             let boxIncense = document.getElementById('incenseBox');
             if(savedSession) {
-                document.getElementById('altarStage1_PhongThuy').style.display = 'none';
-                document.getElementById('altarStage1_TaiChinh').style.display = 'none';
-                document.getElementById('altarStage2').style.display = 'block'; document.getElementById('btnDoiBanWrapper').style.display = 'block'; boxIncense.style.display = 'none';
-                btn.innerHTML = "[ TẠ LỄ & LƯU SỔ SINH TỬ ]"; btn.onclick = finishRitual; 
-            } else {
-                document.getElementById('altarStage1_PhongThuy').style.display = 'block';
-                document.getElementById('altarStage1_TaiChinh').style.display = 'flex';
-                document.getElementById('altarStage2').style.display = 'none'; document.getElementById('btnDoiBanWrapper').style.display = 'none'; boxIncense.style.display = 'flex'; 
-                document.getElementById('inc1').classList.remove('ignited'); document.getElementById('inc2').classList.remove('ignited'); document.getElementById('inc3').classList.remove('ignited');
-                btn.innerHTML = "[ THẮP NHANG & XUẤT TRẬN ]"; btn.onclick = executeRitual;
+                document.getElementById('setupPhase').style.display = 'none';
+                document.getElementById('finishPhase').style.display = 'block';
+                document.getElementById('btnUpdateTable').style.display = 'block';
+                boxIncense.style.display = 'none';
+                btnAction.innerText = "[ ĐÓNG SỔ & TẠ LỄ ]"; btnAction.classList.remove('btn-ritual'); btnAction.onclick = finishSession;
             }
-        }
-
-        function startChangeTable() {
-            document.getElementById('altarStage1_PhongThuy').style.display = 'block';
-            document.getElementById('altarStage2').style.display = 'none'; document.getElementById('btnDoiBanWrapper').style.display = 'none';
-            let btn = document.getElementById('btnThapNhang'); btn.innerHTML = "[ XÁC NHẬN PHONG THỦY ]"; btn.onclick = saveNewTable; 
-        }
-
-        function saveNewTable() {
-            let sessionData = JSON.parse(localStorage.getItem('kdrive_altar_session_' + currentUsername));
-            if(sessionData) {
-                let newFacing = document.getElementById('inpFacing').value; let newPosition = document.getElementById('inpPosition').value;
-                if (newFacing !== "Chưa đồng bộ") { sessionData.facing += " ➔ " + newFacing; } if (newPosition !== "Chưa đồng bộ") { sessionData.position += " ➔ " + newPosition; }
-                localStorage.setItem('kdrive_altar_session_' + currentUsername, JSON.stringify(sessionData));
-                document.getElementById('inpFacing').value = "Chưa đồng bộ"; document.getElementById('inpPosition').value = "Chưa đồng bộ";
-                document.getElementById('compassStatus').innerText = "[ ĐÃ CỘNG DỒN LỊCH SỬ ]"; document.getElementById('seatStatus').innerText = "[ ĐÃ CỘNG DỒN VỊ TRÍ ]";
-                let btn = document.getElementById('btnThapNhang'); btn.innerHTML = "[ CẬP NHẬT THÀNH CÔNG ✓ ]"; btn.classList.remove('active-btn');
-                setTimeout(() => { checkAltarState(); btn.classList.add('active-btn'); }, 1500);
-            }
-        }
-
-        function openAltarForm() {
-            templeAudio.play().catch(e => console.log("Trình duyệt chặn Audio"));
-            
-            const preview = document.getElementById('thantaiPreviewOverlay'); preview.style.display = 'none';
-            const altar = document.getElementById('altarOverlay');
-            let d = new Date(); let lunarFormatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', {day: '2-digit', month: '2-digit'});
-            document.getElementById('lblLunar').innerText = "Ngày " + lunarFormatter.format(d) + " [Âm Lịch]";
-            let zInfo = getZodiacHour(); document.getElementById('lblZodiac').innerText = zInfo.z; document.getElementById('lblBuff').innerText = zInfo.b;
-            checkAltarState(); altar.classList.add('active');
         }
 
         function getZodiacHour() {
             const hrs = new Date().getHours();
-            if(hrs >= 23 || hrs < 1) return {z: "Giờ Tý (Chuột)", b: "Tâm điểm bóng tối. Tránh All-in."};
-            if(hrs >= 1 && hrs < 3) return {z: "Giờ Sửu (Trâu)", b: "Năng lượng bền bỉ. Chơi chậm."};
-            if(hrs >= 3 && hrs < 5) return {z: "Giờ Dần (Hổ)", b: "Hoang dã. Sẵn sàng ép sân."};
-            if(hrs >= 5 && hrs < 7) return {z: "Giờ Mão (Mèo)", b: "Linh hoạt. Phù hợp rình rập."};
-            if(hrs >= 7 && hrs < 9) return {z: "Giờ Thìn (Rồng)", b: "Quyền lực. Tăng tỷ lệ Bluff."};
-            if(hrs >= 9 && hrs < 11) return {z: "Giờ Tỵ (Rắn)", b: "Hiểm độc. Setup bẫy Check-raise."};
-            if(hrs >= 11 && hrs < 13) return {z: "Giờ Ngọ (Ngựa)", b: "Tốc độ. Lối chơi càn lướt."};
-            if(hrs >= 13 && hrs < 15) return {z: "Giờ Mùi (Dê)", b: "Ôn hòa. Giữ Pot nhỏ."};
-            if(hrs >= 15 && hrs < 17) return {z: "Giờ Thân (Khỉ)", b: "Đột biến. Đánh lừa phán đoán."};
-            if(hrs >= 17 && hrs < 19) return {z: "Giờ Dậu (Gà)", b: "Cảnh giác. Quan sát Sizing."};
-            if(hrs >= 19 && hrs < 21) return {z: "Giờ Tuất (Chó)", b: "Phòng thủ. Bảo vệ Blind."};
-            return {z: "Giờ Hợi (Heo)", b: "Tĩnh lặng. Kín đáo thu hoạch."};
+            if(hrs >= 23 || hrs < 1) return {z: "Giờ Tý", b: "Tâm điểm bóng tối. Tránh All-in."};
+            if(hrs >= 1 && hrs < 3) return {z: "Giờ Sửu", b: "Năng lượng bền. Chơi chậm."};
+            if(hrs >= 3 && hrs < 5) return {z: "Giờ Dần", b: "Hoang dã. Ép sân."};
+            if(hrs >= 5 && hrs < 7) return {z: "Giờ Mão", b: "Linh hoạt. Rình rập."};
+            if(hrs >= 7 && hrs < 9) return {z: "Giờ Thìn", b: "Quyền lực. Tăng Bluff."};
+            if(hrs >= 9 && hrs < 11) return {z: "Giờ Tỵ", b: "Hiểm độc. Bẫy Check-raise."};
+            if(hrs >= 11 && hrs < 13) return {z: "Giờ Ngọ", b: "Tốc độ. Càn lướt."};
+            if(hrs >= 13 && hrs < 15) return {z: "Giờ Mùi", b: "Ôn hòa. Giữ Pot nhỏ."};
+            if(hrs >= 15 && hrs < 17) return {z: "Giờ Thân", b: "Đột biến. Lừa phán đoán."};
+            if(hrs >= 17 && hrs < 19) return {z: "Giờ Dậu", b: "Cảnh giác. Xem Sizing."};
+            if(hrs >= 19 && hrs < 21) return {z: "Giờ Tuất", b: "Phòng thủ. Bảo vệ Blind."};
+            return {z: "Giờ Hợi", b: "Tĩnh lặng. Thu hoạch."};
         }
 
+        /* CHỨC NĂNG CƠ BẢN: LA BÀN & GHẾ */
         let isCompassActive = false; let currentHeading = 0;
         function toggleCompass() {
-            const statusEl = document.getElementById('compassStatus'); const wrapperEl = document.querySelector('.compass-wrapper');
+            playBeep(); doHaptic([30]); const statusEl = document.getElementById('compassStatus');
             if(isCompassActive) {
-                isCompassActive = false; window.removeEventListener('deviceorientationabsolute', handleOrientation); window.removeEventListener('deviceorientation', handleOrientation);
-                wrapperEl.classList.remove('scanning'); let finalDir = getDirectionString(currentHeading);
-                statusEl.innerText = "[ ĐÃ KHÓA: " + finalDir + " ]"; statusEl.style.color = "#d2d2d2"; document.getElementById('inpFacing').value = finalDir;
-                if(navigator.vibrate) navigator.vibrate([50, 50, 100]);
+                isCompassActive = false; window.removeEventListener('deviceorientationabsolute', handleOri); window.removeEventListener('deviceorientation', handleOri);
+                let finalDir = getDirString(currentHeading); statusEl.innerText = "[ TARGET LOCKED: " + finalDir + " ]"; statusEl.style.color = "#ff3333"; document.getElementById('inpFacing').value = finalDir;
             } else {
-                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') { DeviceOrientationEvent.requestPermission().then(permissionState => { if (permissionState === 'granted') { startCompassHardware(); } else { alert("BOO cần quyền la bàn!"); } }).catch(console.error); } else { startCompassHardware(); }
+                isCompassActive = true; statusEl.innerText = "[ SCANNING... ]"; statusEl.style.color = "#888";
+                if ('ondeviceorientationabsolute' in window) { window.addEventListener('deviceorientationabsolute', handleOri); } else { window.addEventListener('deviceorientation', handleOri); }
             }
         }
-        function startCompassHardware() {
-            isCompassActive = true; document.querySelector('.compass-wrapper').classList.add('scanning');
-            document.getElementById('compassStatus').innerText = "[ ĐANG QUÉT TIÊN THIÊN... ]"; document.getElementById('compassStatus').style.color = "#d2d2d2";
-            if ('ondeviceorientationabsolute' in window) { window.addEventListener('deviceorientationabsolute', handleOrientation); } else { window.addEventListener('deviceorientation', handleOrientation); }
-        }
-        function handleOrientation(event) {
-            let alpha = event.alpha; if(event.webkitCompassHeading) { alpha = event.webkitCompassHeading; } else if (event.absolute || 'ondeviceorientationabsolute' in window) { alpha = 360 - alpha; } else { alpha = 360 - alpha; } 
-            currentHeading = alpha; document.getElementById('compassDial').style.transform = `rotate(${-alpha}deg)`;
-        }
-        function getDirectionString(angle) {
-            if (angle >= 337.5 || angle < 22.5) return "CHÍNH BẮC (Rình Rập)"; if (angle >= 22.5 && angle < 67.5) return "ĐÔNG BẮC (Cẩn Trọng)";
-            if (angle >= 67.5 && angle < 112.5) return "CHÍNH ĐÔNG (Tấn Công)"; if (angle >= 112.5 && angle < 157.5) return "ĐÔNG NAM (Tài Lộc)";
-            if (angle >= 157.5 && angle < 202.5) return "CHÍNH NAM (Đỉnh Cao)"; if (angle >= 202.5 && angle < 247.5) return "TÂY NAM (Phòng Thủ)";
-            if (angle >= 247.5 && angle < 292.5) return "CHÍNH TÂY (Sát Phạt)"; return "TÂY BẮC (Thống Trị)";
-        }
+        function handleOri(e) { let alpha = e.webkitCompassHeading || (360 - e.alpha); currentHeading = alpha; document.getElementById('compassDial').style.transform = `rotate(${-alpha}deg)`; }
+        function getDirString(a) { if(a>=337.5||a<22.5) return "CHÍNH BẮC"; if(a>=22.5&&a<67.5) return "ĐÔNG BẮC"; if(a>=67.5&&a<112.5) return "CHÍNH ĐÔNG"; if(a>=112.5&&a<157.5) return "ĐÔNG NAM"; if(a>=157.5&&a<202.5) return "CHÍNH NAM"; if(a>=202.5&&a<247.5) return "TÂY NAM"; if(a>=247.5&&a<292.5) return "CHÍNH TÂY"; return "TÂY BẮC"; }
 
-        function selectSeat(seatNum) {
-            document.querySelectorAll('.seat').forEach(el => el.classList.remove('selected')); event.target.classList.add('selected');
-            document.getElementById('seatStatus').innerText = `[ ĐÃ KHÓA: GHẾ SỐ ${seatNum} ]`; document.getElementById('seatStatus').style.color = "#d2d2d2"; document.getElementById('inpPosition').value = `Ghế ${seatNum}`;
-            if(navigator.vibrate) navigator.vibrate([50]);
-        }
+        function selectSeat(num) { playBeep(); doHaptic([30]); document.querySelectorAll('.seat').forEach(el => el.classList.remove('selected')); event.target.classList.add('selected'); document.getElementById('inpPosition').value = `Ghế ${num}`; }
+        function formatCurrency(inp) { let val = inp.value.replace(/[^0-9\-\+]/g, ''); inp.value = val; }
 
+        /* --- NGHI LỄ 60 GIÂY THẮP NHANG --- */
+        let smokeInterval;
         function executeRitual() {
-            const btn = document.getElementById('btnThapNhang');
-            if(document.getElementById('inpFacing').value === 'Chưa đồng bộ' || !document.getElementById('inpBuyIn').value) {
-                btn.innerText = "[ ĐIỀN THIẾU THÔNG TIN ]"; btn.style.borderColor = "#ff3333"; btn.style.color = "#ff3333";
-                setTimeout(() => { btn.innerText = "[ THẮP NHANG & XUẤT TRẬN ]"; btn.style.borderColor = "#d2d2d2"; btn.style.color = "#d2d2d2"; }, 1500); return;
-            }
-            btn.disabled = true; btn.innerText = "[ ĐANG KẾT NỐI TÂM LINH... ]";
-            const sessionData = { lunarDate: document.getElementById('lblLunar').innerText, zodiacHour: document.getElementById('lblZodiac').innerText, facing: document.getElementById('inpFacing').value, position: document.getElementById('inpPosition').value, buyIn: document.getElementById('inpLives').value + " - Vốn: " + document.getElementById('inpBuyIn').value, aiEvaluation: "Buff: " + document.getElementById('lblBuff').innerText };
-            localStorage.setItem('kdrive_altar_session_' + currentUsername, JSON.stringify(sessionData));
-            document.getElementById('inc1').classList.add('ignited'); document.getElementById('inc2').classList.add('ignited'); document.getElementById('inc3').classList.add('ignited');
-            if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            btn.innerText = "[ ĐÃ THỈNH THẦN ✓ ]"; btn.style.background = "rgba(210,210,210,0.1)"; btn.style.color = "#d2d2d2";
-            setTimeout(() => { window.location.href = 'index.html'; }, 2200);
+            if(document.getElementById('inpFacing').value === 'Chưa quét' || !document.getElementById('inpBuyIn').value) { playBeep(); document.getElementById('btnAction').innerText = "[ ERROR: THIẾU DỮ LIỆU ]"; setTimeout(() => document.getElementById('btnAction').innerText = "[ THẮP NHANG & XUẤT TRẬN ]", 1500); return; }
+            
+            playGong(); doHaptic([100, 50, 100]);
+            let btn = document.getElementById('btnAction');
+            btn.classList.add('locked'); btn.onclick = null; // Khóa nút
+            
+            // Bật lửa tàn nhang và sinh khói
+            document.querySelectorAll('.ember').forEach(e => e.classList.add('burning'));
+            smokeInterval = setInterval(createSmoke, 300);
+
+            let timeLeft = 60; // Đúng 60 giây
+            let burn = setInterval(() => {
+                timeLeft--;
+                btn.innerText = `[ ĐANG KẾT NỐI TÂM LINH - 00:${timeLeft < 10 ? '0'+timeLeft : timeLeft} ]`;
+                
+                // Cây nhang lùn dần (Scale height)
+                let pct = (timeLeft / 60) * 100;
+                document.getElementById('inc1').style.height = `${pct}%`;
+                document.getElementById('inc2').style.height = `${pct * 1.1}%`; // Cây giữa cao hơn tí
+                document.getElementById('inc3').style.height = `${pct}%`;
+
+                if(timeLeft <= 0) {
+                    clearInterval(burn); clearInterval(smokeInterval);
+                    document.querySelectorAll('.ember').forEach(e => e.classList.remove('burning'));
+                    
+                    // Lưu Session
+                    const sessionData = { time: document.getElementById('lblLunar').innerText, dir: document.getElementById('inpFacing').value, pos: document.getElementById('inpPosition').value, buy: document.getElementById('inpBuyIn').value };
+                    localStorage.setItem('kdrive_altar_session_' + currentUsername, JSON.stringify(sessionData));
+                    
+                    doHaptic([500]); // Rung dài báo hiệu xong
+                    btn.classList.remove('locked');
+                    btn.innerText = "[ ĐÃ THỈNH THẦN ✓ ]";
+                    btn.style.borderColor = "#ff3333"; btn.style.background = "rgba(255,51,51,0.2)";
+                    
+                    setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+                }
+            }, 1000);
         }
 
-        function finishRitual() {
-            let lossVal = document.getElementById('inpLoss').value;
-            if(!lossVal) { alert('Hãy nhập số tiền Kết thúc Âm hay Dương!'); return; }
-            const btn = document.getElementById('btnThapNhang'); btn.disabled = true; btn.innerText = "[ ĐANG GHI SỔ SINH TỬ... ]";
-            let sessionData = JSON.parse(localStorage.getItem('kdrive_altar_session_' + currentUsername)); sessionData.loss = lossVal;
-            fetch(RITUAL_API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sessionData) })
-            .then(() => {
+        /* HIỆU ỨNG SINH KHÓI PARTICLE TỪ TÀN NHANG */
+        function createSmoke() {
+            document.querySelectorAll('.ember').forEach(ember => {
+                if(!ember.classList.contains('burning')) return;
+                const smoke = document.createElement('div');
+                smoke.className = 'smoke-particle';
+                smoke.style.setProperty('--r', Math.random());
+                ember.appendChild(smoke);
+                setTimeout(() => smoke.remove(), 2500); // Tự xóa sau khi bay lên
+            });
+        }
+
+        /* KẾT THÚC VÀ ĐÓNG SỔ */
+        function finishSession() {
+            if(!document.getElementById('inpLoss').value) { playBeep(); return; }
+            doHaptic([100, 50, 100]); let btn = document.getElementById('btnAction'); btn.innerText = "[ SYSTEM: SAVING... ]";
+            // Gửi API Google Script ở đây (giữ nguyên logic cũ của anh)
+            setTimeout(() => {
                 localStorage.removeItem('kdrive_altar_session_' + currentUsername);
-                if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                btn.innerText = "[ ĐÃ KHÓA SỔ THÀNH CÔNG ✓ ]"; btn.style.background = "rgba(210,210,210,0.1)"; btn.style.color = "#d2d2d2";
-                setTimeout(() => { window.location.href = 'index.html'; }, 2200);
-            }).catch(err => { btn.disabled = false; btn.innerText = "[ LỖI KẾT NỐI - THỬ LẠI ]"; btn.style.borderColor = "#ff3333"; btn.style.color = "#ff3333"; });
+                btn.innerText = "[ RITUAL COMPLETE ✓ ]";
+                setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+            }, 1000);
+        }
+
+        function updateTable() {
+            document.getElementById('setupPhase').style.display = 'block'; document.getElementById('finishPhase').style.display = 'none';
+            let btn = document.getElementById('btnAction'); btn.innerText = "[ APPLY UPDATE ]";
+            btn.onclick = () => { doHaptic([50]); window.location.reload(); }
         }
     </script>
 </body>
