@@ -4,72 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>K-Drive - Neural Altar</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:ital,wght@0,400;0,500;0,700;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
-        body { background-color: #000; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Space Grotesk', sans-serif; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; color: #a0a0a0; }
+        body { background-color: #000; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Space Grotesk', sans-serif; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; color: #d2d2d2; }
         input, select { user-select: auto !important; -webkit-user-select: auto !important; touch-action: auto !important; pointer-events: auto !important; }
 
-        /* MA TRẬN NỔI SÁNG */
-        #matrixCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; opacity: 0.85; pointer-events: none; }
+        /* MA TRẬN XÁM TRẮNG NỔI SÁNG */
+        #matrixCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; opacity: 0.8; pointer-events: none; }
         
         /* KHÓI MỜ NỀN */
         .ambient-smoke { position: fixed; top: 0; left: 0; width: 200vw; height: 100vh; background: url('https://raw.githubusercontent.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/main/smoke-texture.png') repeat-x; background-size: auto 100%; opacity: 0.15; z-index: 1; pointer-events: none; animation: driftSmoke 60s linear infinite; filter: blur(5px); mix-blend-mode: screen; }
         @keyframes driftSmoke { 0% { transform: translateX(0); } 100% { transform: translateX(-50vw); } }
 
-        /* NÚT ĐIỀU HƯỚNG */
-        .btn-return-lobby { position: absolute; top: 25px; left: 25px; color: #666; font-weight: bold; cursor: pointer; z-index: 60000; font-family: 'Share Tech Mono', monospace; font-size: 13px; text-decoration: none; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
-        .btn-return-lobby:hover { color: #d2d2d2; text-shadow: 0 0 10px rgba(210,210,210,0.5); }
+        /* NÚT ĐIỀU HƯỚNG BẢO LƯU TIẾNG ANH */
+        .btn-return-lobby { position: absolute; top: 25px; left: 25px; color: #888; font-weight: bold; cursor: pointer; z-index: 60000; font-family: 'Share Tech Mono', monospace; font-size: 13px; text-decoration: none; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; text-shadow: 0 0 5px #000; }
+        .btn-return-lobby:hover { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
 
         /* SẢNH CHỜ THẦN TÀI */
         .thantai-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, rgba(15,15,15,0.9) 0%, #000 100%); z-index: 45000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1.5s ease-in-out, visibility 1.5s; }
-        .big-thantai-img { width: 320px; max-width: 85vw; filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.1)) grayscale(10%); animation: levitateGod 4s ease-in-out infinite; cursor: pointer; }
-        @keyframes levitateGod { 0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.1)) grayscale(10%); } 50% { transform: translateY(-10px) scale(1.02); filter: drop-shadow(0 0 40px rgba(0, 255, 136, 0.3)) grayscale(0%); } }
-        .summon-text { margin-top: 40px; font-family: 'Space Grotesk', sans-serif; font-size: 16px; color: #d2d2d2; text-shadow: 0 0 15px rgba(210,210,210,0.5); letter-spacing: 3px; pointer-events: none; animation: pulseAlpha 2s infinite; font-weight: 500; }
+        .big-thantai-img { width: 320px; max-width: 85vw; filter: drop-shadow(0 0 20px rgba(218, 165, 32, 0.1)) grayscale(10%); animation: levitateGod 4s ease-in-out infinite; cursor: pointer; }
+        @keyframes levitateGod { 0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 20px rgba(218, 165, 32, 0.1)) grayscale(10%); } 50% { transform: translateY(-10px) scale(1.02); filter: drop-shadow(0 0 40px rgba(218, 165, 32, 0.4)) grayscale(0%); } }
+        .summon-text { margin-top: 40px; font-family: 'Space Grotesk', sans-serif; font-size: 16px; color: #DAA520; text-shadow: 0 0 15px rgba(218,165,32,0.5); letter-spacing: 3px; pointer-events: none; animation: pulseAlpha 2s infinite; font-weight: 500; }
         @keyframes pulseAlpha { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-        /* ĐIỆN THỜ KÍNH MỜ (THẤY MA TRẬN) */
-        .altar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(8, 8, 8, 0.65); backdrop-filter: blur(6px); z-index: 50000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 1.5s ease; }
+        /* ĐIỆN THỜ TRONG SUỐT (NHÌN THẤU MA TRẬN) */
+        .altar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: transparent; z-index: 50000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 1.5s ease; }
         .altar-overlay.active { opacity: 1; visibility: visible; }
         .altar-panel { width: 95%; max-width: 420px; padding: 20px; position: relative; height: 85vh; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
         .altar-panel::-webkit-scrollbar { display: none; }
         
-        .altar-panel > * { position: relative; z-index: 1; }
+        /* SHADOW BẢO VỆ CHỮ TRÊN NỀN MA TRẬN */
+        .altar-panel > * { position: relative; z-index: 1; text-shadow: 0 0 8px #000, 0 0 15px #000, 1px 1px 2px #000; }
         
-        /* ĐÁNH SỐ VÀNG ĐỒNG (GOLD) */
-        .gold-title { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #DAA520; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; text-align: center; text-shadow: 0 0 8px rgba(218, 165, 32, 0.4);}
+        /* TIÊU ĐỀ VÀNG ĐỒNG */
+        .gold-title { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: #DAA520; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; text-align: center; text-shadow: 0 0 8px rgba(0,0,0,0.9), 0 0 5px rgba(218, 165, 32, 0.5);}
         
+        /* THÔNG TIN NGÀY GIỜ & BOO TÂM LINH (XÁM BẠC, IN NGHIÊNG) */
+        .info-text { text-align: center; color: #fff; font-size: 15px; margin-bottom: 25px; line-height: 1.6; }
+        .boo-voice { color: #A9A9A9; font-style: italic; font-weight: 400; text-shadow: 0 0 10px #000, 0 0 5px rgba(169,169,169,0.3); font-size: 14px;}
+
         /* BÁT QUÁI NỔI KHỐI XOAY CHẬM (PHƯƠNG ÁN B) */
-        .compass-wrapper { width: 140px; height: 140px; margin: 15px auto 25px auto; position: relative; cursor: pointer; display: flex; justify-content: center; align-items: center;}
-        .bagua-base { position: absolute; width: 120px; height: 120px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/07/Bagua_Taijitu.svg'); background-size: cover; border-radius: 50%; filter: grayscale(100%) brightness(1.5) drop-shadow(0 10px 15px rgba(0,0,0,0.9)); box-shadow: inset 0 0 20px rgba(255,255,255,0.2), 0 0 10px rgba(255,255,255,0.1); opacity: 0.6; animation: spinBagua 60s linear infinite; }
+        .compass-wrapper { width: 150px; height: 150px; margin: 15px auto 25px auto; position: relative; cursor: pointer; display: flex; justify-content: center; align-items: center;}
+        .bagua-base { position: absolute; width: 130px; height: 130px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/07/Bagua_Taijitu.svg'); background-size: cover; border-radius: 50%; filter: grayscale(100%) drop-shadow(0 8px 15px rgba(0,0,0,0.8)); opacity: 0.25; animation: spinBagua 60s linear infinite; }
         @keyframes spinBagua { 100% { transform: rotate(360deg); } }
         
         .compass-dial { width: 100%; height: 100%; position: absolute; transition: transform 0.1s ease-out; }
-        .compass-dial span { position: absolute; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: bold; color: #C41E3A; text-shadow: 0 0 8px rgba(196, 30, 58, 0.8), 0 0 2px #000; } /* Màu Đỏ Chu Sa */
+        .compass-dial span { position: absolute; font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: bold; color: #C41E3A; text-shadow: 0 0 10px #000, 0 0 8px rgba(196, 30, 58, 0.8); } /* Đỏ Chu Sa */
         .dir-n { top: 0; left: 50%; transform: translateX(-50%); } .dir-s { bottom: 0; left: 50%; transform: translateX(-50%); } .dir-e { top: 50%; right: 0; transform: translateY(-50%); } .dir-w { top: 50%; left: 0; transform: translateY(-50%); }
-        .compass-pointer { position: absolute; top: 50%; left: 50%; width: 2px; height: 60px; background: #DAA520; transform: translate(-50%, -100%); z-index: 5; pointer-events: none; box-shadow: 0 0 5px #DAA520; }
+        .compass-pointer { position: absolute; top: 50%; left: 50%; width: 2px; height: 65px; background: #DAA520; transform: translate(-50%, -100%); z-index: 5; pointer-events: none; box-shadow: 0 0 5px #DAA520; }
         
-        .compass-status { text-align: center; color: #DAA520; font-family: 'Space Grotesk', sans-serif; font-size: 13px; margin-top: 5px; font-weight: 500; cursor: pointer; height: 20px; text-shadow: 0 0 8px rgba(218,165,32,0.3);}
+        .compass-status { text-align: center; color: #DAA520; font-family: 'Share Tech Mono', monospace; font-size: 13px; margin-top: 5px; cursor: pointer; height: 20px; text-shadow: 0 0 10px #000;}
 
-        /* BÀN POKER KẺ VIỀN */
-        .poker-table-hologram { width: 100%; height: 110px; margin: 15px 0 25px 0; position: relative; display: flex; justify-content: center; align-items: center; }
-        .table-surface { width: 240px; height: 90px; border: 1px dashed rgba(255, 255, 255, 0.2); border-radius: 60px; position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
-        .seat { position: absolute; width: 26px; height: 26px; background: #050505; border: 1px solid #444; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 11px; font-family: 'Share Tech Mono', monospace; color: #888; cursor: pointer; transition: 0.3s; transform: translate(-50%, -50%); z-index: 2;}
-        .seat.selected { border: 1px solid #DAA520; color: #DAA520; font-weight: bold; box-shadow: 0 0 15px rgba(218,165,32,0.5); transform: translate(-50%, -50%) scale(1.2); background: rgba(218,165,32,0.1);}
+        /* BÀN POKER CÓ VIỀN */
+        .poker-table-hologram { width: 100%; height: 120px; margin: 15px 0 25px 0; position: relative; display: flex; justify-content: center; align-items: center; }
+        .table-surface { width: 260px; height: 95px; border: 1px dashed rgba(200, 200, 200, 0.3); border-radius: 50px; position: relative; box-shadow: inset 0 0 30px rgba(0,0,0,0.8); background: rgba(0,0,0,0.4); }
+        .seat { position: absolute; width: 28px; height: 28px; background: rgba(10,10,10,0.8); border: 1px solid #555; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; font-family: 'Share Tech Mono', monospace; color: #aaa; cursor: pointer; transition: 0.3s; transform: translate(-50%, -50%); z-index: 2;}
+        .seat.selected { border: 1px solid #DAA520; color: #DAA520; font-weight: bold; box-shadow: 0 0 15px rgba(218,165,32,0.5), 0 0 10px #000; transform: translate(-50%, -50%) scale(1.2); background: rgba(20,20,20,0.9);}
         .s1 { left: 25%; top: 100%; } .s2 { left: 0%; top: 50%; } .s3 { left: 20%; top: 0%; } .s4 { left: 40%; top: 0%; } .s5 { left: 60%; top: 0%; } .s6 { left: 80%; top: 0%; } .s7 { left: 100%; top: 50%; } .s8 { left: 75%; top: 100%; } .s9 { left: 50%; top: 100%; }
 
         /* Ô NHẬP LIỆU */
         .input-box { margin-bottom: 25px; display: flex; flex-direction: column; }
-        .input-box input, .input-box select { background: transparent; border: none; border-bottom: 1px dashed #555; padding: 10px 0; color: #d2d2d2; font-family: 'Space Grotesk', sans-serif; font-size: 16px; border-radius: 0; outline: none; transition: 0.3s; text-align: center; font-weight: 500; }
-        .input-box input:focus, .input-box select:focus { border-bottom-color: #DAA520; border-bottom-style: solid; text-shadow: 0 0 5px rgba(218,165,32,0.3); }
-        .input-box select option { background: #0a0a0a; color: #ccc; }
+        .input-box input, .input-box select { background: transparent; border: none; border-bottom: 1px dashed #666; padding: 10px 0; color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 16px; border-radius: 0; outline: none; transition: 0.3s; text-align: center; font-weight: 500; text-shadow: 0 0 5px #000; }
+        .input-box input:focus, .input-box select:focus { border-bottom-color: #DAA520; border-bottom-style: solid; text-shadow: 0 0 5px rgba(218,165,32,0.5), 0 0 10px #000; }
+        .input-box select option { background: #111; color: #ccc; }
 
-        /* NÚT LỆNH */
-        .action-btn { padding: 15px; background: transparent; color: #d2d2d2; font-weight: 500; font-size: 14px; border: 1px solid #444; cursor: pointer; width: 100%; font-family: 'Space Grotesk', sans-serif; letter-spacing: 2px; text-transform: uppercase; transition: 0.4s; margin-top: 10px;}
-        .btn-ritual { border-color: #DAA520; color: #DAA520; text-shadow: 0 0 5px rgba(218,165,32,0.3); background: rgba(218,165,32,0.05); }
-        .btn-ritual.locked { border-color: #555; color: #555; text-shadow: none; background: transparent; pointer-events: none; animation: breatheLock 2s infinite; }
+        /* NÚT LỆNH THUẦN VIỆT */
+        .action-btn { padding: 15px; background: rgba(0,0,0,0.6); color: #d2d2d2; font-weight: 500; font-size: 14px; border: 1px solid #555; cursor: pointer; width: 100%; font-family: 'Space Grotesk', sans-serif; letter-spacing: 2px; text-transform: uppercase; transition: 0.4s; margin-top: 10px; text-shadow: 0 0 5px #000;}
+        .btn-ritual { border-color: #DAA520; color: #DAA520; box-shadow: 0 0 15px rgba(0,0,0,0.8); background: rgba(20,20,20,0.8); }
+        .btn-ritual.locked { border-color: #555; color: #777; box-shadow: none; background: rgba(0,0,0,0.4); pointer-events: none; animation: breatheLock 2s infinite; }
         @keyframes breatheLock { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .btn-system { font-family: 'Share Tech Mono', monospace; font-size: 12px; border-style: dashed; color: #666; margin-bottom: 40px;}
+        .btn-system { font-family: 'Share Tech Mono', monospace; font-size: 12px; border-style: dashed; color: #888; margin-bottom: 40px;}
 
         /* KHU VỰC THẮP NHANG */
         .incense-shrine { display: flex; justify-content: center; gap: 25px; margin: 30px 0 15px 0; height: 100px; position: relative; align-items: flex-end; }
@@ -78,11 +83,11 @@
         .ember { position: absolute; top: 0; width: 5px; height: 5px; background: #ffaa00; border-radius: 50%; transform: translateY(-50%); box-shadow: 0 0 10px #ff3300, 0 0 20px #ff0000; opacity: 0; transition: opacity 0.5s; z-index: 10; }
         .ember.burning { opacity: 1; animation: pulseEmber 0.5s infinite alternate; }
         @keyframes pulseEmber { 0% { box-shadow: 0 0 5px #ff3300; background: #ff6600; } 100% { box-shadow: 0 0 15px #ff0000, 0 0 25px #ffaa00; background: #ffcc00; } }
-        .smoke-particle { position: absolute; top: -10px; width: 2px; height: 2px; background: #ccc; border-radius: 50%; filter: blur(3px); opacity: 0; }
-        @keyframes riseSmoke { 0% { transform: translateY(0) scale(1) translateX(0); opacity: 0.6; filter: blur(2px); } 100% { transform: translateY(-60px) scale(15) translateX(calc(10px - 20px * var(--r))); opacity: 0; filter: blur(8px); } }
+        .smoke-particle { position: absolute; top: -10px; width: 2px; height: 2px; background: #ddd; border-radius: 50%; filter: blur(3px); opacity: 0; }
+        @keyframes riseSmoke { 0% { transform: translateY(0) scale(1) translateX(0); opacity: 0.5; filter: blur(2px); } 100% { transform: translateY(-60px) scale(15) translateX(calc(10px - 20px * var(--r))); opacity: 0; filter: blur(8px); } }
 
         /* MŨI TÊN CUỘN TRANG */
-        .scroll-indicator { text-align: center; color: #DAA520; font-size: 12px; margin-top: 15px; animation: bounce 1.5s infinite; opacity: 0.7; transition: 0.5s; }
+        .scroll-indicator { text-align: center; color: #DAA520; font-size: 12px; margin-top: 15px; animation: bounce 1.5s infinite; opacity: 0.7; transition: 0.5s; text-shadow: 0 0 5px #000; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 
     </style>
@@ -91,7 +96,7 @@
     <canvas id="matrixCanvas"></canvas>
     <div class="ambient-smoke"></div>
 
-    <a href="index.html" class="btn-return-lobby">[ RETURN TO LOBBY ]</a>
+    <a href="index.html" class="btn-return-lobby" onclick="doHeavyHaptic()">[ RETURN TO LOBBY ]</a>
 
     <div id="thantaiScreen" class="thantai-overlay">
         <img src="https://github.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/blob/main/ban%20tho%20ong%20dia.png?raw=true" class="big-thantai-img" onclick="initiateAltar()">
@@ -101,10 +106,10 @@
     <div id="altarScreen" class="altar-overlay">
         <div class="altar-panel" id="altarPanel" onscroll="hideScrollIndicator()">
             
-            <div class="gold-title">1. THIÊN THỜI [ÂM LỊCH]</div>
-            <div style="text-align: center; color: #ccc; font-size: 14px; margin-bottom: 25px; line-height: 1.6;">
-                Ngày: <span id="lblLunar" style="color: #fff; font-weight: bold;"></span><br>
-                <span id="lblZodiac"></span>
+            <div class="gold-title">1. THIÊN THỜI</div>
+            <div class="info-text">
+                Ngày: <span id="lblLunar" style="font-weight: bold;"></span> [Âm lịch]<br>
+                <div class="boo-voice" id="lblZodiac"></div>
             </div>
 
             <div id="setupPhase">
@@ -115,7 +120,7 @@
                         <div id="compassDial" class="compass-dial"><span class="dir-n">B</span><span class="dir-e">Đ</span><span class="dir-s">N</span><span class="dir-w">T</span></div>
                         <div class="compass-pointer"></div>
                     </div>
-                    <div class="compass-status" id="compassStatus" onclick="toggleCompass()">[ SCAN AREA ]</div>
+                    <div class="compass-status" id="compassStatus" onclick="toggleCompass()">[ TÌM PHƯƠNG VỊ ]</div>
                     <input type="hidden" id="inpFacing" value="Chưa quét">
                 </div>
 
@@ -132,11 +137,11 @@
                 <div style="display: flex; gap: 15px;">
                     <div class="input-box" style="flex: 1;">
                         <div class="gold-title">4. SỐ MẠNG</div>
-                        <select id="inpLives"><option>Mạng 1</option><option>Mạng 2</option><option>Mạng 3</option><option>Mạng 4</option></select>
+                        <select id="inpLives" onchange="playLightClick()"><option>Mạng 1</option><option>Mạng 2</option><option>Mạng 3</option><option>Mạng 4</option></select>
                     </div>
                     <div class="input-box" style="flex: 1.5;">
                         <div class="gold-title">5. TIỀN VỐN</div>
-                        <input type="text" id="inpBuyIn" placeholder="Nhập chip..." oninput="formatCurrency(this)">
+                        <input type="text" id="inpBuyIn" placeholder="Nhập chip..." oninput="formatCurrency(this)" onfocus="playLightClick()">
                     </div>
                 </div>
             </div>
@@ -157,7 +162,7 @@
             </div>
 
             <button class="action-btn btn-ritual" id="btnAction" onclick="executeRitual()">[ THẮP NHANG & XUẤT TRẬN ]</button>
-            <button class="action-btn btn-system" id="btnUpdateTable" style="display:none;" onclick="updateTable()">[ SYSTEM: UPDATE POSITION ]</button>
+            <button class="action-btn btn-system" id="btnUpdateTable" style="display:none;" onclick="updateTable()">[ ĐỔI VỊ TRÍ GHẾ ]</button>
         </div>
     </div>
 
@@ -165,15 +170,25 @@
     <audio id="sfxGong" src="https://assets.mixkit.co/active_storage/sfx/2281/2281-preview.mp3" preload="auto"></audio>
 
     <script>
-        /* MA TRẬN SÁNG MÀU XANH NEON */
+        /* TẠO ÂM THANH CƠ HỌC & RUNG */
+        const AudioCtx = window.AudioContext || window.webkitAudioContext; let actx;
+        function initAudio() { if(!actx) actx = new AudioCtx(); if(actx.state === 'suspended') actx.resume(); }
+        
+        function playLightClick() { initAudio(); const osc = actx.createOscillator(); const gain = actx.createGain(); osc.connect(gain); gain.connect(actx.destination); osc.frequency.setValueAtTime(800, actx.currentTime); gain.gain.setValueAtTime(0.05, actx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.05); osc.start(); osc.stop(actx.currentTime + 0.05); if(navigator.vibrate) navigator.vibrate(20); }
+        
+        function playHeavyClack() { initAudio(); const osc = actx.createOscillator(); const gain = actx.createGain(); osc.connect(gain); gain.connect(actx.destination); osc.frequency.setValueAtTime(250, actx.currentTime); gain.gain.setValueAtTime(0.2, actx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.1); osc.start(); osc.stop(actx.currentTime + 0.1); if(navigator.vibrate) navigator.vibrate([50]); }
+
+        function doHeavyHaptic() { if(navigator.vibrate) navigator.vibrate([50]); }
+
+        /* MA TRẬN XÁM TRẮNG ĐỤC */
         const canvas = document.getElementById('matrixCanvas'); const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const chars = "天地玄黃宇宙洪荒日月盈昃辰宿列張".split("");
         const fontSize = 16; const columns = canvas.width / fontSize; const drops = [];
         for(let x = 0; x < columns; x++) drops[x] = Math.random() * -100;
         function drawMatrix() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(0, 255, 136, 0.8)'; /* Xanh sáng */
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.6)'; /* Xám trắng mờ */
             ctx.font = fontSize + "px 'Space Grotesk', monospace";
             for(let i = 0; i < drops.length; i++) {
                 const text = chars[Math.floor(Math.random() * chars.length)];
@@ -184,15 +199,14 @@
         }
         setInterval(drawMatrix, 50);
 
-        function doHaptic(pattern) { if(navigator.vibrate) navigator.vibrate(pattern); }
         function hideScrollIndicator() { document.getElementById('scrollArrow').style.opacity = '0'; }
 
         /* KHỞI ĐỘNG */
         function initiateAltar() {
-            doHaptic([150, 50, 80]);
+            if(navigator.vibrate) navigator.vibrate([150, 50, 80]);
             let bgm = document.getElementById('bgmAudio'); let gong = document.getElementById('sfxGong');
             bgm.volume = 0.5; bgm.play().catch(e=>console.log(e));
-            gong.volume = 0.8; gong.play().catch(e=>console.log(e)); // SFX chạy độc lập, không cướp mic
+            gong.volume = 0.8; gong.play().catch(e=>console.log(e)); 
             
             document.getElementById('thantaiScreen').style.opacity = '0';
             setTimeout(() => { document.getElementById('thantaiScreen').style.display = 'none'; loadAltarData(); document.getElementById('altarScreen').classList.add('active'); }, 1000);
@@ -202,7 +216,7 @@
         function loadAltarData() {
             let d = new Date(); let lunarFormatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', {day: '2-digit', month: '2-digit'});
             document.getElementById('lblLunar').innerText = lunarFormatter.format(d);
-            document.getElementById('lblZodiac').innerText = getZodiacHour();
+            document.getElementById('lblZodiac').innerHTML = getZodiacHour();
             
             const savedSession = localStorage.getItem('kdrive_altar_session_' + currentUsername);
             if(savedSession) {
@@ -216,41 +230,49 @@
         function getZodiacHour() {
             const hrs = new Date().getHours();
             if(hrs >= 19 && hrs < 21) return "Giờ Tuất | BOO Tâm Linh báo: Phòng thủ Blind.";
-            return "Giờ Mão | BOO Tâm Linh báo: Linh hoạt, rình rập."; // Demo
+            return "Giờ Mão | BOO Tâm Linh báo: Linh hoạt, rình rập."; 
         }
 
-        /* LA BÀN */
+        /* LA BÀN CƠ HỌC */
         let isCompassActive = false; let currentHeading = 0;
         function toggleCompass() {
-            doHaptic([30]); const statusEl = document.getElementById('compassStatus');
+            const statusEl = document.getElementById('compassStatus');
             if(isCompassActive) {
-                isCompassActive = false; window.removeEventListener('deviceorientationabsolute', handleOri); window.removeEventListener('deviceorientation', handleOri);
+                isCompassActive = false; 
+                playHeavyClack(); /* Tiếng CẠCH chốt hạ */
+                window.removeEventListener('deviceorientationabsolute', handleOri); window.removeEventListener('deviceorientation', handleOri);
                 let finalDir = getDirString(currentHeading); 
-                statusEl.innerHTML = `[ BOO TÂM LINH BÁO: <span style="color:#fff;">${finalDir}</span> ]`; 
+                statusEl.innerHTML = `[ <span class="boo-voice">BOO Tâm Linh báo: ${finalDir}</span> ]`; 
                 document.getElementById('inpFacing').value = finalDir;
             } else {
-                isCompassActive = true; statusEl.innerText = "[ SCANNING... ]";
+                isCompassActive = true; 
+                playLightClick(); /* Tiếng Tách khởi động */
+                statusEl.innerHTML = `[ <span style="color:#aaa;">ĐANG DỊCH CHUYỂN...</span> ]`;
                 if ('ondeviceorientationabsolute' in window) { window.addEventListener('deviceorientationabsolute', handleOri); } else { window.addEventListener('deviceorientation', handleOri); }
             }
         }
         function handleOri(e) { let alpha = e.webkitCompassHeading || (360 - e.alpha); currentHeading = alpha; document.getElementById('compassDial').style.transform = `rotate(${-alpha}deg)`; }
         function getDirString(a) { 
-            if(a>=112.5&&a<157.5) return "ĐÔNG NAM - TÀI LỘC"; 
-            if(a>=247.5&&a<292.5) return "CHÍNH TÂY - SÁT PHẠT";
-            return "CHÍNH NAM - BÌNH ỔN"; 
+            if(a>=112.5&&a<157.5) return "Đông Nam - Tài Lộc"; 
+            if(a>=247.5&&a<292.5) return "Chính Tây - Sát Phạt";
+            return "Chính Nam - Bình Ổn"; 
         }
 
-        function selectSeat(num) { doHaptic([30]); document.querySelectorAll('.seat').forEach(el => el.classList.remove('selected')); event.target.classList.add('selected'); document.getElementById('inpPosition').value = `Ghế ${num}`; }
+        function selectSeat(num) { 
+            playLightClick(); /* Tiếng Tách chọn ghế */
+            document.querySelectorAll('.seat').forEach(el => el.classList.remove('selected')); event.target.classList.add('selected'); document.getElementById('inpPosition').value = `Ghế ${num}`; 
+        }
+        
         function formatCurrency(inp) { let val = inp.value.replace(/[^0-9\-\+]/g, ''); inp.value = val; }
 
         /* THẮP NHANG 60S */
         let smokeInterval;
         function executeRitual() {
-            if(document.getElementById('inpFacing').value === 'Chưa quét' || !document.getElementById('inpBuyIn').value) { document.getElementById('btnAction').innerText = "[ ERROR: THIẾU DỮ LIỆU ]"; setTimeout(() => document.getElementById('btnAction').innerText = "[ THẮP NHANG & XUẤT TRẬN ]", 1500); return; }
+            if(document.getElementById('inpFacing').value === 'Chưa quét' || !document.getElementById('inpBuyIn').value) { document.getElementById('btnAction').innerText = "[ LỖI: THIẾU DỮ LIỆU ]"; setTimeout(() => document.getElementById('btnAction').innerText = "[ THẮP NHANG & XUẤT TRẬN ]", 1500); return; }
             
-            document.getElementById('sfxGong').play().catch(e=>{}); doHaptic([100, 50, 100]);
+            playHeavyClack(); document.getElementById('sfxGong').play().catch(e=>{}); if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
             let btn = document.getElementById('btnAction'); btn.classList.add('locked'); btn.onclick = null;
-            document.getElementById('altarPanel').scrollTop = document.getElementById('altarPanel').scrollHeight; // Tự cuộn xuống đáy
+            document.getElementById('altarPanel').scrollTop = document.getElementById('altarPanel').scrollHeight; 
             
             document.querySelectorAll('.ember').forEach(e => e.classList.add('burning'));
             smokeInterval = setInterval(createSmoke, 300);
@@ -265,7 +287,8 @@
                 if(timeLeft <= 0) {
                     clearInterval(burn); clearInterval(smokeInterval); document.querySelectorAll('.ember').forEach(e => e.classList.remove('burning'));
                     localStorage.setItem('kdrive_altar_session_' + currentUsername, JSON.stringify({ active: true }));
-                    doHaptic([500]); btn.classList.remove('locked'); btn.innerText = "[ ĐÃ THỈNH THẦN ✓ ]"; btn.style.background = "rgba(218,165,32,0.2)";
+                    if(navigator.vibrate) navigator.vibrate([500]); 
+                    btn.classList.remove('locked'); btn.innerText = "[ ĐÃ THỈNH THẦN ✓ ]"; btn.style.background = "rgba(218,165,32,0.2)";
                     setTimeout(() => { window.location.href = 'index.html'; }, 2000);
                 }
             }, 1000);
@@ -281,11 +304,16 @@
 
         function finishSession() {
             if(!document.getElementById('inpLoss').value) return;
-            doHaptic([100, 50, 100]); let btn = document.getElementById('btnAction'); btn.innerText = "[ SYSTEM: SAVING... ]";
-            setTimeout(() => { localStorage.removeItem('kdrive_altar_session_' + currentUsername); btn.innerText = "[ RITUAL COMPLETE ✓ ]"; setTimeout(() => { window.location.href = 'index.html'; }, 1500); }, 1000);
+            playHeavyClack(); if(navigator.vibrate) navigator.vibrate([100, 50, 100]); let btn = document.getElementById('btnAction'); btn.innerText = "[ ĐANG LƯU SỔ SINH TỬ... ]";
+            setTimeout(() => { localStorage.removeItem('kdrive_altar_session_' + currentUsername); btn.innerText = "[ ĐÃ TẠ LỄ THÀNH CÔNG ✓ ]"; setTimeout(() => { window.location.href = 'index.html'; }, 1500); }, 1000);
         }
 
-        function updateTable() { document.getElementById('setupPhase').style.display = 'block'; document.getElementById('finishPhase').style.display = 'none'; let btn = document.getElementById('btnAction'); btn.innerText = "[ APPLY UPDATE ]"; btn.onclick = () => { doHaptic([50]); window.location.reload(); } }
+        function updateTable() { 
+            playHeavyClack(); 
+            document.getElementById('setupPhase').style.display = 'block'; document.getElementById('finishPhase').style.display = 'none'; 
+            let btn = document.getElementById('btnAction'); btn.innerText = "[ XÁC NHẬN TỌA ĐỘ ]"; 
+            btn.onclick = () => { playHeavyClack(); window.location.reload(); } 
+        }
     </script>
 </body>
 </html>
