@@ -15,7 +15,7 @@ window.addEventListener('DOMContentLoaded', () => {
         setInterval(() => { document.getElementById('bpmText').innerText = (95 + Math.floor(Math.random() * 15)) + " BPM"; }, 2000);
         pulseTerminal("BOO: SESSION RESTORED.");
         initRelic();
-        spawnNeonRain(); // KÍCH HOẠT MÁY CHIA BÀI NEON
+        spawnNeonRain(); // KHỞI ĐỘNG TRƯỜNG LƯỢNG TỬ
     }
 });
 
@@ -50,7 +50,6 @@ document.body.addEventListener('touchstart', initAudio, {once:true});
 function playCyberSound() { try { initAudio(); const osc = actx.createOscillator(); const gain = actx.createGain(); osc.connect(gain); gain.connect(actx.destination); osc.type = 'triangle'; const now = actx.currentTime; osc.frequency.setValueAtTime(1500, now); osc.frequency.exponentialRampToValueAtTime(400, now + 0.12); gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15); osc.start(now); osc.stop(now + 0.15); } catch(e){} }
 function playWhoosh() { if(!actx) return; let osc = actx.createOscillator(); let gain = actx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(300, actx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, actx.currentTime + 1.2); osc.connect(gain); gain.connect(actx.destination); gain.gain.setValueAtTime(0.15, actx.currentTime); gain.gain.linearRampToValueAtTime(0, actx.currentTime + 1.2); osc.start(); osc.stop(actx.currentTime + 1.2); }
 
-// ÂM THANH NÚT BẤM CƠ KHÍ SẮC LẠNH
 function playCyberClick() { 
     if(!actx) initAudio(); 
     try {
@@ -72,7 +71,7 @@ function stopOverloadRoar() { if(overloadGain) { overloadGain.gain.exponentialRa
 function startBuzz() { } function stopBuzz() { } function playZapPop() { }
 
 // ===================================================
-// HỆ THỐNG MƯA NEON (CHUẨN BẢN GỐC K-DRIVE)
+// TRƯỜNG NĂNG LƯỢNG: HIỆN HÌNH TỪ HƯ VÔ, PHÂN LOẠI MÀU
 // ===================================================
 function spawnNeonRain() {
     if (!isLoggedIn) return;
@@ -81,35 +80,65 @@ function spawnNeonRain() {
     
     const suits = ['♠', '♥', '♣', '♦'];
     const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-    const colors = ['#00e5ff', '#00ff88', '#00cc66']; // Tone Xanh lá & Cyan
+    const redValues = ['A', 'K', 'Q', 'J']; // Thẻ Quyền lực màu Đỏ
+    const chipColors = ['#ffd700', '#ff66b2', '#b026ff']; // Vàng, Hồng, Tím
     
     setInterval(() => {
         let el = document.createElement('div');
-        let isCard = Math.random() > 0.35; // 65% Bài, 35% Đồng tiền
-        let color = colors[Math.floor(Math.random() * colors.length)];
+        let randObj = Math.random(); 
 
-        if (isCard) {
+        if (randObj > 0.5) { 
+            // 50% LÀ LÁ BÀI
             let suit = suits[Math.floor(Math.random() * suits.length)];
             let val = values[Math.floor(Math.random() * values.length)];
             el.className = 'neon-card-real';
+            
+            // Xử lý bài Đỏ (AKQJ) và Bài Xanh (Các số còn lại)
+            if (redValues.includes(val)) {
+                el.style.color = '#ff3366'; 
+                el.style.borderColor = 'rgba(255, 51, 102, 0.6)';
+            } else {
+                el.style.color = '#00ff88'; 
+                el.style.borderColor = 'rgba(0, 255, 136, 0.6)';
+            }
             el.innerHTML = `<span class="val">${val}</span><span class="suit">${suit}</span>`;
-        } else {
+            
+        } else if (randObj > 0.25) { 
+            // 25% LÀ TIỀN GIẤY (Chữ nhật, Xanh lục)
+            el.className = 'neon-dollar-real';
+            el.innerHTML = '<span>100</span>';
+            el.style.color = '#00ff00';
+            el.style.borderColor = 'rgba(0, 255, 0, 0.5)';
+            
+        } else { 
+            // 25% LÀ ĐỒNG CHIP (Vàng/Hồng/Tím)
             el.className = 'neon-coin-real';
-            el.innerHTML = '<span>$</span>';
+            el.innerHTML = '<span>K</span>';
+            el.style.color = chipColors[Math.floor(Math.random() * chipColors.length)];
         }
 
-        el.style.color = color;
+        // Hiện ra từ tọa độ ngẫu nhiên
         el.style.left = Math.random() * 95 + 'vw';
-        
-        let scale = Math.random() * 0.7 + 0.6; // Đổ bóng xa gần
+        let scale = Math.random() * 0.7 + 0.6; 
         el.style.setProperty('--drop-scale', scale);
         
-        let duration = Math.random() * 5 + 6; // Rơi chậm 6-11s
+        // Tỷ lệ tan biến giữa chừng (40%)
+        let duration = Math.random() * 5 + 7; // Rơi rất chậm (7-12s)
+        let isFadeEarly = Math.random() > 0.6; 
+        
+        if (isFadeEarly) {
+            el.style.setProperty('--max-opacity', '0.85');
+            el.style.animationName = 'neonFallVoidEarly'; // Keyframe biến mất ở giữa màn hình
+        } else {
+            el.style.setProperty('--max-opacity', '0.85');
+            el.style.animationName = 'neonFallVoid'; // Trôi đến hết màn hình
+        }
+        
         el.style.animationDuration = duration + 's'; 
         
         container.appendChild(el);
         setTimeout(() => { if(el.parentNode) el.remove(); }, duration * 1000);
-    }, 700); 
+    }, 800); // 0.8s sinh ra 1 vật thể
 }
 
 const hexCanvas = document.getElementById('hexCanvas'); const hexCtx = hexCanvas.getContext('2d'); let hexGrid = []; let canvasW = 0, canvasH = 0;
@@ -119,11 +148,9 @@ window.addEventListener('resize', initHexGrid); initHexGrid();
 function renderCanvas() { 
     hexCtx.clearRect(0, 0, canvasW, canvasH); hexCtx.lineWidth = 1.2; 
     let isStruggling = document.getElementById('cubeWrapper').classList.contains('overload-active'); 
-    let isPlasma = document.getElementById('cubeWrapper').classList.contains('plasma-active'); 
 
     for(let hex of hexGrid) { 
         if(isLoggedIn && isStruggling && Math.hypot(hex.x - canvasW/2, hex.y - canvasH*0.516) < 120) hex.energy = Math.random() * 0.9; 
-        if(isLoggedIn && isPlasma && Math.hypot(hex.x - canvasW/2, hex.y - canvasH*0.516) < 45) hex.energy = Math.random() * 0.9; 
 
         hex.energy *= 0.88; 
         let alpha = (isLoggedIn ? 0.12 : 0.03) + hex.energy; 
@@ -131,7 +158,6 @@ function renderCanvas() {
         
         let color = '0,255,136'; 
         if (isStruggling && hex.energy>0.1) color = '255,51,51'; 
-        else if (isPlasma && hex.energy>0.1) color = '176,38,255'; 
 
         hexCtx.strokeStyle = `rgba(${color},${alpha})`; 
         hexCtx.fillStyle = alpha > 0.22 ? `rgba(${color},${(alpha-0.15)*0.3})` : 'transparent'; 
@@ -224,7 +250,9 @@ function checkLoginGuard() { if (!isLoggedIn) { try { playCyberSound(); } catch(
 
 let capturedVideoUrl = null; let hasUnreadVideo = false;
 
-// KÍCH HOẠT CAMERA -> CUBE THÀNH KHẨU ĐỘ MÁY QUAY (CYBER-IRIS)
+// ===================================================
+// NÚT CAMERA: THU NẠP DỮ LIỆU (THU NHỎ, QUAY NHANH, ĐỎ)
+// ===================================================
 function openSecretCameraGuard(element) { 
     if (!checkLoginGuard()) return; 
     if(navigator.vibrate) navigator.vibrate(50);
@@ -232,21 +260,25 @@ function openSecretCameraGuard(element) {
     try { cameraShutterAudio.play().catch(e=>{}); } catch(e){}
     
     let cube = document.getElementById('cubeWrapper');
-    cube.classList.remove('projector-mode');
+    cube.classList.remove('video-play-mode');
     document.querySelector('.projector-beam').classList.remove('beam-on');
-    cube.classList.add('camera-mode');
+    
+    // Kích hoạt lõi ghi hình
+    cube.classList.add('camera-rec-mode');
     
     setTimeout(() => { document.getElementById('hiddenCamera').click(); }, 600);
 }
 
 window.addEventListener('focus', () => {
-    document.getElementById('cubeWrapper').classList.remove('camera-mode');
+    document.getElementById('cubeWrapper').classList.remove('camera-rec-mode');
 });
 
-function handleVideoUpload(event) { const file = event.target.files[0]; if (file) { capturedVideoUrl = URL.createObjectURL(file); document.getElementById('capturedVideoPlayer').src = capturedVideoUrl; hasUnreadVideo = true; triggerBubble(); } document.getElementById('cubeWrapper').classList.remove('camera-mode'); }
+function handleVideoUpload(event) { const file = event.target.files[0]; if (file) { capturedVideoUrl = URL.createObjectURL(file); document.getElementById('capturedVideoPlayer').src = capturedVideoUrl; hasUnreadVideo = true; triggerBubble(); } document.getElementById('cubeWrapper').classList.remove('camera-rec-mode'); }
 function triggerBubble() { if (!hasUnreadVideo) return; const bubble = document.getElementById('samuraiBubble'); bubble.classList.add('bubble-show'); document.getElementById('bubbleText').innerHTML = "⚠️ MẬT THƯ ĐẾN"; }
 
-// XEM VIDEO -> CUBE DẸP THÀNH MÀN CHIẾU PHẲNG
+// ===================================================
+// NÚT VIDEO: TRÍCH XUẤT MÁY CHIẾU (PHÓNG TO, XANH CYAN)
+// ===================================================
 function processSamuraiAction(element) { 
     if (!hasUnreadVideo || !capturedVideoUrl) { 
         triggerHexagonShield(); 
@@ -257,8 +289,10 @@ function processSamuraiAction(element) {
     try { playCyberSound(); } catch(e){}
     
     let cube = document.getElementById('cubeWrapper');
-    cube.classList.remove('camera-mode');
-    cube.classList.add('projector-mode');
+    cube.classList.remove('camera-rec-mode');
+    
+    // Khóa mục tiêu, hóa thân thành máy chiếu xanh
+    cube.classList.add('video-play-mode');
     document.querySelector('.projector-beam').classList.add('beam-on');
 
     setTimeout(() => {
@@ -270,11 +304,13 @@ function processSamuraiAction(element) {
 function closeVideoModule() { 
     document.getElementById('videoPopup').classList.remove('popup-open'); 
     document.getElementById('capturedVideoPlayer').pause(); 
-    document.getElementById('cubeWrapper').classList.remove('projector-mode'); 
+    document.getElementById('cubeWrapper').classList.remove('video-play-mode'); 
     document.querySelector('.projector-beam').classList.remove('beam-on');
 }
 
-// BẤM NÚT TĨNH -> GLITCH XÉ BÓNG TÍM/XANH
+// ===================================================
+// NÚT TĨNH -> PHÂN TÁCH BÓNG MA TÍM THẤT BẠI
+// ===================================================
 function triggerStaticNode(element) { 
     if (!checkLoginGuard()) return; 
     
@@ -282,10 +318,12 @@ function triggerStaticNode(element) {
     playCyberClick();
     
     let cube = document.getElementById('cubeWrapper');
-    cube.classList.add('plasma-active'); 
+    // Bắn ra bóng ma Tím
+    cube.classList.add('phantom-split'); 
     
     setTimeout(() => {
-        cube.classList.remove('plasma-active');
+        // Hút ngược lại lõi Xanh
+        cube.classList.remove('phantom-split');
     }, 500); 
 }
 
