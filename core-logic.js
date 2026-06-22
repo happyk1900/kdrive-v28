@@ -15,7 +15,7 @@ window.addEventListener('DOMContentLoaded', () => {
         setInterval(() => { document.getElementById('bpmText').innerText = (95 + Math.floor(Math.random() * 15)) + " BPM"; }, 2000);
         pulseTerminal("BOO: SESSION RESTORED.");
         initRelic();
-        spawnNeonRain(); // KÍCH HOẠT MƯA NEON
+        spawnNeonRain(); // KÍCH HOẠT MÁY CHIA BÀI NEON
     }
 });
 
@@ -47,11 +47,10 @@ const AudioContext = window.AudioContext || window.webkitAudioContext; let actx;
 function initAudio() { if(!actx) actx = new AudioContext(); if(actx.state==='suspended') actx.resume(); } 
 document.body.addEventListener('touchstart', initAudio, {once:true});
 
-// Âm thanh Quét hệ thống
 function playCyberSound() { try { initAudio(); const osc = actx.createOscillator(); const gain = actx.createGain(); osc.connect(gain); gain.connect(actx.destination); osc.type = 'triangle'; const now = actx.currentTime; osc.frequency.setValueAtTime(1500, now); osc.frequency.exponentialRampToValueAtTime(400, now + 0.12); gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15); osc.start(now); osc.stop(now + 0.15); } catch(e){} }
 function playWhoosh() { if(!actx) return; let osc = actx.createOscillator(); let gain = actx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(300, actx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, actx.currentTime + 1.2); osc.connect(gain); gain.connect(actx.destination); gain.gain.setValueAtTime(0.15, actx.currentTime); gain.gain.linearRampToValueAtTime(0, actx.currentTime + 1.2); osc.start(); osc.stop(actx.currentTime + 1.2); }
 
-// TÍNH NĂNG MỚI: Âm thanh Click Cơ khí cho 9 Nút
+// ÂM THANH NÚT BẤM CƠ KHÍ SẮC LẠNH
 function playCyberClick() { 
     if(!actx) initAudio(); 
     try {
@@ -72,26 +71,45 @@ function playOverloadRoar() { if(!actx) initAudio(); if(overloadOsc) return; ove
 function stopOverloadRoar() { if(overloadGain) { overloadGain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.2); setTimeout(() => { if(overloadOsc) { overloadOsc.stop(); overloadOsc = null; } overloadGain = null; }, 250); } }
 function startBuzz() { } function stopBuzz() { } function playZapPop() { }
 
-// --- HỆ THỐNG MƯA NEON (CHIP VÀ BÀI) ---
+// ===================================================
+// HỆ THỐNG MƯA NEON (CHUẨN BẢN GỐC K-DRIVE)
+// ===================================================
 function spawnNeonRain() {
     if (!isLoggedIn) return;
     const container = document.getElementById('effectsContainer');
     if (!container) return;
-    const symbols = ['♠️', '♥️', '♣️', '♦️', '🪙'];
-    const colors = ['#00e5ff', '#ff3366', '#00ff88', '#ff3366', '#ffd700'];
+    
+    const suits = ['♠', '♥', '♣', '♦'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    const colors = ['#00e5ff', '#00ff88', '#00cc66']; // Tone Xanh lá & Cyan
     
     setInterval(() => {
         let el = document.createElement('div');
-        let idx = Math.floor(Math.random() * symbols.length);
-        el.innerText = symbols[idx];
-        el.className = 'neon-particle';
-        el.style.left = Math.random() * 90 + 5 + 'vw';
-        el.style.color = colors[idx];
-        el.style.textShadow = `0 0 10px ${colors[idx]}, 0 0 20px ${colors[idx]}`;
-        el.style.animationDuration = (Math.random() * 3 + 4) + 's'; // Rơi từ 4-7 giây
+        let isCard = Math.random() > 0.35; // 65% Bài, 35% Đồng tiền
+        let color = colors[Math.floor(Math.random() * colors.length)];
+
+        if (isCard) {
+            let suit = suits[Math.floor(Math.random() * suits.length)];
+            let val = values[Math.floor(Math.random() * values.length)];
+            el.className = 'neon-card-real';
+            el.innerHTML = `<span class="val">${val}</span><span class="suit">${suit}</span>`;
+        } else {
+            el.className = 'neon-coin-real';
+            el.innerHTML = '<span>$</span>';
+        }
+
+        el.style.color = color;
+        el.style.left = Math.random() * 95 + 'vw';
+        
+        let scale = Math.random() * 0.7 + 0.6; // Đổ bóng xa gần
+        el.style.setProperty('--drop-scale', scale);
+        
+        let duration = Math.random() * 5 + 6; // Rơi chậm 6-11s
+        el.style.animationDuration = duration + 's'; 
+        
         container.appendChild(el);
-        setTimeout(() => { if(el.parentNode) el.remove(); }, 7000);
-    }, 900); // Mỗi 0.9s rớt 1 hạt
+        setTimeout(() => { if(el.parentNode) el.remove(); }, duration * 1000);
+    }, 700); 
 }
 
 const hexCanvas = document.getElementById('hexCanvas'); const hexCtx = hexCanvas.getContext('2d'); let hexGrid = []; let canvasW = 0, canvasH = 0;
@@ -104,29 +122,22 @@ function renderCanvas() {
     let isPlasma = document.getElementById('cubeWrapper').classList.contains('plasma-active'); 
 
     for(let hex of hexGrid) { 
-        // Ép xung đỏ: Bán kính rộng (120)
         if(isLoggedIn && isStruggling && Math.hypot(hex.x - canvasW/2, hex.y - canvasH*0.516) < 120) hex.energy = Math.random() * 0.9; 
-        
-        // Nhấn nút nhòe tím: Bán kính hẹp gọn gàng (45)
         if(isLoggedIn && isPlasma && Math.hypot(hex.x - canvasW/2, hex.y - canvasH*0.516) < 45) hex.energy = Math.random() * 0.9; 
 
         hex.energy *= 0.88; 
         let alpha = (isLoggedIn ? 0.12 : 0.03) + hex.energy; 
         if(alpha>1) alpha=1; 
         
-        // Thuật toán màu sắc
-        let color = '0,255,136'; // Xanh mặc định
-        if (isStruggling && hex.energy>0.1) color = '255,51,51'; // Đỏ khi gầm rú 2 ngón tay
-        else if (isPlasma && hex.energy>0.1) color = '176,38,255'; // TÍM PLASMA khi bấm nút tĩnh
+        let color = '0,255,136'; 
+        if (isStruggling && hex.energy>0.1) color = '255,51,51'; 
+        else if (isPlasma && hex.energy>0.1) color = '176,38,255'; 
 
         hexCtx.strokeStyle = `rgba(${color},${alpha})`; 
         hexCtx.fillStyle = alpha > 0.22 ? `rgba(${color},${(alpha-0.15)*0.3})` : 'transparent'; 
         
         hexCtx.beginPath(); 
-        for (let i=0; i<6; i++) { 
-            let a = Math.PI/180*(60*i-30); 
-            hexCtx.lineTo(hex.x + 20*Math.cos(a), hex.y + 20*Math.sin(a)); 
-        } 
+        for (let i=0; i<6; i++) { let a = Math.PI/180*(60*i-30); hexCtx.lineTo(hex.x + 20*Math.cos(a), hex.y + 20*Math.sin(a)); } 
         hexCtx.closePath(); hexCtx.stroke(); 
         if(hexCtx.fillStyle!=='transparent') hexCtx.fill(); 
     } 
@@ -213,7 +224,7 @@ function checkLoginGuard() { if (!isLoggedIn) { try { playCyberSound(); } catch(
 
 let capturedVideoUrl = null; let hasUnreadVideo = false;
 
-// KÍCH HOẠT CAMERA -> CUBE PHÂN RÃ
+// KÍCH HOẠT CAMERA -> CUBE THÀNH KHẨU ĐỘ MÁY QUAY (CYBER-IRIS)
 function openSecretCameraGuard(element) { 
     if (!checkLoginGuard()) return; 
     if(navigator.vibrate) navigator.vibrate(50);
@@ -235,7 +246,7 @@ window.addEventListener('focus', () => {
 function handleVideoUpload(event) { const file = event.target.files[0]; if (file) { capturedVideoUrl = URL.createObjectURL(file); document.getElementById('capturedVideoPlayer').src = capturedVideoUrl; hasUnreadVideo = true; triggerBubble(); } document.getElementById('cubeWrapper').classList.remove('camera-mode'); }
 function triggerBubble() { if (!hasUnreadVideo) return; const bubble = document.getElementById('samuraiBubble'); bubble.classList.add('bubble-show'); document.getElementById('bubbleText').innerHTML = "⚠️ MẬT THƯ ĐẾN"; }
 
-// XEM VIDEO -> CUBE ÉP PHẲNG LẠI THÀNH MÁY CHIẾU
+// XEM VIDEO -> CUBE DẸP THÀNH MÀN CHIẾU PHẲNG
 function processSamuraiAction(element) { 
     if (!hasUnreadVideo || !capturedVideoUrl) { 
         triggerHexagonShield(); 
@@ -263,20 +274,19 @@ function closeVideoModule() {
     document.querySelector('.projector-beam').classList.remove('beam-on');
 }
 
-// BẤM NÚT TĨNH -> PLASMA TÍM MỜ ẢO + ÂM THANH CLICK
+// BẤM NÚT TĨNH -> GLITCH XÉ BÓNG TÍM/XANH
 function triggerStaticNode(element) { 
     if (!checkLoginGuard()) return; 
     
-    // Kích hoạt rung và phát âm thanh cơ khí
     if(navigator.vibrate) navigator.vibrate([30]); 
     playCyberClick();
     
     let cube = document.getElementById('cubeWrapper');
-    cube.classList.add('plasma-active'); // Đổi sang hiệu ứng Tím Plasma thay vì Đỏ Báo Động
+    cube.classList.add('plasma-active'); 
     
     setTimeout(() => {
         cube.classList.remove('plasma-active');
-    }, 500); // Rút ngắn thời gian nhòe xuống 0.5s cho tinh tế
+    }, 500); 
 }
 
 function rotateWallpapersGuard(element) { currentWallpaperIndex = (currentWallpaperIndex + 1) % base64Wallpapers.length; document.getElementById('kdriveBg').src = base64Wallpapers[currentWallpaperIndex]; }
