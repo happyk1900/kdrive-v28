@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kdrive-core-v2'; // Đổi số v2, v3... mỗi khi anh cập nhật code mới
+const CACHE_NAME = 'kdrive-core-v99'; // Đổi số v2, v3... mỗi khi anh cập nhật code mới
 const urlsToCache = [
   './',
   './index.html',
