@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzZADdsbGIX40AUWKWlmFTnsOXKEy2C8cc6e68XlmvZ0WhU3F-bW2E05FS34le0sPCqJg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycby9__D-oax96p1GG7J3qBAPTWbHjKltEK8Csn3mDIx0L8vHLL3zyMNNundP30-97Xvs/exec";
 let currentUsername = sessionStorage.getItem('kdrive_username') || 'guest';
 
 function lockInteraction() { document.body.classList.add('popups-active'); }
