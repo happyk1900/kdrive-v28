@@ -47,7 +47,7 @@
         .theater-toggle { color: #fff; cursor: pointer; margin-left: 6px; font-weight: bold; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 0 8px #FFF; transition: 0.2s; font-size: 13px; text-decoration: underline; }
         .theater-toggle:hover { color: #DAA520; text-shadow: 0 0 8px #DAA520; }
 
-        /* KIẾN TRÚC NGÔN TỪ BOO MỚI */
+        /* KIẾN TRÚC NGÔN TỪ BOO */
         .info-text { text-align: center; color: #fff; font-size: 15px; margin-bottom: 25px; line-height: 1.6; text-shadow: 0 0 5px rgba(0,0,0,1); }
         .boo-container { font-family: 'Share Tech Mono', monospace; font-size: 14px; margin-top: 8px; display: block; letter-spacing: 0.5px; background: rgba(0,0,0,0.5); padding: 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.02);}
         
@@ -75,11 +75,12 @@
         
         .compass-status { text-align: center; color: #DAA520; font-family: 'Share Tech Mono', monospace; font-size: 13px; margin-top: 5px; cursor: pointer; height: 20px; font-weight: bold;}
 
-        /* CSS MẶT TRĂNG 3D VÀ KHUÔN CẮT */
+        /* CSS MẶT TRĂNG 3D VÀ KHUÔN CẮT (ĐÃ CẬP NHẬT GÓC SÁNG) */
         .moon-3d-css {
             width: 50px; height: 50px;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #ffffff, #aaaaaa 50%, #333333 90%);
+            /* Dời tâm ánh sáng sang ngang để trăng khuyết tự nhiên hơn */
+            background: radial-gradient(circle at 70% 50%, #ffffff, #aaaaaa 60%, #222222 100%);
             box-shadow: inset -5px -5px 15px rgba(0,0,0,0.6), 0 0 15px rgba(255,255,255,0.3);
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             animation: floatMoon 4s ease-in-out infinite; z-index: 10;
@@ -88,12 +89,12 @@
             width: 50px; height: 50px;
             border-radius: 50%;
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(12, 12, 12, 0.9); /* Màu tối hòa vào nền Điện Thờ */
+            background: rgba(12, 12, 12, 0.9);
             transition: clip-path 0.5s ease; z-index: 11;
         }
         @keyframes floatMoon {
             0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
-            50% { transform: translate(-50%, -50%) translateY(-6px); } /* Nổi nhẹ 6px bên trong la bàn */
+            50% { transform: translate(-50%, -50%) translateY(-6px); }
         }
 
         /* BÀN POKER */
@@ -329,18 +330,32 @@
             if(savedSession) { openFinishSpace(); }
         }
 
-        /* THUẬT TOÁN PHA TRĂNG TỰ ĐỘNG */
+        /* THUẬT TOÁN PHA TRĂNG TỰ ĐỘNG (ĐỒNG BỘ HIỂN THỊ) */
         function updateMoonPhase() {
             const moonOverlay = document.getElementById('moon-overlay');
             if(!moonOverlay) return;
-            const now = new Date();
-            const lunarDay = Math.floor((now.getTime() % 2551440000) / 86400000);
-            const percentage = (lunarDay % 29.5) / 29.5;
-            
-            if (percentage < 0.5) {
-                moonOverlay.style.clipPath = `circle(50% at ${percentage * 200}% 50%)`;
+
+            // Lấy ngày âm lịch CHUẨN từ chính text đang hiển thị
+            let lunarText = document.getElementById('lblLunar').innerText; 
+            let lunarDay = 15; 
+            if (lunarText && lunarText.includes('-')) {
+                lunarDay = parseInt(lunarText.split('-')[1], 10);
+            }
+
+            // Tính toán bóng che
+            if (lunarDay === 15 || lunarDay === 16) {
+                moonOverlay.style.display = 'none'; // Trăng tròn, tắt bóng che
             } else {
-                moonOverlay.style.clipPath = `circle(50% at ${(1 - percentage) * 200}% 50%)`;
+                moonOverlay.style.display = 'block';
+                
+                let shadowPosition;
+                if (lunarDay < 15) {
+                    shadowPosition = 50 - (lunarDay / 15) * 110; 
+                } else {
+                    shadowPosition = 160 - ((lunarDay - 15) / 15) * 110;
+                }
+                
+                moonOverlay.style.clipPath = `circle(60% at ${shadowPosition}% 50%)`;
             }
         }
 
