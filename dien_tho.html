@@ -141,7 +141,7 @@
                 <div id="thienThoiBox">
                     <div class="gold-title">1. THIÊN THỜI</div>
                     <div class="info-text">
-                        Ngày: <span id="lblLunar" style="font-weight: bold;"></span> [Âm lịch]
+                        <span id="lblLunar" style="font-weight: bold;"></span>
                         <span class="boo-container" id="lblZodiac"></span>
                     </div>
                 </div>
@@ -208,11 +208,10 @@
     <audio id="bgmAudio" src="https://github.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/raw/refs/heads/main/Temple%20of%20Zero%20dien%20tho.mp3" loop preload="auto"></audio>
 
     <script>
-        /* ĐƯỜNG LINK WEB APP GOOGLE SHEET CHUẨN XÁC CỦA ANH */
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXa68J6oKcemX72IXgEJ5Yka3eglaxHhxuYFObSSkQ3oK322kCfDovpVRxlae4tdLU/exec";
         
-        /* CẬP NHẬT TÊN TÀI KHOẢN BẤT TỬ */
-        let currentUsername = localStorage.getItem('kdrive_logged_in_user') || 'Guest';
+        // ĐỌC CHUẨN TÊN ACCOUNT ĐÃ ĐĂNG NHẬP
+        let currentUsername = sessionStorage.getItem('kdrive_username') || localStorage.getItem('kdrive_logged_in_user') || 'Guest';
         document.getElementById('operatorTag').innerText = `[ OP: ${currentUsername.toUpperCase()} ]`;
 
         const AudioCtx = window.AudioContext || window.webkitAudioContext; 
@@ -270,12 +269,13 @@
             return `<span class="boo-bracket">[</span><span class="boo-name">BOO</span><span class="boo-bracket">]</span>: <span class="${colorClass}">${timeName} - ${tactic}</span>`;
         }
 
-        // 1. TÍCH HỢP GHI NHẬN ĐỔI CHỖ ĐỘNG
-        function updatePosition(newPos, newFace) {
+        // TÁCH LUỒNG LƯU TỌA ĐỘ THÔNG MINH
+        function updatePositionData(payloadData) {
             let sessionDataStr = localStorage.getItem('kdrive_altar_session_' + currentUsername);
             if (sessionDataStr) {
                 let sessionData = JSON.parse(sessionDataStr);
-                let payload = { action: "update", idPhien: sessionData.idPhien, position: newPos, facing: newFace };
+                // Dùng object spread để gộp dữ liệu động vào payload
+                let payload = { action: "update", idPhien: sessionData.idPhien, ...payloadData };
                 fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) }).catch(e => console.log(e));
             }
         }
@@ -289,8 +289,13 @@
         let isEditSpaceActive = false;
         
         function loadAltarData() {
-            let d = new Date(); let lunarFormatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', {day: '2-digit', month: '2-digit'});
-            document.getElementById('lblLunar').innerText = lunarFormatter.format(d);
+            let d = new Date(); 
+            let lunarFormatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', {day: '2-digit', month: '2-digit'});
+            let rawLunar = lunarFormatter.format(d); // VD: "18/05"
+            // QUY CHUẨN LẠI FORMAT NGÀY ÂM: Ngày 05-05 [Âm Lịch]
+            let formattedLunar = `Ngày ${rawLunar.replace('/', '-')} [Âm Lịch]`;
+            document.getElementById('lblLunar').innerText = formattedLunar;
+
             document.getElementById('lblZodiac').innerHTML = getRealTimeCanChi();
             setInterval(() => { document.getElementById('lblZodiac').innerHTML = getRealTimeCanChi(); }, 60000);
             updateCompassAnchor("TÂM TRẬN");
@@ -300,12 +305,14 @@
             if(savedSession) { openFinishSpace(); }
         }
 
-        // 2. THUẬT TOÁN TRĂNG LẸM CHUẨN XÁC
         function updateMoonPhase() {
             const moonOverlay = document.getElementById('moon-overlay'); if(!moonOverlay) return;
             let lunarText = document.getElementById('lblLunar').innerText; 
-            let lunarDay = 15; // Dự phòng
-            if (lunarText && lunarText.includes('-')) { lunarDay = parseInt(lunarText.split('-')[1], 10); }
+            let lunarDay = 15; 
+            if (lunarText) { 
+                let match = lunarText.match(/\d{2}/);
+                if(match) lunarDay = parseInt(match[0], 10); 
+            }
             
             moonOverlay.style.display = 'block'; 
             let diff = Math.abs(lunarDay - 15);
@@ -325,8 +332,7 @@
             const tName = theaters[activeTheaterIdx]; 
             document.getElementById('lblTheater').innerText = `[${tName}]`; 
             playLightClick(); updateCompassAnchor(tName); markEditChanged(); 
-            // Cập nhật vị trí lên Sheet
-            updatePosition(document.getElementById('inpPosition').value, document.getElementById('inpFacing').value);
+            updatePositionData({ facing: document.getElementById('inpFacing').value });
         }
         const theaters = ["TÂM TRẬN", "BẮC TRẬN", "NAM TRẬN", "ĐÔNG TRẬN", "TÂY TRẬN"]; let activeTheaterIdx = 0;
         
@@ -344,8 +350,8 @@
                 if(finalDir.includes("Sinh Khí")) { tactic="Khai thác nhịp độ. Phát triển stack."; colorClass="boo-msg-attack"; } else if(finalDir.includes("Tài Lộc")) { tactic="Áp đảo. Chủ động tấn công ép pot."; colorClass="boo-msg-attack"; } else if(finalDir.includes("Hòa Khí")) { tactic="Cân bằng. Duy trì nhịp độ an toàn."; colorClass="boo-msg-neutral"; } else if(finalDir.includes("Suy Khí")) { tactic="Cảnh giác. Đánh an toàn, tránh bẫy."; colorClass="boo-msg-defend"; } else if(finalDir.includes("Sát Phạt")) { tactic="Kỷ luật. Chỉ đợi Hand quái vật."; colorClass="boo-msg-defend"; } else if(finalDir.includes("Uy Quyền")) { tactic="Dồn ép. Sử dụng Semi-bluff ép sân."; colorClass="boo-msg-attack"; } else if(finalDir.includes("Hàn Khí")) { tactic="Băng giá. Rút lui an toàn, bảo toàn vốn."; colorClass="boo-msg-defend"; } else { tactic="Thăm dò. Check-call đọc vị đối thủ."; colorClass="boo-msg-neutral"; } 
                 let booMsg = document.getElementById('msgDirection'); booMsg.innerHTML = `<span class="boo-bracket">[</span><span class="boo-name">BOO</span><span class="boo-bracket">]</span>: <span class="${colorClass}">${dirName} - ${tactic}</span>`; booMsg.style.opacity = 1; markEditChanged();
                 
-                // Cập nhật vị trí lên Sheet
-                updatePosition(document.getElementById('inpPosition').value, finalDir);
+                // Cập nhật lên Sheet CHỈ HƯỚNG NGỒI
+                updatePositionData({ facing: finalDir });
             } else { isCompassActive = true; playLightClick(); compassWrap.classList.add('scanning'); statusEl.innerHTML = `[ <span style="color:#aaa;">ĐANG QUÉT PHƯƠNG VỊ...</span> ]`; document.getElementById('msgDirection').style.opacity = 0; if ('ondeviceorientationabsolute' in window) { window.addEventListener('deviceorientationabsolute', handleOri); } else { window.addEventListener('deviceorientation', handleOri); } }
         }
         function handleOri(e) { let alpha = e.webkitCompassHeading || (360 - e.alpha); currentHeading = alpha; document.getElementById('compassDial').style.transform = `rotate(${-alpha}deg)`; }
@@ -357,13 +363,12 @@
             document.getElementById('inpPosition').value = newPos; 
             markEditChanged(); 
             
-            // Cập nhật vị trí lên Sheet
-            updatePosition(newPos, document.getElementById('inpFacing').value);
+            // Cập nhật lên Sheet CHỈ GHẾ NGỒI
+            updatePositionData({ position: newPos });
         }
 
         function triggerError(btn, msg) { playHeavyClack(); btn.innerText = msg; btn.classList.add('error-shake'); setTimeout(() => { btn.classList.remove('error-shake'); btn.innerText = "[ TỊNH TÂM KHAI TRẬN ]"; }, 1500); }
 
-        /* 3. QUY TRÌNH THẮP NHANG THIỀN ĐỊNH VÀ GỬI LỆNH KHAI TRẬN VỀ SHEET (ĐÃ CHUẨN HÓA VỐN VÀ A.I) */
         let smokeInterval, moInterval;
         function executeRitual() {
             let btn = document.getElementById('btnAction');
@@ -388,15 +393,22 @@
                     document.querySelectorAll('.ember').forEach(e => e.classList.remove('burning'));
                     btn.innerText = "[ ĐANG KẾT NỐI SỔ SINH TỬ... ]";
 
-                    // Gọi Google Apps Script tạo dòng mới
-                    let buyInVal = document.getElementById('inpBuyIn').value.replace(/,/g, ''); // Bỏ dấu phẩy
-                    let booText = document.getElementById('msgDirection').innerText; // Lấy Text chỉ đạo A.I
+                    // CHUẨN HÓA DỮ LIỆU GỬI ĐI
+                    let buyInVal = document.getElementById('inpBuyIn').value; // Giữ nguyên dấu phẩy
+                    let booText = document.getElementById('msgDirection').innerText; // Đọc trọn vẹn Text A.I
+                    
+                    // Cắt chuỗi lấy "Giờ Tuất (Chó)" bỏ phần sau
+                    let rawZodiac = document.getElementById('lblZodiac').textContent;
+                    let cleanZodiac = "Chưa có";
+                    if(rawZodiac.includes(':') && rawZodiac.includes('-')) {
+                        cleanZodiac = rawZodiac.split(':')[1].split('-')[0].trim();
+                    }
                     
                     let payload = {
                         action: "start", 
                         account: currentUsername,
                         lunarDate: document.getElementById('lblLunar').innerText,
-                        zodiacHour: document.getElementById('lblZodiac').textContent, 
+                        zodiacHour: cleanZodiac, 
                         facing: document.getElementById('inpFacing').value,
                         position: document.getElementById('inpPosition').value,
                         buyIn: buyInVal,
@@ -408,7 +420,6 @@
                     .then(res => res.json())
                     .then(data => {
                         if(data.status === "success") {
-                            // Lưu ID Phiên và timestamp bắt đầu để tính thời lượng
                             localStorage.setItem('kdrive_altar_session_' + currentUsername, JSON.stringify({ active: true, idPhien: data.id, startTime: Date.now() }));
                             playBigBellFromMemory(); if(navigator.vibrate) navigator.vibrate([600]); 
                             btn.classList.remove('locked'); btn.innerText = "[ ĐÃ THỈNH THẦN ✓ ]"; btn.style.background = "rgba(218,165,32,0.2)";
@@ -421,20 +432,16 @@
 
         function createSmoke() { document.querySelectorAll('.ember').forEach(ember => { if(!ember.classList.contains('burning')) return; const smoke = document.createElement('div'); smoke.className = 'smoke-particle'; smoke.style.setProperty('--r', Math.random()); ember.appendChild(smoke); setTimeout(() => smoke.remove(), 2500); }); }
 
-        /* 4. ĐÓNG SỔ TẠ LỄ VÀ CẬP NHẬT KẾT QUẢ VỀ ĐÚNG DÒNG */
         function finishSession() {
             let btn = document.getElementById('btnAction'); 
-            let lossValRaw = document.getElementById('inpLoss').value;
-            if(!lossValRaw) { playHeavyClack(); btn.innerText = "[ LỖI: CHƯA NHẬP KẾT QUẢ ]"; btn.classList.add('error-shake'); setTimeout(() => { btn.classList.remove('error-shake'); btn.innerText = "[ ĐÓNG SỔ & TẠ LỄ ]"; }, 1500); return; }
-            
-            let lossVal = lossValRaw.replace(/,/g, ''); // Bỏ dấu phẩy
+            let lossVal = document.getElementById('inpLoss').value; // Giữ nguyên dấu phẩy
+            if(!lossVal) { playHeavyClack(); btn.innerText = "[ LỖI: CHƯA NHẬP KẾT QUẢ ]"; btn.classList.add('error-shake'); setTimeout(() => { btn.classList.remove('error-shake'); btn.innerText = "[ ĐÓNG SỔ & TẠ LỄ ]"; }, 1500); return; }
 
             playKhanhChime(); btn.innerText = "[ ĐANG KẾT TOÁN SỔ SINH TỬ... ]";
             
             let sessionData = JSON.parse(localStorage.getItem('kdrive_altar_session_' + currentUsername));
             if(!sessionData || !sessionData.idPhien) { btn.innerText = "[ LỖI: KHÔNG TÌM THẤY ID PHIÊN ]"; return; }
 
-            // Tính số phút thực chiến
             let durationMinutes = Math.round((Date.now() - sessionData.startTime) / 60000) || 0;
 
             let payload = {
