@@ -365,3 +365,66 @@ function showNinjaInfo() { document.getElementById('ninjaPopup').style.display =
 function closeNinjaInfo() { document.getElementById('ninjaPopup').style.display = 'none'; unlockInteraction(); }
 function openChangePassPanel() { document.getElementById('changePassPanel').style.display = 'flex'; }
 function closeChangePassPanel() { document.getElementById('changePassPanel').style.display = 'none'; }
+
+
+// ===================================================
+// HỆ THỐNG TRUY XUẤT SỔ SINH TỬ RÚT GỌN (BÁO CÁO)
+// ===================================================
+function closeReportPopup() {
+    document.getElementById('reportPopup').style.display = 'none';
+    unlockInteraction();
+}
+
+function fetchBattleReport() {
+    if (!checkLoginGuard()) return; 
+    if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
+    playCyberClick();
+    
+    pulseTerminal("BOO: ĐANG TRUY XUẤT SỔ SINH TỬ...");
+    
+    // Reset Giao diện trước khi gọi mạng
+    document.getElementById('reportPopup').style.display = 'flex';
+    document.getElementById('repAccountName').innerText = currentUsername.toUpperCase();
+    document.getElementById('repTotalMatches').innerText = "--";
+    document.getElementById('repTotalDuration').innerHTML = "-- <span style='font-size:12px;'>phút</span>";
+    document.getElementById('repNetProfit').innerText = "ĐANG TÍNH TOÁN...";
+    document.getElementById('repNetProfit').style.color = "#888";
+    document.getElementById('repNetProfit').style.textShadow = "none";
+    lockInteraction();
+
+    let payload = { action: "report", account: currentUsername };
+
+    fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+    .then(res => res.json())
+    .then(res => {
+        if(res.status === "success") {
+            let data = res.data;
+            document.getElementById('repTotalMatches').innerText = data.totalMatches;
+            document.getElementById('repTotalDuration').innerHTML = data.totalDuration + " <span style='font-size:12px;'>phút</span>";
+            
+            let profitEl = document.getElementById('repNetProfit');
+            let profitVal = data.netProfit;
+            
+            if (profitVal > 0) {
+                profitEl.innerText = "+" + profitVal.toLocaleString('en-US');
+                profitEl.style.color = "#00ff88"; // Lãi: Xanh Đỉnh Cao
+                profitEl.style.textShadow = "0 0 20px rgba(0, 255, 136, 0.7)";
+                pulseTerminal("BOO: PHONG ĐỘ ĐỈNH CAO.");
+            } else if (profitVal < 0) {
+                profitEl.innerText = profitVal.toLocaleString('en-US');
+                profitEl.style.color = "#ff3333"; // Lỗ: Đỏ Báo Động
+                profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)";
+                pulseTerminal("BOO: BÁO ĐỘNG. KIỂM SOÁT TÂM LÝ.");
+            } else {
+                profitEl.innerText = "0";
+                profitEl.style.color = "#d2d2d2"; 
+                pulseTerminal("BOO: CÂN BẰNG.");
+            }
+        } else {
+            document.getElementById('repNetProfit').innerText = "LỖI TRUY XUẤT";
+        }
+    })
+    .catch(err => {
+        document.getElementById('repNetProfit').innerText = "LỖI MẠNG LƯỚI";
+    });
+}
