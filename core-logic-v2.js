@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbyXa68J6oKcemX72IXgEJ5Yka3eglaxHhxuYFObSSkQ3oK322kCfDovpVRxlae4tdLU/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz2MQO0xYgNPkY_LCQLGgcHwnslfoDbQB1r9j4mTfyTRjGUfMO-eb_kGEYXimGt3Uo/exec";
 
 // 1. ĐỌC ĐỊNH DANH TỪ LOCAL STORAGE ĐỂ GIỮ TÊN BẤT TỬ
 let currentUsername = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_username') || 'guest';
@@ -368,7 +368,7 @@ function closeChangePassPanel() { document.getElementById('changePassPanel').sty
 
 
 // ===================================================
-// HỆ THỐNG TRUY XUẤT SỔ SINH TỬ RÚT GỌN (BÁO CÁO)
+// HỆ THỐNG TRUY XUẤT SỔ SINH TỬ RÚT GỌN (BÁO CÁO NÂNG CẤP)
 // ===================================================
 function closeReportPopup() {
     document.getElementById('reportPopup').style.display = 'none';
@@ -386,10 +386,27 @@ function fetchBattleReport() {
     document.getElementById('reportPopup').style.display = 'flex';
     document.getElementById('repAccountName').innerText = currentUsername.toUpperCase();
     document.getElementById('repTotalMatches').innerText = "--";
-    document.getElementById('repTotalDuration').innerHTML = "-- <span style='font-size:12px;'>phút</span>";
-    document.getElementById('repNetProfit').innerText = "ĐANG TÍNH TOÁN...";
+    
+    let totalDaysEl = document.getElementById('repTotalDays');
+    if(totalDaysEl) totalDaysEl.innerText = "--";
+    
+    document.getElementById('repTotalDuration').innerHTML = "-- <span style='font-size:10px;'>m</span>";
+    document.getElementById('repNetProfit').innerText = "ĐANG TÍNH...";
     document.getElementById('repNetProfit').style.color = "#888";
     document.getElementById('repNetProfit').style.textShadow = "none";
+    
+    let hrRateEl = document.getElementById('repHourlyRate');
+    if(hrRateEl) hrRateEl.innerText = "--";
+    
+    let staminaBar = document.getElementById('repStaminaBar');
+    if(staminaBar) staminaBar.style.width = "0%";
+    
+    let staminaStt = document.getElementById('repStaminaStatus');
+    if(staminaStt) { staminaStt.innerText = "ĐANG ĐO..."; staminaStt.style.color = "#888"; }
+    
+    let booQuote = document.getElementById('repBooQuote');
+    if(booQuote) { booQuote.innerText = "> BOO: PHÂN TÍCH DỮ LIỆU..."; booQuote.style.color = "#888"; }
+
     lockInteraction();
 
     let payload = { action: "report", account: currentUsername };
@@ -400,31 +417,83 @@ function fetchBattleReport() {
         if(res.status === "success") {
             let data = res.data;
             document.getElementById('repTotalMatches').innerText = data.totalMatches;
-            document.getElementById('repTotalDuration').innerHTML = data.totalDuration + " <span style='font-size:12px;'>phút</span>";
+            if(totalDaysEl) totalDaysEl.innerText = data.totalDays || 0;
+            document.getElementById('repTotalDuration').innerHTML = data.totalDuration + " <span style='font-size:10px;'>m</span>";
             
             let profitEl = document.getElementById('repNetProfit');
             let profitVal = data.netProfit;
+
+            // TÍNH TỐC ĐỘ SINH LỜI (LÃI / GIỜ)
+            let hours = data.totalDuration / 60;
+            let hourlyRate = 0;
+            if(hours > 0) hourlyRate = Math.round(profitVal / hours);
+
+            if(hrRateEl) {
+                if (hourlyRate > 0) {
+                    hrRateEl.innerText = "+" + hourlyRate.toLocaleString('en-US');
+                    hrRateEl.style.color = "#00ff88";
+                } else if (hourlyRate < 0) {
+                    hrRateEl.innerText = hourlyRate.toLocaleString('en-US');
+                    hrRateEl.style.color = "#ff3333";
+                } else {
+                    hrRateEl.innerText = "0";
+                    hrRateEl.style.color = "#d2d2d2";
+                }
+            }
             
+            // XỬ LÝ LÃI RÒNG
             if (profitVal > 0) {
                 profitEl.innerText = "+" + profitVal.toLocaleString('en-US');
-                profitEl.style.color = "#00ff88"; // Lãi: Xanh Đỉnh Cao
+                profitEl.style.color = "#00ff88";
                 profitEl.style.textShadow = "0 0 20px rgba(0, 255, 136, 0.7)";
-                pulseTerminal("BOO: PHONG ĐỘ ĐỈNH CAO.");
             } else if (profitVal < 0) {
                 profitEl.innerText = profitVal.toLocaleString('en-US');
-                profitEl.style.color = "#ff3333"; // Lỗ: Đỏ Báo Động
+                profitEl.style.color = "#ff3333";
                 profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)";
-                pulseTerminal("BOO: BÁO ĐỘNG. KIỂM SOÁT TÂM LÝ.");
             } else {
                 profitEl.innerText = "0";
                 profitEl.style.color = "#d2d2d2"; 
-                pulseTerminal("BOO: CÂN BẰNG.");
             }
+
+            // XỬ LÝ THANH THỂ LỰC (Max mốc là 600 phút ~ 10 tiếng)
+            if(staminaBar && staminaStt) {
+                let staminaPct = Math.min((data.totalDuration / 600) * 100, 100);
+                setTimeout(() => { staminaBar.style.width = staminaPct + "%"; }, 100); 
+
+                if (data.totalDuration < 300) {
+                    staminaBar.style.background = "#00ff88"; staminaBar.style.boxShadow = "0 0 10px #00ff88";
+                    staminaStt.innerText = "SUNG MÃN"; staminaStt.style.color = "#00ff88";
+                } else if (data.totalDuration <= 450) {
+                    staminaBar.style.background = "#ff9900"; staminaBar.style.boxShadow = "0 0 10px #ff9900";
+                    staminaStt.innerText = "CẢNH BÁO"; staminaStt.style.color = "#ff9900";
+                } else {
+                    staminaBar.style.background = "#ff3333"; staminaBar.style.boxShadow = "0 0 10px #ff3333";
+                    staminaStt.innerText = "QUÁ TẢI !"; staminaStt.style.color = "#ff3333";
+                }
+            }
+
+            // LỜI KHUYÊN TỪ BOO
+            if(booQuote) {
+                if (data.totalDuration > 450) {
+                    booQuote.innerText = "> BOO: THỂ LỰC CẠN KIỆT. CẦN THIẾT LẬP LẠI !";
+                    booQuote.style.color = "#ff3333"; pulseTerminal("BOO: BÁO ĐỘNG THỂ LỰC.");
+                } else if (profitVal > 0 && hourlyRate > 100000) { 
+                    booQuote.innerText = "> BOO: HIỆU SUẤT ĐỈNH CAO. DUY TRÌ NHỊP ĐỘ !";
+                    booQuote.style.color = "#00e5ff"; pulseTerminal("BOO: PHONG ĐỘ TỐT.");
+                } else if (profitVal < 0) {
+                    booQuote.innerText = "> BOO: TÂM LÝ BẤT ỔN. NÊN THIỀN ĐỊNH LẠI.";
+                    booQuote.style.color = "#ff9900"; pulseTerminal("BOO: KIỂM SOÁT TÂM LÝ.");
+                } else {
+                    booQuote.innerText = "> BOO: CHỈ SỐ CÂN BẰNG. THEO DÕI THÊM.";
+                    booQuote.style.color = "#00ff88"; pulseTerminal("BOO: CÂN BẰNG.");
+                }
+            }
+
         } else {
-            document.getElementById('repNetProfit').innerText = "LỖI TRUY XUẤT";
+            document.getElementById('repNetProfit').innerText = "LỖI DỮ LIỆU";
         }
     })
     .catch(err => {
-        document.getElementById('repNetProfit').innerText = "LỖI MẠNG LƯỚI";
+        document.getElementById('repNetProfit').innerText = "LỖI KẾT NỐI";
     });
 }
