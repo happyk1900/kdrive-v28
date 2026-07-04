@@ -3,8 +3,8 @@
 // ==========================================
 // 1. Link xử lý Đăng Nhập / Tài khoản (Link gốc)
 const API_URL = "https://script.google.com/macros/s/AKfycby9__D-oax96p1GG7J3qBAPTWbHjKltEK8Csn3mDIx0L8vHLL3zyMNNundP30-97Xvs/exec";
-// 2. Link xử lý Sổ Sinh Tử / Báo cáo (Link mới tạo của anh)
-const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbz2MQO0xYgNPkY_LCQLGgcHwnslfoDbQB1r9j4mTfyTRjGUfMO-eb_kGEYXimGt3Uo/exec";
+// 2. Link xử lý Sổ Sinh Tử / Báo cáo (Đã cập nhật link mới nhất của anh Kai)
+const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbwJA0TN4nDkax-6QoBIOo1JCWcAX1WtMhR6NTsHodS-P78-u5mUTMKiUXT8wyDDGkbz/exec";
 
 // 1. ĐỌC ĐỊNH DANH TỪ LOCAL STORAGE ĐỂ GIỮ TÊN BẤT TỬ
 let currentUsername = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_username') || 'guest';
@@ -140,7 +140,6 @@ function renderCanvas() {
 
     for(let hex of hexGrid) { 
         if(isLoggedIn && isStruggling && Math.hypot(hex.x - canvasW/2, hex.y - canvasH*0.516) < 120) hex.energy = Math.random() * 0.9; 
-
         hex.energy *= 0.88; 
         let alpha = (isLoggedIn ? 0.12 : 0.03) + hex.energy; 
         if(alpha>1) alpha=1; 
@@ -235,7 +234,8 @@ function callAPI(action, params, callbackName, onSuccess, onError) {
         if(scriptEl) document.body.removeChild(scriptEl); 
         if (res && res.success) onSuccess(res); else onError(res ? res.msg : "LỖI MÁY CHỦ!"); 
     }; 
-    let script = document.createElement('script'); script.id = callbackName; script.src = finalUrl; 
+    let script = document.createElement('script'); 
+    script.id = callbackName; script.src = finalUrl; 
     script.onerror = function() { onError("LỖI MẠNG!"); }; 
     document.body.appendChild(script); 
 }
@@ -245,7 +245,6 @@ function submitLogin() {
     var acc = document.getElementById('accInput').value.trim(); 
     var code = document.getElementById('passcodeInput').value.trim(); 
     var statusEl = document.getElementById('loginStatus'); 
-    
     if(acc === "" || code === "") { 
         statusEl.innerHTML = "[LỖI]: ĐIỀN ĐỦ THÔNG TIN!"; 
         statusEl.style.color = "#ff3333"; 
@@ -285,7 +284,8 @@ function submitLogin() {
         banner.classList.add('banner-strike'); 
         setTimeout(() => { banner.classList.remove('banner-strike'); initRelic(); spawnNeonRain(); }, 3500); 
     }, function(msg) { 
-        statusEl.style.color = "#ff3333"; statusEl.innerHTML = msg; 
+        statusEl.style.color = "#ff3333"; 
+        statusEl.innerHTML = msg; 
     }); 
 }
 
@@ -317,14 +317,14 @@ let capturedVideoUrl = null; let hasUnreadVideo = false;
 
 function openSecretCameraGuard(element) { 
     if (!checkLoginGuard()) return; 
-    if(navigator.vibrate) navigator.vibrate(50);
+    if(navigator.vibrate) navigator.vibrate(50); 
     playCyberClick();
     try { cameraShutterAudio.play().catch(e=>{}); } catch(e){}
     
     let cube = document.getElementById('cubeWrapper');
     cube.classList.remove('video-play-mode');
     document.querySelector('.projector-beam').classList.remove('beam-on');
-    cube.classList.add('camera-rec-mode');
+    cube.classList.add('camera-rec-mode'); 
     setTimeout(() => { document.getElementById('hiddenCamera').click(); }, 600);
 }
 
@@ -345,19 +345,18 @@ function processSamuraiAction(element) {
     let cube = document.getElementById('cubeWrapper');
     cube.classList.remove('camera-rec-mode');
     cube.classList.add('video-play-mode');
-    document.querySelector('.projector-beam').classList.add('beam-on');
-
+    document.querySelector('.projector-beam').classList.add('beam-on'); 
     setTimeout(() => {
         document.getElementById('videoPopup').classList.add('popup-open'); 
         document.getElementById('capturedVideoPlayer').play(); 
-    }, 600);
+    }, 600); 
 }
 
 function closeVideoModule() { 
     document.getElementById('videoPopup').classList.remove('popup-open'); 
     document.getElementById('capturedVideoPlayer').pause(); 
     document.getElementById('cubeWrapper').classList.remove('video-play-mode'); 
-    document.querySelector('.projector-beam').classList.remove('beam-on');
+    document.querySelector('.projector-beam').classList.remove('beam-on'); 
 }
 
 function triggerStaticNode(element) { 
@@ -383,41 +382,103 @@ function closeChangePassPanel() { document.getElementById('changePassPanel').sty
 // HỆ THỐNG TRUY XUẤT SỔ SINH TỬ RÚT GỌN (BÁO CÁO NÂNG CẤP)
 // ===================================================
 function closeReportPopup() {
-    document.getElementById('reportPopup').style.display = 'none';
+    document.getElementById('reportPopup').style.display = 'none'; 
     unlockInteraction();
+}
+
+let repHexInterval = null;
+function drawReportHexBg(colorRGB) {
+    const canvas = document.getElementById('reportHexCanvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth || 380;
+    canvas.height = canvas.offsetHeight || 400;
+    
+    let r = 20; let h3 = Math.sqrt(3) * r; 
+    let cols = Math.ceil(canvas.width / h3) + 1; 
+    let rows = Math.ceil(canvas.height / (r*1.5)) + 1;
+    
+    let offset = 0;
+    if(repHexInterval) clearInterval(repHexInterval);
+    repHexInterval = setInterval(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 1;
+        offset += 0.05;
+        for(let row=0; row<rows; row++) { 
+            for(let col=0; col<cols; col++) { 
+                let x = col * h3 + (row%2===1 ? h3/2 : 0);
+                let y = row * r*1.5;
+                let alpha = 0.05 + Math.sin(x*0.05 + y*0.05 + offset) * 0.15; // Nhấp nháy nhẹ như dòng chảy data
+                ctx.strokeStyle = `rgba(${colorRGB}, ${alpha})`;
+                ctx.beginPath();
+                for (let i=0; i<6; i++) { 
+                    let a = Math.PI/180*(60*i-30); 
+                    ctx.lineTo(x + r*Math.cos(a), y + r*Math.sin(a)); 
+                }
+                ctx.closePath(); ctx.stroke();
+            }
+        }
+    }, 50);
 }
 
 function fetchBattleReport() {
     if (!checkLoginGuard()) return; 
     if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
-    playCyberClick();
+    playCyberClick(); 
     pulseTerminal("BOO: ĐANG TRUY XUẤT SỔ SINH TỬ...");
     
     // Reset Giao diện
-    document.getElementById('reportPopup').style.display = 'flex';
+    let popup = document.getElementById('reportPopup');
+    popup.style.display = 'flex';
+    popup.className = 'gateway-popup'; // Reset class về mặc định
+    
+    let rankTitleEl = document.getElementById('repRankTitle');
+    if(rankTitleEl) {
+        rankTitleEl.innerText = "ĐANG ĐO...";
+        rankTitleEl.style.color = "#888";
+        rankTitleEl.style.textShadow = "none";
+    }
+
+    let closeBtnEl = document.getElementById('repCloseBtn');
+    if(closeBtnEl) {
+        closeBtnEl.style.borderColor = "#888";
+        closeBtnEl.style.color = "#888";
+        closeBtnEl.style.boxShadow = "none";
+    }
+    
     document.getElementById('repAccountName').innerText = currentUsername.toUpperCase();
     document.getElementById('repTotalMatches').innerText = "--";
     
     let totalDaysEl = document.getElementById('repTotalDays');
     if(totalDaysEl) totalDaysEl.innerText = "--";
     
-    document.getElementById('repTotalDuration').innerHTML = "-- <span style='font-size:10px;'>m</span>";
-    document.getElementById('repNetProfit').innerText = "ĐANG TÍNH...";
-    document.getElementById('repNetProfit').style.color = "#888";
-    document.getElementById('repNetProfit').style.textShadow = "none";
+    let itmPctEl = document.getElementById('repItmPct');
+    if(itmPctEl) {
+        itmPctEl.innerText = "(0%)";
+        itmPctEl.style.color = "#aaa";
+    }
+
+    document.getElementById('repTotalDuration').innerHTML = "--";
+    
+    let profitEl = document.getElementById('repNetProfit');
+    profitEl.innerText = "ĐANG TÍNH...";
+    profitEl.style.color = "#888";
+    profitEl.style.textShadow = "none";
     
     let hrRateEl = document.getElementById('repHourlyRate');
     if(hrRateEl) hrRateEl.innerText = "--";
-    let staminaBar = document.getElementById('repStaminaBar');
-    if(staminaBar) staminaBar.style.width = "0%";
-    let staminaStt = document.getElementById('repStaminaStatus');
-    if(staminaStt) { staminaStt.innerText = "ĐANG ĐO..."; staminaStt.style.color = "#888"; }
+    
     let booQuote = document.getElementById('repBooQuote');
-    if(booQuote) { booQuote.innerText = "> BOO: PHÂN TÍCH DỮ LIỆU..."; booQuote.style.color = "#888"; }
+    if(booQuote) { 
+        booQuote.innerText = "> BOO: PHÂN TÍCH DỮ LIỆU...";
+        booQuote.style.color = "#888"; 
+        booQuote.style.textShadow = "none";
+    }
 
+    drawReportHexBg('136, 136, 136'); // Mặc định xám chờ tải
     lockInteraction();
-    let payload = { action: "report", account: currentUsername };
 
+    let payload = { action: "report", account: currentUsername }; 
     // 👉 HÀM NÀY GỌI LINK MỚI ĐỂ LẤY BÁO CÁO SỔ SINH TỬ
     fetch(REPORT_API_URL, { method: "POST", body: JSON.stringify(payload) })
     .then(res => res.json())
@@ -426,12 +487,13 @@ function fetchBattleReport() {
             let data = res.data;
             document.getElementById('repTotalMatches').innerText = data.totalMatches;
             if(totalDaysEl) totalDaysEl.innerText = data.totalDays || 0;
-            document.getElementById('repTotalDuration').innerHTML = data.totalDuration + " <span style='font-size:10px;'>m</span>";
             
-            let profitEl = document.getElementById('repNetProfit');
+            let itmPct = data.totalDays > 0 ? Math.round((data.itmDays / data.totalDays) * 100) : 0;
+            if(itmPctEl) itmPctEl.innerText = `(${itmPct}%)`;
+            
+            document.getElementById('repTotalDuration').innerText = data.totalDuration;
+            
             let profitVal = data.netProfit;
-
-            // TÍNH TỐC ĐỘ SINH LỜI (LÃI / GIỜ)
             let hours = data.totalDuration / 60;
             let hourlyRate = 0;
             if(hours > 0) hourlyRate = Math.round(profitVal / hours);
@@ -463,47 +525,52 @@ function fetchBattleReport() {
                 profitEl.style.color = "#d2d2d2"; 
             }
 
-            // XỬ LÝ THANH THỂ LỰC (Max mốc là 600 phút ~ 10 tiếng)
-            if(staminaBar && staminaStt) {
-                let staminaPct = Math.min((data.totalDuration / 600) * 100, 100);
-                setTimeout(() => { staminaBar.style.width = staminaPct + "%"; }, 100);
-                if (data.totalDuration < 300) {
-                    staminaBar.style.background = "#00ff88";
-                    staminaBar.style.boxShadow = "0 0 10px #00ff88";
-                    staminaStt.innerText = "SUNG MÃN"; staminaStt.style.color = "#00ff88";
-                } else if (data.totalDuration <= 450) {
-                    staminaBar.style.background = "#ff9900";
-                    staminaBar.style.boxShadow = "0 0 10px #ff9900";
-                    staminaStt.innerText = "CẢNH BÁO"; staminaStt.style.color = "#ff9900";
-                } else {
-                    staminaBar.style.background = "#ff3333";
-                    staminaBar.style.boxShadow = "0 0 10px #ff3333";
-                    staminaStt.innerText = "QUÁ TẢI !"; staminaStt.style.color = "#ff3333";
-                }
+            // HỆ THỐNG ĐẲNG CẤP (AURA SYSTEM)
+            let rankTitle = ""; let rankClass = ""; let rankColorRGB = ""; let hexColor = ""; let quote = "";
+            if (itmPct < 20) {
+                rankTitle = "TẬP SỰ"; rankClass = "rank-rookie"; rankColorRGB = "#a0a0a0"; hexColor = "160, 160, 160";
+                quote = "> BOO: GIAI ĐOẠN TÍCH LŨY. BẢO TOÀN VỐN.";
+            } else if (itmPct < 35) {
+                rankTitle = "CHIẾN BINH"; rankClass = "rank-warrior"; rankColorRGB = "#00e5ff"; hexColor = "0, 229, 255";
+                quote = "> BOO: NHỊP ĐỘ ỔN ĐỊNH. DUY TRÌ KỶ LUẬT.";
+            } else if (itmPct < 50) {
+                rankTitle = "THỦ LĨNH"; rankClass = "rank-leader"; rankColorRGB = "#bf00ff"; hexColor = "191, 0, 255";
+                quote = "> BOO: ĐẲNG CẤP CAO THỦ. KIỂM SOÁT BÀN ĐẤU.";
+            } else {
+                rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#ffd700"; hexColor = "255, 215, 0";
+                quote = "> BOO: ĐỘC TÔN. ÁP ĐẢO HOÀN TOÀN MỌI ĐỐI THỦ !";
             }
 
-            // LỜI KHUYÊN TỪ BOO
-            if(booQuote) {
-                if (data.totalDuration > 450) {
-                    booQuote.innerText = "> BOO: THỂ LỰC CẠN KIỆT. CẦN THIẾT LẬP LẠI !";
-                    booQuote.style.color = "#ff3333"; pulseTerminal("BOO: BÁO ĐỘNG THỂ LỰC.");
-                } else if (profitVal > 0 && hourlyRate > 100000) { 
-                    booQuote.innerText = "> BOO: HIỆU SUẤT ĐỈNH CAO. DUY TRÌ NHỊP ĐỘ !";
-                    booQuote.style.color = "#00e5ff"; pulseTerminal("BOO: PHONG ĐỘ TỐT.");
-                } else if (profitVal < 0) {
-                    booQuote.innerText = "> BOO: TÂM LÝ BẤT ỔN. NÊN THIỀN ĐỊNH LẠI.";
-                    booQuote.style.color = "#ff9900"; pulseTerminal("BOO: KIỂM SOÁT TÂM LÝ.");
-                } else {
-                    booQuote.innerText = "> BOO: CHỈ SỐ CÂN BẰNG. THEO DÕI THÊM.";
-                    booQuote.style.color = "#00ff88"; pulseTerminal("BOO: CÂN BẰNG.");
-                }
+            popup.classList.add(rankClass);
+            
+            if(rankTitleEl) {
+                rankTitleEl.innerText = `ĐẲNG CẤP: [ ${rankTitle} ]`;
+                rankTitleEl.style.color = rankColorRGB;
+                rankTitleEl.style.textShadow = `0 0 15px ${rankColorRGB}`;
             }
+            
+            if(closeBtnEl) {
+                closeBtnEl.style.color = rankColorRGB;
+                closeBtnEl.style.borderColor = rankColorRGB;
+                closeBtnEl.style.boxShadow = `0 0 10px ${rankColorRGB}`;
+            }
+
+            if(booQuote) {
+                booQuote.innerText = quote;
+                booQuote.style.color = rankColorRGB;
+                booQuote.style.textShadow = `0 0 8px ${rankColorRGB}`;
+            }
+            
+            if(itmPctEl) itmPctEl.style.color = rankColorRGB;
+
+            drawReportHexBg(hexColor);
+            pulseTerminal(`BOO: ĐẲNG CẤP [${rankTitle}] XÁC NHẬN.`);
 
         } else {
-            document.getElementById('repNetProfit').innerText = "LỖI DỮ LIỆU";
+            profitEl.innerText = "LỖI DỮ LIỆU";
         }
     })
     .catch(err => {
-        document.getElementById('repNetProfit').innerText = "LỖI KẾT NỐI";
+        profitEl.innerText = "LỖI MẠNG LƯỚI";
     });
 }
