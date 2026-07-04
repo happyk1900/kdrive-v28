@@ -375,7 +375,7 @@ function openChangePassPanel() { document.getElementById('changePassPanel').styl
 function closeChangePassPanel() { document.getElementById('changePassPanel').style.display = 'none'; }
 
 // ===================================================
-// HỆ THỐNG TRUY XUẤT SỔ SINH TỬ RÚT GỌN (BÁO CÁO KÉP)
+// HỆ THỐNG TRUY XUẤT SỔ SINH TỬ RÚT GỌN (BÁO CÁO KÉP - LED CHẠY)
 // ===================================================
 function closeReportPopup() {
     document.getElementById('reportPopup').style.display = 'none'; 
@@ -423,10 +423,10 @@ function fetchBattleReport() {
     playCyberClick(); 
     pulseTerminal("BOO: ĐANG TRUY XUẤT SỔ SINH TỬ...");
     
-    // Reset Giao diện
+    // Reset Giao diện - Xóa hết class đẳng cấp cũ để chuẩn bị kích hoạt LED mới
     let popup = document.getElementById('reportPopup');
-    popup.style.display = 'flex';
     popup.className = 'gateway-popup'; 
+    popup.style.display = 'flex';
     
     let rankTitleEl = document.getElementById('repRankTitle');
     if(rankTitleEl) { rankTitleEl.innerText = "ĐANG ĐO..."; rankTitleEl.style.color = "#888"; rankTitleEl.style.textShadow = "none"; }
@@ -482,7 +482,6 @@ function fetchBattleReport() {
             if(itmPctEl) itmPctEl.innerText = `${itmPct}%`;
             
             // KẾT NỐI CHỈ SỐ PHONG ĐỘ 30 NGÀY
-            // Lưu ý: Tạm thời gán bằng itmPct để mượt UI. Ở bước tiếp theo, anh em mình sẽ dạy Apps Script lọc riêng biến data.itm30Days này nhé!
             let itm30Days = data.itm30Days !== undefined ? data.itm30Days : itmPct; 
             if(itm30DaysEl) itm30DaysEl.innerText = `${itm30Days}%`;
 
@@ -503,7 +502,7 @@ function fetchBattleReport() {
             else if (profitVal < 0) { profitEl.innerText = profitVal.toLocaleString('en-US'); profitEl.style.color = "#ff3333"; profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)"; }
             else { profitEl.innerText = "0"; profitEl.style.color = "#d2d2d2"; }
 
-            // HỆ THỐNG ĐẲNG CẤP (SOFT GLOW AURA)
+            // HỆ THỐNG ĐẲNG CẤP VÀ KÍCH HOẠT HIỆU ỨNG LED BORDER
             let rankTitle = ""; let rankClass = ""; let rankColorRGB = ""; let hexColor = ""; let quote = ""; let hintText = "";
             
             if (itmPct < 20) {
@@ -519,14 +518,15 @@ function fetchBattleReport() {
                 quote = "> BOO: ĐẲNG CẤP CAO THỦ. KIỂM SOÁT BÀN ĐẤU.";
                 hintText = `👑 Sắp chạm đỉnh! Chỉ ${50 - itmPct}% nữa để hóa [HUYỀN THOẠI]`;
             } else {
-                rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#c5a059"; hexColor = "197, 160, 89"; // Vàng Đồng Trầm dịu mắt
+                rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#ffd700"; hexColor = "255, 215, 0"; // Vàng Kim Rực Rỡ Lấp Lánh
                 quote = "> BOO: ĐỘC TÔN. ÁP ĐẢO HOÀN TOÀN MỌI ĐỐI THỦ !";
                 hintText = `🏆 ĐỘC TÔN! Bạn đang thống trị bảng xếp hạng!`;
             }
 
+            // Gắn class vào popup để CSS kích hoạt viền LED xoay vòng
             popup.classList.add(rankClass);
             
-            // Animation Thanh Rank
+            // Animation cho thanh Năng Lượng Rank
             if(rankBar) {
                 setTimeout(() => { 
                     rankBar.style.width = Math.min(itmPct, 100) + "%"; 
@@ -534,19 +534,19 @@ function fetchBattleReport() {
                     rankBar.style.boxShadow = `0 0 10px rgba(${hexColor}, 0.8)`;
                 }, 100);
             }
+            
             if(itmPctEl) itmPctEl.style.color = rankColorRGB;
             if(rankHint) { rankHint.innerText = hintText; rankHint.style.color = rankColorRGB; }
 
             if(rankTitleEl) {
                 rankTitleEl.innerText = `ĐẲNG CẤP: [ ${rankTitle} ]`;
                 rankTitleEl.style.color = rankColorRGB;
-                rankTitleEl.style.textShadow = `0 0 15px rgba(${hexColor}, 0.6)`;
+                rankTitleEl.style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
             }
             
             if(closeBtnEl) {
                 closeBtnEl.style.color = rankColorRGB;
                 closeBtnEl.style.borderColor = rankColorRGB;
-                closeBtnEl.style.boxShadow = `0 0 10px rgba(${hexColor}, 0.5)`;
             }
 
             if(booQuote) {
