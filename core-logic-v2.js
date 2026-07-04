@@ -1,4 +1,10 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbz2MQO0xYgNPkY_LCQLGgcHwnslfoDbQB1r9j4mTfyTRjGUfMO-eb_kGEYXimGt3Uo/exec";
+// ==========================================
+// TRẠM CHỈ HUY: PHÂN LUỒNG 2 BỘ NÃO API
+// ==========================================
+// 1. Link xử lý Đăng Nhập / Tài khoản (Link gốc)
+const API_URL = "https://script.google.com/macros/s/AKfycby9__D-oax96p1GG7J3qBAPTWbHjKltEK8Csn3mDIx0L8vHLL3zyMNNundP30-97Xvs/exec";
+// 2. Link xử lý Sổ Sinh Tử / Báo cáo (Link mới tạo của anh)
+const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbz2MQO0xYgNPkY_LCQLGgcHwnslfoDbQB1r9j4mTfyTRjGUfMO-eb_kGEYXimGt3Uo/exec";
 
 // 1. ĐỌC ĐỊNH DANH TỪ LOCAL STORAGE ĐỂ GIỮ TÊN BẤT TỬ
 let currentUsername = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_username') || 'guest';
@@ -219,7 +225,20 @@ function moveRelic() {
 }
 function captureRelic() { if(!relicActive) return; if(isMusicPlaying && !isMuted) bgAudio.pause(); if (!isRelicCharged) { let today = new Date().toLocaleDateString(); localStorage.setItem('lastCapturedDate_' + currentUsername, today); isRelicCharged = true; stopBuzz(); playZapPop(); if(navigator.vibrate) navigator.vibrate([100, 50, 200, 50, 100]); let flash = document.getElementById('whiteFlash'); flash.style.display = 'block'; flash.style.opacity = '1'; relicEl.style.transform = `translate(-50%, -50%) scale(5)`; relicEl.style.opacity = '0'; setTimeout(() => { window.location.href = "nhap_the.html"; }, 350); } else { if(navigator.vibrate) navigator.vibrate(50); relicEl.style.transform = `translate(-50%, -50%) scale(1.5)`; relicEl.style.opacity = '0'; setTimeout(() => { window.location.href = "trai_huan_luyen.html"; }, 200); } }
 
-function callAPI(action, params, callbackName, onSuccess, onError) { let finalUrl = API_URL + "?action=" + action; for (let key in params) { finalUrl += "&" + key + "=" + encodeURIComponent(params[key]); } finalUrl += "&callback=" + callbackName; window[callbackName] = function(res) { delete window[callbackName]; let scriptEl = document.getElementById(callbackName); if(scriptEl) document.body.removeChild(scriptEl); if (res && res.success) onSuccess(res); else onError(res ? res.msg : "LỖI MÁY CHỦ!"); }; let script = document.createElement('script'); script.id = callbackName; script.src = finalUrl; script.onerror = function() { onError("LỖI MẠNG!"); }; document.body.appendChild(script); }
+function callAPI(action, params, callbackName, onSuccess, onError) { 
+    // 👉 HÀM NÀY SẼ GỌI LINK GỐC ĐỂ ĐĂNG NHẬP
+    let finalUrl = API_URL + "?action=" + action; 
+    for (let key in params) { finalUrl += "&" + key + "=" + encodeURIComponent(params[key]); } 
+    finalUrl += "&callback=" + callbackName; 
+    window[callbackName] = function(res) { 
+        delete window[callbackName]; let scriptEl = document.getElementById(callbackName); 
+        if(scriptEl) document.body.removeChild(scriptEl); 
+        if (res && res.success) onSuccess(res); else onError(res ? res.msg : "LỖI MÁY CHỦ!"); 
+    }; 
+    let script = document.createElement('script'); script.id = callbackName; script.src = finalUrl; 
+    script.onerror = function() { onError("LỖI MẠNG!"); }; 
+    document.body.appendChild(script); 
+}
 
 function submitLogin() { 
     try { playCyberSound(); } catch(e) {} 
@@ -277,7 +296,6 @@ function confirmLogout(isYes) {
     if(isYes) { 
         document.getElementById('logoutConfirmPanel').style.display = 'none'; 
         pulseTerminal("BOO: LOGGING OUT..."); 
-        // 3. XÓA LOCAL STORAGE KHI ĐĂNG XUẤT
         sessionStorage.removeItem('kdrive_session'); 
         sessionStorage.removeItem('kdrive_username'); 
         localStorage.removeItem('kdrive_logged_in_user');
@@ -306,9 +324,7 @@ function openSecretCameraGuard(element) {
     let cube = document.getElementById('cubeWrapper');
     cube.classList.remove('video-play-mode');
     document.querySelector('.projector-beam').classList.remove('beam-on');
-    
     cube.classList.add('camera-rec-mode');
-    
     setTimeout(() => { document.getElementById('hiddenCamera').click(); }, 600);
 }
 
@@ -346,16 +362,12 @@ function closeVideoModule() {
 
 function triggerStaticNode(element) { 
     if (!checkLoginGuard()) return; 
-    
     if(navigator.vibrate) navigator.vibrate([30]); 
     playCyberClick();
     
     let cube = document.getElementById('cubeWrapper');
     cube.classList.add('phantom-split'); 
-    
-    setTimeout(() => {
-        cube.classList.remove('phantom-split');
-    }, 600); 
+    setTimeout(() => { cube.classList.remove('phantom-split'); }, 600); 
 }
 
 function rotateWallpapersGuard(element) { currentWallpaperIndex = (currentWallpaperIndex + 1) % base64Wallpapers.length; document.getElementById('kdriveBg').src = base64Wallpapers[currentWallpaperIndex]; }
@@ -379,10 +391,9 @@ function fetchBattleReport() {
     if (!checkLoginGuard()) return; 
     if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
     playCyberClick();
-    
     pulseTerminal("BOO: ĐANG TRUY XUẤT SỔ SINH TỬ...");
     
-    // Reset Giao diện trước khi gọi mạng
+    // Reset Giao diện
     document.getElementById('reportPopup').style.display = 'flex';
     document.getElementById('repAccountName').innerText = currentUsername.toUpperCase();
     document.getElementById('repTotalMatches').innerText = "--";
@@ -397,21 +408,18 @@ function fetchBattleReport() {
     
     let hrRateEl = document.getElementById('repHourlyRate');
     if(hrRateEl) hrRateEl.innerText = "--";
-    
     let staminaBar = document.getElementById('repStaminaBar');
     if(staminaBar) staminaBar.style.width = "0%";
-    
     let staminaStt = document.getElementById('repStaminaStatus');
     if(staminaStt) { staminaStt.innerText = "ĐANG ĐO..."; staminaStt.style.color = "#888"; }
-    
     let booQuote = document.getElementById('repBooQuote');
     if(booQuote) { booQuote.innerText = "> BOO: PHÂN TÍCH DỮ LIỆU..."; booQuote.style.color = "#888"; }
 
     lockInteraction();
-
     let payload = { action: "report", account: currentUsername };
 
-    fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+    // 👉 HÀM NÀY GỌI LINK MỚI ĐỂ LẤY BÁO CÁO SỔ SINH TỬ
+    fetch(REPORT_API_URL, { method: "POST", body: JSON.stringify(payload) })
     .then(res => res.json())
     .then(res => {
         if(res.status === "success") {
@@ -458,16 +466,18 @@ function fetchBattleReport() {
             // XỬ LÝ THANH THỂ LỰC (Max mốc là 600 phút ~ 10 tiếng)
             if(staminaBar && staminaStt) {
                 let staminaPct = Math.min((data.totalDuration / 600) * 100, 100);
-                setTimeout(() => { staminaBar.style.width = staminaPct + "%"; }, 100); 
-
+                setTimeout(() => { staminaBar.style.width = staminaPct + "%"; }, 100);
                 if (data.totalDuration < 300) {
-                    staminaBar.style.background = "#00ff88"; staminaBar.style.boxShadow = "0 0 10px #00ff88";
+                    staminaBar.style.background = "#00ff88";
+                    staminaBar.style.boxShadow = "0 0 10px #00ff88";
                     staminaStt.innerText = "SUNG MÃN"; staminaStt.style.color = "#00ff88";
                 } else if (data.totalDuration <= 450) {
-                    staminaBar.style.background = "#ff9900"; staminaBar.style.boxShadow = "0 0 10px #ff9900";
+                    staminaBar.style.background = "#ff9900";
+                    staminaBar.style.boxShadow = "0 0 10px #ff9900";
                     staminaStt.innerText = "CẢNH BÁO"; staminaStt.style.color = "#ff9900";
                 } else {
-                    staminaBar.style.background = "#ff3333"; staminaBar.style.boxShadow = "0 0 10px #ff3333";
+                    staminaBar.style.background = "#ff3333";
+                    staminaBar.style.boxShadow = "0 0 10px #ff3333";
                     staminaStt.innerText = "QUÁ TẢI !"; staminaStt.style.color = "#ff3333";
                 }
             }
