@@ -1,19 +1,18 @@
 // ==========================================
 // TRẠM CHỈ HUY: PHÂN LUỒNG 2 BỘ NÃO API
 // ==========================================
-// 1. Link xử lý Đăng Nhập / Tài khoản (Link gốc)
+// 1. Link xử lý Đăng Nhập / Tài khoản
 const API_URL = "https://script.google.com/macros/s/AKfycby9__D-oax96p1GG7J3qBAPTWbHjKltEK8Csn3mDIx0L8vHLL3zyMNNundP30-97Xvs/exec";
-// 2. Link xử lý Sổ Sinh Tử / Báo cáo (Đã cập nhật link mới nhất của anh Kai)
+// 2. Link xử lý Sổ Sinh Tử / Báo cáo
 const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbwJA0TN4nDkax-6QoBIOo1JCWcAX1WtMhR6NTsHodS-P78-u5mUTMKiUXT8wyDDGkbz/exec";
 
-// 1. ĐỌC ĐỊNH DANH TỪ LOCAL STORAGE ĐỂ GIỮ TÊN BẤT TỬ
+// ĐỌC ĐỊNH DANH TỪ LOCAL STORAGE ĐỂ GIỮ TÊN BẤT TỬ
 let currentUsername = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_username') || 'guest';
 
 function lockInteraction() { document.body.classList.add('popups-active'); }
 function unlockInteraction() { document.body.classList.remove('popups-active'); }
 
 window.addEventListener('DOMContentLoaded', () => {
-    // 2. PHỤC HỒI PHIÊN TỪ LOCAL STORAGE
     if (localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active') {
         document.getElementById('loginPanelContainer').style.display = 'none';
         isLoggedIn = true; triggerHexagonShield();
@@ -225,7 +224,6 @@ function moveRelic() {
 function captureRelic() { if(!relicActive) return; if(isMusicPlaying && !isMuted) bgAudio.pause(); if (!isRelicCharged) { let today = new Date().toLocaleDateString(); localStorage.setItem('lastCapturedDate_' + currentUsername, today); isRelicCharged = true; stopBuzz(); playZapPop(); if(navigator.vibrate) navigator.vibrate([100, 50, 200, 50, 100]); let flash = document.getElementById('whiteFlash'); flash.style.display = 'block'; flash.style.opacity = '1'; relicEl.style.transform = `translate(-50%, -50%) scale(5)`; relicEl.style.opacity = '0'; setTimeout(() => { window.location.href = "nhap_the.html"; }, 350); } else { if(navigator.vibrate) navigator.vibrate(50); relicEl.style.transform = `translate(-50%, -50%) scale(1.5)`; relicEl.style.opacity = '0'; setTimeout(() => { window.location.href = "trai_huan_luyen.html"; }, 200); } }
 
 function callAPI(action, params, callbackName, onSuccess, onError) { 
-    // 👉 HÀM NÀY SẼ GỌI LINK GỐC ĐỂ ĐĂNG NHẬP
     let finalUrl = API_URL + "?action=" + action; 
     for (let key in params) { finalUrl += "&" + key + "=" + encodeURIComponent(params[key]); } 
     finalUrl += "&callback=" + callbackName; 
@@ -255,7 +253,6 @@ function submitLogin() {
     statusEl.style.color = "#00e5ff"; 
     
     callAPI('checkLogin', {username: acc, password: code}, 'cb_login', function(res) { 
-        // ĐỒNG BỘ LOCAL STORAGE
         sessionStorage.setItem('kdrive_session', 'active'); 
         sessionStorage.setItem('kdrive_username', acc); 
         localStorage.setItem('kdrive_logged_in_user', acc);
@@ -377,9 +374,8 @@ function closeNinjaInfo() { document.getElementById('ninjaPopup').style.display 
 function openChangePassPanel() { document.getElementById('changePassPanel').style.display = 'flex'; }
 function closeChangePassPanel() { document.getElementById('changePassPanel').style.display = 'none'; }
 
-
 // ===================================================
-// HỆ THỐNG TRUY XUẤT SỔ SINH TỬ RÚT GỌN (BÁO CÁO NÂNG CẤP)
+// HỆ THỐNG TRUY XUẤT SỔ SINH TỬ RÚT GỌN (BÁO CÁO KÉP)
 // ===================================================
 function closeReportPopup() {
     document.getElementById('reportPopup').style.display = 'none'; 
@@ -408,7 +404,7 @@ function drawReportHexBg(colorRGB) {
             for(let col=0; col<cols; col++) { 
                 let x = col * h3 + (row%2===1 ? h3/2 : 0);
                 let y = row * r*1.5;
-                let alpha = 0.05 + Math.sin(x*0.05 + y*0.05 + offset) * 0.15; // Nhấp nháy nhẹ như dòng chảy data
+                let alpha = 0.05 + Math.sin(x*0.05 + y*0.05 + offset) * 0.15; 
                 ctx.strokeStyle = `rgba(${colorRGB}, ${alpha})`;
                 ctx.beginPath();
                 for (let i=0; i<6; i++) { 
@@ -430,21 +426,13 @@ function fetchBattleReport() {
     // Reset Giao diện
     let popup = document.getElementById('reportPopup');
     popup.style.display = 'flex';
-    popup.className = 'gateway-popup'; // Reset class về mặc định
+    popup.className = 'gateway-popup'; 
     
     let rankTitleEl = document.getElementById('repRankTitle');
-    if(rankTitleEl) {
-        rankTitleEl.innerText = "ĐANG ĐO...";
-        rankTitleEl.style.color = "#888";
-        rankTitleEl.style.textShadow = "none";
-    }
+    if(rankTitleEl) { rankTitleEl.innerText = "ĐANG ĐO..."; rankTitleEl.style.color = "#888"; rankTitleEl.style.textShadow = "none"; }
 
     let closeBtnEl = document.getElementById('repCloseBtn');
-    if(closeBtnEl) {
-        closeBtnEl.style.borderColor = "#888";
-        closeBtnEl.style.color = "#888";
-        closeBtnEl.style.boxShadow = "none";
-    }
+    if(closeBtnEl) { closeBtnEl.style.borderColor = "#888"; closeBtnEl.style.color = "#888"; closeBtnEl.style.boxShadow = "none"; }
     
     document.getElementById('repAccountName').innerText = currentUsername.toUpperCase();
     document.getElementById('repTotalMatches').innerText = "--";
@@ -452,11 +440,17 @@ function fetchBattleReport() {
     let totalDaysEl = document.getElementById('repTotalDays');
     if(totalDaysEl) totalDaysEl.innerText = "--";
     
-    let itmPctEl = document.getElementById('repItmPct');
-    if(itmPctEl) {
-        itmPctEl.innerText = "(0%)";
-        itmPctEl.style.color = "#aaa";
-    }
+    let itmPctEl = document.getElementById('repItmProgressText');
+    if(itmPctEl) { itmPctEl.innerText = "0%"; itmPctEl.style.color = "#aaa"; }
+
+    let rankBar = document.getElementById('repRankBar');
+    if(rankBar) { rankBar.style.width = "0%"; rankBar.style.background = "#555"; rankBar.style.boxShadow = "none"; }
+
+    let rankHint = document.getElementById('repNextRankHint');
+    if(rankHint) { rankHint.innerText = "Đang phân tích..."; rankHint.style.color = "#888"; }
+
+    let itm30DaysEl = document.getElementById('repItm30Days');
+    if(itm30DaysEl) { itm30DaysEl.innerText = "--%"; }
 
     document.getElementById('repTotalDuration').innerHTML = "--";
     
@@ -469,17 +463,12 @@ function fetchBattleReport() {
     if(hrRateEl) hrRateEl.innerText = "--";
     
     let booQuote = document.getElementById('repBooQuote');
-    if(booQuote) { 
-        booQuote.innerText = "> BOO: PHÂN TÍCH DỮ LIỆU...";
-        booQuote.style.color = "#888"; 
-        booQuote.style.textShadow = "none";
-    }
+    if(booQuote) { booQuote.innerText = "> BOO: PHÂN TÍCH DỮ LIỆU..."; booQuote.style.color = "#888"; }
 
-    drawReportHexBg('136, 136, 136'); // Mặc định xám chờ tải
+    drawReportHexBg('136, 136, 136'); 
     lockInteraction();
 
     let payload = { action: "report", account: currentUsername }; 
-    // 👉 HÀM NÀY GỌI LINK MỚI ĐỂ LẤY BÁO CÁO SỔ SINH TỬ
     fetch(REPORT_API_URL, { method: "POST", body: JSON.stringify(payload) })
     .then(res => res.json())
     .then(res => {
@@ -488,9 +477,15 @@ function fetchBattleReport() {
             document.getElementById('repTotalMatches').innerText = data.totalMatches;
             if(totalDaysEl) totalDaysEl.innerText = data.totalDays || 0;
             
+            // TỔNG ITM LUỸ KẾ
             let itmPct = data.totalDays > 0 ? Math.round((data.itmDays / data.totalDays) * 100) : 0;
-            if(itmPctEl) itmPctEl.innerText = `(${itmPct}%)`;
+            if(itmPctEl) itmPctEl.innerText = `${itmPct}%`;
             
+            // KẾT NỐI CHỈ SỐ PHONG ĐỘ 30 NGÀY
+            // Lưu ý: Tạm thời gán bằng itmPct để mượt UI. Ở bước tiếp theo, anh em mình sẽ dạy Apps Script lọc riêng biến data.itm30Days này nhé!
+            let itm30Days = data.itm30Days !== undefined ? data.itm30Days : itmPct; 
+            if(itm30DaysEl) itm30DaysEl.innerText = `${itm30Days}%`;
+
             document.getElementById('repTotalDuration').innerText = data.totalDuration;
             
             let profitVal = data.netProfit;
@@ -499,69 +494,65 @@ function fetchBattleReport() {
             if(hours > 0) hourlyRate = Math.round(profitVal / hours);
 
             if(hrRateEl) {
-                if (hourlyRate > 0) {
-                    hrRateEl.innerText = "+" + hourlyRate.toLocaleString('en-US');
-                    hrRateEl.style.color = "#00ff88";
-                } else if (hourlyRate < 0) {
-                    hrRateEl.innerText = hourlyRate.toLocaleString('en-US');
-                    hrRateEl.style.color = "#ff3333";
-                } else {
-                    hrRateEl.innerText = "0";
-                    hrRateEl.style.color = "#d2d2d2";
-                }
+                if (hourlyRate > 0) { hrRateEl.innerText = "+" + hourlyRate.toLocaleString('en-US'); hrRateEl.style.color = "#00ff88"; }
+                else if (hourlyRate < 0) { hrRateEl.innerText = hourlyRate.toLocaleString('en-US'); hrRateEl.style.color = "#ff3333"; }
+                else { hrRateEl.innerText = "0"; hrRateEl.style.color = "#d2d2d2"; }
             }
             
-            // XỬ LÝ LÃI RÒNG
-            if (profitVal > 0) {
-                profitEl.innerText = "+" + profitVal.toLocaleString('en-US');
-                profitEl.style.color = "#00ff88";
-                profitEl.style.textShadow = "0 0 20px rgba(0, 255, 136, 0.7)";
-            } else if (profitVal < 0) {
-                profitEl.innerText = profitVal.toLocaleString('en-US');
-                profitEl.style.color = "#ff3333";
-                profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)";
-            } else {
-                profitEl.innerText = "0";
-                profitEl.style.color = "#d2d2d2"; 
-            }
+            if (profitVal > 0) { profitEl.innerText = "+" + profitVal.toLocaleString('en-US'); profitEl.style.color = "#00ff88"; profitEl.style.textShadow = "0 0 20px rgba(0, 255, 136, 0.7)"; }
+            else if (profitVal < 0) { profitEl.innerText = profitVal.toLocaleString('en-US'); profitEl.style.color = "#ff3333"; profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)"; }
+            else { profitEl.innerText = "0"; profitEl.style.color = "#d2d2d2"; }
 
-            // HỆ THỐNG ĐẲNG CẤP (AURA SYSTEM)
-            let rankTitle = ""; let rankClass = ""; let rankColorRGB = ""; let hexColor = ""; let quote = "";
+            // HỆ THỐNG ĐẲNG CẤP (SOFT GLOW AURA)
+            let rankTitle = ""; let rankClass = ""; let rankColorRGB = ""; let hexColor = ""; let quote = ""; let hintText = "";
+            
             if (itmPct < 20) {
                 rankTitle = "TẬP SỰ"; rankClass = "rank-rookie"; rankColorRGB = "#a0a0a0"; hexColor = "160, 160, 160";
                 quote = "> BOO: GIAI ĐOẠN TÍCH LŨY. BẢO TOÀN VỐN.";
+                hintText = `🔥 Cố lên! Cần ${20 - itmPct}% nữa để đạt mốc [CHIẾN BINH]`;
             } else if (itmPct < 35) {
                 rankTitle = "CHIẾN BINH"; rankClass = "rank-warrior"; rankColorRGB = "#00e5ff"; hexColor = "0, 229, 255";
                 quote = "> BOO: NHỊP ĐỘ ỔN ĐỊNH. DUY TRÌ KỶ LUẬT.";
+                hintText = `⚡ Giữ phong độ! Cần ${35 - itmPct}% nữa để lên [THỦ LĨNH]`;
             } else if (itmPct < 50) {
                 rankTitle = "THỦ LĨNH"; rankClass = "rank-leader"; rankColorRGB = "#bf00ff"; hexColor = "191, 0, 255";
                 quote = "> BOO: ĐẲNG CẤP CAO THỦ. KIỂM SOÁT BÀN ĐẤU.";
+                hintText = `👑 Sắp chạm đỉnh! Chỉ ${50 - itmPct}% nữa để hóa [HUYỀN THOẠI]`;
             } else {
-                rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#ffd700"; hexColor = "255, 215, 0";
+                rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#c5a059"; hexColor = "197, 160, 89"; // Vàng Đồng Trầm dịu mắt
                 quote = "> BOO: ĐỘC TÔN. ÁP ĐẢO HOÀN TOÀN MỌI ĐỐI THỦ !";
+                hintText = `🏆 ĐỘC TÔN! Bạn đang thống trị bảng xếp hạng!`;
             }
 
             popup.classList.add(rankClass);
             
+            // Animation Thanh Rank
+            if(rankBar) {
+                setTimeout(() => { 
+                    rankBar.style.width = Math.min(itmPct, 100) + "%"; 
+                    rankBar.style.background = rankColorRGB;
+                    rankBar.style.boxShadow = `0 0 10px rgba(${hexColor}, 0.8)`;
+                }, 100);
+            }
+            if(itmPctEl) itmPctEl.style.color = rankColorRGB;
+            if(rankHint) { rankHint.innerText = hintText; rankHint.style.color = rankColorRGB; }
+
             if(rankTitleEl) {
                 rankTitleEl.innerText = `ĐẲNG CẤP: [ ${rankTitle} ]`;
                 rankTitleEl.style.color = rankColorRGB;
-                rankTitleEl.style.textShadow = `0 0 15px ${rankColorRGB}`;
+                rankTitleEl.style.textShadow = `0 0 15px rgba(${hexColor}, 0.6)`;
             }
             
             if(closeBtnEl) {
                 closeBtnEl.style.color = rankColorRGB;
                 closeBtnEl.style.borderColor = rankColorRGB;
-                closeBtnEl.style.boxShadow = `0 0 10px ${rankColorRGB}`;
+                closeBtnEl.style.boxShadow = `0 0 10px rgba(${hexColor}, 0.5)`;
             }
 
             if(booQuote) {
                 booQuote.innerText = quote;
                 booQuote.style.color = rankColorRGB;
-                booQuote.style.textShadow = `0 0 8px ${rankColorRGB}`;
             }
-            
-            if(itmPctEl) itmPctEl.style.color = rankColorRGB;
 
             drawReportHexBg(hexColor);
             pulseTerminal(`BOO: ĐẲNG CẤP [${rankTitle}] XÁC NHẬN.`);
