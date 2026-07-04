@@ -16,6 +16,20 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="kdrive-style.css">
+    
+    <style>
+        /* CSS HỆ THỐNG AURA ĐỔI MÀU THEO ĐẲNG CẤP ITM */
+        @keyframes legendaryGlow {
+            0% { box-shadow: 0 0 20px #ffd700, inset 0 0 20px #ffd700, 0 0 40px #ffaa00; border-color: #ffd700; }
+            50% { box-shadow: 0 0 40px #ffaa00, inset 0 0 10px #ffaa00, 0 0 60px #ffd700; border-color: #ffaa00; }
+            100% { box-shadow: 0 0 20px #ffd700, inset 0 0 20px #ffd700, 0 0 40px #ffaa00; border-color: #ffd700; }
+        }
+        .rank-legendary { animation: legendaryGlow 2s infinite alternate !important; border: 2px solid #ffd700 !important; }
+        .rank-leader { border-color: #bf00ff !important; box-shadow: 0 0 30px rgba(191, 0, 255, 0.5), inset 0 0 15px rgba(191, 0, 255, 0.2) !important; }
+        .rank-warrior { border-color: #00e5ff !important; box-shadow: 0 0 30px rgba(0, 229, 255, 0.5), inset 0 0 15px rgba(0, 229, 255, 0.2) !important; }
+        .rank-rookie { border-color: #a0a0a0 !important; box-shadow: 0 0 20px rgba(160, 160, 160, 0.3), inset 0 0 10px rgba(160, 160, 160, 0.1) !important; }
+        .report-hex-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+    </style>
 </head>
 <body>
     <div id="whiteFlash" class="white-flash-overlay"></div>
@@ -233,52 +247,46 @@
         </div>
     </div>
     
-    <div class="gateway-popup" id="reportPopup" style="border-color: #00e5ff; box-shadow: 0 0 50px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.1); width: 92%; max-width: 380px; position: relative; overflow: hidden;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120%; height: 120%; background: url('https://raw.githubusercontent.com/happyk1900/Kai-Ripe/main/t%C3%A1ch%20r%E1%BB%93i.png') no-repeat center center; background-size: contain; opacity: 0.08; z-index: 0; pointer-events: none;"></div>
+    <div class="gateway-popup" id="reportPopup" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; width: 92%; max-width: 380px; overflow: hidden; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); z-index: 99999; border-radius: 12px; transition: all 0.5s ease; border: 1px solid #555; display: none; flex-direction: column;">
+        
+        <canvas id="reportHexCanvas" class="report-hex-bg"></canvas>
 
         <div style="position: relative; z-index: 1;">
-            <div class="close-btn" style="border-color: #00e5ff; color: #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);" onclick="closeReportPopup()">X</div>
-            <h2 style="color: #00e5ff; text-shadow: 0 0 15px rgba(0,229,255,0.6);">SỔ SINH TỬ RÚT GỌN</h2>
+            <div class="close-btn" id="repCloseBtn" onclick="closeReportPopup()">X</div>
             
-            <div style="text-align: center; margin-bottom: 20px; margin-top: 10px;">
-                <div style="font-size: 12px; color: #d2d2d2; margin-bottom: 5px; font-family: 'Share Tech Mono', monospace;">[ CHIẾN BINH ]</div>
-                <div id="repAccountName" style="font-size: 20px; font-weight: bold; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.8);">ĐANG TẢI...</div>
+            <div style="text-align: center; margin-top: 5px; margin-bottom: 10px;">
+                <div style="font-size: 11px; color: #d2d2d2; font-family: 'Share Tech Mono', monospace; letter-spacing: 2px;">[ HỒ SƠ CHIẾN BINH ]</div>
+                <div id="repAccountName" style="font-size: 22px; font-weight: bold; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.8); text-transform: uppercase;">...</div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-family: 'Share Tech Mono', monospace;">
-                <div style="text-align: center; flex: 1; border-right: 1px dashed rgba(0,255,136,0.3);">
-                    <div style="font-size: 11px; color: #777; margin-bottom: 3px;">SỐ MẠNG</div>
-                    <div id="repTotalMatches" style="font-size: 20px; color: #00ff88; font-weight: bold; text-shadow: 0 0 10px rgba(0,255,136,0.5);">--</div>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <div id="repRankTitle" style="font-size: 18px; font-weight: 900; font-family: 'Space Grotesk', sans-serif; letter-spacing: 2px;">ĐANG ĐO...</div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-family: 'Share Tech Mono', monospace; background: rgba(0,0,0,0.4); padding: 10px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="text-align: center; flex: 1; border-right: 1px dashed rgba(255,255,255,0.2);">
+                    <div style="font-size: 10px; color: #888; margin-bottom: 3px;">TỔNG TRẬN</div>
+                    <div id="repTotalMatches" style="font-size: 18px; color: #fff; font-weight: bold;">--</div>
                 </div>
-                <div style="text-align: center; flex: 1; border-right: 1px dashed rgba(0,255,136,0.3);">
-                    <div style="font-size: 11px; color: #777; margin-bottom: 3px;">SỐ NGÀY</div>
-                    <div id="repTotalDays" style="font-size: 20px; color: #00e5ff; font-weight: bold; text-shadow: 0 0 10px rgba(0,229,255,0.5);">--</div>
+                <div style="text-align: center; flex: 1; border-right: 1px dashed rgba(255,255,255,0.2);">
+                    <div style="font-size: 10px; color: #888; margin-bottom: 3px;">NGÀY CHIẾN</div>
+                    <div style="font-size: 18px; color: #fff; font-weight: bold;"><span id="repTotalDays">--</span> <span style="font-size:12px; font-weight:normal;" id="repItmPct">(0%)</span></div>
                 </div>
                 <div style="text-align: center; flex: 1;">
-                    <div style="font-size: 11px; color: #777; margin-bottom: 3px;">THỜI LƯỢNG</div>
-                    <div id="repTotalDuration" style="font-size: 20px; color: #ffd700; font-weight: bold; text-shadow: 0 0 10px rgba(255,215,0,0.5);">-- <span style="font-size:10px;">m</span></div>
+                    <div style="font-size: 10px; color: #888; margin-bottom: 3px;">THỜI LƯỢNG</div>
+                    <div style="font-size: 18px; color: #fff; font-weight: bold;"><span id="repTotalDuration">--</span><span style="font-size:10px; color:#aaa;">m</span></div>
                 </div>
             </div>
 
-            <div style="margin-bottom: 20px; padding: 0 10px;">
-                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; font-family: 'Share Tech Mono', monospace; margin-bottom: 4px;">
-                    <span>THỂ LỰC (STAMINA)</span>
-                    <span id="repStaminaStatus">--</span>
-                </div>
-                <div style="width: 100%; height: 6px; background: #222; border-radius: 3px; overflow: hidden; box-shadow: inset 0 0 5px #000;">
-                    <div id="repStaminaBar" style="height: 100%; width: 0%; background: #00ff88; transition: width 1.5s ease-out;"></div>
-                </div>
-            </div>
-
-            <div style="text-align: center; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;">
-                <div style="font-size: 12px; color: #aaa; margin-bottom: 5px; font-family: 'Share Tech Mono', monospace;">LÃI RÒNG (NET PROFIT)</div>
-                <div id="repNetProfit" style="font-size: 28px; font-weight: bold; font-family: 'Space Grotesk', sans-serif;">--</div>
-                <div style="margin-top: 8px; font-size: 12px; font-family: 'Share Tech Mono', monospace; color: #00e5ff; letter-spacing: 1px;">
+            <div style="text-align: center; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);">
+                <div style="font-size: 11px; color: #aaa; margin-bottom: 5px; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;">LÃI RÒNG (NET PROFIT)</div>
+                <div id="repNetProfit" style="font-size: 32px; font-weight: bold; font-family: 'Space Grotesk', sans-serif;">--</div>
+                <div style="margin-top: 8px; font-size: 12px; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;">
                     <span style="color:#777;">HIỆU SUẤT: </span><span id="repHourlyRate">--</span>/h
                 </div>
             </div>
 
-            <div id="repBooQuote" style="text-align: center; font-size: 11px; color: #ff33cc; font-family: 'Share Tech Mono', monospace; min-height: 15px; font-weight: bold; text-shadow: 0 0 8px rgba(255,51,204,0.6);">
+            <div id="repBooQuote" style="text-align: center; font-size: 11px; font-family: 'Share Tech Mono', monospace; min-height: 15px; font-weight: bold; padding: 0 10px; line-height: 1.4;">
                 > BOO: ĐANG TRUY XUẤT...
             </div>
         </div>
@@ -289,7 +297,7 @@
         <div class="video-box"><video id="capturedVideoPlayer" playsinline controls></video></div>
     </div>
 
-    <script src="core-logic-v2.js?v=200"></script>
+    <script src="core-logic-v2.js?v=999"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
