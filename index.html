@@ -18,33 +18,41 @@
     <link rel="stylesheet" href="kdrive-style.css">
     
     <style>
-        /* HIỆU ỨNG VIỀN LED CHẠY SÁNG LẤP LÁNH */
-        @keyframes spinLED {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* HIỆU ỨNG VIỀN NHỊP THỞ (BREATHE GLOW) - THAY THẾ XOAY VÒNG */
+        @keyframes breatheGlow {
+            0% { opacity: 0.5; box-shadow: 0 0 15px currentColor; filter: brightness(0.9); }
+            50% { opacity: 1; box-shadow: 0 0 30px currentColor, inset 0 0 10px currentColor; filter: brightness(1.2); }
+            100% { opacity: 0.5; box-shadow: 0 0 15px currentColor; filter: brightness(0.9); }
         }
 
-        .report-hex-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.1; }
+        /* LƯỚI TỔ ONG: Đẩy z-index lên 1 để không bị chìm, tăng opacity lên 0.15 */
+        .report-hex-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.15; }
 
         /* ĐỔ MÀU HỒNG NEON CHO CHỮ ITM */
         .itm-label { color: #ff33cc !important; font-weight: bold; text-shadow: 0 0 10px rgba(255, 51, 204, 0.5); }
 
-        /* Đổ màu LED theo từng Đẳng Cấp */
-        .rank-legendary .led-spinner { background: conic-gradient(transparent 60%, #ffd700 85%, #ffffff 100%); }
-        .rank-legendary .popup-inner-content { box-shadow: inset 0 0 35px rgba(255, 215, 0, 0.3); }
-        .rank-legendary { box-shadow: 0 0 30px rgba(255, 215, 0, 0.6) !important; }
+        /* Khung chứa hiệu ứng Breathe Glow */
+        .led-spinner {
+            position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+            z-index: 1; border-radius: 14px; pointer-events: none;
+        }
 
-        .rank-leader .led-spinner { background: conic-gradient(transparent 60%, #bf00ff 85%, #f1a3ff 100%); }
-        .rank-leader .popup-inner-content { box-shadow: inset 0 0 35px rgba(191, 0, 255, 0.3); }
-        .rank-leader { box-shadow: 0 0 30px rgba(191, 0, 255, 0.6) !important; }
+        /* Đổ màu Viền Thở theo từng Đẳng Cấp */
+        .rank-legendary .led-spinner { color: #ffd700; border: 2px solid #ffd700; animation: breatheGlow 3s ease-in-out infinite; }
+        .rank-legendary .popup-inner-content { box-shadow: inset 0 0 35px rgba(255, 215, 0, 0.15); }
+        .rank-legendary { box-shadow: 0 0 30px rgba(255, 215, 0, 0.3) !important; }
 
-        .rank-warrior .led-spinner { background: conic-gradient(transparent 60%, #00e5ff 85%, #bfffffff 100%); }
-        .rank-warrior .popup-inner-content { box-shadow: inset 0 0 35px rgba(0, 229, 255, 0.3); }
-        .rank-warrior { box-shadow: 0 0 30px rgba(0, 229, 255, 0.6) !important; }
+        .rank-leader .led-spinner { color: #bf00ff; border: 2px solid #bf00ff; animation: breatheGlow 3s ease-in-out infinite; }
+        .rank-leader .popup-inner-content { box-shadow: inset 0 0 35px rgba(191, 0, 255, 0.15); }
+        .rank-leader { box-shadow: 0 0 30px rgba(191, 0, 255, 0.3) !important; }
 
-        .rank-rookie .led-spinner { background: conic-gradient(transparent 60%, #a0a0a0 85%, #ffffff 100%); }
-        .rank-rookie .popup-inner-content { box-shadow: inset 0 0 20px rgba(160, 160, 160, 0.15); }
-        .rank-rookie { box-shadow: 0 0 20px rgba(160, 160, 160, 0.3) !important; }
+        .rank-warrior .led-spinner { color: #00e5ff; border: 2px solid #00e5ff; animation: breatheGlow 3s ease-in-out infinite; }
+        .rank-warrior .popup-inner-content { box-shadow: inset 0 0 35px rgba(0, 229, 255, 0.15); }
+        .rank-warrior { box-shadow: 0 0 30px rgba(0, 229, 255, 0.3) !important; }
+
+        .rank-rookie .led-spinner { color: #a0a0a0; border: 2px solid #a0a0a0; animation: breatheGlow 3s ease-in-out infinite; }
+        .rank-rookie .popup-inner-content { box-shadow: inset 0 0 20px rgba(160, 160, 160, 0.1); }
+        .rank-rookie { box-shadow: 0 0 20px rgba(160, 160, 160, 0.2) !important; }
     </style>
 </head>
 <body>
@@ -264,19 +272,19 @@
         </div>
     </div>
     
-    <!-- BẢNG BÁO CÁO NÂNG CẤP HOÀN TOÀN: VIỀN LED & KHUNG RANK CỐ ĐỊNH -->
+    <!-- BẢNG BÁO CÁO NÂNG CẤP HOÀN TOÀN: BREATHE GLOW & KHUNG RANK CỐ ĐỊNH -->
     <div class="gateway-popup" id="reportPopup" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; width: 92%; max-width: 380px; padding: 2.5px; border-radius: 12px; overflow: hidden; display: none; z-index: 99999; background: #111;">
         
-        <!-- HIỆU ỨNG VIỀN LED QUAY -->
-        <div class="led-spinner" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; animation: spinLED 2.5s linear infinite; z-index: 1;"></div>
+        <!-- HIỆU ỨNG VIỀN NHỊP THỞ MỚI -->
+        <div class="led-spinner"></div>
         
-        <!-- NỘI DUNG CHÍNH (Mask che phần giữa của vòng LED) -->
+        <!-- NỘI DUNG CHÍNH -->
         <div class="popup-inner-content" style="position: relative; z-index: 2; width: 100%; height: 100%; background: rgba(10,10,10,0.95); border-radius: 10px; padding: 15px 10px; box-sizing: border-box; display: flex; flex-direction: column;">
             
             <canvas id="reportHexCanvas" class="report-hex-bg"></canvas>
 
-            <!-- NÚT THOÁT SHURIKEN MỚI -->
-            <div class="close-btn" id="repCloseBtn" onclick="closeReportPopup()" style="z-index: 5; background: rgba(0,0,0,0.6); border: 1px solid #555; display: flex; align-items: center; justify-content: center; padding: 4px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+            <!-- NÚT THOÁT SHURIKEN ĐÃ CĂN CHỈNH LẠI -->
+            <div class="close-btn" id="repCloseBtn" onclick="closeReportPopup()" style="position: absolute; top: 15px; right: 15px; width: 32px; height: 32px; z-index: 10; background: rgba(0,0,0,0.7); border: 1px solid #555; display: flex; align-items: center; justify-content: center; padding: 0; box-shadow: 0 0 10px rgba(0,0,0,0.5); border-radius: 50%; cursor: pointer;">
                 <svg viewBox="0 0 100 100" width="16" height="16" style="stroke: currentColor; fill: none; transition: transform 0.3s;" onmouseover="this.style.transform='rotate(90deg)'" onmouseout="this.style.transform='rotate(0deg)'">
                     <path d="M50 5 L58 42 L95 50 L58 58 L50 95 L42 58 L5 50 L42 42 Z" stroke-width="5" />
                     <circle cx="50" cy="50" r="10" stroke-width="3" />
@@ -361,7 +369,7 @@
     </div>
 
     <!-- Cập nhật version để xóa đệm (cache) tự động -->
-    <script src="core-logic-v2.js?v=99991"></script>
+    <script src="core-logic-v2.js?v=99992"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
