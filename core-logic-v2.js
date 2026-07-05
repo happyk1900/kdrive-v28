@@ -417,13 +417,51 @@ function drawReportHexBg(colorRGB) {
     }, 50);
 }
 
+// Hàm hiệu ứng số nhảy từ 0 lên số thực
+function animateValue(objId, start, end, duration, formatStr = '') {
+    let obj = document.getElementById(objId);
+    if (!obj) return;
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        let currentVal = Math.floor(progress * (end - start) + start);
+        
+        let txt = currentVal;
+        if (formatStr === 'money') {
+            txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US');
+        } else if (formatStr === 'hourly') {
+            txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US') + "/ 1 giờ";
+        } else if (formatStr === 'percent') {
+            txt = currentVal + "%";
+        }
+        
+        obj.innerText = txt;
+
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            // Chốt số chuẩn xác ở khung hình cuối
+            let finalTxt = end;
+            if (formatStr === 'money') {
+                finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US');
+            } else if (formatStr === 'hourly') {
+                finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US') + "/ 1 giờ";
+            } else if (formatStr === 'percent') {
+                finalTxt = end + "%";
+            }
+            obj.innerText = finalTxt;
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
 function fetchBattleReport() {
     if (!checkLoginGuard()) return; 
     if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
     playCyberClick(); 
     pulseTerminal("BOO: ĐANG TRUY XUẤT SỔ SINH TỬ...");
     
-    // Reset Giao diện - Xóa hết class đẳng cấp cũ để chuẩn bị kích hoạt LED mới
     let popup = document.getElementById('reportPopup');
     popup.className = 'gateway-popup'; 
     popup.style.display = 'flex';
@@ -474,47 +512,53 @@ function fetchBattleReport() {
     .then(res => {
         if(res.status === "success") {
             let data = res.data;
-            document.getElementById('repTotalMatches').innerText = data.totalMatches;
-            if(totalDaysEl) totalDaysEl.innerText = data.totalDays || 0;
+            
+            // Chạy hiệu ứng số nhảy (Thời gian: 1000ms = 1 giây)
+            animateValue('repTotalMatches', 0, data.totalMatches, 1000);
+            animateValue('repTotalDays', 0, data.totalDays || 0, 1000);
+            animateValue('repTotalDuration', 0, data.totalDuration, 1000);
             
             // TỔNG ITM LUỸ KẾ
             let itmPct = data.totalDays > 0 ? Math.round((data.itmDays / data.totalDays) * 100) : 0;
-            if(itmPctEl) itmPctEl.innerText = `${itmPct}%`;
+            animateValue('repItmProgressText', 0, itmPct, 1000, 'percent');
+            animateValue('repDaysItmPct', 0, itmPct, 1000, 'percent'); // Bơm % ITM vào ô Ngày Chiến
             
             // KẾT NỐI CHỈ SỐ PHONG ĐỘ 30 NGÀY
             let itm30Days = data.itm30Days !== undefined ? data.itm30Days : itmPct; 
-            if(itm30DaysEl) itm30DaysEl.innerText = `${itm30Days}%`;
+            animateValue('repItm30Days', 0, itm30Days, 1000, 'percent');
 
-            document.getElementById('repTotalDuration').innerText = data.totalDuration;
-            
+            // Xử lý Lãi Ròng & Hiệu Suất (Tô màu ngay, chạy số từ từ)
             let profitVal = data.netProfit;
             let hours = data.totalDuration / 60;
             let hourlyRate = 0;
             if(hours > 0) hourlyRate = Math.round(profitVal / hours);
 
             if(hrRateEl) {
-                if (hourlyRate > 0) { hrRateEl.innerText = "+" + hourlyRate.toLocaleString('en-US'); hrRateEl.style.color = "#00ff88"; }
-                else if (hourlyRate < 0) { hrRateEl.innerText = hourlyRate.toLocaleString('en-US'); hrRateEl.style.color = "#ff3333"; }
-                else { hrRateEl.innerText = "0"; hrRateEl.style.color = "#d2d2d2"; }
+                if (hourlyRate > 0) { hrRateEl.style.color = "#00ff88"; }
+                else if (hourlyRate < 0) { hrRateEl.style.color = "#ff3333"; }
+                else { hrRateEl.style.color = "#d2d2d2"; }
+                animateValue('repHourlyRate', 0, hourlyRate, 1000, 'hourly');
             }
             
-            if (profitVal > 0) { profitEl.innerText = "+" + profitVal.toLocaleString('en-US'); profitEl.style.color = "#00ff88"; profitEl.style.textShadow = "0 0 20px rgba(0, 255, 136, 0.7)"; }
-            else if (profitVal < 0) { profitEl.innerText = profitVal.toLocaleString('en-US'); profitEl.style.color = "#ff3333"; profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)"; }
-            else { profitEl.innerText = "0"; profitEl.style.color = "#d2d2d2"; }
+            if (profitVal > 0) { profitEl.style.color = "#00ff88"; profitEl.style.textShadow = "0 0 20px rgba(0, 255, 136, 0.7)"; }
+            else if (profitVal < 0) { profitEl.style.color = "#ff3333"; profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)"; }
+            else { profitEl.style.color = "#d2d2d2"; }
+            animateValue('repNetProfit', 0, profitVal, 1000, 'money');
 
             // HỆ THỐNG ĐẲNG CẤP VÀ KÍCH HOẠT HIỆU ỨNG LED BORDER
             let rankTitle = ""; let rankClass = ""; let rankColorRGB = ""; let hexColor = ""; let quote = ""; let hintText = "";
             
+            // GIỮ NGUYÊN BẢN SẮC 4 MÀU RANK THEO TIẾN ĐỘ
             if (itmPct < 20) {
-                rankTitle = "TẬP SỰ"; rankClass = "rank-rookie"; rankColorRGB = "#a0a0a0"; hexColor = "160, 160, 160";
+                rankTitle = "TẬP SỰ"; rankClass = "rank-rookie"; rankColorRGB = "#a0a0a0"; hexColor = "160, 160, 160"; // Xám bạc thép
                 quote = "> BOO: GIAI ĐOẠN TÍCH LŨY. BẢO TOÀN VỐN.";
                 hintText = `🔥 Cố lên! Cần ${20 - itmPct}% nữa để đạt mốc [CHIẾN BINH]`;
             } else if (itmPct < 35) {
-                rankTitle = "CHIẾN BINH"; rankClass = "rank-warrior"; rankColorRGB = "#00e5ff"; hexColor = "0, 229, 255";
+                rankTitle = "CHIẾN BINH"; rankClass = "rank-warrior"; rankColorRGB = "#00e5ff"; hexColor = "0, 229, 255"; // Xanh dương điện
                 quote = "> BOO: NHỊP ĐỘ ỔN ĐỊNH. DUY TRÌ KỶ LUẬT.";
                 hintText = `⚡ Giữ phong độ! Cần ${35 - itmPct}% nữa để lên [THỦ LĨNH]`;
             } else if (itmPct < 50) {
-                rankTitle = "THỦ LĨNH"; rankClass = "rank-leader"; rankColorRGB = "#bf00ff"; hexColor = "191, 0, 255";
+                rankTitle = "THỦ LĨNH"; rankClass = "rank-leader"; rankColorRGB = "#bf00ff"; hexColor = "191, 0, 255"; // Tím huyền ảo
                 quote = "> BOO: ĐẲNG CẤP CAO THỦ. KIỂM SOÁT BÀN ĐẤU.";
                 hintText = `👑 Sắp chạm đỉnh! Chỉ ${50 - itmPct}% nữa để hóa [HUYỀN THOẠI]`;
             } else {
@@ -535,6 +579,7 @@ function fetchBattleReport() {
                 }, 100);
             }
             
+            // Tô màu theo đẳng cấp (Lưu ý: Không tô màu chữ ITM vì đã khóa CSS màu hồng)
             if(itmPctEl) itmPctEl.style.color = rankColorRGB;
             if(rankHint) { rankHint.innerText = hintText; rankHint.style.color = rankColorRGB; }
 
