@@ -1,612 +1,292 @@
-// ==========================================
-// TRẠM CHỈ HUY: PHÂN LUỒNG 2 BỘ NÃO API
-// ==========================================
-// 1. Link xử lý Đăng Nhập / Tài khoản
-const API_URL = "https://script.google.com/macros/s/AKfycby9__D-oax96p1GG7J3qBAPTWbHjKltEK8Csn3mDIx0L8vHLL3zyMNNundP30-97Xvs/exec";
-// 2. Link xử lý Sổ Sinh Tử / Báo cáo
-const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbwJA0TN4nDkax-6QoBIOo1JCWcAX1WtMhR6NTsHodS-P78-u5mUTMKiUXT8wyDDGkbz/exec";
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="google" content="notranslate">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <title>K-Drive V28 Core</title>
 
-// ĐỌC ĐỊNH DANH TỪ LOCAL STORAGE ĐỂ GIỮ TÊN BẤT TỬ
-let currentUsername = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_username') || 'guest';
+    <link rel="manifest" href="https://happyk1900.github.io/kdrive-v28/manifest.json?v=3">
+    <link rel="icon" type="image/png" href="https://happyk1900.github.io/kdrive-v28/K-Icon.png?v=3">
+    <link rel="apple-touch-icon" href="https://happyk1900.github.io/kdrive-v28/K-Icon.png?v=3">
 
-function lockInteraction() { document.body.classList.add('popups-active'); }
-function unlockInteraction() { document.body.classList.remove('popups-active'); }
-
-window.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active') {
-        document.getElementById('loginPanelContainer').style.display = 'none';
-        isLoggedIn = true; triggerHexagonShield();
-        let hud = document.getElementById('protocolGuide'); if(hud) hud.remove();
-        document.getElementById('logoutHud').classList.add('logout-active');
-        document.getElementById('cyberAltarBtn').classList.add('logged-in');
-        let hIcon = document.getElementById('heartIcon'); hIcon.className = 'heart-icon active'; hIcon.innerHTML = "❤️";
-        setInterval(() => { document.getElementById('bpmText').innerText = (95 + Math.floor(Math.random() * 15)) + " BPM"; }, 2000);
-        pulseTerminal("BOO: SESSION RESTORED.");
-        initRelic();
-        spawnNeonRain(); 
-    }
-});
-
-function isValidUsername(str) { return /^[a-zA-Z0-9]{6,15}$/.test(str); }
-function isValidPassword(str) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(str); }
-function validateLive(type) { }
-
-const EYE_OPEN = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
-const EYE_CLOSED = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
-function togglePass(inputId, iconEl) { let inp = document.getElementById(inputId); if(inp.type === 'password') { inp.type = 'text'; iconEl.innerHTML = EYE_CLOSED; } else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } }
-
-let overloadOsc = null; let overloadGain = null;
-let initPinchDist = 0; let isPinching = false;
-const base64Wallpapers = ["https://i.postimg.cc/J4xHjMr7/1.webp", "https://i.postimg.cc/fRbtKpyD/2.webp", "https://i.postimg.cc/13znH2XR/3.webp", "https://i.postimg.cc/8zCJH9cz/4.webp", "https://i.postimg.cc/K8YkNwjG/5.jpg", "https://i.postimg.cc/SxK2r3R8/6.webp", "https://i.postimg.cc/x1dJRh8R/7.webp"];
-const musicTracks = ["https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20(1).mp3", "https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20(2).mp3"];
-const neonColors = ['#00ff88', '#00e5ff', '#bf00ff', '#ffd700', '#ff3366'];
-
-let currentWallpaperIndex = 0; let isLoggedIn = false;
-let loginDrumAudio = new Audio("https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/0604.mp4");
-let cameraShutterAudio = new Audio("https://www.myinstants.com/media/sounds/camera-shutter-click-01.mp3");
-let bgAudio = new Audio(); bgAudio.loop = false; let currentTrackState = 0; let isMusicPlaying = false; let isMuted = false;
-
-bgAudio.onended = function() { if(!isMuted) { currentTrackState = (currentTrackState % musicTracks.length) + 1; bgAudio.src = musicTracks[currentTrackState - 1]; bgAudio.play().catch(e=>{}); updateAudioUI(currentTrackState); } };
-function updateAudioUI(tNum) { let color = neonColors[(tNum-1)%neonColors.length]; document.getElementById('audioHud').className = 'audio-hud audio-active'; document.getElementById('audioHud').style.setProperty('--neon-color', color); document.getElementById('trackText').innerHTML = `[ ▶️ TRK: ${(tNum<10?'0':'')+tNum} ]`; document.getElementById('trackText').style.color = color; document.getElementById('coreSystem').style.setProperty('--core-color', color); }
-function cycleMusicTracks() { playCyberSound(); currentTrackState = (currentTrackState % musicTracks.length) + 1; bgAudio.src = musicTracks[currentTrackState - 1]; isMusicPlaying = true; isMuted = false; bgAudio.play().catch(e=>{}); updateAudioUI(currentTrackState); }
-function toggleMuteSystem() { playCyberSound(); if(!isMuted) { isMuted = true; bgAudio.pause(); document.getElementById('audioHud').className = 'audio-hud'; document.getElementById('trackText').innerHTML = "[ 🔇 SYS: OFF ]"; document.getElementById('trackText').style.color = "#ff3333"; } else { isMuted = false; bgAudio.play().catch(e=>{}); updateAudioUI(currentTrackState); } }
-
-const AudioContext = window.AudioContext || window.webkitAudioContext; let actx;
-function initAudio() { if(!actx) actx = new AudioContext(); if(actx.state==='suspended') actx.resume(); } 
-document.body.addEventListener('touchstart', initAudio, {once:true});
-
-function playCyberSound() { try { initAudio(); const osc = actx.createOscillator(); const gain = actx.createGain(); osc.connect(gain); gain.connect(actx.destination); osc.type = 'triangle'; const now = actx.currentTime; osc.frequency.setValueAtTime(1500, now); osc.frequency.exponentialRampToValueAtTime(400, now + 0.12); gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15); osc.start(now); osc.stop(now + 0.15); } catch(e){} }
-
-function playCyberClick() { 
-    if(!actx) initAudio(); 
-    try {
-        const osc = actx.createOscillator(); 
-        const gain = actx.createGain(); 
-        osc.connect(gain); gain.connect(actx.destination); 
-        osc.type = 'square'; 
-        const now = actx.currentTime; 
-        osc.frequency.setValueAtTime(800, now); 
-        osc.frequency.exponentialRampToValueAtTime(100, now + 0.05); 
-        gain.gain.setValueAtTime(0.3, now); 
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05); 
-        osc.start(now); osc.stop(now + 0.05); 
-    } catch(e){} 
-}
-
-function playOverloadRoar() { if(!actx) initAudio(); if(overloadOsc) return; overloadOsc = actx.createOscillator(); overloadGain = actx.createGain(); overloadOsc.type = 'sawtooth'; overloadOsc.frequency.setValueAtTime(50, actx.currentTime); overloadOsc.frequency.linearRampToValueAtTime(130, actx.currentTime + 1.5); overloadGain.gain.setValueAtTime(0, actx.currentTime); overloadGain.gain.linearRampToValueAtTime(0.4, actx.currentTime + 0.3); overloadOsc.connect(overloadGain); overloadGain.connect(actx.destination); overloadOsc.start(); }
-function stopOverloadRoar() { if(overloadGain) { overloadGain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.2); setTimeout(() => { if(overloadOsc) { overloadOsc.stop(); overloadOsc = null; } overloadGain = null; }, 250); } }
-function startBuzz() { } function stopBuzz() { } function playZapPop() { }
-
-function spawnNeonRain() {
-    if (!isLoggedIn) return;
-    const container = document.getElementById('effectsContainer');
-    if (!container) return;
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="kdrive-style.css">
     
-    const suits = ['♠', '♥', '♣', '♦'];
-    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-    const redValues = ['A', 'K', 'Q', 'J']; 
-    const chipColors = ['#ffd700', '#ff66b2', '#b026ff']; 
-    
-    setInterval(() => {
-        let el = document.createElement('div');
-        let randObj = Math.random(); 
-
-        if (randObj > 0.5) { 
-            let suit = suits[Math.floor(Math.random() * suits.length)];
-            let val = values[Math.floor(Math.random() * values.length)];
-            el.className = 'neon-card-real';
-            if (redValues.includes(val)) {
-                el.style.color = '#ff3366'; el.style.borderColor = 'rgba(255, 51, 102, 0.6)';
-            } else {
-                el.style.color = '#00ff88'; el.style.borderColor = 'rgba(0, 255, 136, 0.6)';
-            }
-            el.innerHTML = `<span class="val">${val}</span><span class="suit">${suit}</span>`;
-            
-        } else if (randObj > 0.25) { 
-            el.className = 'neon-dollar-real';
-            el.innerHTML = '<span>100</span>';
-            el.style.color = '#00ff00';
-            el.style.borderColor = 'rgba(0, 255, 0, 0.5)';
-            
-        } else { 
-            el.className = 'neon-coin-real';
-            el.innerHTML = '<span>C</span>';
-            el.style.color = chipColors[Math.floor(Math.random() * chipColors.length)];
+    <style>
+        /* HIỆU ỨNG VIỀN NHỊP THỞ (BREATHE GLOW) - THAY THẾ XOAY VÒNG */
+        @keyframes breatheGlow {
+            0% { opacity: 0.5; box-shadow: 0 0 15px currentColor; filter: brightness(0.9); }
+            50% { opacity: 1; box-shadow: 0 0 30px currentColor, inset 0 0 10px currentColor; filter: brightness(1.2); }
+            100% { opacity: 0.5; box-shadow: 0 0 15px currentColor; filter: brightness(0.9); }
         }
 
-        el.style.left = Math.random() * 90 + 5 + 'vw';
-        el.style.top = Math.random() * 60 + 5 + 'vh'; 
-        
-        let scale = Math.random() * 0.7 + 0.6; 
-        el.style.setProperty('--drop-scale', scale);
-        
-        let duration = Math.random() * 3 + 4; 
-        el.style.setProperty('--max-opacity', (Math.random() * 0.4 + 0.5).toString());
-        el.style.animation = `quantumMaterialize ${duration}s ease-in-out forwards`;
-        
-        container.appendChild(el);
-        setTimeout(() => { if(el.parentNode) el.remove(); }, duration * 1000);
-    }, 2500); 
-}
+        /* LƯỚI TỔ ONG: Đẩy z-index lên 1 để không bị chìm, tăng opacity lên 0.15 */
+        .report-hex-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.15; }
 
-const hexCanvas = document.getElementById('hexCanvas'); const hexCtx = hexCanvas.getContext('2d'); let hexGrid = []; let canvasW = 0, canvasH = 0;
-function initHexGrid() { hexCanvas.width = window.innerWidth; hexCanvas.height = window.innerHeight; canvasW = hexCanvas.width; canvasH = hexCanvas.height; hexGrid = []; let r = 24; let h3 = Math.sqrt(3) * r; let cols = Math.ceil(canvasW / h3) + 1; let rows = Math.ceil(canvasH / (r*1.5)) + 1; for(let row=0; row<rows; row++) { for(let col=0; col<cols; col++) { hexGrid.push({x: col * h3 + (row%2===1 ? h3/2 : 0), y: row * r*1.5, energy: 0}); } } }
-window.addEventListener('resize', initHexGrid); initHexGrid();
+        /* ĐỔ MÀU HỒNG NEON CHO CHỮ ITM */
+        .itm-label { color: #ff33cc !important; font-weight: bold; text-shadow: 0 0 10px rgba(255, 51, 204, 0.5); }
 
-function renderCanvas() { 
-    hexCtx.clearRect(0, 0, canvasW, canvasH); hexCtx.lineWidth = 1.2; 
-    let isStruggling = document.getElementById('cubeWrapper').classList.contains('overload-active'); 
-
-    for(let hex of hexGrid) { 
-        if(isLoggedIn && isStruggling && Math.hypot(hex.x - canvasW/2, hex.y - canvasH*0.516) < 120) hex.energy = Math.random() * 0.9; 
-        hex.energy *= 0.88; 
-        let alpha = (isLoggedIn ? 0.12 : 0.03) + hex.energy; 
-        if(alpha>1) alpha=1; 
-        
-        let color = '0,255,136'; 
-        if (isStruggling && hex.energy>0.1) color = '255,51,51'; 
-
-        hexCtx.strokeStyle = `rgba(${color},${alpha})`; 
-        hexCtx.fillStyle = alpha > 0.22 ? `rgba(${color},${(alpha-0.15)*0.3})` : 'transparent'; 
-        
-        hexCtx.beginPath(); 
-        for (let i=0; i<6; i++) { let a = Math.PI/180*(60*i-30); hexCtx.lineTo(hex.x + 20*Math.cos(a), hex.y + 20*Math.sin(a)); } 
-        hexCtx.closePath(); hexCtx.stroke(); 
-        if(hexCtx.fillStyle!=='transparent') hexCtx.fill(); 
-    } 
-    requestAnimationFrame(renderCanvas); 
-}
-renderCanvas();
-
-const cubeWrapperNode = document.getElementById('cubeWrapper');
-cubeWrapperNode.addEventListener('touchstart', (e) => {
-    if (!isLoggedIn) return;
-    if (e.touches.length === 2) {
-        isPinching = true;
-        initPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    }
-}, {passive: false});
-
-cubeWrapperNode.addEventListener('touchmove', (e) => {
-    if (!isPinching || e.touches.length !== 2) return;
-    e.preventDefault(); 
-    let currDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    let scale = currDist / initPinchDist;
-    if(scale < 1) scale = 1; if(scale > 2.5) scale = 2.5; 
-    
-    cubeWrapperNode.style.setProperty('--pinch-scale', scale);
-    
-    if(scale > 1.4 && !cubeWrapperNode.classList.contains('overload-active')) {
-        cubeWrapperNode.classList.add('overload-active');
-        playOverloadRoar();
-        if(navigator.vibrate) navigator.vibrate([50, 50, 50, 50]); 
-    } else if (scale > 1.4 && cubeWrapperNode.classList.contains('overload-active')) {
-        if(navigator.vibrate && Math.random() > 0.8) navigator.vibrate(20); 
-    }
-}, {passive: false});
-
-cubeWrapperNode.addEventListener('touchend', (e) => {
-    if (isPinching && e.touches.length < 2) {
-        isPinching = false;
-        cubeWrapperNode.style.setProperty('--pinch-scale', 1);
-        cubeWrapperNode.classList.remove('overload-active');
-        stopOverloadRoar();
-        if(navigator.vibrate) navigator.vibrate(0);
-    }
-});
-
-function triggerHexagonShield() { if(!isLoggedIn) return; for(let hex of hexGrid) { if(Math.hypot(hex.x - window.innerWidth/2, hex.y - window.innerHeight*0.516) < 70) hex.energy = 0.6; } }
-
-let relicEl = document.getElementById('lightningRelic'); let rx = window.innerWidth / 2, ry = window.innerHeight / 2; let targetRx = rx, targetRy = ry; let relicActive = false; let trailTimer = 0; let isRelicCharged = false; 
-function checkDailyEnergy() { return false; }
-function initRelic() { relicActive = true; relicEl.style.display = 'block'; isRelicCharged = checkDailyEnergy(); if (!isRelicCharged) { relicEl.classList.add('relic-active'); relicEl.classList.remove('relic-passive'); startBuzz(); } else { relicEl.classList.add('relic-passive'); relicEl.classList.remove('relic-active'); } moveRelic(); }
-function moveRelic() { 
-    if(!relicActive || !isLoggedIn) return; 
-    let dx = targetRx - rx; let dy = targetRy - ry; let dist = Math.hypot(dx, dy); 
-    if(dist < 50) { 
-        targetRx = 40 + Math.random() * (window.innerWidth - 80); 
-        targetRy = 40 + Math.random() * (window.innerHeight - 80); 
-    } 
-    let speed = 0.003; 
-    rx += dx * speed; ry += dy * speed; 
-    relicEl.style.left = rx + 'px'; relicEl.style.top = ry + 'px'; 
-    trailTimer++; let trailFreq = isRelicCharged ? 8 : 4; 
-    if(trailTimer % trailFreq === 0) { 
-        let trail = document.createElement('div'); trail.className = 'relic-trail'; 
-        trail.style.left = rx + 'px'; trail.style.top = ry + 'px'; 
-        if (isRelicCharged) { trail.style.boxShadow = '0 0 10px #00ff88, 0 0 20px #00a356'; trail.style.background = '#00ff88'; } 
-        else { trail.style.boxShadow = '0 0 10px #00e5ff, 0 0 25px #00e5ff'; trail.style.background = '#ffffff'; } 
-        document.body.appendChild(trail); 
-        setTimeout(() => { if(trail.parentNode) trail.remove(); }, 800); 
-    } 
-    requestAnimationFrame(moveRelic); 
-}
-function captureRelic() { if(!relicActive) return; if(isMusicPlaying && !isMuted) bgAudio.pause(); if (!isRelicCharged) { let today = new Date().toLocaleDateString(); localStorage.setItem('lastCapturedDate_' + currentUsername, today); isRelicCharged = true; stopBuzz(); playZapPop(); if(navigator.vibrate) navigator.vibrate([100, 50, 200, 50, 100]); let flash = document.getElementById('whiteFlash'); flash.style.display = 'block'; flash.style.opacity = '1'; relicEl.style.transform = `translate(-50%, -50%) scale(5)`; relicEl.style.opacity = '0'; setTimeout(() => { window.location.href = "nhap_the.html"; }, 350); } else { if(navigator.vibrate) navigator.vibrate(50); relicEl.style.transform = `translate(-50%, -50%) scale(1.5)`; relicEl.style.opacity = '0'; setTimeout(() => { window.location.href = "trai_huan_luyen.html"; }, 200); } }
-
-function callAPI(action, params, callbackName, onSuccess, onError) { 
-    let finalUrl = API_URL + "?action=" + action; 
-    for (let key in params) { finalUrl += "&" + key + "=" + encodeURIComponent(params[key]); } 
-    finalUrl += "&callback=" + callbackName; 
-    window[callbackName] = function(res) { 
-        delete window[callbackName]; let scriptEl = document.getElementById(callbackName); 
-        if(scriptEl) document.body.removeChild(scriptEl); 
-        if (res && res.success) onSuccess(res); else onError(res ? res.msg : "LỖI MÁY CHỦ!"); 
-    }; 
-    let script = document.createElement('script'); 
-    script.id = callbackName; script.src = finalUrl; 
-    script.onerror = function() { onError("LỖI MẠNG!"); }; 
-    document.body.appendChild(script); 
-}
-
-function submitLogin() { 
-    try { playCyberSound(); } catch(e) {} 
-    var acc = document.getElementById('accInput').value.trim(); 
-    var code = document.getElementById('passcodeInput').value.trim(); 
-    var statusEl = document.getElementById('loginStatus'); 
-    if(acc === "" || code === "") { 
-        statusEl.innerHTML = "[LỖI]: ĐIỀN ĐỦ THÔNG TIN!"; 
-        statusEl.style.color = "#ff3333"; 
-        return; 
-    } 
-    
-    statusEl.innerHTML = "🛰️ BOO ĐANG KIỂM TRA..."; 
-    statusEl.style.color = "#00e5ff"; 
-    
-    callAPI('checkLogin', {username: acc, password: code}, 'cb_login', function(res) { 
-        sessionStorage.setItem('kdrive_session', 'active'); 
-        sessionStorage.setItem('kdrive_username', acc); 
-        localStorage.setItem('kdrive_logged_in_user', acc);
-        currentUsername = acc; 
-        
-        document.getElementById('loginPanelContainer').style.display = 'none'; 
-        unlockInteraction(); 
-        loginDrumAudio.currentTime = 0; loginDrumAudio.play().catch(e=>{}); 
-        if(navigator.vibrate) navigator.vibrate([200, 100, 200]); 
-        isLoggedIn = true; triggerHexagonShield(); 
-        let hud = document.getElementById('protocolGuide'); if(hud) hud.remove(); 
-        document.getElementById('logoutHud').classList.add('logout-active'); 
-        document.getElementById('cyberAltarBtn').classList.add('logged-in'); 
-        let hIcon = document.getElementById('heartIcon'); hIcon.className = 'heart-icon active'; hIcon.innerHTML = "❤️"; 
-        setInterval(() => { document.getElementById('bpmText').innerText = (95 + Math.floor(Math.random() * 15)) + " BPM"; }, 2000); 
-        document.getElementById('mainWrapper').classList.add('shake-active'); 
-        setTimeout(() => document.getElementById('mainWrapper').classList.remove('shake-active'), 600); 
-        pulseTerminal("BOO: AUTHORIZED."); 
-        
-        const banner = document.getElementById('welcomeHologram'); 
-        const tag = document.getElementById('welcomeTag'); 
-        banner.style.border = `2px solid #00ff88`; 
-        banner.style.boxShadow = `0 0 25px #00ff88, inset 0 0 15px rgba(0,0,0,0.5)`; 
-        tag.style.color = "#00ff88"; tag.innerHTML = `[ 🥷 ${res.nickname || acc} ]`; 
-        document.getElementById('welcomeBody').innerHTML = "Hệ thống BOO đã sẵn sàng nhận lệnh!"; 
-        banner.classList.add('banner-strike'); 
-        setTimeout(() => { banner.classList.remove('banner-strike'); initRelic(); spawnNeonRain(); }, 3500); 
-    }, function(msg) { 
-        statusEl.style.color = "#ff3333"; 
-        statusEl.innerHTML = msg; 
-    }); 
-}
-
-function showLogoutConfirm() { try { playCyberSound(); } catch(e){} document.getElementById('logoutConfirmPanel').style.display = 'flex'; lockInteraction(); }
-
-function confirmLogout(isYes) { 
-    try { playCyberSound(); } catch(e){} 
-    if(isYes) { 
-        document.getElementById('logoutConfirmPanel').style.display = 'none'; 
-        pulseTerminal("BOO: LOGGING OUT..."); 
-        sessionStorage.removeItem('kdrive_session'); 
-        sessionStorage.removeItem('kdrive_username'); 
-        localStorage.removeItem('kdrive_logged_in_user');
-        setTimeout(() => { window.location.reload(); }, 500); 
-    } else { 
-        document.getElementById('logoutConfirmPanel').style.display = 'none'; 
-        unlockInteraction(); 
-    } 
-}
-
-function submitChangePass() { }
-function switchPanel(panelName) { try { playCyberSound(); } catch(e){} document.getElementById('panel-login').style.display = 'none'; document.getElementById('panel-register').style.display = 'none'; document.getElementById('panel-otp').style.display = 'none'; document.getElementById('panel-forgot').style.display = 'none'; document.getElementById('panel-' + panelName).style.display = 'flex'; }
-
-function pulseTerminal(text) { const terminal = document.getElementById('terminalStream'); const newLine = document.createElement('div'); newLine.className = 'terminal-line'; newLine.innerText = `> ${text}`; terminal.appendChild(newLine); if(terminal.children.length > 3) terminal.removeChild(terminal.firstChild); }
-setInterval(() => { pulseTerminal(isLoggedIn ? "BOO: SHIELD ACTIVE" : "AWAITING KAI RIPE..."); }, 4000);
-function checkLoginGuard() { if (!isLoggedIn) { try { playCyberSound(); } catch(e){} const warningEl = document.getElementById('hudGuardWarning'); if(warningEl) { warningEl.className = "hud-warning-text hud-warning-active"; warningEl.innerHTML = "[ ⚠️ BOO TỪ CHỐI LỆNH! ]"; setTimeout(() => { warningEl.className = "hud-warning-text"; warningEl.innerHTML = ""; }, 2500); } return false; } return true; }
-
-let capturedVideoUrl = null; let hasUnreadVideo = false;
-
-function openSecretCameraGuard(element) { 
-    if (!checkLoginGuard()) return; 
-    if(navigator.vibrate) navigator.vibrate(50); 
-    playCyberClick();
-    try { cameraShutterAudio.play().catch(e=>{}); } catch(e){}
-    
-    let cube = document.getElementById('cubeWrapper');
-    cube.classList.remove('video-play-mode');
-    document.querySelector('.projector-beam').classList.remove('beam-on');
-    cube.classList.add('camera-rec-mode'); 
-    setTimeout(() => { document.getElementById('hiddenCamera').click(); }, 600);
-}
-
-window.addEventListener('focus', () => { document.getElementById('cubeWrapper').classList.remove('camera-rec-mode'); });
-
-function handleVideoUpload(event) { const file = event.target.files[0]; if (file) { capturedVideoUrl = URL.createObjectURL(file); document.getElementById('capturedVideoPlayer').src = capturedVideoUrl; hasUnreadVideo = true; triggerBubble(); } document.getElementById('cubeWrapper').classList.remove('camera-rec-mode'); }
-function triggerBubble() { if (!hasUnreadVideo) return; const bubble = document.getElementById('samuraiBubble'); bubble.classList.add('bubble-show'); document.getElementById('bubbleText').innerHTML = "⚠️ MẬT THƯ ĐẾN"; }
-
-function processSamuraiAction(element) { 
-    if (!hasUnreadVideo || !capturedVideoUrl) { 
-        triggerHexagonShield(); 
-        if(navigator.vibrate) navigator.vibrate(50);
-        return; 
-    } 
-    if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
-    try { playCyberSound(); } catch(e){}
-    
-    let cube = document.getElementById('cubeWrapper');
-    cube.classList.remove('camera-rec-mode');
-    cube.classList.add('video-play-mode');
-    document.querySelector('.projector-beam').classList.add('beam-on'); 
-    setTimeout(() => {
-        document.getElementById('videoPopup').classList.add('popup-open'); 
-        document.getElementById('capturedVideoPlayer').play(); 
-    }, 600); 
-}
-
-function closeVideoModule() { 
-    document.getElementById('videoPopup').classList.remove('popup-open'); 
-    document.getElementById('capturedVideoPlayer').pause(); 
-    document.getElementById('cubeWrapper').classList.remove('video-play-mode'); 
-    document.querySelector('.projector-beam').classList.remove('beam-on'); 
-}
-
-function triggerStaticNode(element) { 
-    if (!checkLoginGuard()) return; 
-    if(navigator.vibrate) navigator.vibrate([30]); 
-    playCyberClick();
-    
-    let cube = document.getElementById('cubeWrapper');
-    cube.classList.add('phantom-split'); 
-    setTimeout(() => { cube.classList.remove('phantom-split'); }, 600); 
-}
-
-function rotateWallpapersGuard(element) { currentWallpaperIndex = (currentWallpaperIndex + 1) % base64Wallpapers.length; document.getElementById('kdriveBg').src = base64Wallpapers[currentWallpaperIndex]; }
-function showLoginPanel() { document.getElementById('loginPanelContainer').style.display = 'flex'; lockInteraction(); }
-function closeLoginPanel() { document.getElementById('loginPanelContainer').style.display = 'none'; unlockInteraction(); }
-function showNinjaInfo() { document.getElementById('ninjaPopup').style.display = 'flex'; lockInteraction(); }
-function closeNinjaInfo() { document.getElementById('ninjaPopup').style.display = 'none'; unlockInteraction(); }
-function openChangePassPanel() { document.getElementById('changePassPanel').style.display = 'flex'; }
-function closeChangePassPanel() { document.getElementById('changePassPanel').style.display = 'none'; }
-
-// ===================================================
-// HỆ THỐNG TRUY XUẤT SỔ SINH TỬ RÚT GỌN (BÁO CÁO KÉP - LED CHẠY)
-// ===================================================
-function closeReportPopup() {
-    document.getElementById('reportPopup').style.display = 'none'; 
-    unlockInteraction();
-}
-
-let repHexInterval = null;
-function drawReportHexBg(colorRGB) {
-    const canvas = document.getElementById('reportHexCanvas');
-    if(!canvas) return;
-    const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth || 380;
-    canvas.height = canvas.offsetHeight || 400;
-    
-    let r = 20; let h3 = Math.sqrt(3) * r; 
-    let cols = Math.ceil(canvas.width / h3) + 1; 
-    let rows = Math.ceil(canvas.height / (r*1.5)) + 1;
-    
-    let offset = 0;
-    if(repHexInterval) clearInterval(repHexInterval);
-    repHexInterval = setInterval(() => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 1;
-        offset += 0.05;
-        for(let row=0; row<rows; row++) { 
-            for(let col=0; col<cols; col++) { 
-                let x = col * h3 + (row%2===1 ? h3/2 : 0);
-                let y = row * r*1.5;
-                let alpha = 0.05 + Math.sin(x*0.05 + y*0.05 + offset) * 0.15; 
-                ctx.strokeStyle = `rgba(${colorRGB}, ${alpha})`;
-                ctx.beginPath();
-                for (let i=0; i<6; i++) { 
-                    let a = Math.PI/180*(60*i-30); 
-                    ctx.lineTo(x + r*Math.cos(a), y + r*Math.sin(a)); 
-                }
-                ctx.closePath(); ctx.stroke();
-            }
+        /* Khung chứa hiệu ứng Breathe Glow */
+        .led-spinner {
+            position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+            z-index: 1; border-radius: 14px; pointer-events: none;
         }
-    }, 50);
-}
 
-// Hàm hiệu ứng số nhảy từ 0 lên số thực
-function animateValue(objId, start, end, duration, formatStr = '') {
-    let obj = document.getElementById(objId);
-    if (!obj) return;
-    let startTimestamp = null;
-    const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        let currentVal = Math.floor(progress * (end - start) + start);
+        /* Đổ màu Viền Thở theo từng Đẳng Cấp */
+        .rank-legendary .led-spinner { color: #ffd700; border: 2px solid #ffd700; animation: breatheGlow 3s ease-in-out infinite; }
+        .rank-legendary .popup-inner-content { box-shadow: inset 0 0 35px rgba(255, 215, 0, 0.15); }
+        .rank-legendary { box-shadow: 0 0 30px rgba(255, 215, 0, 0.3) !important; }
+
+        .rank-leader .led-spinner { color: #bf00ff; border: 2px solid #bf00ff; animation: breatheGlow 3s ease-in-out infinite; }
+        .rank-leader .popup-inner-content { box-shadow: inset 0 0 35px rgba(191, 0, 255, 0.15); }
+        .rank-leader { box-shadow: 0 0 30px rgba(191, 0, 255, 0.3) !important; }
+
+        .rank-warrior .led-spinner { color: #00e5ff; border: 2px solid #00e5ff; animation: breatheGlow 3s ease-in-out infinite; }
+        .rank-warrior .popup-inner-content { box-shadow: inset 0 0 35px rgba(0, 229, 255, 0.15); }
+        .rank-warrior { box-shadow: 0 0 30px rgba(0, 229, 255, 0.6) !important; }
+
+        .rank-rookie .led-spinner { color: #a0a0a0; border: 2px solid #a0a0a0; animation: breatheGlow 3s ease-in-out infinite; }
+        .rank-rookie .popup-inner-content { box-shadow: inset 0 0 20px rgba(160, 160, 160, 0.1); }
+        .rank-rookie { box-shadow: 0 0 20px rgba(160, 160, 160, 0.2) !important; }
+    </style>
+</head>
+<body>
+    <div id="whiteFlash" class="white-flash-overlay"></div>
+
+    <div class="kdrive-image-wrapper" id="mainWrapper">
+        <div class="global-radar"><div class="radar-line"></div></div>
+        <div class="hexagon-forcefield" id="hexShield"><canvas id="hexCanvas"></canvas></div>
+        <div class="particle-container" id="particleLayer"></div>
+        <div class="floating-container" id="effectsContainer"></div>
+
+        <img src="https://i.postimg.cc/J4xHjMr7/1.webp" class="kdrive-bg-target" id="kdriveBg">
         
-        let txt = currentVal;
-        if (formatStr === 'money') {
-            txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US');
-        } else if (formatStr === 'hourly') {
-            txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US') + "/ 1 giờ";
-        } else if (formatStr === 'percent') {
-            txt = currentVal + "%";
-        }
+        <div id="lightningRelic" class="lightning-relic" onclick="captureRelic()"></div>
         
-        obj.innerText = txt;
+        <div class="terminal-stream" id="terminalStream"><div class="terminal-line">> BOO AI: STANDBY...</div></div>
+        <div id="bioSyncDisplay" class="bio-sync-hud">[ <span id="heartIcon" class="heart-icon">🤍</span> SYNC: <span id="bpmText">OFFLINE</span> ]</div>
+        
+        <div class="audio-hud" id="audioHud">
+            <div class="shuriken-btn" onclick="cycleMusicTracks()">
+                <svg class="shuriken-svg" viewBox="0 0 100 100" width="24" height="24" style="stroke: #ff3333;">
+                    <path d="M50 5 L58 42 L95 50 L58 58 L50 95 L42 58 L5 50 L42 42 Z" fill="none" stroke-width="5" />
+                    <circle cx="50" cy="50" r="10" fill="none" stroke-width="3" />
+                </svg>
+            </div>
+            <div class="track-display" id="trackText" onclick="toggleMuteSystem()">[ 🔇 SYS: OFF ]</div>
+        </div>
 
-        if (progress < 1) {
-            window.requestAnimationFrame(step);
-        } else {
-            // Chốt số chuẩn xác ở khung hình cuối
-            let finalTxt = end;
-            if (formatStr === 'money') {
-                finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US');
-            } else if (formatStr === 'hourly') {
-                finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US') + "/ 1 giờ";
-            } else if (formatStr === 'percent') {
-                finalTxt = end + "%";
-            }
-            obj.innerText = finalTxt;
+        <div class="logout-hud" id="logoutHud" onclick="showLogoutConfirm()">
+            <div class="shuriken-btn" style="border-color: #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="#00e5ff" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </div>
+        </div>
+
+        <div class="fab-center pulse" id="cyberAltarBtn" onclick="window.location.href='dien_tho.html'">
+            <img src="https://github.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/blob/main/ban%20tho%20ong%20dia.png?raw=true" class="avatar-chibi" alt="Thần Tài">
+        </div>
+
+        <input type="file" accept="video/*" capture="camcorder" id="hiddenCamera" style="display: none;" onchange="handleVideoUpload(event)">
+        <div id="samuraiBubble" class="speech-bubble"><span id="bubbleText"></span></div>
+
+        <div class="core-system-container" id="coreSystem">
+            <div class="projector-beam"></div>
+            <div class="scanning-ring"></div>
+            <div class="cube-wrapper" id="cubeWrapper">
+                    <div class="cube-scene">
+                        <div class="cube" id="wireframeCube">
+                            <div class="cube-face front"></div><div class="cube-face back"></div>
+                            <div class="cube-face right"></div><div class="cube-face left"></div>
+                            <div class="cube-face top"></div><div class="cube-face bottom"></div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+
+        <button class="touch-zone" id="node-samurai" onclick="processSamuraiAction(this)"></button>
+        <button class="touch-zone border-red" id="node-hearts" onclick="openSecretCameraGuard(this)"></button>
+        <button class="touch-zone" id="node-mini-clu" onclick="rotateWallpapersGuard(this)"></button>
+        
+        <button class="touch-zone" id="node-chip" onclick="fetchBattleReport()"></button>
+        
+        <button class="touch-zone" id="node-new-9" onclick="triggerStaticNode(this)"></button>
+        <button class="touch-zone" id="node-spades" onclick="triggerStaticNode(this)"></button>
+        <button class="touch-zone" id="node-clubs" onclick="triggerStaticNode(this)"></button>
+        <button class="touch-zone border-red" id="node-diamonds" onclick="triggerStaticNode(this)"></button>
+        <button class="touch-zone border-red" id="node-mini-dia" onclick="triggerStaticNode(this)"></button>
+
+        <div id="protocolGuide" class="central-hud-container">
+            <div class="glass-layer"></div>
+            <div class="hud-action-btn top-left" onclick="showLoginPanel()">[ ĐĂNG NHẬP ]</div>
+            <div class="hud-action-btn bottom-right" onclick="showNinjaInfo()">[ INFO ]</div>
+            <div class="hud-text main">K-INFO</div>
+            <div id="hudGuardWarning" class="hud-warning-text"></div>
+        </div>
+
+        <div id="welcomeHologram" class="welcome-hologram-banner">
+            <span id="welcomeTag" class="welcome-title-tag"></span>
+            <div id="welcomeBody" class="welcome-msg-body"></div>
+        </div>
+    </div>
+
+    <!-- KHUNG ĐĂNG NHẬP / ĐĂNG KÝ ... -->
+    <div class="gateway-popup" id="logoutConfirmPanel" style="border-color: #ff3333; box-shadow: 0 0 50px rgba(255, 51, 51, 0.4), inset 0 0 20px rgba(255, 51, 51, 0.1);">
+        <h2 style="color: #ff3333; text-shadow: 0 0 15px rgba(255, 51, 51, 0.6);">CẢNH BÁO</h2>
+        <div style="text-align: center; font-size: 14px; color: #fff; margin-bottom: 20px; font-weight: bold;">BẠN CÓ ĐỒNG Ý THOÁT CHƯƠNG TRÌNH?</div>
+        <div style="display: flex; gap: 15px; width: 100%;">
+            <button class="login-btn-submit" style="background: linear-gradient(90deg, #cc0000, #ff3333); color: #fff; box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);" onclick="confirmLogout(true)">CÓ</button>
+            <button class="login-btn-submit" style="background: transparent; border: 1px solid #00ff88; color: #00ff88; box-shadow: none;" onclick="confirmLogout(false)">KHÔNG</button>
+        </div>
+    </div>
+
+    <div class="gateway-popup" id="loginPanelContainer">
+        <div class="close-btn" onclick="closeLoginPanel()">X</div>
+        
+        <div id="panel-login" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <h2>TRẠM KIỂM SOÁT</h2>
+            <div class="input-wrapper" style="margin-bottom: 12px;">
+                <input type="text" id="accInput" class="login-input" placeholder="[ TÀI KHOẢN ]">
+            </div>
+            <div class="input-wrapper">
+                <input type="password" id="passcodeInput" class="login-input" placeholder="[ MẬT MÃ ]">
+                <span class="eye-icon" onclick="togglePass('passcodeInput', this)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+            </div>
+            <div class="account-options-row">
+                <label class="remember-container"><input type="checkbox" id="rememberMeCheck" class="remember-checkbox" checked> Ghi nhớ mã</label>
+                <div style="display: flex; gap: 10px;">
+                    <span class="change-pass-link" onclick="openChangePassPanel()">[ Đổi ]</span>
+                    <span class="change-pass-link" onclick="switchPanel('forgot')" style="color: #00e5ff;">[ Quên ]</span>
+                </div>
+            </div>
+            <button class="login-btn-submit" onclick="submitLogin()">XÁC NHẬN</button>
+            <div id="loginStatus" style="margin-top: 15px; font-weight: bold; text-align: center;"></div>
+            
+            <div style="margin-top: 20px; text-align: center; width: 100%; border-top: 1px dashed rgba(0, 255, 136, 0.3); padding-top: 15px;">
+                <span style="color: #d2d2d2; font-size: 11px;">[ CHƯA CÓ DỮ LIỆU? ]</span><br>
+                <span onclick="switchPanel('register')" style="color: #00ff88; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: underline; text-shadow: 0 0 5px rgba(0,255,136,0.5); display: inline-block; margin-top: 5px;">➔ KÍCH HOẠT TÀI KHOẢN MỚI</span>
+            </div>
+        </div>
+
+        <div id="panel-register" style="width: 100%; display: none; flex-direction: column; align-items: center;">
+            <h2 style="color: #00e5ff; text-shadow: 0 0 15px rgba(0,229,255,0.6);">TẠO HỒ SƠ MỚI</h2>
+            <div class="input-wrapper" style="margin-bottom: 4px;">
+                <input type="text" id="regId" class="login-input" placeholder="[ TÊN ĐỊNH DANH ] *" style="border-color: #00e5ff; color: #00e5ff;" oninput="validateLive('id')" onfocus="document.getElementById('rule-id').style.display='block'; validateLive('id');" onblur="document.getElementById('rule-id').style.display='none';">
+            </div>
+            <div id="rule-id" class="rule-tooltip" style="border-color: #00e5ff; color: #00e5ff;">Tên: 6-15 ký tự, CHỈ chữ cái và số, KHÔNG dấu cách.</div>
+            <div class="input-wrapper" style="margin-bottom: 4px;">
+                <input type="password" id="regPass" class="login-input" placeholder="[ MẬT MÃ MẠNH ] *" style="border-color: #00e5ff; color: #00e5ff;" oninput="validateLive('pass')" onfocus="document.getElementById('rule-pass').style.display='block'; validateLive('pass');" onblur="document.getElementById('rule-pass').style.display='none';">
+                <span class="eye-icon" style="color: #00e5ff;" onclick="togglePass('regPass', this)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+            </div>
+            <div id="rule-pass" class="rule-tooltip" style="border-color: #00e5ff; color: #00e5ff;">Pass: Tối thiểu 8 ký tự, CÓ chữ HOA, chữ thường, số & ký tự đặc biệt (@,#,!,...).</div>
+            <div class="input-wrapper">
+                <input type="password" id="regPassConf" class="login-input" placeholder="[ XÁC NHẬN MẬT MÃ ] *" style="border-color: #00e5ff; color: #00e5ff;" oninput="validateLive('conf')">
+                <span class="eye-icon" style="color: #00e5ff;" onclick="togglePass('regPassConf', this)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+            </div>
+            <div class="input-wrapper" style="margin-bottom: 4px;"><input type="email" id="regEmail" class="login-input" placeholder="[ EMAIL KHÔI PHỤC ] *" style="border-color: #00e5ff; color: #00e5ff;"></div>
+            <div class="input-wrapper" style="margin-bottom: 4px;"><input type="tel" id="regPhone" class="login-input" placeholder="[ SỐ ĐIỆN THOẠI ] *" style="border-color: #00e5ff; color: #00e5ff;"></div>
+            <div class="input-wrapper" style="margin-bottom: 4px;"><input type="text" id="regAlias" class="login-input" placeholder="[ BIỆT DANH CHIẾN ĐẤU ]" style="border-color: #00e5ff; color: #00e5ff;"></div>
+            <div class="input-wrapper"><input type="text" id="regRef" class="login-input" placeholder="[ MẬT MÃ GIỚI THIỆU - Tùy chọn ]" style="border-color: #00e5ff; color: #00e5ff;"></div>
+            
+            <button class="login-btn-submit" style="background: linear-gradient(90deg, #00b3e6, #00e5ff); color: #000; margin-top: 5px; box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);" onclick="processRegistration()">TIẾP TỤC ĐỒNG BỘ</button>
+            <div id="regStatus" style="margin-top: 10px; font-weight: bold; text-align: center; font-size: 11px;"></div>
+            <span onclick="switchPanel('login')" style="color: #ff3333; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline; margin-top: 15px;">[ QUAY LẠI CỔNG ĐĂNG NHẬP ]</span>
+        </div>
+
+        <div id="panel-otp" style="width: 100%; display: none; flex-direction: column; align-items: center;">
+            <h2 style="color: #ffd700; text-shadow: 0 0 15px rgba(255,215,0,0.6);">GIẢI MÃ BẢO MẬT</h2>
+            <div style="text-align: center; font-size: 12px; color: #d2d2d2; margin-bottom: 15px; line-height: 1.5;">BOO đang chờ tín hiệu giải mã.<br>Mật thư sẽ tự hủy sau: <span id="otpTimer" style="color: #ff3333; font-weight: bold; font-size: 16px;">59s</span></div>
+            <input type="number" id="otpInput" class="login-input" placeholder="[ _ _ _ _ _ _ ]" style="border-color: #ffd700; color: #ffd700; font-size: 24px; letter-spacing: 5px; text-align: center; padding: 15px; margin-bottom: 12px; box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.1);">
+            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 15px;">
+                <button class="login-btn-submit" style="background: rgba(0, 104, 255, 0.2); border: 1px solid #0068ff; color: #0068ff; font-size: 12px; padding: 10px; box-shadow: none;" onclick="requestOTP('zalo')">💬 QUA ZALO</button>
+                <button class="login-btn-submit" style="background: rgba(36, 161, 222, 0.2); border: 1px solid #24a1de; color: #24a1de; font-size: 12px; padding: 10px; box-shadow: none;" onclick="requestOTP('tele')">✈️ QUA TELE</button>
+            </div>
+            <div id="emergencyCallZone" style="width: 100%; text-align: center; display: none; flex-direction: column; gap: 8px;">
+                <div style="color: #ff3333; font-size: 11px; font-weight: bold; animation: blinkWarning 0.6s infinite;">[ ⚠️ KẾT NỐI MẠNG LƯỚI THẤT BẠI ]</div>
+                <button class="login-btn-submit" style="background: linear-gradient(90deg, #cc0000, #ff3333); color: #fff; font-size: 13px; box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);" onclick="triggerVoiceOTP()">📞 KÍCH HOẠT LỆNH GỌI</button>
+            </div>
+            <button class="login-btn-submit" style="background: linear-gradient(90deg, #ccaa00, #ffd700); color: #000; margin-top: 15px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);" id="btnFinishReg" onclick="submitOTP()">HOÀN TẤT GHI DANH</button>
+            <div id="otpStatus" style="margin-top: 10px; font-weight: bold; text-align: center; font-size: 12px;"></div>
+        </div>
+
+        <div id="panel-forgot" style="width: 100%; display: none; flex-direction: column; align-items: center;">
+            <h2 style="color: #00e5ff; text-shadow: 0 0 15px rgba(0,229,255,0.6);">KHÔI PHỤC MÃ</h2>
+            <div style="text-align: center; font-size: 12px; color: #d2d2d2; margin-bottom: 15px;">Nhập Email bạn đã dùng để đăng ký. BOO sẽ gửi Mật mã tạm thời đến hòm thư của bạn.</div>
+            <input type="email" id="fgEmail" class="login-input" placeholder="[ NHẬP EMAIL CỦA BẠN ]" style="border-color: #00e5ff; color: #00e5ff; margin-bottom: 12px;">
+            <button class="login-btn-submit" style="background: linear-gradient(90deg, #00b3e6, #00e5ff); color: #000; box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);" onclick="submitForgotPass()">GỬI LỆNH KHÔI PHỤC</button>
+            <div id="fgStatus" style="margin-top: 15px; font-weight: bold; text-align: center; font-size: 12px;"></div>
+            <span onclick="switchPanel('login')" style="color: #ff3333; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline; margin-top: 15px;">[ QUAY LẠI CỔNG ĐĂNG NHẬP ]</span>
+        </div>
+    </div>
+
+    <div class="gateway-popup" id="changePassPanel" style="border-color: #ff9900; box-shadow: 0 0 50px rgba(255, 153, 0, 0.4), inset 0 0 20px rgba(255, 153, 0, 0.1);">
+        <div class="close-btn" style="border-color: #ff9900; color: #ff9900; box-shadow: 0 0 15px rgba(255, 153, 0, 0.5);" onclick="closeChangePassPanel()">X</div>
+        <h2 style="color: #ff9900; text-shadow: 0 0 15px rgba(255, 153, 0, 0.6);">THIẾT LẬP MẬT MÃ</h2>
+        <div class="input-wrapper"><input type="text" id="cpAccInput" class="login-input" placeholder="[ TÀI KHOẢN ]" style="border-color: #ff9900; color: #ff9900;"></div>
+        <div class="input-wrapper">
+            <input type="password" id="cpOldPass" class="login-input" placeholder="[ MẬT MÃ CŨ ]" style="border-color: #ff9900; color: #ff9900;">
+            <span class="eye-icon" style="color: #ff9900;" onclick="togglePass('cpOldPass', this)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+        </div>
+        <div class="input-wrapper">
+            <input type="password" id="cpNewPass" class="login-input" placeholder="[ MẬT MÃ MỚI ]" style="border-color: #ff9900; color: #ff9900;">
+            <span class="eye-icon" style="color: #ff9900;" onclick="togglePass('cpNewPass', this)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+        </div>
+        <div class="input-wrapper">
+            <input type="password" id="cpNewPassConfirm" class="login-input" placeholder="[ XÁC NHẬN MỚI ]" style="border-color: #ff9900; color: #ff9900;">
+            <span class="eye-icon" style="color: #ff9900;" onclick="togglePass('cpNewPassConfirm', this)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+        </div>
+        <button class="login-btn-submit btn-orange" onclick="submitChangePass()">CẬP NHẬT</button>
+        <div id="changePassStatus" style="margin-top: 15px; font-weight: bold; text-align: center;"></div>
+    </div>
+
+    <div class="gateway-popup" id="ninjaPopup" style="width: 92%; max-width: 380px;">
+        <div class="close-btn" onclick="closeNinjaInfo()">X</div>
+        <h2 id="infoPopupTitle">HỒ SƠ HỆ THỐNG</h2>
+        <div class="info-tabs-container">
+            <button class="info-tab-btn tab-active" id="btnTab1" onclick="switchInfoTab(1)">[ HỒ SƠ CHÍNH ]</button>
+            <button class="info-tab-btn" id="btnTab2" onclick="switchInfoTab(2)">[ SYNC SINH HỌC ]</button>
+        </div>
+        <div class="tab-content-panel content-active" id="paneTab1">
+            <div class="info-visual-box" style="height: 190px;"><img src="https://raw.githubusercontent.com/happyk1900/Kai-Ripe/main/t%C3%A1ch%20r%E1%BB%93i.png" alt="Ninja" class="ninja-levitate" style="max-width: 250px;"></div>
+            <div style="text-align: center; width: 100%; padding: 0 15px;">
+                <div style="color: #00e5ff; font-size: 14px; font-weight: bold; margin-bottom: 12px;">K-DRIVE: TRUNG TÂM CHỈ HUY</div>
+                <p style="font-size: 13px; color: #d2d2d2; line-height: 1.6;">Hệ thống kết nối dữ liệu chuyên sâu, giúp các chiến binh tối ưu hóa tư duy và làm chủ quyết định.</p>
+            </div>
+        </div>
+        <div class="tab-content-panel" id="paneTab2">
+            <div class="info-visual-box" style="height: 120px;">
+                <div class="radar-scan-line"></div><img src="https://img.icons8.com/nolan/256/fingerprint.png" alt="Fingerprint" style="width: 85px; filter: drop-shadow(0 0 15px #00e5ff);">
+            </div>
+            <div class="bio-scroll-area">
+                <div class="info-block" style="border-left-color: #ff33cc;"><div style="color: #ff33cc; font-weight: bold; margin-bottom: 6px;">[ NEURAL SYNC ]</div><div style="font-size: 12px; color: #d2d2d2;">K-DRIVE là cầu nối giữa chiến binh và BOO – AI phân tích Poker.</div></div>
+                <div class="info-block"><div style="color: #00e5ff; font-weight: bold; margin-bottom: 6px;">[ TACTICAL ARCHITECT ]</div><div style="font-size: 12px; color: #d2d2d2;">BOO định hình tư duy logic, loại bỏ cảm tính trên bàn đấu.</div></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="video-popup-container" id="videoPopup">
+        <button class="close-popup-btn" onclick="closeVideoModule()">X</button>
+        <div class="video-box"><video id="capturedVideoPlayer" playsinline controls></video></div>
+    </div>
+
+    <!-- Cập nhật version để xóa đệm (cache) tự động -->
+    <script src="core-logic-v2.js?v=99993"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('https://happyk1900.github.io/kdrive-v28/sw.js')
+                    .then((reg) => console.log('K-Drive Service Worker Active!', reg))
+                    .catch((err) => console.log('Lỗi Service Worker: ', err));
+            });
         }
-    };
-    window.requestAnimationFrame(step);
-}
-
-function fetchBattleReport() {
-    if (!checkLoginGuard()) return; 
-    if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
-    playCyberClick(); 
-    pulseTerminal("BOO: ĐANG TRUY XUẤT SỔ SINH TỬ...");
-    
-    let popup = document.getElementById('reportPopup');
-    popup.className = 'gateway-popup'; 
-    popup.style.display = 'flex';
-    
-    let rankTitleEl = document.getElementById('repRankTitle');
-    if(rankTitleEl) { rankTitleEl.innerText = "ĐANG ĐO..."; rankTitleEl.style.color = "#888"; rankTitleEl.style.textShadow = "none"; }
-
-    let closeBtnEl = document.getElementById('repCloseBtn');
-    if(closeBtnEl) { closeBtnEl.style.borderColor = "#888"; closeBtnEl.style.color = "#888"; closeBtnEl.style.boxShadow = "none"; }
-    
-    document.getElementById('repAccountName').innerText = currentUsername.toUpperCase();
-    document.getElementById('repTotalMatches').innerText = "--";
-    
-    let totalDaysEl = document.getElementById('repTotalDays');
-    if(totalDaysEl) totalDaysEl.innerText = "--";
-    
-    let itmPctEl = document.getElementById('repItmProgressText');
-    if(itmPctEl) { itmPctEl.innerText = "0%"; itmPctEl.style.color = "#aaa"; }
-
-    let rankBar = document.getElementById('repRankBar');
-    if(rankBar) { rankBar.style.width = "0%"; rankBar.style.background = "#555"; rankBar.style.boxShadow = "none"; }
-
-    let rankHint = document.getElementById('repNextRankHint');
-    if(rankHint) { rankHint.innerText = "Đang phân tích..."; rankHint.style.color = "#888"; }
-
-    let itm30DaysEl = document.getElementById('repItm30Days');
-    if(itm30DaysEl) { itm30DaysEl.innerText = "--%"; }
-
-    document.getElementById('repTotalDuration').innerHTML = "--";
-    
-    let profitEl = document.getElementById('repNetProfit');
-    profitEl.innerText = "ĐANG TÍNH...";
-    profitEl.style.color = "#888";
-    profitEl.style.textShadow = "none";
-    
-    let hrRateEl = document.getElementById('repHourlyRate');
-    if(hrRateEl) hrRateEl.innerText = "--";
-    
-    let booQuote = document.getElementById('repBooQuote');
-    if(booQuote) { booQuote.innerText = "> BOO: PHÂN TÍCH DỮ LIỆU..."; booQuote.style.color = "#888"; }
-
-    drawReportHexBg('136, 136, 136'); 
-    lockInteraction();
-
-    let payload = { action: "report", account: currentUsername }; 
-    fetch(REPORT_API_URL, { method: "POST", body: JSON.stringify(payload) })
-    .then(res => res.json())
-    .then(res => {
-        if(res.status === "success") {
-            let data = res.data;
-            
-            // Chạy hiệu ứng số nhảy (Thời gian: 1000ms = 1 giây)
-            animateValue('repTotalMatches', 0, data.totalMatches, 1000);
-            animateValue('repTotalDays', 0, data.totalDays || 0, 1000);
-            animateValue('repTotalDuration', 0, data.totalDuration, 1000);
-            
-            // TỔNG ITM LUỸ KẾ
-            let itmPct = data.totalDays > 0 ? Math.round((data.itmDays / data.totalDays) * 100) : 0;
-            animateValue('repItmProgressText', 0, itmPct, 1000, 'percent');
-            animateValue('repDaysItmPct', 0, itmPct, 1000, 'percent'); // Bơm % ITM vào ô Ngày Chiến
-            
-            // KẾT NỐI CHỈ SỐ PHONG ĐỘ 30 NGÀY
-            let itm30Days = data.itm30Days !== undefined ? data.itm30Days : itmPct; 
-            animateValue('repItm30Days', 0, itm30Days, 1000, 'percent');
-
-            // Xử lý Lãi Ròng & Hiệu Suất (Tô màu ngay, chạy số từ từ)
-            let profitVal = data.netProfit;
-            let hours = data.totalDuration / 60;
-            let hourlyRate = 0;
-            if(hours > 0) hourlyRate = Math.round(profitVal / hours);
-
-            if(hrRateEl) {
-                if (hourlyRate > 0) { hrRateEl.style.color = "#00ff88"; }
-                else if (hourlyRate < 0) { hrRateEl.style.color = "#ff3333"; }
-                else { hrRateEl.style.color = "#d2d2d2"; }
-                animateValue('repHourlyRate', 0, hourlyRate, 1000, 'hourly');
-            }
-            
-            if (profitVal > 0) { profitEl.style.color = "#00ff88"; profitEl.style.textShadow = "0 0 20px rgba(0, 255, 136, 0.7)"; }
-            else if (profitVal < 0) { profitEl.style.color = "#ff3333"; profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)"; }
-            else { profitEl.style.color = "#d2d2d2"; }
-            animateValue('repNetProfit', 0, profitVal, 1000, 'money');
-
-            // HỆ THỐNG ĐẲNG CẤP VÀ KÍCH HOẠT HIỆU ỨNG LED BORDER
-            let rankTitle = ""; let rankClass = ""; let rankColorRGB = ""; let hexColor = ""; let quote = ""; let hintText = "";
-            
-            // GIỮ NGUYÊN BẢN SẮC 4 MÀU RANK THEO TIẾN ĐỘ
-            if (itmPct < 20) {
-                rankTitle = "TẬP SỰ"; rankClass = "rank-rookie"; rankColorRGB = "#a0a0a0"; hexColor = "160, 160, 160"; // Xám bạc thép
-                quote = "> BOO: GIAI ĐOẠN TÍCH LŨY. BẢO TOÀN VỐN.";
-                hintText = `🔥 Cố lên! Cần ${20 - itmPct}% nữa để đạt mốc [CHIẾN BINH]`;
-            } else if (itmPct < 35) {
-                rankTitle = "CHIẾN BINH"; rankClass = "rank-warrior"; rankColorRGB = "#00e5ff"; hexColor = "0, 229, 255"; // Xanh dương điện
-                quote = "> BOO: NHỊP ĐỘ ỔN ĐỊNH. DUY TRÌ KỶ LUẬT.";
-                hintText = `⚡ Giữ phong độ! Cần ${35 - itmPct}% nữa để lên [THỦ LĨNH]`;
-            } else if (itmPct < 50) {
-                rankTitle = "THỦ LĨNH"; rankClass = "rank-leader"; rankColorRGB = "#bf00ff"; hexColor = "191, 0, 255"; // Tím huyền ảo
-                quote = "> BOO: ĐẲNG CẤP CAO THỦ. KIỂM SOÁT BÀN ĐẤU.";
-                hintText = `👑 Sắp chạm đỉnh! Chỉ ${50 - itmPct}% nữa để hóa [HUYỀN THOẠI]`;
-            } else {
-                rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#ffd700"; hexColor = "255, 215, 0"; // Vàng Kim Rực Rỡ Lấp Lánh
-                quote = "> BOO: ĐỘC TÔN. ÁP ĐẢO HOÀN TOÀN MỌI ĐỐI THỦ !";
-                hintText = `🏆 ĐỘC TÔN! Bạn đang thống trị bảng xếp hạng!`;
-            }
-
-            // Gắn class vào popup để CSS kích hoạt viền LED xoay vòng
-            popup.classList.add(rankClass);
-            
-            // Animation cho thanh Năng Lượng Rank
-            if(rankBar) {
-                setTimeout(() => { 
-                    rankBar.style.width = Math.min(itmPct, 100) + "%"; 
-                    rankBar.style.background = rankColorRGB;
-                    rankBar.style.boxShadow = `0 0 10px rgba(${hexColor}, 0.8)`;
-                }, 100);
-            }
-            
-            // Tô màu theo đẳng cấp (Lưu ý: Không tô màu chữ ITM vì đã khóa CSS màu hồng)
-            if(itmPctEl) itmPctEl.style.color = rankColorRGB;
-            if(rankHint) { rankHint.innerText = hintText; rankHint.style.color = rankColorRGB; }
-
-            if(rankTitleEl) {
-                rankTitleEl.innerText = `ĐẲNG CẤP: [ ${rankTitle} ]`;
-                rankTitleEl.style.color = rankColorRGB;
-                rankTitleEl.style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
-            }
-            
-            if(closeBtnEl) {
-                closeBtnEl.style.color = rankColorRGB;
-                closeBtnEl.style.borderColor = rankColorRGB;
-            }
-
-            if(booQuote) {
-                booQuote.innerText = quote;
-                booQuote.style.color = rankColorRGB;
-            }
-
-            drawReportHexBg(hexColor);
-            pulseTerminal(`BOO: ĐẲNG CẤP [${rankTitle}] XÁC NHẬN.`);
-
-        } else {
-            profitEl.innerText = "LỖI DỮ LIỆU";
-        }
-    })
-    .catch(err => {
-        profitEl.innerText = "LỖI MẠNG LƯỚI";
-    });
-}
+    </script>
+</body>
+</html>
