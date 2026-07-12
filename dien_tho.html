@@ -36,8 +36,7 @@
         .altar-panel { 
             width: 95%; max-width: 420px; padding: 25px 20px; position: relative; height: 85vh; 
             overflow-y: auto; overflow-x: hidden; scrollbar-width: none; 
-            background: rgba(8, 8, 8, 0.75); 
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            background: rgba(8, 8, 8, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             border-radius: 12px; box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.6);
             border: 1px solid rgba(255,255,255,0.03);
         }
@@ -176,8 +175,12 @@
 
                 <div id="financesBox" style="display: flex; gap: 15px;">
                     <div class="input-box" style="flex: 1;">
-                        <div class="gold-title">4. LINH LỰC</div>
-                        <select id="inpLives" onchange="playLightClick()"><option>Mạng 1</option><option>Mạng 2</option><option>Mạng 3</option><option>Mạng 4</option></select>
+                        <div class="gold-title">4. THỂ LOẠI</div>
+                        <select id="tourneyType" class="linh-luc-select" onchange="playLightClick()" style="background: transparent; border: none; border-bottom: 1px dashed #555; padding: 10px 0; color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: bold; outline: none;">
+                            <option value="DAILY">DAILY</option>
+                            <option value="MULTIDAY">MULTIDAY</option>
+                            <option value="DEEPSTACK">DEEPSTACK</option>
+                        </select>
                     </div>
                     <div class="input-box" style="flex: 1.5;">
                         <div class="gold-title">5. NGÂN LƯỢNG</div>
@@ -208,13 +211,13 @@
 
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz2MQO0xYgNPkY_LCQLGgcHwnslfoDbQB1r9j4mTfyTRjGUfMO-eb_kGEYXimGt3Uo/exec";
-        
         // ĐỌC CHUẨN TÊN ACCOUNT ĐÃ ĐĂNG NHẬP
         let currentUsername = sessionStorage.getItem('kdrive_username') || localStorage.getItem('kdrive_logged_in_user') || 'Guest';
         document.getElementById('operatorTag').innerText = `[ OP: ${currentUsername.toUpperCase()} ]`;
 
         const AudioCtx = window.AudioContext || window.webkitAudioContext; 
-        let actx; let bellAudioBuffer = null;
+        let actx;
+        let bellAudioBuffer = null;
         function initAudio() { if(!actx) actx = new AudioCtx(); if(actx.state === 'suspended') actx.resume(); }
         
         function fetchBellIntoMemory() {
@@ -228,7 +231,8 @@
 
         function playBigBellFromMemory() {
             if(actx && bellAudioBuffer) {
-                let source = actx.createBufferSource(); source.buffer = bellAudioBuffer;
+                let source = actx.createBufferSource();
+                source.buffer = bellAudioBuffer;
                 let gainNode = actx.createGain(); gainNode.gain.value = 1.0;
                 source.connect(gainNode); gainNode.connect(actx.destination); source.start(0);
             }
@@ -252,7 +256,8 @@
         function drawMatrix() { ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = 'rgba(255, 255, 255, 0.55)'; ctx.font = fontSize + "px 'Space Grotesk', monospace"; for(let i = 0; i < drops.length; i++) { const text = chars[Math.floor(Math.random() * chars.length)]; ctx.fillText(text, i * fontSize, drops[i] * fontSize); if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; } } setInterval(drawMatrix, 50);
 
         function getRealTimeCanChi() {
-            const h = new Date().getHours(); let timeName, tactic, colorClass;
+            const h = new Date().getHours();
+            let timeName, tactic, colorClass;
             if(h>=23 || h<1) { timeName="Giờ Tý (Chuột)"; tactic="Tăm tối. Ẩn mình lừa địch."; colorClass="boo-msg-attack"; }
             else if(h>=1 && h<3) { timeName="Giờ Sửu (Trâu)"; tactic="Bền bỉ. Đánh chắc tay."; colorClass="boo-msg-neutral"; }
             else if(h>=3 && h<5) { timeName="Giờ Dần (Hổ)"; tactic="Mãnh liệt. Dồn ép đối thủ."; colorClass="boo-msg-attack"; }
@@ -280,16 +285,18 @@
         }
 
         function initiateAltar() { 
-            if(navigator.vibrate) navigator.vibrate([150, 50, 80]); fetchBellIntoMemory(); 
+            if(navigator.vibrate) navigator.vibrate([150, 50, 80]);
+            fetchBellIntoMemory(); 
             let bgm = document.getElementById('bgmAudio'); bgm.volume = 0.4; if(bgmOn) bgm.play().catch(e=>{}); 
-            document.getElementById('thantaiScreen').style.opacity = '0'; setTimeout(() => { document.getElementById('thantaiScreen').style.display = 'none'; loadAltarData(); document.getElementById('altarScreen').classList.add('active'); }, 1000); 
+            document.getElementById('thantaiScreen').style.opacity = '0';
+            setTimeout(() => { document.getElementById('thantaiScreen').style.display = 'none'; loadAltarData(); document.getElementById('altarScreen').classList.add('active'); }, 1000);
         }
 
         let isEditSpaceActive = false;
         function loadAltarData() {
-            let d = new Date(); 
+            let d = new Date();
             let lunarFormatter = new Intl.DateTimeFormat('vi-VN-u-ca-chinese', {day: '2-digit', month: '2-digit'});
-            let rawLunar = lunarFormatter.format(d); 
+            let rawLunar = lunarFormatter.format(d);
             // VD: "18/05"
             // QUY CHUẨN LẠI FORMAT NGÀY ÂM: Ngày 05-05 [Âm Lịch]
             let formattedLunar = `Ngày ${rawLunar.replace('/', '-')} [Âm Lịch]`;
@@ -304,15 +311,16 @@
         }
 
         function updateMoonPhase() {
-            const moonOverlay = document.getElementById('moon-overlay'); if(!moonOverlay) return;
+            const moonOverlay = document.getElementById('moon-overlay');
+            if(!moonOverlay) return;
             let lunarText = document.getElementById('lblLunar').innerText; 
-            let lunarDay = 15; 
+            let lunarDay = 15;
             if (lunarText) { 
                 let match = lunarText.match(/\d{2}/);
                 if(match) lunarDay = parseInt(match[0], 10); 
             }
             
-            moonOverlay.style.display = 'block'; 
+            moonOverlay.style.display = 'block';
             let diff = Math.abs(lunarDay - 15);
             let shadowPosition;
             if (lunarDay <= 15) { shadowPosition = 50 - (diff * 8); } 
@@ -321,51 +329,89 @@
             moonOverlay.style.clipPath = `circle(60% at ${shadowPosition}% 50%)`;
         }
 
-        function openFinishSpace() { isEditSpaceActive = false; document.getElementById('setupPhase').style.display = 'none'; document.getElementById('incenseBox').style.display = 'none'; document.getElementById('finishPhase').style.display = 'block'; let btn = document.getElementById('btnAction'); btn.style.background = "transparent"; btn.classList.remove('locked'); btn.classList.remove('error-shake'); btn.innerText = "[ ĐÓNG SỔ & TẠ LỄ ]"; btn.onclick = finishSession; let btnView = document.getElementById('btnViewEdit'); btnView.style.display = 'block'; btnView.innerText = "[ XEM TRẬN ĐỒ / DỊCH CHUYỂN ]"; }
-        function openViewSpace() { playHeavyClack(); isEditSpaceActive = true; document.getElementById('finishPhase').style.display = 'none'; document.getElementById('setupPhase').style.display = 'block'; document.getElementById('financesBox').style.display = 'none'; document.getElementById('btnViewEdit').style.display = 'none'; let btn = document.getElementById('btnAction'); btn.innerText = "[ QUAY LẠI TẠ LỄ ]"; btn.onclick = () => { playHeavyClack(); openFinishSpace(); }; }
-        function markEditChanged() { if(isEditSpaceActive) { let btn = document.getElementById('btnAction'); btn.innerText = "[ LƯU TỌA ĐỘ MỚI ]"; btn.onclick = () => { playDoubleClack(); btn.innerText = "[ ĐÃ LƯU TỌA ĐỘ MỚI ✓ ]"; setTimeout(openFinishSpace, 800); }; } }
+        function openFinishSpace() { isEditSpaceActive = false; document.getElementById('setupPhase').style.display = 'none'; document.getElementById('incenseBox').style.display = 'none';
+            document.getElementById('finishPhase').style.display = 'block'; let btn = document.getElementById('btnAction'); btn.style.background = "transparent"; btn.classList.remove('locked'); btn.classList.remove('error-shake');
+            btn.innerText = "[ ĐÓNG SỔ & TẠ LỄ ]"; btn.onclick = finishSession; let btnView = document.getElementById('btnViewEdit'); btnView.style.display = 'block';
+            btnView.innerText = "[ XEM TRẬN ĐỒ / DỊCH CHUYỂN ]";
+        }
+        function openViewSpace() { playHeavyClack(); isEditSpaceActive = true; document.getElementById('finishPhase').style.display = 'none';
+            document.getElementById('setupPhase').style.display = 'block'; document.getElementById('financesBox').style.display = 'none'; document.getElementById('btnViewEdit').style.display = 'none'; let btn = document.getElementById('btnAction');
+            btn.innerText = "[ QUAY LẠI TẠ LỄ ]"; btn.onclick = () => { playHeavyClack(); openFinishSpace(); };
+        }
+        function markEditChanged() { if(isEditSpaceActive) { let btn = document.getElementById('btnAction');
+            btn.innerText = "[ LƯU TỌA ĐỘ MỚI ]"; btn.onclick = () => { playDoubleClack();
+            btn.innerText = "[ ĐÃ LƯU TỌA ĐỘ MỚI ✓ ]"; setTimeout(openFinishSpace, 800); };
+        } }
 
         function cycleTheater() { 
-            activeTheaterIdx = (activeTheaterIdx + 1) % theaters.length; 
+            activeTheaterIdx = (activeTheaterIdx + 1) % theaters.length;
             const tName = theaters[activeTheaterIdx]; 
             document.getElementById('lblTheater').innerText = `[${tName}]`; 
             playLightClick(); updateCompassAnchor(tName); markEditChanged(); 
             updatePositionData({ facing: document.getElementById('inpFacing').value });
         }
-        const theaters = ["TÂM TRẬN", "BẮC TRẬN", "NAM TRẬN", "ĐÔNG TRẬN", "TÂY TRẬN"]; let activeTheaterIdx = 0;
+        const theaters = ["TÂM TRẬN", "BẮC TRẬN", "NAM TRẬN", "ĐÔNG TRẬN", "TÂY TRẬN"];
+        let activeTheaterIdx = 0;
         
-        function updateCompassAnchor(theater) { document.querySelectorAll('.compass-dial span').forEach(el => { el.style.color = '#555'; el.style.textShadow = 'none'; }); let target; if(theater === "TÂM TRẬN" || theater === "BẮC TRẬN") target = document.querySelector('.dir-n'); else if(theater === "NAM TRẬN") target = document.querySelector('.dir-s'); else if(theater === "ĐÔNG TRẬN") target = document.querySelector('.dir-e'); else if(theater === "TÂY TRẬN") target = document.querySelector('.dir-w'); if(target) { target.style.color = '#FFFFFF'; target.style.textShadow = '0 0 10px rgba(255,255,255,0.8)'; } }
+        function updateCompassAnchor(theater) { document.querySelectorAll('.compass-dial span').forEach(el => { el.style.color = '#555'; el.style.textShadow = 'none'; }); let target;
+            if(theater === "TÂM TRẬN" || theater === "BẮC TRẬN") target = document.querySelector('.dir-n'); else if(theater === "NAM TRẬN") target = document.querySelector('.dir-s');
+            else if(theater === "ĐÔNG TRẬN") target = document.querySelector('.dir-e'); else if(theater === "TÂY TRẬN") target = document.querySelector('.dir-w');
+            if(target) { target.style.color = '#FFFFFF'; target.style.textShadow = '0 0 10px rgba(255,255,255,0.8)';
+        } }
 
-        function getDirString8(a) { if(a >= 337.5 || a < 22.5) return "Chính Bắc (Hàn Khí)"; if(a >= 22.5 && a < 67.5) return "Đông Bắc (Giao Khí)"; if(a >= 67.5 && a < 112.5) return "Chính Đông (Sinh Khí)"; if(a >= 112.5 && a < 157.5) return "Đông Nam (Tài Lộc)"; if(a >= 157.5 && a < 202.5) return "Chính Nam (Hòa Khí)"; if(a >= 202.5 && a < 247.5) return "Tây Nam (Suy Khí)"; if(a >= 247.5 && a < 292.5) return "Chính Tây (Sát Phạt)"; if(a >= 292.5 && a < 337.5) return "Tây Bắc (Uy Quyền)"; return "Chính Nam (Hòa Khí)"; }
+        function getDirString8(a) { if(a >= 337.5 || a < 22.5) return "Chính Bắc (Hàn Khí)";
+            if(a >= 22.5 && a < 67.5) return "Đông Bắc (Giao Khí)";
+            if(a >= 67.5 && a < 112.5) return "Chính Đông (Sinh Khí)";
+            if(a >= 112.5 && a < 157.5) return "Đông Nam (Tài Lộc)";
+            if(a >= 157.5 && a < 202.5) return "Chính Nam (Hòa Khí)";
+            if(a >= 202.5 && a < 247.5) return "Tây Nam (Suy Khí)";
+            if(a >= 247.5 && a < 292.5) return "Chính Tây (Sát Phạt)";
+            if(a >= 292.5 && a < 337.5) return "Tây Bắc (Uy Quyền)"; return "Chính Nam (Hòa Khí)";
+        }
 
         let isCompassActive = false; let currentHeading = 0;
         function toggleCompass() {
-            const statusEl = document.getElementById('compassStatus'); const compassWrap = document.getElementById('compassBtn');
+            const statusEl = document.getElementById('compassStatus');
+            const compassWrap = document.getElementById('compassBtn');
             if(isCompassActive) {
-                isCompassActive = false; playHeavyClack(); compassWrap.classList.remove('scanning'); compassWrap.classList.add('locked-effect'); setTimeout(() => compassWrap.classList.remove('locked-effect'), 500); window.removeEventListener('deviceorientationabsolute', handleOri); window.removeEventListener('deviceorientation', handleOri);
-                let finalDir = getDirString8(currentHeading); statusEl.innerHTML = `[ TỌA ĐỘ ĐÃ KHÓA ]`; document.getElementById('inpFacing').value = finalDir;
+                isCompassActive = false;
+                playHeavyClack(); compassWrap.classList.remove('scanning'); compassWrap.classList.add('locked-effect'); setTimeout(() => compassWrap.classList.remove('locked-effect'), 500); window.removeEventListener('deviceorientationabsolute', handleOri); window.removeEventListener('deviceorientation', handleOri);
+                let finalDir = getDirString8(currentHeading);
+                statusEl.innerHTML = `[ TỌA ĐỘ ĐÃ KHÓA ]`; document.getElementById('inpFacing').value = finalDir;
                 let dirName = finalDir, tactic, colorClass;
-                if(finalDir.includes("Sinh Khí")) { tactic="Khai thác nhịp độ. Phát triển stack."; colorClass="boo-msg-attack"; } else if(finalDir.includes("Tài Lộc")) { tactic="Áp đảo. Chủ động tấn công ép pot."; colorClass="boo-msg-attack"; } else if(finalDir.includes("Hòa Khí")) { tactic="Cân bằng. Duy trì nhịp độ an toàn."; colorClass="boo-msg-neutral"; } else if(finalDir.includes("Suy Khí")) { tactic="Cảnh giác. Đánh an toàn, tránh bẫy."; colorClass="boo-msg-defend"; } else if(finalDir.includes("Sát Phạt")) { tactic="Kỷ luật. Chỉ đợi Hand quái vật."; colorClass="boo-msg-defend"; } else if(finalDir.includes("Uy Quyền")) { tactic="Dồn ép. Sử dụng Semi-bluff ép sân."; colorClass="boo-msg-attack"; } else if(finalDir.includes("Hàn Khí")) { tactic="Băng giá. Rút lui an toàn, bảo toàn vốn."; colorClass="boo-msg-defend"; } else { tactic="Thăm dò. Check-call đọc vị đối thủ."; colorClass="boo-msg-neutral"; } 
-                let booMsg = document.getElementById('msgDirection'); booMsg.innerHTML = `<span class="boo-bracket">[</span><span class="boo-name">BOO</span><span class="boo-bracket">]</span>: <span class="${colorClass}">${dirName} - ${tactic}</span>`; booMsg.style.opacity = 1; markEditChanged();
-                
+                if(finalDir.includes("Sinh Khí")) { tactic="Khai thác nhịp độ. Phát triển stack."; colorClass="boo-msg-attack";
+                } else if(finalDir.includes("Tài Lộc")) { tactic="Áp đảo. Chủ động tấn công ép pot."; colorClass="boo-msg-attack";
+                } else if(finalDir.includes("Hòa Khí")) { tactic="Cân bằng. Duy trì nhịp độ an toàn."; colorClass="boo-msg-neutral";
+                } else if(finalDir.includes("Suy Khí")) { tactic="Cảnh giác. Đánh an toàn, tránh bẫy."; colorClass="boo-msg-defend";
+                } else if(finalDir.includes("Sát Phạt")) { tactic="Kỷ luật. Chỉ đợi Hand quái vật."; colorClass="boo-msg-defend";
+                } else if(finalDir.includes("Uy Quyền")) { tactic="Dồn ép. Sử dụng Semi-bluff ép sân."; colorClass="boo-msg-attack";
+                } else if(finalDir.includes("Hàn Khí")) { tactic="Băng giá. Rút lui an toàn, bảo toàn vốn."; colorClass="boo-msg-defend";
+                } else { tactic="Thăm dò. Check-call đọc vị đối thủ."; colorClass="boo-msg-neutral";
+                } 
+                let booMsg = document.getElementById('msgDirection');
+                booMsg.innerHTML = `<span class="boo-bracket">[</span><span class="boo-name">BOO</span><span class="boo-bracket">]</span>: <span class="${colorClass}">${dirName} - ${tactic}</span>`; booMsg.style.opacity = 1; markEditChanged();
                 // Cập nhật lên Sheet CHỈ HƯỚNG NGỒI
                 updatePositionData({ facing: finalDir });
-            } else { isCompassActive = true; playLightClick(); compassWrap.classList.add('scanning'); statusEl.innerHTML = `[ <span style="color:#aaa;">ĐANG QUÉT PHƯƠNG VỊ...</span> ]`; document.getElementById('msgDirection').style.opacity = 0; if ('ondeviceorientationabsolute' in window) { window.addEventListener('deviceorientationabsolute', handleOri); } else { window.addEventListener('deviceorientation', handleOri); } }
+            } else { isCompassActive = true; playLightClick(); compassWrap.classList.add('scanning'); statusEl.innerHTML = `[ <span style="color:#aaa;">ĐANG QUÉT PHƯƠNG VỊ...</span> ]`; document.getElementById('msgDirection').style.opacity = 0;
+                if ('ondeviceorientationabsolute' in window) { window.addEventListener('deviceorientationabsolute', handleOri); } else { window.addEventListener('deviceorientation', handleOri);
+            } }
         }
         function handleOri(e) { let alpha = e.webkitCompassHeading || (360 - e.alpha); currentHeading = alpha; document.getElementById('compassDial').style.transform = `rotate(${-alpha}deg)`; }
         
         function selectSeat(num) { 
-            playLightClick(); document.querySelectorAll('.seat').forEach(el => el.classList.remove('selected')); 
+            playLightClick();
+            document.querySelectorAll('.seat').forEach(el => el.classList.remove('selected')); 
             event.target.classList.add('selected'); 
             let newPos = `Ghế ${num}`;
             document.getElementById('inpPosition').value = newPos; 
-            markEditChanged(); 
-            
+            markEditChanged();
             // Cập nhật lên Sheet CHỈ GHẾ NGỒI
             updatePositionData({ position: newPos });
         }
 
-        function triggerError(btn, msg) { playHeavyClack(); btn.innerText = msg; btn.classList.add('error-shake'); setTimeout(() => { btn.classList.remove('error-shake'); btn.innerText = "[ TỊNH TÂM KHAI TRẬN ]"; }, 1500); }
+        function triggerError(btn, msg) { playHeavyClack(); btn.innerText = msg; btn.classList.add('error-shake');
+            setTimeout(() => { btn.classList.remove('error-shake'); btn.innerText = "[ TỊNH TÂM KHAI TRẬN ]"; }, 1500);
+        }
 
         let smokeInterval, moInterval;
         function executeRitual() {
@@ -375,11 +421,11 @@
             if(!document.getElementById('inpBuyIn').value) { triggerError(btn, "[ LỖI: THIẾU NGÂN LƯỢNG ]"); return; }
 
             playHeavyClack(); if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            btn.classList.add('locked'); btn.onclick = null;
+            btn.classList.add('locked');
+            btn.onclick = null;
             document.getElementById('altarPanel').scrollTop = document.getElementById('altarPanel').scrollHeight; 
             document.querySelectorAll('.ember').forEach(e => e.classList.add('burning'));
             smokeInterval = setInterval(createSmoke, 300); moInterval = setInterval(playMoClick, 1000);
-            
             let timeLeft = 39; 
             let burn = setInterval(() => {
                 timeLeft--; btn.innerText = `[ TỊNH TÂM KHAI TRẬN - 00:${timeLeft < 10 ? '0'+timeLeft : timeLeft} ]`;
@@ -392,10 +438,9 @@
                     btn.innerText = "[ ĐANG KẾT NỐI SỔ SINH TỬ... ]";
 
                     // CHUẨN HÓA DỮ LIỆU GỬI ĐI
-                    let buyInVal = document.getElementById('inpBuyIn').value; // Giữ nguyên dấu phẩy
-                    let booText = document.getElementById('msgDirection').innerText; // Đọc trọn vẹn Text A.I
+                    let buyInVal = document.getElementById('inpBuyIn').value; 
+                    let booText = document.getElementById('msgDirection').innerText; 
                     
-                    // Cắt chuỗi lấy "Giờ Tuất (Chó)" bỏ phần sau
                     let rawZodiac = document.getElementById('lblZodiac').textContent;
                     let cleanZodiac = "Chưa có";
                     if(rawZodiac.includes(':') && rawZodiac.includes('-')) {
@@ -411,9 +456,9 @@
                         position: document.getElementById('inpPosition').value,
                         buyIn: buyInVal,
                         result: 0,
-                        aiEvaluation: booText || "Chưa có"
+                        aiEvaluation: booText || "Chưa có",
+                        tourneyType: document.getElementById('tourneyType').value // Dữ liệu đẩy lên Cột L
                     };
-
                     fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) })
                     .then(res => res.json())
                     .then(data => {
@@ -431,11 +476,15 @@
         function createSmoke() { document.querySelectorAll('.ember').forEach(ember => { if(!ember.classList.contains('burning')) return; const smoke = document.createElement('div'); smoke.className = 'smoke-particle'; smoke.style.setProperty('--r', Math.random()); ember.appendChild(smoke); setTimeout(() => smoke.remove(), 2500); }); }
 
         function finishSession() {
-            let btn = document.getElementById('btnAction'); 
-            let lossVal = document.getElementById('inpLoss').value; // Giữ nguyên dấu phẩy
-            if(!lossVal) { playHeavyClack(); btn.innerText = "[ LỖI: CHƯA NHẬP KẾT QUẢ ]"; btn.classList.add('error-shake'); setTimeout(() => { btn.classList.remove('error-shake'); btn.innerText = "[ ĐÓNG SỔ & TẠ LỄ ]"; }, 1500); return; }
+            let btn = document.getElementById('btnAction');
+            let lossVal = document.getElementById('inpLoss').value; 
+            if(!lossVal) { playHeavyClack();
+                btn.innerText = "[ LỖI: CHƯA NHẬP KẾT QUẢ ]"; btn.classList.add('error-shake');
+                setTimeout(() => { btn.classList.remove('error-shake'); btn.innerText = "[ ĐÓNG SỔ & TẠ LỄ ]"; }, 1500); return;
+            }
 
-            playKhanhChime(); btn.innerText = "[ ĐANG KẾT TOÁN SỔ SINH TỬ... ]";
+            playKhanhChime();
+            btn.innerText = "[ ĐANG KẾT TOÁN SỔ SINH TỬ... ]";
             
             let sessionData = JSON.parse(localStorage.getItem('kdrive_altar_session_' + currentUsername));
             if(!sessionData || !sessionData.idPhien) { btn.innerText = "[ LỖI: KHÔNG TÌM THẤY ID PHIÊN ]"; return; }
@@ -446,7 +495,6 @@
                 action: "end", idPhien: sessionData.idPhien,
                 duration: durationMinutes, result: lossVal
             };
-
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) })
             .then(res => res.json())
             .then(data => {
