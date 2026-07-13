@@ -340,4 +340,221 @@ class ReportDashboard {
                     <div style="text-align: center; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);">
                         <div style="font-size: 11px; color: #aaa; margin-bottom: 5px; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;">LÃI RÒNG (NET PROFIT)</div>
                         <div id="repNetProfit" style="font-size: 32px; font-weight: bold; font-family: 'Space Grotesk', sans-serif; color: #888;">--</div>
-                        <div style="margin-top: 8px
+                        <div style="margin-top: 8px; font-size: 12px; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;">
+                            <span style="color:#777;">HIỆU SUẤT: </span><span id="repHourlyRate">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="repBooQuote" style="text-align: center; font-size: 11px; font-family: 'Share Tech Mono', monospace; min-height: 15px; font-weight: bold; padding: 8px 10px; border-radius: 4px; transition: 0.3s; line-height: 1.4; position: relative; z-index: 3; color: #888;">
+                    > BOO: ĐANG TRUY XUẤT TỪ ĐIỆN THỜ...
+                </div>
+            </div>
+        `;
+        this.popupEl.innerHTML = innerHTML;
+        document.body.appendChild(this.popupEl);
+        
+        document.getElementById('repCloseBtn').addEventListener('click', () => this.close());
+        
+        // Gắn sự kiện cho Công tắc
+        document.getElementById('tabWeekly').addEventListener('click', () => { playCyberClick(); this.switchTab('weekly'); });
+        document.getElementById('tabAllTime').addEventListener('click', () => { playCyberClick(); this.switchTab('allTime'); });
+    }
+
+    switchTab(mode) {
+        if(this.currentMode === mode || !this.reportData) return;
+        this.currentMode = mode;
+        
+        // CSS Style cho tab đang chọn
+        if (mode === 'weekly') {
+            document.getElementById('tabWeekly').style.background = '#DAA520'; document.getElementById('tabWeekly').style.color = '#000';
+            document.getElementById('tabAllTime').style.background = 'transparent'; document.getElementById('tabAllTime').style.color = '#777';
+        } else {
+            document.getElementById('tabAllTime').style.background = '#DAA520'; document.getElementById('tabAllTime').style.color = '#000';
+            document.getElementById('tabWeekly').style.background = 'transparent'; document.getElementById('tabWeekly').style.color = '#777';
+        }
+        
+        // Kích hoạt hiệu ứng Nhiễu sóng
+        const container = document.getElementById('repDataContainer');
+        container.classList.remove('glitch-anim');
+        void container.offsetWidth; // Force DOM reflow
+        container.classList.add('glitch-anim');
+        
+        if(navigator.vibrate) navigator.vibrate([20, 20, 20]);
+        
+        // Render lại dữ liệu
+        this.renderData(mode);
+        
+        setTimeout(() => { container.classList.remove('glitch-anim'); }, 400);
+    }
+
+    drawHexGrid(colorRGB) {
+        const canvas = document.getElementById('reportHexCanvas');
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.offsetWidth || 380;
+        canvas.height = canvas.offsetHeight || 400;
+        
+        let r = 20; let h3 = Math.sqrt(3) * r; 
+        let cols = Math.ceil(canvas.width / h3) + 1; let rows = Math.ceil(canvas.height / (r*1.5)) + 1;
+        
+        let offset = 0;
+        if(this.hexInterval) clearInterval(this.hexInterval);
+        this.hexInterval = setInterval(() => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.lineWidth = 1; offset += 0.05;
+            for(let row=0; row<rows; row++) { 
+                for(let col=0; col<cols; col++) { 
+                    let x = col * h3 + (row%2===1 ? h3/2 : 0); let y = row * r*1.5;
+                    let alpha = 0.05 + Math.sin(x*0.05 + y*0.05 + offset) * 0.15; 
+                    ctx.strokeStyle = `rgba(${colorRGB}, ${alpha})`; ctx.beginPath();
+                    for (let i=0; i<6; i++) { let a = Math.PI/180*(60*i-30); ctx.lineTo(x + r*Math.cos(a), y + r*Math.sin(a)); }
+                    ctx.closePath(); ctx.stroke();
+                }
+            }
+        }, 50);
+    }
+
+    animateValue(objId, start, end, duration, formatStr = '') {
+        let obj = document.getElementById(objId);
+        if (!obj) return;
+        
+        if (this.animFrames[objId]) window.cancelAnimationFrame(this.animFrames[objId]);
+        
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            let currentVal = Math.floor(progress * (end - start) + start);
+            
+            let txt = currentVal;
+            if (formatStr === 'money') { txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US'); } 
+            else if (formatStr === 'hourly') { txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US') + "/ 1 giờ"; } 
+            else if (formatStr === 'percent') { txt = currentVal + "%"; }
+            
+            obj.innerText = txt;
+
+            if (progress < 1) {
+                this.animFrames[objId] = window.requestAnimationFrame(step);
+            } else {
+                let finalTxt = end;
+                if (formatStr === 'money') { finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US'); } 
+                else if (formatStr === 'hourly') { finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US') + "/ 1 giờ"; } 
+                else if (formatStr === 'percent') { finalTxt = end + "%"; }
+                obj.innerText = finalTxt;
+            }
+        };
+        this.animFrames[objId] = window.requestAnimationFrame(step);
+    }
+
+    renderData(mode) {
+        if(!this.reportData) return;
+        let data = this.reportData[mode]; // Chuyển đổi giữa weekly hoặc allTime
+        
+        this.animateValue('repTotalMatches', 0, data.matches, 600);
+        this.animateValue('repTotalDays', 0, data.days || 0, 600);
+        this.animateValue('repTotalDuration', 0, data.duration, 600);
+        
+        let itmPct = data.days > 0 ? Math.round((data.itmDays / data.days) * 100) : 0;
+        this.animateValue('repItmProgressText', 0, itmPct, 600, 'percent');
+        this.animateValue('repItm30Days', 0, itmPct, 600, 'percent'); // Tái sử dụng để hiện tỉ lệ chung
+
+        let profitVal = data.profit;
+        let hours = data.duration / 60;
+        let hourlyRate = hours > 0 ? Math.round(profitVal / hours) : 0;
+
+        let hrRateEl = document.getElementById('repHourlyRate');
+        if (hourlyRate > 0) { hrRateEl.style.color = "#00ff88"; } else if (hourlyRate < 0) { hrRateEl.style.color = "#ff3333"; }
+        this.animateValue('repHourlyRate', 0, hourlyRate, 600, 'hourly');
+        
+        let profitEl = document.getElementById('repNetProfit');
+        if (profitVal > 0) { profitEl.style.color = "#00ff88"; profitEl.style.textShadow = "0 0 20px rgba(0, 255, 136, 0.7)"; } 
+        else if (profitVal < 0) { profitEl.style.color = "#ff3333"; profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)"; }
+        this.animateValue('repNetProfit', 0, profitVal, 600, 'money');
+
+        // TÍNH TOÁN ĐẲNG CẤP VÀ MÀU SẮC CHỦ ĐẠO
+        let rankTitle = ""; let rankClass = ""; let rankColorRGB = ""; let hexColor = ""; 
+        if (itmPct < 20) { rankTitle = "TẬP SỰ"; rankClass = "rank-rookie"; rankColorRGB = "#a0a0a0"; hexColor = "160, 160, 160"; } 
+        else if (itmPct < 35) { rankTitle = "CHIẾN BINH"; rankClass = "rank-warrior"; rankColorRGB = "#00e5ff"; hexColor = "0, 229, 255"; } 
+        else if (itmPct < 50) { rankTitle = "THỦ LĨNH"; rankClass = "rank-leader"; rankColorRGB = "#bf00ff"; hexColor = "191, 0, 255"; } 
+        else { rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#ffd700"; hexColor = "255, 215, 0"; }
+
+        // BÓC TÁCH LỜI SẤM TRUYỀN (Giữ nguyên Cảnh báo của Backend, không thay đổi theo tab để giữ tính chỉ huy thực chiến)
+        let sciStatus = this.reportData.sciStatus || "SAFE";
+        let finalQuote = this.reportData.booCommand || "";
+        let finalHint = this.reportData.booHint || "";
+
+        this.popupEl.classList.remove('rank-rookie', 'rank-warrior', 'rank-leader', 'rank-legendary');
+        this.popupEl.classList.add(rankClass);
+        
+        let rankBar = document.getElementById('repRankBar');
+        rankBar.style.width = Math.min(itmPct, 100) + "%"; 
+        rankBar.style.background = rankColorRGB;
+        rankBar.style.boxShadow = `0 0 10px rgba(${hexColor}, 0.8)`;
+        
+        document.getElementById('repItmProgressText').style.color = rankColorRGB;
+        document.getElementById('repRankTitle').innerText = `ĐẲNG CẤP: [ ${rankTitle} ]`; 
+        document.getElementById('repRankTitle').style.color = rankColorRGB; 
+        document.getElementById('repRankTitle').style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
+
+        let quoteEl = document.getElementById('repBooQuote');
+        let hintEl = document.getElementById('repNextRankHint');
+        let itmBarContainer = document.getElementById('repRankBar').parentElement;
+        
+        quoteEl.innerText = finalQuote;
+        hintEl.innerText = finalHint;
+        quoteEl.classList.remove('sci-critical', 'sci-warning');
+
+        if (sciStatus === "CRITICAL") {
+            quoteEl.classList.add('sci-critical');
+            hintEl.style.color = "#ff3333";
+            itmBarContainer.style.boxShadow = "0 0 15px rgba(255,51,51,0.8), inset 0 0 5px rgba(0,0,0,0.8)";
+            itmBarContainer.style.border = "1px solid #ff3333";
+        } else if (sciStatus === "WARNING") {
+            quoteEl.classList.add('sci-warning');
+            hintEl.style.color = "#ffaa00";
+            itmBarContainer.style.boxShadow = "0 0 10px rgba(255,170,0,0.5), inset 0 0 5px rgba(0,0,0,0.8)";
+            itmBarContainer.style.border = "1px dashed #ffaa00";
+        } else {
+            quoteEl.style.color = rankColorRGB;
+            hintEl.style.color = rankColorRGB;
+            quoteEl.style.border = "none";
+            quoteEl.style.background = "transparent";
+            itmBarContainer.style.boxShadow = "inset 0 0 5px rgba(0,0,0,0.8)";
+            itmBarContainer.style.border = "none";
+        }
+
+        this.drawHexGrid(hexColor);
+    }
+
+    fetchAndPopulate() {
+        this.drawHexGrid('136, 136, 136');
+        let payload = { action: "report", account: this.username }; 
+        fetch(REPORT_API_URL, { method: "POST", body: JSON.stringify(payload) })
+        .then(res => res.json())
+        .then(res => {
+            if(res.status === "success") {
+                this.reportData = res.data; // Lưu toàn bộ data trả về
+                this.currentMode = 'weekly'; // Mặc định mở lên là xem Tuần
+                this.renderData('weekly');
+                pulseTerminal(`BOO: X-QUANG ĐƯỢC CHUẨN Y.`);
+            } else { document.getElementById('repNetProfit').innerText = "LỖI DỮ LIỆU"; }
+        })
+        .catch(err => { document.getElementById('repNetProfit').innerText = "MẤT KẾT NỐI ĐIỆN THỜ"; });
+    }
+
+    open() { this.renderHTML(); lockInteraction(); this.fetchAndPopulate(); }
+    close() { 
+        if(this.hexInterval) clearInterval(this.hexInterval); 
+        for (let key in this.animFrames) { window.cancelAnimationFrame(this.animFrames[key]); }
+        if(this.popupEl) { this.popupEl.remove(); this.popupEl = null; } unlockInteraction(); 
+    }
+}
+
+function fetchBattleReport() {
+    if (!checkLoginGuard()) return; 
+    if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
+    playCyberClick(); 
+    pulseTerminal("BOO: ĐANG TRUY XUẤT X-QUANG TỪ BỘ NHỚ...");
+    const dashboard = new ReportDashboard(currentUsername);
+    dashboard.open();
+}
