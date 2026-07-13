@@ -397,6 +397,30 @@ class ReportDashboard {
         this.popupEl.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; width: 92%; max-width: 380px; padding: 2.5px; border-radius: 12px; overflow: hidden; display: flex; z-index: 99999; background: #111; flex-direction: column;';
 
         const innerHTML = `
+            <style>
+                @keyframes sciCriticalPulse {
+                    0% { box-shadow: 0 0 10px rgba(255, 51, 51, 0.5); border-color: rgba(255, 51, 51, 0.5); }
+                    50% { box-shadow: 0 0 30px rgba(255, 51, 51, 1); border-color: rgba(255, 51, 51, 1); }
+                    100% { box-shadow: 0 0 10px rgba(255, 51, 51, 0.5); border-color: rgba(255, 51, 51, 0.5); }
+                }
+                @keyframes sciWarningPulse {
+                    0% { box-shadow: 0 0 5px rgba(255, 170, 0, 0.3); border-color: rgba(255, 170, 0, 0.3); }
+                    50% { box-shadow: 0 0 15px rgba(255, 170, 0, 0.8); border-color: rgba(255, 170, 0, 0.8); }
+                    100% { box-shadow: 0 0 5px rgba(255, 170, 0, 0.3); border-color: rgba(255, 170, 0, 0.3); }
+                }
+                .sci-critical {
+                    animation: sciCriticalPulse 0.8s infinite;
+                    background: rgba(50, 0, 0, 0.8) !important;
+                    color: #ff3333 !important;
+                    border: 1px solid #ff3333 !important;
+                }
+                .sci-warning {
+                    animation: sciWarningPulse 1.5s infinite;
+                    background: rgba(50, 30, 0, 0.8) !important;
+                    color: #ffaa00 !important;
+                    border: 1px dashed #ffaa00 !important;
+                }
+            </style>
             <div class="led-spinner" id="repLedSpinner"></div>
             <div class="popup-inner-content" style="position: relative; z-index: 2; width: 100%; height: 100%; background: rgba(10,10,10,0.95); border-radius: 10px; padding: 15px 10px; box-sizing: border-box; display: flex; flex-direction: column;">
                 <canvas id="reportHexCanvas" class="report-hex-bg"></canvas>
@@ -455,7 +479,7 @@ class ReportDashboard {
                         <span style="color:#777;">HIỆU SUẤT: </span><span id="repHourlyRate">--</span>
                     </div>
                 </div>
-                <div id="repBooQuote" style="text-align: center; font-size: 11px; font-family: 'Share Tech Mono', monospace; min-height: 15px; font-weight: bold; padding: 0 10px; line-height: 1.4; position: relative; z-index: 3; color: #888;">
+                <div id="repBooQuote" style="text-align: center; font-size: 11px; font-family: 'Share Tech Mono', monospace; min-height: 15px; font-weight: bold; padding: 8px 10px; border-radius: 4px; transition: 0.3s; line-height: 1.4; position: relative; z-index: 3; color: #888;">
                     > BOO: ĐANG TRUY XUẤT TỪ ĐIỆN THỜ...
                 </div>
             </div>
@@ -563,20 +587,28 @@ class ReportDashboard {
                 if (profitVal > 0) { profitEl.style.color = "#00ff88"; profitEl.style.textShadow = "0 0 20px rgba(0, 255, 136, 0.7)"; } else if (profitVal < 0) { profitEl.style.color = "#ff3333"; profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)"; }
                 this.animateValue('repNetProfit', 0, profitVal, 1000, 'money');
 
-                let rankTitle = ""; let rankClass = ""; let rankColorRGB = ""; let hexColor = ""; let quote = ""; let hintText = "";
+                // TÍNH TOÁN ĐẲNG CẤP VÀ MÀU SẮC CHỦ ĐẠO
+                let rankTitle = ""; let rankClass = ""; let rankColorRGB = ""; let hexColor = ""; 
+                let defaultQuote = ""; let defaultHintText = "";
+                
                 if (itmPct < 20) {
                     rankTitle = "TẬP SỰ"; rankClass = "rank-rookie"; rankColorRGB = "#a0a0a0"; hexColor = "160, 160, 160";
-                    quote = "> BOO: GIAI ĐOẠN TÍCH LŨY. BẢO TOÀN VỐN."; hintText = `🔥 Cần ${20 - itmPct}% nữa để đạt mốc [CHIẾN BINH]`;
+                    defaultQuote = "> BOO: GIAI ĐOẠN TÍCH LŨY. BẢO TOÀN VỐN."; defaultHintText = `🔥 Cần ${20 - itmPct}% nữa để đạt mốc [CHIẾN BINH]`;
                 } else if (itmPct < 35) {
                     rankTitle = "CHIẾN BINH"; rankClass = "rank-warrior"; rankColorRGB = "#00e5ff"; hexColor = "0, 229, 255";
-                    quote = "> BOO: NHỊP ĐỘ ỔN ĐỊNH. DUY TRÌ KỶ LUẬT."; hintText = `⚡ Cần ${35 - itmPct}% nữa để lên [THỦ LĨNH]`;
+                    defaultQuote = "> BOO: NHỊP ĐỘ ỔN ĐỊNH. DUY TRÌ KỶ LUẬT."; defaultHintText = `⚡ Cần ${35 - itmPct}% nữa để lên [THỦ LĨNH]`;
                 } else if (itmPct < 50) {
                     rankTitle = "THỦ LĨNH"; rankClass = "rank-leader"; rankColorRGB = "#bf00ff"; hexColor = "191, 0, 255";
-                    quote = "> BOO: ĐẲNG CẤP CAO THỦ. KIỂM SOÁT BÀN ĐẤU."; hintText = `👑 Chỉ ${50 - itmPct}% nữa để hóa [HUYỀN THOẠI]`;
+                    defaultQuote = "> BOO: ĐẲNG CẤP CAO THỦ. KIỂM SOÁT BÀN ĐẤU."; defaultHintText = `👑 Chỉ ${50 - itmPct}% nữa để hóa [HUYỀN THOẠI]`;
                 } else {
                     rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#ffd700"; hexColor = "255, 215, 0";
-                    quote = "> BOO: ĐỘC TÔN. ÁP ĐẢO HOÀN TOÀN MỌI ĐỐI THỦ !"; hintText = `🏆 ĐỘC TÔN! Bạn đang thống trị!`;
+                    defaultQuote = "> BOO: ĐỘC TÔN. ÁP ĐẢO HOÀN TOÀN MỌI ĐỐI THỦ !"; defaultHintText = `🏆 ĐỘC TÔN! Bạn đang thống trị!`;
                 }
+
+                // GHI NHẬN TÍN HIỆU CẢNH BÁO TỪ BOO AI
+                let finalQuote = data.booCommand || defaultQuote;
+                let finalHint = data.booHint || defaultHintText;
+                let sciStatus = data.sciStatus || "SAFE";
 
                 this.popupEl.classList.add(rankClass);
                 setTimeout(() => { 
@@ -587,10 +619,41 @@ class ReportDashboard {
                 }, 100);
                 
                 document.getElementById('repItmProgressText').style.color = rankColorRGB;
-                document.getElementById('repNextRankHint').innerText = hintText; document.getElementById('repNextRankHint').style.color = rankColorRGB;
-                document.getElementById('repRankTitle').innerText = `ĐẲNG CẤP: [ ${rankTitle} ]`; document.getElementById('repRankTitle').style.color = rankColorRGB; document.getElementById('repRankTitle').style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
-                document.getElementById('repCloseBtn').style.color = rankColorRGB; document.getElementById('repCloseBtn').style.borderColor = rankColorRGB;
-                document.getElementById('repBooQuote').innerText = quote; document.getElementById('repBooQuote').style.color = rankColorRGB;
+                document.getElementById('repRankTitle').innerText = `ĐẲNG CẤP: [ ${rankTitle} ]`; 
+                document.getElementById('repRankTitle').style.color = rankColorRGB; 
+                document.getElementById('repRankTitle').style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
+                document.getElementById('repCloseBtn').style.color = rankColorRGB; 
+                document.getElementById('repCloseBtn').style.borderColor = rankColorRGB;
+
+                // ÁP DỤNG TRẠNG THÁI SCI LÊN GIAO DIỆN
+                let quoteEl = document.getElementById('repBooQuote');
+                let hintEl = document.getElementById('repNextRankHint');
+                let itmBarContainer = document.getElementById('repRankBar').parentElement;
+                
+                quoteEl.innerText = finalQuote;
+                hintEl.innerText = finalHint;
+                quoteEl.classList.remove('sci-critical', 'sci-warning');
+
+                if (sciStatus === "CRITICAL") {
+                    quoteEl.classList.add('sci-critical');
+                    hintEl.style.color = "#ff3333";
+                    hintEl.style.fontWeight = "bold";
+                    itmBarContainer.style.boxShadow = "0 0 15px rgba(255,51,51,0.8), inset 0 0 5px rgba(0,0,0,0.8)";
+                    itmBarContainer.style.border = "1px solid #ff3333";
+                } else if (sciStatus === "WARNING") {
+                    quoteEl.classList.add('sci-warning');
+                    hintEl.style.color = "#ffaa00";
+                    hintEl.style.fontWeight = "bold";
+                    itmBarContainer.style.boxShadow = "0 0 10px rgba(255,170,0,0.5), inset 0 0 5px rgba(0,0,0,0.8)";
+                    itmBarContainer.style.border = "1px dashed #ffaa00";
+                } else {
+                    quoteEl.style.color = rankColorRGB;
+                    hintEl.style.color = rankColorRGB;
+                    quoteEl.style.border = "none";
+                    quoteEl.style.background = "transparent";
+                    itmBarContainer.style.boxShadow = "inset 0 0 5px rgba(0,0,0,0.8)";
+                    itmBarContainer.style.border = "none";
+                }
 
                 this.drawHexGrid(hexColor);
                 pulseTerminal(`BOO: ĐẲNG CẤP [${rankTitle}] ĐƯỢC CHUẨN Y.`);
