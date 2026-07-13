@@ -1,10 +1,9 @@
 // ==========================================
 // TRẠM CHỈ HUY: PHÂN LUỒNG 2 BỘ NÃO API
 // ==========================================
-// 1. Link xử lý Đăng Nhập / Tài khoản (TRẢ VỀ LINK GỐC)
+// 1. Link xử lý Đăng Nhập / Tài khoản (Đường link cũ của anh)
 const API_URL = "https://script.google.com/macros/s/AKfycby9__D-oax96p1GG7J3qBAPTWbHjKltEK8Csn3mDIx0L8vHLL3zyMNNundP30-97Xvs/exec";
-
-// 2. Link xử lý Sổ Sinh Tử / Báo cáo (LINK X-QUANG MỚI)
+// 2. Link xử lý Sổ Sinh Tử / Báo cáo (Đường link MỚI có tính năng X-Quang)
 const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbxDAXLd-LSLzdfqTkKrOJDiFN9hYjBurkbEGkMya91qJmUruos3FD8UD6jZJV9kYcsM/exec";
 
 // ĐỌC ĐỊNH DANH TỪ LOCAL STORAGE ĐỂ GIỮ TÊN BẤT TỬ
