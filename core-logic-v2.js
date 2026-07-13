@@ -1,9 +1,9 @@
 // ==========================================
 // TRẠM CHỈ HUY: PHÂN LUỒNG 2 BỘ NÃO API
 // ==========================================
-// 1. Link xử lý Đăng Nhập / Tài khoản (Đường link cũ của anh)
+// 1. Link xử lý Đăng Nhập / Tài khoản
 const API_URL = "https://script.google.com/macros/s/AKfycby9__D-oax96p1GG7J3qBAPTWbHjKltEK8Csn3mDIx0L8vHLL3zyMNNundP30-97Xvs/exec";
-// 2. Link xử lý Sổ Sinh Tử / Báo cáo (Đường link MỚI có tính năng X-Quang)
+// 2. Link xử lý Sổ Sinh Tử / Báo cáo
 const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbxDAXLd-LSLzdfqTkKrOJDiFN9hYjBurkbEGkMya91qJmUruos3FD8UD6jZJV9kYcsM/exec";
 
 // ĐỌC ĐỊNH DANH TỪ LOCAL STORAGE ĐỂ GIỮ TÊN BẤT TỬ
@@ -299,6 +299,7 @@ class ReportDashboard {
                 <div id="repDataContainer" style="position: relative; z-index: 3; width: 100%;">
                     <div style="text-align: center; margin-bottom: 10px;">
                         <div id="repRankTitle" style="font-size: 20px; font-weight: 900; font-family: 'Space Grotesk', sans-serif; letter-spacing: 1px; color: #888;">ĐANG ĐO...</div>
+                        <div id="timeHud" style="font-size: 11px; font-family: 'Share Tech Mono', monospace; margin-top: 5px; font-weight: bold; letter-spacing: 1px;"></div>
                     </div>
                     
                     <div style="margin-bottom: 15px; padding: 0 10px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column;">
@@ -495,6 +496,15 @@ class ReportDashboard {
         document.getElementById('repRankTitle').innerText = `ĐẲNG CẤP: [ ${rankTitle} ]`; 
         document.getElementById('repRankTitle').style.color = rankColorRGB; 
         document.getElementById('repRankTitle').style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
+
+        // GIAO DIỆN THỜI GIAN THỰC
+        let timeHud = document.getElementById('timeHud');
+        if (timeHud) {
+            let todayMins = this.reportData.todayDuration || 0;
+            timeHud.innerText = `[ ĐÃ CHIẾN ĐẤU ${todayMins} PHÚT HÔM NAY ]`;
+            timeHud.style.color = rankColorRGB;
+            timeHud.style.textShadow = `0 0 8px rgba(${hexColor}, 0.8)`;
+        }
 
         let quoteEl = document.getElementById('repBooQuote');
         let hintEl = document.getElementById('repNextRankHint');
