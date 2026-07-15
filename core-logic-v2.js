@@ -4,8 +4,8 @@
 // 1. Link xử lý Đăng Nhập / Tài khoản (Cổng An Ninh Cũ - GIỮ NGUYÊN)
 const API_URL = "https://script.google.com/macros/s/AKfycby9__D-oax96p1GG7J3qBAPTWbHjKltEK8Csn3mDIx0L8vHLL3zyMNNundP30-97Xvs/exec";
 
-// 2. Link xử lý Sổ Sinh Tử / Báo cáo (LINK ĐIỆN THỜ MỚI TINH ANH KAI VỪA TẠO)
-const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbza6xQrMsEQfFh4-S2HgstjL5lrgtF5DmicFWgqdJmzqe247mMY6fmZA4j-1Ec-ola2/exec";
+// 2. Link xử lý Sổ Sinh Tử / Báo cáo (LINK ĐIỆN THỜ MỚI TINH ANH KAI VỪA CẤP)
+const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbwLW59QcyxNnk3riMqoTdTfNEfhKxFK1cdtUqVIwpGXYouBLVKW4u1UXwo9RJSzT7Yk/exec";
 
 // ĐỌC ĐỊNH DANH TỪ LOCAL STORAGE ĐỂ GIỮ TÊN BẤT TỬ
 let currentUsername = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_username') || 'guest';
@@ -229,7 +229,6 @@ function closeNinjaInfo() { document.getElementById('ninjaPopup').style.display 
 function openChangePassPanel() { document.getElementById('changePassPanel').style.display = 'flex'; }
 function closeChangePassPanel() { document.getElementById('changePassPanel').style.display = 'none'; }
 
-
 // ===================================================
 // K-DRIVE MODULE ĐỘC LẬP: SỔ SINH TỬ (REPORT DASHBOARD V-FINAL)
 // ===================================================
@@ -440,6 +439,15 @@ class ReportDashboard {
         this.animFrames[objId] = window.requestAnimationFrame(step);
     }
 
+    // Hàm format tiền thu gọn cho X-Quang Động
+    formatMoneyShort(amount) {
+        if (!amount) return "0";
+        let sign = amount > 0 ? "+" : "";
+        let m = amount / 1000000;
+        let mStr = (m % 1 === 0) ? m.toString() : m.toFixed(1);
+        return sign + mStr + "M";
+    }
+
     renderData(mode) {
         if(!this.reportData) return;
         let data = this.reportData[mode]; 
@@ -471,9 +479,12 @@ class ReportDashboard {
         else if (itmPct < 50) { rankTitle = "THỦ LĨNH"; rankClass = "rank-leader"; rankColorRGB = "#bf00ff"; hexColor = "191, 0, 255"; } 
         else { rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#ffd700"; hexColor = "255, 215, 0"; }
 
-        let sciStatus = this.reportData.sciStatus || "SAFE";
-        let finalQuote = this.reportData.booCommand || "";
-        let finalHint = this.reportData.booHint || "";
+        // TÍNH TOÁN X-QUANG ĐỘNG NGAY TẠI GIAO DIỆN
+        let xray = data.xray;
+        let deepStr = this.formatMoneyShort(xray["DEEPSTACK"]);
+        let multiStr = this.formatMoneyShort(xray["MULTIDAY"]);
+        let dailyStr = this.formatMoneyShort(xray["DAILY"]);
+        let finalHint = `📊 X-Quang: DEEP (${deepStr}) | MULTI (${multiStr}) | DAILY (${dailyStr})`;
 
         this.popupEl.classList.remove('rank-rookie', 'rank-warrior', 'rank-leader', 'rank-legendary');
         this.popupEl.classList.add(rankClass);
@@ -488,19 +499,33 @@ class ReportDashboard {
         document.getElementById('repRankTitle').style.color = rankColorRGB; 
         document.getElementById('repRankTitle').style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
 
-        // GIAO DIỆN THỜI GIAN THỰC ĐƯỢC CHÈN CHUẨN XÁC
+        // GIAO DIỆN THỜI GIAN THỰC ĐƯỢC NÂNG CẤP (3 CẤP ĐỘ CẢNH BÁO)
         let timeHud = document.getElementById('timeHud');
         if (timeHud) {
             let todayMins = this.reportData.todayDuration || 0;
-            timeHud.innerText = `[ ĐÃ CHIẾN ĐẤU ${todayMins} PHÚT HÔM NAY ]`;
-            timeHud.style.color = rankColorRGB;
-            timeHud.style.textShadow = `0 0 8px rgba(${hexColor}, 0.8)`;
+            if (todayMins >= 540) {
+                timeHud.innerText = `[ 🔴 NÃO BỘ QUÁ TẢI: ĐÃ CHIẾN ĐẤU ${todayMins}p - CẤM NẠP MẠNG ]`;
+                timeHud.style.color = "#ff3333";
+                timeHud.style.textShadow = "0 0 10px rgba(255, 51, 51, 0.8)";
+            } else if (todayMins >= 360) {
+                timeHud.innerText = `[ ⚠️ THỂ LỰC SUY GIẢM: ĐÃ CHIẾN ĐẤU ${todayMins}p ]`;
+                timeHud.style.color = "#ffaa00";
+                timeHud.style.textShadow = "0 0 10px rgba(255, 170, 0, 0.8)";
+            } else {
+                timeHud.innerText = `[ ĐÃ CHIẾN ĐẤU ${todayMins} PHÚT HÔM NAY ]`;
+                timeHud.style.color = rankColorRGB;
+                timeHud.style.textShadow = `0 0 8px rgba(${hexColor}, 0.8)`;
+            }
         }
 
+        // BÓC TÁCH SCI BOX
         let quoteEl = document.getElementById('repBooQuote');
         let hintEl = document.getElementById('repNextRankHint');
         let itmBarContainer = document.getElementById('repRankBar').parentElement;
         
+        let sciStatus = this.reportData.sciStatus || "SAFE";
+        let finalQuote = this.reportData.booCommand || "";
+
         quoteEl.innerText = finalQuote;
         hintEl.innerText = finalHint;
         quoteEl.classList.remove('sci-critical', 'sci-warning');
