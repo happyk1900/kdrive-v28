@@ -415,7 +415,6 @@ function closeNinjaInfo() { document.getElementById('ninjaPopup').style.display 
 function openChangePassPanel() { document.getElementById('changePassPanel').style.display = 'flex'; }
 function closeChangePassPanel() { document.getElementById('changePassPanel').style.display = 'none'; }
 
-
 // ===================================================
 // K-DRIVE MODULE ĐỘC LẬP: SỔ SINH TỬ (REPORT DASHBOARD V-ULTIMATE)
 // ===================================================
@@ -517,10 +516,8 @@ class ReportDashboard {
                             <div id="repTotalMatches" style="font-size: 18px; color: #fff; font-weight: bold;">--</div>
                         </div>
                         <div style="text-align: center; flex: 1; border-right: 1px dashed rgba(255,255,255,0.2);">
-                            <div style="font-size: 10px; color: #888; margin-bottom: 3px;">WIN RATE</div>
-                            <div style="font-size: 18px; color: #fff; font-weight: bold;">
-                                <span id="repWinRate">--</span><span style="font-size:12px; color:#aaa;">%</span>
-                            </div>
+                            <div style="font-size: 10px; color: #888; margin-bottom: 3px;">(SỐ NGÀY)</div>
+                            <div id="repTotalDays" style="font-size: 18px; color: #fff; font-weight: bold;">--</div>
                         </div>
                         <div style="text-align: center; flex: 1;">
                             <div style="font-size: 10px; color: #888; margin-bottom: 3px;">THỜI LƯỢNG</div>
@@ -562,7 +559,8 @@ class ReportDashboard {
             tabW.style.cssText = 'flex: 1; text-align: center; padding: 8px 0; background: #00e5ff; color: #000; box-shadow: 0 0 10px #00e5ff; font-family: "Share Tech Mono", monospace; font-size: 13px; font-weight: bold; border-radius: 2px; cursor: pointer; transition: 0.3s;';
             tabA.style.cssText = 'flex: 1; text-align: center; padding: 8px 0; background: transparent; color: #777; border: 1px solid #333; font-family: "Share Tech Mono", monospace; font-size: 13px; font-weight: bold; border-radius: 2px; cursor: pointer; transition: 0.3s;';
         } else {
-            tabA.style.cssText = 'flex: 1; text-align: center; padding: 8px 0; background: #ffaa00; color: #000; box-shadow: 0 0 10px #ffaa00; font-family: "Share Tech Mono", monospace; font-size: 13px; font-weight: bold; border-radius: 2px; cursor: pointer; transition: 0.3s;';
+            // Cập nhật tab TOÀN CHIẾN DỊCH thành màu Neon Amber (Cam)
+            tabA.style.cssText = 'flex: 1; text-align: center; padding: 8px 0; background: #ffbf00; color: #000; box-shadow: 0 0 10px #ffbf00; font-family: "Share Tech Mono", monospace; font-size: 13px; font-weight: bold; border-radius: 2px; cursor: pointer; transition: 0.3s;';
             tabW.style.cssText = 'flex: 1; text-align: center; padding: 8px 0; background: transparent; color: #777; border: 1px solid #333; font-family: "Share Tech Mono", monospace; font-size: 13px; font-weight: bold; border-radius: 2px; cursor: pointer; transition: 0.3s;';
         }
         
@@ -602,7 +600,6 @@ class ReportDashboard {
         }, 50);
     }
 
-    // Hiệu ứng Mưa Sao Băng Đa Hướng (Chiến Thuật)
     drawMeteors(xrayData) {
         const canvas = document.getElementById('meteorCanvas');
         if(!canvas) return;
@@ -612,9 +609,8 @@ class ReportDashboard {
 
         let meteors = [];
         
-        // Spawn theo Thể loại: Lãi bay từ Trái -> Phải (Xanh). Lỗ bay từ Phải -> Trái (Đỏ/Cam)
         const addMeteors = (amount, isProfit) => {
-            let count = Math.abs(amount) > 0 ? 6 : 0; // Số lượng sao mỗi vệt
+            let count = Math.abs(amount) > 0 ? 6 : 0; 
             for(let i=0; i<count; i++) {
                 let y = Math.random() * canvas.height;
                 let x = isProfit ? (Math.random() * -100) : (canvas.width + Math.random() * 100);
@@ -622,14 +618,14 @@ class ReportDashboard {
                 let vx = isProfit ? speed : -speed;
                 let vy = (Math.random() - 0.5) * 5; 
                 let color = isProfit ? '#00e5ff' : '#ffaa00'; 
-                if (amount < -5000000) color = '#ff3333'; // Lỗ nặng -> Sao đỏ rực
+                if (amount < -5000000) color = '#ff3333'; 
                 meteors.push({x, y, vx, vy, len: Math.random()*40 + 20, color, life: 1.0});
             }
         };
 
-        addMeteors(xrayData["DEEPSTACK"], xrayData["DEEPSTACK"] > 0);
-        addMeteors(xrayData["MULTIDAY"], xrayData["MULTIDAY"] > 0);
-        addMeteors(xrayData["DAILY"], xrayData["DAILY"] > 0);
+        addMeteors(xrayData["DEEPSTACK"] || 0, (xrayData["DEEPSTACK"] || 0) > 0);
+        addMeteors(xrayData["MULTIDAY"] || 0, (xrayData["MULTIDAY"] || 0) > 0);
+        addMeteors(xrayData["DAILY"] || 0, (xrayData["DAILY"] || 0) > 0);
 
         if(this.meteorAnimFrame) cancelAnimationFrame(this.meteorAnimFrame);
 
@@ -640,10 +636,10 @@ class ReportDashboard {
                 if(m.life > 0) {
                     active = true;
                     m.x += m.vx; m.y += m.vy;
-                    m.life -= 0.018; // Tốc độ mờ dần
+                    m.life -= 0.018; 
                     ctx.beginPath();
                     ctx.moveTo(m.x, m.y);
-                    ctx.lineTo(m.x - m.vx*2, m.y - m.vy*2); // Đuôi vệt sao
+                    ctx.lineTo(m.x - m.vx*2, m.y - m.vy*2); 
                     ctx.strokeStyle = m.color;
                     ctx.globalAlpha = Math.max(0, m.life);
                     ctx.lineWidth = 1.5;
@@ -700,16 +696,24 @@ class ReportDashboard {
         if(!this.reportData) return;
         let data = this.reportData[mode];
         
-        // 3 Cột số liệu
-        this.animateValue('repTotalMatches', 0, data.matches, 600);
-        this.animateValue('repWinRate', 0, data.winRate || 0, 600);
-        this.animateValue('repTotalDuration', 0, Math.floor(data.duration / 60), 600); // Đổi ra Giờ
+        // SỐ MẠNG | SỐ NGÀY | THỜI LƯỢNG (Ép kiểu chống NaN tuyệt đối)
+        this.animateValue('repTotalMatches', 0, data.matches || 0, 600);
+        this.animateValue('repTotalDays', 0, data.days || 0, 600);
+        this.animateValue('repTotalDuration', 0, Math.floor((data.duration || 0) / 60), 600); 
         
-        let itmPct = data.matches > 0 ? Math.round((data.wins / data.matches) * 100) : 0;
+        // TÍNH ITM (%) VÀ RENDER THANH SINH TỒN
+        // Ưu tiên tính ITM theo data.itmDays (nếu backend gửi về) hoặc tính từ số win/matches
+        let itmPct = 0;
+        if (typeof data.itmDays !== 'undefined') {
+            itmPct = data.days > 0 ? Math.round((data.itmDays / data.days) * 100) : 0;
+        } else {
+            itmPct = data.matches > 0 ? Math.round((data.wins / data.matches) * 100) : 0;
+        }
+
         this.animateValue('repItmProgressText', 0, itmPct, 600, 'percent');
 
-        let profitVal = data.profit;
-        let hours = data.duration / 60;
+        let profitVal = data.profit || 0;
+        let hours = (data.duration || 0) / 60;
         let hourlyRate = hours > 0 ? Math.round(profitVal / hours) : 0;
 
         let hrRateEl = document.getElementById('repHourlyRate');
@@ -724,7 +728,6 @@ class ReportDashboard {
         }
         this.animateValue('repNetProfit', 0, profitVal, 600, 'money');
         
-        // Hiệu ứng lóe sáng vàng kim (Sparkle) khi load xong Lãi Ròng
         profitEl.classList.remove('sparkle-active');
         void profitEl.offsetWidth; 
         profitEl.classList.add('sparkle-active');
@@ -740,7 +743,6 @@ class ReportDashboard {
             rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#ffd700"; hexColor = "255, 215, 0"; 
         }
 
-        // TÒA ÁN SCI 
         let sciStatus = data.sci ? data.sci.status : "SAFE";
         let finalQuote = data.sci ? data.sci.command : "> BOO: PHONG ĐỘ ỔN ĐỊNH.";
 
@@ -757,18 +759,18 @@ class ReportDashboard {
         document.getElementById('repRankTitle').style.color = rankColorRGB; 
         document.getElementById('repRankTitle').style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
 
-        // THỂ LOẠI
-        let xray = data.xray;
+        // THỂ LOẠI (THAY THẾ X-QUANG)
+        let xray = data.xray || {};
         let deepStr = this.formatMoneyShort(xray["DEEPSTACK"]);
         let multiStr = this.formatMoneyShort(xray["MULTIDAY"]);
         let dailyStr = this.formatMoneyShort(xray["DAILY"]);
         let hintEl = document.getElementById('repNextRankHint');
         hintEl.innerHTML = `🎮 THỂ LOẠI: DEEP (${deepStr}) | MULTI (${multiStr}) | DAILY (${dailyStr})`;
 
-        // KÍCH HOẠT MƯA SAO BĂNG DỰA TRÊN THỂ LOẠI
+        // KÍCH HOẠT MƯA SAO BĂNG CHIẾN THUẬT
         this.drawMeteors(xray);
 
-        // BÓC TÁCH MÀU SẮC SCI BOX
+        // BÓC TÁCH MÀU SẮC SCI BOX THEO CHIẾN LƯỢC MỚI CỦA BOO
         let quoteEl = document.getElementById('repBooQuote');
         let itmBarContainer = document.getElementById('repRankBar').parentElement;
         
