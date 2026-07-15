@@ -667,17 +667,22 @@ class ReportDashboard {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
             let currentVal = Math.floor(progress * (end - start) + start);
+            
             let txt = currentVal;
             if (formatStr === 'money') { txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US'); } 
             else if (formatStr === 'hourly') { txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US') + "/ 1 giờ"; } 
+            else if (formatStr === 'percent') { txt = currentVal + "%"; }
             
             obj.innerText = txt;
+            
             if (progress < 1) {
                 this.animFrames[objId] = window.requestAnimationFrame(step);
             } else {
                 let finalTxt = end;
                 if (formatStr === 'money') { finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US'); } 
                 else if (formatStr === 'hourly') { finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US') + "/ 1 giờ"; } 
+                else if (formatStr === 'percent') { finalTxt = end + "%"; }
+                
                 obj.innerText = finalTxt;
             }
         };
@@ -702,14 +707,7 @@ class ReportDashboard {
         this.animateValue('repTotalDuration', 0, Math.floor((data.duration || 0) / 60), 600); 
         
         // TÍNH ITM (%) VÀ RENDER THANH SINH TỒN
-        // Ưu tiên tính ITM theo data.itmDays (nếu backend gửi về) hoặc tính từ số win/matches
-        let itmPct = 0;
-        if (typeof data.itmDays !== 'undefined') {
-            itmPct = data.days > 0 ? Math.round((data.itmDays / data.days) * 100) : 0;
-        } else {
-            itmPct = data.matches > 0 ? Math.round((data.wins / data.matches) * 100) : 0;
-        }
-
+        let itmPct = data.itmPct || 0; // Lấy trực tiếp từ BOO Backend đã đóng gói sẵn
         this.animateValue('repItmProgressText', 0, itmPct, 600, 'percent');
 
         let profitVal = data.profit || 0;
@@ -759,12 +757,15 @@ class ReportDashboard {
         document.getElementById('repRankTitle').style.color = rankColorRGB; 
         document.getElementById('repRankTitle').style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
 
-        // THỂ LOẠI (THAY THẾ X-QUANG)
+        // THỂ LOẠI (THAY THẾ X-QUANG) VỚI MÀU TÍM NEON
         let xray = data.xray || {};
         let deepStr = this.formatMoneyShort(xray["DEEPSTACK"]);
         let multiStr = this.formatMoneyShort(xray["MULTIDAY"]);
         let dailyStr = this.formatMoneyShort(xray["DAILY"]);
+        
         let hintEl = document.getElementById('repNextRankHint');
+        hintEl.style.color = "#bd00ff"; // Màu Tím Neon
+        hintEl.style.textShadow = "0 0 8px #bd00ff";
         hintEl.innerHTML = `🎮 THỂ LOẠI: DEEP (${deepStr}) | MULTI (${multiStr}) | DAILY (${dailyStr})`;
 
         // KÍCH HOẠT MƯA SAO BĂNG CHIẾN THUẬT
@@ -787,8 +788,8 @@ class ReportDashboard {
             itmBarContainer.style.border = "1px dashed #ffaa00";
         } else {
             quoteEl.style.color = rankColorRGB;
-            quoteEl.style.border = "none";
-            quoteEl.style.background = "transparent";
+            quoteEl.style.border = "1px solid rgba(255,255,255,0.05)";
+            quoteEl.style.background = "rgba(0,0,0,0.4)";
             itmBarContainer.style.boxShadow = "inset 0 0 5px rgba(0,0,0,0.8)";
             itmBarContainer.style.border = "none";
         }
