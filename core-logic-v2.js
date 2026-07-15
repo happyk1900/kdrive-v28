@@ -4,7 +4,7 @@
 // 1. Link xử lý Đăng Nhập / Tài khoản (Cổng An Ninh Cũ - GIỮ NGUYÊN)
 const API_URL = "https://script.google.com/macros/s/AKfycby9__D-oax96p1GG7J3qBAPTWbHjKltEK8Csn3mDIx0L8vHLL3zyMNNundP30-97Xvs/exec";
 
-// 2. Link xử lý Sổ Sinh Tử / Báo cáo (LINK ĐIỆN THỜ MỚI TINH ANH KAI VỪA CẤP)
+// 2. Link xử lý Sổ Sinh Tử / Báo cáo (LINK ĐIỆN THỜ HIỆN TẠI)
 const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbwLW59QcyxNnk3riMqoTdTfNEfhKxFK1cdtUqVIwpGXYouBLVKW4u1UXwo9RJSzT7Yk/exec";
 
 // ĐỌC ĐỊNH DANH TỪ LOCAL STORAGE ĐỂ GIỮ TÊN BẤT TỬ
@@ -21,7 +21,9 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('logoutHud').classList.add('logout-active');
         document.getElementById('cyberAltarBtn').classList.add('logged-in');
         let hIcon = document.getElementById('heartIcon'); hIcon.className = 'heart-icon active'; hIcon.innerHTML = "❤️";
-        setInterval(() => { document.getElementById('bpmText').innerText = (95 + Math.floor(Math.random() * 15)) + " BPM"; }, 2000);
+        setInterval(() => { 
+            document.getElementById('bpmText').innerText = (95 + Math.floor(Math.random() * 15)) + " BPM"; 
+        }, 2000);
         pulseTerminal("BOO: SESSION RESTORED.");
         initRelic();
         spawnNeonRain(); 
@@ -34,7 +36,12 @@ function validateLive(type) { }
 
 const EYE_OPEN = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
 const EYE_CLOSED = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
-function togglePass(inputId, iconEl) { let inp = document.getElementById(inputId); if(inp.type === 'password') { inp.type = 'text'; iconEl.innerHTML = EYE_CLOSED; } else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } }
+
+function togglePass(inputId, iconEl) { 
+    let inp = document.getElementById(inputId); 
+    if(inp.type === 'password') { inp.type = 'text'; iconEl.innerHTML = EYE_CLOSED; } 
+    else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } 
+}
 
 let overloadOsc = null; let overloadGain = null;
 let initPinchDist = 0; let isPinching = false;
@@ -42,24 +49,104 @@ const base64Wallpapers = ["https://i.postimg.cc/J4xHjMr7/1.webp", "https://i.pos
 const musicTracks = ["https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20(1).mp3", "https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20(2).mp3"];
 const neonColors = ['#00ff88', '#00e5ff', '#bf00ff', '#ffd700', '#ff3366'];
 
-let currentWallpaperIndex = 0; let isLoggedIn = false;
+let currentWallpaperIndex = 0;
+let isLoggedIn = false;
 let loginDrumAudio = new Audio("https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/0604.mp4");
 let cameraShutterAudio = new Audio("https://www.myinstants.com/media/sounds/camera-shutter-click-01.mp3");
-let bgAudio = new Audio(); bgAudio.loop = false; let currentTrackState = 0; let isMusicPlaying = false; let isMuted = false;
+let bgAudio = new Audio();
+bgAudio.loop = false; let currentTrackState = 0; let isMusicPlaying = false; let isMuted = false;
 
-bgAudio.onended = function() { if(!isMuted) { currentTrackState = (currentTrackState % musicTracks.length) + 1; bgAudio.src = musicTracks[currentTrackState - 1]; bgAudio.play().catch(e=>{}); updateAudioUI(currentTrackState); } };
-function updateAudioUI(tNum) { let color = neonColors[(tNum-1)%neonColors.length]; document.getElementById('audioHud').className = 'audio-hud audio-active'; document.getElementById('audioHud').style.setProperty('--neon-color', color); document.getElementById('trackText').innerHTML = `[ ▶️ TRK: ${(tNum<10?'0':'')+tNum} ]`; document.getElementById('trackText').style.color = color; document.getElementById('coreSystem').style.setProperty('--core-color', color); }
-function cycleMusicTracks() { playCyberSound(); currentTrackState = (currentTrackState % musicTracks.length) + 1; bgAudio.src = musicTracks[currentTrackState - 1]; isMusicPlaying = true; isMuted = false; bgAudio.play().catch(e=>{}); updateAudioUI(currentTrackState); }
-function toggleMuteSystem() { playCyberSound(); if(!isMuted) { isMuted = true; bgAudio.pause(); document.getElementById('audioHud').className = 'audio-hud'; document.getElementById('trackText').innerHTML = "[ 🔇 SYS: OFF ]"; document.getElementById('trackText').style.color = "#ff3333"; } else { isMuted = false; bgAudio.play().catch(e=>{}); updateAudioUI(currentTrackState); } }
+bgAudio.onended = function() { 
+    if(!isMuted) { 
+        currentTrackState = (currentTrackState % musicTracks.length) + 1; 
+        bgAudio.src = musicTracks[currentTrackState - 1]; 
+        bgAudio.play().catch(e=>{}); 
+        updateAudioUI(currentTrackState);
+    } 
+};
+
+function updateAudioUI(tNum) { 
+    let color = neonColors[(tNum-1)%neonColors.length]; 
+    document.getElementById('audioHud').className = 'audio-hud audio-active'; 
+    document.getElementById('audioHud').style.setProperty('--neon-color', color);
+    document.getElementById('trackText').innerHTML = `[ ▶️ TRK: ${(tNum<10?'0':'')+tNum} ]`; 
+    document.getElementById('trackText').style.color = color; 
+    document.getElementById('coreSystem').style.setProperty('--core-color', color); 
+}
+
+function cycleMusicTracks() { 
+    playCyberSound();
+    currentTrackState = (currentTrackState % musicTracks.length) + 1; 
+    bgAudio.src = musicTracks[currentTrackState - 1]; 
+    isMusicPlaying = true; isMuted = false; 
+    bgAudio.play().catch(e=>{}); 
+    updateAudioUI(currentTrackState);
+}
+
+function toggleMuteSystem() { 
+    playCyberSound(); 
+    if(!isMuted) { 
+        isMuted = true; bgAudio.pause(); 
+        document.getElementById('audioHud').className = 'audio-hud'; 
+        document.getElementById('trackText').innerHTML = "[ 🔇 SYS: OFF ]";
+        document.getElementById('trackText').style.color = "#ff3333"; 
+    } else { 
+        isMuted = false; bgAudio.play().catch(e=>{}); 
+        updateAudioUI(currentTrackState); 
+    } 
+}
 
 const AudioContext = window.AudioContext || window.webkitAudioContext; let actx;
 function initAudio() { if(!actx) actx = new AudioContext(); if(actx.state==='suspended') actx.resume(); } 
 document.body.addEventListener('touchstart', initAudio, {once:true});
 
-function playCyberSound() { try { initAudio(); const osc = actx.createOscillator(); const gain = actx.createGain(); osc.connect(gain); gain.connect(actx.destination); osc.type = 'triangle'; const now = actx.currentTime; osc.frequency.setValueAtTime(1500, now); osc.frequency.exponentialRampToValueAtTime(400, now + 0.12); gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15); osc.start(now); osc.stop(now + 0.15); } catch(e){} }
-function playCyberClick() { if(!actx) initAudio(); try { const osc = actx.createOscillator(); const gain = actx.createGain(); osc.connect(gain); gain.connect(actx.destination); osc.type = 'square'; const now = actx.currentTime; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.05); gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05); osc.start(now); osc.stop(now + 0.05); } catch(e){} }
-function playOverloadRoar() { if(!actx) initAudio(); if(overloadOsc) return; overloadOsc = actx.createOscillator(); overloadGain = actx.createGain(); overloadOsc.type = 'sawtooth'; overloadOsc.frequency.setValueAtTime(50, actx.currentTime); overloadOsc.frequency.linearRampToValueAtTime(130, actx.currentTime + 1.5); overloadGain.gain.setValueAtTime(0, actx.currentTime); overloadGain.gain.linearRampToValueAtTime(0.4, actx.currentTime + 0.3); overloadOsc.connect(overloadGain); overloadGain.connect(actx.destination); overloadOsc.start(); }
-function stopOverloadRoar() { if(overloadGain) { overloadGain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.2); setTimeout(() => { if(overloadOsc) { overloadOsc.stop(); overloadOsc = null; } overloadGain = null; }, 250); } }
+function playCyberSound() { 
+    try { 
+        initAudio();
+        const osc = actx.createOscillator(); const gain = actx.createGain(); 
+        osc.connect(gain); gain.connect(actx.destination); 
+        osc.type = 'triangle'; const now = actx.currentTime; 
+        osc.frequency.setValueAtTime(1500, now);
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.12); 
+        gain.gain.setValueAtTime(0.5, now); 
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15); 
+        osc.start(now); osc.stop(now + 0.15);
+    } catch(e){} 
+}
+
+function playCyberClick() { 
+    if(!actx) initAudio(); 
+    try { 
+        const osc = actx.createOscillator(); const gain = actx.createGain(); 
+        osc.connect(gain); gain.connect(actx.destination);
+        osc.type = 'square'; const now = actx.currentTime; 
+        osc.frequency.setValueAtTime(800, now); 
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.05); 
+        gain.gain.setValueAtTime(0.3, now); 
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05); 
+        osc.start(now);
+        osc.stop(now + 0.05); 
+    } catch(e){} 
+}
+
+function playOverloadRoar() { 
+    if(!actx) initAudio(); 
+    if(overloadOsc) return; 
+    overloadOsc = actx.createOscillator(); overloadGain = actx.createGain();
+    overloadOsc.type = 'sawtooth'; overloadOsc.frequency.setValueAtTime(50, actx.currentTime); 
+    overloadOsc.frequency.linearRampToValueAtTime(130, actx.currentTime + 1.5); 
+    overloadGain.gain.setValueAtTime(0, actx.currentTime); 
+    overloadGain.gain.linearRampToValueAtTime(0.4, actx.currentTime + 0.3); 
+    overloadOsc.connect(overloadGain); overloadGain.connect(actx.destination); 
+    overloadOsc.start();
+}
+
+function stopOverloadRoar() { 
+    if(overloadGain) { 
+        overloadGain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.2); 
+        setTimeout(() => { if(overloadOsc) { overloadOsc.stop(); overloadOsc = null; } overloadGain = null; }, 250);
+    } 
+}
 function startBuzz() { } function stopBuzz() { } function playZapPop() { }
 
 function spawnNeonRain() {
@@ -70,7 +157,7 @@ function spawnNeonRain() {
     const suits = ['♠', '♥', '♣', '♦'];
     const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
     const redValues = ['A', 'K', 'Q', 'J']; 
-    const chipColors = ['#ffd700', '#ff66b2', '#b026ff']; 
+    const chipColors = ['#ffd700', '#ff66b2', '#b026ff'];
     
     setInterval(() => {
         let el = document.createElement('div');
@@ -80,8 +167,11 @@ function spawnNeonRain() {
             let suit = suits[Math.floor(Math.random() * suits.length)];
             let val = values[Math.floor(Math.random() * values.length)];
             el.className = 'neon-card-real';
-            if (redValues.includes(val)) { el.style.color = '#ff3366'; el.style.borderColor = 'rgba(255, 51, 102, 0.6)'; } 
-            else { el.style.color = '#00ff88'; el.style.borderColor = 'rgba(0, 255, 136, 0.6)'; }
+            if (redValues.includes(val)) { 
+                el.style.color = '#ff3366'; el.style.borderColor = 'rgba(255, 51, 102, 0.6)'; 
+            } else { 
+                el.style.color = '#00ff88'; el.style.borderColor = 'rgba(0, 255, 136, 0.6)'; 
+            }
             el.innerHTML = `<span class="val">${val}</span><span class="suit">${suit}</span>`;
         } else if (randObj > 0.25) { 
             el.className = 'neon-dollar-real'; el.innerHTML = '<span>100</span>'; el.style.color = '#00ff00'; el.style.borderColor = 'rgba(0, 255, 0, 0.5)';
@@ -89,7 +179,8 @@ function spawnNeonRain() {
             el.className = 'neon-coin-real'; el.innerHTML = '<span>C</span>'; el.style.color = chipColors[Math.floor(Math.random() * chipColors.length)];
         }
 
-        el.style.left = Math.random() * 90 + 5 + 'vw'; el.style.top = Math.random() * 60 + 5 + 'vh'; 
+        el.style.left = Math.random() * 90 + 5 + 'vw';
+        el.style.top = Math.random() * 60 + 5 + 'vh'; 
         let scale = Math.random() * 0.7 + 0.6; el.style.setProperty('--drop-scale', scale);
         let duration = Math.random() * 3 + 4; el.style.setProperty('--max-opacity', (Math.random() * 0.4 + 0.5).toString());
         el.style.animation = `quantumMaterialize ${duration}s ease-in-out forwards`;
@@ -98,22 +189,36 @@ function spawnNeonRain() {
     }, 2500); 
 }
 
-const hexCanvas = document.getElementById('hexCanvas'); const hexCtx = hexCanvas.getContext('2d'); let hexGrid = []; let canvasW = 0, canvasH = 0;
-function initHexGrid() { hexCanvas.width = window.innerWidth; hexCanvas.height = window.innerHeight; canvasW = hexCanvas.width; canvasH = hexCanvas.height; hexGrid = []; let r = 24; let h3 = Math.sqrt(3) * r; let cols = Math.ceil(canvasW / h3) + 1; let rows = Math.ceil(canvasH / (r*1.5)) + 1; for(let row=0; row<rows; row++) { for(let col=0; col<cols; col++) { hexGrid.push({x: col * h3 + (row%2===1 ? h3/2 : 0), y: row * r*1.5, energy: 0}); } } }
+const hexCanvas = document.getElementById('hexCanvas'); const hexCtx = hexCanvas.getContext('2d');
+let hexGrid = []; let canvasW = 0, canvasH = 0;
+function initHexGrid() { 
+    hexCanvas.width = window.innerWidth; hexCanvas.height = window.innerHeight;
+    canvasW = hexCanvas.width; canvasH = hexCanvas.height; hexGrid = []; 
+    let r = 24; let h3 = Math.sqrt(3) * r;
+    let cols = Math.ceil(canvasW / h3) + 1; let rows = Math.ceil(canvasH / (r*1.5)) + 1;
+    for(let row=0; row<rows; row++) { 
+        for(let col=0; col<cols; col++) { 
+            hexGrid.push({x: col * h3 + (row%2===1 ? h3/2 : 0), y: row * r*1.5, energy: 0});
+        } 
+    } 
+}
 window.addEventListener('resize', initHexGrid); initHexGrid();
 
 function renderCanvas() { 
-    hexCtx.clearRect(0, 0, canvasW, canvasH); hexCtx.lineWidth = 1.2; 
+    hexCtx.clearRect(0, 0, canvasW, canvasH); hexCtx.lineWidth = 1.2;
     let isStruggling = document.getElementById('cubeWrapper').classList.contains('overload-active'); 
     for(let hex of hexGrid) { 
-        if(isLoggedIn && isStruggling && Math.hypot(hex.x - canvasW/2, hex.y - canvasH*0.516) < 120) hex.energy = Math.random() * 0.9; 
+        if(isLoggedIn && isStruggling && Math.hypot(hex.x - canvasW/2, hex.y - canvasH*0.516) < 120) hex.energy = Math.random() * 0.9;
         hex.energy *= 0.88; 
         let alpha = (isLoggedIn ? 0.12 : 0.03) + hex.energy; if(alpha>1) alpha=1; 
-        let color = '0,255,136'; if (isStruggling && hex.energy>0.1) color = '255,51,51'; 
+        let color = '0,255,136';
+        if (isStruggling && hex.energy>0.1) color = '255,51,51'; 
         hexCtx.strokeStyle = `rgba(${color},${alpha})`; 
         hexCtx.fillStyle = alpha > 0.22 ? `rgba(${color},${(alpha-0.15)*0.3})` : 'transparent'; 
-        hexCtx.beginPath(); 
-        for (let i=0; i<6; i++) { let a = Math.PI/180*(60*i-30); hexCtx.lineTo(hex.x + 20*Math.cos(a), hex.y + 20*Math.sin(a)); } 
+        hexCtx.beginPath();
+        for (let i=0; i<6; i++) { 
+            let a = Math.PI/180*(60*i-30); hexCtx.lineTo(hex.x + 20*Math.cos(a), hex.y + 20*Math.sin(a));
+        } 
         hexCtx.closePath(); hexCtx.stroke(); 
         if(hexCtx.fillStyle!=='transparent') hexCtx.fill(); 
     } 
@@ -145,89 +250,171 @@ cubeWrapperNode.addEventListener('touchend', (e) => {
     }
 });
 
-function triggerHexagonShield() { if(!isLoggedIn) return; for(let hex of hexGrid) { if(Math.hypot(hex.x - window.innerWidth/2, window.innerHeight*0.516) < 70) hex.energy = 0.6; } }
+function triggerHexagonShield() { 
+    if(!isLoggedIn) return; 
+    for(let hex of hexGrid) { 
+        if(Math.hypot(hex.x - window.innerWidth/2, window.innerHeight*0.516) < 70) hex.energy = 0.6;
+    } 
+}
 
-let relicEl = document.getElementById('lightningRelic'); let rx = window.innerWidth / 2, ry = window.innerHeight / 2; let targetRx = rx, targetRy = ry; let relicActive = false; let trailTimer = 0; let isRelicCharged = false; 
+let relicEl = document.getElementById('lightningRelic'); let rx = window.innerWidth / 2, ry = window.innerHeight / 2;
+let targetRx = rx, targetRy = ry; let relicActive = false; let trailTimer = 0; let isRelicCharged = false;
 function checkDailyEnergy() { return false; }
-function initRelic() { relicActive = true; relicEl.style.display = 'block'; isRelicCharged = checkDailyEnergy(); if (!isRelicCharged) { relicEl.classList.add('relic-active'); relicEl.classList.remove('relic-passive'); startBuzz(); } else { relicEl.classList.add('relic-passive'); relicEl.classList.remove('relic-active'); } moveRelic(); }
+
+function initRelic() { 
+    relicActive = true; relicEl.style.display = 'block'; isRelicCharged = checkDailyEnergy();
+    if (!isRelicCharged) { relicEl.classList.add('relic-active'); relicEl.classList.remove('relic-passive'); startBuzz(); } 
+    else { relicEl.classList.add('relic-passive'); relicEl.classList.remove('relic-active'); } 
+    moveRelic();
+}
+
 function moveRelic() { 
     if(!relicActive || !isLoggedIn) return; 
-    let dx = targetRx - rx; let dy = targetRy - ry; let dist = Math.hypot(dx, dy); 
-    if(dist < 50) { targetRx = 40 + Math.random() * (window.innerWidth - 80); targetRy = 40 + Math.random() * (window.innerHeight - 80); } 
-    let speed = 0.003; rx += dx * speed; ry += dy * speed; 
-    relicEl.style.left = rx + 'px'; relicEl.style.top = ry + 'px'; 
+    let dx = targetRx - rx;
+    let dy = targetRy - ry; let dist = Math.hypot(dx, dy);
+    if(dist < 50) { 
+        targetRx = 40 + Math.random() * (window.innerWidth - 80);
+        targetRy = 40 + Math.random() * (window.innerHeight - 80); 
+    } 
+    let speed = 0.003;
+    rx += dx * speed; ry += dy * speed; 
+    relicEl.style.left = rx + 'px'; relicEl.style.top = ry + 'px';
     trailTimer++; let trailFreq = isRelicCharged ? 8 : 4; 
     if(trailTimer % trailFreq === 0) { 
-        let trail = document.createElement('div'); trail.className = 'relic-trail'; trail.style.left = rx + 'px'; trail.style.top = ry + 'px'; 
-        if (isRelicCharged) { trail.style.boxShadow = '0 0 10px #00ff88, 0 0 20px #00a356'; trail.style.background = '#00ff88'; } 
-        else { trail.style.boxShadow = '0 0 10px #00e5ff, 0 0 25px #00e5ff'; trail.style.background = '#ffffff'; } 
-        document.body.appendChild(trail); setTimeout(() => { if(trail.parentNode) trail.remove(); }, 800); 
+        let trail = document.createElement('div');
+        trail.className = 'relic-trail'; trail.style.left = rx + 'px'; trail.style.top = ry + 'px';
+        if (isRelicCharged) { 
+            trail.style.boxShadow = '0 0 10px #00ff88, 0 0 20px #00a356'; trail.style.background = '#00ff88';
+        } else { 
+            trail.style.boxShadow = '0 0 10px #00e5ff, 0 0 25px #00e5ff';
+            trail.style.background = '#ffffff'; 
+        } 
+        document.body.appendChild(trail); setTimeout(() => { if(trail.parentNode) trail.remove(); }, 800);
     } 
     requestAnimationFrame(moveRelic); 
 }
-function captureRelic() { if(!relicActive) return; if(isMusicPlaying && !isMuted) bgAudio.pause(); if (!isRelicCharged) { let today = new Date().toLocaleDateString(); localStorage.setItem('lastCapturedDate_' + currentUsername, today); isRelicCharged = true; stopBuzz(); playZapPop(); if(navigator.vibrate) navigator.vibrate([100, 50, 200, 50, 100]); let flash = document.getElementById('whiteFlash'); flash.style.display = 'block'; flash.style.opacity = '1'; relicEl.style.transform = `translate(-50%, -50%) scale(5)`; relicEl.style.opacity = '0'; setTimeout(() => { window.location.href = "nhap_the.html"; }, 350); } else { if(navigator.vibrate) navigator.vibrate(50); relicEl.style.transform = `translate(-50%, -50%) scale(1.5)`; relicEl.style.opacity = '0'; setTimeout(() => { window.location.href = "trai_huan_luyen.html"; }, 200); } }
+
+function captureRelic() { 
+    if(!relicActive) return; if(isMusicPlaying && !isMuted) bgAudio.pause();
+    if (!isRelicCharged) { 
+        let today = new Date().toLocaleDateString(); localStorage.setItem('lastCapturedDate_' + currentUsername, today); 
+        isRelicCharged = true; stopBuzz(); playZapPop();
+        if(navigator.vibrate) navigator.vibrate([100, 50, 200, 50, 100]); 
+        let flash = document.getElementById('whiteFlash'); flash.style.display = 'block'; flash.style.opacity = '1';
+        relicEl.style.transform = `translate(-50%, -50%) scale(5)`; relicEl.style.opacity = '0'; 
+        setTimeout(() => { window.location.href = "nhap_the.html"; }, 350);
+    } else { 
+        if(navigator.vibrate) navigator.vibrate(50); relicEl.style.transform = `translate(-50%, -50%) scale(1.5)`; relicEl.style.opacity = '0';
+        setTimeout(() => { window.location.href = "trai_huan_luyen.html"; }, 200); 
+    } 
+}
 
 function callAPI(action, params, callbackName, onSuccess, onError) { 
-    let finalUrl = API_URL + "?action=" + action; 
+    let finalUrl = API_URL + "?action=" + action;
     for (let key in params) { finalUrl += "&" + key + "=" + encodeURIComponent(params[key]); } 
-    finalUrl += "&callback=" + callbackName; 
+    finalUrl += "&callback=" + callbackName;
     window[callbackName] = function(res) { 
         delete window[callbackName]; let scriptEl = document.getElementById(callbackName); 
-        if(scriptEl) document.body.removeChild(scriptEl); 
+        if(scriptEl) document.body.removeChild(scriptEl);
         if (res && res.success) onSuccess(res); else onError(res ? res.msg : "LỖI MÁY CHỦ!"); 
     }; 
-    let script = document.createElement('script'); script.id = callbackName; script.src = finalUrl; script.onerror = function() { onError("LỖI MẠNG!"); }; document.body.appendChild(script); 
+    let script = document.createElement('script');
+    script.id = callbackName; script.src = finalUrl; script.onerror = function() { onError("LỖI MẠNG!"); }; document.body.appendChild(script);
 }
 
 function submitLogin() { 
     try { playCyberSound(); } catch(e) {} 
-    var acc = document.getElementById('accInput').value.trim(); var code = document.getElementById('passcodeInput').value.trim(); var statusEl = document.getElementById('loginStatus'); 
+    var acc = document.getElementById('accInput').value.trim(); var code = document.getElementById('passcodeInput').value.trim(); var statusEl = document.getElementById('loginStatus');
     if(acc === "" || code === "") { statusEl.innerHTML = "[LỖI]: ĐIỀN ĐỦ THÔNG TIN!"; statusEl.style.color = "#ff3333"; return; } 
-    statusEl.innerHTML = "🛰️ BOO ĐANG KIỂM TRA..."; statusEl.style.color = "#00e5ff"; 
-    
+    statusEl.innerHTML = "🛰️ BOO ĐANG KIỂM TRA..."; statusEl.style.color = "#00e5ff";
     callAPI('checkLogin', {username: acc, password: code}, 'cb_login', function(res) { 
         sessionStorage.setItem('kdrive_session', 'active'); sessionStorage.setItem('kdrive_username', acc); localStorage.setItem('kdrive_logged_in_user', acc); currentUsername = acc; 
         document.getElementById('loginPanelContainer').style.display = 'none'; unlockInteraction(); loginDrumAudio.currentTime = 0; loginDrumAudio.play().catch(e=>{}); if(navigator.vibrate) navigator.vibrate([200, 100, 200]); isLoggedIn = true; triggerHexagonShield(); 
         let hud = document.getElementById('protocolGuide'); if(hud) hud.remove(); document.getElementById('logoutHud').classList.add('logout-active'); document.getElementById('cyberAltarBtn').classList.add('logged-in'); let hIcon = document.getElementById('heartIcon'); hIcon.className = 'heart-icon active'; hIcon.innerHTML = "❤️"; setInterval(() => { document.getElementById('bpmText').innerText = (95 + Math.floor(Math.random() * 15)) + " BPM"; }, 2000); 
-        document.getElementById('mainWrapper').classList.add('shake-active'); setTimeout(() => document.getElementById('mainWrapper').classList.remove('shake-active'), 600); pulseTerminal("BOO: AUTHORIZED."); 
-        const banner = document.getElementById('welcomeHologram'); const tag = document.getElementById('welcomeTag'); banner.style.border = `2px solid #00ff88`; banner.style.boxShadow = `0 0 25px #00ff88, inset 0 0 15px rgba(0,0,0,0.5)`; tag.style.color = "#00ff88"; tag.innerHTML = `[ 🥷 ${res.nickname || acc} ]`; document.getElementById('welcomeBody').innerHTML = "Hệ thống BOO đã sẵn sàng nhận lệnh!"; banner.classList.add('banner-strike'); setTimeout(() => { banner.classList.remove('banner-strike'); initRelic(); spawnNeonRain(); }, 3500); 
-    }, function(msg) { statusEl.style.color = "#ff3333"; statusEl.innerHTML = msg; }); 
+        document.getElementById('mainWrapper').classList.add('shake-active');
+        setTimeout(() => document.getElementById('mainWrapper').classList.remove('shake-active'), 600); pulseTerminal("BOO: AUTHORIZED."); 
+        const banner = document.getElementById('welcomeHologram'); const tag = document.getElementById('welcomeTag'); banner.style.border = `2px solid #00ff88`;
+        banner.style.boxShadow = `0 0 25px #00ff88, inset 0 0 15px rgba(0,0,0,0.5)`; tag.style.color = "#00ff88"; tag.innerHTML = `[ 🥷 ${res.nickname || acc} ]`; document.getElementById('welcomeBody').innerHTML = "Hệ thống BOO đã sẵn sàng nhận lệnh!"; banner.classList.add('banner-strike');
+        setTimeout(() => { banner.classList.remove('banner-strike'); initRelic(); spawnNeonRain(); }, 3500); 
+    }, function(msg) { statusEl.style.color = "#ff3333"; statusEl.innerHTML = msg; });
 }
 
-function showLogoutConfirm() { try { playCyberSound(); } catch(e){} document.getElementById('logoutConfirmPanel').style.display = 'flex'; lockInteraction(); }
+function showLogoutConfirm() { 
+    try { playCyberSound(); } catch(e){} 
+    document.getElementById('logoutConfirmPanel').style.display = 'flex'; lockInteraction();
+}
 function confirmLogout(isYes) { 
     try { playCyberSound(); } catch(e){} 
-    if(isYes) { document.getElementById('logoutConfirmPanel').style.display = 'none'; pulseTerminal("BOO: LOGGING OUT..."); sessionStorage.removeItem('kdrive_session'); sessionStorage.removeItem('kdrive_username'); localStorage.removeItem('kdrive_logged_in_user'); setTimeout(() => { window.location.reload(); }, 500); } 
-    else { document.getElementById('logoutConfirmPanel').style.display = 'none'; unlockInteraction(); } 
+    if(isYes) { 
+        document.getElementById('logoutConfirmPanel').style.display = 'none'; pulseTerminal("BOO: LOGGING OUT..."); 
+        sessionStorage.removeItem('kdrive_session'); sessionStorage.removeItem('kdrive_username'); localStorage.removeItem('kdrive_logged_in_user');
+        setTimeout(() => { window.location.reload(); }, 500); 
+    } else { 
+        document.getElementById('logoutConfirmPanel').style.display = 'none'; unlockInteraction();
+    } 
 }
 function submitChangePass() { }
-function switchPanel(panelName) { try { playCyberSound(); } catch(e){} document.getElementById('panel-login').style.display = 'none'; document.getElementById('panel-register').style.display = 'none'; document.getElementById('panel-otp').style.display = 'none'; document.getElementById('panel-forgot').style.display = 'none'; document.getElementById('panel-' + panelName).style.display = 'flex'; }
-function pulseTerminal(text) { const terminal = document.getElementById('terminalStream'); const newLine = document.createElement('div'); newLine.className = 'terminal-line'; newLine.innerText = `> ${text}`; terminal.appendChild(newLine); if(terminal.children.length > 3) terminal.removeChild(terminal.firstChild); }
+function switchPanel(panelName) { 
+    try { playCyberSound(); } catch(e){} 
+    document.getElementById('panel-login').style.display = 'none'; document.getElementById('panel-register').style.display = 'none';
+    document.getElementById('panel-otp').style.display = 'none'; document.getElementById('panel-forgot').style.display = 'none'; document.getElementById('panel-' + panelName).style.display = 'flex'; 
+}
+function pulseTerminal(text) { 
+    const terminal = document.getElementById('terminalStream');
+    const newLine = document.createElement('div'); newLine.className = 'terminal-line'; newLine.innerText = `> ${text}`; terminal.appendChild(newLine); if(terminal.children.length > 3) terminal.removeChild(terminal.firstChild);
+}
 setInterval(() => { pulseTerminal(isLoggedIn ? "BOO: SHIELD ACTIVE" : "AWAITING KAI RIPE..."); }, 4000);
-function checkLoginGuard() { if (!isLoggedIn) { try { playCyberSound(); } catch(e){} const warningEl = document.getElementById('hudGuardWarning'); if(warningEl) { warningEl.className = "hud-warning-text hud-warning-active"; warningEl.innerHTML = "[ ⚠️ BOO TỪ CHỐI LỆNH! ]"; setTimeout(() => { warningEl.className = "hud-warning-text"; warningEl.innerHTML = ""; }, 2500); } return false; } return true; }
+function checkLoginGuard() { 
+    if (!isLoggedIn) { 
+        try { playCyberSound(); } catch(e){} 
+        const warningEl = document.getElementById('hudGuardWarning');
+        if(warningEl) { 
+            warningEl.className = "hud-warning-text hud-warning-active"; warningEl.innerHTML = "[ ⚠️ BOO TỪ CHỐI LỆNH! ]";
+            setTimeout(() => { warningEl.className = "hud-warning-text"; warningEl.innerHTML = ""; }, 2500); 
+        } 
+        return false; 
+    } 
+    return true;
+}
 
 let capturedVideoUrl = null; let hasUnreadVideo = false;
 function openSecretCameraGuard(element) { 
-    if (!checkLoginGuard()) return; if(navigator.vibrate) navigator.vibrate(50); playCyberClick(); try { cameraShutterAudio.play().catch(e=>{}); } catch(e){}
-    let cube = document.getElementById('cubeWrapper'); cube.classList.remove('video-play-mode'); document.querySelector('.projector-beam').classList.remove('beam-on'); cube.classList.add('camera-rec-mode'); setTimeout(() => { document.getElementById('hiddenCamera').click(); }, 600);
+    if (!checkLoginGuard()) return; if(navigator.vibrate) navigator.vibrate(50);
+    playCyberClick(); try { cameraShutterAudio.play().catch(e=>{}); } catch(e){}
+    let cube = document.getElementById('cubeWrapper'); cube.classList.remove('video-play-mode'); document.querySelector('.projector-beam').classList.remove('beam-on'); cube.classList.add('camera-rec-mode');
+    setTimeout(() => { document.getElementById('hiddenCamera').click(); }, 600);
 }
 window.addEventListener('focus', () => { document.getElementById('cubeWrapper').classList.remove('camera-rec-mode'); });
-function handleVideoUpload(event) { const file = event.target.files[0]; if (file) { capturedVideoUrl = URL.createObjectURL(file); document.getElementById('capturedVideoPlayer').src = capturedVideoUrl; hasUnreadVideo = true; triggerBubble(); } document.getElementById('cubeWrapper').classList.remove('camera-rec-mode'); }
-function triggerBubble() { if (!hasUnreadVideo) return; const bubble = document.getElementById('samuraiBubble'); bubble.classList.add('bubble-show'); document.getElementById('bubbleText').innerHTML = "⚠️ MẬT THƯ ĐẾN"; }
+function handleVideoUpload(event) { 
+    const file = event.target.files[0];
+    if (file) { capturedVideoUrl = URL.createObjectURL(file); document.getElementById('capturedVideoPlayer').src = capturedVideoUrl; hasUnreadVideo = true; triggerBubble(); } document.getElementById('cubeWrapper').classList.remove('camera-rec-mode');
+}
+function triggerBubble() { 
+    if (!hasUnreadVideo) return; 
+    const bubble = document.getElementById('samuraiBubble'); bubble.classList.add('bubble-show'); document.getElementById('bubbleText').innerHTML = "⚠️ MẬT THƯ ĐẾN";
+}
 function processSamuraiAction(element) { 
     if (!hasUnreadVideo || !capturedVideoUrl) { triggerHexagonShield(); if(navigator.vibrate) navigator.vibrate(50); return; } 
     if(navigator.vibrate) navigator.vibrate([30, 50, 30]); try { playCyberSound(); } catch(e){}
-    let cube = document.getElementById('cubeWrapper'); cube.classList.remove('camera-rec-mode'); cube.classList.add('video-play-mode'); document.querySelector('.projector-beam').classList.add('beam-on'); setTimeout(() => { document.getElementById('videoPopup').classList.add('popup-open'); document.getElementById('capturedVideoPlayer').play(); }, 600); 
+    let cube = document.getElementById('cubeWrapper'); cube.classList.remove('camera-rec-mode'); cube.classList.add('video-play-mode'); document.querySelector('.projector-beam').classList.add('beam-on'); setTimeout(() => { document.getElementById('videoPopup').classList.add('popup-open'); document.getElementById('capturedVideoPlayer').play(); }, 600);
 }
-function closeVideoModule() { document.getElementById('videoPopup').classList.remove('popup-open'); document.getElementById('capturedVideoPlayer').pause(); document.getElementById('cubeWrapper').classList.remove('video-play-mode'); document.querySelector('.projector-beam').classList.remove('beam-on'); }
-function triggerStaticNode(element) { if (!checkLoginGuard()) return; if(navigator.vibrate) navigator.vibrate([30]); playCyberClick(); let cube = document.getElementById('cubeWrapper'); cube.classList.add('phantom-split'); setTimeout(() => { cube.classList.remove('phantom-split'); }, 600); }
-function rotateWallpapersGuard(element) { currentWallpaperIndex = (currentWallpaperIndex + 1) % base64Wallpapers.length; document.getElementById('kdriveBg').src = base64Wallpapers[currentWallpaperIndex]; }
+function closeVideoModule() { 
+    document.getElementById('videoPopup').classList.remove('popup-open'); document.getElementById('capturedVideoPlayer').pause(); document.getElementById('cubeWrapper').classList.remove('video-play-mode'); document.querySelector('.projector-beam').classList.remove('beam-on'); 
+}
+function triggerStaticNode(element) { 
+    if (!checkLoginGuard()) return; if(navigator.vibrate) navigator.vibrate([30]); playCyberClick(); let cube = document.getElementById('cubeWrapper');
+    cube.classList.add('phantom-split'); setTimeout(() => { cube.classList.remove('phantom-split'); }, 600); 
+}
+function rotateWallpapersGuard(element) { 
+    currentWallpaperIndex = (currentWallpaperIndex + 1) % base64Wallpapers.length; document.getElementById('kdriveBg').src = base64Wallpapers[currentWallpaperIndex];
+}
 function showLoginPanel() { document.getElementById('loginPanelContainer').style.display = 'flex'; lockInteraction(); }
 function closeLoginPanel() { document.getElementById('loginPanelContainer').style.display = 'none'; unlockInteraction(); }
 function showNinjaInfo() { document.getElementById('ninjaPopup').style.display = 'flex'; lockInteraction(); }
 function closeNinjaInfo() { document.getElementById('ninjaPopup').style.display = 'none'; unlockInteraction(); }
 function openChangePassPanel() { document.getElementById('changePassPanel').style.display = 'flex'; }
 function closeChangePassPanel() { document.getElementById('changePassPanel').style.display = 'none'; }
+
 
 // ===================================================
 // K-DRIVE MODULE ĐỘC LẬP: SỔ SINH TỬ (REPORT DASHBOARD V-FINAL)
@@ -254,7 +441,6 @@ class ReportDashboard {
         this.popupEl.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; width: 92%; max-width: 380px; padding: 2.5px; border-radius: 12px; overflow: hidden; display: flex; z-index: 99999; background: #111; flex-direction: column;';
         
         this.popupEl.dashboardRef = this;
-
         const innerHTML = `
             <style>
                 @keyframes sciCriticalPulse { 0% { box-shadow: 0 0 10px rgba(255, 51, 51, 0.5); border-color: rgba(255, 51, 51, 0.5); } 50% { box-shadow: 0 0 30px rgba(255, 51, 51, 1); border-color: rgba(255, 51, 51, 1); } 100% { box-shadow: 0 0 10px rgba(255, 51, 51, 0.5); border-color: rgba(255, 51, 51, 0.5); } }
@@ -276,13 +462,13 @@ class ReportDashboard {
             <div class="led-spinner" id="repLedSpinner"></div>
             <div class="popup-inner-content" style="position: relative; z-index: 2; width: 100%; height: 100%; background: rgba(10,10,10,0.95); border-radius: 10px; padding: 15px 10px; box-sizing: border-box; display: flex; flex-direction: column;">
                 <canvas id="reportHexCanvas" class="report-hex-bg"></canvas>
-                
+          
                 <div class="close-btn" id="repCloseBtn" style="position: absolute; top: 15px; right: 15px; width: 32px; height: 32px; z-index: 10; background: rgba(0,0,0,0.7); border: 1px solid #555; display: flex; align-items: center; justify-content: center; padding: 0; box-shadow: 0 0 10px rgba(0,0,0,0.5); border-radius: 50%; cursor: pointer;">
                     <svg viewBox="0 0 100 100" width="16" height="16" style="stroke: currentColor; fill: none; transition: transform 0.3s;" onmouseover="this.style.transform='rotate(90deg)'" onmouseout="this.style.transform='rotate(0deg)'">
                         <path d="M50 5 L58 42 L95 50 L58 58 L50 95 L42 58 L5 50 L42 42 Z" stroke-width="5" />
                         <circle cx="50" cy="50" r="10" stroke-width="3" />
                     </svg>
-                </div>
+                 </div>
                 
                 <div style="text-align: center; margin-top: 5px; margin-bottom: 10px; position: relative; z-index: 3;">
                     <div style="font-size: 11px; color: #d2d2d2; font-family: 'Share Tech Mono', monospace; letter-spacing: 2px;">[ HỒ SƠ CHIẾN BINH ]</div>
@@ -418,14 +604,12 @@ class ReportDashboard {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
             let currentVal = Math.floor(progress * (end - start) + start);
-            
             let txt = currentVal;
             if (formatStr === 'money') { txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US'); } 
             else if (formatStr === 'hourly') { txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US') + "/ 1 giờ"; } 
             else if (formatStr === 'percent') { txt = currentVal + "%"; }
             
             obj.innerText = txt;
-
             if (progress < 1) {
                 this.animFrames[objId] = window.requestAnimationFrame(step);
             } else {
@@ -450,12 +634,11 @@ class ReportDashboard {
 
     renderData(mode) {
         if(!this.reportData) return;
-        let data = this.reportData[mode]; 
+        let data = this.reportData[mode];
         
         this.animateValue('repTotalMatches', 0, data.matches, 600);
         this.animateValue('repTotalDays', 0, data.days || 0, 600);
         this.animateValue('repTotalDuration', 0, data.duration, 600);
-        
         let itmPct = data.days > 0 ? Math.round((data.itmDays / data.days) * 100) : 0;
         this.animateValue('repItmProgressText', 0, itmPct, 600, 'percent');
         this.animateValue('repItm30Days', 0, itmPct, 600, 'percent'); 
@@ -469,80 +652,85 @@ class ReportDashboard {
         this.animateValue('repHourlyRate', 0, hourlyRate, 600, 'hourly');
         
         let profitEl = document.getElementById('repNetProfit');
-        if (profitVal > 0) { profitEl.style.color = "#00ff88"; profitEl.style.textShadow = "0 0 20px rgba(0, 255, 136, 0.7)"; } 
-        else if (profitVal < 0) { profitEl.style.color = "#ff3333"; profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)"; }
+        if (profitVal > 0) { 
+            profitEl.style.color = "#00ff88"; profitEl.style.textShadow = "0 0 20px rgba(0, 255, 136, 0.7)";
+        } else if (profitVal < 0) { 
+            profitEl.style.color = "#ff3333"; profitEl.style.textShadow = "0 0 20px rgba(255, 51, 51, 0.7)"; 
+        }
         this.animateValue('repNetProfit', 0, profitVal, 600, 'money');
+        
+        let rankTitle = ""; let rankClass = ""; let rankColorRGB = ""; let hexColor = "";
+        if (itmPct < 20) { 
+            rankTitle = "TẬP SỰ"; rankClass = "rank-rookie"; rankColorRGB = "#a0a0a0"; hexColor = "160, 160, 160";
+        } else if (itmPct < 35) { 
+            rankTitle = "CHIẾN BINH"; rankClass = "rank-warrior"; rankColorRGB = "#00e5ff"; hexColor = "0, 229, 255";
+        } else if (itmPct < 50) { 
+            rankTitle = "THỦ LĨNH"; rankClass = "rank-leader"; rankColorRGB = "#bf00ff"; hexColor = "191, 0, 255";
+        } else { 
+            rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#ffd700"; hexColor = "255, 215, 0"; 
+        }
 
-        let rankTitle = ""; let rankClass = ""; let rankColorRGB = ""; let hexColor = ""; 
-        if (itmPct < 20) { rankTitle = "TẬP SỰ"; rankClass = "rank-rookie"; rankColorRGB = "#a0a0a0"; hexColor = "160, 160, 160"; } 
-        else if (itmPct < 35) { rankTitle = "CHIẾN BINH"; rankClass = "rank-warrior"; rankColorRGB = "#00e5ff"; hexColor = "0, 229, 255"; } 
-        else if (itmPct < 50) { rankTitle = "THỦ LĨNH"; rankClass = "rank-leader"; rankColorRGB = "#bf00ff"; hexColor = "191, 0, 255"; } 
-        else { rankTitle = "HUYỀN THOẠI"; rankClass = "rank-legendary"; rankColorRGB = "#ffd700"; hexColor = "255, 215, 0"; }
-
-        // TÍNH TOÁN X-QUANG ĐỘNG NGAY TẠI GIAO DIỆN
-        let xray = data.xray;
-        let deepStr = this.formatMoneyShort(xray["DEEPSTACK"]);
-        let multiStr = this.formatMoneyShort(xray["MULTIDAY"]);
-        let dailyStr = this.formatMoneyShort(xray["DAILY"]);
-        let finalHint = `📊 X-Quang: DEEP (${deepStr}) | MULTI (${multiStr}) | DAILY (${dailyStr})`;
+        // 1. TÒA ÁN SCI ĐỘC LẬP TỪ MÁY CHỦ
+        let sciStatus = data.sci ? data.sci.status : "SAFE";
+        let finalQuote = data.sci ? data.sci.command : "> BOO: PHONG ĐỘ ỔN ĐỊNH.";
 
         this.popupEl.classList.remove('rank-rookie', 'rank-warrior', 'rank-leader', 'rank-legendary');
         this.popupEl.classList.add(rankClass);
         
         let rankBar = document.getElementById('repRankBar');
-        rankBar.style.width = Math.min(itmPct, 100) + "%"; 
+        rankBar.style.width = Math.min(itmPct, 100) + "%";
         rankBar.style.background = rankColorRGB;
         rankBar.style.boxShadow = `0 0 10px rgba(${hexColor}, 0.8)`;
         
         document.getElementById('repItmProgressText').style.color = rankColorRGB;
-        document.getElementById('repRankTitle').innerText = `ĐẲNG CẤP: [ ${rankTitle} ]`; 
+        document.getElementById('repRankTitle').innerText = `ĐẲNG CẤP: [ ${rankTitle} ]`;
         document.getElementById('repRankTitle').style.color = rankColorRGB; 
         document.getElementById('repRankTitle').style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
 
-        // GIAO DIỆN THỜI GIAN THỰC ĐƯỢC NÂNG CẤP (3 CẤP ĐỘ CẢNH BÁO)
+        // 2. GIAO DIỆN X-QUANG ĐỘNG
+        let xray = data.xray;
+        let deepStr = this.formatMoneyShort(xray["DEEPSTACK"]);
+        let multiStr = this.formatMoneyShort(xray["MULTIDAY"]);
+        let dailyStr = this.formatMoneyShort(xray["DAILY"]);
+        let hintEl = document.getElementById('repNextRankHint');
+        hintEl.innerHTML = `📊 X-Quang: DEEP (${deepStr}) | MULTI (${multiStr}) | DAILY (${dailyStr})`;
+
+        // 3. CẢNH BÁO THỂ LỰC & THỜI GIAN THỰC (RÚT GỌN CHUẨN XÁC)
         let timeHud = document.getElementById('timeHud');
         if (timeHud) {
             let todayMins = this.reportData.todayDuration || 0;
             if (todayMins >= 540) {
-                timeHud.innerText = `[ 🔴 NÃO BỘ QUÁ TẢI: ĐÃ CHIẾN ĐẤU ${todayMins}p - CẤM NẠP MẠNG ]`;
+                timeHud.innerText = `[ 🔴 NÃO BỘ QUÁ TẢI: ${todayMins} PHÚT ]`;
                 timeHud.style.color = "#ff3333";
                 timeHud.style.textShadow = "0 0 10px rgba(255, 51, 51, 0.8)";
             } else if (todayMins >= 360) {
-                timeHud.innerText = `[ ⚠️ THỂ LỰC SUY GIẢM: ĐÃ CHIẾN ĐẤU ${todayMins}p ]`;
+                timeHud.innerText = `[ ⚠️ CẢNH BÁO THỂ LỰC: ${todayMins} PHÚT ]`;
                 timeHud.style.color = "#ffaa00";
                 timeHud.style.textShadow = "0 0 10px rgba(255, 170, 0, 0.8)";
             } else {
-                timeHud.innerText = `[ ĐÃ CHIẾN ĐẤU ${todayMins} PHÚT HÔM NAY ]`;
+                timeHud.innerText = `[ ⏱️ THỰC CHIẾN: ${todayMins} PHÚT ]`;
                 timeHud.style.color = rankColorRGB;
                 timeHud.style.textShadow = `0 0 8px rgba(${hexColor}, 0.8)`;
             }
         }
 
-        // BÓC TÁCH SCI BOX
+        // 4. BÓC TÁCH MÀU SẮC SCI BOX
         let quoteEl = document.getElementById('repBooQuote');
-        let hintEl = document.getElementById('repNextRankHint');
         let itmBarContainer = document.getElementById('repRankBar').parentElement;
         
-        let sciStatus = this.reportData.sciStatus || "SAFE";
-        let finalQuote = this.reportData.booCommand || "";
-
         quoteEl.innerText = finalQuote;
-        hintEl.innerText = finalHint;
         quoteEl.classList.remove('sci-critical', 'sci-warning');
 
         if (sciStatus === "CRITICAL") {
             quoteEl.classList.add('sci-critical');
-            hintEl.style.color = "#ff3333";
             itmBarContainer.style.boxShadow = "0 0 15px rgba(255,51,51,0.8), inset 0 0 5px rgba(0,0,0,0.8)";
             itmBarContainer.style.border = "1px solid #ff3333";
         } else if (sciStatus === "WARNING") {
             quoteEl.classList.add('sci-warning');
-            hintEl.style.color = "#ffaa00";
             itmBarContainer.style.boxShadow = "0 0 10px rgba(255,170,0,0.5), inset 0 0 5px rgba(0,0,0,0.8)";
             itmBarContainer.style.border = "1px dashed #ffaa00";
         } else {
             quoteEl.style.color = rankColorRGB;
-            hintEl.style.color = rankColorRGB;
             quoteEl.style.border = "none";
             quoteEl.style.background = "transparent";
             itmBarContainer.style.boxShadow = "inset 0 0 5px rgba(0,0,0,0.8)";
@@ -570,7 +758,7 @@ class ReportDashboard {
 
     open() { this.renderHTML(); lockInteraction(); this.fetchAndPopulate(); }
     close() { 
-        if(this.hexInterval) clearInterval(this.hexInterval); 
+        if(this.hexInterval) clearInterval(this.hexInterval);
         for (let key in this.animFrames) { window.cancelAnimationFrame(this.animFrames[key]); }
         if(this.popupEl) { this.popupEl.remove(); this.popupEl = null; } unlockInteraction(); 
     }
@@ -579,7 +767,7 @@ class ReportDashboard {
 function fetchBattleReport() {
     if (!checkLoginGuard()) return; 
     if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
-    playCyberClick(); 
+    playCyberClick();
     pulseTerminal("BOO: ĐANG TRUY XUẤT X-QUANG TỪ BỘ NHỚ...");
     const dashboard = new ReportDashboard(currentUsername);
     dashboard.open();
