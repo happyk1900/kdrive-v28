@@ -530,6 +530,8 @@ class ReportDashboard {
                         <div id="repNetProfit" style="font-size: 32px; font-weight: bold; font-family: 'Space Grotesk', sans-serif; color: #888; transition: color 0.3s;">--</div>
                         <div style="margin-top: 8px; font-size: 12px; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;">
                             <span style="color:#777;">HIỆU SUẤT: </span><span id="repHourlyRate">--</span>
+                            <span style="color:#555; margin: 0 4px;">|</span>
+                            <span style="color:#777;">ROI: </span><span id="repRoiStr" style="font-weight:bold; transition: color 0.3s;">--</span>
                         </div>
                     </div>
                 </div>
@@ -559,7 +561,6 @@ class ReportDashboard {
             tabW.style.cssText = 'flex: 1; text-align: center; padding: 8px 0; background: #00e5ff; color: #000; box-shadow: 0 0 10px #00e5ff; font-family: "Share Tech Mono", monospace; font-size: 13px; font-weight: bold; border-radius: 2px; cursor: pointer; transition: 0.3s;';
             tabA.style.cssText = 'flex: 1; text-align: center; padding: 8px 0; background: transparent; color: #777; border: 1px solid #333; font-family: "Share Tech Mono", monospace; font-size: 13px; font-weight: bold; border-radius: 2px; cursor: pointer; transition: 0.3s;';
         } else {
-            // Cập nhật tab TOÀN CHIẾN DỊCH thành màu Neon Amber (Cam)
             tabA.style.cssText = 'flex: 1; text-align: center; padding: 8px 0; background: #ffbf00; color: #000; box-shadow: 0 0 10px #ffbf00; font-family: "Share Tech Mono", monospace; font-size: 13px; font-weight: bold; border-radius: 2px; cursor: pointer; transition: 0.3s;';
             tabW.style.cssText = 'flex: 1; text-align: center; padding: 8px 0; background: transparent; color: #777; border: 1px solid #333; font-family: "Share Tech Mono", monospace; font-size: 13px; font-weight: bold; border-radius: 2px; cursor: pointer; transition: 0.3s;';
         }
@@ -666,12 +667,16 @@ class ReportDashboard {
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            let currentVal = Math.floor(progress * (end - start) + start);
+            
+            // Xử lý giữ lại phần thập phân cho ROI
+            let currentVal = progress * (end - start) + start;
+            if (formatStr !== 'roi') currentVal = Math.floor(currentVal);
             
             let txt = currentVal;
             if (formatStr === 'money') { txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US'); } 
             else if (formatStr === 'hourly') { txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US') + "/ 1 giờ"; } 
             else if (formatStr === 'percent') { txt = currentVal + "%"; }
+            else if (formatStr === 'roi') { txt = (currentVal > 0 ? "+" : "") + currentVal.toFixed(1) + "%"; }
             
             obj.innerText = txt;
             
@@ -682,6 +687,7 @@ class ReportDashboard {
                 if (formatStr === 'money') { finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US'); } 
                 else if (formatStr === 'hourly') { finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US') + "/ 1 giờ"; } 
                 else if (formatStr === 'percent') { finalTxt = end + "%"; }
+                else if (formatStr === 'roi') { finalTxt = (end > 0 ? "+" : "") + end.toFixed(1) + "%"; }
                 
                 obj.innerText = finalTxt;
             }
@@ -701,13 +707,11 @@ class ReportDashboard {
         if(!this.reportData) return;
         let data = this.reportData[mode];
         
-        // SỐ MẠNG | SỐ NGÀY | THỜI LƯỢNG (Ép kiểu chống NaN tuyệt đối)
         this.animateValue('repTotalMatches', 0, data.matches || 0, 600);
         this.animateValue('repTotalDays', 0, data.days || 0, 600);
         this.animateValue('repTotalDuration', 0, Math.floor((data.duration || 0) / 60), 600); 
         
-        // TÍNH ITM (%) VÀ RENDER THANH SINH TỒN
-        let itmPct = data.itmPct || 0; // Lấy trực tiếp từ BOO Backend đã đóng gói sẵn
+        let itmPct = data.itmPct || 0; 
         this.animateValue('repItmProgressText', 0, itmPct, 600, 'percent');
 
         let profitVal = data.profit || 0;
@@ -717,6 +721,14 @@ class ReportDashboard {
         let hrRateEl = document.getElementById('repHourlyRate');
         if (hourlyRate > 0) { hrRateEl.style.color = "#00e5ff"; } else if (hourlyRate < 0) { hrRateEl.style.color = "#ff3333"; }
         this.animateValue('repHourlyRate', 0, hourlyRate, 600, 'hourly');
+        
+        // Thêm tính toán và hiển thị ROI
+        let roiVal = parseFloat(data.roi) || 0;
+        let roiEl = document.getElementById('repRoiStr');
+        if (roiVal > 0) { roiEl.style.color = "#00e5ff"; } 
+        else if (roiVal < 0) { roiEl.style.color = "#ff3333"; }
+        else { roiEl.style.color = "#aaa"; }
+        this.animateValue('repRoiStr', 0, roiVal, 600, 'roi');
         
         let profitEl = document.getElementById('repNetProfit');
         if (profitVal > 0) { 
@@ -757,21 +769,19 @@ class ReportDashboard {
         document.getElementById('repRankTitle').style.color = rankColorRGB; 
         document.getElementById('repRankTitle').style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
 
-        // THỂ LOẠI (THAY THẾ X-QUANG) VỚI MÀU TÍM NEON
+        // THỂ LOẠI: MÀU BẠC SÁNG CHUYÊN NGHIỆP
         let xray = data.xray || {};
         let deepStr = this.formatMoneyShort(xray["DEEPSTACK"]);
         let multiStr = this.formatMoneyShort(xray["MULTIDAY"]);
         let dailyStr = this.formatMoneyShort(xray["DAILY"]);
         
         let hintEl = document.getElementById('repNextRankHint');
-        hintEl.style.color = "#bd00ff"; // Màu Tím Neon
-        hintEl.style.textShadow = "0 0 8px #bd00ff";
+        hintEl.style.color = "#e0e0e0"; 
+        hintEl.style.textShadow = "0 0 8px rgba(224, 224, 224, 0.4)";
         hintEl.innerHTML = `🎮 THỂ LOẠI: DEEP (${deepStr}) | MULTI (${multiStr}) | DAILY (${dailyStr})`;
 
-        // KÍCH HOẠT MƯA SAO BĂNG CHIẾN THUẬT
         this.drawMeteors(xray);
 
-        // BÓC TÁCH MÀU SẮC SCI BOX THEO CHIẾN LƯỢC MỚI CỦA BOO
         let quoteEl = document.getElementById('repBooQuote');
         let itmBarContainer = document.getElementById('repRankBar').parentElement;
         
