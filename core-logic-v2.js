@@ -528,7 +528,7 @@ class ReportDashboard {
                     <div style="text-align: center; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);">
                         <div style="font-size: 11px; color: #aaa; margin-bottom: 5px; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;">LÃI RÒNG (NET PROFIT)</div>
                         <div id="repNetProfit" style="font-size: 32px; font-weight: bold; font-family: 'Space Grotesk', sans-serif; color: #888; transition: color 0.3s;">--</div>
-                        <div style="margin-top: 8px; font-size: 12px; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;">
+                        <div style="margin-top: 8px; font-size: 12px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0px;">
                             <span style="color:#777;">HIỆU SUẤT: </span><span id="repHourlyRate">--</span>
                             <span style="color:#555; margin: 0 4px;">|</span>
                             <span style="color:#777;">ROI: </span><span id="repRoiStr" style="font-weight:bold; transition: color 0.3s;">--</span>
@@ -663,18 +663,29 @@ class ReportDashboard {
         
         if (this.animFrames[objId]) window.cancelAnimationFrame(this.animFrames[objId]);
         
+        // Hàm rút gọn Hiệu suất (-264,627 -> -264k/h)
+        const formatHourly = (val) => {
+            if (val === 0) return "0/h";
+            let sign = val > 0 ? "+" : "";
+            let absVal = Math.abs(val);
+            if (absVal >= 1000) {
+                let kVal = (absVal / 1000).toFixed(0);
+                return sign + kVal + "k/h";
+            }
+            return sign + absVal + "/h";
+        };
+
         let startTimestamp = null;
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
             
-            // Xử lý giữ lại phần thập phân cho ROI
             let currentVal = progress * (end - start) + start;
             if (formatStr !== 'roi') currentVal = Math.floor(currentVal);
             
             let txt = currentVal;
             if (formatStr === 'money') { txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US'); } 
-            else if (formatStr === 'hourly') { txt = (currentVal > 0 ? "+" : "") + currentVal.toLocaleString('en-US') + "/ 1 giờ"; } 
+            else if (formatStr === 'hourly') { txt = formatHourly(currentVal); } 
             else if (formatStr === 'percent') { txt = currentVal + "%"; }
             else if (formatStr === 'roi') { txt = (currentVal > 0 ? "+" : "") + currentVal.toFixed(1) + "%"; }
             
@@ -685,7 +696,7 @@ class ReportDashboard {
             } else {
                 let finalTxt = end;
                 if (formatStr === 'money') { finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US'); } 
-                else if (formatStr === 'hourly') { finalTxt = (end > 0 ? "+" : "") + end.toLocaleString('en-US') + "/ 1 giờ"; } 
+                else if (formatStr === 'hourly') { finalTxt = formatHourly(end); } 
                 else if (formatStr === 'percent') { finalTxt = end + "%"; }
                 else if (formatStr === 'roi') { finalTxt = (end > 0 ? "+" : "") + end.toFixed(1) + "%"; }
                 
@@ -722,7 +733,6 @@ class ReportDashboard {
         if (hourlyRate > 0) { hrRateEl.style.color = "#00e5ff"; } else if (hourlyRate < 0) { hrRateEl.style.color = "#ff3333"; }
         this.animateValue('repHourlyRate', 0, hourlyRate, 600, 'hourly');
         
-        // Thêm tính toán và hiển thị ROI
         let roiVal = parseFloat(data.roi) || 0;
         let roiEl = document.getElementById('repRoiStr');
         if (roiVal > 0) { roiEl.style.color = "#00e5ff"; } 
@@ -769,7 +779,6 @@ class ReportDashboard {
         document.getElementById('repRankTitle').style.color = rankColorRGB; 
         document.getElementById('repRankTitle').style.textShadow = `0 0 15px rgba(${hexColor}, 0.8)`;
 
-        // THỂ LOẠI: MÀU BẠC SÁNG CHUYÊN NGHIỆP
         let xray = data.xray || {};
         let deepStr = this.formatMoneyShort(xray["DEEPSTACK"]);
         let multiStr = this.formatMoneyShort(xray["MULTIDAY"]);
