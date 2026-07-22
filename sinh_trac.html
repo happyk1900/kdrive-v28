@@ -1,4 +1,209 @@
 <!DOCTYPE html>
 <html lang="vi">
-<!-- Trạm hiển thị Chỉ số Sinh học (Nút Bích) đang được xây dựng -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-DRIVE: Biometrics Dashboard</title>
+    <style>
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-red: #ff003c;
+            --neon-green: #39ff14;
+            --bg-dark: #090a0f;
+            --panel-bg: rgba(0, 243, 255, 0.05);
+        }
+        
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--neon-cyan);
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Nút quay lại màn hình chính */
+        .btn-esc {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan);
+            padding: 5px 15px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-esc:hover {
+            background: var(--neon-cyan);
+            color: #000;
+        }
+
+        .header {
+            text-align: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+            text-shadow: 0 0 8px var(--neon-cyan);
+            letter-spacing: 2px;
+        }
+
+        .dashboard {
+            display: flex;
+            flex: 1;
+            padding: 15px;
+            gap: 15px;
+        }
+
+        /* Các khối Module */
+        .panel {
+            flex: 1;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            background: var(--panel-bg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.05);
+            position: relative;
+        }
+
+        .panel h2 {
+            font-size: 1.2rem;
+            margin-top: 0;
+            border-bottom: 1px dashed rgba(0, 243, 255, 0.5);
+            padding-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        /* Khối Tâm lý/Nhịp tim ở giữa làm nổi bật bằng màu đỏ */
+        .center-panel {
+            flex: 1.2;
+            border-color: rgba(255, 0, 60, 0.5);
+            box-shadow: inset 0 0 20px rgba(255, 0, 60, 0.1);
+        }
+        .center-panel h2 {
+            border-bottom-color: var(--neon-red);
+            color: var(--neon-red);
+            text-shadow: 0 0 5px var(--neon-red);
+        }
+        
+        .data-row {
+            margin: 12px 0;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .value {
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0.3; }
+        }
+
+        /* Terminal BOO AI */
+        .boo-terminal {
+            height: 150px;
+            border-top: 2px solid var(--neon-cyan);
+            background: #000;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .log { margin: 5px 0; color: #aaa; }
+        .log.system { color: var(--neon-cyan); }
+        .log.alert { color: var(--neon-red); text-shadow: 0 0 3px var(--neon-red); }
+    </style>
+</head>
+<body>
+
+    <!-- Nút điều hướng về lại index.html -->
+    <button class="btn-esc" onclick="window.location.href='index.html'">[ ESC ]</button>
+
+    <div class="header">
+        <h2>SYS_BIOMETRICS_UI // K-DRIVE</h2>
+    </div>
+
+    <div class="dashboard">
+        <!-- MODULE TRÁI: Phục hồi & Giấc ngủ -->
+        <div class="panel">
+            <h2>[ RECOVERY_NODE ]</h2>
+            <div class="data-row"><span>Deep Sleep:</span> <span class="value">6h 15m</span></div>
+            <div class="data-row"><span>Energy Thresh:</span> <span class="value" style="color: var(--neon-green)">Optimal</span></div>
+            <div class="data-row"><span>System Status:</span> <span class="value">Ready</span></div>
+        </div>
+
+        <!-- MODULE GIỮA: Tâm lý & Nhịp tim -->
+        <div class="panel center-panel">
+            <h2>[ PSYCH_CORE ]</h2>
+            <div class="data-row"><span>Live BPM:</span> <span class="value blink" id="bpm-val" style="color: var(--neon-red)">78</span></div>
+            <div class="data-row"><span>Stress Level:</span> <span class="value" id="stress-val">Nominal</span></div>
+            <div class="data-row"><span>SCI Index:</span> <span class="value">+2.4</span></div>
+        </div>
+
+        <!-- MODULE PHẢI: Nền tảng thể lực -->
+        <div class="panel">
+            <h2>[ PHYSICAL_NODE ]</h2>
+            <div class="data-row"><span>Steps Logged:</span> <span class="value">4,520</span></div>
+            <div class="data-row"><span>Gym Routine:</span> <span class="value" style="color: var(--neon-green)">Logged</span></div>
+            <div class="data-row"><span>Muscle Load:</span> <span class="value">Recovering</span></div>
+        </div>
+    </div>
+
+    <!-- TERMINAL BOO AI -->
+    <div class="boo-terminal" id="boo-log">
+        <div class="log system">> [BOO_AI_AGENT]: Khởi động giao thức giám sát sinh trắc...</div>
+        <div class="log system">> [BOO_AI_AGENT]: Đang thiết lập kết nối dữ liệu ngoại vi... [OK]</div>
+    </div>
+
+    <script>
+        // Các biến điều khiển DOM
+        const bpmVal = document.getElementById('bpm-val');
+        const stressVal = document.getElementById('stress-val');
+        const terminal = document.getElementById('boo-log');
+
+        // Hàm in log ra terminal của BOO AI
+        function addBooLog(message, isAlert = false) {
+            const div = document.createElement('div');
+            div.className = 'log ' + (isAlert ? 'alert' : 'system');
+            
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0]; // Lấy định dạng HH:MM:SS
+            
+            div.textContent = `[${timeStr}] > [BOO_AI_AGENT]: ${message}`;
+            terminal.appendChild(div);
+            
+            // Tự động cuộn xuống dòng mới nhất
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // Giả lập Dòng chảy dữ liệu nhịp tim (Mỗi 3 giây cập nhật 1 lần)
+        setInterval(() => {
+            // Random nhịp tim từ 70 đến 125
+            const currentBpm = Math.floor(Math.random() * (125 - 70 + 1) + 70);
+            bpmVal.textContent = currentBpm;
+
+            // Xử lý logic cảnh báo Tilt
+            if (currentBpm > 110) {
+                stressVal.textContent = "TILT WARNING";
+                stressVal.style.color = "var(--neon-red)";
+                addBooLog(`Phát hiện nhịp tim tăng đột biến (${currentBpm} BPM). XÁC SUẤT TILT CAO. Đề nghị hít thở sâu và đánh giá lại table dynamics ngay lập tức!`, true);
+            } else {
+                stressVal.textContent = "Nominal";
+                stressVal.style.color = "var(--neon-cyan)";
+            }
+        }, 3000);
+    </script>
+</body>
 </html>
