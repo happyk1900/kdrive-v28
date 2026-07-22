@@ -2,224 +2,344 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K-DRIVE: Medical Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spades Node - Biometric Scanner</title>
     <style>
         :root {
-            --neon-cyan: #00f3ff;
-            --neon-green: #39ff14;
-            --neon-red: #ff003c;
-            --bg-dark: #050608;
-            --text-dim: #5a7b8c;
+            --obsidian: #0b0c10;
+            --neon-mint: #00ff9d;
+            --amber-red: #ff4d00;
+            --electric-violet: #b026ff;
+            --hex-cyan: rgba(0, 255, 255, 0.15);
+            --font-main: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--obsidian);
+            color: white;
+            font-family: var(--font-main);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 1. Lưới Tổ Ong & Không Gian 3D */
+        .hex-background {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='69.282' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 17.32l-20 11.547L0 17.32V-5.774l20-11.547L40-5.774V17.32zm0 46.188l-20 11.548-20-11.548V40.414L0 28.867l20 11.548 20-11.548v23.094z' fill='none' stroke='%2300ffff' stroke-width='1' stroke-opacity='0.15'/%3E%3C/svg%3E");
+            background-size: 60px 103.923px;
+            z-index: 1;
+            opacity: 0.8;
+        }
+
+        .atmospheric-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw; height: 80vh;
+            background: radial-gradient(circle, rgba(0, 255, 157, 0.05) 0%, rgba(11, 12, 16, 1) 70%);
+            z-index: 2;
+        }
+
+        /* 2. Trục Y - Thước ngắm chuẩn trực */
+        .y-axis-scale {
+            position: absolute;
+            left: 15px;
+            top: 10%;
+            height: 80%;
+            width: 30px;
+            border-right: 1px solid rgba(0, 255, 157, 0.3);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .tick {
+            position: relative;
+            width: 100%;
+            text-align: right;
+            padding-right: 5px;
+            font-size: 10px;
+            color: var(--neon-mint);
+            opacity: 0.7;
+        }
+
+        .tick::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: 50%;
+            width: 8px;
+            height: 1px;
+            background-color: var(--neon-mint);
+        }
+
+        .tick.target {
+            color: var(--electric-violet);
+            font-weight: bold;
+            opacity: 1;
+            text-shadow: 0 0 5px var(--electric-violet);
         }
         
-        body {
-            margin: 0;
-            background-color: var(--bg-dark);
-            color: var(--neon-cyan);
-            font-family: 'Courier New', Courier, monospace;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* HEADER & NÚT THOÁT */
-        .header {
-            padding: 12px 20px;
-            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            letter-spacing: 2px;
-            z-index: 10;
-        }
-        .btn-esc {
-            cursor: pointer;
-            color: var(--neon-cyan);
-            text-shadow: 0 0 5px var(--neon-cyan);
-            font-weight: bold;
-        }
-
-        /* KHU VỰC QUÉT CHÍNH */
-        .scanner-bay {
-            flex: 1;
-            position: relative;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 15px;
-            background: radial-gradient(circle at center, rgba(0, 243, 255, 0.03) 0%, transparent 70%);
-        }
-
-        /* TRỤC TỌA ĐỘ Y (CHIỀU CAO) - Phong cách ngắm bắn */
-        .y-axis {
-            position: absolute;
-            left: 25px;
-            top: 15%;
-            bottom: 15%;
-            border-left: 1px dashed rgba(0, 243, 255, 0.5);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .crosshair {
-            position: relative;
-            left: -8px;
+        .tick.target::after {
+            background-color: var(--electric-violet);
             width: 15px;
-            height: 1px;
-            background: var(--neon-cyan);
-            box-shadow: 0 0 5px var(--neon-cyan);
+            box-shadow: 0 0 5px var(--electric-violet);
         }
-        .crosshair::after {
-            position: absolute;
-            left: 20px;
-            top: -7px;
-            font-size: 10px;
-            color: var(--neon-cyan);
-            letter-spacing: 1px;
-        }
-        .crosshair.top::after { content: "H_1.76m"; }
-        .crosshair.bottom::after { content: "GND_0.0"; }
 
-        /* SCI INDEX - Treo lơ lửng đỉnh đầu */
+        /* 3. Lõi SCI Index */
         .sci-core {
             position: absolute;
             top: 5%;
             left: 50%;
             transform: translateX(-50%);
+            z-index: 10;
             text-align: center;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 5px 15px;
-            border: 1px solid rgba(0, 243, 255, 0.3);
-        }
-        .sci-label { font-size: 10px; color: var(--text-dim); }
-        .sci-val { font-size: 18px; font-weight: bold; text-shadow: 0 0 8px var(--neon-cyan); animation: pulse 2s infinite; }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
         }
 
-        /* BODY MAP SVG */
-        .body-map {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -45%);
-            height: 75%;
-            width: auto;
-            pointer-events: none;
-            filter: drop-shadow(0 0 8px rgba(57, 255, 20, 0.2));
+        .sci-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--electric-violet);
+            text-shadow: 0 0 15px rgba(176, 38, 255, 0.6);
+            letter-spacing: 2px;
         }
-
-        /* 2 CỘT THÔNG SỐ (TRÁI/PHẢI) */
-        .data-col {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            height: 60%;
-            z-index: 2;
-        }
-        .col-left { margin-right: auto; padding-left: 45px; text-align: left; }
-        .col-right { margin-left: auto; text-align: right; }
-
-        .stat-block { margin: 15px 0; }
-        .stat-label {
+        
+        .sci-label {
             font-size: 10px;
-            color: var(--text-dim);
-            margin-bottom: 2px;
+            color: rgba(255,255,255,0.5);
             letter-spacing: 1px;
         }
-        .stat-val {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--neon-green); /* Đạt chuẩn = Xanh */
-            text-shadow: 0 0 5px var(--neon-green);
+
+        /* 4. Hình nộm & Hiệu ứng quét */
+        .avatar-container {
+            position: relative;
+            height: 65vh;
+            width: 200px;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* MINI TERMINAL BOO AI */
-        .boo-ticker {
-            height: 60px;
-            border-top: 1px solid rgba(0, 243, 255, 0.3);
-            background: #020202;
-            padding: 10px 15px;
-            font-size: 11px;
-            line-height: 1.6;
+        .wireframe-svg {
+            height: 100%;
+            width: auto;
+            stroke-width: 1.5;
+            fill: none;
+            filter: drop-shadow(0 0 8px var(--neon-mint));
         }
-        .log-line { color: var(--text-dim); }
-        .highlight { color: var(--neon-cyan); }
+
+        /* Các vùng trạng thái */
+        .optimal-zone {
+            stroke: var(--neon-mint);
+            animation: pulse-mint 3s infinite;
+        }
+
+        .warning-zone {
+            stroke: var(--amber-red);
+            animation: pulse-amber 1.5s infinite;
+            filter: drop-shadow(0 0 10px var(--amber-red));
+        }
+
+        /* Tia laser */
+        .laser-scanner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--neon-mint);
+            box-shadow: 0 0 15px 3px var(--neon-mint);
+            animation: scan 4s linear infinite;
+            z-index: 6;
+        }
+
+        /* 5. HUD Thông số neo */
+        .hud-panel {
+            position: absolute;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hud-left { left: 45px; align-items: flex-start; }
+        .hud-right { right: 20px; align-items: flex-end; }
+        
+        .hud-item {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .hud-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .hud-label {
+            font-size: 9px;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+        }
+
+        .status-mint { color: var(--neon-mint); text-shadow: 0 0 8px var(--neon-mint); }
+        .status-amber { color: var(--amber-red); text-shadow: 0 0 8px var(--amber-red); }
+
+        /* Keyframes Animations */
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        @keyframes pulse-mint {
+            0%, 100% { filter: drop-shadow(0 0 5px var(--neon-mint)); }
+            50% { filter: drop-shadow(0 0 15px var(--neon-mint)); }
+        }
+
+        @keyframes pulse-amber {
+            0%, 100% { filter: drop-shadow(0 0 8px var(--amber-red)); opacity: 0.8; }
+            50% { filter: drop-shadow(0 0 20px var(--amber-red)); opacity: 1; }
+        }
+
+        /* Glitch Effect cho text */
+        .glitch-text {
+            position: relative;
+        }
+        
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.8;
+        }
+        
+        .glitch-text::before {
+            left: 1px;
+            color: #0ff;
+            clip: rect(0, 900px, 0, 0);
+            animation: glitch-anim 3s infinite linear alternate-reverse;
+        }
+        
+        .glitch-text::after {
+            left: -1px;
+            color: #f0f;
+            clip: rect(0, 900px, 0, 0);
+            animation: glitch-anim 2s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(10px, 9999px, 31px, 0); }
+            20% { clip: rect(62px, 9999px, 18px, 0); }
+            40% { clip: rect(35px, 9999px, 98px, 0); }
+            60% { clip: rect(85px, 9999px, 2px, 0); }
+            80% { clip: rect(15px, 9999px, 75px, 0); }
+            100% { clip: rect(90px, 9999px, 45px, 0); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <span class="btn-esc" onclick="window.location.href='index.html'">[ ESC ]</span>
-        <span>SYS_SCANNER</span>
+    <!-- Lớp hậu cảnh & Khí quyển -->
+    <div class="hex-background"></div>
+    <div class="atmospheric-glow"></div>
+
+    <!-- Thước ngắm dọc 1.76m -->
+    <div class="y-axis-scale">
+        <div class="tick target">1.76m</div>
+        <div class="tick">1.60m</div>
+        <div class="tick">1.40m</div>
+        <div class="tick">1.20m</div>
+        <div class="tick">1.00m</div>
+        <div class="tick">0.80m</div>
+        <div class="tick">0.60m</div>
+        <div class="tick">0.40m</div>
+        <div class="tick">0.20m</div>
+        <div class="tick">0.00m</div>
     </div>
 
-    <div class="scanner-bay">
-        
-        <!-- TRỤC Y: THƯỚC NGẮM 1.76M -->
-        <div class="y-axis">
-            <div class="crosshair top"></div>
-            <div class="crosshair bottom"></div>
-        </div>
+    <!-- Core SCI Index -->
+    <div class="sci-core">
+        <div class="sci-value glitch-text" data-text="94.2">94.2</div>
+        <div class="sci-label">SCI INDEX</div>
+    </div>
 
-        <!-- TRUNG TÂM: CHỈ SỐ SCI -->
-        <div class="sci-core">
-            <div class="sci-label">SCI_INDEX</div>
-            <div class="sci-val">[ ? ]</div>
+    <!-- Thông số HUD Bên Trái -->
+    <div class="hud-panel hud-left" style="top: 25%;">
+        <div class="hud-item">
+            <div class="hud-value status-mint glitch-text" data-text="63.0">63.0</div>
+            <div class="hud-label">WEIGHT (KG)</div>
         </div>
-
-        <!-- CỘT TRÁI: PHỤC HỒI & NƯỚC -->
-        <div class="data-col col-left">
-            <div class="stat-block">
-                <div class="stat-label">SLEEP_LOG</div>
-                <div class="stat-val">7.0 h</div>
-            </div>
-            <div class="stat-block">
-                <div class="stat-label">HYDRATION</div>
-                <div class="stat-val">50 %</div>
-            </div>
+        <div class="hud-item">
+            <div class="hud-value status-amber glitch-text" data-text="6.5">6.5</div>
+            <div class="hud-label">SLEEP (HRS)</div>
         </div>
+    </div>
 
-        <!-- HÌNH NỘM WIREFRAME (SVG) -->
-        <!-- Tô màu stroke="#39ff14" (Xanh Lục) thể hiện đạt chuẩn -->
-        <svg class="body-map" viewBox="0 0 100 300" xmlns="http://www.w3.org/2000/svg">
-            <!-- Đầu (Đứt đoạn) -->
-            <circle cx="50" cy="30" r="15" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-dasharray="3 3"/>
-            <!-- Lõi / Thân -->
-            <polygon points="35,80 65,80 58,150 42,150" fill="none" stroke="#39ff14" stroke-width="1.5"/>
-            <!-- Tay (Cứng cáp) -->
-            <path d="M 25 70 L 50 55 L 75 70 L 82 135 L 72 135 L 65 85 L 50 75 L 35 85 L 28 135 L 18 135 Z" fill="none" stroke="#39ff14" stroke-width="1"/>
+    <!-- Trung tâm: Hình nộm & Tia quét -->
+    <div class="avatar-container">
+        <div class="laser-scanner"></div>
+        <!-- Hình nộm SVG giả lập Wireframe -->
+        <svg class="wireframe-svg" viewBox="0 0 100 300" xmlns="http://www.w3.org/2000/svg">
+            <!-- Đầu -->
+            <path class="optimal-zone" d="M40,20 C40,10 60,10 60,20 C65,30 60,40 50,45 C40,40 35,30 40,20 Z" />
+            <!-- Thân trên -->
+            <path class="optimal-zone" d="M50,45 L75,60 L65,130 L35,130 L25,60 Z" />
+            <!-- Tay (Trái & Phải) -->
+            <path class="optimal-zone" d="M25,60 L10,120 L15,160 M75,60 L90,120 L85,160" />
+            <!-- Bụng (Cảnh báo mỡ/nước) -->
+            <path class="warning-zone" d="M35,130 L65,130 L55,160 L45,160 Z" />
             <!-- Chân -->
-            <path d="M 42 150 L 58 150 L 65 260 L 55 260 L 50 180 L 45 260 L 35 260 Z" fill="none" stroke="#39ff14" stroke-width="1.5"/>
+            <path class="optimal-zone" d="M45,160 L30,240 L35,290 M55,160 L70,240 L65,290" />
+            <!-- Các đường kết nối Data/Mạch -->
+            <line x1="50" y1="45" x2="50" y2="130" stroke="rgba(0,255,157,0.5)" stroke-dasharray="2,2"/>
         </svg>
+    </div>
 
-        <!-- CỘT PHẢI: THỂ CHẤT -->
-        <div class="data-col col-right">
-            <div class="stat-block">
-                <div class="stat-label">WEIGHT_MASS</div>
-                <div class="stat-val">63.0 kg</div>
-            </div>
-            <div class="stat-block">
-                <div class="stat-label">BODY_FAT</div>
-                <div class="stat-val">13.0 %</div>
-            </div>
-            <div class="stat-block">
-                <div class="stat-label">STEP_COUNT</div>
-                <div class="stat-val">6,000</div>
-            </div>
+    <!-- Thông số HUD Bên Phải -->
+    <div class="hud-panel hud-right" style="top: 45%;">
+        <div class="hud-item">
+            <div class="hud-value status-mint glitch-text" data-text="13.0">13.0</div>
+            <div class="hud-label">BODY FAT (%)</div>
         </div>
-
+        <div class="hud-item">
+            <div class="hud-value status-mint glitch-text" data-text="2.5">2.5</div>
+            <div class="hud-label">WATER (L)</div>
+        </div>
+        <div class="hud-item">
+            <div class="hud-value status-amber glitch-text" data-text="5420">5420</div>
+            <div class="hud-label">STEPS</div>
+        </div>
     </div>
 
-    <!-- TERMINAL THU GỌN -->
-    <div class="boo-ticker">
-        <div class="log-line">> [BOO_AI]: Xác thực form thể chất... <span class="highlight">OPTIMAL</span></div>
-        <div class="log-line">> [BOO_AI]: Chờ cập nhật trọng số cho biến SCI...</div>
-    </div>
+    <script>
+        // JS mô phỏng dữ liệu nhiễu loạn nhẹ theo thời gian thực
+        setInterval(() => {
+            const glitchElements = document.querySelectorAll('.glitch-text');
+            // Tạo hiệu ứng nhiễu ngẫu nhiên cho 1 phần tử
+            const randomEl = glitchElements[Math.floor(Math.random() * glitchElements.length)];
+            const originalText = randomEl.getAttribute('data-text');
+            
+            // Giả lập nhảy số trong 200ms
+            randomEl.innerText = (parseFloat(originalText) + (Math.random() * 0.5 - 0.25)).toFixed(1);
+            setTimeout(() => {
+                randomEl.innerText = originalText;
+            }, 200);
 
+        }, 3000);
+    </script>
 </body>
 </html>
