@@ -39,6 +39,22 @@
             overflow: hidden;
         }
 
+        /* Nút Exit */
+        .btn-exit {
+            position: absolute; top: 15px; left: 15px; z-index: 50;
+            text-decoration: none; font-family: var(--font-display);
+            font-size: 10px; font-weight: bold; letter-spacing: 1px;
+            color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.3);
+            background: rgba(0, 229, 255, 0.05); padding: 5px 12px;
+            clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+            transition: all 0.3s ease;
+        }
+        
+        body.combat-active .btn-exit {
+            color: var(--crimson); border-color: var(--crimson);
+            background: rgba(255, 42, 42, 0.1);
+        }
+
         /* 1. Lưới Tổ Ong Nhịp Thở */
         .hex-grid {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -54,21 +70,21 @@
 
         /* 2. Top Banner & Avatar */
         .top-section {
-            position: relative; z-index: 10; padding: 20px 20px 0;
-            display: flex; justify-content: space-between; align-items: flex-start;
+            position: relative; z-index: 10; padding: 15px 15px 0;
+            display: flex; justify-content: flex-end; align-items: flex-start;
         }
 
         .status-banner {
-            flex: 1; text-align: center;
-            font-family: var(--font-display); font-size: 12px; font-weight: 700;
-            letter-spacing: 2px; padding: 8px;
+            position: absolute; left: 50%; transform: translateX(-50%); top: 15px;
+            font-family: var(--font-display); font-size: 11px; font-weight: 700;
+            letter-spacing: 2px; padding: 6px 15px; white-space: nowrap;
             border: 1px solid var(--amber); color: var(--amber);
             background: rgba(255, 170, 0, 0.1);
             clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
             transition: all 0.5s ease;
         }
 
-        .sys-info { text-align: right; font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.4; margin-left: 15px;}
+        .sys-info { text-align: right; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4;}
         .sys-info span { color: var(--cyan); font-weight: bold; }
 
         /* 3. LÕI ARC REACTOR (4 Vòng Quỹ Đạo) */
@@ -85,20 +101,22 @@
 
         .ring-svg { position: absolute; width: 100%; height: 100%; overflow: visible; }
 
-        .ring { fill: none; stroke-linecap: butt; transform-origin: center; transition: all 1s ease; }
-        
-        /* Trạng thái Standby (Nét đứt) */
-        .ring-hr { stroke: var(--crimson); stroke-width: 4; stroke-dasharray: 4 12; animation: spin-cw 15s linear infinite; filter: drop-shadow(0 0 5px var(--crimson)); }
-        .ring-phys { stroke: var(--mint); stroke-width: 3; stroke-dasharray: 10 20; animation: spin-ccw 20s linear infinite; filter: drop-shadow(0 0 5px var(--mint)); }
-        .ring-rec { stroke: var(--cyan); stroke-width: 3; stroke-dasharray: 15 30; animation: spin-cw 25s linear infinite; filter: drop-shadow(0 0 5px var(--cyan)); }
-        .ring-move { stroke: var(--amber); stroke-width: 2; stroke-dasharray: 5 15; animation: spin-ccw 30s linear infinite; filter: drop-shadow(0 0 5px var(--amber)); }
+        /* Các group quỹ đạo xoay */
+        .orb-group { transform-origin: 170px 170px; transition: all 1s ease; }
+        .orb-cw { animation: spin-cw 20s linear infinite; }
+        .orb-ccw { animation: spin-ccw 25s linear infinite; }
 
-        /* Các đường dẫn dữ liệu */
-        .leader-lines { stroke-width: 1.5; fill: none; stroke: rgba(255,255,255,0.15); }
-        .leader-hr { stroke: rgba(255, 42, 42, 0.6); }
-        .leader-phys { stroke: rgba(0, 255, 157, 0.6); }
-        .leader-rec { stroke: rgba(0, 229, 255, 0.6); }
-        .leader-move { stroke: rgba(255, 170, 0, 0.6); }
+        /* Các vòng tròn lõi */
+        .ring { fill: none; stroke-linecap: round; }
+        
+        /* Trạng thái Standby (Nét đứt thưa thớt) */
+        .ring-hr { stroke: var(--crimson); stroke-width: 2; stroke-dasharray: 4 12; filter: drop-shadow(0 0 5px var(--crimson)); }
+        .ring-phys { stroke: var(--mint); stroke-width: 2; stroke-dasharray: 10 20; filter: drop-shadow(0 0 5px var(--mint)); }
+        .ring-rec { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 15 30; filter: drop-shadow(0 0 5px var(--cyan)); }
+        .ring-move { stroke: var(--amber); stroke-width: 2; stroke-dasharray: 5 15; filter: drop-shadow(0 0 5px var(--amber)); }
+
+        /* Hạt Plasma (ẩn ở Standby, hiện ở Combat) */
+        .plasma-node { fill: #fff; opacity: 0; transition: opacity 0.5s ease; }
 
         /* Tâm lõi SCI */
         .sci-nexus {
@@ -128,42 +146,53 @@
         .pos-rec2 { top: 45%; right: 5%; border-color: var(--cyan); } .pos-rec2 .dp-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
         .pos-move { top: 75%; right: 5%; border-color: var(--amber); } .pos-move .dp-val { color: var(--amber); text-shadow: 0 0 10px var(--amber); }
 
-        /* 4. A.I Terminal Full-width */
+        /* 4. A.I Terminal Full-width - Fix lỗi tràn chữ */
         .terminal-panel {
-            position: relative; z-index: 10; margin: 0 10px 15px; padding: 15px;
+            position: relative; z-index: 10; margin: 0 10px 15px; padding: 25px 15px 15px;
             background: rgba(0, 229, 255, 0.02);
             border: 1px solid rgba(0, 229, 255, 0.2); border-bottom: 3px solid var(--cyan);
             clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
-            height: 110px; box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05);
+            min-height: 120px; /* Chuyển từ height sang min-height để tự động mở rộng */
+            box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05);
         }
 
         .terminal-header { position: absolute; top: 0; left: 20px; font-size: 9px; color: var(--bg-obsidian); background: var(--cyan); padding: 2px 10px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(0 0, 100% 0, calc(100% - 5px) 100%, 0 100%); }
 
-        .typewriter { margin-top: 10px; font-family: var(--font-display); font-size: 10px; color: var(--cyan); line-height: 1.6; letter-spacing: 1px; }
+        .typewriter { font-family: var(--font-display); font-size: 10px; color: var(--cyan); line-height: 1.6; letter-spacing: 1px; word-wrap: break-word; }
         .cursor { display: inline-block; width: 6px; height: 12px; background-color: var(--cyan); animation: blink 1s step-end infinite; vertical-align: bottom; }
 
         /* ==========================================
-           CƠ CHẾ COMBAT MODE (KHÓA MỤC TIÊU)
+           CƠ CHẾ COMBAT MODE (SAO CHỔI + HẠT PLASMA)
            ========================================== */
         body.combat-active .status-banner {
             border-color: var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.15);
             animation: alert-flash 1s infinite alternate;
         }
 
-        /* Hiệu ứng 3D Con quay hồi chuyển */
+        /* Hiệu ứng 3D Con quay hồi chuyển & Rung chấn */
         body.combat-active .arc-reactor {
-            transform: rotateX(25deg) rotateY(-15deg) scale(1.1);
+            transform: rotateX(20deg) rotateY(-15deg) scale(1.1);
+            animation: overload-shake 0.2s infinite;
         }
 
-        /* Biến nét đứt thành Solid và Tăng tốc độ điên cuồng */
-        body.combat-active .ring-hr { stroke-dasharray: none; stroke-width: 6; animation: spin-cw 2s linear infinite; filter: drop-shadow(0 0 15px var(--crimson)); }
-        body.combat-active .ring-phys { stroke-dasharray: none; animation: spin-ccw 3s linear infinite; filter: drop-shadow(0 0 15px var(--mint)); }
-        body.combat-active .ring-rec { stroke-dasharray: none; animation: spin-cw 4s linear infinite; filter: drop-shadow(0 0 15px var(--cyan)); }
-        body.combat-active .ring-move { stroke-dasharray: none; stroke-width: 4; animation: spin-ccw 5s linear infinite; filter: drop-shadow(0 0 15px var(--amber)); }
+        /* Kích hoạt Hạt Plasma */
+        body.combat-active .plasma-node { opacity: 1; }
+
+        /* Tăng tốc độ quay & Tỉ lệ nét để tạo đuôi sao chổi */
+        body.combat-active .orb-hr { animation: spin-cw 1.2s linear infinite; }
+        body.combat-active .orb-phys { animation: spin-ccw 2s linear infinite; }
+        body.combat-active .orb-rec { animation: spin-cw 2.5s linear infinite; }
+        body.combat-active .orb-move { animation: spin-ccw 3s linear infinite; }
+
+        /* Sao chổi: Nét đứt với khoảng trống cực lớn tạo vệt kéo dài */
+        body.combat-active .ring-hr { stroke-width: 4; stroke-dasharray: 200 1000; filter: drop-shadow(0 0 15px var(--crimson)); stroke-linecap: round; }
+        body.combat-active .ring-phys { stroke-width: 3; stroke-dasharray: 250 1000; filter: drop-shadow(0 0 10px var(--mint)); stroke-linecap: round; }
+        body.combat-active .ring-rec { stroke-width: 3; stroke-dasharray: 300 1000; filter: drop-shadow(0 0 10px var(--cyan)); stroke-linecap: round; }
+        body.combat-active .ring-move { stroke-width: 2; stroke-dasharray: 400 1000; filter: drop-shadow(0 0 10px var(--amber)); stroke-linecap: round; }
 
         /* Sóng xung kích lõi SCI */
         body.combat-active .sci-nexus {
-            animation: shockwave-pulse 1.5s infinite;
+            animation: shockwave-pulse 1s infinite;
         }
 
         body.combat-active .terminal-panel {
@@ -178,9 +207,16 @@
         @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         @keyframes alert-flash { 0% { text-shadow: 0 0 5px var(--crimson); } 100% { text-shadow: 0 0 20px var(--crimson); box-shadow: 0 0 15px rgba(255, 42, 42, 0.4); } }
+        @keyframes overload-shake { 
+            0% { margin-left: 0; margin-top: 0; } 
+            25% { margin-left: 1px; margin-top: -1px; } 
+            50% { margin-left: -1px; margin-top: 1px; } 
+            75% { margin-left: 1px; margin-top: 1px; } 
+            100% { margin-left: 0; margin-top: 0; } 
+        }
         @keyframes shockwave-pulse {
-            0% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0.4); }
-            70% { box-shadow: inset 0 0 50px rgba(176, 38, 255, 0.6), 0 0 0 40px rgba(176, 38, 255, 0); }
+            0% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0.6); }
+            50% { box-shadow: inset 0 0 50px rgba(176, 38, 255, 0.8), 0 0 0 30px rgba(176, 38, 255, 0); }
             100% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0); }
         }
     </style>
@@ -190,10 +226,13 @@
     <div class="pwa-container">
         <div class="hex-grid"></div>
 
+        <!-- Nút Exit Trở về Index -->
+        <a href="index.html" class="btn-exit">[ EXIT ]</a>
+
         <!-- Header -->
         <div class="top-section">
             <div class="status-banner" id="status-banner">
-                [ PHASE 1: CHARGING ]
+                [ CHARGING ]
             </div>
             <div class="sys-info">
                 OPR: <span>KAI</span><br>
@@ -206,19 +245,31 @@
         <div class="core-wrapper">
             <div class="arc-reactor">
                 <svg class="ring-svg" viewBox="0 0 340 340">
-                    <!-- Lines Base -->
-                    <!-- HR to Top Left --> <polyline class="leader-lines leader-hr" points="135,135 90,90 20,90" />
-                    <!-- Phys to Mid Left --> <polyline class="leader-lines leader-phys" points="105,170 20,170" />
-                    <!-- Rec to Bot Left --> <polyline class="leader-lines leader-rec" points="115,225 70,270 20,270" />
-                    <!-- Phys to Top Right --> <polyline class="leader-lines leader-phys" points="205,135 250,90 320,90" />
-                    <!-- Rec to Mid Right --> <polyline class="leader-lines leader-rec" points="235,170 320,170" />
-                    <!-- Move to Bot Right --> <polyline class="leader-lines leader-move" points="225,225 270,270 320,270" />
+                    
+                    <!-- Vòng 4: Vận Động (R=125) --> 
+                    <g class="orb-group orb-ccw orb-move">
+                        <circle class="ring ring-move" cx="170" cy="170" r="125" />
+                        <circle class="plasma-node" cx="170" cy="45" r="3.5" filter="drop-shadow(0 0 6px var(--amber))" />
+                    </g>
 
-                    <!-- Rings (Tâm 170,170) -->
-                    <!-- Vòng 1: Tim (R=65) --> <circle class="ring ring-hr" cx="170" cy="170" r="65" />
-                    <!-- Vòng 2: Thể Trạng (R=85) --> <circle class="ring ring-phys" cx="170" cy="170" r="85" />
-                    <!-- Vòng 3: Phục Hồi (R=105) --> <circle class="ring ring-rec" cx="170" cy="170" r="105" />
-                    <!-- Vòng 4: Vận Động (R=125) --> <circle class="ring ring-move" cx="170" cy="170" r="125" />
+                    <!-- Vòng 3: Phục Hồi (R=105) --> 
+                    <g class="orb-group orb-cw orb-rec">
+                        <circle class="ring ring-rec" cx="170" cy="170" r="105" />
+                        <circle class="plasma-node" cx="170" cy="65" r="4" filter="drop-shadow(0 0 8px var(--cyan))" />
+                    </g>
+
+                    <!-- Vòng 2: Thể Trạng (R=85) --> 
+                    <g class="orb-group orb-ccw orb-phys">
+                        <circle class="ring ring-phys" cx="170" cy="170" r="85" />
+                        <circle class="plasma-node" cx="170" cy="85" r="4.5" filter="drop-shadow(0 0 8px var(--mint))" />
+                    </g>
+
+                    <!-- Vòng 1: Tim (R=65) --> 
+                    <g class="orb-group orb-cw orb-hr">
+                        <circle class="ring ring-hr" cx="170" cy="170" r="65" />
+                        <circle class="plasma-node" cx="170" cy="105" r="5" filter="drop-shadow(0 0 10px var(--crimson))" />
+                    </g>
+
                 </svg>
 
                 <!-- Lõi SCI -->
@@ -258,13 +309,11 @@
     </div>
 
     <script>
-        // Hệ thống hiển thị chữ Terminal
         const textElement = document.getElementById('ai-text');
         const statusBanner = document.getElementById('status-banner');
-        let typeSpeed = 40;
+        let typeSpeed = 30;
 
         const bootSequence = [
-            "> Kích hoạt tiến trình quét sinh trắc học...",
             "> Đang thu thập chỉ số nhịp tim và phục hồi...",
             "> CẢNH BÁO: Nhịp tim MAX chưa đạt ngưỡng 160 BPM.",
             "> Yêu cầu gia tăng cường độ tập luyện vật lý."
@@ -285,7 +334,7 @@
                     await new Promise(r => setTimeout(r, typeSpeed));
                 }
                 textElement.innerHTML += '<br>';
-                await new Promise(r => setTimeout(r, 300));
+                await new Promise(r => setTimeout(r, 200));
             }
         }
 
@@ -307,14 +356,14 @@
             // Cập nhật giao diện
             document.body.classList.add('combat-active');
             statusBanner.innerText = "[ OVERRIDE: COMBAT MODE READY ]";
-            typeSpeed = 15; // Phản hồi AI nhanh hơn trong combat mode
+            typeSpeed = 15; 
             typeLines(combatSequence, true);
         }
 
-        // Tự động kích hoạt sau 12 giây để biểu diễn
+        // Tự động kích hoạt sau 12 giây
         let autoTrigger = setTimeout(triggerCombatMode, 12000);
 
-        // Cho phép ấn vào SCI Core để kích hoạt thủ công ngay
+        // Click để kích hoạt thủ công
         document.getElementById('trigger-combat').addEventListener('click', () => {
             clearTimeout(autoTrigger);
             triggerCombatMode();
