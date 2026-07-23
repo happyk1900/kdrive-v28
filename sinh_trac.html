@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Ultimate Combat HUD</title>
-    <!-- Import Font công nghệ -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Import Font công nghệ viễn tưởng -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --mint: #00ff9d;
@@ -13,7 +13,7 @@
             --amber: #ffaa00;
             --violet: #b026ff;
             --crimson: #ff2a2a;
-            --bg-glass: rgba(10, 12, 18, 0.7);
+            --bg-glass: rgba(10, 12, 18, 0.85);
             --font-display: 'Orbitron', sans-serif;
             --font-ui: 'Rajdhani', sans-serif;
         }
@@ -29,8 +29,8 @@
             display: flex; justify-content: center; align-items: center;
             height: 100vh; height: 100dvh;
             background-image: 
-                radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.08), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(176, 38, 255, 0.05), transparent 25%);
+                radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.08), transparent 30%),
+                radial-gradient(circle at 85% 30%, rgba(176, 38, 255, 0.06), transparent 30%);
             animation: bg-shift 20s infinite alternate linear;
         }
 
@@ -43,7 +43,7 @@
             width: 100%; max-width: 420px; height: 100%;
             position: relative;
             display: flex; flex-direction: column;
-            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            box-shadow: 0 0 50px rgba(0,0,0,0.95);
             overflow: hidden;
         }
 
@@ -54,9 +54,7 @@
                 linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
             background-size: 30px 30px;
-            z-index: 0; opacity: 0.5;
-            transform: perspective(500px) rotateX(10deg);
-            transform-origin: top center;
+            z-index: 0; opacity: 0.4;
         }
 
         /* HEADER & INFO */
@@ -65,17 +63,17 @@
             display: flex; justify-content: space-between; align-items: flex-start;
         }
 
-        .btn-esc {
-            text-decoration: none; font-family: var(--font-display); font-size: 11px; font-weight: bold;
-            color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.4); background: rgba(0, 229, 255, 0.05); 
-            padding: 6px 15px; border-radius: 4px; transition: all 0.2s;
+        /* ESC KHÔNG KHUNG, KHÔNG GLOW */
+        .btn-esc-static {
+            font-family: var(--font-display); font-size: 11px; font-weight: bold;
+            color: var(--crimson); background: transparent; border: none;
+            padding: 4px 0; letter-spacing: 1px; cursor: pointer; opacity: 0.8;
         }
-        body.combat-active .btn-esc { color: var(--crimson); border-color: var(--crimson); background: rgba(255, 42, 42, 0.1); }
 
         .sys-info { text-align: right; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.5; }
         .sys-info span { color: var(--cyan); font-weight: bold; }
 
-        .ctrl-group { display: flex; flex-direction: column; align-items: flex-end; margin-top: 6px; gap: 4px; }
+        .ctrl-group { display: flex; flex-direction: column; align-items: flex-end; margin-top: 6px; gap: 5px; }
         
         .btn-rank, .streak-box {
             border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.1); color: var(--amber);
@@ -83,12 +81,12 @@
             border-radius: 3px; letter-spacing: 1px;
         }
 
-        .banner-wrapper { position: relative; z-index: 10; display: flex; justify-content: center; width: 100%; margin-top: 10px; }
-        .status-banner {
+        /* COMBAT BANNER KHÔNG KHUNG, KHÔNG GLOW */
+        .banner-wrapper { position: relative; z-index: 10; display: flex; justify-content: center; width: 100%; margin-top: 5px; }
+        .status-banner-static {
             font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 2px;
-            padding: 6px 20px; text-align: center; border-radius: 4px;
-            border: 1px solid var(--amber); color: var(--amber); background: rgba(255, 170, 0, 0.1);
-            box-shadow: 0 0 10px rgba(255, 170, 0, 0.2);
+            padding: 4px 10px; text-align: center; color: var(--crimson); background: transparent;
+            opacity: 0.9;
         }
 
         /* LÕI ARC REACTOR */
@@ -98,10 +96,11 @@
         .arc-reactor {
             position: absolute; width: 320px; height: 320px;
             display: flex; justify-content: center; align-items: center;
-            transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .ring-svg { position: absolute; width: 100%; height: 100%; overflow: visible; }
-        .orb-group { transform-origin: 160px 160px; transition: all 1s ease; }
+        
+        /* HOẠT ẢNH XOAY CHO CÁC VÒNG TÂM */
+        .orb-group { transform-origin: 160px 160px; }
         .orb-cw { animation: spin-cw 20s linear infinite; }
         .orb-ccw { animation: spin-ccw 25s linear infinite; }
 
@@ -111,17 +110,19 @@
         .ring-rec { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 15 30; }
         .ring-move { stroke: var(--amber); stroke-width: 2; stroke-dasharray: 5 15; }
 
+        /* ĐƯỜNG CHỈ KẺ MỜ NỐI CHỈ SỐ VÀO LÕI */
+        .tracer-line { stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.35; }
+
         .sci-nexus {
             position: absolute; text-align: center; z-index: 15;
             width: 100px; height: 100px; border-radius: 50%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: radial-gradient(circle, rgba(176, 38, 255, 0.2) 0%, transparent 70%);
-            box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2);
+            background: radial-gradient(circle, rgba(176, 38, 255, 0.25) 0%, transparent 70%);
         }
         .sci-val { font-family: var(--font-display); font-size: 32px; font-weight: 900; color: var(--violet); text-shadow: 0 0 15px var(--violet); letter-spacing: 1px; }
         .sci-lbl { font-size: 9px; color: #fff; letter-spacing: 2px; margin-top: -5px; }
 
-        /* KHỐI CHỈ SỐ GỌN GÀNG (XÓA CHỈ KẺ) */
+        /* CHỈ CÁC Ô BẤM ĐƯỢC MỚI CÓ KHUNG & NHẤP NHÁY */
         .data-panel { 
             position: absolute; z-index: 15; background: var(--bg-glass);
             padding: 6px 12px; border: 1px solid; border-radius: 4px;
@@ -129,47 +130,43 @@
         }
         .dp-right { text-align: right; }
         .dp-val { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
-        .dp-lbl { font-size: 9px; color: rgba(255,255,255,0.6); letter-spacing: 1px; margin-top: 2px; }
+        .dp-lbl { font-size: 9px; color: rgba(255,255,255,0.7); letter-spacing: 1px; margin-top: 2px; }
 
-        .pos-hr { top: 12%; left: 5%; color: var(--crimson); border-color: rgba(255, 42, 42, 0.4); } 
-        .pos-phys1 { top: 40%; left: 2%; color: var(--mint); border-color: rgba(0, 255, 157, 0.4); } 
-        .pos-rec1 { top: 75%; left: 5%; color: var(--cyan); border-color: rgba(0, 229, 255, 0.4); } 
+        .pos-hr { top: 12%; left: 5%; color: var(--crimson); border-color: rgba(255, 42, 42, 0.6); } 
+        .pos-phys1 { top: 40%; left: 2%; color: var(--mint); border-color: rgba(0, 255, 157, 0.6); } 
+        .pos-rec1 { top: 75%; left: 5%; color: var(--cyan); border-color: rgba(0, 229, 255, 0.6); } 
         
-        .pos-phys2 { top: 12%; right: 5%; color: var(--mint); border-color: rgba(0, 255, 157, 0.4); } 
-        .pos-rec2 { top: 40%; right: 2%; color: var(--cyan); border-color: rgba(0, 229, 255, 0.4); } 
-        .pos-move { top: 75%; right: 5%; color: var(--amber); border-color: rgba(255, 170, 0, 0.4); } 
+        .pos-phys2 { top: 12%; right: 5%; color: var(--mint); border-color: rgba(0, 255, 157, 0.6); } 
+        .pos-rec2 { top: 40%; right: 2%; color: var(--cyan); border-color: rgba(0, 229, 255, 0.6); } 
+        .pos-move { top: 75%; right: 5%; color: var(--amber); border-color: rgba(255, 170, 0, 0.6); } 
 
-        /* TẤT CẢ NÚT CLICK ĐỀU NHẤP NHÁY */
-        .clickable { cursor: pointer; animation: pulse-glow 2s infinite alternate; transition: transform 0.1s; }
-        .clickable:active { transform: scale(0.92); }
+        .clickable { cursor: pointer; animation: pulse-glow 2.5s infinite alternate; transition: transform 0.1s; }
+        .clickable:active { transform: scale(0.93); }
 
         @keyframes pulse-glow {
-            0% { box-shadow: 0 0 2px currentColor; filter: brightness(0.9); }
-            100% { box-shadow: 0 0 12px currentColor; filter: brightness(1.2); }
+            0% { box-shadow: 0 0 3px currentColor; filter: brightness(0.95); }
+            100% { box-shadow: 0 0 12px currentColor; filter: brightness(1.25); }
         }
 
-        /* TERMINAL A.I FIX LẸM ĐÁY */
+        /* BOO DIAGNOSTICS TERMINAL */
         .terminal-panel {
             position: relative; z-index: 10; margin: 0 15px calc(20px + env(safe-area-inset-bottom)); 
-            padding: 25px 15px 15px; background: rgba(0, 229, 255, 0.05); 
-            border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 6px;
-            min-height: 110px; flex-shrink: 0; box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.1);
+            padding: 25px 15px 15px; background: rgba(255, 42, 42, 0.08); 
+            border: 1px solid rgba(255, 42, 42, 0.4); border-radius: 6px;
+            min-height: 110px; flex-shrink: 0; box-shadow: inset 0 0 15px rgba(255, 42, 42, 0.1);
         }
         .terminal-header { 
-            position: absolute; top: -1px; left: -1px; font-size: 9px; color: var(--bg-obsidian); 
-            background: var(--cyan); padding: 4px 12px; font-weight: bold; letter-spacing: 1px; 
-            border-top-left-radius: 6px; border-bottom-right-radius: 6px;
+            position: absolute; top: -1px; left: -1px; font-size: 9px; color: #fff; 
+            background: var(--crimson); padding: 3px 10px; font-weight: bold; letter-spacing: 1px; 
+            border-top-left-radius: 6px; border-bottom-right-radius: 6px; font-family: var(--font-display);
         }
-        .typewriter { font-family: var(--font-display); font-size: 10px; color: var(--cyan); line-height: 1.6; letter-spacing: 1px; }
-
-        /* COMBAT MODE EFFECTS */
-        body.combat-active .status-banner { border-color: var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.15); box-shadow: 0 0 15px rgba(255,42,42,0.4); }
-        body.combat-active .arc-reactor { transform: scale(1.05); }
-        body.combat-active .orb-hr { animation: spin-cw 1s linear infinite; }
-        body.combat-active .ring-hr { stroke-dasharray: 200 1000; filter: drop-shadow(0 0 10px var(--crimson)); }
-        body.combat-active .terminal-panel { border-color: rgba(255, 42, 42, 0.5); background: rgba(255, 42, 42, 0.05); box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.1); }
-        body.combat-active .terminal-header { background: var(--crimson); color: white; }
-        body.combat-active .typewriter { color: var(--crimson); text-shadow: 0 0 5px rgba(255,42,42,0.5); }
+        
+        /* CHỮ THÔNG BÁO CỦA BOO ĐỔI SANG MÀU TRẮNG DỄ ĐỌC */
+        .typewriter { 
+            font-family: var(--font-ui); font-size: 13px; font-weight: 600; 
+            color: #ffffff; line-height: 1.6; letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
 
         @keyframes spin-cw { 100% { transform: rotate(360deg); } }
         @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
@@ -177,42 +174,62 @@
         /* HOLOGRAM POPUP */
         .holo-popup {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); z-index: 60;
+            background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px); z-index: 60;
             display: flex; justify-content: center; align-items: center;
             opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
         }
         .holo-popup.active { opacity: 1; pointer-events: auto; }
         .holo-box { width: 85%; background: var(--bg-glass); padding: 25px; border-radius: 8px; border: 1px solid var(--cyan); text-align: center; }
-        .holo-title { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 15px; text-transform: uppercase; }
-        .holo-desc { font-size: 0.95rem; color: #c0c0d0; margin-bottom: 25px; line-height: 1.5; }
+        .holo-title { font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 15px; text-transform: uppercase; }
+        .holo-desc { font-size: 0.95rem; color: #e0e0e0; margin-bottom: 25px; line-height: 1.5; font-family: var(--font-ui); }
         .btn-close-holo { width: 100%; padding: 12px; font-family: var(--font-display); background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 4px; }
 
-        /* RANK OVERLAY (CÓ CUỘN) */
+        /* RANK OVERLAY (BÍ LỤC) */
         .rank-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5,6,8,0.95); backdrop-filter: blur(10px); z-index: 50;
+            background: rgba(8,9,12,0.96); backdrop-filter: blur(12px); z-index: 50;
             display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s ease;
         }
         .rank-overlay.active { transform: translateY(0); }
         
         .rank-header { padding: 25px 20px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .rank-header h2 { font-family: var(--font-display); color: var(--cyan); font-size: 1.2rem; letter-spacing: 2px; }
+        .rank-header h2 { font-family: var(--font-display); color: var(--cyan); font-size: 1.1rem; letter-spacing: 2px; }
         
         .tier-list { flex-grow: 1; overflow-y: auto; padding: 20px; }
-        .tier-item { border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; background: rgba(255,255,255,0.02); border-radius: 4px; }
-        .tier-btn { width: 100%; background: transparent; color: #fff; border: none; padding: 15px; text-align: left; font-family: var(--font-display); font-size: 1rem; cursor: pointer; }
+        .tier-item { border: 1px solid rgba(255,255,255,0.12); margin-bottom: 12px; background: rgba(255,255,255,0.02); border-radius: 6px; overflow: hidden; }
+        .tier-btn { 
+            width: 100%; background: transparent; color: #fff; border: none; padding: 15px; 
+            text-align: left; font-family: var(--font-display); font-size: 0.95rem; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+        }
         
-        /* FOOTER RANK OVERLAY FIX LẸM ĐÁY */
+        /* CHỮ BÍ LỤC DỄ ĐỌC & KHOA HỌC */
+        .tier-content { 
+            padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; 
+            font-family: var(--font-ui); font-size: 0.9rem; color: #d0d5e0; line-height: 1.6; 
+        }
+        .tier-content.open { max-height: 300px; padding-bottom: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px; }
+        .tier-content p { margin-bottom: 8px; }
+        .tier-content strong { color: var(--cyan); }
+
+        /* FOOTER RANK OVERLAY */
         .rank-footer {
             padding: 15px 20px calc(20px + env(safe-area-inset-bottom));
-            background: #050608; border-top: 1px solid rgba(255,255,255,0.1);
+            background: #08090c; border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; gap: 10px;
         }
+
         .hold-btn {
-            width: 100%; background: rgba(255, 42, 42, 0.05); border: 1px solid var(--crimson); color: var(--crimson);
-            padding: 16px; font-family: var(--font-display); font-size: 0.9rem; font-weight: bold; letter-spacing: 1px;
+            width: 100%; background: rgba(255, 42, 42, 0.08); border: 1px solid var(--crimson); color: var(--crimson);
+            padding: 15px; font-family: var(--font-display); font-size: 0.85rem; font-weight: bold; letter-spacing: 1px;
             border-radius: 6px; position: relative; overflow: hidden;
         }
-        .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: rgba(255, 42, 42, 0.3); z-index: -1; }
+        .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: rgba(255, 42, 42, 0.35); z-index: -1; }
+
+        .btn-abort-phys {
+            width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6);
+            padding: 10px; font-family: var(--font-display); font-size: 0.75rem; border-radius: 4px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -220,38 +237,54 @@
     <div class="pwa-container">
         <div class="cyber-grid"></div>
 
+        <!-- TOP ROW -->
         <div class="top-row">
-            <button class="btn-esc clickable" onclick="playBeep(); triggerAbort()">[ ESC ]</button>
+            <!-- ESC KHÔNG CÓ KHUNG -->
+            <button class="btn-esc-static" onclick="playBeep()">[ ESC ]</button>
             <div class="sys-info">
                 OPR: <span>KAI</span><br>
                 LOC: <span>HANOI</span><br>
                 DATE: <span id="current-date">--.--.----</span>
                 <div class="ctrl-group">
-                    <div class="streak-box" id="streak-box">[ STREAK: D-00 ]</div>
+                    <!-- KHUNG CÓ THỂ BẤM (CLICKABLE) -->
+                    <div class="streak-box clickable" id="streak-box" onclick="playBeep()">[ STREAK: D-00 ]</div>
                     <button class="btn-rank clickable" onclick="playBeep(); toggleRankMenu()" id="btn-rank">[ RANK: CHƯA KÝ ]</button>
                 </div>
             </div>
         </div>
 
+        <!-- BANNER COMBAT KHÔNG CÓ KHUNG -->
         <div class="banner-wrapper">
-            <div class="status-banner" id="status-banner">[ CHARGING ]</div>
+            <div class="status-banner-static" id="status-banner">[ COMBAT MODE READY ]</div>
         </div>
 
+        <!-- CORE & TRACER LINES -->
         <div class="core-wrapper">
             <div class="arc-reactor">
                 <svg class="ring-svg" viewBox="0 0 320 320">
+                    <!-- Đường chỉ mờ nối từ 6 ô chỉ số vào lõi -->
+                    <line x1="30" y1="40" x2="115" y2="115" class="tracer-line" stroke="var(--crimson)" />
+                    <line x1="20" y1="160" x2="85" y2="160" class="tracer-line" stroke="var(--mint)" />
+                    <line x1="30" y1="280" x2="100" y2="220" class="tracer-line" stroke="var(--cyan)" />
+
+                    <line x1="290" y1="40" x2="205" y2="115" class="tracer-line" stroke="var(--mint)" />
+                    <line x1="300" y1="160" x2="235" y2="160" class="tracer-line" stroke="var(--cyan)" />
+                    <line x1="290" y1="280" x2="220" y2="220" class="tracer-line" stroke="var(--amber)" />
+
+                    <!-- Vòng quỹ đạo tự xoay -->
                     <g class="orb-group orb-ccw orb-move"><circle class="ring ring-move" cx="160" cy="160" r="115" /></g>
                     <g class="orb-group orb-cw orb-rec"><circle class="ring ring-rec" cx="160" cy="160" r="95" /></g>
                     <g class="orb-group orb-ccw orb-phys"><circle class="ring ring-phys" cx="160" cy="160" r="75" /></g>
                     <g class="orb-group orb-cw orb-hr"><circle class="ring ring-hr" cx="160" cy="160" r="55" /></g>
                 </svg>
+
                 <div class="sci-nexus clickable" onclick="playBeep(); triggerCombatMode()">
                     <div class="sci-val">94.2</div>
                     <div class="sci-lbl">SCI INDEX</div>
                 </div>
             </div>
 
-            <!-- 6 Chỉ số nhấp nháy -->
+            <!-- 6 Khối chỉ số BẤM ĐƯỢC -> CÓ KHUNG & NHẤP NHÁY -->
             <div class="data-panel clickable pos-hr" onclick="openHolo('hr')"><div class="dp-val">160</div><div class="dp-lbl">HEART RATE</div></div>
             <div class="data-panel clickable pos-phys1" onclick="openHolo('weight')"><div class="dp-val">63.0</div><div class="dp-lbl">WEIGHT (KG)</div></div>
             <div class="data-panel clickable pos-rec1" onclick="openHolo('sleep')"><div class="dp-val">6.5</div><div class="dp-lbl">SLEEP (HRS)</div></div>
@@ -261,12 +294,13 @@
             <div class="data-panel clickable dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val">5420</div><div class="dp-lbl">STEPS</div></div>
         </div>
 
+        <!-- BOO TERMINAL -->
         <div class="terminal-panel">
-            <div class="terminal-header">A.I // DIAGNOSTICS</div>
+            <div class="terminal-header">BOO // DIAGNOSTICS</div>
             <div class="typewriter" id="ai-text"></div>
         </div>
 
-        <!-- HOLOGRAM -->
+        <!-- HOLOGRAM POPUP -->
         <div class="holo-popup" id="holo-popup" onclick="closeHolo(event)">
             <div class="holo-box" id="holo-box">
                 <div class="holo-title" id="holo-title">NAME</div>
@@ -275,78 +309,100 @@
             </div>
         </div>
 
-        <!-- RANK OVERLAY -->
+        <!-- RANK OVERLAY (BÍ LỤC) -->
         <div class="rank-overlay" id="rank-overlay">
             <div class="rank-header">
                 <h2>BÍ LỤC // TIẾN HÓA</h2>
-                <button class="btn-esc clickable" onclick="playBeep(); toggleRankMenu()" style="border-color: rgba(255,255,255,0.3); color: #fff;">[ X ]</button>
+                <button class="btn-esc-static" onclick="playBeep(); toggleRankMenu()">[ ĐÓNG ]</button>
             </div>
+            
             <div class="tier-list">
-                <div class="tier-item"><button class="tier-btn">[ TIER 1: CHIẾN BINH ] Trạng thái nền. Thất bại 1 ngày = Bị reset.</button></div>
-                <div class="tier-item"><button class="tier-btn" style="color:var(--mint)">[ TIER 2: TINH ANH ] 90 ngày 100% kỷ luật. Không vùng xám.</button></div>
-                <div class="tier-item"><button class="tier-btn" style="color:var(--cyan)">[ TIER 3: VÔ NGÃ ] 1,000 ngày duy trì. Cảnh giới tối thượng.</button></div>
+                <!-- Tier 1 -->
+                <div class="tier-item">
+                    <button class="tier-btn" onclick="toggleTier('tier1')">
+                        [ TIER 1: CHIẾN BINH ] <span>▼</span>
+                    </button>
+                    <div class="tier-content" id="tier1">
+                        <p><strong>Trạng thái Baseline:</strong> Giai đoạn thiết lập nền tảng tính kỷ luật.</p>
+                        <p>Bất kỳ chỉ số cốt lõi nào vi phạm Hard Limit vào cuối ngày sẽ lập tức kích hoạt <em>System Purge</em>: Xóa toàn bộ dữ liệu chuỗi (Streak = 0) và giáng về vạch xuất phát.</p>
+                    </div>
+                </div>
+
+                <!-- Tier 2 -->
+                <div class="tier-item">
+                    <button class="tier-btn" style="color:var(--mint)" onclick="toggleTier('tier2')">
+                        [ TIER 2: TINH ANH ] <span>▼</span>
+                    </button>
+                    <div class="tier-content" id="tier2">
+                        <p><strong>Mục tiêu:</strong> 90 Ngày Liên Tục // Compliance 100%.</p>
+                        <p><strong>Cơ sở khoa học:</strong> 90 ngày là chu kỳ thần kinh tối thiểu để não bộ hoàn tất quá trình tái cấu trúc (<em>Neuroplasticity</em>), hình thành các liên kết Myelin mới cho phản xạ vận động. Loại bỏ hoàn toàn "vùng xám" và thói quen thỏa hiệp.</p>
+                        <p>Kèm theo Giao thức Phục hồi Chủ Nhật (Active Recovery) để tối ưu hóa chức năng sinh lý.</p>
+                    </div>
+                </div>
+
+                <!-- Tier 3 -->
+                <div class="tier-item">
+                    <button class="tier-btn" style="color:var(--cyan)" onclick="toggleTier('tier3')">
+                        [ TIER 3: VÔ NGÃ ] <span>▼</span>
+                    </button>
+                    <div class="tier-content" id="tier3">
+                        <p><strong>Mục tiêu:</strong> 1,000 Ngày Duy Trì // Compliance 99%.</p>
+                        <p><strong>Cơ sở khoa học:</strong> Đạt mốc 1,000 ngày đưa tính kỷ luật chuyển hóa từ nhận thức ý thức thành phản xạ sinh học tự động (<em>Automaticity</em>). Bạn đạt trạng thái "Vô ngã": Hành động không còn ma sát với cảm xúc hay sự lười biếng.</p>
+                        <p>Cho phép quỹ dự phòng 10 ngày FAILED cho các sự cố bất khả kháng nghiêm trọng.</p>
+                    </div>
+                </div>
             </div>
+
             <div class="rank-footer">
-                <div style="text-align:center; font-size: 0.7rem; color: #777; margin-bottom: 8px;">GIỮ 3 GIÂY ĐỂ CHỐT HỢP ĐỒNG</div>
+                <div style="text-align:center; font-size: 0.7rem; color: #888;">SAU KHI ĐỌC KỸ BÍ LỤC CẤP BẬC:</div>
                 <button id="hold-confirm-btn" class="hold-btn clickable">
-                    [ NHẤN GIỮ: CAM KẾT ]
+                    [ NHẤN GIỮ 3S: XÁC NHẬN CAM KẾT ]
                     <div id="hold-progress" class="hold-progress"></div>
                 </button>
+
+                <!-- NÚT HỦY HỢP ĐỒNG VẬT LÝ -->
+                <button class="btn-abort-phys clickable" onclick="triggerAbort()">[ HỦY KẾT NỐI // RESET SYSTEM ]</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Set Date
+        // Date Setup
         const dateStr = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
         document.getElementById('current-date').innerText = dateStr;
 
-        // --- WEB AUDIO API (SOUND EFFECTS) ---
+        // Sound Effects (Web Audio API)
         let audioCtx;
-        function initAudio() { if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } if(audioCtx.state === 'suspended') audioCtx.resume(); }
+        function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); }
         
         function playBeep(freq = 900, duration = 0.05, type = 'sine') {
             initAudio();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime + duration);
         }
 
-        function playHoldSound() {
-            initAudio();
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-            osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 3); // Sweep up 3 seconds
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start();
-            return { osc, gain };
-        }
-
-        // --- STREAK & STATE LOGIC ---
+        // Streak State Management
         let currentStreak = parseInt(localStorage.getItem('combat_streak')) || 0;
         const streakBox = document.getElementById('streak-box');
-        
         function updateStreakUI() { streakBox.innerText = `[ STREAK: D-${currentStreak < 10 ? '0'+currentStreak : currentStreak} ]`; }
         updateStreakUI();
 
-        // --- HOLOGAM ---
+        // Hologram Logic
         const holoData = {
-            hr: { title: "HEART RATE", desc: "Đạt 160 BPM tối thiểu 01 lần/ngày.", color: "var(--crimson)" },
-            fat: { title: "BODY FAT", desc: "Không vượt 13.0%.", color: "var(--mint)" },
-            weight: { title: "WEIGHT", desc: "Giữ 63.0kg - 67.0kg.", color: "var(--mint)" },
-            water: { title: "WATER", desc: "Duy trì 50% - 60%.", color: "var(--cyan)" },
-            sleep: { title: "SLEEP", desc: "Ngủ 7 giờ/đêm. Bắt buộc.", color: "var(--cyan)" },
-            steps: { title: "STEPS", desc: "Tối thiểu 6.000 bước/ngày.", color: "var(--amber)" }
+            hr: { title: "HEART RATE", desc: "Yêu cầu đạt 160 BPM ít nhất 01 lần/ngày để ép động cơ.", color: "var(--crimson)" },
+            fat: { title: "BODY FAT", desc: "Không vượt quá 13.0%. Kiểm soát nghiêm ngặt bằng dinh dưỡng.", color: "var(--mint)" },
+            weight: { title: "WEIGHT", desc: "Giữ vững khung trọng lượng từ 63.0 kg đến 67.0 kg.", color: "var(--mint)" },
+            water: { title: "WATER", desc: "Duy trì ổn định mức nước cơ thể từ 50% - 60%.", color: "var(--cyan)" },
+            sleep: { title: "SLEEP", desc: "Ngủ phục hồi tối thiểu 7 giờ/đêm không ngoại lệ.", color: "var(--cyan)" },
+            steps: { title: "STEPS", desc: "Tối thiểu 6.000 bước vận động mỗi ngày.", color: "var(--amber)" }
         };
         const holoPopup = document.getElementById('holo-popup');
         function openHolo(type) {
-            playBeep(1200, 0.1, 'triangle');
+            playBeep(1100, 0.08, 'triangle');
             const data = holoData[type];
             document.getElementById('holo-title').innerText = data.title;
             document.getElementById('holo-title').style.color = data.color;
@@ -357,27 +413,26 @@
         function closeHoloDirect() { holoPopup.classList.remove('active'); }
         function closeHolo(e) { if (e.target === holoPopup) { playBeep(); closeHoloDirect(); } }
 
-        // --- TERMINAL & SYSTEM ---
+        // BOO Terminal Diagnostic Log (Chữ Trắng Sắc Nét)
         const textElement = document.getElementById('ai-text');
-        const statusBanner = document.getElementById('status-banner');
-        
         async function typeLines(lines) {
             textElement.innerHTML = '';
             for (let i = 0; i < lines.length; i++) {
                 for (let j = 0; j < lines[i].length; j++) {
                     textElement.innerHTML += lines[i].charAt(j);
-                    await new Promise(r => setTimeout(r, 20));
+                    await new Promise(r => setTimeout(r, 18));
                 }
                 textElement.innerHTML += '<br>';
-                await new Promise(r => setTimeout(r, 100));
+                await new Promise(r => setTimeout(r, 80));
             }
         }
 
         function triggerCombatMode() {
-            if(document.body.classList.contains('combat-active')) return;
-            document.body.classList.add('combat-active');
-            statusBanner.innerText = "[ COMBAT MODE READY ]";
-            typeLines(["> [CONTRACT SIGNED]", "> CÁC CHỈ SỐ KHÓA KẾT NỐI.", "> COMBAT MODE... SẴN SÀNG!"]);
+            typeLines([
+                "> [CONTRACT SIGNED & LOCKED]",
+                "> BOO: TẤT CẢ CHỈ SỐ ĐÃ ĐƯỢC NỔI KHÓA.",
+                "> COMBAT MODE VẬN HÀNH... SẴN SÀNG XUẤT TRẬN!"
+            ]);
         }
 
         function checkStatus() {
@@ -387,23 +442,38 @@
                 document.getElementById('btn-rank').style.borderColor = "var(--mint)";
                 triggerCombatMode();
             } else {
-                typeLines(["> Đang thu thập chỉ số...", "> CHƯA KÝ CAM KẾT. YÊU CẦU MỞ RANK."]);
+                typeLines([
+                    "> BOO: HỆ THỐNG ĐANG Ở TRẠNG THÁI CHỜ.",
+                    "> CHƯA THIẾT LẬP CAM KẾT VẬN HÀNH.",
+                    "> VUI LÒNG MỞ BÍ LỤC ĐỂ CHỐT HỢP ĐỒNG."
+                ]);
             }
         }
-        setTimeout(checkStatus, 500);
+        setTimeout(checkStatus, 400);
 
-        // --- HOLD TO CONFIRM ---
+        // Accordion for Tiers
+        function toggleTier(tierId) {
+            playBeep(800, 0.04);
+            const content = document.getElementById(tierId);
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+            } else {
+                document.querySelectorAll('.tier-content').forEach(el => el.classList.remove('open'));
+                content.classList.add('open');
+            }
+        }
+
+        // Rank Overlay & Hold to Confirm
         const rankOverlay = document.getElementById('rank-overlay');
         function toggleRankMenu() { rankOverlay.classList.toggle('active'); }
 
-        let holdTimer, soundNode;
+        let holdTimer, startTime = 0;
         const holdBtn = document.getElementById('hold-confirm-btn');
         const holdProgress = document.getElementById('hold-progress');
-        let startTime = 0;
 
         function startHold(e) {
             e.preventDefault(); startTime = Date.now();
-            soundNode = playHoldSound(); // Phát âm thanh gồng
+            playBeep(600, 0.1, 'sawtooth');
             holdTimer = setInterval(() => {
                 let percent = ((Date.now() - startTime) / 3000) * 100;
                 if (percent >= 100) { percent = 100; confirmCommitment(); }
@@ -413,21 +483,20 @@
 
         function cancelHold() {
             clearInterval(holdTimer); holdProgress.style.width = '0%';
-            if(soundNode) { soundNode.osc.stop(); soundNode = null; }
         }
 
         function confirmCommitment() {
-            cancelHold(); playBeep(2000, 0.5, 'square'); // Beep chốt thành công
+            cancelHold(); playBeep(1800, 0.4, 'square');
             localStorage.setItem('combat_committed', 'true');
-            if(currentStreak === 0) currentStreak = 1; // Khởi tạo Day 1
+            if(currentStreak === 0) currentStreak = 1;
             localStorage.setItem('combat_streak', currentStreak);
             updateStreakUI();
             toggleRankMenu(); checkStatus();
         }
 
         function triggerAbort() {
-            if (confirm("HỦY CAM KẾT? Streak sẽ bị reset về 0.")) {
-                playBeep(400, 0.3, 'sawtooth');
+            if (confirm("CẢNH BÁO: Thao tác này sẽ hủy hợp đồng và reset Streak về 0. Tiếp tục?")) {
+                playBeep(300, 0.3, 'sawtooth');
                 localStorage.removeItem('combat_committed');
                 currentStreak = 0; localStorage.setItem('combat_streak', 0);
                 location.reload();
@@ -439,8 +508,7 @@
         holdBtn.addEventListener('mouseleave', cancelHold);
         holdBtn.addEventListener('touchstart', startHold);
         holdBtn.addEventListener('touchend', cancelHold);
-        
-        // Khởi tạo Audio Context khi chạm bất kỳ đâu
+
         document.body.addEventListener('click', initAudio, { once: true });
     </script>
 </body>
