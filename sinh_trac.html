@@ -2,510 +2,446 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Spades Node - Ultimate Arc Core</title>
-    <!-- Import Font công nghệ viễn tưởng -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Spades Node - Ultimate Combat HUD</title>
+    <!-- Import Font công nghệ -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-obsidian: #08090d;
             --mint: #00ff9d;
             --cyan: #00e5ff;
             --amber: #ffaa00;
             --violet: #b026ff;
             --crimson: #ff2a2a;
+            --bg-glass: rgba(10, 12, 18, 0.7);
             --font-display: 'Orbitron', sans-serif;
             --font-ui: 'Rajdhani', sans-serif;
-            --glass-bg: rgba(8, 9, 13, 0.95);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
 
+        /* NỀN ĐỘNG VIỄN TƯỞNG */
         body {
-            background-color: var(--bg-obsidian);
+            background-color: #050608;
             color: white;
             font-family: var(--font-ui);
             overflow: hidden;
             display: flex; justify-content: center; align-items: center;
-            height: 100vh; height: 100dvh; 
-            perspective: 1000px;
+            height: 100vh; height: 100dvh;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(176, 38, 255, 0.05), transparent 25%);
+            animation: bg-shift 20s infinite alternate linear;
+        }
+
+        @keyframes bg-shift {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
         }
 
         .pwa-container {
-            width: 100%; max-width: 420px; height: 100%; max-height: 900px;
+            width: 100%; max-width: 420px; height: 100%;
             position: relative;
-            background: radial-gradient(circle at center, rgba(176, 38, 255, 0.05) 0%, var(--bg-obsidian) 80%);
             display: flex; flex-direction: column;
             box-shadow: 0 0 50px rgba(0,0,0,0.9);
             overflow: hidden;
         }
 
-        /* 1. Lưới Tổ Ong */
-        .hex-grid {
+        /* Lưới Cyber */
+        .cyber-grid {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg width='40' height='69.28' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 17.32l-20 11.55L0 17.32V-5.77l20-11.55L40-5.77V17.32zm0 46.19l-20 11.55-20-11.55V40.41L0 28.87l20 11.55 20-11.55v23.09z' fill='none' stroke='%23ffffff' stroke-width='0.5' stroke-opacity='0.03'/%3E%3C/svg%3E");
-            z-index: 1; animation: breathe 6s infinite ease-in-out alternate;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: 0; opacity: 0.5;
+            transform: perspective(500px) rotateX(10deg);
+            transform-origin: top center;
         }
 
-        @keyframes breathe {
-            0% { opacity: 0.3; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.05); }
-        }
-
-        /* 2. HEADER & SYS INFO */
+        /* HEADER & INFO */
         .top-row {
-            position: relative; z-index: 10; padding: 15px 15px 10px;
+            position: relative; z-index: 10; padding: 15px 15px 5px;
             display: flex; justify-content: space-between; align-items: flex-start;
         }
 
-        .btn-exit {
-            text-decoration: none; font-family: var(--font-display);
-            font-size: 10px; font-weight: bold; letter-spacing: 1px;
-            color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.3);
-            background: rgba(0, 229, 255, 0.05); padding: 5px 12px;
-            clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
-            transition: all 0.3s ease; cursor: pointer;
+        .btn-esc {
+            text-decoration: none; font-family: var(--font-display); font-size: 11px; font-weight: bold;
+            color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.4); background: rgba(0, 229, 255, 0.05); 
+            padding: 6px 15px; border-radius: 4px; transition: all 0.2s;
         }
-        body.combat-active .btn-exit {
-            color: var(--crimson); border-color: var(--crimson); background: rgba(255, 42, 42, 0.1);
-        }
+        body.combat-active .btn-esc { color: var(--crimson); border-color: var(--crimson); background: rgba(255, 42, 42, 0.1); }
 
-        .sys-info { text-align: right; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; }
+        .sys-info { text-align: right; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.5; }
         .sys-info span { color: var(--cyan); font-weight: bold; }
 
-        .btn-rank {
-            margin-top: 5px; border: 1px solid var(--amber); color: var(--amber);
-            background: rgba(255, 170, 0, 0.1); padding: 4px 10px;
-            font-family: var(--font-display); font-size: 9px; cursor: pointer;
-            letter-spacing: 1px; transition: all 0.2s; display: inline-block;
+        .ctrl-group { display: flex; flex-direction: column; align-items: flex-end; margin-top: 6px; gap: 4px; }
+        
+        .btn-rank, .streak-box {
+            border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.1); color: var(--amber);
+            padding: 4px 10px; font-family: var(--font-display); font-size: 10px;
+            border-radius: 3px; letter-spacing: 1px;
         }
-        .btn-rank:hover { background: var(--amber); color: #000; }
 
-        .banner-wrapper { position: relative; z-index: 10; display: flex; justify-content: center; width: 100%; }
+        .banner-wrapper { position: relative; z-index: 10; display: flex; justify-content: center; width: 100%; margin-top: 10px; }
         .status-banner {
-            font-family: var(--font-display); font-size: 11px; font-weight: 700;
-            letter-spacing: 2px; padding: 6px 15px; text-align: center;
+            font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 2px;
+            padding: 6px 20px; text-align: center; border-radius: 4px;
             border: 1px solid var(--amber); color: var(--amber); background: rgba(255, 170, 0, 0.1);
-            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); transition: all 0.5s ease;
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.2);
         }
 
-        /* 3. LÕI ARC REACTOR */
+        /* LÕI ARC REACTOR */
         .core-wrapper {
-            position: relative; flex: 1; display: flex; justify-content: center; align-items: center; z-index: 10; min-height: 0;
+            position: relative; flex: 1; display: flex; justify-content: center; align-items: center; z-index: 10; min-height: 300px;
         }
         .arc-reactor {
-            position: absolute; width: 340px; height: 340px;
+            position: absolute; width: 320px; height: 320px;
             display: flex; justify-content: center; align-items: center;
             transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .ring-svg { position: absolute; width: 100%; height: 100%; overflow: visible; }
-        .orb-group { transform-origin: 170px 170px; transition: all 1s ease; }
+        .orb-group { transform-origin: 160px 160px; transition: all 1s ease; }
         .orb-cw { animation: spin-cw 20s linear infinite; }
         .orb-ccw { animation: spin-ccw 25s linear infinite; }
 
         .ring { fill: none; stroke-linecap: round; }
-        .ring-hr { stroke: var(--crimson); stroke-width: 2; stroke-dasharray: 4 12; filter: drop-shadow(0 0 5px var(--crimson)); }
-        .ring-phys { stroke: var(--mint); stroke-width: 2; stroke-dasharray: 10 20; filter: drop-shadow(0 0 5px var(--mint)); }
-        .ring-rec { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 15 30; filter: drop-shadow(0 0 5px var(--cyan)); }
-        .ring-move { stroke: var(--amber); stroke-width: 2; stroke-dasharray: 5 15; filter: drop-shadow(0 0 5px var(--amber)); }
-        .plasma-node { fill: #fff; opacity: 0; transition: opacity 0.5s ease; }
+        .ring-hr { stroke: var(--crimson); stroke-width: 2; stroke-dasharray: 4 12; }
+        .ring-phys { stroke: var(--mint); stroke-width: 2; stroke-dasharray: 10 20; }
+        .ring-rec { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 15 30; }
+        .ring-move { stroke: var(--amber); stroke-width: 2; stroke-dasharray: 5 15; }
 
         .sci-nexus {
             position: absolute; text-align: center; z-index: 15;
-            width: 110px; height: 110px; border-radius: 50%;
+            width: 100px; height: 100px; border-radius: 50%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             background: radial-gradient(circle, rgba(176, 38, 255, 0.2) 0%, transparent 70%);
-            box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.1); cursor: pointer;
+            box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2);
         }
-        .sci-val { font-family: var(--font-display); font-size: 34px; font-weight: 900; color: var(--violet); text-shadow: 0 0 20px var(--violet); letter-spacing: 2px; }
-        .sci-lbl { font-size: 10px; color: #fff; letter-spacing: 2px; opacity: 0.8; margin-top: -5px; }
+        .sci-val { font-family: var(--font-display); font-size: 32px; font-weight: 900; color: var(--violet); text-shadow: 0 0 15px var(--violet); letter-spacing: 1px; }
+        .sci-lbl { font-size: 9px; color: #fff; letter-spacing: 2px; margin-top: -5px; }
 
-        /* Khối dữ liệu (Bấm được) */
+        /* KHỐI CHỈ SỐ GỌN GÀNG (XÓA CHỈ KẺ) */
         .data-panel { 
-            position: absolute; z-index: 15; background: rgba(8, 9, 13, 0.9); padding: 4px 12px; 
-            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); border-left: 2px solid; 
-            cursor: pointer; transition: transform 0.1s;
+            position: absolute; z-index: 15; background: var(--bg-glass);
+            padding: 6px 12px; border: 1px solid; border-radius: 4px;
+            backdrop-filter: blur(4px);
         }
-        .data-panel:active { transform: scale(0.95); }
-        .dp-right { clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px)); border-left: none; border-right: 2px solid; text-align: right; }
-
+        .dp-right { text-align: right; }
         .dp-val { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
-        .dp-lbl { font-size: 10px; color: rgba(255,255,255,0.6); letter-spacing: 1px; }
+        .dp-lbl { font-size: 9px; color: rgba(255,255,255,0.6); letter-spacing: 1px; margin-top: 2px; }
 
-        .pos-hr { top: 10%; left: 5%; border-color: var(--crimson); } .pos-hr .dp-val { color: var(--crimson); text-shadow: 0 0 10px var(--crimson); }
-        .pos-phys1 { top: 35%; left: 5%; border-color: var(--mint); } .pos-phys1 .dp-val { color: var(--mint); text-shadow: 0 0 10px var(--mint); }
-        .pos-rec1 { top: 75%; left: 5%; border-color: var(--cyan); } .pos-rec1 .dp-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
-        .pos-phys2 { top: 10%; right: 5%; border-color: var(--mint); } .pos-phys2 .dp-val { color: var(--mint); text-shadow: 0 0 10px var(--mint); }
-        .pos-rec2 { top: 45%; right: 5%; border-color: var(--cyan); } .pos-rec2 .dp-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
-        .pos-move { top: 75%; right: 5%; border-color: var(--amber); } .pos-move .dp-val { color: var(--amber); text-shadow: 0 0 10px var(--amber); }
+        .pos-hr { top: 12%; left: 5%; color: var(--crimson); border-color: rgba(255, 42, 42, 0.4); } 
+        .pos-phys1 { top: 40%; left: 2%; color: var(--mint); border-color: rgba(0, 255, 157, 0.4); } 
+        .pos-rec1 { top: 75%; left: 5%; color: var(--cyan); border-color: rgba(0, 229, 255, 0.4); } 
+        
+        .pos-phys2 { top: 12%; right: 5%; color: var(--mint); border-color: rgba(0, 255, 157, 0.4); } 
+        .pos-rec2 { top: 40%; right: 2%; color: var(--cyan); border-color: rgba(0, 229, 255, 0.4); } 
+        .pos-move { top: 75%; right: 5%; color: var(--amber); border-color: rgba(255, 170, 0, 0.4); } 
 
-        /* 4. Terminal */
-        .terminal-panel {
-            position: relative; z-index: 10; margin: 0 10px 20px; padding: 25px 15px 15px;
-            background: rgba(0, 229, 255, 0.02); border: 1px solid rgba(0, 229, 255, 0.2); border-bottom: 3px solid var(--cyan);
-            clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
-            min-height: 115px; flex-shrink: 0; box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05);
+        /* TẤT CẢ NÚT CLICK ĐỀU NHẤP NHÁY */
+        .clickable { cursor: pointer; animation: pulse-glow 2s infinite alternate; transition: transform 0.1s; }
+        .clickable:active { transform: scale(0.92); }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 2px currentColor; filter: brightness(0.9); }
+            100% { box-shadow: 0 0 12px currentColor; filter: brightness(1.2); }
         }
-        .terminal-header { position: absolute; top: 0; left: 20px; font-size: 9px; color: var(--bg-obsidian); background: var(--cyan); padding: 2px 10px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(0 0, 100% 0, calc(100% - 5px) 100%, 0 100%); }
-        .typewriter { font-family: var(--font-display); font-size: 10px; color: var(--cyan); line-height: 1.6; letter-spacing: 1px; word-wrap: break-word; }
-        .cursor { display: inline-block; width: 6px; height: 12px; background-color: var(--cyan); animation: blink 1s step-end infinite; vertical-align: bottom; }
+
+        /* TERMINAL A.I FIX LẸM ĐÁY */
+        .terminal-panel {
+            position: relative; z-index: 10; margin: 0 15px calc(20px + env(safe-area-inset-bottom)); 
+            padding: 25px 15px 15px; background: rgba(0, 229, 255, 0.05); 
+            border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 6px;
+            min-height: 110px; flex-shrink: 0; box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.1);
+        }
+        .terminal-header { 
+            position: absolute; top: -1px; left: -1px; font-size: 9px; color: var(--bg-obsidian); 
+            background: var(--cyan); padding: 4px 12px; font-weight: bold; letter-spacing: 1px; 
+            border-top-left-radius: 6px; border-bottom-right-radius: 6px;
+        }
+        .typewriter { font-family: var(--font-display); font-size: 10px; color: var(--cyan); line-height: 1.6; letter-spacing: 1px; }
 
         /* COMBAT MODE EFFECTS */
-        body.combat-active .status-banner { border-color: var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.15); animation: alert-flash 1s infinite alternate; }
-        body.combat-active .arc-reactor { transform: rotateX(20deg) rotateY(-15deg) scale(1.1); animation: overload-shake 0.2s infinite; }
-        body.combat-active .plasma-node { opacity: 1; }
-        body.combat-active .orb-hr { animation: spin-cw 1.2s linear infinite; }
-        body.combat-active .orb-phys { animation: spin-ccw 2s linear infinite; }
-        body.combat-active .orb-rec { animation: spin-cw 2.5s linear infinite; }
-        body.combat-active .orb-move { animation: spin-ccw 3s linear infinite; }
-        body.combat-active .ring-hr { stroke-width: 4; stroke-dasharray: 200 1000; filter: drop-shadow(0 0 15px var(--crimson)); stroke-linecap: round; }
-        body.combat-active .ring-phys { stroke-width: 3; stroke-dasharray: 250 1000; filter: drop-shadow(0 0 10px var(--mint)); stroke-linecap: round; }
-        body.combat-active .ring-rec { stroke-width: 3; stroke-dasharray: 300 1000; filter: drop-shadow(0 0 10px var(--cyan)); stroke-linecap: round; }
-        body.combat-active .ring-move { stroke-width: 2; stroke-dasharray: 400 1000; filter: drop-shadow(0 0 10px var(--amber)); stroke-linecap: round; }
-        body.combat-active .sci-nexus { animation: shockwave-pulse 1s infinite; }
-        body.combat-active .terminal-panel { border-color: rgba(255, 42, 42, 0.5); border-bottom-color: var(--crimson); box-shadow: inset 0 0 30px rgba(255, 42, 42, 0.1); }
+        body.combat-active .status-banner { border-color: var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.15); box-shadow: 0 0 15px rgba(255,42,42,0.4); }
+        body.combat-active .arc-reactor { transform: scale(1.05); }
+        body.combat-active .orb-hr { animation: spin-cw 1s linear infinite; }
+        body.combat-active .ring-hr { stroke-dasharray: 200 1000; filter: drop-shadow(0 0 10px var(--crimson)); }
+        body.combat-active .terminal-panel { border-color: rgba(255, 42, 42, 0.5); background: rgba(255, 42, 42, 0.05); box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.1); }
         body.combat-active .terminal-header { background: var(--crimson); color: white; }
-        body.combat-active .typewriter { color: var(--crimson); text-shadow: 0 0 5px var(--crimson); }
-        body.combat-active .cursor { background-color: var(--crimson); }
+        body.combat-active .typewriter { color: var(--crimson); text-shadow: 0 0 5px rgba(255,42,42,0.5); }
 
         @keyframes spin-cw { 100% { transform: rotate(360deg); } }
         @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        @keyframes alert-flash { 0% { text-shadow: 0 0 5px var(--crimson); } 100% { text-shadow: 0 0 20px var(--crimson); box-shadow: 0 0 15px rgba(255, 42, 42, 0.4); } }
-        @keyframes overload-shake { 0% { margin-left: 0; margin-top: 0; } 25% { margin-left: 1px; margin-top: -1px; } 50% { margin-left: -1px; margin-top: 1px; } 75% { margin-left: 1px; margin-top: 1px; } 100% { margin-left: 0; margin-top: 0; } }
-        @keyframes shockwave-pulse { 0% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0.6); } 50% { box-shadow: inset 0 0 50px rgba(176, 38, 255, 0.8), 0 0 0 30px rgba(176, 38, 255, 0); } 100% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0); } }
 
-        /* 5. HOLOGRAM POPUP CHỈ SỐ */
+        /* HOLOGRAM POPUP */
         .holo-popup {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 60;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); z-index: 60;
             display: flex; justify-content: center; align-items: center;
             opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
         }
         .holo-popup.active { opacity: 1; pointer-events: auto; }
-        .holo-box {
-            width: 85%; background: var(--bg-obsidian); border: 1px solid var(--cyan);
-            padding: 20px; position: relative; box-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
-            clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
-        }
-        .holo-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
-        .holo-desc { font-size: 0.9rem; color: #b0b0c0; line-height: 1.5; margin-bottom: 20px; }
-        .btn-close-holo {
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff;
-            padding: 10px; font-family: var(--font-display); cursor: pointer; letter-spacing: 1px;
-        }
+        .holo-box { width: 85%; background: var(--bg-glass); padding: 25px; border-radius: 8px; border: 1px solid var(--cyan); text-align: center; }
+        .holo-title { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 15px; text-transform: uppercase; }
+        .holo-desc { font-size: 0.95rem; color: #c0c0d0; margin-bottom: 25px; line-height: 1.5; }
+        .btn-close-holo { width: 100%; padding: 12px; font-family: var(--font-display); background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 4px; }
 
-        /* 6. RANK OVERLAY & CONTRACT */
+        /* RANK OVERLAY (CÓ CUỘN) */
         .rank-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--glass-bg); backdrop-filter: blur(8px); z-index: 50;
-            padding: 25px 20px; display: flex; flex-direction: column;
-            transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            background: rgba(5,6,8,0.95); backdrop-filter: blur(10px); z-index: 50;
+            display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s ease;
         }
-        .rank-overlay.active { transform: translateX(0); }
-        .rank-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;
-        }
-        .rank-header h2 { font-family: var(--font-display); color: var(--cyan); letter-spacing: 2px; font-size: 1.2rem; }
+        .rank-overlay.active { transform: translateY(0); }
         
-        .tier-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
-        .tier-item { border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; background: rgba(0,0,0,0.5); }
-        .tier-btn {
-            width: 100%; background: transparent; color: #fff; border: none; padding: 15px; text-align: left;
-            font-family: var(--font-display); font-size: 1rem; cursor: pointer; display: flex; justify-content: space-between;
+        .rank-header { padding: 25px 20px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .rank-header h2 { font-family: var(--font-display); color: var(--cyan); font-size: 1.2rem; letter-spacing: 2px; }
+        
+        .tier-list { flex-grow: 1; overflow-y: auto; padding: 20px; }
+        .tier-item { border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; background: rgba(255,255,255,0.02); border-radius: 4px; }
+        .tier-btn { width: 100%; background: transparent; color: #fff; border: none; padding: 15px; text-align: left; font-family: var(--font-display); font-size: 1rem; cursor: pointer; }
+        
+        /* FOOTER RANK OVERLAY FIX LẸM ĐÁY */
+        .rank-footer {
+            padding: 15px 20px calc(20px + env(safe-area-inset-bottom));
+            background: #050608; border-top: 1px solid rgba(255,255,255,0.1);
         }
-        .tier-btn span { color: var(--amber); }
-        .tier-content { padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; font-size: 0.85rem; color: #a0a0b0; line-height: 1.6; }
-        .tier-content.open { max-height: 250px; padding-bottom: 15px; }
-        .tier-content strong { color: var(--crimson); }
-
-        /* Hold to Confirm Button */
         .hold-btn {
             width: 100%; background: rgba(255, 42, 42, 0.05); border: 1px solid var(--crimson); color: var(--crimson);
-            padding: 16px; font-family: var(--font-display); font-size: 0.9rem; font-weight: bold; letter-spacing: 2px;
-            cursor: pointer; position: relative; overflow: hidden; margin-top: 15px;
-            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+            padding: 16px; font-family: var(--font-display); font-size: 0.9rem; font-weight: bold; letter-spacing: 1px;
+            border-radius: 6px; position: relative; overflow: hidden;
         }
-        .hold-progress {
-            position: absolute; top: 0; left: 0; height: 100%; width: 0%;
-            background: rgba(255, 42, 42, 0.4); z-index: -1;
-        }
+        .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: rgba(255, 42, 42, 0.3); z-index: -1; }
     </style>
 </head>
 <body>
 
     <div class="pwa-container">
-        <div class="hex-grid"></div>
+        <div class="cyber-grid"></div>
 
-        <!-- Hàng 1: Nút ESC và Tọa độ -->
         <div class="top-row">
-            <a href="index.html" class="btn-exit">[ ESC ]</a>
+            <button class="btn-esc clickable" onclick="playBeep(); triggerAbort()">[ ESC ]</button>
             <div class="sys-info">
                 OPR: <span>KAI</span><br>
                 LOC: <span>HANOI</span><br>
-                DATE: <span id="current-date">--.--.----</span><br>
-                <button class="btn-rank" onclick="toggleRankMenu()" id="btn-rank">[ RANK: CHƯA KÝ ]</button>
+                DATE: <span id="current-date">--.--.----</span>
+                <div class="ctrl-group">
+                    <div class="streak-box" id="streak-box">[ STREAK: D-00 ]</div>
+                    <button class="btn-rank clickable" onclick="playBeep(); toggleRankMenu()" id="btn-rank">[ RANK: CHƯA KÝ ]</button>
+                </div>
             </div>
         </div>
 
-        <!-- Hàng 2: Trạng thái -->
         <div class="banner-wrapper">
-            <div class="status-banner" id="status-banner">
-                [ CHARGING ]
-            </div>
+            <div class="status-banner" id="status-banner">[ CHARGING ]</div>
         </div>
 
-        <!-- ARC REACTOR CORE & METRICS -->
         <div class="core-wrapper">
             <div class="arc-reactor">
-                <svg class="ring-svg" viewBox="0 0 340 340">
-                    <g class="orb-group orb-ccw orb-move">
-                        <circle class="ring ring-move" cx="170" cy="170" r="125" />
-                        <circle class="plasma-node" cx="170" cy="45" r="3.5" filter="drop-shadow(0 0 6px var(--amber))" />
-                    </g>
-                    <g class="orb-group orb-cw orb-rec">
-                        <circle class="ring ring-rec" cx="170" cy="170" r="105" />
-                        <circle class="plasma-node" cx="170" cy="65" r="4" filter="drop-shadow(0 0 8px var(--cyan))" />
-                    </g>
-                    <g class="orb-group orb-ccw orb-phys">
-                        <circle class="ring ring-phys" cx="170" cy="170" r="85" />
-                        <circle class="plasma-node" cx="170" cy="85" r="4.5" filter="drop-shadow(0 0 8px var(--mint))" />
-                    </g>
-                    <g class="orb-group orb-cw orb-hr">
-                        <circle class="ring ring-hr" cx="170" cy="170" r="65" />
-                        <circle class="plasma-node" cx="170" cy="105" r="5" filter="drop-shadow(0 0 10px var(--crimson))" />
-                    </g>
+                <svg class="ring-svg" viewBox="0 0 320 320">
+                    <g class="orb-group orb-ccw orb-move"><circle class="ring ring-move" cx="160" cy="160" r="115" /></g>
+                    <g class="orb-group orb-cw orb-rec"><circle class="ring ring-rec" cx="160" cy="160" r="95" /></g>
+                    <g class="orb-group orb-ccw orb-phys"><circle class="ring ring-phys" cx="160" cy="160" r="75" /></g>
+                    <g class="orb-group orb-cw orb-hr"><circle class="ring ring-hr" cx="160" cy="160" r="55" /></g>
                 </svg>
-
-                <!-- Trung tâm SCI, bấm vào cũng kích hoạt (Backup) -->
-                <div class="sci-nexus" id="trigger-combat">
+                <div class="sci-nexus clickable" onclick="playBeep(); triggerCombatMode()">
                     <div class="sci-val">94.2</div>
                     <div class="sci-lbl">SCI INDEX</div>
                 </div>
             </div>
 
-            <!-- Các khối chỉ số bấm mở Hologram -->
-            <div class="data-panel pos-hr" onclick="openHolo('hr')"><div class="dp-val" id="val-hr">160</div><div class="dp-lbl">HEART RATE</div></div>
-            <div class="data-panel pos-phys1" onclick="openHolo('weight')"><div class="dp-val">63.0</div><div class="dp-lbl">WEIGHT (KG)</div></div>
-            <div class="data-panel pos-rec1" onclick="openHolo('sleep')"><div class="dp-val">6.5</div><div class="dp-lbl">SLEEP (HRS)</div></div>
+            <!-- 6 Chỉ số nhấp nháy -->
+            <div class="data-panel clickable pos-hr" onclick="openHolo('hr')"><div class="dp-val">160</div><div class="dp-lbl">HEART RATE</div></div>
+            <div class="data-panel clickable pos-phys1" onclick="openHolo('weight')"><div class="dp-val">63.0</div><div class="dp-lbl">WEIGHT (KG)</div></div>
+            <div class="data-panel clickable pos-rec1" onclick="openHolo('sleep')"><div class="dp-val">6.5</div><div class="dp-lbl">SLEEP (HRS)</div></div>
             
-            <div class="data-panel dp-right pos-phys2" onclick="openHolo('fat')"><div class="dp-val">13.0</div><div class="dp-lbl">BODY FAT (%)</div></div>
-            <div class="data-panel dp-right pos-rec2" onclick="openHolo('water')"><div class="dp-val">2.5</div><div class="dp-lbl">WATER (L)</div></div>
-            <div class="data-panel dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val">5420</div><div class="dp-lbl">STEPS</div></div>
+            <div class="data-panel clickable dp-right pos-phys2" onclick="openHolo('fat')"><div class="dp-val">13.0</div><div class="dp-lbl">BODY FAT (%)</div></div>
+            <div class="data-panel clickable dp-right pos-rec2" onclick="openHolo('water')"><div class="dp-val">2.5</div><div class="dp-lbl">WATER (L)</div></div>
+            <div class="data-panel clickable dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val">5420</div><div class="dp-lbl">STEPS</div></div>
         </div>
 
-        <!-- Terminal A.I -->
         <div class="terminal-panel">
             <div class="terminal-header">A.I // DIAGNOSTICS</div>
-            <div class="typewriter" id="ai-text"></div><span class="cursor"></span>
+            <div class="typewriter" id="ai-text"></div>
         </div>
 
-        <!-- HOLOGRAM POPUP CHỈ SỐ -->
+        <!-- HOLOGRAM -->
         <div class="holo-popup" id="holo-popup" onclick="closeHolo(event)">
             <div class="holo-box" id="holo-box">
-                <div class="holo-title" id="holo-title">QUY ĐỊNH // NAME</div>
+                <div class="holo-title" id="holo-title">NAME</div>
                 <div class="holo-desc" id="holo-desc">Nội dung...</div>
-                <button class="btn-close-holo" onclick="closeHoloDirect()">[ ĐÓNG ]</button>
+                <button class="btn-close-holo clickable" onclick="playBeep(); closeHoloDirect()">[ ĐÓNG ]</button>
             </div>
         </div>
 
-        <!-- RANK OVERLAY & HỢP ĐỒNG -->
+        <!-- RANK OVERLAY -->
         <div class="rank-overlay" id="rank-overlay">
             <div class="rank-header">
                 <h2>BÍ LỤC // TIẾN HÓA</h2>
-                <button class="btn-exit" onclick="toggleRankMenu()" style="clip-path: none; border: 1px solid rgba(255,255,255,0.3); color: #fff;">[ X ]</button>
+                <button class="btn-esc clickable" onclick="playBeep(); toggleRankMenu()" style="border-color: rgba(255,255,255,0.3); color: #fff;">[ X ]</button>
             </div>
-            
             <div class="tier-list">
-                <!-- Tier 1 -->
-                <div class="tier-item">
-                    <button class="tier-btn" onclick="toggleTier('tier1')">
-                        [ TIER 1: CHIẾN BINH ] <span>+</span>
-                    </button>
-                    <div class="tier-content" id="tier1">
-                        Trạng thái nền tảng. Khi sự lười biếng và thỏa hiệp chiếm lấy, bạn sẽ bị đẩy về đây. Bất kỳ chỉ số FAILED nào vào cuối ngày cũng sẽ xóa sổ toàn bộ dữ liệu, <strong>Reset về vạch xuất phát.</strong>
-                    </div>
-                </div>
-                <!-- Tier 2 -->
-                <div class="tier-item">
-                    <button class="tier-btn" onclick="toggleTier('tier2')">
-                        [ TIER 2: TINH ANH ] <span>+</span>
-                    </button>
-                    <div class="tier-content" id="tier2">
-                        Yêu cầu: <strong>90 ngày kỷ luật 100%</strong>. Không có vùng xám. Không có lời bào chữa. Thất bại 1 ngày = Hủy hợp đồng. Có hỗ trợ Giao thức Phục hồi Chủ Nhật (Active Recovery) để duy trì sinh lý.
-                    </div>
-                </div>
-                <!-- Tier 3 -->
-                <div class="tier-item">
-                    <button class="tier-btn" onclick="toggleTier('tier3')">
-                        [ TIER 3: VÔ NGÃ ] <span>+</span>
-                    </button>
-                    <div class="tier-content" id="tier3">
-                        Cảnh giới tối thượng. Yêu cầu: <strong>1,000 ngày duy trì (99%)</strong>. Bản ngã và cảm xúc biến mất, chỉ còn lại sự thực thi. Hạn mức an toàn: 10 ngày FAILED dự phòng cho các sự cố bất khả kháng.
-                    </div>
-                </div>
+                <div class="tier-item"><button class="tier-btn">[ TIER 1: CHIẾN BINH ] Trạng thái nền. Thất bại 1 ngày = Bị reset.</button></div>
+                <div class="tier-item"><button class="tier-btn" style="color:var(--mint)">[ TIER 2: TINH ANH ] 90 ngày 100% kỷ luật. Không vùng xám.</button></div>
+                <div class="tier-item"><button class="tier-btn" style="color:var(--cyan)">[ TIER 3: VÔ NGÃ ] 1,000 ngày duy trì. Cảnh giới tối thượng.</button></div>
             </div>
-
-            <div style="text-align: center; font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 10px;">SAU KHI ĐÃ ĐỌC KỸ BÍ LỤC:</div>
-            <button id="hold-confirm-btn" class="hold-btn">
-                [ GIỮ 3S: XÁC NHẬN CAM KẾT ]
-                <div id="hold-progress" class="hold-progress"></div>
-            </button>
+            <div class="rank-footer">
+                <div style="text-align:center; font-size: 0.7rem; color: #777; margin-bottom: 8px;">GIỮ 3 GIÂY ĐỂ CHỐT HỢP ĐỒNG</div>
+                <button id="hold-confirm-btn" class="hold-btn clickable">
+                    [ NHẤN GIỮ: CAM KẾT ]
+                    <div id="hold-progress" class="hold-progress"></div>
+                </button>
+            </div>
         </div>
-
     </div>
 
     <script>
-        // Set Date Dynamic
-        const today = new Date();
-        const dateStr = today.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
+        // Set Date
+        const dateStr = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
         document.getElementById('current-date').innerText = dateStr;
 
-        // Logic Hologram Popup
+        // --- WEB AUDIO API (SOUND EFFECTS) ---
+        let audioCtx;
+        function initAudio() { if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } if(audioCtx.state === 'suspended') audioCtx.resume(); }
+        
+        function playBeep(freq = 900, duration = 0.05, type = 'sine') {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playHoldSound() {
+            initAudio();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 3); // Sweep up 3 seconds
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start();
+            return { osc, gain };
+        }
+
+        // --- STREAK & STATE LOGIC ---
+        let currentStreak = parseInt(localStorage.getItem('combat_streak')) || 0;
+        const streakBox = document.getElementById('streak-box');
+        
+        function updateStreakUI() { streakBox.innerText = `[ STREAK: D-${currentStreak < 10 ? '0'+currentStreak : currentStreak} ]`; }
+        updateStreakUI();
+
+        // --- HOLOGAM ---
         const holoData = {
-            hr: { title: "QUY ĐỊNH // HEART RATE", desc: "Yêu cầu đạt 160 BPM ít nhất 01 lần/ngày để ép động cơ.", color: "var(--crimson)" },
-            fat: { title: "QUY ĐỊNH // BODY FAT", desc: "Không vượt quá 13.0%. Kiểm soát nghiêm ngặt bằng dinh dưỡng.", color: "var(--mint)" },
-            weight: { title: "QUY ĐỊNH // WEIGHT", desc: "Giữ vững khung trọng lượng sinh lý học từ 63.0 kg đến 67.0 kg.", color: "var(--mint)" },
-            water: { title: "QUY ĐỊNH // WATER", desc: "Duy trì ổn định mức nước cơ thể từ 50% - 60%.", color: "var(--cyan)" },
-            sleep: { title: "QUY ĐỊNH // SLEEP", desc: "Ngủ phục hồi tối thiểu 7 giờ/đêm. Không thỏa hiệp.", color: "var(--cyan)" },
-            steps: { title: "QUY ĐỊNH // STEPS", desc: "Vận động tối thiểu 6.000 bước/ngày để duy trì cơ khí.", color: "var(--amber)" }
+            hr: { title: "HEART RATE", desc: "Đạt 160 BPM tối thiểu 01 lần/ngày.", color: "var(--crimson)" },
+            fat: { title: "BODY FAT", desc: "Không vượt 13.0%.", color: "var(--mint)" },
+            weight: { title: "WEIGHT", desc: "Giữ 63.0kg - 67.0kg.", color: "var(--mint)" },
+            water: { title: "WATER", desc: "Duy trì 50% - 60%.", color: "var(--cyan)" },
+            sleep: { title: "SLEEP", desc: "Ngủ 7 giờ/đêm. Bắt buộc.", color: "var(--cyan)" },
+            steps: { title: "STEPS", desc: "Tối thiểu 6.000 bước/ngày.", color: "var(--amber)" }
         };
-
         const holoPopup = document.getElementById('holo-popup');
-        const holoTitle = document.getElementById('holo-title');
-        const holoDesc = document.getElementById('holo-desc');
-        const holoBox = document.getElementById('holo-box');
-
         function openHolo(type) {
+            playBeep(1200, 0.1, 'triangle');
             const data = holoData[type];
-            if (data) {
-                holoTitle.innerText = data.title;
-                holoTitle.style.color = data.color;
-                holoBox.style.borderColor = data.color;
-                holoBox.style.boxShadow = `0 0 30px ${data.color}40`;
-                holoDesc.innerText = data.desc;
-                holoPopup.classList.add('active');
-            }
+            document.getElementById('holo-title').innerText = data.title;
+            document.getElementById('holo-title').style.color = data.color;
+            document.getElementById('holo-box').style.borderColor = data.color;
+            document.getElementById('holo-desc').innerText = data.desc;
+            holoPopup.classList.add('active');
         }
         function closeHoloDirect() { holoPopup.classList.remove('active'); }
-        function closeHolo(e) { if (e.target === holoPopup) holoPopup.classList.remove('active'); }
+        function closeHolo(e) { if (e.target === holoPopup) { playBeep(); closeHoloDirect(); } }
 
-        // Logic Rank Overlay & Accordion
-        const rankOverlay = document.getElementById('rank-overlay');
-        function toggleRankMenu() { rankOverlay.classList.toggle('active'); }
-
-        function toggleTier(tierId) {
-            const content = document.getElementById(tierId);
-            if (content.classList.contains('open')) {
-                content.classList.remove('open');
-            } else {
-                document.querySelectorAll('.tier-content').forEach(el => el.classList.remove('open'));
-                content.classList.add('open');
-            }
-        }
-
-        // Logic Typewriter Terminal
+        // --- TERMINAL & SYSTEM ---
         const textElement = document.getElementById('ai-text');
         const statusBanner = document.getElementById('status-banner');
-        let typeSpeed = 30;
-
-        const bootSequence = [
-            "> [SYSTEM BOOT] Đang thu thập chỉ số nền...",
-            "> HỆ THỐNG ĐANG CHỜ LỆNH XÁC NHẬN TỪ OPERATOR.",
-            "> CHƯA THIẾT LẬP CAM KẾT. VUI LÒNG KÝ HỢP ĐỒNG RANK."
-        ];
-
-        const combatSequence = [
-            "> [OVERRIDE DETECTED: CONTRACT SIGNED]",
-            "> NHỊP TIM ĐẠT MAX. CÁC CHỈ SỐ ĐÃ KHÓA KẾT NỐI.",
-            "> TRẠNG THÁI TÂM LÝ & THỂ LỰC ĐẠT ĐỈNH.",
-            "> THIẾT LẬP COMBAT MODE... SẴN SÀNG XUẤT TRẬN!"
-        ];
-
-        async function typeLines(lines, clearFirst = true) {
-            if(clearFirst) textElement.innerHTML = '';
+        
+        async function typeLines(lines) {
+            textElement.innerHTML = '';
             for (let i = 0; i < lines.length; i++) {
                 for (let j = 0; j < lines[i].length; j++) {
                     textElement.innerHTML += lines[i].charAt(j);
-                    await new Promise(r => setTimeout(r, typeSpeed));
+                    await new Promise(r => setTimeout(r, 20));
                 }
                 textElement.innerHTML += '<br>';
-                await new Promise(r => setTimeout(r, 200));
+                await new Promise(r => setTimeout(r, 100));
             }
         }
-
-        // Khởi động Typewriter
-        setTimeout(() => {
-            if (localStorage.getItem('combat_committed') !== 'true') {
-                typeLines(bootSequence);
-            }
-        }, 1000);
 
         function triggerCombatMode() {
             if(document.body.classList.contains('combat-active')) return;
             document.body.classList.add('combat-active');
-            statusBanner.innerText = "[ OVERRIDE: COMBAT MODE READY ]";
-            typeSpeed = 15; 
-            typeLines(combatSequence, true);
+            statusBanner.innerText = "[ COMBAT MODE READY ]";
+            typeLines(["> [CONTRACT SIGNED]", "> CÁC CHỈ SỐ KHÓA KẾT NỐI.", "> COMBAT MODE... SẴN SÀNG!"]);
         }
-
-        // Nút trung tâm vẫn giữ trigger backup
-        document.getElementById('trigger-combat').addEventListener('click', triggerCombatMode);
-
-        // Logic Hold-to-Confirm (3s)
-        const holdBtn = document.getElementById('hold-confirm-btn');
-        const holdProgress = document.getElementById('hold-progress');
-        const rankBtnLabel = document.getElementById('btn-rank');
-        
-        let progressInterval = null;
-        let holdDuration = 3000;
-        let startTime = 0;
 
         function checkStatus() {
             if (localStorage.getItem('combat_committed') === 'true') {
-                rankBtnLabel.innerText = "[ RANK: TIER 2 ]";
-                rankBtnLabel.style.color = "var(--mint)";
-                rankBtnLabel.style.borderColor = "var(--mint)";
-                rankBtnLabel.style.background = "rgba(0, 255, 157, 0.1)";
+                document.getElementById('btn-rank').innerText = "[ RANK: TIER 2 ]";
+                document.getElementById('btn-rank').style.color = "var(--mint)";
+                document.getElementById('btn-rank').style.borderColor = "var(--mint)";
                 triggerCombatMode();
+            } else {
+                typeLines(["> Đang thu thập chỉ số...", "> CHƯA KÝ CAM KẾT. YÊU CẦU MỞ RANK."]);
             }
         }
-        checkStatus(); // Chạy ngay khi load để nếu đã ký thì bật đỏ luôn
+        setTimeout(checkStatus, 500);
+
+        // --- HOLD TO CONFIRM ---
+        const rankOverlay = document.getElementById('rank-overlay');
+        function toggleRankMenu() { rankOverlay.classList.toggle('active'); }
+
+        let holdTimer, soundNode;
+        const holdBtn = document.getElementById('hold-confirm-btn');
+        const holdProgress = document.getElementById('hold-progress');
+        let startTime = 0;
 
         function startHold(e) {
-            e.preventDefault();
-            startTime = Date.now();
-            progressInterval = setInterval(() => {
-                let elapsed = Date.now() - startTime;
-                let percent = (elapsed / holdDuration) * 100;
-                if (percent >= 100) {
-                    percent = 100;
-                    clearInterval(progressInterval);
-                    confirmCommitment();
-                }
+            e.preventDefault(); startTime = Date.now();
+            soundNode = playHoldSound(); // Phát âm thanh gồng
+            holdTimer = setInterval(() => {
+                let percent = ((Date.now() - startTime) / 3000) * 100;
+                if (percent >= 100) { percent = 100; confirmCommitment(); }
                 holdProgress.style.width = percent + '%';
             }, 50);
         }
 
         function cancelHold() {
-            if (progressInterval) clearInterval(progressInterval);
-            holdProgress.style.width = '0%';
+            clearInterval(holdTimer); holdProgress.style.width = '0%';
+            if(soundNode) { soundNode.osc.stop(); soundNode = null; }
         }
 
         function confirmCommitment() {
+            cancelHold(); playBeep(2000, 0.5, 'square'); // Beep chốt thành công
             localStorage.setItem('combat_committed', 'true');
-            holdProgress.style.width = '0%';
-            toggleRankMenu(); // Đóng overlay rank
-            checkStatus(); // Đổi nút rank & Kích hoạt nháy đỏ Combat
+            if(currentStreak === 0) currentStreak = 1; // Khởi tạo Day 1
+            localStorage.setItem('combat_streak', currentStreak);
+            updateStreakUI();
+            toggleRankMenu(); checkStatus();
         }
 
-        // Bắt sự kiện Hold trên PC & Điện thoại
+        function triggerAbort() {
+            if (confirm("HỦY CAM KẾT? Streak sẽ bị reset về 0.")) {
+                playBeep(400, 0.3, 'sawtooth');
+                localStorage.removeItem('combat_committed');
+                currentStreak = 0; localStorage.setItem('combat_streak', 0);
+                location.reload();
+            }
+        }
+
         holdBtn.addEventListener('mousedown', startHold);
         holdBtn.addEventListener('mouseup', cancelHold);
         holdBtn.addEventListener('mouseleave', cancelHold);
         holdBtn.addEventListener('touchstart', startHold);
         holdBtn.addEventListener('touchend', cancelHold);
+        
+        // Khởi tạo Audio Context khi chạm bất kỳ đâu
+        document.body.addEventListener('click', initAudio, { once: true });
     </script>
 </body>
 </html>
