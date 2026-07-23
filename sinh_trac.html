@@ -2,390 +2,319 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPADES NODE // COMBAT MODE HUD</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spades Node - Ultimate Arc Core</title>
+    <!-- Import Font công nghệ viễn tưởng -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #050505;
-            --panel-bg: #0a0a0c;
-            --border-color: #222228;
-            --text-main: #8a8a9e;
-            --accent-red: #ff3333;
-            --accent-green: #00ff66;
-            --accent-cyan: #00e5ff;
-            --accent-amber: #ffbb00;
-            --accent-purple: #9d00ff;
-            --dim-gray: #444450;
+            --bg-obsidian: #08090d;
+            --mint: #00ff9d;
+            --cyan: #00e5ff;
+            --amber: #ffaa00;
+            --violet: #b026ff;
+            --crimson: #ff2a2a;
+            --font-display: 'Orbitron', sans-serif;
+            --font-ui: 'Rajdhani', sans-serif;
+            --glass-bg: rgba(8, 9, 13, 0.95);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Share Tech Mono', monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-color: var(--bg-obsidian);
+            color: white;
+            font-family: var(--font-ui);
             overflow: hidden;
-            background-image: radial-gradient(circle at center, #111 0%, #000 100%);
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; height: 100dvh; 
+            perspective: 1000px;
         }
 
-        .hud-container {
-            width: 100%;
-            max-width: 420px;
-            height: 100vh;
-            max-height: 850px;
+        .pwa-container {
+            width: 100%; max-width: 420px; height: 100%; max-height: 900px;
             position: relative;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            background: radial-gradient(circle at center, rgba(176, 38, 255, 0.05) 0%, var(--bg-obsidian) 80%);
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            overflow: hidden;
         }
 
-        /* --- HEADER TACTICAL --- */
-        .hud-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            z-index: 10;
+        /* 1. Lưới Tổ Ong */
+        .hex-grid {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='69.28' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 17.32l-20 11.55L0 17.32V-5.77l20-11.55L40-5.77V17.32zm0 46.19l-20 11.55-20-11.55V40.41L0 28.87l20 11.55 20-11.55v23.09z' fill='none' stroke='%23ffffff' stroke-width='0.5' stroke-opacity='0.03'/%3E%3C/svg%3E");
+            z-index: 1; animation: breathe 6s infinite ease-in-out alternate;
         }
 
-        .btn-esc {
-            border: 1px solid var(--accent-red);
-            color: var(--accent-red);
-            background: transparent;
-            padding: 5px 15px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.9rem;
-            cursor: pointer;
+        @keyframes breathe {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
         }
 
-        .operator-info {
-            text-align: right;
-            font-size: 0.75rem;
-            color: var(--accent-cyan);
-            line-height: 1.4;
+        /* 2. HEADER & SYS INFO */
+        .top-row {
+            position: relative; z-index: 10; padding: 15px 15px 10px;
+            display: flex; justify-content: space-between; align-items: flex-start;
         }
 
-        .operator-info span { color: #fff; }
+        .btn-exit {
+            text-decoration: none; font-family: var(--font-display);
+            font-size: 10px; font-weight: bold; letter-spacing: 1px;
+            color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.3);
+            background: rgba(0, 229, 255, 0.05); padding: 5px 12px;
+            clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+            transition: all 0.3s ease; cursor: pointer;
+        }
+        body.combat-active .btn-exit {
+            color: var(--crimson); border-color: var(--crimson); background: rgba(255, 42, 42, 0.1);
+        }
+
+        .sys-info { text-align: right; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; }
+        .sys-info span { color: var(--cyan); font-weight: bold; }
 
         .btn-rank {
-            margin-top: 5px;
-            border: 1px solid var(--accent-amber);
-            color: var(--accent-amber);
-            background: rgba(255, 187, 0, 0.1);
-            padding: 4px 10px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.75rem;
-            cursor: pointer;
-            letter-spacing: 1px;
-            transition: all 0.2s;
+            margin-top: 5px; border: 1px solid var(--amber); color: var(--amber);
+            background: rgba(255, 170, 0, 0.1); padding: 4px 10px;
+            font-family: var(--font-display); font-size: 9px; cursor: pointer;
+            letter-spacing: 1px; transition: all 0.2s; display: inline-block;
+        }
+        .btn-rank:hover { background: var(--amber); color: #000; }
+
+        .banner-wrapper { position: relative; z-index: 10; display: flex; justify-content: center; width: 100%; }
+        .status-banner {
+            font-family: var(--font-display); font-size: 11px; font-weight: 700;
+            letter-spacing: 2px; padding: 6px 15px; text-align: center;
+            border: 1px solid var(--amber); color: var(--amber); background: rgba(255, 170, 0, 0.1);
+            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); transition: all 0.5s ease;
         }
 
-        .btn-rank:hover {
-            background: var(--accent-amber);
-            color: #000;
+        /* 3. LÕI ARC REACTOR */
+        .core-wrapper {
+            position: relative; flex: 1; display: flex; justify-content: center; align-items: center; z-index: 10; min-height: 0;
+        }
+        .arc-reactor {
+            position: absolute; width: 340px; height: 340px;
+            display: flex; justify-content: center; align-items: center;
+            transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .ring-svg { position: absolute; width: 100%; height: 100%; overflow: visible; }
+        .orb-group { transform-origin: 170px 170px; transition: all 1s ease; }
+        .orb-cw { animation: spin-cw 20s linear infinite; }
+        .orb-ccw { animation: spin-ccw 25s linear infinite; }
+
+        .ring { fill: none; stroke-linecap: round; }
+        .ring-hr { stroke: var(--crimson); stroke-width: 2; stroke-dasharray: 4 12; filter: drop-shadow(0 0 5px var(--crimson)); }
+        .ring-phys { stroke: var(--mint); stroke-width: 2; stroke-dasharray: 10 20; filter: drop-shadow(0 0 5px var(--mint)); }
+        .ring-rec { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 15 30; filter: drop-shadow(0 0 5px var(--cyan)); }
+        .ring-move { stroke: var(--amber); stroke-width: 2; stroke-dasharray: 5 15; filter: drop-shadow(0 0 5px var(--amber)); }
+        .plasma-node { fill: #fff; opacity: 0; transition: opacity 0.5s ease; }
+
+        .sci-nexus {
+            position: absolute; text-align: center; z-index: 15;
+            width: 110px; height: 110px; border-radius: 50%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: radial-gradient(circle, rgba(176, 38, 255, 0.2) 0%, transparent 70%);
+            box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.1); cursor: pointer;
+        }
+        .sci-val { font-family: var(--font-display); font-size: 34px; font-weight: 900; color: var(--violet); text-shadow: 0 0 20px var(--violet); letter-spacing: 2px; }
+        .sci-lbl { font-size: 10px; color: #fff; letter-spacing: 2px; opacity: 0.8; margin-top: -5px; }
+
+        /* Khối dữ liệu (Bấm được) */
+        .data-panel { 
+            position: absolute; z-index: 15; background: rgba(8, 9, 13, 0.9); padding: 4px 12px; 
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); border-left: 2px solid; 
+            cursor: pointer; transition: transform 0.1s;
+        }
+        .data-panel:active { transform: scale(0.95); }
+        .dp-right { clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px)); border-left: none; border-right: 2px solid; text-align: right; }
+
+        .dp-val { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+        .dp-lbl { font-size: 10px; color: rgba(255,255,255,0.6); letter-spacing: 1px; }
+
+        .pos-hr { top: 10%; left: 5%; border-color: var(--crimson); } .pos-hr .dp-val { color: var(--crimson); text-shadow: 0 0 10px var(--crimson); }
+        .pos-phys1 { top: 35%; left: 5%; border-color: var(--mint); } .pos-phys1 .dp-val { color: var(--mint); text-shadow: 0 0 10px var(--mint); }
+        .pos-rec1 { top: 75%; left: 5%; border-color: var(--cyan); } .pos-rec1 .dp-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
+        .pos-phys2 { top: 10%; right: 5%; border-color: var(--mint); } .pos-phys2 .dp-val { color: var(--mint); text-shadow: 0 0 10px var(--mint); }
+        .pos-rec2 { top: 45%; right: 5%; border-color: var(--cyan); } .pos-rec2 .dp-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
+        .pos-move { top: 75%; right: 5%; border-color: var(--amber); } .pos-move .dp-val { color: var(--amber); text-shadow: 0 0 10px var(--amber); }
+
+        /* 4. Terminal */
+        .terminal-panel {
+            position: relative; z-index: 10; margin: 0 10px 20px; padding: 25px 15px 15px;
+            background: rgba(0, 229, 255, 0.02); border: 1px solid rgba(0, 229, 255, 0.2); border-bottom: 3px solid var(--cyan);
+            clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+            min-height: 115px; flex-shrink: 0; box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05);
+        }
+        .terminal-header { position: absolute; top: 0; left: 20px; font-size: 9px; color: var(--bg-obsidian); background: var(--cyan); padding: 2px 10px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(0 0, 100% 0, calc(100% - 5px) 100%, 0 100%); }
+        .typewriter { font-family: var(--font-display); font-size: 10px; color: var(--cyan); line-height: 1.6; letter-spacing: 1px; word-wrap: break-word; }
+        .cursor { display: inline-block; width: 6px; height: 12px; background-color: var(--cyan); animation: blink 1s step-end infinite; vertical-align: bottom; }
+
+        /* COMBAT MODE EFFECTS */
+        body.combat-active .status-banner { border-color: var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.15); animation: alert-flash 1s infinite alternate; }
+        body.combat-active .arc-reactor { transform: rotateX(20deg) rotateY(-15deg) scale(1.1); animation: overload-shake 0.2s infinite; }
+        body.combat-active .plasma-node { opacity: 1; }
+        body.combat-active .orb-hr { animation: spin-cw 1.2s linear infinite; }
+        body.combat-active .orb-phys { animation: spin-ccw 2s linear infinite; }
+        body.combat-active .orb-rec { animation: spin-cw 2.5s linear infinite; }
+        body.combat-active .orb-move { animation: spin-ccw 3s linear infinite; }
+        body.combat-active .ring-hr { stroke-width: 4; stroke-dasharray: 200 1000; filter: drop-shadow(0 0 15px var(--crimson)); stroke-linecap: round; }
+        body.combat-active .ring-phys { stroke-width: 3; stroke-dasharray: 250 1000; filter: drop-shadow(0 0 10px var(--mint)); stroke-linecap: round; }
+        body.combat-active .ring-rec { stroke-width: 3; stroke-dasharray: 300 1000; filter: drop-shadow(0 0 10px var(--cyan)); stroke-linecap: round; }
+        body.combat-active .ring-move { stroke-width: 2; stroke-dasharray: 400 1000; filter: drop-shadow(0 0 10px var(--amber)); stroke-linecap: round; }
+        body.combat-active .sci-nexus { animation: shockwave-pulse 1s infinite; }
+        body.combat-active .terminal-panel { border-color: rgba(255, 42, 42, 0.5); border-bottom-color: var(--crimson); box-shadow: inset 0 0 30px rgba(255, 42, 42, 0.1); }
+        body.combat-active .terminal-header { background: var(--crimson); color: white; }
+        body.combat-active .typewriter { color: var(--crimson); text-shadow: 0 0 5px var(--crimson); }
+        body.combat-active .cursor { background-color: var(--crimson); }
+
+        @keyframes spin-cw { 100% { transform: rotate(360deg); } }
+        @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes alert-flash { 0% { text-shadow: 0 0 5px var(--crimson); } 100% { text-shadow: 0 0 20px var(--crimson); box-shadow: 0 0 15px rgba(255, 42, 42, 0.4); } }
+        @keyframes overload-shake { 0% { margin-left: 0; margin-top: 0; } 25% { margin-left: 1px; margin-top: -1px; } 50% { margin-left: -1px; margin-top: 1px; } 75% { margin-left: 1px; margin-top: 1px; } 100% { margin-left: 0; margin-top: 0; } }
+        @keyframes shockwave-pulse { 0% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0.6); } 50% { box-shadow: inset 0 0 50px rgba(176, 38, 255, 0.8), 0 0 0 30px rgba(176, 38, 255, 0); } 100% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0); } }
+
+        /* 5. HOLOGRAM POPUP CHỈ SỐ */
+        .holo-popup {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 60;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+        }
+        .holo-popup.active { opacity: 1; pointer-events: auto; }
+        .holo-box {
+            width: 85%; background: var(--bg-obsidian); border: 1px solid var(--cyan);
+            padding: 20px; position: relative; box-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
+            clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+        }
+        .holo-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
+        .holo-desc { font-size: 0.9rem; color: #b0b0c0; line-height: 1.5; margin-bottom: 20px; }
+        .btn-close-holo {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff;
+            padding: 10px; font-family: var(--font-display); cursor: pointer; letter-spacing: 1px;
         }
 
-        /* --- CENTER: SCI INDEX CIRCLE --- */
-        .center-hud {
-            position: relative;
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .sci-circle {
-            position: relative;
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: rgba(157, 0, 255, 0.15);
-            border: 2px solid var(--accent-red);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 30px rgba(157, 0, 255, 0.3);
-            z-index: 5;
-        }
-
-        .sci-circle::before {
-            content: '';
-            position: absolute;
-            top: -15px; left: -15px; right: -15px; bottom: -15px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            border-top-color: var(--accent-cyan);
-            border-right-color: var(--accent-green);
-            transform: rotate(45deg);
-        }
-
-        .sci-circle::after {
-            content: '';
-            position: absolute;
-            top: -30px; left: -30px; right: -30px; bottom: -30px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            border-bottom-color: var(--accent-amber);
-            transform: rotate(-15deg);
-        }
-
-        .sci-val {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: var(--accent-purple);
-            text-shadow: 0 0 10px rgba(157, 0, 255, 0.8);
-            line-height: 1;
-        }
-
-        .sci-label {
-            font-size: 0.75rem;
-            color: #fff;
-            letter-spacing: 2px;
-            margin-top: 5px;
-        }
-
-        /* --- 6 METRICS AROUND CIRCLE --- */
-        .metric {
-            position: absolute;
-            text-align: left;
-        }
-
-        .metric .val {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .metric .label {
-            font-size: 0.6rem;
-            color: var(--text-main);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* Positioning to match 15741.jpg roughly */
-        .m-hr { top: 10%; left: 0; }
-        .m-hr .val { color: var(--accent-red); }
-
-        .m-fat { top: 10%; right: 0; text-align: right;}
-        .m-fat .val { color: var(--accent-green); }
-
-        .m-weight { top: 40%; left: 0; }
-        .m-weight .val { color: var(--accent-green); }
-
-        .m-water { top: 45%; right: 0; text-align: right;}
-        .m-water .val { color: var(--accent-cyan); }
-
-        .m-sleep { bottom: 15%; left: 0; }
-        .m-sleep .val { color: var(--accent-cyan); }
-
-        .m-steps { bottom: 15%; right: 0; text-align: right;}
-        .m-steps .val { color: var(--accent-amber); }
-
-
-        /* --- A.I DIAGNOSTICS TERMINAL --- */
-        .ai-terminal {
-            border: 1px solid var(--accent-red);
-            background: rgba(255, 51, 51, 0.05);
-            padding: 10px;
-            position: relative;
-        }
-
-        .ai-terminal-title {
-            position: absolute;
-            top: -10px; left: 10px;
-            background: var(--accent-red);
-            color: #000;
-            font-size: 0.65rem;
-            font-weight: bold;
-            padding: 2px 8px;
-            letter-spacing: 1px;
-        }
-
-        .ai-log {
-            font-size: 0.7rem;
-            color: var(--accent-red);
-            line-height: 1.6;
-            margin-top: 8px;
-        }
-
-        /* --- LAYER 2: RANK OVERLAY --- */
+        /* 6. RANK OVERLAY & CONTRACT */
         .rank-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 5, 0.95);
-            backdrop-filter: blur(5px);
-            z-index: 20;
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--glass-bg); backdrop-filter: blur(8px); z-index: 50;
+            padding: 25px 20px; display: flex; flex-direction: column;
+            transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
         }
-
-        .rank-overlay.active {
-            transform: translateX(0);
-        }
-
+        .rank-overlay.active { transform: translateX(0); }
         .rank-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--dim-gray);
-            padding-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;
         }
-
-        .rank-header h2 {
-            font-family: 'Rajdhani', sans-serif;
-            color: #fff;
-            letter-spacing: 2px;
-        }
-
-        .tier-list {
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        .tier-item {
-            border: 1px solid var(--dim-gray);
-            margin-bottom: 10px;
-            background: rgba(255,255,255,0.02);
-        }
-
+        .rank-header h2 { font-family: var(--font-display); color: var(--cyan); letter-spacing: 2px; font-size: 1.2rem; }
+        
+        .tier-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        .tier-item { border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; background: rgba(0,0,0,0.5); }
         .tier-btn {
-            width: 100%;
-            background: transparent;
-            color: #fff;
-            border: none;
-            padding: 15px;
-            text-align: left;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
+            width: 100%; background: transparent; color: #fff; border: none; padding: 15px; text-align: left;
+            font-family: var(--font-display); font-size: 1rem; cursor: pointer; display: flex; justify-content: space-between;
         }
-
-        .tier-btn:hover { background: rgba(255,255,255,0.05); }
-
-        .tier-content {
-            padding: 0 15px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-            font-size: 0.8rem;
-            color: #b0b0c0;
-            line-height: 1.5;
-        }
-
-        .tier-content.open {
-            max-height: 200px;
-            padding-bottom: 15px;
-        }
+        .tier-btn span { color: var(--amber); }
+        .tier-content { padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; font-size: 0.85rem; color: #a0a0b0; line-height: 1.6; }
+        .tier-content.open { max-height: 250px; padding-bottom: 15px; }
+        .tier-content strong { color: var(--crimson); }
 
         /* Hold to Confirm Button */
         .hold-btn {
-            width: 100%;
-            background: transparent;
-            border: 1px solid var(--accent-red);
-            color: var(--accent-red);
-            padding: 15px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.9rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            margin-top: 15px;
+            width: 100%; background: rgba(255, 42, 42, 0.05); border: 1px solid var(--crimson); color: var(--crimson);
+            padding: 16px; font-family: var(--font-display); font-size: 0.9rem; font-weight: bold; letter-spacing: 2px;
+            cursor: pointer; position: relative; overflow: hidden; margin-top: 15px;
+            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
         }
-
         .hold-progress {
-            position: absolute;
-            top: 0; left: 0; height: 100%; width: 0%;
-            background: rgba(255, 51, 51, 0.3);
-            z-index: -1;
+            position: absolute; top: 0; left: 0; height: 100%; width: 0%;
+            background: rgba(255, 42, 42, 0.4); z-index: -1;
         }
-
     </style>
 </head>
 <body>
 
-    <div class="hud-container">
-        <!-- HEADER -->
-        <div class="hud-header">
-            <button class="btn-esc">[ ESC ]</button>
-            <div class="operator-info">
+    <div class="pwa-container">
+        <div class="hex-grid"></div>
+
+        <!-- Hàng 1: Nút ESC và Tọa độ -->
+        <div class="top-row">
+            <a href="index.html" class="btn-exit">[ ESC ]</a>
+            <div class="sys-info">
                 OPR: <span>KAI</span><br>
                 LOC: <span>HANOI</span><br>
                 DATE: <span id="current-date">--.--.----</span><br>
-                <button class="btn-rank" onclick="toggleRankMenu()">[ RANK: CHƯA KÝ ]</button>
+                <button class="btn-rank" onclick="toggleRankMenu()" id="btn-rank">[ RANK: CHƯA KÝ ]</button>
             </div>
         </div>
 
-        <!-- CENTER HUD -->
-        <div class="center-hud">
-            <!-- Metrics -->
-            <div class="metric m-hr">
-                <div class="val">160</div>
-                <div class="label">HEART RATE (MAX 160)</div>
-            </div>
-            <div class="metric m-fat">
-                <div class="val">13.0</div>
-                <div class="label">BODY FAT (%)</div>
-            </div>
-            <div class="metric m-weight">
-                <div class="val">63.0</div>
-                <div class="label">WEIGHT (KG)</div>
-            </div>
-            <div class="metric m-water">
-                <div class="val">2.5</div>
-                <div class="label">WATER (L)</div>
-            </div>
-            <div class="metric m-sleep">
-                <div class="val">6.5</div>
-                <div class="label">SLEEP (HRS)</div>
-            </div>
-            <div class="metric m-steps">
-                <div class="val">5420</div>
-                <div class="label">STEPS</div>
-            </div>
-
-            <!-- SCI CIRCLE -->
-            <div class="sci-circle">
-                <div class="sci-val">94.2</div>
-                <div class="label sci-label">SCI INDEX</div>
+        <!-- Hàng 2: Trạng thái -->
+        <div class="banner-wrapper">
+            <div class="status-banner" id="status-banner">
+                [ CHARGING ]
             </div>
         </div>
 
-        <!-- A.I TERMINAL -->
-        <div class="ai-terminal">
-            <div class="ai-terminal-title">A.I // DIAGNOSTICS</div>
-            <div class="ai-log" id="ai-log-text">
-                > [WAITING FOR COMMITMENT]<br>
-                > HỆ THỐNG ĐANG CHỜ LỆNH XÁC NHẬN TỪ OPERATOR.<br>
-                > CHƯA THIẾT LẬP COMBAT MODE.
+        <!-- ARC REACTOR CORE & METRICS -->
+        <div class="core-wrapper">
+            <div class="arc-reactor">
+                <svg class="ring-svg" viewBox="0 0 340 340">
+                    <g class="orb-group orb-ccw orb-move">
+                        <circle class="ring ring-move" cx="170" cy="170" r="125" />
+                        <circle class="plasma-node" cx="170" cy="45" r="3.5" filter="drop-shadow(0 0 6px var(--amber))" />
+                    </g>
+                    <g class="orb-group orb-cw orb-rec">
+                        <circle class="ring ring-rec" cx="170" cy="170" r="105" />
+                        <circle class="plasma-node" cx="170" cy="65" r="4" filter="drop-shadow(0 0 8px var(--cyan))" />
+                    </g>
+                    <g class="orb-group orb-ccw orb-phys">
+                        <circle class="ring ring-phys" cx="170" cy="170" r="85" />
+                        <circle class="plasma-node" cx="170" cy="85" r="4.5" filter="drop-shadow(0 0 8px var(--mint))" />
+                    </g>
+                    <g class="orb-group orb-cw orb-hr">
+                        <circle class="ring ring-hr" cx="170" cy="170" r="65" />
+                        <circle class="plasma-node" cx="170" cy="105" r="5" filter="drop-shadow(0 0 10px var(--crimson))" />
+                    </g>
+                </svg>
+
+                <!-- Trung tâm SCI, bấm vào cũng kích hoạt (Backup) -->
+                <div class="sci-nexus" id="trigger-combat">
+                    <div class="sci-val">94.2</div>
+                    <div class="sci-lbl">SCI INDEX</div>
+                </div>
+            </div>
+
+            <!-- Các khối chỉ số bấm mở Hologram -->
+            <div class="data-panel pos-hr" onclick="openHolo('hr')"><div class="dp-val" id="val-hr">160</div><div class="dp-lbl">HEART RATE</div></div>
+            <div class="data-panel pos-phys1" onclick="openHolo('weight')"><div class="dp-val">63.0</div><div class="dp-lbl">WEIGHT (KG)</div></div>
+            <div class="data-panel pos-rec1" onclick="openHolo('sleep')"><div class="dp-val">6.5</div><div class="dp-lbl">SLEEP (HRS)</div></div>
+            
+            <div class="data-panel dp-right pos-phys2" onclick="openHolo('fat')"><div class="dp-val">13.0</div><div class="dp-lbl">BODY FAT (%)</div></div>
+            <div class="data-panel dp-right pos-rec2" onclick="openHolo('water')"><div class="dp-val">2.5</div><div class="dp-lbl">WATER (L)</div></div>
+            <div class="data-panel dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val">5420</div><div class="dp-lbl">STEPS</div></div>
+        </div>
+
+        <!-- Terminal A.I -->
+        <div class="terminal-panel">
+            <div class="terminal-header">A.I // DIAGNOSTICS</div>
+            <div class="typewriter" id="ai-text"></div><span class="cursor"></span>
+        </div>
+
+        <!-- HOLOGRAM POPUP CHỈ SỐ -->
+        <div class="holo-popup" id="holo-popup" onclick="closeHolo(event)">
+            <div class="holo-box" id="holo-box">
+                <div class="holo-title" id="holo-title">QUY ĐỊNH // NAME</div>
+                <div class="holo-desc" id="holo-desc">Nội dung...</div>
+                <button class="btn-close-holo" onclick="closeHoloDirect()">[ ĐÓNG ]</button>
             </div>
         </div>
 
-        <!-- LAYER 2: RANK OVERLAY & CONTRACT -->
+        <!-- RANK OVERLAY & HỢP ĐỒNG -->
         <div class="rank-overlay" id="rank-overlay">
             <div class="rank-header">
-                <h2>CẤP BẬC // TIẾN HÓA</h2>
-                <button class="btn-esc" onclick="toggleRankMenu()">[ ĐÓNG ]</button>
+                <h2>BÍ LỤC // TIẾN HÓA</h2>
+                <button class="btn-exit" onclick="toggleRankMenu()" style="clip-path: none; border: 1px solid rgba(255,255,255,0.3); color: #fff;">[ X ]</button>
             </div>
             
             <div class="tier-list">
@@ -395,7 +324,7 @@
                         [ TIER 1: CHIẾN BINH ] <span>+</span>
                     </button>
                     <div class="tier-content" id="tier1">
-                        Trạng thái mặc định hoặc bị giáng cấp. Yêu cầu duy trì kỷ luật cơ bản. Bất kỳ chỉ số nào FAILED sẽ reset toàn bộ tiến trình.
+                        Trạng thái nền tảng. Khi sự lười biếng và thỏa hiệp chiếm lấy, bạn sẽ bị đẩy về đây. Bất kỳ chỉ số FAILED nào vào cuối ngày cũng sẽ xóa sổ toàn bộ dữ liệu, <strong>Reset về vạch xuất phát.</strong>
                     </div>
                 </div>
                 <!-- Tier 2 -->
@@ -404,7 +333,7 @@
                         [ TIER 2: TINH ANH ] <span>+</span>
                     </button>
                     <div class="tier-content" id="tier2">
-                        Yêu cầu: 90 ngày liên tục đạt tỷ lệ hoàn thành 100%. Không có vùng xám. Thất bại 1 ngày = Hủy hợp đồng, quay về vạch xuất phát. Có giao thức Chủ Nhật (Active Recovery).
+                        Yêu cầu: <strong>90 ngày kỷ luật 100%</strong>. Không có vùng xám. Không có lời bào chữa. Thất bại 1 ngày = Hủy hợp đồng. Có hỗ trợ Giao thức Phục hồi Chủ Nhật (Active Recovery) để duy trì sinh lý.
                     </div>
                 </div>
                 <!-- Tier 3 -->
@@ -413,50 +342,122 @@
                         [ TIER 3: VÔ NGÃ ] <span>+</span>
                     </button>
                     <div class="tier-content" id="tier3">
-                        Yêu cầu: 1,000 ngày liên tục đạt tỷ lệ hoàn thành 99%. Quỹ dự phòng: 10 ngày FAILED cho sự cố bất khả kháng. Cấp độ cao nhất của tính kỷ luật.
+                        Cảnh giới tối thượng. Yêu cầu: <strong>1,000 ngày duy trì (99%)</strong>. Bản ngã và cảm xúc biến mất, chỉ còn lại sự thực thi. Hạn mức an toàn: 10 ngày FAILED dự phòng cho các sự cố bất khả kháng.
                     </div>
                 </div>
             </div>
 
-            <div style="text-align: center; font-size: 0.7rem; margin-top: 10px;">SAU KHI ĐỌC KỸ BÍ LỤC CẤP BẬC:</div>
+            <div style="text-align: center; font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 10px;">SAU KHI ĐÃ ĐỌC KỸ BÍ LỤC:</div>
             <button id="hold-confirm-btn" class="hold-btn">
-                [ NHẤN GIỮ 3S: KÝ CAM KẾT ]
+                [ GIỮ 3S: XÁC NHẬN CAM KẾT ]
                 <div id="hold-progress" class="hold-progress"></div>
             </button>
         </div>
+
     </div>
 
     <script>
-        // Set Date
+        // Set Date Dynamic
         const today = new Date();
         const dateStr = today.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
         document.getElementById('current-date').innerText = dateStr;
 
-        // Rank Menu Logic
-        const rankOverlay = document.getElementById('rank-overlay');
-        function toggleRankMenu() {
-            rankOverlay.classList.toggle('active');
-        }
+        // Logic Hologram Popup
+        const holoData = {
+            hr: { title: "QUY ĐỊNH // HEART RATE", desc: "Yêu cầu đạt 160 BPM ít nhất 01 lần/ngày để ép động cơ.", color: "var(--crimson)" },
+            fat: { title: "QUY ĐỊNH // BODY FAT", desc: "Không vượt quá 13.0%. Kiểm soát nghiêm ngặt bằng dinh dưỡng.", color: "var(--mint)" },
+            weight: { title: "QUY ĐỊNH // WEIGHT", desc: "Giữ vững khung trọng lượng sinh lý học từ 63.0 kg đến 67.0 kg.", color: "var(--mint)" },
+            water: { title: "QUY ĐỊNH // WATER", desc: "Duy trì ổn định mức nước cơ thể từ 50% - 60%.", color: "var(--cyan)" },
+            sleep: { title: "QUY ĐỊNH // SLEEP", desc: "Ngủ phục hồi tối thiểu 7 giờ/đêm. Không thỏa hiệp.", color: "var(--cyan)" },
+            steps: { title: "QUY ĐỊNH // STEPS", desc: "Vận động tối thiểu 6.000 bước/ngày để duy trì cơ khí.", color: "var(--amber)" }
+        };
 
-        // Accordion for Tiers
+        const holoPopup = document.getElementById('holo-popup');
+        const holoTitle = document.getElementById('holo-title');
+        const holoDesc = document.getElementById('holo-desc');
+        const holoBox = document.getElementById('holo-box');
+
+        function openHolo(type) {
+            const data = holoData[type];
+            if (data) {
+                holoTitle.innerText = data.title;
+                holoTitle.style.color = data.color;
+                holoBox.style.borderColor = data.color;
+                holoBox.style.boxShadow = `0 0 30px ${data.color}40`;
+                holoDesc.innerText = data.desc;
+                holoPopup.classList.add('active');
+            }
+        }
+        function closeHoloDirect() { holoPopup.classList.remove('active'); }
+        function closeHolo(e) { if (e.target === holoPopup) holoPopup.classList.remove('active'); }
+
+        // Logic Rank Overlay & Accordion
+        const rankOverlay = document.getElementById('rank-overlay');
+        function toggleRankMenu() { rankOverlay.classList.toggle('active'); }
+
         function toggleTier(tierId) {
             const content = document.getElementById(tierId);
             if (content.classList.contains('open')) {
                 content.classList.remove('open');
             } else {
-                // Close others
                 document.querySelectorAll('.tier-content').forEach(el => el.classList.remove('open'));
                 content.classList.add('open');
             }
         }
 
-        // Hold-to-Confirm Logic
+        // Logic Typewriter Terminal
+        const textElement = document.getElementById('ai-text');
+        const statusBanner = document.getElementById('status-banner');
+        let typeSpeed = 30;
+
+        const bootSequence = [
+            "> [SYSTEM BOOT] Đang thu thập chỉ số nền...",
+            "> HỆ THỐNG ĐANG CHỜ LỆNH XÁC NHẬN TỪ OPERATOR.",
+            "> CHƯA THIẾT LẬP CAM KẾT. VUI LÒNG KÝ HỢP ĐỒNG RANK."
+        ];
+
+        const combatSequence = [
+            "> [OVERRIDE DETECTED: CONTRACT SIGNED]",
+            "> NHỊP TIM ĐẠT MAX. CÁC CHỈ SỐ ĐÃ KHÓA KẾT NỐI.",
+            "> TRẠNG THÁI TÂM LÝ & THỂ LỰC ĐẠT ĐỈNH.",
+            "> THIẾT LẬP COMBAT MODE... SẴN SÀNG XUẤT TRẬN!"
+        ];
+
+        async function typeLines(lines, clearFirst = true) {
+            if(clearFirst) textElement.innerHTML = '';
+            for (let i = 0; i < lines.length; i++) {
+                for (let j = 0; j < lines[i].length; j++) {
+                    textElement.innerHTML += lines[i].charAt(j);
+                    await new Promise(r => setTimeout(r, typeSpeed));
+                }
+                textElement.innerHTML += '<br>';
+                await new Promise(r => setTimeout(r, 200));
+            }
+        }
+
+        // Khởi động Typewriter
+        setTimeout(() => {
+            if (localStorage.getItem('combat_committed') !== 'true') {
+                typeLines(bootSequence);
+            }
+        }, 1000);
+
+        function triggerCombatMode() {
+            if(document.body.classList.contains('combat-active')) return;
+            document.body.classList.add('combat-active');
+            statusBanner.innerText = "[ OVERRIDE: COMBAT MODE READY ]";
+            typeSpeed = 15; 
+            typeLines(combatSequence, true);
+        }
+
+        // Nút trung tâm vẫn giữ trigger backup
+        document.getElementById('trigger-combat').addEventListener('click', triggerCombatMode);
+
+        // Logic Hold-to-Confirm (3s)
         const holdBtn = document.getElementById('hold-confirm-btn');
         const holdProgress = document.getElementById('hold-progress');
-        const aiLog = document.getElementById('ai-log-text');
-        const rankBtnLabel = document.querySelector('.btn-rank');
+        const rankBtnLabel = document.getElementById('btn-rank');
         
-        let holdTimer = null;
         let progressInterval = null;
         let holdDuration = 3000;
         let startTime = 0;
@@ -464,23 +465,17 @@
         function checkStatus() {
             if (localStorage.getItem('combat_committed') === 'true') {
                 rankBtnLabel.innerText = "[ RANK: TIER 2 ]";
-                rankBtnLabel.style.color = "var(--accent-green)";
-                rankBtnLabel.style.borderColor = "var(--accent-green)";
-                
-                aiLog.innerHTML = `
-                > [OVERRIDE DETECTED]<br>
-                > HỢP ĐỒNG ĐÃ KÝ KẾT. CÁC CHỈ SỐ ĐÃ KHÓA KẾT NỐI.<br>
-                > TRẠNG THÁI TÂM LÝ & THỂ LỰC ĐẠT ĐỈNH.<br>
-                > THIẾT LẬP COMBAT MODE... SẴN SÀNG XUẤT TRẬN!
-                `;
+                rankBtnLabel.style.color = "var(--mint)";
+                rankBtnLabel.style.borderColor = "var(--mint)";
+                rankBtnLabel.style.background = "rgba(0, 255, 157, 0.1)";
+                triggerCombatMode();
             }
         }
-        checkStatus();
+        checkStatus(); // Chạy ngay khi load để nếu đã ký thì bật đỏ luôn
 
         function startHold(e) {
             e.preventDefault();
             startTime = Date.now();
-            
             progressInterval = setInterval(() => {
                 let elapsed = Date.now() - startTime;
                 let percent = (elapsed / holdDuration) * 100;
@@ -501,16 +496,16 @@
         function confirmCommitment() {
             localStorage.setItem('combat_committed', 'true');
             holdProgress.style.width = '0%';
-            toggleRankMenu(); // Đóng menu
-            checkStatus(); // Update log
+            toggleRankMenu(); // Đóng overlay rank
+            checkStatus(); // Đổi nút rank & Kích hoạt nháy đỏ Combat
         }
 
+        // Bắt sự kiện Hold trên PC & Điện thoại
         holdBtn.addEventListener('mousedown', startHold);
         holdBtn.addEventListener('mouseup', cancelHold);
         holdBtn.addEventListener('mouseleave', cancelHold);
         holdBtn.addEventListener('touchstart', startHold);
         holdBtn.addEventListener('touchend', cancelHold);
-
     </script>
 </body>
 </html>
