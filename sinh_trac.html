@@ -132,6 +132,7 @@
         .pos-phys2 { top: 10%; right: 5%; border-color: var(--mint); } .pos-phys2 .dp-val { color: var(--mint); text-shadow: 0 0 10px var(--mint); }
         .pos-rec2 { top: 45%; right: 5%; border-color: var(--cyan); } .pos-rec2 .dp-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
         .pos-move { top: 75%; right: 5%; border-color: var(--amber); } .pos-move .dp-val { color: var(--amber); text-shadow: 0 0 10px var(--amber); }
+        .blinking { animation: blinker 1s linear infinite; } @keyframes blinker { 50% { opacity: 0; } }
 
         /* =========================================
            4. BOO TERMINAL (CHỮ TRẮNG)
@@ -186,7 +187,7 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(5,6,8,0.98); backdrop-filter: blur(12px); z-index: 50; 
             display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s ease; 
-            padding-bottom: 80px; /* Nhỏ lại vì chỉ còn 1 nút */
+            padding-bottom: 80px;
         }
         .rank-overlay.active { transform: translateY(0); }
         
@@ -214,11 +215,9 @@
             transition: all 0.3s;
         }
         
-        /* Trạng thái 1: Chưa ký (Màu Xanh Mint/Cyan) */
         .hold-btn.state-sign { border: 1px solid var(--cyan); color: var(--cyan); background: rgba(0, 229, 255, 0.05); }
         .hold-btn.state-sign .hold-progress { background: rgba(0, 229, 255, 0.35); }
         
-        /* Trạng thái 2: Đã ký -> Nút Hủy (Màu Đỏ) */
         .hold-btn.state-abort { border: 1px solid var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.05); }
         .hold-btn.state-abort .hold-progress { background: rgba(255, 42, 42, 0.35); }
         
@@ -264,17 +263,17 @@
                     <g class="orb-group orb-cw orb-hr"><circle class="ring ring-hr" cx="170" cy="170" r="65" /><circle class="plasma-node" cx="170" cy="105" r="5" filter="drop-shadow(0 0 10px var(--crimson))" /></g>
                 </svg>
                 <div class="sci-nexus" id="trigger-combat" onclick="triggerCombatMode()" title="Khởi động Combat">
-                    <div class="sci-val">94.2</div><div class="sci-lbl">SCI INDEX</div>
+                    <div class="sci-val blinking" id="val-sci">---</div><div class="sci-lbl">SCI INDEX</div>
                 </div>
             </div>
 
-            <!-- CHỈ SỐ -->
-            <div class="data-panel pos-hr" onclick="openHolo('hr')"><div class="dp-val" id="val-hr">110</div><div class="dp-lbl">HEART RATE</div></div>
-            <div class="data-panel pos-phys1" onclick="openHolo('weight')"><div class="dp-val">63.0</div><div class="dp-lbl">WEIGHT (KG)</div></div>
-            <div class="data-panel pos-rec1" onclick="openHolo('sleep')"><div class="dp-val">6.5</div><div class="dp-lbl">SLEEP (HRS)</div></div>
-            <div class="data-panel dp-right pos-phys2" onclick="openHolo('fat')"><div class="dp-val">13.0</div><div class="dp-lbl">BODY FAT (%)</div></div>
-            <div class="data-panel dp-right pos-rec2" onclick="openHolo('water')"><div class="dp-val">2.5</div><div class="dp-lbl">WATER (L)</div></div>
-            <div class="data-panel dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val">5420</div><div class="dp-lbl">STEPS</div></div>
+            <!-- CHỈ SỐ SẼ ĐƯỢC API CẬP NHẬT -->
+            <div class="data-panel pos-hr" onclick="openHolo('hr')"><div class="dp-val blinking" id="val-hr">---</div><div class="dp-lbl">HEART RATE</div></div>
+            <div class="data-panel pos-phys1" onclick="openHolo('weight')"><div class="dp-val blinking" id="val-weight">---</div><div class="dp-lbl">WEIGHT (KG)</div></div>
+            <div class="data-panel pos-rec1" onclick="openHolo('sleep')"><div class="dp-val blinking" id="val-sleep">---</div><div class="dp-lbl">SLEEP (HRS)</div></div>
+            <div class="data-panel dp-right pos-phys2" onclick="openHolo('fat')"><div class="dp-val blinking" id="val-fat">---</div><div class="dp-lbl">BODY FAT (%)</div></div>
+            <div class="data-panel dp-right pos-rec2" onclick="openHolo('water')"><div class="dp-val blinking" id="val-water">---</div><div class="dp-lbl">WATER (L)</div></div>
+            <div class="data-panel dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val blinking" id="val-steps">---</div><div class="dp-lbl">STEPS</div></div>
         </div>
 
         <div class="terminal-panel">
@@ -331,6 +330,9 @@
     </div>
 
     <script>
+        // === CẤU HÌNH API GOOGLE SCRIPT (ĐÃ GẮN LINK) ===
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw2zvS-7i0bz-q3BB6Uq9RZ3UytHelqtIT0bQx5c8A0R0Gu97sMPM0E0FWBsVoCekET/exec";
+
         // 1. DATE & AUDIO
         const d = new Date(); document.getElementById('current-date').innerText = ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
         
@@ -401,17 +403,6 @@
             }
         }
 
-        function checkStatus() {
-            updateButtonState();
-            if (isCommitted) {
-                document.getElementById('btn-rank').innerText = "[ RANK: TIER 2 ]"; document.getElementById('btn-rank').style.color = "var(--mint)"; document.getElementById('btn-rank').style.borderColor = "var(--mint)";
-                typeLines(["> BOO: Hợp đồng đã ký kết. Các chỉ số đang được giám sát.", "> STANDBY. Nhấn vào lõi SCI INDEX để kích hoạt Combat Mode."]);
-            } else { 
-                typeLines(["> BOO: Hệ thống đang chờ.", "> Bạn chưa ký cam kết. Vui lòng mở BÍ LỤC để tiến hành."]); 
-            }
-        }
-        setTimeout(checkStatus, 500);
-
         // 5. RANK OVERLAY & HOLD LOGIC (1 NÚT CHO 2 LỆNH)
         function toggleRankMenu() { document.getElementById('rank-overlay').classList.toggle('active'); }
         function toggleTier(id) { 
@@ -448,9 +439,9 @@
             if(!isCommitted) { playBeep(); typeLines(["> BOO: TỪ CHỐI LỆNH.", "> Yêu cầu ký hợp đồng trong BÍ LỤC trước khi vận hành."]); return; }
             if(document.body.classList.contains('combat-active')) return;
             
-            let currentHr = 110;
+            let currentHr = parseFloat(document.getElementById('val-hr').innerText) || 110;
             const hrInterval = setInterval(() => {
-                currentHr += 5; document.getElementById('val-hr').innerText = currentHr;
+                currentHr += 5; document.getElementById('val-hr').innerText = currentHr.toFixed(0);
                 if(currentHr >= 160) {
                     clearInterval(hrInterval); document.body.classList.add('combat-active'); document.getElementById('status-banner').innerText = "[ OVERRIDE: COMBAT MODE READY ]";
                     typeSpeed = 10; typeLines([ "> [OVERRIDE DETECTED]", "> NHỊP TIM ĐẠT 160 BPM.", "> TRẠNG THÁI ĐẠT ĐỈNH.", "> THIẾT LẬP COMBAT MODE... SẴN SÀNG!" ]);
@@ -458,6 +449,57 @@
                 }
             }, 50);
         }
+
+        // 7. HÀM GỌI API KÉO DỮ LIỆU TỪ SHEET (CẬP NHẬT MỚI)
+        async function fetchBioData() {
+            updateButtonState();
+            typeLines(["> ESTABLISHING SECURE CONNECTION TO BIO-LOG...", "> WAITING FOR DATA RESPONSE..."]);
+
+            try {
+                const response = await fetch(GAS_API_URL + "?action=hud");
+                const resData = await response.json();
+
+                // Gỡ bỏ hiệu ứng nhấp nháy khi đã tải xong
+                const ids = ['val-sci', 'val-hr', 'val-weight', 'val-sleep', 'val-fat', 'val-water', 'val-steps'];
+                ids.forEach(id => document.getElementById(id).classList.remove('blinking'));
+
+                if (resData.status === 'success') {
+                    // Đổ dữ liệu thật vào HTML
+                    document.getElementById('val-sci').innerText = resData.sci || '---';
+                    document.getElementById('val-hr').innerText = resData.hr || '---';
+                    document.getElementById('val-weight').innerText = resData.weight || '---';
+                    document.getElementById('val-sleep').innerText = resData.sleep || '---';
+                    document.getElementById('val-fat').innerText = resData.fat || '---';
+                    document.getElementById('val-water').innerText = resData.water || '---';
+                    document.getElementById('val-steps').innerText = resData.steps || '---';
+
+                    if (isCommitted) {
+                        document.getElementById('btn-rank').innerText = "[ RANK: TIER 2 ]"; 
+                        document.getElementById('btn-rank').style.color = "var(--mint)"; 
+                        document.getElementById('btn-rank').style.borderColor = "var(--mint)";
+                        typeLines(["> SYNC COMPLETE. DỮ LIỆU ĐÃ CẬP NHẬT TỪ SHEET.", "> STANDBY. Nhấn vào lõi SCI INDEX để kích hoạt Combat Mode."]);
+                    } else {
+                        typeLines(["> SYNC COMPLETE.", "> Hệ thống đang chờ ký cam kết trong BÍ LỤC."]);
+                    }
+                } else {
+                    typeLines(["> WARNING: BIO-DATA NOT FOUND FOR TODAY.", "> AWAITING MANUAL INPUT IN BIO-LOG."]);
+                }
+            } catch (error) {
+                typeLines(["> ERROR: KHÔNG THỂ KẾT NỐI HỆ THỐNG.", "> VUI LÒNG KIỂM TRA MẠNG."]);
+                console.error(error);
+                
+                // Fallback nếu API lỗi
+                if (isCommitted) {
+                    document.getElementById('btn-rank').innerText = "[ RANK: TIER 2 ]"; 
+                    document.getElementById('btn-rank').style.color = "var(--mint)"; 
+                    document.getElementById('btn-rank').style.borderColor = "var(--mint)";
+                }
+            }
+        }
+
+        // Tự động chạy API sau khi load trang 0.5s
+        setTimeout(fetchBioData, 500);
+
     </script>
 </body>
 </html>
