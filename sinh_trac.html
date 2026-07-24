@@ -57,6 +57,8 @@
         .sys-info { text-align: right; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; text-shadow: 0 1px 2px #000; transition: opacity 1.5s ease; }
         .sys-info span { color: var(--cyan); font-weight: bold; }
         .ctrl-group { display: flex; flex-direction: column; align-items: flex-end; margin-top: 8px; gap: 6px; }
+        
+        .btn-rank, .streak-box, .sci-lbl, .fingerprint-wrapper { transition: opacity 0.4s ease; }
         .btn-rank, .streak-box { border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.1); color: var(--amber); padding: 4px 10px; font-family: var(--font-display); font-size: 10px; cursor: pointer; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); transition: all 0.3s ease;}
         
         @keyframes flash-unsigned {
@@ -109,9 +111,42 @@
         .sci-val { font-family: var(--font-display); font-size: 34px; font-weight: 900; color: var(--violet); text-shadow: 0 0 20px var(--violet); letter-spacing: 2px; transition: opacity 1.5s ease; }
         .sci-lbl { font-size: 10px; color: #fff; letter-spacing: 2px; opacity: 0.8; margin-top: 40px; transition: opacity 1.5s ease; z-index: 25; position: absolute; bottom: 15px;}
 
-        /* --- THÊM MỚI: KHÓA AN TOÀN PRE-SCAN --- */
-        .safety-lock-box { position: absolute; bottom: -35px; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.1); color: var(--amber); font-family: var(--font-display); font-size: 9px; padding: 6px 12px; white-space: nowrap; cursor: pointer; z-index: 30; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); animation: flash-unsigned 1.2s infinite ease-in-out; transition: all 0.3s ease; }
-        .safety-lock-box.unlocked { border-color: var(--mint); color: var(--mint); background: rgba(0, 255, 157, 0.1); animation: none; pointer-events: none; }
+        /* --- STATE: KHÓA AN TOÀN PRE-SCAN (TÀNG HÌNH CÁC TÍNH NĂNG KHÁC) --- */
+        body.pre-scan-locked .sci-lbl,
+        body.pre-scan-locked .fingerprint-wrapper,
+        body.pre-scan-locked #btn-rank,
+        body.pre-scan-locked .streak-box,
+        body.pre-scan-locked #val-sci {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        body.pre-scan-locked .sci-nexus {
+            pointer-events: none !important;
+        }
+
+        /* NÚT CẢNH BÁO MỚI (NEO SÁT VÂN TAY) */
+        .safety-lock-box { 
+            position: absolute; 
+            margin-top: 135px; /* Kéo lên nằm gọn gàng dưới lõi Tím */
+            border: 1px solid var(--amber); 
+            background: rgba(255, 170, 0, 0.1); 
+            color: var(--amber); 
+            font-family: var(--font-display); 
+            font-size: 11px; 
+            font-weight: bold;
+            padding: 8px 16px; 
+            white-space: nowrap; 
+            cursor: pointer; 
+            z-index: 50; 
+            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); 
+            animation: flash-unsigned 1.2s infinite ease-in-out; 
+            transition: all 0.3s ease; 
+            text-align: center;
+            text-shadow: 0 0 5px var(--amber);
+        }
+        .safety-lock-box.unlocked { 
+            display: none !important; 
+        }
 
         /* BOO TERMINAL & DATA PANELS */
         .data-panel { position: absolute; z-index: 15; background: rgba(8, 9, 13, 0.75); backdrop-filter: blur(3px); padding: 4px 12px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); border-left: 2px solid; cursor: pointer; transition: transform 0.2s, opacity 1.5s ease; }
@@ -247,7 +282,6 @@
 <body>
 
     <div class="pwa-container">
-        <!-- LƯỚI CHIẾN THUẬT & MA TRẬN HẠT -->
         <div class="tactical-grid-bg"><div class="grid-plane"></div></div>
         <div class="particle-matrix" id="particle-matrix"></div>
         <div class="vignette"></div>
@@ -300,9 +334,9 @@
                 </div>
             </div>
 
-            <!-- KHÓA AN TOÀN PRE-SCAN -->
+            <!-- KHÓA AN TOÀN PRE-SCAN (CĂN GIỮA VÀ SÁT DƯỚI LÕI) -->
             <div id="safety-lock" class="safety-lock-box" onclick="unlockPreScan()">
-                [ 🔒 ] YÊU CẦU: XÁC NHẬN ĐÃ ĐEO ĐỒNG HỒ 24H & LÊN CÂN ĐẦU NGÀY
+                [ 🔒 ] CHECK: ĐÃ ĐEO ĐỒNG HỒ 24H + ĐO CÂN SINH HỌC?
             </div>
 
             <div class="data-panel pos-hr" onclick="openHolo('hr')"><div class="dp-val blinking" id="val-hr">---</div><div class="dp-lbl">HEART RATE</div></div>
@@ -318,7 +352,6 @@
             <div class="typewriter" id="ai-text"></div><span class="cursor"></span>
         </div>
 
-        <!-- HOLOGRAM POPUP -->
         <div class="holo-popup" id="holo-popup" onclick="closeHolo(event)">
             <div class="holo-box" id="holo-box">
                 <div class="holo-title" id="holo-title">NAME</div>
@@ -327,7 +360,6 @@
             </div>
         </div>
 
-        <!-- BÍ LỤC & TIER SYSTEM -->
         <div class="rank-overlay" id="rank-overlay">
             <div class="rank-header">
                 <h2>BÍ LỤC // TIẾN HÓA</h2>
@@ -377,19 +409,15 @@
     </div>
 
     <script>
-        // JS FIX VIEWPORT SHIFT TRÊN MOBILE
         function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport);
         fixViewport();
 
-        // LINK API
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwQGfT7P6azOYPBcTb5PF-Ug4NZonlTbvSdY87GPw3ro21icFRdMWl_iQkHAUuF22I6mw/exec";
 
-        // 1. DATE & TIME INFO
         const d = new Date(); document.getElementById('current-date').innerText = ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
         const isSunday = d.getDay() === 0;
         
-        // 2. AUDIO & HAPTIC ENGINE
         let audioCtx; 
         function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
         
@@ -450,14 +478,12 @@
             else { bgmAudio.pause(); isMuted=true; document.getElementById('icon-sound-on').style.display='none'; document.getElementById('icon-sound-off').style.display='block'; } 
         }
 
-        // 3. HOLOGRAM
         const holoData = { hr: { title: "HEART RATE", desc: "Yêu cầu nhịp tim đạt 160 BPM để mở khóa trạng thái Overdrive.", color: "var(--crimson)" }, weight: { title: "WEIGHT", desc: "Duy trì khung trọng lượng chiến đấu: 63.0 kg - 67.0 kg.", color: "var(--mint)" }, sleep: { title: "SLEEP", desc: "Ngủ phục hồi tối thiểu 7 giờ/đêm không ngoại lệ.", color: "var(--cyan)" }, fat: { title: "BODY FAT", desc: "Giữ tỷ lệ mỡ dưới 13.0%. Kiểm soát nghiêm ngặt bằng dinh dưỡng.", color: "var(--mint)" }, water: { title: "WATER", desc: "Bơm 2.5 - 3.0 Lít nước mỗi ngày.", color: "var(--cyan)" }, steps: { title: "STEPS", desc: "Tối thiểu 6.000 bước vận động mỗi ngày.", color: "var(--amber)" } };
         const holoPopup = document.getElementById('holo-popup');
         function openHolo(type) { playBeep(); const data = holoData[type]; document.getElementById('holo-title').innerText = data.title; document.getElementById('holo-title').style.color = data.color; document.getElementById('holo-box').style.borderColor = data.color; document.getElementById('holo-desc').innerText = data.desc; holoPopup.classList.add('active'); }
         function closeHoloDirect() { holoPopup.classList.remove('active'); }
         function closeHolo(e) { if(e.target === holoPopup){ playBeep(); closeHoloDirect(); } }
 
-        // 4. LOGIC STREAK & BOO TEXT
         let currentStreak = parseInt(localStorage.getItem('combat_streak')) || 0;
         let isCommitted = localStorage.getItem('combat_committed') === 'true';
         document.getElementById('streak-box').innerText = `[ STREAK: D-${currentStreak<10?'0'+currentStreak:currentStreak} ]`;
@@ -493,7 +519,6 @@
             }
         }
 
-        // 5. RANK OVERLAY
         function toggleRankMenu() { document.getElementById('rank-overlay').classList.toggle('active'); }
         function toggleTier(id, btnElement) { 
             playSlashSound(); let star = btnElement.querySelector('.shooting-star');
@@ -502,7 +527,6 @@
             c.classList.contains('open') ? c.classList.remove('open') : (document.querySelectorAll('.tier-content').forEach(e=>e.classList.remove('open')), c.classList.add('open')); 
         }
         
-        // 6. CƠ CHẾ NÚT BẤM 3S
         const dynamicBtn = document.getElementById('dynamic-hold-btn');
         function updateButtonState() {
             const rankBtn = document.getElementById('btn-rank');
@@ -549,34 +573,34 @@
             }
         }
 
-        // 7. LUỒNG LIÊN KẾT SINH HỌC & GIẢ LẬP DỮ LIỆU
+        // --- CƠ CHẾ MỞ KHÓA TÀNG HÌNH (PRE-SCAN LOCK) ---
         let isSynced = false;
-        let isSafetyUnlocked = false; // Biến kiểm soát khóa an toàn
+        let isSafetyUnlocked = false; 
 
         function unlockPreScan() {
-            if(!isCommitted || isSafetyUnlocked) return;
+            if(isSafetyUnlocked) return;
             playLockSound();
             isSafetyUnlocked = true;
+            
+            // Xóa khóa
             const lockBox = document.getElementById('safety-lock');
             lockBox.classList.add('unlocked');
-            lockBox.innerHTML = "[ 🔓 ] ĐIỀU KIỆN ĐÁP ỨNG. HỆ THỐNG QUÉT MỞ KHÓA.";
-            typeTextSafe(["> KHÓA AN TOÀN ĐÃ MỞ.", "> HỆ THỐNG SINH TRẮC HỌC KÍCH HOẠT. MỜI CHẠM VÂN TAY."]);
+            
+            // Xóa hiệu ứng tàng hình để vẩy ra UI chính
+            document.body.classList.remove('pre-scan-locked');
+            
+            if(isCommitted) {
+                typeTextSafe(["> KHÓA AN TOÀN ĐÃ MỞ.", "> HỆ THỐNG SINH TRẮC HỌC KÍCH HOẠT. MỜI CHẠM VÂN TAY."]);
+            } else {
+                typeTextSafe(["> KHÓA AN TOÀN ĐÃ MỞ.", "> YÊU CẦU: Ký hợp đồng trong BÍ LỤC (Góc phải) trước khi quét."]);
+            }
         }
         
         async function triggerBioSync() {
             if(!isCommitted) { playBeep(); typeTextSafe(["> BOO: TỪ CHỐI LỆNH.", "> Yêu cầu ký hợp đồng trong BÍ LỤC trước khi vận hành."]); return; }
-            
-            // Chặn nếu chưa mở khóa an toàn
-            if(!isSafetyUnlocked && !isSynced) {
-                playLockSound();
-                typeTextSafe(["> BOO: TỪ CHỐI LỆNH.", "> YÊU CẦU XÁC NHẬN ĐIỀU KIỆN TIỀN ĐỀ TRƯỚC KHI QUÉT."]);
-                return;
-            }
-
-            if(isSynced) { triggerCombatMode(); return; } // Gọi lệnh Ghi Đè nếu đã quét xong nhưng thiếu điểm
+            if(isSynced) { triggerCombatMode(); return; }
             if(window.isScanning) return; window.isScanning = true;
 
-            document.getElementById('safety-lock').style.opacity = '0'; // Ẩn nút khóa cho gọn UI
             document.body.classList.remove('standby-mode'); document.body.classList.add('scanning-mode');
             updateMarquee('scanning'); playChargeSound(); if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
 
@@ -586,8 +610,8 @@
 
         async function fetchBioData() {
             try {
-                // TẠM THỜI GIẢ LẬP DỮ LIỆU THIẾU ĐIỂM TỪ API
-                await new Promise(r => setTimeout(r, 1500)); // Delay mô phỏng mạng
+                // TẠM THỜI GIẢ LẬP DỮ LIỆU THIẾU ĐIỂM
+                await new Promise(r => setTimeout(r, 1500));
                 const textData = JSON.stringify({
                     status: 'success',
                     sci: '35', hr: '85', weight: '65.0', sleep: '5.5', fat: '14.0', water: '1.0', steps: '3200'
@@ -623,16 +647,14 @@
                         if (sciScore >= 40) {
                             updateMarquee('ready');
                             typeTextSafe(["> BOO // ĐỒNG BỘ HOÀN TẤT.", "> ĐÁNH GIÁ CHỈ SỐ: ĐẠT CHUẨN THỰC CHIẾN.", "> HỆ THỐNG SẴN SÀNG."]);
-                            // Nhạc chỉ chạy khi >= 40
                             if (!isMuted && bgmAudio.paused) {
                                 bgmAudio.play().catch(e => console.log(e));
                                 document.getElementById('icon-sound-on').style.display = 'block'; 
                                 document.getElementById('icon-sound-off').style.display = 'none';
                             }
                         } else {
-                            // KỊCH BẢN THIẾU ĐIỂM: BÁO CÁO CHI TIẾT
                             updateMarquee('train');
-                            playLockSound(); // Âm thanh cảnh báo từ chối
+                            playLockSound(); 
                             typeTextSafe([
                                 "> BOO // ĐỒNG BỘ HOÀN TẤT.", 
                                 "> CẢNH BÁO TỔNG THỂ: CHỈ SỐ DƯỚI MỨC TIÊU CHUẨN (SCI: 35/40).", 
@@ -656,7 +678,6 @@
             window.isScanning = false;
         }
 
-        // 8. TÍNH NĂNG COMBAT SIMULATOR (LỆNH GHI ĐÈ)
         async function triggerCombatMode() {
             if(document.body.classList.contains('combat-active') || window.isScanning) return;
             window.isScanning = true; let combatSpeed = 15;
@@ -678,7 +699,6 @@
             document.body.classList.add('combat-active'); document.getElementById('status-banner').innerText = "[ OVERRIDE: COMBAT MODE READY ]"; playCombatAlarm(); 
             await typeTextSafe(["> CẢNH BÁO: BỎ QUA GIAO THỨC AN TOÀN.", "> LỆNH GHI ĐÈ TỐI CAO ĐƯỢC CHẤP NHẬN.", "> THIẾT LẬP OVERRIDE // COMBAT MODE... SẴN SÀNG!"], combatSpeed);
             
-            // Kích hoạt nhạc Rōnin khi Override
             if (!isMuted) { 
                 if(bgmAudio.paused) bgmAudio.play(); 
                 bgmAudio.volume = 1.0; 
@@ -689,11 +709,13 @@
             window.isScanning = false; setTimeout(() => { document.body.classList.add('tunnel-vision'); }, 2500);
         }
 
-        // HÀM KHỞI TẠO HỆ THỐNG
         function initializeSystem() {
             initParticles(); document.body.classList.add('standby-mode'); updateButtonState(); updateMarquee('standby');
-            if (isCommitted) { typeTextSafe(["> BOO // HỆ THỐNG CHỜ", "> YÊU CẦU LIÊN KẾT TÂM TRÍ.", "> Mở khóa tiền đề & chạm Lõi Vân Tay để xác thực."]); } 
-            else { typeTextSafe(["> BOO // HỆ THỐNG ĐÓNG BĂNG.", "> Yêu cầu ký hợp đồng trong BÍ LỤC trước khi vận hành."]); }
+            
+            // Ép hệ thống vào trạng thái khóa an toàn tiền đề
+            document.body.classList.add('pre-scan-locked'); 
+            
+            typeTextSafe(["> BOO // HỆ THỐNG ĐÓNG BĂNG.", "> Yêu cầu BẮT BUỘC: Xác nhận điều kiện đo lường trước."]);
         }
         
         setTimeout(initializeSystem, 500);
