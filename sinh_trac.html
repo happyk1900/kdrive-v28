@@ -30,7 +30,7 @@
             box-shadow: 0 0 50px rgba(0,0,0,0.9); overflow: hidden;
         }
 
-        /* BACKGROUND MỚI: LƯỚI CHIẾN THUẬT & TẦM NHÌN HÌNH ỐNG */
+        /* LƯỚI CHIẾN THUẬT & TẦM NHÌN HÌNH ỐNG */
         .tactical-grid-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-obsidian); z-index: 1; perspective: 600px; overflow: hidden; }
         .grid-plane { position: absolute; width: 200%; height: 200%; left: -50%; top: 0%; background-image: linear-gradient(rgba(0, 229, 255, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.15) 1px, transparent 1px); background-size: 40px 40px; transform: rotateX(75deg); animation: grid-scroll 10s linear infinite; }
         .vignette { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; background: radial-gradient(circle at center, transparent 40%, #050608 95%); transition: all 0.5s ease; }
@@ -42,11 +42,17 @@
         .particle-wrap { position: absolute; width: 2px; height: 250px; transform-origin: top center; top: 0; left: 0; }
         .particle { position: absolute; bottom: 100%; left: -1px; width: 3px; height: 3px; border-radius: 50%; opacity: 0; }
 
-        @keyframes particle-fall {
-            0% { transform: translateY(0); opacity: 0; }
-            20% { opacity: 0.8; }
-            80% { opacity: 0.8; }
-            100% { transform: translateY(180px); opacity: 0; }
+        @keyframes particle-inward {
+            0% { transform: translateY(200px); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(20px); opacity: 0; }
+        }
+        @keyframes particle-outward {
+            0% { transform: translateY(20px); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(250px); opacity: 0; }
         }
 
         /* HEADER & RANK */
@@ -62,8 +68,15 @@
         .sys-info span { color: var(--cyan); font-weight: bold; }
         .ctrl-group { display: flex; flex-direction: column; align-items: flex-end; margin-top: 8px; gap: 6px; }
         .btn-rank, .streak-box { border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.1); color: var(--amber); padding: 4px 10px; font-family: var(--font-display); font-size: 10px; cursor: pointer; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); transition: all 0.3s ease;}
-        .banner-wrapper { position: relative; z-index: 10; display: flex; justify-content: center; width: 100%; }
+        
+        /* BANNER & MARQUEE */
+        .banner-wrapper { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 5px; }
         .status-banner { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 6px 15px; text-align: center; border: 1px solid var(--amber); color: var(--amber); background: rgba(255, 170, 0, 0.1); clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); transition: all 0.5s ease; }
+        
+        .combat-marquee-box { display: none; width: 92%; max-width: 360px; overflow: hidden; white-space: nowrap; border: 1px solid var(--crimson); background: rgba(255, 42, 42, 0.15); padding: 4px 0; margin-top: 8px; cursor: pointer; text-decoration: none; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); position: relative; }
+        body.combat-active .combat-marquee-box { display: block; animation: alert-flash 1s infinite alternate; }
+        .marquee-text { display: inline-block; padding-left: 100%; animation: marquee 12s linear infinite; color: white; font-family: var(--font-display); font-size: 10px; font-weight: bold; text-shadow: 0 0 5px var(--crimson); letter-spacing: 1px; }
+        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
         /* LÕI ARC REACTOR 3D TRONG SUỐT */
         .core-wrapper { position: relative; flex: 1; display: flex; justify-content: center; align-items: center; z-index: 10; min-height: 0; perspective: 1000px; }
@@ -122,8 +135,10 @@
         /* Hiệu ứng Background Tác chiến lạnh */
         body.combat-active .grid-plane { background-image: linear-gradient(rgba(100, 110, 120, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(100, 110, 120, 0.3) 1px, transparent 1px); animation-duration: 3s; }
         body.combat-active .vignette { background: radial-gradient(circle at center, transparent 40%, rgba(60, 0, 0, 0.85) 90%, rgba(120, 0, 0, 0.95) 100%); animation: tunnel-pulse 1s infinite alternate; }
-        body.combat-active .particle { animation-duration: 0.6s !important; height: 35px; width: 1px; border-radius: 0; box-shadow: none !important; animation-timing-function: ease-in; }
-        body.combat-active .particle.red-alert-potential { background-color: var(--crimson) !important; box-shadow: 0 0 10px var(--crimson) !important; z-index: 10; width: 2px; }
+        
+        /* Override Particle Physics to Outward */
+        body.combat-active .particle { animation-name: particle-outward !important; animation-duration: 0.6s !important; height: 35px; width: 1.5px; border-radius: 0; box-shadow: none !important; animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1); }
+        body.combat-active .particle.red-alert-potential { background-color: var(--crimson) !important; box-shadow: 0 0 10px var(--crimson) !important; z-index: 10; width: 2.5px; }
 
         @keyframes tunnel-pulse { 0% { opacity: 0.9; } 100% { opacity: 1; box-shadow: inset 0 0 60px 20px rgba(255, 42, 42, 0.15); } }
         @keyframes spin-cw { 100% { transform: rotate(360deg); } }
@@ -187,7 +202,7 @@
 <body>
 
     <div class="pwa-container">
-        <!-- LƯỚI CHIẾN THUẬT & MA TRẬN HẠT (Xóa Hố Đen) -->
+        <!-- LƯỚI CHIẾN THUẬT & MA TRẬN HẠT -->
         <div class="tactical-grid-bg">
             <div class="grid-plane"></div>
         </div>
@@ -213,6 +228,10 @@
 
         <div class="banner-wrapper">
             <div class="status-banner" id="status-banner">[ CHARGING // STANDBY ]</div>
+            <!-- DẢI MARQUEE CHO NÚT TÉP -->
+            <a href="#" class="combat-marquee-box" id="combat-marquee">
+                <span class="marquee-text">[ TRẠNG THÁI CHIẾN ĐẤU ĐÃ KÍCH HOẠT ] /// Cổng [ NÚT TÉP ] đã mở. Truy cập bài test Phản Xạ & Trí Nhớ. Hoàn thành để nhận cấp vốn và tiến vào Vương Quốc Poker. /// </span>
+            </a>
         </div>
 
         <div class="core-wrapper">
@@ -313,14 +332,14 @@
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport);
         fixViewport();
 
-        // LINK API MỚI NHẤT CỦA KAI
+        // LINK API MỚI NHẤT
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxkS8wrEI8rBHYzG9F2a414DCtEwQnPjc5jryFLzIUNL28QeQj283MEV-57EUTzuOHVlQ/exec";
 
         // 1. DATE & TIME INFO
         const d = new Date(); document.getElementById('current-date').innerText = ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
         const isSunday = d.getDay() === 0;
         
-        // 2. AUDIO & HAPTIC ENGINE (Đã gỡ bỏ điều kiện isMuted cho toàn bộ SFX)
+        // 2. AUDIO & HAPTIC ENGINE
         let audioCtx; 
         function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
         
@@ -391,8 +410,10 @@
         
         const textElement = document.getElementById('ai-text'); 
         let typeSpeed = 25; let isTyping = false; let typeQueue = [];
+        window.isScanning = false; // Cờ khóa chẩn đoán
 
         async function typeLines(lines) { 
+            if(window.isScanning) return; // Bỏ qua nếu đang chạy quét combat
             typeQueue.push(lines); if(isTyping) return; isTyping = true;
             while(typeQueue.length > 0) {
                 let currentLines = typeQueue.shift(); textElement.innerHTML = ''; 
@@ -406,6 +427,15 @@
                 await new Promise(r => setTimeout(r, 600)); 
             }
             isTyping = false;
+        }
+
+        // Hàm gõ phím chuyên dụng cho luồng Combat (không qua Queue)
+        async function typeLineDirect(text) {
+            for (let i = 0; i < text.length; i++) {
+                textElement.innerHTML += text.charAt(i);
+                await new Promise(r => setTimeout(r, typeSpeed));
+            }
+            textElement.innerHTML += '<br>';
         }
 
         // 5. RANK OVERLAY
@@ -475,7 +505,7 @@
         dynamicBtn.addEventListener('mousedown', startHold); dynamicBtn.addEventListener('mouseup', cancelHold); dynamicBtn.addEventListener('mouseleave', cancelHold); 
         dynamicBtn.addEventListener('touchstart', startHold, {passive: false}); dynamicBtn.addEventListener('touchend', cancelHold);
 
-        // TẠO HẠT DỮ LIỆU ĐỘNG BẰNG JS
+        // TẠO HẠT DỮ LIỆU ĐỘNG BẰNG JS (Gắn hiệu ứng Standby bay vào lõi)
         function initParticles() {
             const matrix = document.getElementById('particle-matrix');
             const colors = ['#00ff9d', '#00e5ff', '#b026ff']; 
@@ -492,7 +522,7 @@
                 
                 let duration = 2.5 + Math.random() * 3;
                 let delay = Math.random() * 5;
-                p.style.animation = `particle-fall ${duration}s infinite ${delay}s linear`;
+                p.style.animation = `particle-inward ${duration}s infinite ${delay}s linear`;
                 
                 if(Math.random() > 0.85) p.classList.add('red-alert-potential');
                 
@@ -501,20 +531,46 @@
             }
         }
 
-        // 7. COMBAT MODE
-        function triggerCombatMode() {
+        // 7. CHUỖI COMBAT MODE 6/6
+        async function triggerCombatMode() {
             if(!isCommitted) { playBeep(); typeLines(["> BOO: TỪ CHỐI LỆNH.", "> Yêu cầu ký hợp đồng trong BÍ LỤC trước khi vận hành."]); return; }
-            if(document.body.classList.contains('combat-active')) return;
+            if(document.body.classList.contains('combat-active') || window.isScanning) return;
             
+            // Khóa chẩn đoán, clear hàng đợi text cũ
+            window.isScanning = true; 
+            typeQueue = []; 
+            textElement.innerHTML = ''; 
+            typeSpeed = 15;
+
+            // Chạy giả lập tăng nhịp tim dần dần
             let currentHr = parseFloat(document.getElementById('val-hr').innerText) || 110;
             const hrInterval = setInterval(() => {
-                currentHr += 5; document.getElementById('val-hr').innerText = currentHr.toFixed(0);
-                if(currentHr >= 160) {
-                    clearInterval(hrInterval); document.body.classList.add('combat-active'); document.getElementById('status-banner').innerText = "[ OVERRIDE: COMBAT MODE READY ]";
-                    typeSpeed = 10; typeLines([ "> [OVERRIDE DETECTED]", "> NHỊP TIM ĐẠT 160 BPM.", "> THIẾT LẬP COMBAT MODE... SẴN SÀNG!" ]);
-                    if (!isMuted) { if(bgmAudio.paused) bgmAudio.play(); bgmAudio.volume = 1.0; }
-                }
-            }, 50);
+                currentHr += 2; if(currentHr > 160) currentHr = 160;
+                document.getElementById('val-hr').innerText = currentHr.toFixed(0);
+            }, 40);
+
+            // Giao thức quét từng mốc
+            await typeLineDirect("> [ THẨM ĐỊNH SINH TRẮC TOÀN DIỆN... ]");
+            playLockSound(); await new Promise(r => setTimeout(r, 400));
+            
+            await typeLineDirect("> ĐỒNG BỘ 6/6 CHỈ SỐ HARD LIMIT.");
+            playLockSound(); await new Promise(r => setTimeout(r, 400));
+            
+            await typeLineDirect("> KIỂM SOÁT THỂ CHẤT: ĐẠT MỨC TỐI ĐA.");
+            playLockSound(); await new Promise(r => setTimeout(r, 500));
+
+            // Đạt ngưỡng, kích nổ Combat Mode
+            clearInterval(hrInterval);
+            document.getElementById('val-hr').innerText = '160';
+            
+            document.body.classList.add('combat-active'); 
+            document.getElementById('status-banner').innerText = "[ OVERRIDE: COMBAT MODE READY ]";
+            playChargeSound();
+
+            await typeLineDirect("> THIẾT LẬP OVERRIDE // COMBAT MODE... SẴN SÀNG!");
+
+            if (!isMuted) { if(bgmAudio.paused) bgmAudio.play(); bgmAudio.volume = 1.0; }
+            window.isScanning = false;
         }
 
         // 8. API FETCH DATA
