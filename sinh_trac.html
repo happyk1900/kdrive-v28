@@ -2,24 +2,29 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- BỔ SUNG viewport-fit=cover để chống lỗi trượt khung trên iOS/Android -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Event Horizon Core</title>
-    <!-- Import Font -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-obsidian: #050608; --mint: #00ff9d; --cyan: #00e5ff;
             --amber: #ffaa00; --violet: #b026ff; --crimson: #ff2a2a;
             --font-display: 'Orbitron', sans-serif; --font-ui: 'Rajdhani', sans-serif;
+            --vh: 1vh; /* Biến động chống lỗi Viewport Shift */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
 
+        /* KHÓA CHẾT BODY BẰNG POSITION FIXED ĐỂ TRÁNH LỖI KÉO DÀI GIAO DIỆN KHI MỚI VÀO */
         body {
             background-color: var(--bg-obsidian); color: white;
             font-family: var(--font-ui); overflow: hidden;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw; 
+            height: 100vh; height: calc(var(--vh, 1vh) * 100); 
             display: flex; justify-content: center; align-items: center;
-            height: 100vh; height: 100dvh; perspective: 1000px;
+            perspective: 1000px;
         }
 
         .pwa-container {
@@ -28,20 +33,10 @@
             box-shadow: 0 0 50px rgba(0,0,0,0.9); overflow: hidden;
         }
 
-        /* 1. HỐ ĐEN VŨ TRỤ */
+        /* HỐ ĐEN VŨ TRỤ */
         .deep-space-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background: #020203; overflow: hidden; }
-        .nebula {
-            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: conic-gradient(from 0deg, transparent 0%, rgba(176, 38, 255, 0.08) 25%, transparent 50%, rgba(0, 229, 255, 0.05) 75%, transparent 100%);
-            animation: rotate-nebula 35s linear infinite;
-        }
-        .black-hole {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 280px; height: 280px; border-radius: 50%;
-            background: radial-gradient(circle, #000 40%, rgba(0,0,0,0.9) 60%, transparent 80%);
-            box-shadow: 0 0 60px 15px rgba(176, 38, 255, 0.1), inset 0 0 30px 5px rgba(0,0,0,1);
-            z-index: 2; animation: pulse-hole 5s ease-in-out infinite alternate;
-        }
+        .nebula { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(from 0deg, transparent 0%, rgba(176, 38, 255, 0.08) 25%, transparent 50%, rgba(0, 229, 255, 0.05) 75%, transparent 100%); animation: rotate-nebula 35s linear infinite; }
+        .black-hole { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(circle, #000 40%, rgba(0,0,0,0.9) 60%, transparent 80%); box-shadow: 0 0 60px 15px rgba(176, 38, 255, 0.1), inset 0 0 30px 5px rgba(0,0,0,1); z-index: 2; animation: pulse-hole 5s ease-in-out infinite alternate; }
         @keyframes rotate-nebula { 100% { transform: rotate(360deg); } }
         @keyframes pulse-hole { 100% { transform: translate(-50%, -50%) scale(1.02); box-shadow: 0 0 70px 20px rgba(176, 38, 255, 0.15), inset 0 0 30px 5px rgba(0,0,0,1); } }
         
@@ -49,7 +44,7 @@
         body.combat-active .black-hole { box-shadow: 0 0 90px 30px rgba(255, 42, 42, 0.3), inset 0 0 20px 5px rgba(0,0,0,1); animation: pulse-hole-combat 0.8s ease-in-out infinite alternate; }
         @keyframes pulse-hole-combat { 100% { transform: translate(-50%, -50%) scale(1.08); box-shadow: 0 0 120px 45px rgba(255, 42, 42, 0.5), inset 0 0 20px 5px rgba(0,0,0,1); } }
 
-        /* 2. HEADER & RANK */
+        /* HEADER & RANK */
         .top-row { position: relative; z-index: 10; padding: 15px 15px 10px; display: flex; justify-content: space-between; align-items: flex-start; }
         .left-controls { display: flex; flex-direction: column; gap: 10px; }
         .btn-exit, .btn-audio { background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0,229,255,0.3); color: var(--cyan); transition: all 0.3s ease; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
@@ -64,7 +59,7 @@
         .banner-wrapper { position: relative; z-index: 10; display: flex; justify-content: center; width: 100%; }
         .status-banner { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 6px 15px; text-align: center; border: 1px solid var(--amber); color: var(--amber); background: rgba(255, 170, 0, 0.1); clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); transition: all 0.5s ease; }
 
-        /* 3. LÕI ARC REACTOR 3D & CHỈ SỐ */
+        /* LÕI ARC REACTOR 3D & CHỈ SỐ */
         .core-wrapper { position: relative; flex: 1; display: flex; justify-content: center; align-items: center; z-index: 10; min-height: 0; }
         .arc-reactor { position: absolute; width: 340px; height: 340px; display: flex; justify-content: center; align-items: center; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
         .ring-svg { position: absolute; width: 100%; height: 100%; overflow: visible; z-index: 5; transition: all 0.5s ease; }
@@ -96,7 +91,7 @@
         .pos-move { top: 75%; right: 5%; border-color: var(--amber); } .pos-move .dp-val { color: var(--amber); text-shadow: 0 0 10px var(--amber); }
         .blinking { animation: blinker 1s linear infinite; } @keyframes blinker { 50% { opacity: 0; } }
 
-        /* 4. BOO TERMINAL */
+        /* BOO TERMINAL */
         .terminal-panel { position: relative; z-index: 10; margin: 0 10px 20px; padding: 25px 15px 15px; background: rgba(0, 229, 255, 0.02); border: 1px solid rgba(0, 229, 255, 0.2); border-bottom: 3px solid var(--cyan); clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%); min-height: 115px; flex-shrink: 0; box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05); transition: all 0.5s ease; }
         .terminal-header { position: absolute; top: 0; left: 20px; font-size: 9px; color: var(--bg-obsidian); background: var(--cyan); padding: 2px 10px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(0 0, 100% 0, calc(100% - 5px) 100%, 0 100%); transition: all 0.5s ease; }
         .typewriter { font-family: var(--font-ui); font-weight: 600; font-size: 13px; color: #ffffff; line-height: 1.6; letter-spacing: 1px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
@@ -125,7 +120,7 @@
         @keyframes overload-shake { 0% { margin-left: 0; margin-top: 0; } 25% { margin-left: 1px; margin-top: -1px; } 50% { margin-left: -1px; margin-top: 1px; } 75% { margin-left: 1px; margin-top: 1px; } 100% { margin-left: 0; margin-top: 0; } }
         @keyframes shockwave-pulse { 0% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0.6); } 50% { box-shadow: inset 0 0 50px rgba(176, 38, 255, 0.8), 0 0 0 30px rgba(176, 38, 255, 0); } 100% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0); } }
 
-        /* 5. HOLOGRAM POPUP */
+        /* HOLOGRAM POPUP */
         .holo-popup { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 60; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
         .holo-popup.active { opacity: 1; pointer-events: auto; }
         .holo-box { width: 85%; background: var(--bg-obsidian); padding: 25px; border-radius: 0; border: 1px solid var(--cyan); text-align: center; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
@@ -133,23 +128,30 @@
         .holo-desc { font-size: 1rem; color: #e0e0e0; margin-bottom: 25px; line-height: 1.5; }
         .btn-close-holo { width: 100%; padding: 10px; font-family: var(--font-display); background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; cursor: pointer; }
 
-        /* 6. BÍ LỤC & TIER SYSTEM V2 (KARATE LORE) */
+        /* BÍ LỤC & TIER SYSTEM V2 (KARATE LORE + SAO BĂNG + DARK MATTER) */
         .rank-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,6,8,0.98); backdrop-filter: blur(12px); z-index: 50; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s ease; padding-bottom: 80px; }
         .rank-overlay.active { transform: translateY(0); }
         .rank-header { padding: 25px 20px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
         .rank-header h2 { font-family: var(--font-display); color: var(--cyan); font-size: 1.1rem; letter-spacing: 2px; }
         .tier-list { flex-grow: 1; overflow-y: auto; padding: 20px; }
-        .tier-item { border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; background: rgba(255,255,255,0.02); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
-        .tier-btn { width: 100%; background: transparent; padding: 15px; text-align: left; font-family: var(--font-display); font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
         
+        .tier-item { position: relative; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; background: rgba(255,255,255,0.02); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); overflow: hidden; }
+        .tier-btn { position: relative; z-index: 2; width: 100%; background: transparent; padding: 15px; text-align: left; font-family: var(--font-display); font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
+        
+        /* HIỆU ỨNG SAO BĂNG KHI CLICK */
+        .shooting-star { position: absolute; bottom: 0; left: -150px; width: 150px; height: 2px; background: linear-gradient(90deg, transparent, currentColor, #fff); box-shadow: 0 0 10px currentColor; z-index: 3; opacity: 0; pointer-events: none; }
+        .shooting-star.active { animation: sweep 0.5s ease-out forwards; }
+        @keyframes sweep { 0% { left: -150px; opacity: 1; } 100% { left: 100%; opacity: 0; } }
+
         /* MÀU ĐAI KARATE */
         .tier-shiro { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3); border-left: 3px solid #fff; }
         .tier-chairo { color: var(--amber); text-shadow: 0 0 5px rgba(255, 170, 0, 0.5); border-left: 3px solid var(--amber); }
-        .tier-kuro { color: var(--crimson); text-shadow: 0 0 8px rgba(255, 42, 42, 0.6); border-left: 3px solid var(--crimson); font-weight: bold; }
+        /* TIER KURO: DARK MATTER - THAN CHÌ VÀ VIỀN SÁNG RỰC */
+        .tier-kuro { color: #a9b1d6; text-shadow: 0 0 10px rgba(176, 38, 255, 0.8); border-left: 3px solid #b026ff; font-weight: bold; background: rgba(10, 10, 15, 0.6); }
         .tier-void { color: var(--cyan); text-shadow: 0 0 8px rgba(0, 229, 255, 0.5); border-left: 3px solid var(--cyan); }
 
-        .tier-content { padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; font-size: 0.9rem; color: #d0d5e0; line-height: 1.6; }
-        .tier-content.open { max-height: 500px; padding-bottom: 15px; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px; }
+        .tier-content { position: relative; z-index: 2; padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.3s ease; font-size: 0.9rem; color: #d0d5e0; line-height: 1.6; opacity: 0; }
+        .tier-content.open { max-height: 500px; padding-bottom: 15px; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px; opacity: 1; }
         .tier-content p { margin-bottom: 10px; } .tier-content strong { color: var(--cyan); }
         
         .rank-footer { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 55; padding: 12px 20px calc(15px + env(safe-area-inset-bottom)); background: #050608; border-top: 1px solid rgba(255,255,255,0.15); }
@@ -159,6 +161,11 @@
         .hold-btn.state-abort { border: 1px solid var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.05); }
         .hold-btn.state-abort .hold-progress { background: rgba(255, 42, 42, 0.35); }
         .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; z-index: -1; transition: background 0.3s; }
+        
+        /* Hiệu ứng rung bần bật khi sạc 3s */
+        .hold-btn.charging { animation: shake 0.1s infinite; filter: brightness(1.3); text-shadow: 0 0 5px currentColor; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-1.5px) translateY(-0.5px); } 75% { transform: translateX(1.5px) translateY(0.5px); } }
+
     </style>
 </head>
 <body>
@@ -235,36 +242,38 @@
             <div class="tier-list">
                 
                 <div class="tier-item">
-                    <button class="tier-btn tier-shiro" onclick="toggleTier('tier1')">[ TIER 1: CHIẾN BINH // SHIRO ] <span>▼</span></button>
+                    <button class="tier-btn tier-shiro" onclick="toggleTier('tier1', this)">[ TIER 1: CHIẾN BINH // SHIRO ] <span>▼</span><div class="shooting-star"></div></button>
                     <div class="tier-content" id="tier1">
-                        <p><em>Trạng thái vỡ lòng. Cơ thể sinh học của bạn là một mớ hỗn độn của sự trì hoãn.</em></p>
-                        <p>Động lực là thứ rác rưởi. Kỷ luật là vũ khí duy nhất. Bắt buộc hoàn thành các chỉ số Hard Limit (Nhịp tim, Giấc ngủ, Dinh dưỡng) trước 00:00 mỗi ngày.</p>
-                        <p>Bất kỳ sự thỏa hiệp nào sẽ lập tức kích hoạt <strong>SYSTEM PURGE</strong>: Giáng cấp về 0. Chuỗi Streak bị hủy bõ. Không khoan nhượng.</p>
+                        <p><em>Giai đoạn Phá Vỡ. Cơ thể bạn hiện là nô lệ của cơ chế tiết kiệm năng lượng nguyên thủy (Homeostasis).</em></p>
+                        <p>Động lực là thứ rác rưởi. Kỷ luật cơ học là vũ khí duy nhất. Bắt buộc hoàn thành các chỉ số Hard Limit trước 00:00 mỗi ngày để tạo vi chấn thương lên hệ thần kinh.</p>
+                        <p>Mọi thỏa hiệp đều là sự yếu hèn. Bất tuân quy tắc sẽ kích hoạt <strong>SYSTEM PURGE</strong>: Giáng cấp về 0. Không khoan nhượng.</p>
                     </div>
                 </div>
 
                 <div class="tier-item">
-                    <button class="tier-btn tier-chairo" onclick="toggleTier('tier2')">[ TIER 2: TINH ANH // CHAIRO ] <span>▼</span></button>
+                    <button class="tier-btn tier-chairo" onclick="toggleTier('tier2', this)">[ TIER 2: TINH ANH // CHAIRO ] <span>▼</span><div class="shooting-star"></div></button>
                     <div class="tier-content" id="tier2">
                         <p><em>Sự chai sạn. 90 Ngày Tái Cấu Trúc Não Bộ (Neuroplasticity).</em></p>
-                        <p>Biến mọi hành động gượng ép thành thói quen. Sẽ không còn sự phấn khích, chỉ còn lại sự lặp lại tàn khốc. Bạn bắt đầu học cách đối diện với những biến số tồi tệ nhất trên bàn chơi mà nhịp tim không hề dao động.</p>
+                        <p>Khởi động quá trình Myelin hóa. Hàng trăm giờ tuân thủ kỷ luật đang bọc các rễ thần kinh mới. Hành động gượng ép dần chuyển hóa thành lộ trình phản xạ tốc độ cao.</p>
+                        <p>Sự hưng phấn biến mất, nhường chỗ cho sự lỳ lợm tàn khốc. Đối diện với những biến số tồi tệ nhất trên bàn chơi mà nhịp tim không hề dao động.</p>
                     </div>
                 </div>
 
                 <div class="tier-item">
-                    <button class="tier-btn tier-kuro" onclick="toggleTier('tier3')">[ TIER 3: VÔ NGÃ // KURO ] <span>▼</span></button>
+                    <button class="tier-btn tier-kuro" onclick="toggleTier('tier3', this)">[ TIER 3: VÔ NGÃ // KURO ] <span>▼</span><div class="shooting-star"></div></button>
                     <div class="tier-content" id="tier3">
-                        <p><em>Cảnh giới Tâm Vô Thủy (Mushin). 1,000 Ngày Duy Trì.</em></p>
-                        <p>Bạn không còn phải 'cố gắng' giữ kỷ luật, vì bạn CHÍNH LÀ kỷ luật. Hành động diễn ra trước cả khi tâm trí phân tích. Không sợ hãi, không cái tôi, ma sát cảm xúc bằng 0. Trở thành một cỗ máy chuẩn xác tối thượng.</p>
+                        <p><em>Cảnh giới Tâm Vô Thủy (Mushin). Trạng thái Dòng Chảy (Flow State) vĩnh viễn.</em></p>
+                        <p>Ý thức về 'Cái Tôi' đã bị triệt tiêu, mạng lưới thần kinh phản xạ vận hành độc lập trước cả khi tâm trí kịp phân tích.</p>
+                        <p>Không sợ hãi, không kỳ vọng, ma sát cảm xúc bằng 0. Bạn chính thức trở thành một thực thể chiến thuật tối thượng giữa tâm bão.</p>
                     </div>
                 </div>
 
                 <div class="tier-item" style="margin-top: 20px;">
-                    <button class="tier-btn tier-void" onclick="toggleTier('tier4')">[ PROTOCOL: VOID REGEN - NGHỈ NGƠI ] <span>▼</span></button>
+                    <button class="tier-btn tier-void" onclick="toggleTier('tier4', this)">[ PROTOCOL: VOID REGEN - NGHỈ NGƠI ] <span>▼</span><div class="shooting-star"></div></button>
                     <div class="tier-content" id="tier4">
                         <p><em>Cơ chế Xả tải Chủ Nhật: Tĩnh lặng tuyệt đối để tái sinh.</em></p>
                         <p><strong>HỆ THỐNG XẢ TẢI:</strong> Gỡ bỏ giới hạn ép nhịp tim (160 BPM) và bước chân (6000). Cơ thể được phép hạ nhiệt về mức cân bằng sinh lý, chữa lành sợi cơ.</p>
-                        <p><strong>THÁNH ĐỊA GIẤC NGỦ:</strong> Dù là ngày nghỉ, giấc ngủ vẫn là luật cứng bất khả xâm phạm. Không có ngoại lệ cho việc thức khuya. Hệ thần kinh cần dọn rác dọn dẹp (Glymphatic system).</p>
+                        <p><strong>THÁNH ĐỊA GIẤC NGỦ:</strong> Dù là ngày nghỉ, giấc ngủ vẫn là luật cứng bất khả xâm phạm. Không có ngoại lệ. Hệ thần kinh cần dọn rác (Glymphatic system).</p>
                     </div>
                 </div>
 
@@ -277,17 +286,24 @@
     </div>
 
     <script>
-        // LINK API MỚI NHẤT CỦA KAI (GIỮ NGUYÊN)
+        // JS FIX VIEWPORT SHIFT TRÊN MOBILE
+        function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
+        window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport);
+        fixViewport();
+
+        // LINK API MỚI NHẤT CỦA KAI
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxkS8wrEI8rBHYzG9F2a414DCtEwQnPjc5jryFLzIUNL28QeQj283MEV-57EUTzuOHVlQ/exec";
 
-        // 1. DATE & AUDIO
+        // 1. DATE & TIME INFO
         const d = new Date(); document.getElementById('current-date').innerText = ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
-        const isSunday = d.getDay() === 0; // Kiem tra ngay Chu Nhat (0)
+        const isSunday = d.getDay() === 0;
         
+        // 2. AUDIO & HAPTIC ENGINE
         let audioCtx; 
+        function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+        
         function playBeep() { 
-            if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); 
-            if(isMuted) return; 
+            initAudio(); if(isMuted) return; 
             const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); 
             osc.frequency.value = 800; gain.gain.value = 0.1; 
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); 
@@ -295,73 +311,131 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.05); 
         }
 
+        function playSlashSound() {
+            initAudio(); if(isMuted) return;
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+        }
+
+        let chargeOsc, chargeGain;
+        function playChargeSound() {
+            initAudio(); if(isMuted) return;
+            chargeOsc = audioCtx.createOscillator(); chargeGain = audioCtx.createGain();
+            chargeOsc.type = 'square'; chargeOsc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            chargeOsc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 3);
+            chargeGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            chargeOsc.connect(chargeGain); chargeGain.connect(audioCtx.destination);
+            chargeOsc.start();
+        }
+        function stopChargeSound() { if(chargeOsc) { chargeOsc.stop(); chargeOsc = null; } }
+
+        function playLockSound() {
+            initAudio(); if(isMuted) return;
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+        }
+
         const bgmAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20R%C5%8Dnin.mp3'); 
         bgmAudio.loop = true; bgmAudio.volume = 0.5; let isMuted = false;
-        
         document.body.addEventListener('click', () => { if(!isMuted && bgmAudio.paused) bgmAudio.play().catch(e=>console.log(e)); }, {once:true});
+        
         function toggleBGM(e) { 
             e.stopPropagation(); 
             if(bgmAudio.paused){ bgmAudio.play(); isMuted=false; document.getElementById('icon-sound-on').style.display='block'; document.getElementById('icon-sound-off').style.display='none'; } 
             else { bgmAudio.pause(); isMuted=true; document.getElementById('icon-sound-on').style.display='none'; document.getElementById('icon-sound-off').style.display='block'; } 
         }
 
-        // 2. HOLOGRAM
+        // 3. HOLOGRAM
         const holoData = { hr: { title: "HEART RATE", desc: "Yêu cầu nhịp tim đạt 160 BPM để mở khóa trạng thái Overdrive.", color: "var(--crimson)" }, weight: { title: "WEIGHT", desc: "Duy trì khung trọng lượng chiến đấu: 63.0 kg - 67.0 kg.", color: "var(--mint)" }, sleep: { title: "SLEEP", desc: "Ngủ phục hồi tối thiểu 7 giờ/đêm không ngoại lệ.", color: "var(--cyan)" }, fat: { title: "BODY FAT", desc: "Giữ tỷ lệ mỡ dưới 13.0%. Kiểm soát nghiêm ngặt bằng dinh dưỡng.", color: "var(--mint)" }, water: { title: "WATER", desc: "Bơm 2.5 - 3.0 Lít nước mỗi ngày.", color: "var(--cyan)" }, steps: { title: "STEPS", desc: "Tối thiểu 6.000 bước vận động mỗi ngày.", color: "var(--amber)" } };
         const holoPopup = document.getElementById('holo-popup');
         function openHolo(type) { playBeep(); const data = holoData[type]; document.getElementById('holo-title').innerText = data.title; document.getElementById('holo-title').style.color = data.color; document.getElementById('holo-box').style.borderColor = data.color; document.getElementById('holo-desc').innerText = data.desc; holoPopup.classList.add('active'); }
         function closeHoloDirect() { holoPopup.classList.remove('active'); }
         function closeHolo(e) { if(e.target === holoPopup){ playBeep(); closeHoloDirect(); } }
 
-        // 3. LOGIC STREAK & BOO TEXT
+        // 4. LOGIC STREAK & BOO TEXT
         let currentStreak = parseInt(localStorage.getItem('combat_streak')) || 0;
         let isCommitted = localStorage.getItem('combat_committed') === 'true';
         document.getElementById('streak-box').innerText = `[ STREAK: D-${currentStreak<10?'0'+currentStreak:currentStreak} ]`;
         
         const textElement = document.getElementById('ai-text'); 
-        let typeSpeed = 25;
-        let isTyping = false;
-        let typeQueue = [];
+        let typeSpeed = 25; let isTyping = false; let typeQueue = [];
 
         async function typeLines(lines) { 
-            typeQueue.push(lines);
-            if(isTyping) return;
-            isTyping = true;
-
+            typeQueue.push(lines); if(isTyping) return; isTyping = true;
             while(typeQueue.length > 0) {
-                let currentLines = typeQueue.shift();
-                textElement.innerHTML = ''; 
+                let currentLines = typeQueue.shift(); textElement.innerHTML = ''; 
                 for (let i = 0; i < currentLines.length; i++) { 
                     for (let j = 0; j < currentLines[i].length; j++) { 
                         textElement.innerHTML += currentLines[i].charAt(j); 
                         await new Promise(r => setTimeout(r, typeSpeed)); 
                     } 
-                    textElement.innerHTML += '<br>'; 
-                    await new Promise(r => setTimeout(r, 150)); 
+                    textElement.innerHTML += '<br>'; await new Promise(r => setTimeout(r, 150)); 
                 } 
                 await new Promise(r => setTimeout(r, 600)); 
             }
             isTyping = false;
         }
 
-        // 4. KIỂM TRA TRẠNG THÁI & RENDER NÚT ĐỘNG
+        // 5. RANK OVERLAY (SAO BĂNG KẾT HỢP)
+        function toggleRankMenu() { document.getElementById('rank-overlay').classList.toggle('active'); }
+        
+        function toggleTier(id, btnElement) { 
+            playSlashSound(); 
+            // Kích hoạt sao băng
+            let star = btnElement.querySelector('.shooting-star');
+            if(star) { star.classList.remove('active'); void star.offsetWidth; star.classList.add('active'); }
+            
+            const c = document.getElementById(id); 
+            c.classList.contains('open') ? c.classList.remove('open') : (document.querySelectorAll('.tier-content').forEach(e=>e.classList.remove('open')), c.classList.add('open')); 
+        }
+        
+        // 6. CƠ CHẾ NÚT BẤM 3S (CÓ ÂM THANH SẠC & RUNG HAPTIC)
         const dynamicBtn = document.getElementById('dynamic-hold-btn');
         function updateButtonState() {
             if (isCommitted) { dynamicBtn.className = 'hold-btn state-abort'; dynamicBtn.innerHTML = '[ GIỮ 3S: HỦY CAM KẾT // RESET ]<div id="hold-progress" class="hold-progress"></div>'; } 
             else { dynamicBtn.className = 'hold-btn state-sign'; dynamicBtn.innerHTML = '[ GIỮ 3S: KÝ CAM KẾT ]<div id="hold-progress" class="hold-progress"></div>'; }
         }
 
-        // 5. RANK OVERLAY & HOLD LOGIC
-        function toggleRankMenu() { document.getElementById('rank-overlay').classList.toggle('active'); }
-        function toggleTier(id) { playBeep(); const c = document.getElementById(id); c.classList.contains('open') ? c.classList.remove('open') : (document.querySelectorAll('.tier-content').forEach(e=>e.classList.remove('open')), c.classList.add('open')); }
-        
         let holdTimer, startTime=0; 
-        function startHold(e) { e.preventDefault(); playBeep(); startTime = Date.now(); const prog = document.getElementById('hold-progress'); holdTimer = setInterval(() => { let p = ((Date.now() - startTime) / 3000) * 100; if(p>=100){ p=100; clearInterval(holdTimer); if(isCommitted) { triggerAbort(); } else { confirmCommitment(); } } prog.style.width = p+'%'; }, 50); }
-        function cancelHold() { clearInterval(holdTimer); const prog = document.getElementById('hold-progress'); if(prog) prog.style.width = '0%'; }
+        function startHold(e) { 
+            e.preventDefault(); startTime = Date.now(); 
+            playChargeSound(); dynamicBtn.classList.add('charging');
+            if(navigator.vibrate) navigator.vibrate([50, 50, 50, 50, 50, 50, 50, 50]); // Rung bần bật theo nhịp
+            
+            const prog = document.getElementById('hold-progress'); 
+            holdTimer = setInterval(() => { 
+                let p = ((Date.now() - startTime) / 3000) * 100; 
+                if(p>=100){ 
+                    p=100; clearInterval(holdTimer); 
+                    stopChargeSound(); playLockSound(); dynamicBtn.classList.remove('charging');
+                    if(navigator.vibrate) navigator.vibrate(300); // Rung mạnh chốt ngàm
+                    if(isCommitted) { triggerAbort(); } else { confirmCommitment(); } 
+                } 
+                prog.style.width = p+'%'; 
+            }, 50); 
+        }
+        function cancelHold() { 
+            clearInterval(holdTimer); stopChargeSound(); dynamicBtn.classList.remove('charging');
+            if(navigator.vibrate) navigator.vibrate(0);
+            const prog = document.getElementById('hold-progress'); if(prog) prog.style.width = '0%'; 
+        }
         function confirmCommitment() { localStorage.setItem('combat_committed', 'true'); if(currentStreak===0) localStorage.setItem('combat_streak', 1); location.reload(); }
         function triggerAbort() { localStorage.removeItem('combat_committed'); localStorage.setItem('combat_streak', 0); location.reload(); }
-        dynamicBtn.addEventListener('mousedown', startHold); dynamicBtn.addEventListener('mouseup', cancelHold); dynamicBtn.addEventListener('mouseleave', cancelHold); dynamicBtn.addEventListener('touchstart', startHold, {passive: false}); dynamicBtn.addEventListener('touchend', cancelHold);
+        
+        dynamicBtn.addEventListener('mousedown', startHold); dynamicBtn.addEventListener('mouseup', cancelHold); dynamicBtn.addEventListener('mouseleave', cancelHold); 
+        dynamicBtn.addEventListener('touchstart', startHold, {passive: false}); dynamicBtn.addEventListener('touchend', cancelHold);
 
-        // 6. COMBAT MODE
+        // 7. COMBAT MODE
         function triggerCombatMode() {
             if(!isCommitted) { playBeep(); typeLines(["> BOO: TỪ CHỐI LỆNH.", "> Yêu cầu ký hợp đồng trong BÍ LỤC trước khi vận hành."]); return; }
             if(document.body.classList.contains('combat-active')) return;
@@ -377,7 +451,7 @@
             }, 50);
         }
 
-        // 7. API FETCH DATA
+        // 8. API FETCH DATA
         async function fetchBioData() {
             updateButtonState();
             typeLines(["> ESTABLISHING SECURE CONNECTION TO BIO-LOG...", "> WAITING FOR DATA RESPONSE..."]);
@@ -387,16 +461,10 @@
                 const textData = await response.text(); 
                 
                 let resData;
-                try {
-                    resData = JSON.parse(textData);
-                } catch (parseError) {
+                try { resData = JSON.parse(textData); } 
+                catch (parseError) {
                     console.error("Lỗi parse JSON:", textData);
-                    typeLines([
-                        "> ERROR: DATA CORRUPTION DETECTED.", 
-                        "> KẾT NỐI API BỊ TRẢ VỀ SAI ĐỊNH DẠNG.", 
-                        "> BẠN PHẢI CHỌN 'NEW VERSION' KHI DEPLOY GOOGLE SCRIPT MỚI!"
-                    ]);
-                    return;
+                    typeLines([ "> ERROR: DATA CORRUPTION DETECTED.", "> KẾT NỐI API BỊ TRẢ VỀ SAI ĐỊNH DẠNG.", "> BẠN PHẢI CHỌN 'NEW VERSION' KHI DEPLOY GOOGLE SCRIPT MỚI!" ]); return;
                 }
 
                 const ids = ['val-sci', 'val-hr', 'val-weight', 'val-sleep', 'val-fat', 'val-water', 'val-steps'];
@@ -423,7 +491,6 @@
                             document.getElementById('status-banner').style.borderColor = "var(--cyan)";
                             document.getElementById('status-banner').style.background = "rgba(0, 229, 255, 0.1)";
                             
-                            // Đổi màu vòng tròn Reactor sang Xanh Cyan
                             document.querySelector('.ring-hr').style.stroke = "var(--cyan)";
                             document.querySelector('.ring-phys').style.stroke = "var(--cyan)";
                             document.querySelector('.ring-move').style.stroke = "var(--cyan)";
@@ -437,12 +504,8 @@
                         } else {
                             typeLines(["> SYNC COMPLETE. DỮ LIỆU ĐÃ CẬP NHẬT TỪ SHEET.", "> STANDBY. NHẤN VÀO SCI INDEX ĐỂ COMBAT."]);
                         }
-                    } else {
-                        typeLines(["> SYNC COMPLETE.", "> HỆ THỐNG ĐANG CHỜ KÝ CAM KẾT."]);
-                    }
-                } else {
-                    typeLines(["> WARNING: KHÔNG CÓ DATA CHO NGÀY HÔM NAY.", "> AWAITING MANUAL INPUT."]);
-                }
+                    } else { typeLines(["> SYNC COMPLETE.", "> HỆ THỐNG ĐANG CHỜ KÝ CAM KẾT."]); }
+                } else { typeLines(["> WARNING: KHÔNG CÓ DATA CHO NGÀY HÔM NAY.", "> AWAITING MANUAL INPUT."]); }
             } catch (error) {
                 typeLines(["> ERROR: KHÔNG THỂ KẾT NỐI SERVER.", "> VUI LÒNG KIỂM TRA LẠI MẠNG."]);
                 console.error(error);
@@ -451,7 +514,6 @@
         }
 
         setTimeout(fetchBioData, 500);
-
     </script>
 </body>
 </html>
