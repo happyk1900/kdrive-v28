@@ -68,7 +68,7 @@
         .alert-unsigned { animation: flash-unsigned 1.2s infinite ease-in-out !important; border: 2px solid var(--amber) !important; font-weight: bold; }
 
         /* BANNER & MARQUEE */
-        .banner-wrapper { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 5px; transition: all 0.5s ease; }
+        .banner-wrapper { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 5px; transition: opacity 0.5s ease, transform 0.5s ease; }
         .status-banner { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 6px 15px; text-align: center; border: 1px solid var(--amber); color: var(--amber); background: rgba(255, 170, 0, 0.1); clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); transition: all 0.5s ease; }
         
         .combat-marquee-box { display: block; width: 92%; max-width: 360px; overflow: hidden; white-space: nowrap; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.15); padding: 5px 0; margin-top: 8px; cursor: pointer; text-decoration: none; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); position: relative; transition: all 0.5s ease; -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); }
@@ -114,9 +114,8 @@
         /* --- STATE: KHÓA AN TOÀN PRE-SCAN (TÀNG HÌNH CÁC TÍNH NĂNG KHÁC) --- */
         body.pre-scan-locked .sci-lbl,
         body.pre-scan-locked .fingerprint-wrapper,
-        body.pre-scan-locked #btn-rank,
-        body.pre-scan-locked .streak-box,
-        body.pre-scan-locked #val-sci {
+        body.pre-scan-locked #val-sci,
+        body.pre-scan-locked .banner-wrapper { /* Ẩn 2 dòng banner trên cùng khi bị khóa */
             opacity: 0 !important;
             pointer-events: none !important;
         }
@@ -124,16 +123,23 @@
             pointer-events: none !important;
         }
 
-        /* NÚT CẢNH BÁO MỚI (NEO SÁT VÂN TAY) */
+        /* --- STATE: CHƯA KÝ BÍ LỤC --- */
+        /* Ẩn hoàn toàn nút check đồng hồ nếu chưa ký */
+        body.uncommitted .safety-lock-box {
+            display: none !important;
+        }
+
+        /* NÚT CẢNH BÁO MỚI (NEO SÁT VÂN TAY, ĐỔI FONT) */
         .safety-lock-box { 
             position: absolute; 
             margin-top: 135px; /* Kéo lên nằm gọn gàng dưới lõi Tím */
             border: 1px solid var(--amber); 
             background: rgba(255, 170, 0, 0.1); 
             color: var(--amber); 
-            font-family: var(--font-display); 
-            font-size: 11px; 
-            font-weight: bold;
+            font-family: var(--font-ui); /* Đổi sang font việt hóa mềm mại */
+            font-size: 13px; 
+            font-weight: 600;
+            letter-spacing: 0.5px;
             padding: 8px 16px; 
             white-space: nowrap; 
             cursor: pointer; 
@@ -334,9 +340,9 @@
                 </div>
             </div>
 
-            <!-- KHÓA AN TOÀN PRE-SCAN (CĂN GIỮA VÀ SÁT DƯỚI LÕI) -->
+            <!-- KHÓA AN TOÀN PRE-SCAN -->
             <div id="safety-lock" class="safety-lock-box" onclick="unlockPreScan()">
-                [ 🔒 ] CHECK: ĐÃ ĐEO ĐỒNG HỒ 24H + ĐO CÂN SINH HỌC?
+                [ 🔒 ] XÁC NHẬN: ĐÃ ĐEO ĐỒNG HỒ & ĐO CÂN?
             </div>
 
             <div class="data-panel pos-hr" onclick="openHolo('hr')"><div class="dp-val blinking" id="val-hr">---</div><div class="dp-lbl">HEART RATE</div></div>
@@ -578,7 +584,7 @@
         let isSafetyUnlocked = false; 
 
         function unlockPreScan() {
-            if(isSafetyUnlocked) return;
+            if(isSafetyUnlocked || !isCommitted) return;
             playLockSound();
             isSafetyUnlocked = true;
             
@@ -589,11 +595,7 @@
             // Xóa hiệu ứng tàng hình để vẩy ra UI chính
             document.body.classList.remove('pre-scan-locked');
             
-            if(isCommitted) {
-                typeTextSafe(["> KHÓA AN TOÀN ĐÃ MỞ.", "> HỆ THỐNG SINH TRẮC HỌC KÍCH HOẠT. MỜI CHẠM VÂN TAY."]);
-            } else {
-                typeTextSafe(["> KHÓA AN TOÀN ĐÃ MỞ.", "> YÊU CẦU: Ký hợp đồng trong BÍ LỤC (Góc phải) trước khi quét."]);
-            }
+            typeTextSafe(["> KHÓA AN TOÀN ĐÃ MỞ.", "> HỆ THỐNG SINH TRẮC HỌC KÍCH HOẠT. MỜI CHẠM VÂN TAY."]);
         }
         
         async function triggerBioSync() {
@@ -715,7 +717,13 @@
             // Ép hệ thống vào trạng thái khóa an toàn tiền đề
             document.body.classList.add('pre-scan-locked'); 
             
-            typeTextSafe(["> BOO // HỆ THỐNG ĐÓNG BĂNG.", "> Yêu cầu BẮT BUỘC: Xác nhận điều kiện đo lường trước."]);
+            if (isCommitted) { 
+                typeTextSafe(["> BOO // HỆ THỐNG ĐÓNG BĂNG.", "> Yêu cầu BẮT BUỘC: Xác nhận điều kiện đo lường trước."]); 
+            } 
+            else { 
+                document.body.classList.add('uncommitted'); // Ẩn hoàn toàn nút check đồng hồ
+                typeTextSafe(["> BOO // HỆ THỐNG ĐÓNG BĂNG.", "> Yêu cầu: Ký hợp đồng trong BÍ LỤC (Góc phải) trước khi vận hành."]); 
+            }
         }
         
         setTimeout(initializeSystem, 500);
