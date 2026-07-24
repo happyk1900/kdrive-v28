@@ -75,7 +75,10 @@
         
         .combat-marquee-box { display: none; width: 92%; max-width: 360px; overflow: hidden; white-space: nowrap; border: 1px solid var(--crimson); background: rgba(255, 42, 42, 0.15); padding: 4px 0; margin-top: 8px; cursor: pointer; text-decoration: none; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); position: relative; }
         body.combat-active .combat-marquee-box { display: block; animation: alert-flash 1s infinite alternate; }
-        .marquee-text { display: inline-block; padding-left: 100%; animation: marquee 12s linear infinite; color: white; font-family: var(--font-display); font-size: 10px; font-weight: bold; text-shadow: 0 0 5px var(--crimson); letter-spacing: 1px; }
+        .marquee-text { display: inline-block; padding-left: 100%; animation: marquee 15s linear infinite; color: white; font-family: var(--font-display); font-size: 10px; font-weight: bold; text-shadow: 0 0 5px var(--crimson); letter-spacing: 1px; }
+        
+        .cta-blink { color: var(--amber); text-shadow: 0 0 8px var(--amber); animation: text-blink 0.8s infinite alternate; font-size: 11px; }
+        @keyframes text-blink { 0% { opacity: 1; text-shadow: 0 0 15px var(--amber); } 100% { opacity: 0.5; text-shadow: 0 0 5px var(--amber); } }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
         /* LÕI ARC REACTOR 3D TRONG SUỐT */
@@ -230,7 +233,7 @@
             <div class="status-banner" id="status-banner">[ CHARGING // STANDBY ]</div>
             <!-- DẢI MARQUEE CHO NÚT TÉP -->
             <a href="#" class="combat-marquee-box" id="combat-marquee">
-                <span class="marquee-text">[ TRẠNG THÁI CHIẾN ĐẤU ĐÃ KÍCH HOẠT ] /// Cổng [ NÚT TÉP ] đã mở. Truy cập bài test Phản Xạ & Trí Nhớ. Hoàn thành để nhận cấp vốn và tiến vào Vương Quốc Poker. /// </span>
+                <span class="marquee-text">⚡ [ TRẠNG THÁI CHIẾN ĐẤU ĐÃ KÍCH HOẠT ] — CỔNG [ NÚT TÉP ] ĐÃ MỞ: <span class="cta-blink">[ BẤM VÀO ĐÂY ]</span> ĐỂ TEST PHẢN XẠ & TRÍ NHỚ, NHẬN CẤP VỐN VÀO VƯƠNG QUỐC POKER. </span>
             </a>
         </div>
 
@@ -386,6 +389,23 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.2);
         }
 
+        // Còi báo động Combat Mode (1.5 giây rồi ngắt)
+        function playCombatAlarm() {
+            initAudio();
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 1.5);
+            
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.2);
+            gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 1.0);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+            
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 1.5);
+        }
+
         const bgmAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20R%C5%8Dnin.mp3'); 
         bgmAudio.loop = true; bgmAudio.volume = 0.5; let isMuted = false;
         document.body.addEventListener('click', () => { if(!isMuted && bgmAudio.paused) bgmAudio.play().catch(e=>console.log(e)); }, {once:true});
@@ -429,7 +449,7 @@
             isTyping = false;
         }
 
-        // Hàm gõ phím chuyên dụng cho luồng Combat (không qua Queue)
+        // Hàm gõ phím chuyên dụng cho luồng Combat
         async function typeLineDirect(text) {
             for (let i = 0; i < text.length; i++) {
                 textElement.innerHTML += text.charAt(i);
@@ -505,7 +525,7 @@
         dynamicBtn.addEventListener('mousedown', startHold); dynamicBtn.addEventListener('mouseup', cancelHold); dynamicBtn.addEventListener('mouseleave', cancelHold); 
         dynamicBtn.addEventListener('touchstart', startHold, {passive: false}); dynamicBtn.addEventListener('touchend', cancelHold);
 
-        // TẠO HẠT DỮ LIỆU ĐỘNG BẰNG JS (Gắn hiệu ứng Standby bay vào lõi)
+        // TẠO HẠT DỮ LIỆU ĐỘNG BẰNG JS
         function initParticles() {
             const matrix = document.getElementById('particle-matrix');
             const colors = ['#00ff9d', '#00e5ff', '#b026ff']; 
@@ -536,17 +556,36 @@
             if(!isCommitted) { playBeep(); typeLines(["> BOO: TỪ CHỐI LỆNH.", "> Yêu cầu ký hợp đồng trong BÍ LỤC trước khi vận hành."]); return; }
             if(document.body.classList.contains('combat-active') || window.isScanning) return;
             
-            // Khóa chẩn đoán, clear hàng đợi text cũ
             window.isScanning = true; 
             typeQueue = []; 
             textElement.innerHTML = ''; 
             typeSpeed = 15;
 
-            // Chạy giả lập tăng nhịp tim dần dần
-            let currentHr = parseFloat(document.getElementById('val-hr').innerText) || 110;
-            const hrInterval = setInterval(() => {
-                currentHr += 2; if(currentHr > 160) currentHr = 160;
-                document.getElementById('val-hr').innerText = currentHr.toFixed(0);
+            // Lấy chỉ số hiện tại làm mốc bắt đầu nhảy
+            let hr = parseFloat(document.getElementById('val-hr').innerText) || 90;
+            let steps = parseFloat(document.getElementById('val-steps').innerText) || 1200;
+            let sleep = parseFloat(document.getElementById('val-sleep').innerText) || 4.5;
+            let weight = parseFloat(document.getElementById('val-weight').innerText) || 68.0;
+            let fat = parseFloat(document.getElementById('val-fat').innerText) || 16.0;
+            let water = parseFloat(document.getElementById('val-water').innerText) || 1.0;
+
+            // Mục tiêu Tier 1
+            const t_hr = 160, t_steps = 6050, t_sleep = 7.2, t_weight = 64.5, t_fat = 12.5, t_water = 2.6;
+
+            const simInterval = setInterval(() => {
+                hr += (t_hr - hr) * 0.1;
+                steps += (t_steps - steps) * 0.1;
+                sleep += (t_sleep - sleep) * 0.1;
+                weight += (t_weight - weight) * 0.1;
+                fat += (t_fat - fat) * 0.1;
+                water += (t_water - water) * 0.1;
+                
+                document.getElementById('val-hr').innerText = hr.toFixed(0);
+                document.getElementById('val-steps').innerText = steps.toFixed(0);
+                document.getElementById('val-sleep').innerText = sleep.toFixed(1);
+                document.getElementById('val-weight').innerText = weight.toFixed(1);
+                document.getElementById('val-fat').innerText = fat.toFixed(1);
+                document.getElementById('val-water').innerText = water.toFixed(1);
             }, 40);
 
             // Giao thức quét từng mốc
@@ -559,13 +598,18 @@
             await typeLineDirect("> KIỂM SOÁT THỂ CHẤT: ĐẠT MỨC TỐI ĐA.");
             playLockSound(); await new Promise(r => setTimeout(r, 500));
 
-            // Đạt ngưỡng, kích nổ Combat Mode
-            clearInterval(hrInterval);
+            // Dừng interval và khóa số hoàn hảo
+            clearInterval(simInterval);
             document.getElementById('val-hr').innerText = '160';
+            document.getElementById('val-steps').innerText = '6050';
+            document.getElementById('val-sleep').innerText = '7.2';
+            document.getElementById('val-weight').innerText = '64.5';
+            document.getElementById('val-fat').innerText = '12.5';
+            document.getElementById('val-water').innerText = '2.6';
             
             document.body.classList.add('combat-active'); 
             document.getElementById('status-banner').innerText = "[ OVERRIDE: COMBAT MODE READY ]";
-            playChargeSound();
+            playCombatAlarm(); // Hú 1 lần rồi ngắt
 
             await typeLineDirect("> THIẾT LẬP OVERRIDE // COMBAT MODE... SẴN SÀNG!");
 
