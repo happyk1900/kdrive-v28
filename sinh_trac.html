@@ -22,7 +22,6 @@
             width: 100vw; 
             height: 100vh; height: calc(var(--vh, 1vh) * 100); 
             display: flex; justify-content: center; align-items: center;
-            perspective: 1000px;
         }
 
         .pwa-container {
@@ -31,16 +30,24 @@
             box-shadow: 0 0 50px rgba(0,0,0,0.9); overflow: hidden;
         }
 
-        /* HỐ ĐEN VŨ TRỤ */
-        .deep-space-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background: #020203; overflow: hidden; }
-        .nebula { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(from 0deg, transparent 0%, rgba(176, 38, 255, 0.08) 25%, transparent 50%, rgba(0, 229, 255, 0.05) 75%, transparent 100%); animation: rotate-nebula 35s linear infinite; }
-        .black-hole { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(circle, #000 40%, rgba(0,0,0,0.9) 60%, transparent 80%); box-shadow: 0 0 60px 15px rgba(176, 38, 255, 0.1), inset 0 0 30px 5px rgba(0,0,0,1); z-index: 2; animation: pulse-hole 5s ease-in-out infinite alternate; }
-        @keyframes rotate-nebula { 100% { transform: rotate(360deg); } }
-        @keyframes pulse-hole { 100% { transform: translate(-50%, -50%) scale(1.02); box-shadow: 0 0 70px 20px rgba(176, 38, 255, 0.15), inset 0 0 30px 5px rgba(0,0,0,1); } }
+        /* BACKGROUND MỚI: LƯỚI CHIẾN THUẬT & TẦM NHÌN HÌNH ỐNG */
+        .tactical-grid-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-obsidian); z-index: 1; perspective: 600px; overflow: hidden; }
+        .grid-plane { position: absolute; width: 200%; height: 200%; left: -50%; top: 0%; background-image: linear-gradient(rgba(0, 229, 255, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.15) 1px, transparent 1px); background-size: 40px 40px; transform: rotateX(75deg); animation: grid-scroll 10s linear infinite; }
+        .vignette { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; background: radial-gradient(circle at center, transparent 40%, #050608 95%); transition: all 0.5s ease; }
         
-        body.combat-active .nebula { background: conic-gradient(from 0deg, transparent 0%, rgba(255, 42, 42, 0.15) 25%, transparent 50%, rgba(255, 170, 0, 0.1) 75%, transparent 100%); animation: rotate-nebula 10s linear infinite; }
-        body.combat-active .black-hole { box-shadow: 0 0 90px 30px rgba(255, 42, 42, 0.3), inset 0 0 20px 5px rgba(0,0,0,1); animation: pulse-hole-combat 0.8s ease-in-out infinite alternate; }
-        @keyframes pulse-hole-combat { 100% { transform: translate(-50%, -50%) scale(1.08); box-shadow: 0 0 120px 45px rgba(255, 42, 42, 0.5), inset 0 0 20px 5px rgba(0,0,0,1); } }
+        @keyframes grid-scroll { 0% { background-position: 0 0; } 100% { background-position: 0 40px; } }
+
+        /* MA TRẬN HẠT DỮ LIỆU (DATA PARTICLES) */
+        .particle-matrix { position: absolute; top: 50%; left: 50%; z-index: 4; width: 0; height: 0; }
+        .particle-wrap { position: absolute; width: 2px; height: 250px; transform-origin: top center; top: 0; left: 0; }
+        .particle { position: absolute; bottom: 100%; left: -1px; width: 3px; height: 3px; border-radius: 50%; opacity: 0; }
+
+        @keyframes particle-fall {
+            0% { transform: translateY(0); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { transform: translateY(180px); opacity: 0; }
+        }
 
         /* HEADER & RANK */
         .top-row { position: relative; z-index: 10; padding: 15px 15px 10px; display: flex; justify-content: space-between; align-items: flex-start; }
@@ -49,6 +56,7 @@
         .btn-exit { text-decoration: none; font-family: var(--font-display); font-size: 10px; font-weight: bold; letter-spacing: 1px; padding: 5px 12px; width: fit-content; }
         .btn-audio { padding: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
         .btn-audio svg { width: 14px; height: 14px; fill: currentColor; }
+        
         body.combat-active .btn-exit, body.combat-active .btn-audio { color: var(--crimson); border-color: var(--crimson); background: rgba(255, 42, 42, 0.1); }
         .sys-info { text-align: right; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; text-shadow: 0 1px 2px #000; }
         .sys-info span { color: var(--cyan); font-weight: bold; }
@@ -57,8 +65,8 @@
         .banner-wrapper { position: relative; z-index: 10; display: flex; justify-content: center; width: 100%; }
         .status-banner { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 6px 15px; text-align: center; border: 1px solid var(--amber); color: var(--amber); background: rgba(255, 170, 0, 0.1); clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); transition: all 0.5s ease; }
 
-        /* LÕI ARC REACTOR 3D & CHỈ SỐ */
-        .core-wrapper { position: relative; flex: 1; display: flex; justify-content: center; align-items: center; z-index: 10; min-height: 0; }
+        /* LÕI ARC REACTOR 3D TRONG SUỐT */
+        .core-wrapper { position: relative; flex: 1; display: flex; justify-content: center; align-items: center; z-index: 10; min-height: 0; perspective: 1000px; }
         .arc-reactor { position: absolute; width: 340px; height: 340px; display: flex; justify-content: center; align-items: center; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
         .ring-svg { position: absolute; width: 100%; height: 100%; overflow: visible; z-index: 5; transition: all 0.5s ease; }
         .orb-group { transform-origin: 170px 170px; transition: all 1s ease; }
@@ -95,7 +103,7 @@
         .typewriter { font-family: var(--font-ui); font-weight: 600; font-size: 13px; color: #ffffff; line-height: 1.6; letter-spacing: 1px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
         .cursor { display: inline-block; width: 6px; height: 12px; background-color: #ffffff; animation: blink 1s step-end infinite; vertical-align: bottom; }
 
-        /* CƠ CHẾ COMBAT MODE */
+        /* CƠ CHẾ COLD COMBAT MODE */
         body.combat-active .status-banner { border-color: var(--crimson) !important; color: var(--crimson) !important; background: rgba(255, 42, 42, 0.15) !important; animation: alert-flash 1s infinite alternate; }
         body.combat-active .arc-reactor { transform: rotateX(20deg) rotateY(-15deg) scale(1.1); animation: overload-shake 0.2s infinite; }
         body.combat-active .plasma-node { opacity: 1; }
@@ -111,6 +119,13 @@
         body.combat-active .terminal-panel { border-color: rgba(255, 42, 42, 0.5); border-bottom-color: var(--crimson); box-shadow: inset 0 0 30px rgba(255, 42, 42, 0.2); background: rgba(255, 42, 42, 0.15); }
         body.combat-active .terminal-header { background: var(--crimson); color: white; }
         
+        /* Hiệu ứng Background Tác chiến lạnh */
+        body.combat-active .grid-plane { background-image: linear-gradient(rgba(100, 110, 120, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(100, 110, 120, 0.3) 1px, transparent 1px); animation-duration: 3s; }
+        body.combat-active .vignette { background: radial-gradient(circle at center, transparent 40%, rgba(60, 0, 0, 0.85) 90%, rgba(120, 0, 0, 0.95) 100%); animation: tunnel-pulse 1s infinite alternate; }
+        body.combat-active .particle { animation-duration: 0.6s !important; height: 35px; width: 1px; border-radius: 0; box-shadow: none !important; animation-timing-function: ease-in; }
+        body.combat-active .particle.red-alert-potential { background-color: var(--crimson) !important; box-shadow: 0 0 10px var(--crimson) !important; z-index: 10; width: 2px; }
+
+        @keyframes tunnel-pulse { 0% { opacity: 0.9; } 100% { opacity: 1; box-shadow: inset 0 0 60px 20px rgba(255, 42, 42, 0.15); } }
         @keyframes spin-cw { 100% { transform: rotate(360deg); } }
         @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
@@ -126,7 +141,7 @@
         .holo-desc { font-size: 1rem; color: #e0e0e0; margin-bottom: 25px; line-height: 1.5; }
         .btn-close-holo { width: 100%; padding: 10px; font-family: var(--font-display); background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; cursor: pointer; }
 
-        /* BÍ LỤC & TIER SYSTEM V2 (KARATE LORE + SAO BĂNG + DARK MATTER) */
+        /* BÍ LỤC & TIER SYSTEM */
         .rank-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,6,8,0.98); backdrop-filter: blur(12px); z-index: 50; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s ease; padding-bottom: 80px; }
         .rank-overlay.active { transform: translateY(0); }
         .rank-header { padding: 25px 20px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
@@ -136,15 +151,12 @@
         .tier-item { position: relative; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; background: rgba(255,255,255,0.02); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); overflow: hidden; }
         .tier-btn { position: relative; z-index: 2; width: 100%; background: transparent; padding: 15px; text-align: left; font-family: var(--font-display); font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
         
-        /* HIỆU ỨNG SAO BĂNG KHI CLICK */
         .shooting-star { position: absolute; bottom: 0; left: -150px; width: 150px; height: 2px; background: linear-gradient(90deg, transparent, currentColor, #fff); box-shadow: 0 0 10px currentColor; z-index: 3; opacity: 0; pointer-events: none; }
         .shooting-star.active { animation: sweep 0.5s ease-out forwards; }
         @keyframes sweep { 0% { left: -150px; opacity: 1; } 100% { left: 100%; opacity: 0; } }
 
-        /* MÀU ĐAI KARATE */
         .tier-shiro { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3); border-left: 3px solid #fff; }
         .tier-chairo { color: var(--amber); text-shadow: 0 0 5px rgba(255, 170, 0, 0.5); border-left: 3px solid var(--amber); }
-        /* TIER KURO: DARK MATTER - THAN CHÌ VÀ VIỀN SÁNG RỰC */
         .tier-kuro { color: #a9b1d6; text-shadow: 0 0 10px rgba(176, 38, 255, 0.8); border-left: 3px solid #b026ff; font-weight: bold; background: rgba(10, 10, 15, 0.6); }
         .tier-void { color: var(--cyan); text-shadow: 0 0 8px rgba(0, 229, 255, 0.5); border-left: 3px solid var(--cyan); }
 
@@ -152,7 +164,6 @@
         .tier-content.open { max-height: 600px; padding-bottom: 15px; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px; opacity: 1; }
         .tier-content p { margin-bottom: 10px; } .tier-content strong { color: var(--cyan); }
         
-        /* ĐỊNH DẠNG UI: GIAO DIỆN TERMINAL XÓA BỎ NỀN ĐẶC */
         .directive-line { font-family: var(--font-display); font-size: 0.8rem; font-weight: bold; padding: 6px 12px; margin-bottom: 10px; background: transparent; border-left: 2px solid; letter-spacing: 1px; display: block; text-shadow: 0 0 8px currentColor; }
         .dir-shiro { color: var(--crimson); border-color: var(--crimson); }
         .dir-shiro-2 { color: var(--mint); border-color: var(--mint); }
@@ -168,7 +179,6 @@
         .hold-btn.state-abort .hold-progress { background: rgba(255, 42, 42, 0.35); }
         .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; z-index: -1; transition: background 0.3s; }
         
-        /* Hiệu ứng rung bần bật khi sạc 3s */
         .hold-btn.charging { animation: shake 0.1s infinite; filter: brightness(1.3); text-shadow: 0 0 5px currentColor; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-1.5px) translateY(-0.5px); } 75% { transform: translateX(1.5px) translateY(0.5px); } }
 
@@ -177,11 +187,12 @@
 <body>
 
     <div class="pwa-container">
-        <!-- HỐ ĐEN VŨ TRỤ -->
-        <div class="deep-space-bg">
-            <div class="black-hole"></div>
-            <div class="nebula"></div>
+        <!-- LƯỚI CHIẾN THUẬT & MA TRẬN HẠT (Xóa Hố Đen) -->
+        <div class="tactical-grid-bg">
+            <div class="grid-plane"></div>
         </div>
+        <div class="particle-matrix" id="particle-matrix"></div>
+        <div class="vignette"></div>
 
         <div class="top-row">
             <div class="left-controls">
@@ -309,12 +320,12 @@
         const d = new Date(); document.getElementById('current-date').innerText = ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
         const isSunday = d.getDay() === 0;
         
-        // 2. AUDIO & HAPTIC ENGINE
+        // 2. AUDIO & HAPTIC ENGINE (Đã gỡ bỏ điều kiện isMuted cho toàn bộ SFX)
         let audioCtx; 
         function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
         
         function playBeep() { 
-            initAudio(); if(isMuted) return; 
+            initAudio();
             const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); 
             osc.frequency.value = 800; gain.gain.value = 0.1; 
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); 
@@ -323,7 +334,7 @@
         }
 
         function playSlashSound() {
-            initAudio(); if(isMuted) return;
+            initAudio();
             const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
             osc.type = 'sawtooth'; osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.15);
@@ -335,7 +346,7 @@
 
         let chargeOsc, chargeGain;
         function playChargeSound() {
-            initAudio(); if(isMuted) return;
+            initAudio();
             chargeOsc = audioCtx.createOscillator(); chargeGain = audioCtx.createGain();
             chargeOsc.type = 'square'; chargeOsc.frequency.setValueAtTime(100, audioCtx.currentTime);
             chargeOsc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 3);
@@ -346,7 +357,7 @@
         function stopChargeSound() { if(chargeOsc) { chargeOsc.stop(); chargeOsc = null; } }
 
         function playLockSound() {
-            initAudio(); if(isMuted) return;
+            initAudio();
             const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
             osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.2);
@@ -397,12 +408,11 @@
             isTyping = false;
         }
 
-        // 5. RANK OVERLAY (SAO BĂNG KẾT HỢP)
+        // 5. RANK OVERLAY
         function toggleRankMenu() { document.getElementById('rank-overlay').classList.toggle('active'); }
         
         function toggleTier(id, btnElement) { 
             playSlashSound(); 
-            // Kích hoạt sao băng
             let star = btnElement.querySelector('.shooting-star');
             if(star) { star.classList.remove('active'); void star.offsetWidth; star.classList.add('active'); }
             
@@ -410,7 +420,7 @@
             c.classList.contains('open') ? c.classList.remove('open') : (document.querySelectorAll('.tier-content').forEach(e=>e.classList.remove('open')), c.classList.add('open')); 
         }
         
-        // 6. CƠ CHẾ NÚT BẤM 3S VÀ CẬP NHẬT TRẠNG THÁI RANK TRÊN MÀN HÌNH CHÍNH
+        // 6. CƠ CHẾ NÚT BẤM 3S
         const dynamicBtn = document.getElementById('dynamic-hold-btn');
         function updateButtonState() {
             const rankBtn = document.getElementById('btn-rank');
@@ -440,7 +450,7 @@
         function startHold(e) { 
             e.preventDefault(); startTime = Date.now(); 
             playChargeSound(); dynamicBtn.classList.add('charging');
-            if(navigator.vibrate) navigator.vibrate([50, 50, 50, 50, 50, 50, 50, 50]); // Rung bần bật theo nhịp
+            if(navigator.vibrate) navigator.vibrate([50, 50, 50, 50, 50, 50, 50, 50]); 
             
             const prog = document.getElementById('hold-progress'); 
             holdTimer = setInterval(() => { 
@@ -448,7 +458,7 @@
                 if(p>=100){ 
                     p=100; clearInterval(holdTimer); 
                     stopChargeSound(); playLockSound(); dynamicBtn.classList.remove('charging');
-                    if(navigator.vibrate) navigator.vibrate(300); // Rung mạnh chốt ngàm
+                    if(navigator.vibrate) navigator.vibrate(300); 
                     if(isCommitted) { triggerAbort(); } else { confirmCommitment(); } 
                 } 
                 prog.style.width = p+'%'; 
@@ -464,6 +474,32 @@
         
         dynamicBtn.addEventListener('mousedown', startHold); dynamicBtn.addEventListener('mouseup', cancelHold); dynamicBtn.addEventListener('mouseleave', cancelHold); 
         dynamicBtn.addEventListener('touchstart', startHold, {passive: false}); dynamicBtn.addEventListener('touchend', cancelHold);
+
+        // TẠO HẠT DỮ LIỆU ĐỘNG BẰNG JS
+        function initParticles() {
+            const matrix = document.getElementById('particle-matrix');
+            const colors = ['#00ff9d', '#00e5ff', '#b026ff']; 
+            for(let i = 0; i < 45; i++) {
+                let wrapper = document.createElement('div');
+                wrapper.className = 'particle-wrap';
+                let angle = Math.random() * 360;
+                wrapper.style.transform = `rotate(${angle}deg)`;
+                
+                let p = document.createElement('div');
+                p.className = 'particle';
+                p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                p.style.boxShadow = `0 0 8px ${p.style.backgroundColor}`;
+                
+                let duration = 2.5 + Math.random() * 3;
+                let delay = Math.random() * 5;
+                p.style.animation = `particle-fall ${duration}s infinite ${delay}s linear`;
+                
+                if(Math.random() > 0.85) p.classList.add('red-alert-potential');
+                
+                wrapper.appendChild(p);
+                matrix.appendChild(wrapper);
+            }
+        }
 
         // 7. COMBAT MODE
         function triggerCombatMode() {
@@ -510,7 +546,6 @@
                     document.getElementById('val-steps').innerText = resData.steps || '---';
 
                     if (isCommitted) {
-                        // LOGIC XẢ TẢI NGÀY CHỦ NHẬT (VOID REGEN)
                         if (isSunday) {
                             document.getElementById('status-banner').innerText = "[ PROTOCOL: VOID REGEN ]";
                             document.getElementById('status-banner').style.color = "var(--cyan)";
@@ -538,6 +573,7 @@
             }
         }
 
+        initParticles();
         setTimeout(fetchBioData, 500);
     </script>
 </body>
