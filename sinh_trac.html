@@ -342,7 +342,7 @@
 
             <!-- KHÓA AN TOÀN PRE-SCAN -->
             <div id="safety-lock" class="safety-lock-box" onclick="unlockPreScan()">
-                [ 🔒 ] XÁC NHẬN: ĐÃ ĐEO ĐỒNG HỒ & ĐO CÂN?
+                [ 🔒 ] CHECK: ĐÃ ĐEO ĐỒNG HỒ + ĐO CÂN?
             </div>
 
             <div class="data-panel pos-hr" onclick="openHolo('hr')"><div class="dp-val blinking" id="val-hr">---</div><div class="dp-lbl">HEART RATE</div></div>
@@ -486,7 +486,42 @@
 
         const holoData = { hr: { title: "HEART RATE", desc: "Yêu cầu nhịp tim đạt 160 BPM để mở khóa trạng thái Overdrive.", color: "var(--crimson)" }, weight: { title: "WEIGHT", desc: "Duy trì khung trọng lượng chiến đấu: 63.0 kg - 67.0 kg.", color: "var(--mint)" }, sleep: { title: "SLEEP", desc: "Ngủ phục hồi tối thiểu 7 giờ/đêm không ngoại lệ.", color: "var(--cyan)" }, fat: { title: "BODY FAT", desc: "Giữ tỷ lệ mỡ dưới 13.0%. Kiểm soát nghiêm ngặt bằng dinh dưỡng.", color: "var(--mint)" }, water: { title: "WATER", desc: "Bơm 2.5 - 3.0 Lít nước mỗi ngày.", color: "var(--cyan)" }, steps: { title: "STEPS", desc: "Tối thiểu 6.000 bước vận động mỗi ngày.", color: "var(--amber)" } };
         const holoPopup = document.getElementById('holo-popup');
-        function openHolo(type) { playBeep(); const data = holoData[type]; document.getElementById('holo-title').innerText = data.title; document.getElementById('holo-title').style.color = data.color; document.getElementById('holo-box').style.borderColor = data.color; document.getElementById('holo-desc').innerText = data.desc; holoPopup.classList.add('active'); }
+        
+        // CẬP NHẬT LOGIC HOLO-POPUP (TÍNH TOÁN DATA THỰC TẾ)
+        function openHolo(type) { 
+            playBeep(); 
+            const data = holoData[type]; 
+            document.getElementById('holo-title').innerText = data.title; 
+            document.getElementById('holo-title').style.color = data.color; 
+            document.getElementById('holo-box').style.borderColor = data.color; 
+            
+            // Xử lý báo cáo chi tiết nếu hệ thống đã quét
+            if(isSynced) {
+                let currentVal = parseFloat(document.getElementById(`val-${type}`).innerText);
+                let targetVal = 0, unit = "", msg = "";
+                
+                if(type === 'hr') { targetVal = 160; unit = "BPM"; if(currentVal < targetVal) msg = `⚠️ Cảnh báo: Cơ thể đang ỳ. Yêu cầu Cardio nạp gấp +${(targetVal - currentVal).toFixed(0)} ${unit}.`; else msg = `✅ Đạt chuẩn Overdrive.`; }
+                else if(type === 'weight') { targetVal = 67; unit = "KG"; if(currentVal > targetVal) msg = `⚠️ Vượt khung chiến đấu ${(currentVal - targetVal).toFixed(1)} ${unit}. Yêu cầu cắt giảm Calories.`; else if (currentVal < 63) msg = `⚠️ Dưới khung chiến đấu ${(63 - currentVal).toFixed(1)} ${unit}.`; else msg = `✅ Thể trạng lý tưởng.`; }
+                else if(type === 'sleep') { targetVal = 7.0; unit = "HRS"; if(currentVal < targetVal) msg = `⚠️ Hệ thần kinh chưa phục hồi. Nợ ${(targetVal - currentVal).toFixed(1)} ${unit}.`; else msg = `✅ Đã tái tạo đủ năng lượng.`; }
+                else if(type === 'fat') { targetVal = 13.0; unit = "%"; if(currentVal > targetVal) msg = `⚠️ Tỷ lệ mỡ vượt ngưỡng +${(currentVal - targetVal).toFixed(1)} ${unit}. Siết lại dinh dưỡng.`; else msg = `✅ Đạt chuẩn tỷ lệ vàng.`; }
+                else if(type === 'water') { targetVal = 2.5; unit = "L"; if(currentVal < targetVal) msg = `⚠️ Báo động khát. Yêu cầu nạp gấp +${(targetVal - currentVal).toFixed(1)} ${unit} nước.`; else msg = `✅ Đủ nước vận hành.`; }
+                else if(type === 'steps') { targetVal = 6000; unit = "STEPS"; if(currentVal < targetVal) msg = `⚠️ Thiếu hụt vận động. Cần hoàn thành ${(targetVal - currentVal).toFixed(0)} ${unit} nữa.`; else msg = `✅ Hoàn thành mục tiêu di chuyển.`; }
+                
+                document.getElementById('holo-desc').innerHTML = `
+                    <div style="font-size: 0.9rem; margin-bottom: 10px; color: rgba(255,255,255,0.7);">[ MỤC TIÊU CỐT LÕI ]<br>${data.desc}</div>
+                    <div style="padding: 10px; border: 1px dashed ${data.color}; background: rgba(0,0,0,0.5);">
+                        <strong style="color: ${data.color}; font-family: var(--font-display); font-size: 1.1rem;">DATA RECOVERY:</strong><br>
+                        ${msg}
+                    </div>
+                `;
+            } else {
+                // Nếu chưa quét, chỉ hiện mô tả mặc định
+                document.getElementById('holo-desc').innerText = data.desc; 
+            }
+            
+            holoPopup.classList.add('active'); 
+        }
+        
         function closeHoloDirect() { holoPopup.classList.remove('active'); }
         function closeHolo(e) { if(e.target === holoPopup){ playBeep(); closeHoloDirect(); } }
 
@@ -657,16 +692,17 @@
                         } else {
                             updateMarquee('train');
                             playLockSound(); 
+                            // CẬP NHẬT LẠI LỜI THOẠI TERMINAL NGẮN GỌN HƠN
                             typeTextSafe([
-                                "> BOO // ĐỒNG BỘ HOÀN TẤT.", 
-                                "> CẢNH BÁO TỔNG THỂ: CHỈ SỐ DƯỚI MỨC TIÊU CHUẨN (SCI: 35/40).", 
-                                "> TRÍCH XUẤT BÁO CÁO THIẾU HỤT THỂ CHẤT:",
-                                "  [!] WATER: Đang ở mức 1.0L -> Yêu cầu nạp gấp thêm 1.5L.",
-                                "  [!] SLEEP: Đạt 5.5h -> Hệ thần kinh chưa phục hồi, nợ 1.5h.",
-                                "  [!] HEART RATE: Cơ thể đang ỳ (85 BPM) -> Yêu cầu cardio đẩy thêm +75 BPM.",
-                                "> KẾT LUẬN: TỪ CHỐI CẤP QUYỀN COMBAT. HÃY THỰC THI KỶ LUẬT.",
-                                "> (Chạm vào lõi SCI để KÍCH HOẠT LỆNH GHI ĐÈ nếu bắt buộc thực chiến)"
+                                "> BOO // ĐỒNG BỘ HOÀN TẤT. TỪ CHỐI CẤP QUYỀN COMBAT.", 
+                                "> CẢNH BÁO: Chỉ số SCI chưa đạt. Chạm vào từng thông số để kiểm tra mức độ thiếu hụt.", 
+                                "> (Chạm lõi SCI để KÍCH HOẠT LỆNH GHI ĐÈ nếu bắt buộc thực chiến)"
                             ], 20, 200);
+                            
+                            // Làm nổi bật các ô bị thiếu
+                            if (parseFloat(resData.water) < 2.5) document.querySelector('.pos-rec2').style.animation = "alert-flash 1s infinite alternate";
+                            if (parseFloat(resData.hr) < 160) document.querySelector('.pos-hr').style.animation = "alert-flash 1s infinite alternate";
+                            if (parseFloat(resData.sleep) < 7.0) document.querySelector('.pos-rec1').style.animation = "alert-flash 1s infinite alternate";
                         }
                     }
                 } else { 
@@ -685,6 +721,9 @@
             window.isScanning = true; let combatSpeed = 15;
             let hr = parseFloat(document.getElementById('val-hr').innerText) || 90; let steps = parseFloat(document.getElementById('val-steps').innerText) || 1200; let sleep = parseFloat(document.getElementById('val-sleep').innerText) || 4.5; let weight = parseFloat(document.getElementById('val-weight').innerText) || 68.0; let fat = parseFloat(document.getElementById('val-fat').innerText) || 16.0; let water = parseFloat(document.getElementById('val-water').innerText) || 1.0;
             const t_hr = 160, t_steps = 6050, t_sleep = 7.2, t_weight = 64.5, t_fat = 12.5, t_water = 2.6;
+
+            // Xóa hiệu ứng nháy khi ghi đè
+            document.querySelectorAll('.data-panel').forEach(el => el.style.animation = 'none');
 
             const simInterval = setInterval(() => {
                 hr += (t_hr - hr) * 0.1; steps += (t_steps - steps) * 0.1; sleep += (t_sleep - sleep) * 0.1; weight += (t_weight - weight) * 0.1; fat += (t_fat - fat) * 0.1; water += (t_water - water) * 0.1;
@@ -718,7 +757,13 @@
             document.body.classList.add('pre-scan-locked'); 
             
             if (isCommitted) { 
-                typeTextSafe(["> BOO // HỆ THỐNG ĐÓNG BĂNG.", "> Yêu cầu BẮT BUỘC: Xác nhận điều kiện đo lường trước."]); 
+                // Cập nhật lại lời thoại khai báo quy tắc
+                typeTextSafe([
+                    "> BOO // HỆ THỐNG ĐÓNG BĂNG.", 
+                    "> GIAO THỨC BẮT BUỘC: Đeo đồng hồ tình báo trước 24h.",
+                    "> GIAO THỨC BẮT BUỘC: Lên cân sinh học ngay khi mới ngủ dậy.",
+                    "> (Chạm vào nút [ 🔒 ] phía trên để xác nhận hoàn tất)"
+                ], 20, 100); 
             } 
             else { 
                 document.body.classList.add('uncommitted'); // Ẩn hoàn toàn nút check đồng hồ
