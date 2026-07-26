@@ -4,15 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Event Horizon Core</title>
-    <!-- Bổ sung phông chữ Inter chuyên dành cho đọc văn bản dài (body text) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-obsidian: #050608; --mint: #00ff9d; --cyan: #00e5ff;
             --amber: #ffaa00; --violet: #b026ff; --crimson: #ff2a2a;
-            --font-display: 'Orbitron', sans-serif; 
-            --font-ui: 'Rajdhani', sans-serif;
-            --font-read: 'Inter', sans-serif; /* Phông chữ mới, dễ đọc, không chân */
+            --font-display: 'Orbitron', sans-serif; --font-ui: 'Rajdhani', sans-serif;
             --vh: 1vh; 
         }
 
@@ -120,21 +117,21 @@
         body.pre-scan-locked #val-sci,
         body.pre-scan-locked .banner-wrapper { opacity: 0 !important; pointer-events: none !important; }
         body.pre-scan-locked .sci-nexus { pointer-events: none !important; }
+
+        /* --- STATE: CHƯA KÝ BÍ LỤC --- */
         body.uncommitted .safety-lock-box { display: none !important; }
 
-        /* NÚT CẢNH BÁO PRE-SCAN */
         .safety-lock-box { 
-            position: absolute; margin-top: 135px; border: 1px solid var(--amber); 
-            background: rgba(255, 170, 0, 0.1); color: var(--amber); 
-            font-family: var(--font-ui); font-size: 13px; font-weight: 600;
-            letter-spacing: 0.5px; padding: 8px 16px; white-space: nowrap; 
-            cursor: pointer; z-index: 50; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); 
+            position: absolute; margin-top: 135px; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.1); 
+            color: var(--amber); font-family: var(--font-ui); font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
+            padding: 8px 16px; white-space: nowrap; cursor: pointer; z-index: 50; 
+            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); 
             animation: flash-unsigned 1.2s infinite ease-in-out; transition: all 0.3s ease; 
             text-align: center; text-shadow: 0 0 5px var(--amber);
         }
         .safety-lock-box.unlocked { display: none !important; }
 
-        /* BOO TERMINAL & DATA PANELS */
+        /* DATA PANELS */
         .data-panel { position: absolute; z-index: 15; background: rgba(8, 9, 13, 0.75); backdrop-filter: blur(3px); padding: 4px 12px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); border-left: 2px solid; cursor: pointer; transition: transform 0.2s, opacity 1.5s ease; }
         .data-panel:active { transform: scale(0.95); }
         .dp-right { clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px)); border-left: none; border-right: 2px solid; text-align: right; }
@@ -153,7 +150,7 @@
         .typewriter { font-family: var(--font-ui); font-weight: 600; font-size: 13px; color: #ffffff; line-height: 1.6; letter-spacing: 1px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
         .cursor { display: inline-block; width: 6px; height: 12px; background-color: #ffffff; animation: blink 1s step-end infinite; vertical-align: bottom; }
 
-        /* TRẠNG THÁI NGỦ ĐÔNG (STANDBY) & QUÉT & HOÀN TẤT */
+        /* TRẠNG THÁI NGỦ ĐÔNG / QUÉT / TẤN CÔNG / V.V... (Giữ Nguyên) */
         body.standby-mode .data-panel { opacity: 0.05; pointer-events: none; transform: scale(0.9); transition: all 1.5s ease; filter: grayscale(1); }
         body.standby-mode .ring-svg { opacity: 0.15; transition: all 1.5s ease; }
         body.standby-mode .plasma-node { opacity: 0; }
@@ -174,7 +171,6 @@
         body.sync-complete #val-sci { display: block; animation: sci-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes sci-pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-        /* CƠ CHẾ COLD COMBAT MODE & TUNNEL VISION */
         body.combat-active .status-banner { border-color: var(--crimson) !important; color: var(--crimson) !important; background: rgba(255, 42, 42, 0.15) !important; animation: alert-flash 1s infinite alternate; }
         body.combat-active .arc-reactor { transform: rotateX(20deg) rotateY(-15deg) scale(1.1); animation: overload-shake 0.2s infinite; }
         body.combat-active .plasma-node { opacity: 1; }
@@ -237,35 +233,25 @@
         .tier-kuro { color: #a9b1d6; text-shadow: 0 0 10px rgba(176, 38, 255, 0.8); border-left: 3px solid #b026ff; font-weight: bold; background: rgba(10, 10, 15, 0.6); }
         .tier-void { color: var(--cyan); text-shadow: 0 0 8px rgba(0, 229, 255, 0.5); border-left: 3px solid var(--cyan); }
 
-        /* Cập nhật font và không in nghiêng cho văn bản dài */
-        .tier-content { position: relative; z-index: 2; padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.3s ease; opacity: 0; }
-        .tier-content.open { max-height: 2500px; padding-bottom: 15px; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px; opacity: 1; }
-        
-        .tier-content p { font-family: var(--font-read); font-style: normal; font-size: 0.9rem; color: #d0d5e0; line-height: 1.6; letter-spacing: 0.3px; margin-bottom: 12px; }
-        .tier-content strong { color: var(--cyan); }
+        .tier-content { position: relative; z-index: 2; padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.3s ease; font-size: 0.9rem; color: #d0d5e0; line-height: 1.6; opacity: 0; }
+        .tier-content.open { max-height: 600px; padding-bottom: 15px; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px; opacity: 1; }
+        .tier-content p { margin-bottom: 10px; } .tier-content strong { color: var(--cyan); }
         
         .directive-line { font-family: var(--font-display); font-size: 0.8rem; font-weight: bold; padding: 6px 12px; margin-bottom: 10px; background: transparent; border-left: 2px solid; letter-spacing: 1px; display: block; text-shadow: 0 0 8px currentColor; }
-        .dir-shiro { color: var(--crimson); border-color: var(--crimson); }
-        .dir-shiro-2 { color: var(--mint); border-color: var(--mint); }
         .dir-chairo { color: var(--amber); border-color: var(--amber); }
         .dir-kuro { color: var(--violet); border-color: var(--violet); }
         .dir-void { color: var(--cyan); border-color: var(--cyan); }
 
-        /* --- TIẾT LỘ LŨY TIẾN (PROGRESSIVE DISCLOSURE) --- */
-        .sub-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 15px; font-family: var(--font-display); font-size: 0.85rem; font-weight: bold; cursor: pointer; width: 100%; text-align: left; margin-top: 10px; transition: all 0.3s; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
-        .sub-btn:hover { background: rgba(255,255,255,0.15); border-color: var(--cyan); }
-        .sub-content { max-height: 0; overflow: hidden; opacity: 0; transition: all 0.4s ease-out; padding: 0 15px; border-left: 2px solid rgba(0, 229, 255, 0.5); margin-left: 5px; background: rgba(0,0,0,0.3); }
-        .sub-content.open { max-height: 1000px; opacity: 1; padding-top: 15px; padding-bottom: 15px; margin-top: 10px; margin-bottom: 15px; }
+        /* TIER 1 CUSTOM STYLES (CẬP NHẬT MỚI) */
+        .t1-objective { font-family: var(--font-ui); font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 15px; line-height: 1.5; text-transform: uppercase; letter-spacing: 0.5px; }
+        .t1-objective span { color: var(--cyan); }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
+        .stat-box { background: rgba(255,255,255,0.03); border: 1px solid; padding: 10px 4px; text-align: center; font-family: var(--font-display); font-size: 0.75rem; font-weight: bold; clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px); }
+        .stat-red { border-color: rgba(255, 42, 42, 0.3); color: var(--crimson); text-shadow: 0 0 5px rgba(255, 42, 42, 0.4); }
+        .stat-green { border-color: rgba(0, 255, 157, 0.3); color: var(--mint); text-shadow: 0 0 5px rgba(0, 255, 157, 0.4); }
+        .t1-warning { background: rgba(255, 42, 42, 0.05); border-left: 2px solid var(--crimson); padding: 12px; font-size: 0.9rem; line-height: 1.5; color: #e0e0e0; margin-top: 15px; }
+        .t1-warning strong { color: var(--crimson); font-family: var(--font-display); letter-spacing: 1px; }
 
-        /* --- TIER 3 IMAGE STYLES --- */
-        .musashi-cyber-img { width: 100%; border: 1px solid var(--violet); margin-top: 5px; margin-bottom: 12px; filter: grayscale(20%) contrast(120%); display: block; }
-        .tier3-ultimate-stage { width: 100%; margin: 25px auto 10px; padding: 2px; background: linear-gradient(45deg, #00f0ff, transparent, #ff003c); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%); }
-        .ultimate-image-wrapper { position: relative; width: 100%; height: auto; background-color: #0a0a0a; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28px), calc(100% - 28px) 100%, 0 100%); overflow: hidden; }
-        .cyber-ronin-img { width: 100%; display: block; object-fit: cover; filter: grayscale(20%) contrast(120%); transition: transform 0.5s ease; }
-        .ultimate-image-wrapper:hover .cyber-ronin-img { transform: scale(1.05); }
-        .cyber-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: repeating-linear-gradient(0deg, rgba(0, 240, 255, 0.03) 0px, rgba(0, 240, 255, 0.03) 1px, transparent 1px, transparent 2px); pointer-events: none; }
-
-        /* KÝ CAM KẾT */
         .rank-footer { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 55; padding: 12px 20px calc(15px + env(safe-area-inset-bottom)); background: #050608; border-top: 1px solid rgba(255,255,255,0.15); }
         .hold-btn { width: 100%; padding: 15px; font-family: var(--font-display); font-size: 0.85rem; font-weight: bold; letter-spacing: 1px; position: relative; overflow: hidden; cursor: pointer; touch-action: none; transition: all 0.3s; }
         .hold-btn.state-sign { border: 1px solid var(--cyan); color: var(--cyan); background: rgba(0, 229, 255, 0.05); }
@@ -279,7 +265,7 @@
 <body>
 
     <div class="pwa-container">
-        <!-- VẪN GIỮ NGUYÊN TOÀN BỘ GIAO DIỆN & TÍNH NĂNG Ở NGOÀI BÍ LỤC -->
+        <!-- CÁC THÀNH PHẦN NỀN & UI LÕI (GIỮ NGUYÊN) -->
         <div class="tactical-grid-bg"><div class="grid-plane"></div></div>
         <div class="particle-matrix" id="particle-matrix"></div>
         <div class="vignette"></div>
@@ -318,7 +304,13 @@
                 </svg>
                 <div class="sci-nexus" id="trigger-combat" onclick="triggerBioSync()" title="Khởi động Kết Nối">
                     <div class="fingerprint-wrapper" id="fp-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M18.9 7a8 8 0 0 1 1.1 5v1a6 6 0 0 0 .8 3" /><path d="M8 11a4 4 0 0 1 8 0v1a10 10 0 0 0 2 6" /><path d="M12 11v2a14 14 0 0 0 2.5 8" /><path d="M8 15a18 18 0 0 0 1.8 6" /><path d="M4.9 19a22 22 0 0 1 -.9 -7v-1a8 8 0 0 1 12 -6.95" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                          <path d="M18.9 7a8 8 0 0 1 1.1 5v1a6 6 0 0 0 .8 3" />
+                          <path d="M8 11a4 4 0 0 1 8 0v1a10 10 0 0 0 2 6" />
+                          <path d="M12 11v2a14 14 0 0 0 2.5 8" />
+                          <path d="M8 15a18 18 0 0 0 1.8 6" />
+                          <path d="M4.9 19a22 22 0 0 1 -.9 -7v-1a8 8 0 0 1 12 -6.95" />
+                        </svg>
                         <div class="fp-scanner-line"></div>
                     </div>
                     <div class="sci-val" id="val-sci">---</div>
@@ -326,7 +318,6 @@
                 </div>
             </div>
 
-            <!-- KHÓA AN TOÀN PRE-SCAN -->
             <div id="safety-lock" class="safety-lock-box" onclick="unlockPreScan()">
                 [ 🔒 ] CHECK: ĐÃ ĐEO ĐỒNG HỒ + ĐO CÂN?
             </div>
@@ -352,89 +343,75 @@
             </div>
         </div>
 
-        <!-- BẢNG BÍ LỤC: CẤU TRÚC MỚI VỚI CƠ CHẾ LŨY TIẾN -->
         <div class="rank-overlay" id="rank-overlay">
             <div class="rank-header">
                 <h2>BÍ LỤC // TIẾN HÓA</h2>
                 <button class="btn-exit" style="background:transparent" onclick="playBeep(); toggleRankMenu()">[ ĐÓNG ]</button>
             </div>
+            
             <div class="tier-list">
-                
-                <!-- TIER 1 -->
+                <!-- TIER 1: ĐƯỢC CẬP NHẬT GIAO DIỆN MỚI -->
                 <div class="tier-item">
                     <button class="tier-btn tier-shiro" onclick="toggleTier('tier1', this)">[ TIER 1: CHIẾN BINH // SHIRO ] <span>▼</span><div class="shooting-star"></div></button>
                     <div class="tier-content" id="tier1">
-                        <p style="font-family: var(--font-display); font-size: 0.85rem; color: #fff;">Mục tiêu: Đạt chuẩn 6/6 chỉ số sinh học để mở khóa Bankroll, nhận cấp vốn ngân lượng tiến vào Vương quốc Poker.</p>
-                        <div class="directive-line dir-shiro">[ HR ≥ 160 BPM | STEPS ≥ 6,000 | SLEEP ≥ 7.0H ]</div>
-                        <div class="directive-line dir-shiro-2">[ WEIGHT: 63-67KG | FAT ≤ 13.0% | WATER ≥ 2.5L ]</div>
                         
-                        <button class="sub-btn" onclick="toggleSub(this, 'sub-t1')">[ + ] GIẢI MÃ Ý NGHĨA SCI</button>
-                        <div class="sub-content" id="sub-t1">
-                            <p>Chỉ số SCI quyết định trực tiếp số lượng Bankroll bạn được cấp. Động lực là thứ rác rưởi, kỷ luật cơ học mới là vũ khí. Bạn buộc phải ép cơ thể vào khuôn khổ để hệ thần kinh duy trì sự sắc bén, lì lợm và một cái đầu lạnh trước những quyết định sống còn trên bàn Poker tại các giải đấu ở Hà Nội. Thỏa hiệp với sự lười biếng, hệ thống sẽ thanh trừng (SYSTEM PURGE).</p>
+                        <div class="t1-objective">
+                            [ MỤC TIÊU CỐT LÕI ]<br>
+                            HOÀN THÀNH 6/6 CHỈ SỐ SINH HỌC.<br>
+                            <span>MỞ KHÓA BANKROLL.</span>
                         </div>
+                        
+                        <!-- LƯỚI CHỈ SỐ DẠNG 3x2 -->
+                        <div class="stats-grid">
+                            <div class="stat-box stat-red">160 BPM</div>
+                            <div class="stat-box stat-red">6K BƯỚC</div>
+                            <div class="stat-box stat-red">7H NGỦ</div>
+                            <div class="stat-box stat-green">63-67 KG</div>
+                            <div class="stat-box stat-green">FAT ≤ 13%</div>
+                            <div class="stat-box stat-green">NƯỚC 2.5L</div>
+                        </div>
+
+                        <p>Chỉ số SCI là thước đo tuyệt đối quyết định hạn mức Bankroll được cấp. Động lực là thứ rác rưởi, kỷ luật cơ học là vũ khí duy nhất để duy trì sự sắc bén và lì lợm trên bàn Poker.</p>
+                        
+                        <div class="t1-warning">
+                            <strong>[ HÌNH PHẠT ]</strong><br>
+                            Bắt buộc hoàn thành 6/6 chỉ số trước <strong>06:00 SÁNG</strong> mỗi ngày.<br><br>
+                            Chỉ cần 1 chu kỳ không đạt chuẩn trước bình minh, toàn bộ hệ thống lập tức <strong style="font-size: 1rem; text-shadow: 0 0 8px var(--crimson);">RESET VỀ 0</strong>. Không lý do. Không khoan nhượng.
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- TIER 2 -->
+                <!-- TIER 2 (GIỮ NGUYÊN) -->
                 <div class="tier-item">
                     <button class="tier-btn tier-chairo" onclick="toggleTier('tier2', this)">[ TIER 2: TINH ANH // CHAIRO ] <span>▼</span><div class="shooting-star"></div></button>
                     <div class="tier-content" id="tier2">
                         <div class="directive-line dir-chairo">[ TIẾN TRÌNH: DUY TRÌ 90 NGÀY LIÊN TIẾP TÁI CẤU TRÚC ]</div>
-                        <button class="sub-btn" onclick="toggleSub(this, 'sub-t2')">[ + ] GIẢI MÃ Ý NGHĨA 90 NGÀY</button>
-                        <div class="sub-content" id="sub-t2">
-                            <p>Tại sao là 90 ngày? Đây không phải con số cảm tính. Khởi động quá trình Myelin hóa màng thần kinh (Neuroplasticity) đòi hỏi đúng 90 ngày nã đạn liên tục vào sự lười biếng.</p>
-                            <p>Lớp vỏ Myelin đang dày lên, biến các hành động gượng ép của Tier 1 thành một lộ trình phản xạ tốc độ cao. Sự hưng phấn rẻ tiền đã chết, nhường chỗ cho sự lỳ lợm tàn khốc.</p>
-                        </div>
+                        <p>Tại sao là 90 ngày? Đây không phải con số cảm tính. Khởi động quá trình Myelin hóa màng thần kinh (Neuroplasticity) đòi hỏi đúng 90 ngày nã đạn liên tục vào sự lười biếng.</p>
+                        <p>Lớp vỏ Myelin đang dày lên, biến các hành động gượng ép của Tier 1 thành một lộ trình phản xạ tốc độ cao. Sự hưng phấn rẻ tiền đã chết, nhường chỗ cho sự lỳ lợm tàn khốc.</p>
                     </div>
                 </div>
 
-                <!-- TIER 3 -->
+                <!-- TIER 3 (GIỮ NGUYÊN) -->
                 <div class="tier-item">
                     <button class="tier-btn tier-kuro" onclick="toggleTier('tier3', this)">[ TIER 3: VÔ NGÃ // KURO ] <span>▼</span><div class="shooting-star"></div></button>
                     <div class="tier-content" id="tier3">
-                        <p style="font-family: var(--font-display); font-size: 0.9rem; color: var(--violet); text-align: center; text-shadow: 0 0 5px var(--violet);">"Thiên nhật chi kê vi Đạo, vạn nhật chi kê vi Thần"</p>
-                        
-                        <button class="sub-btn" onclick="toggleSub(this, 'sub-t3-1')">[ + ] MUSASHI KIẾM SĨ HUYỀN THOẠI</button>
-                        <div class="sub-content" id="sub-t3-1">
-                            <img src="https://via.placeholder.com/600x300/111111/b026ff?text=MUSASHI+CYBERPUNK+PORTRAIT" class="musashi-cyber-img" alt="Musashi">
-                            <p>Miyamoto Musashi - ronin vĩ đại nhất lịch sử. Kẻ tồn tại qua 60 trận tử chiến không một lần thất bại. Bí quyết không nằm ở chiêu thức, mà ở sự tàn nhẫn với chính bản thân mình.</p>
-                        </div>
-
-                        <button class="sub-btn" onclick="toggleSub(this, 'sub-t3-2')">[ + ] NGŨ LUÂN THƯ</button>
-                        <div class="sub-content" id="sub-t3-2">
-                            <p>Ngũ Luân Thư (Go Rin No Sho) chắt lọc tinh hoa của Đất, Nước, Lửa, Gió và Hư Không. Đó là sự thấu hiểu dòng chảy trận đấu, nhận diện điểm yếu và triệt hạ đối thủ bằng sự điềm tĩnh tuyệt đối.</p>
-                        </div>
-
-                        <button class="sub-btn" onclick="toggleSub(this, 'sub-t3-3')">[ + ] LIÊN HỆ TỚI POKER</button>
-                        <div class="sub-content" id="sub-t3-3">
-                            <p>Poker là chiến trường không đổ máu nhưng tàn sát tinh thần. Áp dụng kỷ luật cơ học và chỉ số SCI để duy trì cái đầu lạnh, triệt tiêu hoàn toàn Tilt. Tâm Vô Thủy (Mushin) giúp bạn đọc thấu mọi tell vật lý trên bàn đấu mà không bị cảm xúc chi phối.</p>
-                        </div>
-                        
-                        <button class="sub-btn" onclick="toggleSub(this, 'sub-t3-4')">[ + ] TÓM LẠI</button>
-                        <div class="sub-content" id="sub-t3-4">
-                            <p>Kỷ luật là con đường duy nhất dẫn đến tự do. Mọi chi tiết nhỏ nhất trong cuộc sống đều rèn luyện bản lĩnh trên bàn đấu.</p>
-                        </div>
-
-                        <div class="tier3-ultimate-stage">
-                          <div class="ultimate-image-wrapper">
-                            <img src="https://via.placeholder.com/800x450/111111/00FFFF?text=10.000+DAYS+RONIN" alt="Cảnh giới 10.000 ngày" class="cyber-ronin-img">
-                            <div class="cyber-overlay"></div>
-                          </div>
-                        </div>
+                        <div class="directive-line dir-kuro">[ CẢNH GIỚI TỐI THƯỢNG: 1.000 NGÀY KIẾN TẠO VÔ NGÃ ]</div>
+                        <p><em>Cảnh giới Tâm Vô Thủy (Mushin). Miyamoto Musashi rèn 1.000 ngày để khai mở tinh thần.</em></p>
+                        <p>Về mặt sinh học, 1.000 ngày là giới hạn tuyệt đối để định tuyến lại toàn bộ mạng lưới nhận thức (Default Mode Network). Ở mốc thời gian này, bạn không còn phải 'đếm' số ngày kỷ luật nữa, vì hệ thống đã dung hợp làm một với huyết quản.</p>
                     </div>
                 </div>
 
-                <!-- TIER 4 -->
+                <!-- TIER 4 (GIỮ NGUYÊN) -->
                 <div class="tier-item" style="margin-top: 20px;">
                     <button class="tier-btn tier-void" onclick="toggleTier('tier4', this)">[ PROTOCOL: VOID REGEN - NGHỈ NGƠI ] <span>▼</span><div class="shooting-star"></div></button>
                     <div class="tier-content" id="tier4">
                         <div class="directive-line dir-void">[ GIAO THỨC CHỦ NHẬT: XẢ TẢI SINH LÝ & TÁI TẠO ]</div>
-                        <p style="color: var(--cyan);">Cơ chế Xả tải Chủ Nhật: Tĩnh lặng tuyệt đối để tái sinh.</p>
-                        <p><strong style="color: var(--cyan);">HỆ THỐNG XẢ TẢI:</strong> Gỡ bỏ giới hạn ép nhịp tim (160 BPM) và bước chân (6000). Cơ thể được phép hạ nhiệt về mức cân bằng sinh lý, chữa lành sợi cơ.</p>
-                        <p><strong style="color: var(--cyan);">THÁNH ĐỊA GIẤC NGỦ:</strong> Dù là ngày nghỉ, giấc ngủ vẫn là luật cứng bất khả xâm phạm.</p>
+                        <p><em>Cơ chế Xả tải Chủ Nhật: Tĩnh lặng tuyệt đối để tái sinh.</em></p>
+                        <p><strong>HỆ THỐNG XẢ TẢI:</strong> Gỡ bỏ giới hạn ép nhịp tim (160 BPM) và bước chân (6000). Cơ thể được phép hạ nhiệt về mức cân bằng sinh lý, chữa lành sợi cơ.</p>
+                        <p><strong>THÁNH ĐỊA GIẤC NGỦ:</strong> Dù là ngày nghỉ, giấc ngủ vẫn là luật cứng bất khả xâm phạm.</p>
                     </div>
                 </div>
-
             </div>
             <div class="rank-footer">
                 <button id="dynamic-hold-btn" class="hold-btn"></button>
@@ -442,6 +419,7 @@
         </div>
     </div>
 
+    <!-- LOGIC JS GIỮ NGUYÊN 100% NHƯ BẢN CŨ -->
     <script>
         function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport);
@@ -543,6 +521,7 @@
             } else {
                 document.getElementById('holo-desc').innerText = data.desc; 
             }
+            
             holoPopup.classList.add('active'); 
         }
         
@@ -585,25 +564,11 @@
         }
 
         function toggleRankMenu() { document.getElementById('rank-overlay').classList.toggle('active'); }
-        
         function toggleTier(id, btnElement) { 
             playSlashSound(); let star = btnElement.querySelector('.shooting-star');
             if(star) { star.classList.remove('active'); void star.offsetWidth; star.classList.add('active'); }
             const c = document.getElementById(id); 
             c.classList.contains('open') ? c.classList.remove('open') : (document.querySelectorAll('.tier-content').forEach(e=>e.classList.remove('open')), c.classList.add('open')); 
-        }
-
-        /* Script mới xử lý nút mở rộng "Tiết lộ lũy tiến" */
-        function toggleSub(btn, contentId) {
-            playBeep();
-            const content = document.getElementById(contentId);
-            if (content.classList.contains('open')) {
-                content.classList.remove('open');
-                btn.innerHTML = btn.innerHTML.replace('[ - ]', '[ + ]');
-            } else {
-                content.classList.add('open');
-                btn.innerHTML = btn.innerHTML.replace('[ + ]', '[ - ]');
-            }
         }
         
         const dynamicBtn = document.getElementById('dynamic-hold-btn');
@@ -659,9 +624,12 @@
             if(isSafetyUnlocked || !isCommitted) return;
             playLockSound();
             isSafetyUnlocked = true;
+            
             const lockBox = document.getElementById('safety-lock');
             lockBox.classList.add('unlocked');
+            
             document.body.classList.remove('pre-scan-locked');
+            
             typeTextSafe(["> KHÓA AN TOÀN ĐÃ MỞ.", "> HỆ THỐNG SINH TRẮC HỌC KÍCH HOẠT. MỜI CHẠM VÂN TAY."]);
         }
         
