@@ -524,6 +524,37 @@ class ReportDashboard {
                             <div style="font-size: 18px; color: #fff; font-weight: bold;"><span id="repTotalDuration">--</span><span style="font-size:10px; color:#aaa;">h</span></div>
                         </div>
                     </div>
+
+                    <!-- ========================================== -->
+                    <!-- BẮT ĐẦU VÁ: HỆ THỐNG LÕI SINH MỆNH 90M -->
+                    <!-- ========================================== -->
+                    <div id="bankrollCoreContainer" style="margin-bottom: 15px; padding: 12px; background: rgba(0,0,0,0.7); border-radius: 8px; border: 1px solid rgba(0,255,136,0.2); position: relative; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.9); transition: all 0.3s;">
+                        <div style="display: flex; justify-content: space-between; font-family: 'Share Tech Mono', monospace; margin-bottom: 8px;">
+                            <span style="font-size: 11px; color: #aaa; letter-spacing: 1px;">[ LÕI SINH MỆNH ]</span>
+                            <span id="repBankrollText" style="font-size: 13px; font-weight: bold; color: #00ff88;">-- / 90M</span>
+                        </div>
+                        
+                        <!-- Thanh Năng Lượng Bankroll -->
+                        <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; position: relative; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                            <!-- Lưới tọa độ sinh tồn (33% và 66%) -->
+                            <div style="position: absolute; left: 33.33%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.2); z-index: 2;"></div>
+                            <div style="position: absolute; left: 66.66%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.2); z-index: 2;"></div>
+                            
+                            <div id="repBankrollBar" style="height: 100%; width: 100%; background: #00ff88; transition: width 1s ease-out, background 0.5s; position: relative; z-index: 1; border-radius: 4px; box-shadow: 0 0 10px #00ff88;"></div>
+                        </div>
+
+                        <!-- Hệ thống Đạn dược (Quy đổi Buy-in) -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace;">
+                            <span style="font-size: 10px; color: #888;">ĐẠN DƯỢC TỒN KHO:</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <span style="font-size: 12px;">🎯</span>
+                                <span id="repAmmoText" style="font-size: 14px; font-weight: bold; color: #ffd700;">-- / 30 BUY-IN</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ========================================== -->
+                    <!-- KẾT THÚC VÁ HỆ THỐNG LÕI SINH MỆNH 90M -->
+                    <!-- ========================================== -->
                     
                     <div style="text-align: center; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);">
                         <div style="font-size: 11px; color: #aaa; margin-bottom: 5px; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;">LÃI RÒNG (NET PROFIT)</div>
@@ -726,6 +757,63 @@ class ReportDashboard {
         this.animateValue('repItmProgressText', 0, itmPct, 600, 'percent');
 
         let profitVal = data.profit || 0;
+
+        // ==========================================
+        // BẮT ĐẦU VÁ: THUẬT TOÁN QUY ĐỔI ĐẠN DƯỢC
+        // ==========================================
+        const BASE_BANKROLL = 90000000;
+        // Trung bình 1 Buy-in tại các đấu trường như Grand Loyal
+        const BUYIN_COST = 3000000; 
+        const MAX_AMMO = Math.floor(BASE_BANKROLL / BUYIN_COST); // 30 viên
+
+        let currentBankroll = BASE_BANKROLL + profitVal;
+        let currentAmmo = Math.floor(currentBankroll / BUYIN_COST);
+
+        // 1. Cập nhật Text Lõi Sinh Mệnh
+        let formattedBankroll = (currentBankroll / 1000000).toFixed(1) + "M";
+        document.getElementById('repBankrollText').innerText = formattedBankroll + " / 90.0M";
+
+        // 2. Cập nhật Text Đạn Dược
+        document.getElementById('repAmmoText').innerText = Math.max(0, currentAmmo) + " / " + MAX_AMMO + " BUY-IN";
+
+        // 3. Xử lý Thanh Năng Lượng và Trạng Thái Cảnh Báo Tâm Lý
+        let bankrollPct = (currentBankroll / BASE_BANKROLL) * 100;
+        let bankrollBar = document.getElementById('repBankrollBar');
+        let bankrollContainer = document.getElementById('bankrollCoreContainer');
+
+        bankrollBar.style.width = Math.min(Math.max(bankrollPct, 0), 100) + "%";
+
+        // Reset trạng thái
+        bankrollContainer.classList.remove('sci-critical', 'sci-warning');
+        bankrollContainer.style.borderColor = "rgba(0,255,136,0.2)";
+        document.getElementById('repBankrollText').style.color = "#00ff88";
+        document.getElementById('repAmmoText').style.color = "#ffd700";
+
+        if (currentAmmo >= 20) {
+            // MỨC AN TOÀN (VÔ NGÃ TỐI ĐA)
+            bankrollBar.style.background = "#00ff88"; 
+            bankrollBar.style.boxShadow = "0 0 10px #00ff88";
+        } else if (currentAmmo >= 10) {
+            // MỨC RỦI RO (CẢNH BÁO VÀNG)
+            bankrollBar.style.background = "#ffaa00"; 
+            bankrollBar.style.boxShadow = "0 0 10px #ffaa00";
+            bankrollContainer.classList.add('sci-warning');
+            bankrollContainer.style.borderColor = "rgba(255,170,0,0.5)";
+            document.getElementById('repBankrollText').style.color = "#ffaa00";
+            document.getElementById('repAmmoText').style.color = "#ffaa00";
+        } else {
+            // MỨC TỬ CHIẾN (BÁO ĐỘNG ĐỎ)
+            bankrollBar.style.background = "#ff3333"; 
+            bankrollBar.style.boxShadow = "0 0 15px #ff3333";
+            bankrollContainer.classList.add('sci-critical');
+            bankrollContainer.style.borderColor = "rgba(255,51,51,0.5)";
+            document.getElementById('repBankrollText').style.color = "#ff3333";
+            document.getElementById('repAmmoText').style.color = "#ff3333";
+        }
+        // ==========================================
+        // KẾT THÚC VÁ THUẬT TOÁN ĐẠN DƯỢC
+        // ==========================================
+
         let hours = (data.duration || 0) / 60;
         let hourlyRate = hours > 0 ? Math.round(profitVal / hours) : 0;
 
