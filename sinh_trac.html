@@ -59,11 +59,15 @@
         /* HEADER */
         .top-row { position: relative; z-index: 10; padding: 15px 15px 10px; display: flex; justify-content: space-between; align-items: flex-start; transition: opacity 1.5s ease; }
         .left-controls { display: flex; flex-direction: column; gap: 10px; transition: opacity 1.5s ease; }
-        .btn-exit, .btn-audio { background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0,229,255,0.3); color: var(--cyan); transition: all 0.3s ease; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
+        .btn-exit, .btn-audio, .btn-chip { background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0,229,255,0.3); color: var(--cyan); transition: all 0.3s ease; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
         .btn-exit { text-decoration: none; font-family: var(--font-display); font-size: 10px; font-weight: bold; letter-spacing: 1px; padding: 5px 12px; width: fit-content; }
-        .btn-audio { padding: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
-        .btn-audio svg { width: 14px; height: 14px; fill: currentColor; }
+        .btn-audio, .btn-chip { padding: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+        .btn-audio svg, .btn-chip svg { width: 16px; height: 16px; fill: currentColor; }
         
+        /* CHIP BUTTON SPECIFIC */
+        .btn-chip { display: none; color: var(--amber); border-color: var(--amber); background: rgba(255, 170, 0, 0.1); animation: chip-pulse 2s infinite alternate; }
+        @keyframes chip-pulse { 0% { box-shadow: 0 0 5px rgba(255, 170, 0, 0.2); } 100% { box-shadow: 0 0 15px rgba(255, 170, 0, 0.8); border-color: #fff; color: #fff; } }
+
         body.combat-active .btn-exit, body.combat-active .btn-audio { color: var(--crimson); border-color: var(--crimson); background: rgba(255, 42, 42, 0.1); }
         .sys-info { text-align: right; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; text-shadow: 0 1px 2px #000; transition: opacity 1.5s ease; }
         .sys-info span { color: var(--cyan); font-weight: bold; }
@@ -343,6 +347,9 @@
                     <svg id="icon-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
                     <svg id="icon-sound-off" viewBox="0 0 24 24" style="display:none;"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.11-.31 2.15-.81 3.09-1.45l2.64 2.64 1.27-1.27L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
                 </button>
+                <button class="btn-chip" id="btn-chip-vault" onclick="openVaultMenu()" title="Truy cập Kdrive Bankroll">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Zm0-14a6,6,0,1,0,6,6A6,6,0,0,0,12,6Zm0,10a4,4,0,1,1,4-4A4,4,0,0,1,12,16Z"/></svg>
+                </button>
             </div>
             <div class="sys-info">
                 OPR: <span>KAI</span><br> LOC: <span>HANOI</span><br> DATE: <span id="current-date">--.--.----</span>
@@ -409,7 +416,7 @@
         <div class="holo-box" id="holo-box">
             <div class="holo-title" id="holo-title">NAME</div>
             <div class="holo-desc" id="holo-desc">Nội dung...</div>
-            <button class="btn-close-holo" onclick="playBeep(); closeHoloDirect()">[ XÁC NHẬN ]</button>
+            <button class="btn-close-holo" id="btn-close-holo" onclick="playBeep(); closeHoloDirect()">[ XÁC NHẬN ]</button>
         </div>
     </div>
 
@@ -685,6 +692,12 @@
                         ${msg}
                     </div>
                 `;
+                
+                // Trả lại nút đóng mặc định
+                document.getElementById('btn-close-holo').style.display = 'block';
+                document.getElementById('btn-close-holo').innerText = '[ XÁC NHẬN ]';
+                document.getElementById('btn-close-holo').onclick = function() { playBeep(); closeHoloDirect(); };
+                
             } else {
                 document.getElementById('holo-desc').innerText = data.desc; 
             }
@@ -693,6 +706,51 @@
         
         function closeHoloDirect() { holoPopup.classList.remove('active'); }
         function closeHolo(e) { if(e.target === holoPopup){ playBeep(); closeHoloDirect(); } }
+
+        // --- CƠ CHẾ KDRIVE VAULT BẰNG MÃ BÍ MẬT ---
+        let currentVaultCode = "";
+
+        function openVaultMenu() {
+            playBeep();
+            document.getElementById('holo-title').innerText = "KDRIVE SECURE VAULT";
+            document.getElementById('holo-title').style.color = "var(--amber)";
+            document.getElementById('holo-box').style.borderColor = "var(--amber)";
+            
+            document.getElementById('holo-desc').innerHTML = `
+                <div style="font-size: 0.9rem; margin-bottom: 15px; color: rgba(255,255,255,0.7);">Nhập mã bảo mật để truy cập Báo Cáo Chiến Dịch:</div>
+                <input type="text" id="vault-input" placeholder="[ NHẬP MÃ BẢO MẬT ]" autocomplete="off" style="width:100%; background:rgba(0,0,0,0.5); border:1px solid var(--amber); color:var(--amber); text-align:center; padding:12px; font-family:var(--font-display); font-size:16px; font-weight:bold; letter-spacing:2px; outline:none; text-transform:uppercase;">
+                <div id="vault-error" style="color:var(--crimson); font-size:11px; margin-top:10px; display:none;">⚠️ MÃ KHÔNG HỢP LỆ HOẶC ĐÃ HẾT HẠN</div>
+            `;
+            
+            document.getElementById('btn-close-holo').style.display = 'block';
+            document.getElementById('btn-close-holo').innerText = '[ KẾT NỐI KDRIVE ]';
+            
+            // Xử lý xác thực mã
+            document.getElementById('btn-close-holo').onclick = function() {
+                playBeep();
+                const inputVal = document.getElementById('vault-input').value.trim().toUpperCase();
+                if(inputVal === currentVaultCode && currentVaultCode !== "") {
+                    playSlashSound();
+                    document.getElementById('holo-desc').innerHTML = `
+                        <div style="color:var(--mint); font-family:var(--font-display); font-size:1.1rem; padding: 20px 0;">[ TRUY CẬP THÀNH CÔNG ]<br><span style="font-size:12px; font-family:var(--font-ui); color:#fff;">Đang mở cổng thông tin Kdrive...</span></div>
+                    `;
+                    document.getElementById('btn-close-holo').style.display = 'none';
+                    
+                    // NƠI GẮN LINK HOẶC MỞ KDRIVE CỦA ANH
+                    setTimeout(() => {
+                        closeHoloDirect();
+                        alert("ĐÃ MỞ KHU VỰC BÁO CÁO KDRIVE!"); // Thay bằng lệnh chuyển trang sau này
+                    }, 1500);
+                } else {
+                    document.getElementById('vault-error').style.display = 'block';
+                    document.getElementById('vault-input').style.borderColor = "var(--crimson)";
+                    playLockSound();
+                }
+            };
+            
+            holoPopup.classList.add('active');
+            setTimeout(() => { document.getElementById('vault-input').focus(); }, 100);
+        }
 
         let currentStreak = parseInt(localStorage.getItem('combat_streak')) || 0;
         let isCommitted = localStorage.getItem('combat_committed') === 'true';
@@ -720,7 +778,6 @@
             const box = document.getElementById('combat-marquee');
             const icon = document.getElementById('mq-icon');
 
-            // Thiết lập màu sắc tĩnh Trắng Kim cho text ở mọi trạng thái
             mqText.style.color = '#ffffff'; 
             mqText.style.textShadow = '0 0 6px rgba(255, 255, 255, 0.8)';
 
@@ -827,29 +884,28 @@
         async function triggerBioSync() {
             if(!isCommitted) { playBeep(); typeTextSafe(["BOO: TỪ CHỐI LỆNH.", "Yêu cầu ký hợp đồng trong BÍ LỤC trước khi vận hành."]); return; }
             if(window.isScanning) return; window.isScanning = true;
+            
+            // Ẩn nút Chip bảo mật khi quét lại
+            document.getElementById('btn-chip-vault').style.display = 'none';
+            currentVaultCode = "";
 
             document.body.classList.remove('standby-mode'); document.body.classList.add('scanning-mode');
             updateMarquee('scanning'); playChargeSound(); if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
 
             await typeTextSafe(["BOO: XÁC NHẬN YÊU CẦU...", "Đang trích xuất Dữ liệu Sinh trắc..."], 20, 200);
             
-            // Gọi thẳng hàm gọi API thực tế
             await fetchBioDataReal();
         }
 
         async function fetchBioDataReal() {
             try {
-                // Link API xịn đã cấp action=hud
                 const API_URL = "https://script.google.com/macros/s/AKfycbxLBcp8F1-mMMk4V78jMrqjEtrSXQ97fKBe84zzuVB73dfztZ5VOP-jByVpebTdqcsQZA/exec?action=hud";
-                
-                // Fetch trực tiếp từ Google Servers
                 const response = await fetch(API_URL);
                 const resData = await response.json();
                 
                 stopChargeSound(); 
                 document.body.classList.remove('scanning-mode');
                 
-                // Tắt nháy đèn đỏ
                 const ids = ['val-sci', 'val-hr', 'val-weight', 'val-sleep', 'val-fat', 'val-water', 'val-steps'];
                 ids.forEach(id => document.getElementById(id).classList.remove('blinking'));
 
@@ -857,7 +913,6 @@
                     document.body.classList.add('sync-complete'); isSynced = true; 
                     playSlashSound(); if(navigator.vibrate) navigator.vibrate(200);
 
-                    // Bơm Data thật vào Lõi và các Panel
                     document.getElementById('val-sci').innerText = resData.sci || '---'; 
                     document.getElementById('val-hr').innerText = resData.hr || '---'; 
                     document.getElementById('val-weight').innerText = resData.weight || '---'; 
@@ -883,7 +938,7 @@
                         typeTextSafe([
                             "BOO: ĐỒNG BỘ HOÀN TẤT.",
                             "CẢNH BÁO: Thể chất rệu rã.", 
-                            "LỆNH: Khóa Bankroll. Chấp nhận thực tại.", 
+                            "LỆNH: Khóa Bankroll. Không cấp quyền Vault.", 
                             "(Chạm thông số để xem độ thiếu hụt)"
                         ], 20, 200);
                         
@@ -900,10 +955,15 @@
                         document.querySelectorAll('.data-panel').forEach(el => el.style.animation = 'none');
                         updateMarquee('chairo');
                         
+                        // TẠO MÃ BẢO MẬT VÀ HIỆN NÚT CHIP
+                        currentVaultCode = "KAI-" + sciScore + "-" + Math.floor(1000 + Math.random() * 9000);
+                        document.getElementById('btn-chip-vault').style.display = 'flex';
+
                         typeTextSafe([
                             "BOO: ĐỒNG BỘ HOÀN TẤT.",
-                            "ĐÁNH GIÁ: Myelin ổn định. Cơ thể lỳ lợm.",
-                            "LỆNH: Mở khóa Bankroll (Mid Stakes)."
+                            "ĐÁNH GIÁ: Myelin ổn định. Mở khóa Bankroll.",
+                            "MÃ BẢO MẬT KDRIVE: [" + currentVaultCode + "]",
+                            "LỆNH: Sử dụng biểu tượng Đồng Chip để truy cập Báo Cáo."
                         ], 20, 200);
                         
                         if (!isMuted && !bgmAudio.paused) bgmAudio.pause();
@@ -917,16 +977,20 @@
                         updateMarquee('kuro');
                         triggerMushinProtocol();
                         
+                        // TẠO MÃ BẢO MẬT VÀ HIỆN NÚT CHIP
+                        currentVaultCode = "KAI-" + sciScore + "-" + Math.floor(1000 + Math.random() * 9000);
+                        document.getElementById('btn-chip-vault').style.display = 'flex';
+
                         typeTextSafe([
                             "BOO: ĐỒNG BỘ HOÀN TẤT.",
-                            "ĐÁNH GIÁ: Overdrive hoàn hảo.",
-                            "LỆNH: Mở khóa Bankroll tối đa."
+                            "ĐÁNH GIÁ: Overdrive. Mở khóa Bankroll tối đa.",
+                            "MÃ BẢO MẬT KDRIVE: [" + currentVaultCode + "]",
+                            "LỆNH: Sử dụng biểu tượng Đồng Chip để truy cập Báo Cáo."
                         ], 20, 200);
                         
                         if (!isMuted && bgmAudio.paused) { bgmAudio.play().catch(e=>console.log(e)); document.getElementById('icon-sound-on').style.display='block'; document.getElementById('icon-sound-off').style.display='none'; }
                     }
                 } else if (resData.status === 'empty') { 
-                    // Khóa an toàn: Kích hoạt khi Google Sheet toàn số 0
                     typeTextSafe([
                         "BOO: TỪ CHỐI TRUY CẬP.",
                         "LỖI: Dữ liệu sinh trắc hôm nay trống.",
@@ -934,7 +998,6 @@
                     ], 20, 150); 
                     updateMarquee('standby'); document.body.classList.add('standby-mode');
                 } else {
-                    // Lỗi trả về từ Sheet (VD: Không tìm thấy Tab)
                     typeTextSafe(["BOO: LỖI HỆ THỐNG - " + (resData.message || "Truy xuất thất bại.")]); 
                     updateMarquee('standby'); document.body.classList.add('standby-mode');
                 }
