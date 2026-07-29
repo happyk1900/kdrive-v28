@@ -327,6 +327,19 @@
         .hold-btn.state-abort .hold-progress { background: rgba(255, 42, 42, 0.35); }
         .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; z-index: -1; transition: background 0.3s; }
         .hold-btn.charging { animation: shake 0.1s infinite; filter: brightness(1.3); text-shadow: 0 0 5px currentColor; }
+
+        /* --- NÂNG CẤP GIAO DIỆN KDRIVE VAULT --- */
+        .vault-input {
+            width: 100%; background: rgba(255, 170, 0, 0.05); border: 1px solid var(--amber);
+            color: var(--amber); text-align: center; padding: 15px; font-family: var(--font-display);
+            font-size: 22px; font-weight: 900; letter-spacing: 4px; outline: none;
+            text-transform: uppercase; transition: all 0.3s ease; box-shadow: inset 0 0 15px rgba(255, 170, 0, 0.1);
+        }
+        .vault-input:focus { background: rgba(255, 170, 0, 0.15); box-shadow: inset 0 0 20px rgba(255, 170, 0, 0.3), 0 0 10px rgba(255, 170, 0, 0.5); }
+        .vault-input.error { border-color: var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.1); box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.3); animation: overload-shake 0.3s ease-in-out; }
+        .vault-input.success { border-color: var(--mint); color: var(--mint); background: rgba(0, 255, 157, 0.1); box-shadow: inset 0 0 20px rgba(0, 255, 157, 0.3); }
+
+        @keyframes load-bar { 0% { width: 0%; } 100% { width: 100%; } }
     </style>
 </head>
 <body>
@@ -696,6 +709,8 @@
                 // Trả lại nút đóng mặc định
                 document.getElementById('btn-close-holo').style.display = 'block';
                 document.getElementById('btn-close-holo').innerText = '[ XÁC NHẬN ]';
+                document.getElementById('btn-close-holo').style.borderColor = 'rgba(255,255,255,0.3)';
+                document.getElementById('btn-close-holo').style.color = 'white';
                 document.getElementById('btn-close-holo').onclick = function() { playBeep(); closeHoloDirect(); };
                 
             } else {
@@ -707,49 +722,85 @@
         function closeHoloDirect() { holoPopup.classList.remove('active'); }
         function closeHolo(e) { if(e.target === holoPopup){ playBeep(); closeHoloDirect(); } }
 
-        // --- CƠ CHẾ KDRIVE VAULT BẰNG MÃ BÍ MẬT ---
+        // --- CƠ CHẾ KDRIVE VAULT BẰNG MÃ BÍ MẬT (BẢN V2.0 TỐI THƯỢNG) ---
         let currentVaultCode = "";
 
         function openVaultMenu() {
             playBeep();
-            document.getElementById('holo-title').innerText = "KDRIVE SECURE VAULT";
+            document.getElementById('holo-title').innerText = "[ KDRIVE SECURE VAULT ]";
             document.getElementById('holo-title').style.color = "var(--amber)";
             document.getElementById('holo-box').style.borderColor = "var(--amber)";
             
             document.getElementById('holo-desc').innerHTML = `
-                <div style="font-size: 0.9rem; margin-bottom: 15px; color: rgba(255,255,255,0.7);">Nhập mã bảo mật để truy cập Báo Cáo Chiến Dịch:</div>
-                <input type="text" id="vault-input" placeholder="[ NHẬP MÃ BẢO MẬT ]" autocomplete="off" style="width:100%; background:rgba(0,0,0,0.5); border:1px solid var(--amber); color:var(--amber); text-align:center; padding:12px; font-family:var(--font-display); font-size:16px; font-weight:bold; letter-spacing:2px; outline:none; text-transform:uppercase;">
-                <div id="vault-error" style="color:var(--crimson); font-size:11px; margin-top:10px; display:none;">⚠️ MÃ KHÔNG HỢP LỆ HOẶC ĐÃ HẾT HẠN</div>
+                <div style="font-size: 11px; margin-bottom: 15px; color: rgba(255,255,255,0.7); letter-spacing: 1px;">YÊU CẦU XÁC THỰC MÃ OTP ĐỂ TRUY CẬP KDRIVE:</div>
+                <input type="text" id="vault-input" class="vault-input" placeholder="NHẬP MÃ OTP" autocomplete="off">
+                <div id="vault-error" style="color:var(--crimson); font-size:11px; margin-top:12px; display:none; font-weight:bold; letter-spacing:1px; text-shadow: 0 0 5px var(--crimson);">[ ! ] MÃ KHÔNG HỢP LỆ HOẶC ĐÃ BỊ HỦY</div>
             `;
             
             document.getElementById('btn-close-holo').style.display = 'block';
             document.getElementById('btn-close-holo').innerText = '[ KẾT NỐI KDRIVE ]';
+            document.getElementById('btn-close-holo').style.borderColor = 'var(--amber)';
+            document.getElementById('btn-close-holo').style.color = 'var(--amber)';
             
             // Xử lý xác thực mã
             document.getElementById('btn-close-holo').onclick = function() {
                 playBeep();
-                const inputVal = document.getElementById('vault-input').value.trim().toUpperCase();
+                const inputEl = document.getElementById('vault-input');
+                const inputVal = inputEl.value.trim().toUpperCase();
+                
                 if(inputVal === currentVaultCode && currentVaultCode !== "") {
-                    playSlashSound();
+                    playChargeSound(); 
+                    inputEl.className = "vault-input success";
+                    document.getElementById('holo-title').innerText = "[ XÁC THỰC THÀNH CÔNG ]";
+                    document.getElementById('holo-title').style.color = "var(--mint)";
+                    document.getElementById('holo-box').style.borderColor = "var(--mint)";
+                    
                     document.getElementById('holo-desc').innerHTML = `
-                        <div style="color:var(--mint); font-family:var(--font-display); font-size:1.1rem; padding: 20px 0;">[ TRUY CẬP THÀNH CÔNG ]<br><span style="font-size:12px; font-family:var(--font-ui); color:#fff;">Đang mở cổng thông tin Kdrive...</span></div>
+                        <div style="color:var(--mint); font-family:var(--font-display); font-size:1.2rem; padding: 15px 0; text-shadow: 0 0 10px var(--mint);">ACCESS GRANTED</div>
+                        <div style="width: 100%; height: 2px; background: rgba(0, 255, 157, 0.2); margin-top: 10px; position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: 0; left: 0; height: 100%; background: var(--mint); width: 100%; animation: load-bar 1.5s ease-out forwards;"></div>
+                        </div>
+                        <div style="font-size:10px; font-family:var(--font-ui); color:var(--mint); margin-top: 10px; animation: blink 0.5s infinite;">Đang thiết lập đường truyền bảo mật tới Kdrive...</div>
                     `;
                     document.getElementById('btn-close-holo').style.display = 'none';
                     
-                    // NƠI GẮN LINK HOẶC MỞ KDRIVE CỦA ANH
                     setTimeout(() => {
+                        stopChargeSound(); playSlashSound();
                         closeHoloDirect();
-                        alert("ĐÃ MỞ KHU VỰC BÁO CÁO KDRIVE!"); // Thay bằng lệnh chuyển trang sau này
+                        showBeautifulSuccess(); // Mở giao diện thay thế cái Alert xấu xí
                     }, 1500);
                 } else {
                     document.getElementById('vault-error').style.display = 'block';
-                    document.getElementById('vault-input').style.borderColor = "var(--crimson)";
+                    inputEl.className = "vault-input error";
                     playLockSound();
                 }
             };
             
             holoPopup.classList.add('active');
             setTimeout(() => { document.getElementById('vault-input').focus(); }, 100);
+        }
+
+        // HÀM MỞ GIAO DIỆN THÀNH CÔNG SIÊU NGẦU (THAY THẾ ALERT)
+        function showBeautifulSuccess() {
+            document.body.classList.add('tunnel-vision'); // Làm tối mờ cái nền HUD
+            
+            const overlay = document.createElement('div');
+            overlay.id = "kdrive-success-overlay";
+            overlay.style.position = 'fixed'; overlay.style.top = '0'; overlay.style.left = '0'; overlay.style.width = '100vw'; overlay.style.height = '100vh';
+            overlay.style.background = 'rgba(0, 255, 157, 0.1)'; overlay.style.backdropFilter = 'blur(10px)'; overlay.style.zIndex = '999999';
+            overlay.style.display = 'flex'; overlay.style.justifyContent = 'center'; overlay.style.alignItems = 'center';
+            
+            overlay.innerHTML = `
+                <div style="border: 2px solid var(--mint); background: rgba(5,6,8,0.9); padding: 40px; text-align: center; box-shadow: 0 0 50px rgba(0, 255, 157, 0.3), inset 0 0 30px rgba(0, 255, 157, 0.1); clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);">
+                    <svg viewBox="0 0 24 24" style="width: 70px; height: 70px; fill: var(--mint); margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--mint));">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <h2 style="font-family: var(--font-display); color: var(--mint); letter-spacing: 3px; font-size: 26px; margin-bottom: 10px; text-shadow: 0 0 20px var(--mint);">KDRIVE UNLOCKED</h2>
+                    <p style="font-family: var(--font-ui); color: #fff; font-size: 15px; opacity: 0.8; margin-bottom: 35px; letter-spacing: 1px;">Hệ thống ngân lượng đã sẵn sàng phục vụ.</p>
+                    <button onclick="document.getElementById('kdrive-success-overlay').remove(); document.body.classList.remove('tunnel-vision'); playBeep();" style="background: rgba(0, 255, 157, 0.15); border: 1px solid var(--mint); color: var(--mint); padding: 15px 40px; font-family: var(--font-display); font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 15px rgba(0, 255, 157, 0.4); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);">[ MỞ ỨNG DỤNG KDRIVE ]</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
         }
 
         let currentStreak = parseInt(localStorage.getItem('combat_streak')) || 0;
