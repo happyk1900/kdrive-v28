@@ -539,7 +539,7 @@
                     <details class="sub-tier">
                         <summary class="sub-tier-btn" onclick="playSlashSound()">[ + ] NGŨ LUÂN THƯ (BẢN DỊCH THỰC CHIẾN POKER)</summary>
                         <div class="sub-tier-content">
-                            <p>• <strong>1. Quyển Đất (Nền Tảng & Kỷ Luật):</strong> Mọi đế chế bắt đầu từ móng. Musashi ví người cầm quân như thợ mộc. Trong Poker, "Đất" là quản trị Bankroll và chỉ số SCI. Chuẩn bị thể chất rệu rã, cầm Bankroll mỏng manh bước vào giải đấu giống như xây nhà trên cát. Nền tảng không vững, mọi kỹ năng đều vô nghĩa.</p>
+                            <p>• <strong>1. Quyển Đất (Nền Tảng & Kỷ Discipline):</strong> Mọi đế chế bắt đầu từ móng. Musashi ví người cầm quân như thợ mộc. Trong Poker, "Đất" là quản trị Bankroll và chỉ số SCI. Chuẩn bị thể chất rệu rã, cầm Bankroll mỏng manh bước vào giải đấu giống như xây nhà trên cát. Nền tảng không vững, mọi kỹ năng đều vô nghĩa.</p>
                             <p>• <strong>2. Quyển Nước (Sự Linh Hoạt & Tâm Tĩnh):</strong> Nước không có hình dạng cố định, lúc tĩnh lặng êm đềm, lúc cuộn trào hung hãn. Bàn đấu biến thiên, Variance xuất hiện. Tâm trí phải lỏng và tĩnh như nước để thích nghi với mọi phong cách, không bao giờ để một cú Bad Beat làm vẩn đục.</p>
                             <p>• <strong>3. Quyển Lửa (Giao Tranh & Áp Đảo):</strong> Lửa đại diện cho sự bùng nổ tàn khốc. Nghệ thuật chọn thời điểm công kích. Chiếm lợi thế vị trí (Position), đọc vị điểm yếu, tung ra những cú Bluff hoặc Value Bet chí mạng để thiêu rụi ý chí đối phương.</p>
                             <p>• <strong>4. Quyển Gió (Thấu Hiểu Đối Thủ):</strong> "Gió" là nghiên cứu các trường phái khác. Gạt bỏ hội chứng "Fancy Play" (chơi ngẫu hứng, màu mè). Chân lý của binh pháp là sự tối giản: Hiệu quả (EV+) là thước đo duy nhất.</p>
@@ -990,23 +990,43 @@
                     document.getElementById('val-steps').innerText = resData.steps || '---';
 
                     // 2. T-0 LIVE RADAR (TÍNH TOÁN MÓN NỢ SINH HỌC)
-                    // NÂNG CẤP LORE: Áp dụng quy tắc Chủ Nhật miễn chạy 6000 bước
+                    // NÂNG CẤP LORE: Áp dụng quy tắc Chủ Nhật miễn trừ
                     let targetSteps = isSunday ? 0 : 6000; 
                     let targetWater = 2.5;
-                    let targetSleep = 7.0; // Giấc ngủ là luật bất khả xâm phạm
+                    let targetSleep = 7.0;
 
-                    let liveSteps = parseFloat(resData.steps_live) || 0;
-                    let liveWater = parseFloat(resData.water_live) || 0;
-                    let liveSleep = parseFloat(resData.sleep_live) || 0;
+                    let liveSteps = parseFloat(resData.steps_live !== undefined ? resData.steps_live : resData.steps) || 0;
+                    let liveWater = parseFloat(resData.water_live !== undefined ? resData.water_live : resData.water) || 0;
+                    let liveSleep = parseFloat(resData.sleep_live !== undefined ? resData.sleep_live : resData.sleep) || 0;
+                    
+                    let liveHR = parseFloat(resData.hr_live !== undefined ? resData.hr_live : resData.hr) || 0;
+                    let liveWeight = parseFloat(resData.weight_live !== undefined ? resData.weight_live : resData.weight) || 0;
+                    let liveFat = parseFloat(resData.fat_live !== undefined ? resData.fat_live : resData.fat) || 0;
 
                     let defSteps = targetSteps - liveSteps;
                     let defWater = targetWater - liveWater;
                     let defSleep = targetSleep - liveSleep;
 
                     let liveHtml = '';
+                    
+                    // Nhóm Vận Động & Phục Hồi
+                    if (!isSunday && liveHR > 0 && liveHR < 160) {
+                        liveHtml += `<span class="metric-item">❤️ Peak: ${liveHR.toFixed(0)}</span>`;
+                    }
                     if (defSteps > 0) liveHtml += `<span class="metric-item">👟 +${defSteps.toFixed(0)}</span>`;
-                    if (defWater > 0) liveHtml += `<span class="metric-item">💧 +${defWater.toFixed(1)}</span>`;
-                    if (defSleep > 0) liveHtml += `<span class="metric-item">🛌 +${defSleep.toFixed(1)}</span>`;
+                    if (defSleep > 0) liveHtml += `<span class="metric-item">🛌 +${defSleep.toFixed(1)}h</span>`;
+                    if (defWater > 0) liveHtml += `<span class="metric-item">💧 +${defWater.toFixed(1)}L</span>`;
+                    
+                    // Nhóm Cơ Thể
+                    if (liveWeight > 67.0) {
+                        liveHtml += `<span class="metric-item">⚖️ -${(liveWeight - 67.0).toFixed(1)}kg</span>`;
+                    } else if (liveWeight > 0 && liveWeight < 63.0) {
+                        liveHtml += `<span class="metric-item">⚖️ +${(63.0 - liveWeight).toFixed(1)}kg</span>`;
+                    }
+                    
+                    if (liveFat > 13.0) {
+                        liveHtml += `<span class="metric-item">🥓 -${(liveFat - 13.0).toFixed(1)}%</span>`;
+                    }
 
                     const radarBar = document.getElementById('live-radar-bar');
                     const radarPulse = document.getElementById('live-pulse');
