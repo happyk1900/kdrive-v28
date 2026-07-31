@@ -168,19 +168,29 @@
         /* --- PRE-SCAN STATE --- */
         body.pre-scan-locked .sci-lbl, body.pre-scan-locked .fingerprint-wrapper, body.pre-scan-locked #val-sci, body.pre-scan-locked .banner-wrapper { opacity: 0 !important; pointer-events: none !important; }
         body.pre-scan-locked .sci-nexus { pointer-events: none !important; }
-        body.uncommitted .safety-lock-box { display: none !important; }
+        body.uncommitted .safety-hud-box { display: none !important; }
 
-        .safety-lock-box { 
-            position: absolute; margin-top: 135px; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.1); color: var(--amber); font-family: var(--font-ui); font-size: 13px; font-weight: 600; letter-spacing: 0.5px; padding: 8px 16px; white-space: nowrap; cursor: pointer; z-index: 50; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); animation: flash-unsigned 1.2s infinite ease-in-out; transition: all 0.3s ease; text-align: center; text-shadow: 0 0 5px var(--amber);
+        .safety-hud-box {
+            position: absolute; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(5, 6, 8, 0.9); border: 1px solid var(--amber); box-shadow: 0 0 20px rgba(255, 170, 0, 0.1);
+            padding: 20px 15px; backdrop-filter: blur(5px); clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            transition: all 0.5s ease; width: 90%; max-width: 340px; margin-top: 0;
         }
-        .safety-lock-box.unlocked { display: none !important; }
+        .safety-hud-box.unlocked { opacity: 0; pointer-events: none; transform: scale(1.1); display: none !important; }
+        .hud-cond { font-family: var(--font-ui); font-size: 13px; color: #fff; margin-bottom: 12px; font-weight: 600; text-align: left; width: 100%; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; opacity: 0.9; }
+        .safety-lock-btn {
+            margin-top: 5px; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.15); color: var(--amber);
+            font-family: var(--font-display); font-size: 12px; font-weight: bold; padding: 10px; cursor: pointer;
+            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); animation: flash-unsigned 1.5s infinite ease-in-out;
+            text-shadow: 0 0 5px var(--amber); text-align: center; width: 100%; letter-spacing: 1px;
+        }
 
         /* DATA PANELS */
         .data-panel { position: absolute; z-index: 15; background: rgba(8, 9, 13, 0.75); backdrop-filter: blur(3px); padding: 4px 12px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); border-left: 2px solid; cursor: pointer; transition: transform 0.2s, opacity 1.5s ease; }
         .data-panel:active { transform: scale(0.95); }
         .dp-right { clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px)); border-left: none; border-right: 2px solid; text-align: right; }
         .dp-val { font-family: var(--font-display); font-size: 16px; font-weight: 700; transition: all 0.3s ease; }
-        .dp-lbl { font-size: 10px; color: rgba(255,255,255,0.8); letter-spacing: 1px; }
+        .dp-lbl { font-size: 10px; color: rgba(255,255,255,0.8); letter-spacing: 1px; font-weight: 600; }
 
         .pos-hr { top: 10%; left: 5%; border-color: var(--crimson); } .pos-hr .dp-val { color: var(--crimson); text-shadow: 0 0 10px var(--crimson); }
         .pos-phys1 { top: 35%; left: 5%; border-color: var(--mint); } .pos-phys1 .dp-val { color: var(--mint); text-shadow: 0 0 10px var(--mint); }
@@ -422,16 +432,18 @@
                 </div>
             </div>
 
-            <div id="safety-lock" class="safety-lock-box" onclick="unlockPreScan()">
-                [ 🔒 ] XÁC NHẬN: ĐÃ ĐÁP ỨNG ĐIỀU KIỆN 1 & 2
+            <div id="safety-lock-hud" class="safety-hud-box">
+                <div class="hud-cond"><span>⌚</span> Đeo đồng hồ theo dõi toàn thời gian.</div>
+                <div class="hud-cond"><span>⚖️</span> Bước lên cân sinh trắc ngay khi tỉnh giấc.</div>
+                <div class="safety-lock-btn" onclick="unlockPreScan()">[ 🔒 ] XÁC NHẬN ĐIỀU KIỆN ĐỦ</div>
             </div>
 
-            <div class="data-panel pos-hr" onclick="openHolo('hr')"><div class="dp-val blinking" id="val-hr">---</div><div class="dp-lbl">HEART RATE</div></div>
-            <div class="data-panel pos-phys1" onclick="openHolo('weight')"><div class="dp-val blinking" id="val-weight">---</div><div class="dp-lbl">WEIGHT (KG)</div></div>
-            <div class="data-panel pos-rec1" onclick="openHolo('sleep')"><div class="dp-val blinking" id="val-sleep">---</div><div class="dp-lbl">SLEEP (HRS)</div></div>
-            <div class="data-panel dp-right pos-phys2" onclick="openHolo('fat')"><div class="dp-val blinking" id="val-fat">---</div><div class="dp-lbl">FAT (%)</div></div>
-            <div class="data-panel dp-right pos-rec2" onclick="openHolo('water')"><div class="dp-val blinking" id="val-water">---</div><div class="dp-lbl">WATER (%)</div></div>
-            <div class="data-panel dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val blinking" id="val-steps">---</div><div class="dp-lbl">STEPS</div></div>
+            <div class="data-panel pos-hr" onclick="openHolo('hr')"><div class="dp-val blinking" id="val-hr">---</div><div class="dp-lbl">[ ❤️ ] NHỊP TIM</div></div>
+            <div class="data-panel pos-phys1" onclick="openHolo('weight')"><div class="dp-val blinking" id="val-weight">---</div><div class="dp-lbl">[ ⚖️ ] CÂN NẶNG</div></div>
+            <div class="data-panel pos-rec1" onclick="openHolo('sleep')"><div class="dp-val blinking" id="val-sleep">---</div><div class="dp-lbl">[ 🛌 ] PHỤC HỒI</div></div>
+            <div class="data-panel dp-right pos-phys2" onclick="openHolo('fat')"><div class="dp-val blinking" id="val-fat">---</div><div class="dp-lbl">[ 🧬 ] TỶ LỆ MỠ</div></div>
+            <div class="data-panel dp-right pos-rec2" onclick="openHolo('water')"><div class="dp-val blinking" id="val-water">---</div><div class="dp-lbl">[ 💧 ] NƯỚC (%)</div></div>
+            <div class="data-panel dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val blinking" id="val-steps">---</div><div class="dp-lbl">[ 👟 ] VẬN ĐỘNG</div></div>
         </div>
 
         <!-- THANH LIVE RADAR T-0 MỚI BỔ SUNG -->
@@ -948,12 +960,12 @@
             playLockSound();
             isSafetyUnlocked = true;
             
-            const lockBox = document.getElementById('safety-lock');
+            const lockBox = document.getElementById('safety-lock-hud');
             lockBox.classList.add('unlocked');
             
             document.body.classList.remove('pre-scan-locked');
             
-            typeTextSafe(["KHÓA AN TOÀN ĐÃ MỞ.", "HỆ THỐNG KÍCH HOẠT. MỜI CHẠM LÕI SCI."]);
+            typeTextSafe(["[ 🔓 BOO: KHÓA AN TOÀN ĐÃ MỞ ]", ">> MỜI CHẠM LÕI SCI BÊN TRÊN ĐỂ KẾT NỐI."]);
         }
         
         // ==========================================
@@ -1071,10 +1083,10 @@
                         updateMarquee('shiro'); playLockSound(); 
                         
                         typeTextSafe([
-                            "BOO: ĐỒNG BỘ HOÀN TẤT.",
-                            "CẢNH BÁO: Chỉ số SCI AVG 30D ở mức rệu rã.", 
-                            "LỆNH: Khóa Bankroll. Không cấp quyền Vault.", 
-                            "(Chạm thông số để xem báo cáo T-1)"
+                            "[ 📡 BOO: ĐỒNG BỘ HOÀN TẤT ]",
+                            "⚠️ CẢNH BÁO: Chỉ số SCI AVG 30D ở mức rệu rã.", 
+                            "🛑 LỆNH: Khóa Bankroll. Không cấp quyền Vault.", 
+                            "🔍 (Chạm thông số để xem báo cáo T-1)"
                         ], 20, 200);
                         
                         if (parseFloat(resData.water) < 55.0) document.querySelector('.pos-rec2').style.animation = "alert-flash 1s infinite alternate";
@@ -1093,10 +1105,10 @@
                         document.getElementById('btn-chip-vault').style.display = 'flex';
 
                         typeTextSafe([
-                            "BOO: ĐỒNG BỘ HOÀN TẤT.",
-                            "ĐÁNH GIÁ: Myelin ổn định. Mở khóa Bankroll.",
-                            "MÃ BẢO MẬT KDRIVE: [" + currentVaultCode + "]",
-                            "LỆNH: Sử dụng biểu tượng Đồng Chip để truy cập."
+                            "[ 📡 BOO: ĐỒNG BỘ HOÀN TẤT ]",
+                            "📊 ĐÁNH GIÁ: Myelin ổn định. Mở khóa Bankroll.",
+                            "🔑 MÃ KDRIVE: [" + currentVaultCode + "]",
+                            "🛑 LỆNH: Chạm biểu tượng Đồng Chip để truy cập."
                         ], 20, 200);
                         
                         if (!isMuted && !bgmAudio.paused) bgmAudio.pause();
@@ -1112,28 +1124,28 @@
                         document.getElementById('btn-chip-vault').style.display = 'flex';
 
                         typeTextSafe([
-                            "BOO: ĐỒNG BỘ HOÀN TẤT.",
-                            "ĐÁNH GIÁ: Overdrive. Mở khóa Bankroll tối đa.",
-                            "MÃ BẢO MẬT KDRIVE: [" + currentVaultCode + "]",
-                            "LỆNH: Sử dụng biểu tượng Đồng Chip để truy cập."
+                            "[ 📡 BOO: ĐỒNG BỘ HOÀN TẤT ]",
+                            "🔥 ĐÁNH GIÁ: Trạng thái Vô Ngã. Mở khóa Bankroll tối đa.",
+                            "🔑 MÃ KDRIVE: [" + currentVaultCode + "]",
+                            "🛑 LỆNH: Chạm biểu tượng Đồng Chip để truy cập."
                         ], 20, 200);
                         
                         if (!isMuted && bgmAudio.paused) { bgmAudio.play().catch(e=>console.log(e)); document.getElementById('icon-sound-on').style.display='block'; document.getElementById('icon-sound-off').style.display='none'; }
                     }
                 } else if (resData.status === 'empty') { 
                     typeTextSafe([
-                        "BOO: TỪ CHỐI TRUY CẬP.",
-                        "LỖI: Chưa có dữ liệu sinh trắc trong Sheet.",
-                        "LỆNH: Yêu cầu đồng bộ Health Connect lập tức."
+                        "[ 🛑 BOO: TỪ CHỐI TRUY CẬP ]",
+                        "⚠️ LỖI: Chưa có dữ liệu sinh trắc trong Sheet.",
+                        "🔧 LỆNH: Yêu cầu đồng bộ Health Connect lập tức."
                     ], 20, 150); 
                     updateMarquee('standby'); document.body.classList.add('standby-mode');
                 } else {
-                    typeTextSafe(["BOO: LỖI HỆ THỐNG - " + (resData.message || "Truy xuất thất bại.")]); 
+                    typeTextSafe(["[ ❌ BOO: LỖI HỆ THỐNG ]", "⚠️ " + (resData.message || "Truy xuất thất bại.")]); 
                     updateMarquee('standby'); document.body.classList.add('standby-mode');
                 }
             } catch (error) {
                 stopChargeSound(); 
-                typeTextSafe(["BOO: CẢNH BÁO ĐỎ - MẤT KẾT NỐI VỚI VỆ TINH GOOGLE."]);
+                typeTextSafe(["[ 🚨 BOO: CẢNH BÁO ĐỎ ]", "⚠️ MẤT KẾT NỐI VỚI VỆ TINH GOOGLE."]);
                 updateMarquee('standby'); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
             }
             window.isScanning = false;
@@ -1168,17 +1180,14 @@
             
             if (isCommitted) { 
                 typeTextSafe([
-                    "[ BOO: KÍCH HOẠT TƯỜNG LỬA SINH TRẮC HỌC ]", 
-                    "// Hệ thống thiết lập kỷ luật và quản trị rủi ro cá nhân.",
-                    "// Mục tiêu tối thượng: Bảo vệ Bankroll. Ngăn chặn triệt để sự mất kiểm soát và quyết định tài chính dựa trên cảm xúc.",
-                    ">> ĐIỀU KIỆN 1: Đeo đồng hồ theo dõi toàn thời gian.",
-                    ">> ĐIỀU KIỆN 2: Bước lên cân sinh trắc ngay khi tỉnh giấc.",
-                    "( Chạm [ 🔒 ] để xác thực và mở khóa hệ thống )"
+                    "[ 🛡️ BOO: TƯỜNG LỬA SINH TRẮC KÍCH HOẠT ]",
+                    "🎯 MỤC TIÊU: Quản trị rủi ro. Bảo vệ Bankroll tuyệt đối.",
+                    "🛑 LỆNH: Triệt tiêu mọi quyết định tài chính cảm xúc."
                 ], 20, 100); 
             } 
             else { 
                 document.body.classList.add('uncommitted');
-                typeTextSafe(["BOO: HỆ THỐNG ĐÓNG BĂNG.", "Yêu cầu: Ký hợp đồng trong BÍ LỤC (Góc phải) trước khi vận hành."]); 
+                typeTextSafe(["[ ⚠️ BOO: HỆ THỐNG ĐÓNG BĂNG ]", ">> Yêu cầu: Ký hợp đồng trong BÍ LỤC (Góc phải) trước khi vận hành."]); 
             }
         }
         
