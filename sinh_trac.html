@@ -430,7 +430,8 @@
             <div class="data-panel pos-phys1" onclick="openHolo('weight')"><div class="dp-val blinking" id="val-weight">---</div><div class="dp-lbl">WEIGHT (KG)</div></div>
             <div class="data-panel pos-rec1" onclick="openHolo('sleep')"><div class="dp-val blinking" id="val-sleep">---</div><div class="dp-lbl">SLEEP (HRS)</div></div>
             <div class="data-panel dp-right pos-phys2" onclick="openHolo('fat')"><div class="dp-val blinking" id="val-fat">---</div><div class="dp-lbl">FAT (%)</div></div>
-            <div class="data-panel dp-right pos-rec2" onclick="openHolo('water')"><div class="dp-val blinking" id="val-water">---</div><div class="dp-lbl">WATER (L)</div></div>
+            <!-- ĐỔI NHÃN WATER (L) THÀNH WATER (%) -->
+            <div class="data-panel dp-right pos-rec2" onclick="openHolo('water')"><div class="dp-val blinking" id="val-water">---</div><div class="dp-lbl">WATER (%)</div></div>
             <div class="data-panel dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val blinking" id="val-steps">---</div><div class="dp-lbl">STEPS</div></div>
         </div>
 
@@ -696,7 +697,15 @@
             else { bgmAudio.pause(); isMuted=true; document.getElementById('icon-sound-on').style.display='none'; document.getElementById('icon-sound-off').style.display='block'; } 
         }
 
-        const holoData = { hr: { title: "HEART RATE", desc: "Yêu cầu nhịp tim đạt 160 BPM để mở khóa trạng thái Overdrive.", color: "var(--crimson)" }, weight: { title: "WEIGHT", desc: "Duy trì khung trọng lượng chiến đấu: 63.0 kg - 67.0 kg.", color: "var(--mint)" }, sleep: { title: "SLEEP", desc: "Ngủ phục hồi tối thiểu 7 giờ/đêm không ngoại lệ.", color: "var(--cyan)" }, fat: { title: "FAT (%)", desc: "Giữ tỷ lệ mỡ dưới 13.0%. Kiểm soát nghiêm ngặt bằng dinh dưỡng.", color: "var(--mint)" }, water: { title: "WATER", desc: "Bơm 2.5 - 3.0 Lít nước mỗi ngày.", color: "var(--cyan)" }, steps: { title: "STEPS", desc: "Tối thiểu 6.000 bước vận động mỗi ngày.", color: "var(--amber)" } };
+        // ĐỔI LABEL THÀNH WATER (%) VÀ ĐIỀU CHỈNH DESC
+        const holoData = { 
+            hr: { title: "HEART RATE", desc: "Yêu cầu nhịp tim đạt 160 BPM để mở khóa trạng thái Overdrive.", color: "var(--crimson)" }, 
+            weight: { title: "WEIGHT", desc: "Duy trì khung trọng lượng chiến đấu: 63.0 kg - 67.0 kg.", color: "var(--mint)" }, 
+            sleep: { title: "SLEEP", desc: "Ngủ phục hồi tối thiểu 7 giờ/đêm không ngoại lệ.", color: "var(--cyan)" }, 
+            fat: { title: "FAT (%)", desc: "Giữ tỷ lệ mỡ dưới 13.0%. Kiểm soát nghiêm ngặt bằng dinh dưỡng.", color: "var(--mint)" }, 
+            water: { title: "WATER (%)", desc: "Yêu cầu nạp đúng 2.5 Lít nước mỗi ngày (Target thể trạng: 55%).", color: "var(--cyan)" }, 
+            steps: { title: "STEPS", desc: "Tối thiểu 6.000 bước vận động mỗi ngày.", color: "var(--amber)" } 
+        };
         const holoPopup = document.getElementById('holo-popup');
         
         function openHolo(type) { 
@@ -710,12 +719,20 @@
                 let currentVal = parseFloat(document.getElementById(`val-${type}`).innerText);
                 let targetVal = 0, unit = "", msg = "";
                 
-                // NÂNG CẤP LORE: Văn phong được điều chỉnh thành BÁO CÁO CỦA T-1 (Ngày hôm qua)
                 if(type === 'hr') { targetVal = isT1Sunday ? 0 : 160; unit = "BPM"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Thiếu ${(targetVal - currentVal).toFixed(0)} ${unit}. Động cơ chưa đạt trạng thái Overdrive.`; else msg = isT1Sunday ? `✅ VOID REGEN (Chủ Nhật): Miễn trừ nhịp tim.` : `✅ Đạt chuẩn Overdrive T-1.`; }
                 else if(type === 'weight') { targetVal = 67; unit = "KG"; if(currentVal > targetVal) msg = `⚠️ Đóng sổ T-1: Vượt khung chiến đấu ${(currentVal - targetVal).toFixed(1)} ${unit}.`; else if (currentVal < 63) msg = `⚠️ Đóng sổ T-1: Dưới khung chiến đấu ${(63 - currentVal).toFixed(1)} ${unit}.`; else msg = `✅ Thể trạng lý tưởng.`; }
                 else if(type === 'sleep') { targetVal = 7.0; unit = "HRS"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Thiếu ${(targetVal - currentVal).toFixed(1)} ${unit} phục hồi.`; else msg = `✅ Đã tái tạo đủ năng lượng.`; }
                 else if(type === 'fat') { targetVal = 13.0; unit = "%"; if(currentVal > targetVal) msg = `⚠️ Đóng sổ T-1: Tỷ lệ mỡ vượt +${(currentVal - targetVal).toFixed(1)} ${unit}.`; else msg = `✅ Đạt chuẩn tỷ lệ vàng.`; }
-                else if(type === 'water') { targetVal = 2.5; unit = "L"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Thiếu hụt ${(targetVal - currentVal).toFixed(1)} ${unit} nước.`; else msg = `✅ Đủ nước vận hành.`; }
+                // LOGIC PHẦN TRĂM NƯỚC MỚI
+                else if(type === 'water') { 
+                    targetVal = 55.0; 
+                    unit = "%"; 
+                    if(currentVal < targetVal) {
+                        msg = `⚠️ CẢNH BÁO: Đang thiếu ${(targetVal - currentVal).toFixed(1)}${unit} nước trong cơ thể.<br>LỆNH THỰC THI: Nạp đủ 2.5 Lít hôm nay, tuyệt đối không vượt ngưỡng.`; 
+                    } else {
+                        msg = `✅ ĐẠT CHUẨN: Đủ nước vận hành.<br>LỆNH THỰC THI: Tiếp tục duy trì nạp 2.5L. Giữ vững kỷ luật.`; 
+                    }
+                }
                 else if(type === 'steps') { targetVal = isT1Sunday ? 0 : 6000; unit = "STEPS"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Nợ ${(targetVal - currentVal).toFixed(0)} ${unit} vận động.`; else msg = isT1Sunday ? `✅ VOID REGEN (Chủ Nhật): Miễn trừ vận động.` : `✅ Hoàn thành mục tiêu di chuyển.`; }
                 
                 document.getElementById('holo-desc').innerHTML = `
@@ -822,8 +839,7 @@
         let currentStreak = parseInt(localStorage.getItem('combat_streak')) || 0;
         let isCommitted = localStorage.getItem('combat_committed') === 'true';
         
-        // CẬP NHẬT LOGIC ĐẾM NGÀY TỰ ĐỘNG (19/07/2026 - Hôm nay)
-        const startDate = new Date(2026, 6, 19); // Tháng 6 là July do Javascript dùng 0-index cho tháng
+        const startDate = new Date(2026, 6, 19); 
         const activeDays = Math.floor((d.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         let mushinDaysLeft = Math.max(1000 - activeDays, 0);
         
@@ -994,7 +1010,6 @@
                     document.getElementById('val-steps').innerText = resData.steps || '---';
 
                     // 2. T-0 LIVE RADAR (TÍNH TOÁN MÓN NỢ SINH HỌC)
-                    // NÂNG CẤP LORE: Áp dụng quy tắc Chủ Nhật miễn trừ
                     let targetSteps = isSunday ? 0 : 6000; 
                     let targetWater = 2.5;
                     let targetSleep = 7.0;
@@ -1063,14 +1078,16 @@
                         
                         updateMarquee('shiro'); playLockSound(); 
                         
+                        // ĐỒNG BỘ THUẬT NGỮ CHỈ SỐ SCI AVG 30D Ở ĐÂY
                         typeTextSafe([
                             "BOO: ĐỒNG BỘ HOÀN TẤT.",
-                            "CẢNH BÁO: Lõi MA30 ở mức rệu rã.", 
+                            "CẢNH BÁO: Chỉ số SCI AVG 30D ở mức rệu rã.", 
                             "LỆNH: Khóa Bankroll. Không cấp quyền Vault.", 
                             "(Chạm thông số để xem báo cáo T-1)"
                         ], 20, 200);
                         
-                        if (parseFloat(resData.water) < 2.5) document.querySelector('.pos-rec2').style.animation = "alert-flash 1s infinite alternate";
+                        // CẬP NHẬT KIỂM TRA WATER T-1 CHUẨN %
+                        if (parseFloat(resData.water) < 55.0) document.querySelector('.pos-rec2').style.animation = "alert-flash 1s infinite alternate";
                         if (parseFloat(resData.hr) < (isT1Sunday ? 0 : 160)) document.querySelector('.pos-hr').style.animation = "alert-flash 1s infinite alternate";
                         if (parseFloat(resData.sleep) < 7.0) document.querySelector('.pos-rec1').style.animation = "alert-flash 1s infinite alternate";
                         
@@ -1159,12 +1176,15 @@
             initParticles(); document.body.classList.add('standby-mode'); updateButtonState(); updateMarquee('standby');
             document.body.classList.add('pre-scan-locked'); 
             
+            // CẬP NHẬT VĂN BẢN BOOT-UP TERMINAL MỚI Ở ĐÂY
             if (isCommitted) { 
                 typeTextSafe([
-                    "BOO: HỆ THỐNG ĐÓNG BĂNG.", 
-                    "GIAO THỨC BẮT BUỘC: Đeo đồng hồ thông minh trước 24h.",
-                    "GIAO THỨC BẮT BUỘC: Lên cân sinh trắc ngay khi mới ngủ dậy.",
-                    "(Chạm vào nút [ 🔒 ] phía trên để xác nhận hoàn tất)"
+                    "[ BOO: KÍCH HOẠT TƯỜNG LỬA SINH TRẮC HỌC ]", 
+                    "// Hệ thống thiết lập kỷ luật và quản trị rủi ro cá nhân.",
+                    "// Mục tiêu tối thượng: Bảo vệ Bankroll. Ngăn chặn triệt để sự mất kiểm soát và quyết định tài chính dựa trên cảm xúc.",
+                    ">> ĐIỀU KIỆN 1: Đeo đồng hồ theo dõi toàn thời gian.",
+                    ">> ĐIỀU KIỆN 2: Bước lên cân sinh trắc ngay khi tỉnh giấc.",
+                    "( Chạm [ 🔒 ] để xác thực và mở khóa hệ thống )"
                 ], 20, 100); 
             } 
             else { 
