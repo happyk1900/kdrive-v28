@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Event Horizon Core</title>
-    <!-- Thêm font chữ cho Intro -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -27,14 +26,14 @@
         }
 
         /* =========================================
-           LỚP INTRO ĐIỆN ẢNH (CINEMATIC LAYER)
+           LỚP INTRO CỔNG BẢO MẬT (ÉP Z-INDEX TUYỆT ĐỐI)
            ========================================= */
         #intro-layer { position: fixed; inset: 0; z-index: 100000; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 2s ease; overflow: hidden; }
         
         #intro-bg { position: absolute; inset: -5%; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/anh%20intro%20(1).jpg?raw=true') center/cover; filter: blur(25px) brightness(0.15) grayscale(0.6); opacity: 0; transition: all 15s ease-out; }
         #intro-bg.reveal { opacity: 1; filter: blur(6px) brightness(0.35) grayscale(0.2); transform: scale(1.05); }
 
-        #gatekeeper-btn { z-index: 10; border: 1px solid rgba(0,229,255,0.5); background: rgba(0,229,255,0.05); color: var(--cyan); padding: 15px 30px; font-family: var(--font-display); font-size: 13px; letter-spacing: 3px; font-weight: bold; cursor: pointer; transition: all 0.3s; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); animation: pulse-gatekeeper 2s infinite alternate; text-align: center; }
+        #gatekeeper-btn { position: relative; z-index: 999999; pointer-events: auto !important; border: 1px solid rgba(0,229,255,0.5); background: rgba(0,229,255,0.05); color: var(--cyan); padding: 15px 30px; font-family: var(--font-display); font-size: 13px; letter-spacing: 3px; font-weight: bold; cursor: pointer; transition: all 0.3s; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); animation: pulse-gatekeeper 2s infinite alternate; text-align: center; }
         #gatekeeper-btn:active { transform: scale(0.95); }
         @keyframes pulse-gatekeeper { 0% { box-shadow: 0 0 10px rgba(0, 229, 255, 0.1); } 100% { box-shadow: 0 0 30px rgba(0, 229, 255, 0.4); border-color: var(--cyan); } }
         
@@ -55,102 +54,56 @@
         #skip-btn { position: absolute; bottom: 30px; right: 30px; z-index: 30; background: transparent; border: none; color: rgba(255,255,255,0.3); font-family: var(--font-display); font-size: 11px; letter-spacing: 1px; cursor: pointer; transition: color 0.3s; display: none; padding: 10px; }
         #skip-btn:active { color: #fff; }
 
-        /* FULLSCREEN BACKGROUNDS */
+        /* FULLSCREEN BACKGROUNDS (MAIN APP) */
         .tactical-grid-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-obsidian); z-index: 1; perspective: 600px; overflow: hidden; transition: opacity 1.5s ease; }
         .grid-plane { position: absolute; width: 200vw; height: 200vh; left: -50vw; top: 0%; background-image: linear-gradient(rgba(0, 229, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.1) 1px, transparent 1px); background-size: 40px 40px; transform: rotateX(75deg); animation: grid-scroll 10s linear infinite; transition: opacity 1.5s ease; }
         .vignette { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; background: radial-gradient(circle at center, transparent 30%, #050608 90%); transition: all 1.5s ease; }
-        
         @keyframes grid-scroll { 0% { background-position: 0 0; } 100% { background-position: 0 40px; } }
 
         .particle-matrix { position: fixed; top: 50%; left: 50%; z-index: 3; width: 0; height: 0; transition: opacity 1.5s ease; }
         .particle-wrap { position: absolute; width: 2px; height: 250px; transform-origin: top center; top: 0; left: 0; }
         .particle { position: absolute; bottom: 100%; left: -1px; width: 3px; height: 3px; border-radius: 50%; opacity: 0; }
-
         @keyframes particle-inward { 0% { transform: translateY(200px); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.6; } 100% { transform: translateY(20px); opacity: 0; } }
         @keyframes particle-outward { 0% { transform: translateY(20px); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translateY(250px); opacity: 0; } }
 
-        /* EDGE LIGHTING */
         .edge-lighting { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999; pointer-events: none; transition: box-shadow 1s ease, border 1s ease; box-shadow: inset 0 0 0px transparent; border: 0px solid transparent; }
-        
         body.tier-shiro .edge-lighting { box-shadow: inset 0 0 50px rgba(255, 42, 42, 0.6), inset 0 0 15px rgba(255, 42, 42, 0.8); border: 2px solid rgba(255, 42, 42, 0.4); }
         body.tier-chairo .edge-lighting { box-shadow: inset 0 0 50px rgba(176, 38, 255, 0.5), inset 0 0 15px rgba(176, 38, 255, 0.7); border: 2px solid rgba(176, 38, 255, 0.4); }
         body.tier-kuro .edge-lighting { box-shadow: inset 0 0 70px rgba(0, 255, 157, 0.6), inset 0 0 25px rgba(0, 255, 157, 0.9); border: 2px solid rgba(0, 255, 157, 0.6); animation: edge-breathe 1.5s infinite alternate; }
-        
         @keyframes edge-breathe { 0% { opacity: 0.7; } 100% { opacity: 1; box-shadow: inset 0 0 90px rgba(0, 255, 157, 0.8), inset 0 0 35px rgba(0, 255, 157, 1); border-width: 4px; } }
-        
         .edge-lighting.touch-pulse { filter: brightness(2.5); transition: filter 0.1s ease; }
 
-        /* UI CONTAINER */
-        .pwa-container {
-            width: 100%; max-width: 420px; height: 100%; max-height: 900px; position: relative;
-            background: transparent; display: flex; flex-direction: column; z-index: 10;
-            opacity: 0; /* Ẩn đi chờ Intro xong */
-            transition: opacity 2s ease;
-        }
-
-        /* HEADER */
+        .pwa-container { width: 100%; max-width: 420px; height: 100%; max-height: 900px; position: relative; background: transparent; display: flex; flex-direction: column; z-index: 10; opacity: 0; transition: opacity 2s ease; }
         .top-row { position: relative; z-index: 10; padding: 15px 15px 10px; display: flex; justify-content: space-between; align-items: flex-start; transition: opacity 1.5s ease; }
         .left-controls { display: flex; flex-direction: column; gap: 10px; transition: opacity 1.5s ease; }
         .btn-exit, .btn-audio, .btn-chip { background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0,229,255,0.3); color: var(--cyan); transition: all 0.3s ease; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
         .btn-exit { text-decoration: none; font-family: var(--font-display); font-size: 10px; font-weight: bold; letter-spacing: 1px; padding: 5px 12px; width: fit-content; }
         .btn-audio, .btn-chip { padding: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
         .btn-audio svg, .btn-chip svg { width: 16px; height: 16px; fill: currentColor; }
-        
         .btn-chip { display: none; color: var(--amber); border-color: var(--amber); background: rgba(255, 170, 0, 0.1); animation: chip-pulse 2s infinite alternate; }
         @keyframes chip-pulse { 0% { box-shadow: 0 0 5px rgba(255, 170, 0, 0.2); } 100% { box-shadow: 0 0 15px rgba(255, 170, 0, 0.8); border-color: #fff; color: #fff; } }
-
         body.combat-active .btn-exit, body.combat-active .btn-audio { color: var(--crimson); border-color: var(--crimson); background: rgba(255, 42, 42, 0.1); }
         .sys-info { text-align: right; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; text-shadow: 0 1px 2px #000; transition: opacity 1.5s ease; }
         .sys-info span { color: var(--cyan); font-weight: bold; }
         .ctrl-group { display: flex; flex-direction: column; align-items: flex-end; margin-top: 10px; gap: 6px; }
         
         .streak-box, .sci-lbl, .fingerprint-wrapper { transition: opacity 0.4s ease; }
-        .streak-box { 
-            position: relative; overflow: hidden;
-            border: 1px solid var(--amber); 
-            background: linear-gradient(135deg, rgba(255, 170, 0, 0.15) 0%, rgba(255, 170, 0, 0.35) 100%); 
-            color: #fff; padding: 8px 18px; 
-            font-family: var(--font-display); font-size: 13.5px; font-weight: 900; 
-            letter-spacing: 1.5px; cursor: pointer; 
-            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); 
-            transition: all 0.3s ease; 
-            box-shadow: 0 0 15px rgba(255, 170, 0, 0.5), inset 0 0 8px rgba(255, 170, 0, 0.3);
-            text-shadow: 0 0 10px var(--amber);
-        }
-        .streak-box::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,0.4), rgba(255,255,255,0));
-            transform: rotate(45deg); animation: btn-shine 3s infinite ease-in-out;
-        }
+        .streak-box { position: relative; overflow: hidden; border: 1px solid var(--amber); background: linear-gradient(135deg, rgba(255, 170, 0, 0.15) 0%, rgba(255, 170, 0, 0.35) 100%); color: #fff; padding: 8px 18px; font-family: var(--font-display); font-size: 13.5px; font-weight: 900; letter-spacing: 1.5px; cursor: pointer; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); transition: all 0.3s ease; box-shadow: 0 0 15px rgba(255, 170, 0, 0.5), inset 0 0 8px rgba(255, 170, 0, 0.3); text-shadow: 0 0 10px var(--amber); }
+        .streak-box::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,0.4), rgba(255,255,255,0)); transform: rotate(45deg); animation: btn-shine 3s infinite ease-in-out; }
         @keyframes btn-shine { 0% { left: -150%; } 100% { left: 150%; } }
         .streak-box:active { transform: scale(0.95); }
-        
-        @keyframes flash-unsigned {
-            0%, 100% { background: rgba(255, 170, 0, 0.15); box-shadow: 0 0 12px rgba(255, 170, 0, 0.3); transform: scale(1); }
-            50% { background: rgba(255, 170, 0, 0.5); box-shadow: 0 0 25px var(--amber); transform: scale(1.05); color: #fff; }
-        }
+        @keyframes flash-unsigned { 0%, 100% { background: rgba(255, 170, 0, 0.15); box-shadow: 0 0 12px rgba(255, 170, 0, 0.3); transform: scale(1); } 50% { background: rgba(255, 170, 0, 0.5); box-shadow: 0 0 25px var(--amber); transform: scale(1.05); color: #fff; } }
         .alert-unsigned { animation: flash-unsigned 1.2s infinite ease-in-out !important; border: 2px solid var(--amber) !important; font-weight: bold; }
 
-        /* BANNER & MARQUEE */
         .banner-wrapper { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 0px; transition: opacity 0.5s ease, transform 0.5s ease; }
         .status-banner { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 2px; padding: 6px 20px; text-align: center; border: 1px solid var(--amber); color: var(--amber); background: rgba(255, 170, 0, 0.1); clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); transition: all 0.5s ease; }
-        
-        .combat-marquee-box { 
-            display: flex; align-items: center; width: 92%; max-width: 360px; 
-            border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.1); 
-            padding: 5px 12px; margin-top: 8px; cursor: pointer; text-decoration: none; 
-            clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); 
-            transition: all 0.5s ease; 
-        }
-        
+        .combat-marquee-box { display: flex; align-items: center; width: 92%; max-width: 360px; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.1); padding: 5px 12px; margin-top: 8px; cursor: pointer; text-decoration: none; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); transition: all 0.5s ease; }
         .mq-icon-fixed { font-size: 15px; margin-right: 12px; flex-shrink: 0; animation: icon-heartbeat 0.8s infinite alternate cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 0 4px currentColor); z-index: 2; }
         .mq-text-container { flex-grow: 1; overflow: hidden; white-space: nowrap; position: relative; -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); }
         .marquee-text { display: inline-block; padding-left: 100%; animation: marquee 20s linear infinite; font-family: var(--font-display); font-size: 10px; font-weight: bold; letter-spacing: 1.5px; }
-        
         @keyframes icon-heartbeat { 0% { transform: scale(0.9); } 100% { transform: scale(1.35); } }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
-        /* LÕI ARC REACTOR 3D */
         .core-wrapper { position: relative; flex: 1; display: flex; justify-content: center; align-items: center; z-index: 10; min-height: 0; perspective: 1000px; }
         .arc-reactor { position: absolute; width: 340px; height: 340px; display: flex; justify-content: center; align-items: center; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.5s ease; }
         .ring-svg { position: absolute; width: 100%; height: 100%; overflow: visible; z-index: 5; transition: all 1.5s ease; }
@@ -165,30 +118,23 @@
         .plasma-node { fill: #fff; opacity: 0; transition: opacity 0.5s ease; }
 
         .sci-nexus { position: absolute; text-align: center; z-index: 15; width: 110px; height: 110px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(176, 38, 255, 0.2) 0%, transparent 70%); box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.1); cursor: pointer; transition: all 1.5s ease; overflow: hidden; }
-        
         .fingerprint-wrapper { position: absolute; width: 50px; height: 50px; display: none; justify-content: center; align-items: center; z-index: 20; }
         .fingerprint-wrapper svg { width: 100%; height: 100%; stroke: var(--violet); filter: drop-shadow(0 0 8px var(--violet)); transition: all 0.3s ease; }
         .fp-scanner-line { position: absolute; width: 120%; height: 3px; background: var(--mint); box-shadow: 0 0 15px 3px var(--mint); top: -10%; left: -10%; border-radius: 50%; display: none; }
-
         .sci-val { font-family: var(--font-display); font-size: 34px; font-weight: 900; color: var(--violet); text-shadow: 0 0 20px var(--violet); letter-spacing: 2px; transition: color 1s ease, text-shadow 1s ease, opacity 1.5s ease; }
         .sci-lbl { font-size: 10px; color: #fff; letter-spacing: 1px; opacity: 0.8; margin-top: 40px; transition: opacity 1.5s ease; z-index: 25; position: absolute; bottom: 15px;}
 
-        /* --- TIER DYNAMIC STYLING --- */
         body.tier-shiro .ring { stroke-dasharray: 2 30 !important; stroke: var(--crimson) !important; filter: drop-shadow(0 0 5px var(--crimson)); }
         body.tier-shiro .plasma-node { opacity: 0; } 
         body.tier-shiro .sci-val { color: var(--crimson); text-shadow: 0 0 15px var(--crimson); }
         body.tier-shiro .sci-nexus { box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.2); }
-        body.tier-shiro .orb-cw { animation: spin-cw 30s linear infinite; }
-        body.tier-shiro .orb-ccw { animation: spin-ccw 35s linear infinite; }
-        
+        body.tier-shiro .orb-cw { animation: spin-cw 30s linear infinite; } body.tier-shiro .orb-ccw { animation: spin-ccw 35s linear infinite; }
         body.tier-chairo .ring { stroke-dasharray: 2000 !important; stroke: var(--cyan) !important; filter: drop-shadow(0 0 5px var(--cyan)); }
         body.tier-chairo .ring-phys, body.tier-chairo .ring-rec { stroke: var(--mint) !important; filter: drop-shadow(0 0 5px var(--mint)); }
         body.tier-chairo .plasma-node { opacity: 1; fill: #fff; filter: drop-shadow(0 0 6px #fff); } 
         body.tier-chairo .sci-val { color: var(--cyan); text-shadow: 0 0 15px var(--cyan); }
         body.tier-chairo .sci-nexus { box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.2); }
-        body.tier-chairo .orb-cw { animation: spin-cw 10s linear infinite; }
-        body.tier-chairo .orb-ccw { animation: spin-ccw 12s linear infinite; }
-
+        body.tier-chairo .orb-cw { animation: spin-cw 10s linear infinite; } body.tier-chairo .orb-ccw { animation: spin-ccw 12s linear infinite; }
         body.tier-kuro .ring { stroke-dasharray: 2000 !important; stroke: var(--neon-pink) !important; filter: drop-shadow(0 0 10px var(--neon-pink)); stroke-width: 3; }
         body.tier-kuro .ring-phys, body.tier-kuro .ring-rec { stroke: var(--violet) !important; filter: drop-shadow(0 0 10px var(--violet)); }
         body.tier-kuro .plasma-node { opacity: 1; fill: #fff; filter: drop-shadow(0 0 12px #fff); r: 5.5; }
@@ -197,33 +143,20 @@
         @keyframes kuro-pulse { 0% { box-shadow: inset 0 0 30px rgba(255, 0, 255, 0.6), 0 0 40px 10px rgba(255, 0, 255, 0.3); } 100% { box-shadow: inset 0 0 60px rgba(255, 0, 255, 1), 0 0 80px 30px rgba(255, 0, 255, 0.6); } }
         body.tier-kuro .orb-cw { animation: spin-cw 3s linear infinite; } body.tier-kuro .orb-ccw { animation: spin-ccw 4s linear infinite; }
 
-        /* --- PRE-SCAN STATE --- */
         body.pre-scan-locked .sci-lbl, body.pre-scan-locked .fingerprint-wrapper, body.pre-scan-locked #val-sci, body.pre-scan-locked .banner-wrapper { opacity: 0 !important; pointer-events: none !important; }
         body.pre-scan-locked .sci-nexus { pointer-events: none !important; }
         body.uncommitted .safety-hud-box { display: none !important; }
 
-        .safety-hud-box {
-            position: absolute; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: rgba(5, 6, 8, 0.9); border: 1px solid var(--amber); box-shadow: 0 0 20px rgba(255, 170, 0, 0.1);
-            padding: 20px 15px; backdrop-filter: blur(5px); clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
-            transition: all 0.5s ease; width: 90%; max-width: 340px; margin-top: 0;
-        }
+        .safety-hud-box { position: absolute; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5, 6, 8, 0.9); border: 1px solid var(--amber); box-shadow: 0 0 20px rgba(255, 170, 0, 0.1); padding: 20px 15px; backdrop-filter: blur(5px); clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); transition: all 0.5s ease; width: 90%; max-width: 340px; margin-top: 0; }
         .safety-hud-box.unlocked { opacity: 0; pointer-events: none; transform: scale(1.1); display: none !important; }
         .hud-cond { font-family: var(--font-ui); font-size: 13px; color: #fff; margin-bottom: 12px; font-weight: 600; text-align: left; width: 100%; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; opacity: 0.9; }
-        .safety-lock-btn {
-            margin-top: 5px; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.15); color: var(--amber);
-            font-family: var(--font-display); font-size: 12px; font-weight: bold; padding: 10px; cursor: pointer;
-            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); animation: flash-unsigned 1.5s infinite ease-in-out;
-            text-shadow: 0 0 5px var(--amber); text-align: center; width: 100%; letter-spacing: 1px;
-        }
+        .safety-lock-btn { margin-top: 5px; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.15); color: var(--amber); font-family: var(--font-display); font-size: 12px; font-weight: bold; padding: 10px; cursor: pointer; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); animation: flash-unsigned 1.5s infinite ease-in-out; text-shadow: 0 0 5px var(--amber); text-align: center; width: 100%; letter-spacing: 1px; }
 
-        /* DATA PANELS */
         .data-panel { position: absolute; z-index: 15; background: rgba(8, 9, 13, 0.75); backdrop-filter: blur(3px); padding: 4px 12px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); border-left: 2px solid; cursor: pointer; transition: transform 0.2s, opacity 1.5s ease; }
         .data-panel:active { transform: scale(0.95); }
         .dp-right { clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px)); border-left: none; border-right: 2px solid; text-align: right; }
         .dp-val { font-family: var(--font-display); font-size: 16px; font-weight: 700; transition: all 0.3s ease; }
         .dp-lbl { font-size: 10px; color: rgba(255,255,255,0.8); letter-spacing: 1px; font-weight: 600; }
-
         .pos-hr { top: 10%; left: 5%; border-color: var(--crimson); } .pos-hr .dp-val { color: var(--crimson); text-shadow: 0 0 10px var(--crimson); }
         .pos-phys1 { top: 35%; left: 5%; border-color: var(--mint); } .pos-phys1 .dp-val { color: var(--mint); text-shadow: 0 0 10px var(--mint); }
         .pos-rec1 { top: 75%; left: 5%; border-color: var(--cyan); } .pos-rec1 .dp-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
@@ -231,36 +164,22 @@
         .pos-rec2 { top: 45%; right: 5%; border-color: var(--cyan); } .pos-rec2 .dp-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
         .pos-move { top: 75%; right: 5%; border-color: var(--amber); } .pos-move .dp-val { color: var(--amber); text-shadow: 0 0 10px var(--amber); }
         
-        /* LIVE RADAR BAR (T-0) */
-        .live-radar-bar {
-            position: relative; z-index: 10; margin: 0 10px 5px; padding: 6px 12px;
-            background: rgba(255, 42, 42, 0.05); border: 1px solid rgba(255, 42, 42, 0.3);
-            border-left: 3px solid var(--crimson);
-            font-family: var(--font-display); font-size: 11px; font-weight: bold;
-            display: flex; align-items: center; letter-spacing: 1px;
-            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%);
-            transition: all 0.5s ease; opacity: 0; display: none;
-        }
+        .live-radar-bar { position: relative; z-index: 10; margin: 0 10px 5px; padding: 6px 12px; background: rgba(255, 42, 42, 0.05); border: 1px solid rgba(255, 42, 42, 0.3); border-left: 3px solid var(--crimson); font-family: var(--font-display); font-size: 11px; font-weight: bold; display: flex; align-items: center; letter-spacing: 1px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%); transition: all 0.5s ease; opacity: 0; display: none; }
         .live-radar-bar.active { opacity: 1; display: flex; }
         .live-radar-bar.all-clear { background: rgba(0, 255, 157, 0.05); border-color: rgba(0, 255, 157, 0.3); border-left-color: var(--mint); }
-        
         .live-pulse { color: var(--crimson); animation: pulse-red 1s infinite alternate; margin-right: 12px; white-space: nowrap; text-shadow: 0 0 5px var(--crimson); }
         .live-pulse.clear { color: var(--mint); animation: pulse-green 1.5s infinite alternate; text-shadow: 0 0 5px var(--mint); }
-        
         .live-metrics { color: #fff; display: flex; gap: 15px; flex-wrap: wrap; text-shadow: 0 0 3px rgba(255,255,255,0.5); font-family: var(--font-ui); font-size: 13px; font-weight: 700; }
         .metric-item { display: inline-flex; align-items: center; gap: 5px; }
 
         @keyframes pulse-red { 0% { opacity: 0.5; } 100% { opacity: 1; text-shadow: 0 0 10px var(--crimson); } }
         @keyframes pulse-green { 0% { opacity: 0.5; } 100% { opacity: 1; text-shadow: 0 0 10px var(--mint); } }
 
-        /* TERMINAL PANEL */
         .terminal-panel { position: relative; z-index: 10; margin: 0 10px 20px; padding: 25px 15px 12px; background: rgba(0, 229, 255, 0.02); border: 1px solid rgba(0, 229, 255, 0.2); border-bottom: 3px solid var(--cyan); clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%); min-height: 125px; flex-shrink: 0; box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05); transition: opacity 1.5s ease, border-color 0.5s, box-shadow 0.5s; }
         .terminal-header { position: absolute; top: 0; left: 20px; font-size: 9px; color: var(--bg-obsidian); background: var(--cyan); padding: 2px 10px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(0 0, 100% 0, calc(100% - 5px) 100%, 0 100%); transition: all 0.5s ease; }
-        
         .typewriter { font-family: var(--font-ui); font-weight: 600; font-size: 11.5px; color: #ffffff; line-height: 1.5; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); word-break: break-word; text-align: left; }
         .cursor { display: inline-block; width: 6px; height: 11px; background-color: #ffffff; animation: blink 1s step-end infinite; vertical-align: bottom; }
 
-        /* SYSTEM MODES */
         body.standby-mode .data-panel, body.standby-mode .live-radar-bar { opacity: 0.05; pointer-events: none; transform: scale(0.9); transition: all 1.5s ease; filter: grayscale(1); }
         body.standby-mode .ring-svg { opacity: 0.15; transition: all 1.5s ease; }
         body.standby-mode .plasma-node { opacity: 0; }
@@ -317,10 +236,8 @@
         @keyframes shockwave-pulse { 0% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0.6); } 50% { box-shadow: inset 0 0 50px rgba(176, 38, 255, 0.8), 0 0 0 30px rgba(176, 38, 255, 0); } 100% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0); } }
         @keyframes shockwave-pulse-red { 0% { box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.2), 0 0 0 0 rgba(255, 42, 42, 0.6); } 50% { box-shadow: inset 0 0 30px rgba(255, 42, 42, 0.8), 0 0 0 15px rgba(255, 42, 42, 0); } 100% { box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.2), 0 0 0 0 rgba(255, 42, 42, 0); } }
 
-        /* HIỆU ỨNG TIER 3 - MUSHIN PULSE */
         @keyframes mushin-flash { 0% { box-shadow: inset 0 0 0px var(--violet); } 15% { box-shadow: inset 0 0 120px rgba(176, 38, 255, 0.4); } 100% { box-shadow: inset 0 0 0px var(--violet); } }
 
-        /* HOLOGRAM & RANK UI */
         .holo-popup { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 60; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
         .holo-popup.active { opacity: 1; pointer-events: auto; }
         .holo-box { width: 85%; max-width: 360px; background: var(--bg-obsidian); padding: 25px; border-radius: 0; border: 1px solid var(--cyan); text-align: center; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
@@ -361,7 +278,6 @@
         .t1-warning { background: rgba(255, 42, 42, 0.05); border-left: 2px solid var(--crimson); padding: 12px; font-size: 0.9rem; line-height: 1.5; color: #e0e0e0; margin-top: 15px; }
         .t1-warning strong { color: var(--crimson); font-family: var(--font-display); letter-spacing: 1px; }
 
-        /* TIER 3 SUB-TIERS */
         .sub-tier { margin-bottom: 8px; background: rgba(0,0,0,0.4); border: 1px solid rgba(176, 38, 255, 0.2); border-left: 2px solid var(--violet); transition: all 0.3s ease; }
         .sub-tier-btn { padding: 12px 15px; font-family: var(--font-display); font-size: 0.9rem; font-weight: bold; color: #e0e0e0; cursor: pointer; display: block; outline: none; letter-spacing: 1px; }
         .sub-tier-btn::marker { display: none; content: ""; } .sub-tier-btn::-webkit-details-marker { display: none; }
@@ -373,7 +289,6 @@
         .tier3-img { width: 100%; border: 1px solid var(--violet); margin-top: 5px; border-radius: 2px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
         .tier3-img:active { transform: scale(0.98); box-shadow: 0 0 15px var(--violet); }
 
-        /* FULLSCREEN IMAGE VIEWER */
         .img-viewer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .img-viewer.active { opacity: 1; pointer-events: auto; }
         .img-viewer img { max-width: 100vw; max-height: 100vh; object-fit: contain; }
@@ -389,13 +304,7 @@
         .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; z-index: -1; transition: background 0.3s; }
         .hold-btn.charging { animation: shake 0.1s infinite; filter: brightness(1.3); text-shadow: 0 0 5px currentColor; }
 
-        /* KDRIVE VAULT */
-        .vault-input {
-            width: 100%; background: rgba(255, 170, 0, 0.05); border: 1px solid var(--amber);
-            color: var(--amber); text-align: center; padding: 15px; font-family: var(--font-display);
-            font-size: 22px; font-weight: 900; letter-spacing: 4px; outline: none;
-            text-transform: uppercase; transition: all 0.3s ease; box-shadow: inset 0 0 15px rgba(255, 170, 0, 0.1);
-        }
+        .vault-input { width: 100%; background: rgba(255, 170, 0, 0.05); border: 1px solid var(--amber); color: var(--amber); text-align: center; padding: 15px; font-family: var(--font-display); font-size: 22px; font-weight: 900; letter-spacing: 4px; outline: none; text-transform: uppercase; transition: all 0.3s ease; box-shadow: inset 0 0 15px rgba(255, 170, 0, 0.1); }
         .vault-input:focus { background: rgba(255, 170, 0, 0.15); box-shadow: inset 0 0 20px rgba(255, 170, 0, 0.3), 0 0 10px rgba(255, 170, 0, 0.5); }
         .vault-input.error { border-color: var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.1); box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.3); animation: overload-shake 0.3s ease-in-out; }
         .vault-input.success { border-color: var(--mint); color: var(--mint); background: rgba(0, 255, 157, 0.1); box-shadow: inset 0 0 20px rgba(0, 255, 157, 0.3); }
@@ -405,10 +314,11 @@
 </head>
 <body>
 
-    <!-- LỚP INTRO CỔNG BẢO MẬT ĐIỆN ẢNH -->
+    <!-- LỚP INTRO ĐIỆN ẢNH BỌC THÉP -->
     <div id="intro-layer">
         <div id="intro-bg"></div>
-        <button id="gatekeeper-btn" onclick="startIntro()">[ KHỞI CHẠY GIAO THỨC ]</button>
+        <!-- Bổ sung ontouchstart để nhận diện cảm ứng cực nhạy -->
+        <button id="gatekeeper-btn" onclick="startIntro(event)" ontouchstart="startIntro(event)">[ KHỞI CHẠY GIAO THỨC ]</button>
         <div id="cine-subtitles"></div>
         <button id="skip-btn" onclick="skipIntro()">[ >> BỎ QUA ]</button>
         <div id="intro-flash"></div>
@@ -492,7 +402,6 @@
             <div class="data-panel dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val blinking" id="val-steps">---</div><div class="dp-lbl">[ 👟 ] VẬN ĐỘNG</div></div>
         </div>
 
-        <!-- THANH LIVE RADAR T-0 MỚI BỔ SUNG -->
         <div class="live-radar-bar" id="live-radar-bar">
             <span class="live-pulse" id="live-pulse">[ 🔴 LIVE ]</span>
             <span class="live-metrics" id="live-metrics"></span>
@@ -504,7 +413,7 @@
         </div>
     </div>
 
-    <!-- HOLOGRAM POPUPS & OVERLAYS -->
+    <!-- HOLOGRAM POPUPS -->
     <div class="holo-popup" id="holo-popup" onclick="closeHolo(event)">
         <div class="holo-box" id="holo-box">
             <div class="holo-title" id="holo-title">NAME</div>
@@ -520,37 +429,16 @@
         </div>
         
         <div class="tier-list">
-            <!-- TIER 1 -->
             <div class="tier-item">
                 <button class="tier-btn tier-shiro" onclick="toggleTier('tier1', this)">[ TIER 1: CHIẾN BINH - SHIRO ] <span>▼</span><div class="shooting-star"></div></button>
                 <div class="tier-content" id="tier1">
-                    
-                    <div class="t1-objective">
-                        <span style="color: #fff;">[ MỤC TIÊU CỐT LÕI ]</span><br>
-                        <span style="color: var(--cyan); text-shadow: 0 0 8px var(--cyan); font-size: 1.1rem; display: block; margin: 8px 0;">HOÀN THÀNH 6/6 CHỈ SỐ SINH HỌC.</span>
-                        <span style="color: #d0d5e0; font-size: 0.9rem; text-transform: none;">Mở khóa Bankroll để có ngân lượng chinh phục Vương quốc Poker.</span>
-                    </div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-box stat-cyan">160 BPM</div>
-                        <div class="stat-box stat-cyan">6K BƯỚC</div>
-                        <div class="stat-box stat-cyan">7H NGỦ</div>
-                        <div class="stat-box stat-cyan">63-67 KG</div>
-                        <div class="stat-box stat-cyan">MỠ ≤ 13%</div>
-                        <div class="stat-box stat-cyan">NƯỚC 2.5L</div>
-                    </div>
-
+                    <div class="t1-objective"><span style="color: #fff;">[ MỤC TIÊU CỐT LÕI ]</span><br><span style="color: var(--cyan); text-shadow: 0 0 8px var(--cyan); font-size: 1.1rem; display: block; margin: 8px 0;">HOÀN THÀNH 6/6 CHỈ SỐ SINH HỌC.</span><span style="color: #d0d5e0; font-size: 0.9rem; text-transform: none;">Mở khóa Bankroll để có ngân lượng chinh phục Vương quốc Poker.</span></div>
+                    <div class="stats-grid"><div class="stat-box stat-cyan">160 BPM</div><div class="stat-box stat-cyan">6K BƯỚC</div><div class="stat-box stat-cyan">7H NGỦ</div><div class="stat-box stat-cyan">63-67 KG</div><div class="stat-box stat-cyan">MỠ ≤ 13%</div><div class="stat-box stat-cyan">NƯỚC 2.5L</div></div>
                     <p>Chỉ số SCI là thước đo tuyệt đối quyết định hạn mức Bankroll được cấp. Động lực là thứ rác rưởi, kỷ luật cơ học là vũ khí duy nhất để duy trì sự sắc bén và lì lợm trên bàn Poker.</p>
-                    
-                    <div class="t1-warning">
-                        <strong>[ QUẢN TRỊ BANKROLL: BÁO ĐỘNG ]</strong><br>
-                        Điểm SCI Trung bình <strong>< 50</strong>. Cơ thể đang rệu rã, phản xạ thần kinh chậm.<br><br>
-                        <strong style="color: var(--crimson);">HÀNH ĐỘNG:</strong> Khóa toàn bộ Bankroll lớn. Chỉ được phép đánh Low Stakes (Micro) hoặc Review Hand. Tuyệt đối không ném tiền khi vũ khí chưa sắc bén.
-                    </div>
+                    <div class="t1-warning"><strong>[ QUẢN TRỊ BANKROLL: BÁO ĐỘNG ]</strong><br>Điểm SCI Trung bình <strong>< 50</strong>. Cơ thể đang rệu rã, phản xạ thần kinh chậm.<br><br><strong style="color: var(--crimson);">HÀNH ĐỘNG:</strong> Khóa toàn bộ Bankroll lớn. Chỉ được phép đánh Low Stakes (Micro) hoặc Review Hand. Tuyệt đối không ném tiền khi vũ khí chưa sắc bén.</div>
                 </div>
             </div>
 
-            <!-- TIER 2 -->
             <div class="tier-item">
                 <button class="tier-btn tier-chairo" onclick="toggleTier('tier2', this)">[ TIER 2: TINH ANH - CHAIRO ] <span>▼</span><div class="shooting-star"></div></button>
                 <div class="tier-content" id="tier2">
@@ -561,21 +449,12 @@
                 </div>
             </div>
 
-            <!-- TIER 3: VÔ NGÃ -->
             <div class="tier-item">
                 <button class="tier-btn tier-kuro" onclick="toggleTier('tier3', this)">[ TIER 3: VÔ NGÃ - KURO ] <span>▼</span><div class="shooting-star"></div></button>
                 <div class="tier-content" id="tier3" style="padding-top: 20px;">
-                    
                     <div class="directive-line" style="color: #b026ff; border-color: #b026ff;">[ QUẢN TRỊ BANKROLL: TỐI THƯỢNG ]</div>
                     <p style="margin-bottom: 25px;">• <strong>Điều kiện:</strong> Điểm SCI Trung bình <strong>≥ 85</strong>.<br>• <strong>Hành động:</strong> Mở khóa Bankroll tối đa (High Roller / Main Event). Trạng thái Overdrive hoàn hảo để chinh phục các đỉnh cao.</p>
-
-                    <!-- Lời răn gốc -->
-                    <div style="font-family: sans-serif; font-weight: bold; color: #fff; text-align: center; margin-bottom: 25px; font-size: 1.05rem; text-shadow: 0 0 8px rgba(176, 38, 255, 0.8); line-height: 1.5;">
-                        "Thiên nhật chi kê vi Đạo,<br>Vạn nhật chi kê vi Thần."<br>
-                        <span style="font-size: 0.9rem; color: #d0d5e0; text-shadow: none;">— Miyamoto Musashi (Ngũ Luân Thư)</span>
-                    </div>
-
-                    <!-- Khối 1000 Ngày -->
+                    <div style="font-family: sans-serif; font-weight: bold; color: #fff; text-align: center; margin-bottom: 25px; font-size: 1.05rem; text-shadow: 0 0 8px rgba(176, 38, 255, 0.8); line-height: 1.5;">"Thiên nhật chi kê vi Đạo,<br>Vạn nhật chi kê vi Thần."<br><span style="font-size: 0.9rem; color: #d0d5e0; text-shadow: none;">— Miyamoto Musashi (Ngũ Luân Thư)</span></div>
                     <div style="margin-bottom: 25px; padding: 15px; border-left: 2px solid var(--violet); background: rgba(0,0,0,0.4); border-top: 1px solid rgba(176, 38, 255, 0.1); border-right: 1px solid rgba(176, 38, 255, 0.1); border-bottom: 1px solid rgba(176, 38, 255, 0.1);">
                         <div style="font-family: var(--font-display); font-weight: bold; color: #fff; text-align: center; margin-bottom: 12px; letter-spacing: 1px;">[ MỤC TIÊU: 1000 NGÀY KIẾN TẠO VÔ NGÃ ]</div>
                         <p style="margin-bottom: 8px;"><strong style="color: #fff;">Tại sao là 1.000 ngày?</strong></p>
@@ -586,52 +465,16 @@
 
                     <details class="sub-tier" open>
                         <summary class="sub-tier-btn" onclick="playSlashSound()">[ + ] MUSASHI - KIẾM SĨ HUYỀN THOẠI (1584 - 1645)</summary>
-                        <div class="sub-tier-content">
-                            <p>• <strong>Huyền thoại bất bại:</strong> Miyamoto Musashi (1584 - 1645), kiếm khách vĩ đại nhất lịch sử Nhật Bản. Bằng kỷ luật thép và tư duy vượt thời đại, ông đã trải qua hơn 60 trận sinh tử chiến trong suốt cuộc đời mà chưa một lần nếm mùi thất bại.</p>
-                            <p>• <strong>Vượt lên trên bạo lực:</strong> Kẻ thù lớn nhất không nằm ở mũi kiếm của đối phương, mà nằm ở chính tâm trí. Sự vĩ đại của Musashi không chỉ ở kỹ năng cơ học cơ bắp, mà ở khả năng giữ được sự tĩnh tại đến đáng sợ ngay giữa lằn ranh sống chết.</p>
-                            <p>• <strong>Di sản để đời:</strong> Cuối đời, ông lui về hang động Reigandō (Linh Nham Động) để viết nên "Ngũ Luân Thư". Tác phẩm này thực sự được rất nhiều nhà đầu tư, nhà quản lý quỹ, doanh nhân lớn tại Mỹ (bao gồm cả các vòng tròn lãnh đạo tại Harvard hay Phố Wall) nghiên cứu như một cẩm nang về quản trị rủi ro, đối đầu cạnh tranh và đưa ra quyết định dưới áp lực cao.</p>
-                            <img src="https://github.com/happyk1900/Kai-Ripe/blob/main/huyenthoaiok.jpg?raw=true" class="tier3-img" onclick="openFullscreen(this)" alt="Musashi">
-                        </div>
+                        <div class="sub-tier-content"><p>• <strong>Huyền thoại bất bại:</strong> Miyamoto Musashi (1584 - 1645), kiếm khách vĩ đại nhất lịch sử Nhật Bản. Bằng kỷ luật thép và tư duy vượt thời đại, ông đã trải qua hơn 60 trận sinh tử chiến trong suốt cuộc đời mà chưa một lần nếm mùi thất bại.</p><p>• <strong>Vượt lên trên bạo lực:</strong> Kẻ thù lớn nhất không nằm ở mũi kiếm của đối phương, mà nằm ở chính tâm trí. Sự vĩ đại của Musashi không chỉ ở kỹ năng cơ học cơ bắp, mà ở khả năng giữ được sự tĩnh tại đến đáng sợ ngay giữa lằn ranh sống chết.</p><p>• <strong>Di sản để đời:</strong> Cuối đời, ông lui về hang động Reigandō (Linh Nham Động) để viết nên "Ngũ Luân Thư". Tác phẩm này thực sự được rất nhiều nhà đầu tư, nhà quản lý quỹ, doanh nhân lớn tại Mỹ nghiên cứu như một cẩm nang về quản trị rủi ro.</p><img src="https://github.com/happyk1900/Kai-Ripe/blob/main/huyenthoaiok.jpg?raw=true" class="tier3-img" onclick="openFullscreen(this)" alt="Musashi"></div>
                     </details>
 
                     <details class="sub-tier">
                         <summary class="sub-tier-btn" onclick="playSlashSound()">[ + ] NGŨ LUÂN THƯ (BẢN DỊCH THỰC CHIẾN POKER)</summary>
-                        <div class="sub-tier-content">
-                            <p>• <strong>1. Quyển Đất (Nền Tảng & Kỷ Discipline):</strong> Mọi đế chế bắt đầu từ móng. Musashi ví người cầm quân như thợ mộc. Trong Poker, "Đất" là quản trị Bankroll và chỉ số SCI. Chuẩn bị thể chất rệu rã, cầm Bankroll mỏng manh bước vào giải đấu giống như xây nhà trên cát. Nền tảng không vững, mọi kỹ năng đều vô nghĩa.</p>
-                            <p>• <strong>2. Quyển Nước (Sự Linh Hoạt & Tâm Tĩnh):</strong> Nước không có hình dạng cố định, lúc tĩnh lặng êm đềm, lúc cuộn trào hung hãn. Bàn đấu biến thiên, Variance xuất hiện. Tâm trí phải lỏng và tĩnh như nước để thích nghi với mọi phong cách, không bao giờ để một cú Bad Beat làm vẩn đục.</p>
-                            <p>• <strong>3. Quyển Lửa (Giao Tranh & Áp Đảo):</strong> Lửa đại diện cho sự bùng nổ tàn khốc. Nghệ thuật chọn thời điểm công kích. Chiếm lợi thế vị trí (Position), đọc vị điểm yếu, tung ra những cú Bluff hoặc Value Bet chí mạng để thiêu rụi ý chí đối phương.</p>
-                            <p>• <strong>4. Quyển Gió (Thấu Hiểu Đối Thủ):</strong> "Gió" là nghiên cứu các trường phái khác. Gạt bỏ hội chứng "Fancy Play" (chơi ngẫu hứng, màu mè). Chân lý của binh pháp là sự tối giản: Hiệu quả (EV+) là thước đo duy nhất.</p>
-                            <p>• <strong>5. Quyển Không (Cảnh Giới Vô Ngã):</strong> Tầng cao nhất của võ đạo. Không phải trống rỗng, mà là sự thấu hiểu tuyệt đối khi mọi kỹ năng hóa thành xương máu. Hành động dựa trên bản năng tính toán thuần khiết. Không hưng phấn khi thắng lớn, không sợ hãi rủi ro.</p>
-                            <p style="margin-top: 10px; border-top: 1px dashed rgba(176,38,255,0.3); padding-top: 10px;">• <strong>Quy tắc Sinh tử (The Void Slash):</strong> Bàn đấu là chiến địa. Bài tẩy, Bad Beat hay Variance (Độ lệch chuẩn) chính là những nhát chém từ hư không. Bạn không thể né tránh, nhưng bạn có quyền chọn cách đón nhận nó. Chỉ có kỷ luật cơ học (SCI) mới giúp bạn không gục ngã khi dính chém. Chơi như một cỗ máy vô cảm.<br>• <strong>Mắt của Tâm (Kansken):</strong> Đừng nhìn bằng mắt thường vào bài lật trên bàn. Hãy dùng Mắt của Tâm để thấu thị Range bài và ý đồ sau từng nhịp thở của đối thủ.<br>• <strong>Phá vỡ nhịp điệu:</strong> Kẻ làm chủ nhịp điệu của mình và bẻ gãy nhịp độ đối thủ sẽ là kẻ sống sót.<br>• <strong>Tuyên ngôn:</strong> <em>"Không có gì ngoài thực tế. Đừng làm bất cứ điều gì vô ích."</em></p>
-                        </div>
-                    </details>
-
-                    <details class="sub-tier">
-                        <summary class="sub-tier-btn" onclick="playSlashSound()">[ + ] DI HUẤN NGUYÊN BẢN (TÀI LIỆU GỐC MUSASHI)</summary>
-                        <div class="sub-tier-content">
-                            <p><strong>1. Tổng quan tác phẩm:</strong><br>
-                            <em>Ngũ Luân Thư (Go Rin No Sho - 五輪書)</em> là tác phẩm kinh điển về binh pháp, chiến thuật và triết lý võ đạo được viết bởi Miyamoto Musashi (Cung Bản Vũ Tàng) – kiếm sĩ huyền thoại vĩ đại nhất lịch sử Nhật Bản vào khoảng năm 1645 tại hang động Reigandō (Linh Nham Động). Ban đầu viết làm giáo trình cho môn phái Hyoho Niten Ichi-ryu (phái song kiếm), nay đã trở thành cẩm nang kinh điển về tư duy chiến lược, quản trị và phát triển bản thân.</p>
-                            
-                            <p><strong>2. Cấu trúc 5 Quyển theo triết lý Phật giáo/Đạo giáo:</strong></p>
-                            <p>• <strong>Quyển Đất (Earth):</strong> Trọng tâm là cơ sở, nền tảng và thế giới quan. Musashi giải thích về con đường binh pháp (Heiho), so sánh người cầm quân/kiếm sĩ với người thợ mộc: phải biết dùng đúng người, đúng việc, nắm rõ công cụ và chuẩn bị nền móng vững chắc.</p>
-                            <p>• <strong>Quyển Nước (Water):</strong> Trọng tâm là sự linh hoạt và tư thế/kỹ thuật. Nước có hình dạng của bình chứa nó. Quyển này bàn về tinh thần chiến đấu: tâm trí phải luôn bình tĩnh, linh hoạt, không bị gò bó.</p>
-                            <p>• <strong>Quyển Lửa (Fire):</strong> Trọng tâm là chiến thuật, giao tranh và làm chủ thể trận. Lửa đại diện cho sự bùng nổ, biến đổi vĩnh cửu. Phân tích thực chiến: chiếm lợi thế địa hình, thời điểm công kích, đọc vị đối thủ và áp đảo tinh thần.</p>
-                            <p>• <strong>Quyển Gió (Wind):</strong> Trọng tâm là nghiên cứu đối thủ. "Phong" đại diện cho truyền thống/phong cách các trường phái khác. Musashi chỉ ra sự đơn giản, thực tế và hiệu quả mới là cốt lõi của binh pháp, loại bỏ kỹ xảo màu mè.</p>
-                            <p>• <strong>Quyển Không (Void):</strong> Trọng tâm là cảnh giới tối cao của triết lý và tâm trí. "Không" không phải là trống rỗng, mà là trạng thái thấu hiểu tuyệt đối sau khi rèn luyện thành thục. Kiếm sĩ hành động theo bản năng thuần khiết, không vướng bận cái Tôi hay sợ hãi.</p>
-                        </div>
-                    </details>
-
-                    <details class="sub-tier">
-                        <summary class="sub-tier-btn" onclick="playSlashSound()">[ + ] TÓM LẠI</summary>
-                        <div class="sub-tier-content">
-                            <p>• <strong>Đích đến cuối cùng:</strong> Động lực chỉ giúp kẻ nghiệp dư bám víu qua 90 ngày. Kỷ luật cơ học mới đưa bạn xuyên thủng 1.000 ngày để chạm tới Vô Ngã. Khi mọi biến số và quyết định trên bàn Poker hóa thành phản xạ tuyệt đối, bạn bước sang cột mốc 10.000 ngày. Không có kiếm pháp vô địch, chỉ có con người vô địch. Hãy rũ bỏ bản ngã để trở thành một huyền thoại bất tử.</p>
-                            <img src="https://github.com/happyk1900/Kai-Ripe/blob/main/vonga%20ok.jpg?raw=true" class="tier3-img" onclick="openFullscreen(this)" alt="10.000 Ngày">
-                        </div>
+                        <div class="sub-tier-content"><p>• <strong>1. Quyển Đất (Nền Tảng & Kỷ Discipline):</strong> Mọi đế chế bắt đầu từ móng. Trong Poker, "Đất" là quản trị Bankroll và chỉ số SCI.</p><p>• <strong>2. Quyển Nước (Sự Linh Hoạt & Tâm Tĩnh):</strong> Tâm trí phải lỏng và tĩnh như nước để thích nghi với mọi phong cách, không bao giờ để một cú Bad Beat làm vẩn đục.</p><p>• <strong>3. Quyển Lửa (Giao Tranh & Áp Đảo):</strong> Nghệ thuật chọn thời điểm công kích. Chiếm lợi thế vị trí (Position), đọc vị điểm yếu.</p><p>• <strong>4. Quyển Gió (Thấu Hiểu Đối Thủ):</strong> Gạt bỏ hội chứng "Fancy Play". Chân lý của binh pháp là sự tối giản: Hiệu quả (EV+) là thước đo duy nhất.</p><p>• <strong>5. Quyển Không (Cảnh Giới Vô Ngã):</strong> Tầng cao nhất của võ đạo. Không hưng phấn khi thắng lớn, không sợ hãi rủi ro.</p></div>
                     </details>
                 </div>
             </div>
 
-            <!-- TIER 4 -->
             <div class="tier-item" style="margin-top: 20px;">
                 <button class="tier-btn tier-void" onclick="toggleTier('tier4', this)">[ PROTOCOL: VOID REGEN - NGHỈ NGƠI ] <span>▼</span><div class="shooting-star"></div></button>
                 <div class="tier-content" id="tier4">
@@ -659,7 +502,6 @@
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport);
         fixViewport();
 
-        // XÁC ĐỊNH NGÀY HÔM NAY VÀ NGÀY HÔM QUA CHO LOGIC VOID REGEN (CHỦ NHẬT)
         const d = new Date(); document.getElementById('current-date').innerText = ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
         const isSunday = d.getDay() === 0; 
         const t1Date = new Date(d); t1Date.setDate(d.getDate() - 1);
@@ -762,20 +604,14 @@
             if(edge) { edge.classList.add('touch-pulse'); setTimeout(() => edge.classList.remove('touch-pulse'), 150); }
         });
 
-        const bgmAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20R%C5%8Dnin.mp3'); 
-        bgmAudio.loop = true; bgmAudio.volume = 0.5; let isMuted = false;
-        
-        function toggleBGM(e) { 
-            e.stopPropagation(); 
-            if(bgmAudio.paused){ bgmAudio.play(); isMuted=false; document.getElementById('icon-sound-on').style.display='block'; document.getElementById('icon-sound-off').style.display='none'; } 
-            else { bgmAudio.pause(); isMuted=true; document.getElementById('icon-sound-on').style.display='none'; document.getElementById('icon-sound-off').style.display='block'; } 
-        }
-
         // ==========================================
-        // GIAO THỨC INTRO ĐIỆN ẢNH (CINEMATIC)
+        // GIAO THỨC INTRO ĐIỆN ẢNH (BỌC THÉP V3)
         // ==========================================
         
-        const cinematicAudio = new Audio('https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/INTRO-THOAI.mp3');
+        let cinematicAudio = null;
+        let bgmAudio = null;
+        let isMuted = false;
+        let introStarted = false;
         let introReq;
         let introFinished = false;
 
@@ -795,49 +631,86 @@
 
         const climaxTime = 85.5; 
 
-        function startIntro() {
-            initAudio(); 
-            
-            const btn = document.getElementById('gatekeeper-btn');
-            btn.innerHTML = '[ ĐANG TẢI DỮ LIỆU BẢO MẬT... ]';
-            btn.classList.add('loading-pulse');
-            btn.style.pointerEvents = 'none';
-
-            let playPromise = cinematicAudio.play();
-
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    btn.style.display = 'none';
-                    document.getElementById('skip-btn').style.display = 'block';
-                    document.getElementById('intro-bg').classList.add('reveal'); 
-                    
-                    const subContainer = document.getElementById('cine-subtitles');
-                    introSubtitles.forEach((sub, index) => {
-                        let el = document.createElement('div');
-                        el.className = 'cine-text'; el.id = 'sub-' + index; el.innerHTML = sub.html;
-                        subContainer.appendChild(el);
-                    });
-                    
-                    checkIntroTime();
-                }).catch(error => {
-                    console.warn("Media chặn tải: ", error);
-                    btn.innerHTML = '[ LỖI TẢI ÂM THANH - BỎ QUA ]';
-                    btn.classList.remove('loading-pulse');
-                    btn.style.pointerEvents = 'auto';
-                    btn.style.borderColor = 'var(--crimson)';
-                    btn.style.color = 'var(--crimson)';
-                    btn.onclick = skipIntro; 
-                });
+        function initAllAudio() {
+            if (!cinematicAudio) {
+                cinematicAudio = new Audio('https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/INTRO-THOAI.mp3');
+            }
+            if (!bgmAudio) {
+                bgmAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20R%C5%8Dnin.mp3');
+                bgmAudio.loop = true; bgmAudio.volume = 0.5;
             }
         }
 
+        function startIntro(e) {
+            // Chặn đúp chuột do ontouchstart và onclick gọi cùng lúc
+            if (e && e.type === 'touchstart') {
+                e.preventDefault();
+            }
+            
+            if(introStarted) return;
+            introStarted = true;
+
+            initAudio(); 
+            initAllAudio();
+            
+            const btn = document.getElementById('gatekeeper-btn');
+            btn.innerHTML = '[ ĐANG GIẢI MÃ TÍN HIỆU... ]';
+            btn.classList.add('loading-pulse');
+
+            try {
+                let playPromise = cinematicAudio.play();
+                if (playPromise !== undefined && typeof playPromise.then === 'function') {
+                    playPromise.then(() => {
+                        startIntroVisuals();
+                    }).catch(error => {
+                        console.warn("Zalo chặn media:", error);
+                        showSkipFallback(btn);
+                    });
+                } else {
+                    startIntroVisuals(); // Cho các trình duyệt đời rất cũ
+                }
+            } catch (err) {
+                showSkipFallback(btn);
+            }
+        }
+
+        function startIntroVisuals() {
+            document.getElementById('gatekeeper-btn').style.display = 'none';
+            document.getElementById('skip-btn').style.display = 'block';
+            document.getElementById('intro-bg').classList.add('reveal'); 
+            
+            const subContainer = document.getElementById('cine-subtitles');
+            subContainer.innerHTML = '';
+            introSubtitles.forEach((sub, index) => {
+                let el = document.createElement('div');
+                el.className = 'cine-text'; el.id = 'sub-' + index; el.innerHTML = sub.html;
+                subContainer.appendChild(el);
+            });
+            checkIntroTime();
+        }
+
+        function showSkipFallback(btn) {
+            btn.innerHTML = '[ BỎ QUA - VÀO HỆ THỐNG ]';
+            btn.classList.remove('loading-pulse');
+            btn.style.borderColor = 'var(--crimson)';
+            btn.style.color = 'var(--crimson)';
+            
+            // Xóa block trạng thái cũ để ấn tiếp được
+            introStarted = false; 
+            btn.onclick = skipIntro;
+            btn.ontouchstart = skipIntro;
+        }
+
         function checkIntroTime() {
+            if(!cinematicAudio) return;
             const ct = cinematicAudio.currentTime;
             
             introSubtitles.forEach((sub, index) => {
                 let el = document.getElementById('sub-' + index);
-                if(ct >= sub.tIn && ct < sub.tOut) { el.classList.add('active'); el.classList.remove('fade-out'); } 
-                else if (ct >= sub.tOut) { el.classList.remove('active'); el.classList.add('fade-out'); }
+                if(el) {
+                    if(ct >= sub.tIn && ct < sub.tOut) { el.classList.add('active'); el.classList.remove('fade-out'); } 
+                    else if (ct >= sub.tOut) { el.classList.remove('active'); el.classList.add('fade-out'); }
+                }
             });
             
             if(ct >= climaxTime && !introFinished) {
@@ -868,17 +741,18 @@
             if (introReq) cancelAnimationFrame(introReq); 
             playBeep();
             
-            let vol = cinematicAudio.volume;
-            let fadeOut = setInterval(() => {
-                if (vol > 0.05) { vol -= 0.05; cinematicAudio.volume = vol; } 
-                else { clearInterval(fadeOut); cinematicAudio.pause(); }
-            }, 50);
-            
+            if(cinematicAudio) {
+                let vol = cinematicAudio.volume;
+                let fadeOut = setInterval(() => {
+                    if (vol > 0.05) { vol -= 0.05; cinematicAudio.volume = vol; } 
+                    else { clearInterval(fadeOut); cinematicAudio.pause(); }
+                }, 50);
+            }
             endIntroSequence();
         }
 
         function endIntroSequence() {
-            cinematicAudio.pause();
+            if(cinematicAudio) cinematicAudio.pause();
             const layer = document.getElementById('intro-layer');
             layer.style.opacity = '0'; 
             
@@ -887,6 +761,13 @@
                 document.getElementById('main-pwa').style.opacity = '1'; 
                 initializeSystem(); 
             }, 2000); 
+        }
+
+        function toggleBGM(e) { 
+            e.stopPropagation(); 
+            if(!bgmAudio) initAllAudio();
+            if(bgmAudio.paused){ bgmAudio.play(); isMuted=false; document.getElementById('icon-sound-on').style.display='block'; document.getElementById('icon-sound-off').style.display='none'; } 
+            else { bgmAudio.pause(); isMuted=true; document.getElementById('icon-sound-on').style.display='none'; document.getElementById('icon-sound-off').style.display='block'; } 
         }
 
         // ==========================================
@@ -1185,7 +1066,6 @@
                     document.body.classList.add('sync-complete'); isSynced = true; 
                     playSlashSound(); if(navigator.vibrate) navigator.vibrate(200);
 
-                    // 1. T-1 DATA & LÕI SCI MA30
                     let centerSci = resData.sci_ma30 !== undefined ? resData.sci_ma30 : resData.sci;
                     document.getElementById('val-sci').innerText = centerSci || '---'; 
                     document.getElementById('val-hr').innerText = resData.hr || '---'; 
@@ -1195,7 +1075,6 @@
                     document.getElementById('val-water').innerText = resData.water || '---'; 
                     document.getElementById('val-steps').innerText = resData.steps || '---';
 
-                    // 2. T-0 LIVE RADAR (TÍNH TOÁN MÓN NỢ SINH HỌC)
                     let targetSteps = isSunday ? 0 : 6000; 
                     let targetWater = 2.5;
                     let targetSleep = 7.0;
@@ -1214,7 +1093,6 @@
 
                     let liveHtml = '';
                     
-                    // Nhóm Vận Động & Phục Hồi
                     if (!isSunday && liveHR > 0 && liveHR < 160) {
                         liveHtml += `<span class="metric-item">❤️ Peak: ${liveHR.toFixed(0)}</span>`;
                     }
@@ -1222,7 +1100,6 @@
                     if (defSleep > 0) liveHtml += `<span class="metric-item">🛌 +${defSleep.toFixed(1)}h</span>`;
                     if (defWater > 0) liveHtml += `<span class="metric-item">💧 +${defWater.toFixed(1)}L</span>`;
                     
-                    // Nhóm Cơ Thể
                     if (liveWeight > 67.0) {
                         liveHtml += `<span class="metric-item">⚖️ -${(liveWeight - 67.0).toFixed(1)}kg</span>`;
                     } else if (liveWeight > 0 && liveWeight < 63.0) {
@@ -1251,7 +1128,6 @@
                         radarMetrics.innerHTML = liveHtml;
                     }
 
-                    // 3. LOGIC RANK (Dựa trên SCI MA30)
                     const statusBanner = document.getElementById('status-banner');
                     document.body.classList.remove('tier-shiro', 'tier-chairo', 'tier-kuro');
 
