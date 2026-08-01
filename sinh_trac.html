@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Event Horizon Core</title>
+    <!-- Thêm font chữ cho Intro -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -30,7 +31,7 @@
            ========================================= */
         #intro-layer { position: fixed; inset: 0; z-index: 100000; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 2s ease; overflow: hidden; }
         
-        #intro-bg { position: absolute; inset: -5%; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/anh%20intro.jpg?raw=true') center/cover; filter: blur(25px) brightness(0.15) grayscale(0.6); opacity: 0; transition: all 15s ease-out; }
+        #intro-bg { position: absolute; inset: -5%; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/anh%20intro%20(1).jpg?raw=true') center/cover; filter: blur(25px) brightness(0.15) grayscale(0.6); opacity: 0; transition: all 15s ease-out; }
         #intro-bg.reveal { opacity: 1; filter: blur(6px) brightness(0.35) grayscale(0.2); transform: scale(1.05); }
 
         #gatekeeper-btn { z-index: 10; border: 1px solid rgba(0,229,255,0.5); background: rgba(0,229,255,0.05); color: var(--cyan); padding: 15px 30px; font-family: var(--font-display); font-size: 13px; letter-spacing: 3px; font-weight: bold; cursor: pointer; transition: all 0.3s; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); animation: pulse-gatekeeper 2s infinite alternate; text-align: center; }
@@ -54,7 +55,7 @@
         #skip-btn { position: absolute; bottom: 30px; right: 30px; z-index: 30; background: transparent; border: none; color: rgba(255,255,255,0.3); font-family: var(--font-display); font-size: 11px; letter-spacing: 1px; cursor: pointer; transition: color 0.3s; display: none; padding: 10px; }
         #skip-btn:active { color: #fff; }
 
-        /* FULLSCREEN BACKGROUNDS (MAIN APP) */
+        /* FULLSCREEN BACKGROUNDS */
         .tactical-grid-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-obsidian); z-index: 1; perspective: 600px; overflow: hidden; transition: opacity 1.5s ease; }
         .grid-plane { position: absolute; width: 200vw; height: 200vh; left: -50vw; top: 0%; background-image: linear-gradient(rgba(0, 229, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.1) 1px, transparent 1px); background-size: 40px 40px; transform: rotateX(75deg); animation: grid-scroll 10s linear infinite; transition: opacity 1.5s ease; }
         .vignette { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; background: radial-gradient(circle at center, transparent 30%, #050608 90%); transition: all 1.5s ease; }
@@ -70,44 +71,86 @@
 
         /* EDGE LIGHTING */
         .edge-lighting { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999; pointer-events: none; transition: box-shadow 1s ease, border 1s ease; box-shadow: inset 0 0 0px transparent; border: 0px solid transparent; }
+        
         body.tier-shiro .edge-lighting { box-shadow: inset 0 0 50px rgba(255, 42, 42, 0.6), inset 0 0 15px rgba(255, 42, 42, 0.8); border: 2px solid rgba(255, 42, 42, 0.4); }
         body.tier-chairo .edge-lighting { box-shadow: inset 0 0 50px rgba(176, 38, 255, 0.5), inset 0 0 15px rgba(176, 38, 255, 0.7); border: 2px solid rgba(176, 38, 255, 0.4); }
         body.tier-kuro .edge-lighting { box-shadow: inset 0 0 70px rgba(0, 255, 157, 0.6), inset 0 0 25px rgba(0, 255, 157, 0.9); border: 2px solid rgba(0, 255, 157, 0.6); animation: edge-breathe 1.5s infinite alternate; }
+        
         @keyframes edge-breathe { 0% { opacity: 0.7; } 100% { opacity: 1; box-shadow: inset 0 0 90px rgba(0, 255, 157, 0.8), inset 0 0 35px rgba(0, 255, 157, 1); border-width: 4px; } }
+        
         .edge-lighting.touch-pulse { filter: brightness(2.5); transition: filter 0.1s ease; }
 
         /* UI CONTAINER */
-        .pwa-container { width: 100%; max-width: 420px; height: 100%; max-height: 900px; position: relative; background: transparent; display: flex; flex-direction: column; z-index: 10; opacity: 0; transition: opacity 2s ease; }
+        .pwa-container {
+            width: 100%; max-width: 420px; height: 100%; max-height: 900px; position: relative;
+            background: transparent; display: flex; flex-direction: column; z-index: 10;
+            opacity: 0; /* Ẩn đi chờ Intro xong */
+            transition: opacity 2s ease;
+        }
+
+        /* HEADER */
         .top-row { position: relative; z-index: 10; padding: 15px 15px 10px; display: flex; justify-content: space-between; align-items: flex-start; transition: opacity 1.5s ease; }
         .left-controls { display: flex; flex-direction: column; gap: 10px; transition: opacity 1.5s ease; }
         .btn-exit, .btn-audio, .btn-chip { background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0,229,255,0.3); color: var(--cyan); transition: all 0.3s ease; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
         .btn-exit { text-decoration: none; font-family: var(--font-display); font-size: 10px; font-weight: bold; letter-spacing: 1px; padding: 5px 12px; width: fit-content; }
         .btn-audio, .btn-chip { padding: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
         .btn-audio svg, .btn-chip svg { width: 16px; height: 16px; fill: currentColor; }
+        
         .btn-chip { display: none; color: var(--amber); border-color: var(--amber); background: rgba(255, 170, 0, 0.1); animation: chip-pulse 2s infinite alternate; }
         @keyframes chip-pulse { 0% { box-shadow: 0 0 5px rgba(255, 170, 0, 0.2); } 100% { box-shadow: 0 0 15px rgba(255, 170, 0, 0.8); border-color: #fff; color: #fff; } }
+
         body.combat-active .btn-exit, body.combat-active .btn-audio { color: var(--crimson); border-color: var(--crimson); background: rgba(255, 42, 42, 0.1); }
         .sys-info { text-align: right; font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; text-shadow: 0 1px 2px #000; transition: opacity 1.5s ease; }
         .sys-info span { color: var(--cyan); font-weight: bold; }
         .ctrl-group { display: flex; flex-direction: column; align-items: flex-end; margin-top: 10px; gap: 6px; }
         
         .streak-box, .sci-lbl, .fingerprint-wrapper { transition: opacity 0.4s ease; }
-        .streak-box { position: relative; overflow: hidden; border: 1px solid var(--amber); background: linear-gradient(135deg, rgba(255, 170, 0, 0.15) 0%, rgba(255, 170, 0, 0.35) 100%); color: #fff; padding: 8px 18px; font-family: var(--font-display); font-size: 13.5px; font-weight: 900; letter-spacing: 1.5px; cursor: pointer; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); transition: all 0.3s ease; box-shadow: 0 0 15px rgba(255, 170, 0, 0.5), inset 0 0 8px rgba(255, 170, 0, 0.3); text-shadow: 0 0 10px var(--amber); }
-        .streak-box::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,0.4), rgba(255,255,255,0)); transform: rotate(45deg); animation: btn-shine 3s infinite ease-in-out; }
+        .streak-box { 
+            position: relative; overflow: hidden;
+            border: 1px solid var(--amber); 
+            background: linear-gradient(135deg, rgba(255, 170, 0, 0.15) 0%, rgba(255, 170, 0, 0.35) 100%); 
+            color: #fff; padding: 8px 18px; 
+            font-family: var(--font-display); font-size: 13.5px; font-weight: 900; 
+            letter-spacing: 1.5px; cursor: pointer; 
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); 
+            transition: all 0.3s ease; 
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.5), inset 0 0 8px rgba(255, 170, 0, 0.3);
+            text-shadow: 0 0 10px var(--amber);
+        }
+        .streak-box::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,0.4), rgba(255,255,255,0));
+            transform: rotate(45deg); animation: btn-shine 3s infinite ease-in-out;
+        }
         @keyframes btn-shine { 0% { left: -150%; } 100% { left: 150%; } }
         .streak-box:active { transform: scale(0.95); }
-        @keyframes flash-unsigned { 0%, 100% { background: rgba(255, 170, 0, 0.15); box-shadow: 0 0 12px rgba(255, 170, 0, 0.3); transform: scale(1); } 50% { background: rgba(255, 170, 0, 0.5); box-shadow: 0 0 25px var(--amber); transform: scale(1.05); color: #fff; } }
+        
+        @keyframes flash-unsigned {
+            0%, 100% { background: rgba(255, 170, 0, 0.15); box-shadow: 0 0 12px rgba(255, 170, 0, 0.3); transform: scale(1); }
+            50% { background: rgba(255, 170, 0, 0.5); box-shadow: 0 0 25px var(--amber); transform: scale(1.05); color: #fff; }
+        }
         .alert-unsigned { animation: flash-unsigned 1.2s infinite ease-in-out !important; border: 2px solid var(--amber) !important; font-weight: bold; }
 
+        /* BANNER & MARQUEE */
         .banner-wrapper { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 0px; transition: opacity 0.5s ease, transform 0.5s ease; }
         .status-banner { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 2px; padding: 6px 20px; text-align: center; border: 1px solid var(--amber); color: var(--amber); background: rgba(255, 170, 0, 0.1); clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); transition: all 0.5s ease; }
-        .combat-marquee-box { display: flex; align-items: center; width: 92%; max-width: 360px; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.1); padding: 5px 12px; margin-top: 8px; cursor: pointer; text-decoration: none; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); transition: all 0.5s ease; }
+        
+        .combat-marquee-box { 
+            display: flex; align-items: center; width: 92%; max-width: 360px; 
+            border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.1); 
+            padding: 5px 12px; margin-top: 8px; cursor: pointer; text-decoration: none; 
+            clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); 
+            transition: all 0.5s ease; 
+        }
+        
         .mq-icon-fixed { font-size: 15px; margin-right: 12px; flex-shrink: 0; animation: icon-heartbeat 0.8s infinite alternate cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 0 4px currentColor); z-index: 2; }
         .mq-text-container { flex-grow: 1; overflow: hidden; white-space: nowrap; position: relative; -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); }
         .marquee-text { display: inline-block; padding-left: 100%; animation: marquee 20s linear infinite; font-family: var(--font-display); font-size: 10px; font-weight: bold; letter-spacing: 1.5px; }
+        
         @keyframes icon-heartbeat { 0% { transform: scale(0.9); } 100% { transform: scale(1.35); } }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
+        /* LÕI ARC REACTOR 3D */
         .core-wrapper { position: relative; flex: 1; display: flex; justify-content: center; align-items: center; z-index: 10; min-height: 0; perspective: 1000px; }
         .arc-reactor { position: absolute; width: 340px; height: 340px; display: flex; justify-content: center; align-items: center; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.5s ease; }
         .ring-svg { position: absolute; width: 100%; height: 100%; overflow: visible; z-index: 5; transition: all 1.5s ease; }
@@ -122,23 +165,30 @@
         .plasma-node { fill: #fff; opacity: 0; transition: opacity 0.5s ease; }
 
         .sci-nexus { position: absolute; text-align: center; z-index: 15; width: 110px; height: 110px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(176, 38, 255, 0.2) 0%, transparent 70%); box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.1); cursor: pointer; transition: all 1.5s ease; overflow: hidden; }
+        
         .fingerprint-wrapper { position: absolute; width: 50px; height: 50px; display: none; justify-content: center; align-items: center; z-index: 20; }
         .fingerprint-wrapper svg { width: 100%; height: 100%; stroke: var(--violet); filter: drop-shadow(0 0 8px var(--violet)); transition: all 0.3s ease; }
         .fp-scanner-line { position: absolute; width: 120%; height: 3px; background: var(--mint); box-shadow: 0 0 15px 3px var(--mint); top: -10%; left: -10%; border-radius: 50%; display: none; }
+
         .sci-val { font-family: var(--font-display); font-size: 34px; font-weight: 900; color: var(--violet); text-shadow: 0 0 20px var(--violet); letter-spacing: 2px; transition: color 1s ease, text-shadow 1s ease, opacity 1.5s ease; }
         .sci-lbl { font-size: 10px; color: #fff; letter-spacing: 1px; opacity: 0.8; margin-top: 40px; transition: opacity 1.5s ease; z-index: 25; position: absolute; bottom: 15px;}
 
+        /* --- TIER DYNAMIC STYLING --- */
         body.tier-shiro .ring { stroke-dasharray: 2 30 !important; stroke: var(--crimson) !important; filter: drop-shadow(0 0 5px var(--crimson)); }
         body.tier-shiro .plasma-node { opacity: 0; } 
         body.tier-shiro .sci-val { color: var(--crimson); text-shadow: 0 0 15px var(--crimson); }
         body.tier-shiro .sci-nexus { box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.2); }
-        body.tier-shiro .orb-cw { animation: spin-cw 30s linear infinite; } body.tier-shiro .orb-ccw { animation: spin-ccw 35s linear infinite; }
+        body.tier-shiro .orb-cw { animation: spin-cw 30s linear infinite; }
+        body.tier-shiro .orb-ccw { animation: spin-ccw 35s linear infinite; }
+        
         body.tier-chairo .ring { stroke-dasharray: 2000 !important; stroke: var(--cyan) !important; filter: drop-shadow(0 0 5px var(--cyan)); }
         body.tier-chairo .ring-phys, body.tier-chairo .ring-rec { stroke: var(--mint) !important; filter: drop-shadow(0 0 5px var(--mint)); }
         body.tier-chairo .plasma-node { opacity: 1; fill: #fff; filter: drop-shadow(0 0 6px #fff); } 
         body.tier-chairo .sci-val { color: var(--cyan); text-shadow: 0 0 15px var(--cyan); }
         body.tier-chairo .sci-nexus { box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.2); }
-        body.tier-chairo .orb-cw { animation: spin-cw 10s linear infinite; } body.tier-chairo .orb-ccw { animation: spin-ccw 12s linear infinite; }
+        body.tier-chairo .orb-cw { animation: spin-cw 10s linear infinite; }
+        body.tier-chairo .orb-ccw { animation: spin-ccw 12s linear infinite; }
+
         body.tier-kuro .ring { stroke-dasharray: 2000 !important; stroke: var(--neon-pink) !important; filter: drop-shadow(0 0 10px var(--neon-pink)); stroke-width: 3; }
         body.tier-kuro .ring-phys, body.tier-kuro .ring-rec { stroke: var(--violet) !important; filter: drop-shadow(0 0 10px var(--violet)); }
         body.tier-kuro .plasma-node { opacity: 1; fill: #fff; filter: drop-shadow(0 0 12px #fff); r: 5.5; }
@@ -147,20 +197,33 @@
         @keyframes kuro-pulse { 0% { box-shadow: inset 0 0 30px rgba(255, 0, 255, 0.6), 0 0 40px 10px rgba(255, 0, 255, 0.3); } 100% { box-shadow: inset 0 0 60px rgba(255, 0, 255, 1), 0 0 80px 30px rgba(255, 0, 255, 0.6); } }
         body.tier-kuro .orb-cw { animation: spin-cw 3s linear infinite; } body.tier-kuro .orb-ccw { animation: spin-ccw 4s linear infinite; }
 
+        /* --- PRE-SCAN STATE --- */
         body.pre-scan-locked .sci-lbl, body.pre-scan-locked .fingerprint-wrapper, body.pre-scan-locked #val-sci, body.pre-scan-locked .banner-wrapper { opacity: 0 !important; pointer-events: none !important; }
         body.pre-scan-locked .sci-nexus { pointer-events: none !important; }
         body.uncommitted .safety-hud-box { display: none !important; }
 
-        .safety-hud-box { position: absolute; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5, 6, 8, 0.9); border: 1px solid var(--amber); box-shadow: 0 0 20px rgba(255, 170, 0, 0.1); padding: 20px 15px; backdrop-filter: blur(5px); clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); transition: all 0.5s ease; width: 90%; max-width: 340px; margin-top: 0; }
+        .safety-hud-box {
+            position: absolute; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(5, 6, 8, 0.9); border: 1px solid var(--amber); box-shadow: 0 0 20px rgba(255, 170, 0, 0.1);
+            padding: 20px 15px; backdrop-filter: blur(5px); clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            transition: all 0.5s ease; width: 90%; max-width: 340px; margin-top: 0;
+        }
         .safety-hud-box.unlocked { opacity: 0; pointer-events: none; transform: scale(1.1); display: none !important; }
         .hud-cond { font-family: var(--font-ui); font-size: 13px; color: #fff; margin-bottom: 12px; font-weight: 600; text-align: left; width: 100%; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; opacity: 0.9; }
-        .safety-lock-btn { margin-top: 5px; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.15); color: var(--amber); font-family: var(--font-display); font-size: 12px; font-weight: bold; padding: 10px; cursor: pointer; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); animation: flash-unsigned 1.5s infinite ease-in-out; text-shadow: 0 0 5px var(--amber); text-align: center; width: 100%; letter-spacing: 1px; }
+        .safety-lock-btn {
+            margin-top: 5px; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.15); color: var(--amber);
+            font-family: var(--font-display); font-size: 12px; font-weight: bold; padding: 10px; cursor: pointer;
+            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); animation: flash-unsigned 1.5s infinite ease-in-out;
+            text-shadow: 0 0 5px var(--amber); text-align: center; width: 100%; letter-spacing: 1px;
+        }
 
+        /* DATA PANELS */
         .data-panel { position: absolute; z-index: 15; background: rgba(8, 9, 13, 0.75); backdrop-filter: blur(3px); padding: 4px 12px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); border-left: 2px solid; cursor: pointer; transition: transform 0.2s, opacity 1.5s ease; }
         .data-panel:active { transform: scale(0.95); }
         .dp-right { clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px)); border-left: none; border-right: 2px solid; text-align: right; }
         .dp-val { font-family: var(--font-display); font-size: 16px; font-weight: 700; transition: all 0.3s ease; }
         .dp-lbl { font-size: 10px; color: rgba(255,255,255,0.8); letter-spacing: 1px; font-weight: 600; }
+
         .pos-hr { top: 10%; left: 5%; border-color: var(--crimson); } .pos-hr .dp-val { color: var(--crimson); text-shadow: 0 0 10px var(--crimson); }
         .pos-phys1 { top: 35%; left: 5%; border-color: var(--mint); } .pos-phys1 .dp-val { color: var(--mint); text-shadow: 0 0 10px var(--mint); }
         .pos-rec1 { top: 75%; left: 5%; border-color: var(--cyan); } .pos-rec1 .dp-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
@@ -168,22 +231,36 @@
         .pos-rec2 { top: 45%; right: 5%; border-color: var(--cyan); } .pos-rec2 .dp-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
         .pos-move { top: 75%; right: 5%; border-color: var(--amber); } .pos-move .dp-val { color: var(--amber); text-shadow: 0 0 10px var(--amber); }
         
-        .live-radar-bar { position: relative; z-index: 10; margin: 0 10px 5px; padding: 6px 12px; background: rgba(255, 42, 42, 0.05); border: 1px solid rgba(255, 42, 42, 0.3); border-left: 3px solid var(--crimson); font-family: var(--font-display); font-size: 11px; font-weight: bold; display: flex; align-items: center; letter-spacing: 1px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%); transition: all 0.5s ease; opacity: 0; display: none; }
+        /* LIVE RADAR BAR (T-0) */
+        .live-radar-bar {
+            position: relative; z-index: 10; margin: 0 10px 5px; padding: 6px 12px;
+            background: rgba(255, 42, 42, 0.05); border: 1px solid rgba(255, 42, 42, 0.3);
+            border-left: 3px solid var(--crimson);
+            font-family: var(--font-display); font-size: 11px; font-weight: bold;
+            display: flex; align-items: center; letter-spacing: 1px;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%);
+            transition: all 0.5s ease; opacity: 0; display: none;
+        }
         .live-radar-bar.active { opacity: 1; display: flex; }
         .live-radar-bar.all-clear { background: rgba(0, 255, 157, 0.05); border-color: rgba(0, 255, 157, 0.3); border-left-color: var(--mint); }
+        
         .live-pulse { color: var(--crimson); animation: pulse-red 1s infinite alternate; margin-right: 12px; white-space: nowrap; text-shadow: 0 0 5px var(--crimson); }
         .live-pulse.clear { color: var(--mint); animation: pulse-green 1.5s infinite alternate; text-shadow: 0 0 5px var(--mint); }
+        
         .live-metrics { color: #fff; display: flex; gap: 15px; flex-wrap: wrap; text-shadow: 0 0 3px rgba(255,255,255,0.5); font-family: var(--font-ui); font-size: 13px; font-weight: 700; }
         .metric-item { display: inline-flex; align-items: center; gap: 5px; }
 
         @keyframes pulse-red { 0% { opacity: 0.5; } 100% { opacity: 1; text-shadow: 0 0 10px var(--crimson); } }
         @keyframes pulse-green { 0% { opacity: 0.5; } 100% { opacity: 1; text-shadow: 0 0 10px var(--mint); } }
 
+        /* TERMINAL PANEL */
         .terminal-panel { position: relative; z-index: 10; margin: 0 10px 20px; padding: 25px 15px 12px; background: rgba(0, 229, 255, 0.02); border: 1px solid rgba(0, 229, 255, 0.2); border-bottom: 3px solid var(--cyan); clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%); min-height: 125px; flex-shrink: 0; box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05); transition: opacity 1.5s ease, border-color 0.5s, box-shadow 0.5s; }
         .terminal-header { position: absolute; top: 0; left: 20px; font-size: 9px; color: var(--bg-obsidian); background: var(--cyan); padding: 2px 10px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(0 0, 100% 0, calc(100% - 5px) 100%, 0 100%); transition: all 0.5s ease; }
+        
         .typewriter { font-family: var(--font-ui); font-weight: 600; font-size: 11.5px; color: #ffffff; line-height: 1.5; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); word-break: break-word; text-align: left; }
         .cursor { display: inline-block; width: 6px; height: 11px; background-color: #ffffff; animation: blink 1s step-end infinite; vertical-align: bottom; }
 
+        /* SYSTEM MODES */
         body.standby-mode .data-panel, body.standby-mode .live-radar-bar { opacity: 0.05; pointer-events: none; transform: scale(0.9); transition: all 1.5s ease; filter: grayscale(1); }
         body.standby-mode .ring-svg { opacity: 0.15; transition: all 1.5s ease; }
         body.standby-mode .plasma-node { opacity: 0; }
@@ -240,8 +317,10 @@
         @keyframes shockwave-pulse { 0% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0.6); } 50% { box-shadow: inset 0 0 50px rgba(176, 38, 255, 0.8), 0 0 0 30px rgba(176, 38, 255, 0); } 100% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0); } }
         @keyframes shockwave-pulse-red { 0% { box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.2), 0 0 0 0 rgba(255, 42, 42, 0.6); } 50% { box-shadow: inset 0 0 30px rgba(255, 42, 42, 0.8), 0 0 0 15px rgba(255, 42, 42, 0); } 100% { box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.2), 0 0 0 0 rgba(255, 42, 42, 0); } }
 
+        /* HIỆU ỨNG TIER 3 - MUSHIN PULSE */
         @keyframes mushin-flash { 0% { box-shadow: inset 0 0 0px var(--violet); } 15% { box-shadow: inset 0 0 120px rgba(176, 38, 255, 0.4); } 100% { box-shadow: inset 0 0 0px var(--violet); } }
 
+        /* HOLOGRAM & RANK UI */
         .holo-popup { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 60; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
         .holo-popup.active { opacity: 1; pointer-events: auto; }
         .holo-box { width: 85%; max-width: 360px; background: var(--bg-obsidian); padding: 25px; border-radius: 0; border: 1px solid var(--cyan); text-align: center; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
@@ -282,6 +361,7 @@
         .t1-warning { background: rgba(255, 42, 42, 0.05); border-left: 2px solid var(--crimson); padding: 12px; font-size: 0.9rem; line-height: 1.5; color: #e0e0e0; margin-top: 15px; }
         .t1-warning strong { color: var(--crimson); font-family: var(--font-display); letter-spacing: 1px; }
 
+        /* TIER 3 SUB-TIERS */
         .sub-tier { margin-bottom: 8px; background: rgba(0,0,0,0.4); border: 1px solid rgba(176, 38, 255, 0.2); border-left: 2px solid var(--violet); transition: all 0.3s ease; }
         .sub-tier-btn { padding: 12px 15px; font-family: var(--font-display); font-size: 0.9rem; font-weight: bold; color: #e0e0e0; cursor: pointer; display: block; outline: none; letter-spacing: 1px; }
         .sub-tier-btn::marker { display: none; content: ""; } .sub-tier-btn::-webkit-details-marker { display: none; }
@@ -293,6 +373,7 @@
         .tier3-img { width: 100%; border: 1px solid var(--violet); margin-top: 5px; border-radius: 2px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
         .tier3-img:active { transform: scale(0.98); box-shadow: 0 0 15px var(--violet); }
 
+        /* FULLSCREEN IMAGE VIEWER */
         .img-viewer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .img-viewer.active { opacity: 1; pointer-events: auto; }
         .img-viewer img { max-width: 100vw; max-height: 100vh; object-fit: contain; }
@@ -308,7 +389,13 @@
         .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; z-index: -1; transition: background 0.3s; }
         .hold-btn.charging { animation: shake 0.1s infinite; filter: brightness(1.3); text-shadow: 0 0 5px currentColor; }
 
-        .vault-input { width: 100%; background: rgba(255, 170, 0, 0.05); border: 1px solid var(--amber); color: var(--amber); text-align: center; padding: 15px; font-family: var(--font-display); font-size: 22px; font-weight: 900; letter-spacing: 4px; outline: none; text-transform: uppercase; transition: all 0.3s ease; box-shadow: inset 0 0 15px rgba(255, 170, 0, 0.1); }
+        /* KDRIVE VAULT */
+        .vault-input {
+            width: 100%; background: rgba(255, 170, 0, 0.05); border: 1px solid var(--amber);
+            color: var(--amber); text-align: center; padding: 15px; font-family: var(--font-display);
+            font-size: 22px; font-weight: 900; letter-spacing: 4px; outline: none;
+            text-transform: uppercase; transition: all 0.3s ease; box-shadow: inset 0 0 15px rgba(255, 170, 0, 0.1);
+        }
         .vault-input:focus { background: rgba(255, 170, 0, 0.15); box-shadow: inset 0 0 20px rgba(255, 170, 0, 0.3), 0 0 10px rgba(255, 170, 0, 0.5); }
         .vault-input.error { border-color: var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.1); box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.3); animation: overload-shake 0.3s ease-in-out; }
         .vault-input.success { border-color: var(--mint); color: var(--mint); background: rgba(0, 255, 157, 0.1); box-shadow: inset 0 0 20px rgba(0, 255, 157, 0.3); }
@@ -318,7 +405,7 @@
 </head>
 <body>
 
-    <!-- LỚP INTRO (SẼ BIẾN MẤT KHI CHẠY XONG) -->
+    <!-- LỚP INTRO CỔNG BẢO MẬT ĐIỆN ẢNH -->
     <div id="intro-layer">
         <div id="intro-bg"></div>
         <button id="gatekeeper-btn" onclick="startIntro()">[ KHỞI CHẠY GIAO THỨC ]</button>
@@ -405,6 +492,7 @@
             <div class="data-panel dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val blinking" id="val-steps">---</div><div class="dp-lbl">[ 👟 ] VẬN ĐỘNG</div></div>
         </div>
 
+        <!-- THANH LIVE RADAR T-0 MỚI BỔ SUNG -->
         <div class="live-radar-bar" id="live-radar-bar">
             <span class="live-pulse" id="live-pulse">[ 🔴 LIVE ]</span>
             <span class="live-metrics" id="live-metrics"></span>
@@ -416,7 +504,7 @@
         </div>
     </div>
 
-    <!-- CÁC POPUP HOLOGRAM -->
+    <!-- HOLOGRAM POPUPS & OVERLAYS -->
     <div class="holo-popup" id="holo-popup" onclick="closeHolo(event)">
         <div class="holo-box" id="holo-box">
             <div class="holo-title" id="holo-title">NAME</div>
@@ -432,22 +520,37 @@
         </div>
         
         <div class="tier-list">
+            <!-- TIER 1 -->
             <div class="tier-item">
                 <button class="tier-btn tier-shiro" onclick="toggleTier('tier1', this)">[ TIER 1: CHIẾN BINH - SHIRO ] <span>▼</span><div class="shooting-star"></div></button>
                 <div class="tier-content" id="tier1">
+                    
                     <div class="t1-objective">
                         <span style="color: #fff;">[ MỤC TIÊU CỐT LÕI ]</span><br>
                         <span style="color: var(--cyan); text-shadow: 0 0 8px var(--cyan); font-size: 1.1rem; display: block; margin: 8px 0;">HOÀN THÀNH 6/6 CHỈ SỐ SINH HỌC.</span>
                         <span style="color: #d0d5e0; font-size: 0.9rem; text-transform: none;">Mở khóa Bankroll để có ngân lượng chinh phục Vương quốc Poker.</span>
                     </div>
+                    
                     <div class="stats-grid">
-                        <div class="stat-box stat-cyan">160 BPM</div><div class="stat-box stat-cyan">6K BƯỚC</div><div class="stat-box stat-cyan">7H NGỦ</div><div class="stat-box stat-cyan">63-67 KG</div><div class="stat-box stat-cyan">MỠ ≤ 13%</div><div class="stat-box stat-cyan">NƯỚC 2.5L</div>
+                        <div class="stat-box stat-cyan">160 BPM</div>
+                        <div class="stat-box stat-cyan">6K BƯỚC</div>
+                        <div class="stat-box stat-cyan">7H NGỦ</div>
+                        <div class="stat-box stat-cyan">63-67 KG</div>
+                        <div class="stat-box stat-cyan">MỠ ≤ 13%</div>
+                        <div class="stat-box stat-cyan">NƯỚC 2.5L</div>
                     </div>
+
                     <p>Chỉ số SCI là thước đo tuyệt đối quyết định hạn mức Bankroll được cấp. Động lực là thứ rác rưởi, kỷ luật cơ học là vũ khí duy nhất để duy trì sự sắc bén và lì lợm trên bàn Poker.</p>
-                    <div class="t1-warning"><strong>[ QUẢN TRỊ BANKROLL: BÁO ĐỘNG ]</strong><br>Điểm SCI Trung bình <strong>< 50</strong>. Cơ thể đang rệu rã, phản xạ thần kinh chậm.<br><br><strong style="color: var(--crimson);">HÀNH ĐỘNG:</strong> Khóa toàn bộ Bankroll lớn. Chỉ được phép đánh Low Stakes (Micro) hoặc Review Hand. Tuyệt đối không ném tiền khi vũ khí chưa sắc bén.</div>
+                    
+                    <div class="t1-warning">
+                        <strong>[ QUẢN TRỊ BANKROLL: BÁO ĐỘNG ]</strong><br>
+                        Điểm SCI Trung bình <strong>< 50</strong>. Cơ thể đang rệu rã, phản xạ thần kinh chậm.<br><br>
+                        <strong style="color: var(--crimson);">HÀNH ĐỘNG:</strong> Khóa toàn bộ Bankroll lớn. Chỉ được phép đánh Low Stakes (Micro) hoặc Review Hand. Tuyệt đối không ném tiền khi vũ khí chưa sắc bén.
+                    </div>
                 </div>
             </div>
 
+            <!-- TIER 2 -->
             <div class="tier-item">
                 <button class="tier-btn tier-chairo" onclick="toggleTier('tier2', this)">[ TIER 2: TINH ANH - CHAIRO ] <span>▼</span><div class="shooting-star"></div></button>
                 <div class="tier-content" id="tier2">
@@ -458,12 +561,21 @@
                 </div>
             </div>
 
+            <!-- TIER 3: VÔ NGÃ -->
             <div class="tier-item">
                 <button class="tier-btn tier-kuro" onclick="toggleTier('tier3', this)">[ TIER 3: VÔ NGÃ - KURO ] <span>▼</span><div class="shooting-star"></div></button>
                 <div class="tier-content" id="tier3" style="padding-top: 20px;">
+                    
                     <div class="directive-line" style="color: #b026ff; border-color: #b026ff;">[ QUẢN TRỊ BANKROLL: TỐI THƯỢNG ]</div>
                     <p style="margin-bottom: 25px;">• <strong>Điều kiện:</strong> Điểm SCI Trung bình <strong>≥ 85</strong>.<br>• <strong>Hành động:</strong> Mở khóa Bankroll tối đa (High Roller / Main Event). Trạng thái Overdrive hoàn hảo để chinh phục các đỉnh cao.</p>
-                    <div style="font-family: sans-serif; font-weight: bold; color: #fff; text-align: center; margin-bottom: 25px; font-size: 1.05rem; text-shadow: 0 0 8px rgba(176, 38, 255, 0.8); line-height: 1.5;">"Thiên nhật chi kê vi Đạo,<br>Vạn nhật chi kê vi Thần."<br><span style="font-size: 0.9rem; color: #d0d5e0; text-shadow: none;">— Miyamoto Musashi (Ngũ Luân Thư)</span></div>
+
+                    <!-- Lời răn gốc -->
+                    <div style="font-family: sans-serif; font-weight: bold; color: #fff; text-align: center; margin-bottom: 25px; font-size: 1.05rem; text-shadow: 0 0 8px rgba(176, 38, 255, 0.8); line-height: 1.5;">
+                        "Thiên nhật chi kê vi Đạo,<br>Vạn nhật chi kê vi Thần."<br>
+                        <span style="font-size: 0.9rem; color: #d0d5e0; text-shadow: none;">— Miyamoto Musashi (Ngũ Luân Thư)</span>
+                    </div>
+
+                    <!-- Khối 1000 Ngày -->
                     <div style="margin-bottom: 25px; padding: 15px; border-left: 2px solid var(--violet); background: rgba(0,0,0,0.4); border-top: 1px solid rgba(176, 38, 255, 0.1); border-right: 1px solid rgba(176, 38, 255, 0.1); border-bottom: 1px solid rgba(176, 38, 255, 0.1);">
                         <div style="font-family: var(--font-display); font-weight: bold; color: #fff; text-align: center; margin-bottom: 12px; letter-spacing: 1px;">[ MỤC TIÊU: 1000 NGÀY KIẾN TẠO VÔ NGÃ ]</div>
                         <p style="margin-bottom: 8px;"><strong style="color: #fff;">Tại sao là 1.000 ngày?</strong></p>
@@ -481,6 +593,7 @@
                             <img src="https://github.com/happyk1900/Kai-Ripe/blob/main/huyenthoaiok.jpg?raw=true" class="tier3-img" onclick="openFullscreen(this)" alt="Musashi">
                         </div>
                     </details>
+
                     <details class="sub-tier">
                         <summary class="sub-tier-btn" onclick="playSlashSound()">[ + ] NGŨ LUÂN THƯ (BẢN DỊCH THỰC CHIẾN POKER)</summary>
                         <div class="sub-tier-content">
@@ -492,10 +605,13 @@
                             <p style="margin-top: 10px; border-top: 1px dashed rgba(176,38,255,0.3); padding-top: 10px;">• <strong>Quy tắc Sinh tử (The Void Slash):</strong> Bàn đấu là chiến địa. Bài tẩy, Bad Beat hay Variance (Độ lệch chuẩn) chính là những nhát chém từ hư không. Bạn không thể né tránh, nhưng bạn có quyền chọn cách đón nhận nó. Chỉ có kỷ luật cơ học (SCI) mới giúp bạn không gục ngã khi dính chém. Chơi như một cỗ máy vô cảm.<br>• <strong>Mắt của Tâm (Kansken):</strong> Đừng nhìn bằng mắt thường vào bài lật trên bàn. Hãy dùng Mắt của Tâm để thấu thị Range bài và ý đồ sau từng nhịp thở của đối thủ.<br>• <strong>Phá vỡ nhịp điệu:</strong> Kẻ làm chủ nhịp điệu của mình và bẻ gãy nhịp độ đối thủ sẽ là kẻ sống sót.<br>• <strong>Tuyên ngôn:</strong> <em>"Không có gì ngoài thực tế. Đừng làm bất cứ điều gì vô ích."</em></p>
                         </div>
                     </details>
+
                     <details class="sub-tier">
                         <summary class="sub-tier-btn" onclick="playSlashSound()">[ + ] DI HUẤN NGUYÊN BẢN (TÀI LIỆU GỐC MUSASHI)</summary>
                         <div class="sub-tier-content">
-                            <p><strong>1. Tổng quan tác phẩm:</strong><br><em>Ngũ Luân Thư (Go Rin No Sho - 五輪書)</em> là tác phẩm kinh điển về binh pháp, chiến thuật và triết lý võ đạo được viết bởi Miyamoto Musashi (Cung Bản Vũ Tàng) – kiếm sĩ huyền thoại vĩ đại nhất lịch sử Nhật Bản vào khoảng năm 1645 tại hang động Reigandō (Linh Nham Động). Ban đầu viết làm giáo trình cho môn phái Hyoho Niten Ichi-ryu (phái song kiếm), nay đã trở thành cẩm nang kinh điển về tư duy chiến lược, quản trị và phát triển bản thân.</p>
+                            <p><strong>1. Tổng quan tác phẩm:</strong><br>
+                            <em>Ngũ Luân Thư (Go Rin No Sho - 五輪書)</em> là tác phẩm kinh điển về binh pháp, chiến thuật và triết lý võ đạo được viết bởi Miyamoto Musashi (Cung Bản Vũ Tàng) – kiếm sĩ huyền thoại vĩ đại nhất lịch sử Nhật Bản vào khoảng năm 1645 tại hang động Reigandō (Linh Nham Động). Ban đầu viết làm giáo trình cho môn phái Hyoho Niten Ichi-ryu (phái song kiếm), nay đã trở thành cẩm nang kinh điển về tư duy chiến lược, quản trị và phát triển bản thân.</p>
+                            
                             <p><strong>2. Cấu trúc 5 Quyển theo triết lý Phật giáo/Đạo giáo:</strong></p>
                             <p>• <strong>Quyển Đất (Earth):</strong> Trọng tâm là cơ sở, nền tảng và thế giới quan. Musashi giải thích về con đường binh pháp (Heiho), so sánh người cầm quân/kiếm sĩ với người thợ mộc: phải biết dùng đúng người, đúng việc, nắm rõ công cụ và chuẩn bị nền móng vững chắc.</p>
                             <p>• <strong>Quyển Nước (Water):</strong> Trọng tâm là sự linh hoạt và tư thế/kỹ thuật. Nước có hình dạng của bình chứa nó. Quyển này bàn về tinh thần chiến đấu: tâm trí phải luôn bình tĩnh, linh hoạt, không bị gò bó.</p>
@@ -504,6 +620,7 @@
                             <p>• <strong>Quyển Không (Void):</strong> Trọng tâm là cảnh giới tối cao của triết lý và tâm trí. "Không" không phải là trống rỗng, mà là trạng thái thấu hiểu tuyệt đối sau khi rèn luyện thành thục. Kiếm sĩ hành động theo bản năng thuần khiết, không vướng bận cái Tôi hay sợ hãi.</p>
                         </div>
                     </details>
+
                     <details class="sub-tier">
                         <summary class="sub-tier-btn" onclick="playSlashSound()">[ + ] TÓM LẠI</summary>
                         <div class="sub-tier-content">
@@ -514,6 +631,7 @@
                 </div>
             </div>
 
+            <!-- TIER 4 -->
             <div class="tier-item" style="margin-top: 20px;">
                 <button class="tier-btn tier-void" onclick="toggleTier('tier4', this)">[ PROTOCOL: VOID REGEN - NGHỈ NGƠI ] <span>▼</span><div class="shooting-star"></div></button>
                 <div class="tier-content" id="tier4">
@@ -541,13 +659,13 @@
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport);
         fixViewport();
 
+        // XÁC ĐỊNH NGÀY HÔM NAY VÀ NGÀY HÔM QUA CHO LOGIC VOID REGEN (CHỦ NHẬT)
         const d = new Date(); document.getElementById('current-date').innerText = ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
         const isSunday = d.getDay() === 0; 
         const t1Date = new Date(d); t1Date.setDate(d.getDate() - 1);
         const isT1Sunday = t1Date.getDay() === 0; 
         
         let audioCtx; 
-        // Thay đổi 1: Bọc try...catch cực an toàn để Zalo Webview không văng lỗi sập luồng
         function initAudio() { 
             try {
                 if(!audioCtx) {
@@ -582,27 +700,44 @@
                 const parentTier = btnElement.nextElementSibling;
                 if(parentTier && parentTier.classList && parentTier.classList.contains('open')) return;
             }
+
             try {
-                initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(100, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 1.5);
-                gain.gain.setValueAtTime(0.6, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
-                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 1.5);
+                initAudio(); 
+                const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                osc.type = 'triangle'; 
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 1.5);
+                gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 1.5);
             } catch(e){}
 
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                let msg = new SpeechSynthesisUtterance('Mushin'); msg.lang = 'ja-JP'; msg.pitch = 0; msg.rate = 0.5; window.speechSynthesis.speak(msg);
+                let msg = new SpeechSynthesisUtterance('Mushin'); 
+                msg.lang = 'ja-JP'; 
+                msg.pitch = 0; 
+                msg.rate = 0.5; 
+                window.speechSynthesis.speak(msg);
             }
+
             const overlay = document.getElementById('rank-overlay');
-            overlay.style.animation = 'none'; void overlay.offsetWidth; overlay.style.animation = 'mushin-flash 1.5s ease-out';
+            overlay.style.animation = 'none';
+            void overlay.offsetWidth; 
+            overlay.style.animation = 'mushin-flash 1.5s ease-out';
         }
 
         let chargeOsc, chargeGain;
         function playChargeSound() {
             try {
-                initAudio(); chargeOsc = audioCtx.createOscillator(); chargeGain = audioCtx.createGain();
-                chargeOsc.type = 'square'; chargeOsc.frequency.setValueAtTime(100, audioCtx.currentTime); chargeOsc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 3);
-                chargeGain.gain.setValueAtTime(0.05, audioCtx.currentTime); chargeOsc.connect(chargeGain); chargeGain.connect(audioCtx.destination); chargeOsc.start();
+                initAudio();
+                chargeOsc = audioCtx.createOscillator(); chargeGain = audioCtx.createGain();
+                chargeOsc.type = 'square'; chargeOsc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                chargeOsc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 3);
+                chargeGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                chargeOsc.connect(chargeGain); chargeGain.connect(audioCtx.destination);
+                chargeOsc.start();
             } catch(e){}
         }
         function stopChargeSound() { if(chargeOsc) { chargeOsc.stop(); chargeOsc.disconnect(); chargeOsc = null; } }
@@ -610,14 +745,22 @@
         function playLockSound() {
             try {
                 initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-                osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.2);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.2);
             } catch(e){}
         }
 
-        document.addEventListener('touchstart', () => { const edge = document.getElementById('edge-lighting'); if(edge) { edge.classList.add('touch-pulse'); setTimeout(() => edge.classList.remove('touch-pulse'), 150); } }, {passive: true});
-        document.addEventListener('mousedown', () => { const edge = document.getElementById('edge-lighting'); if(edge) { edge.classList.add('touch-pulse'); setTimeout(() => edge.classList.remove('touch-pulse'), 150); } });
+        document.addEventListener('touchstart', () => {
+            const edge = document.getElementById('edge-lighting');
+            if(edge) { edge.classList.add('touch-pulse'); setTimeout(() => edge.classList.remove('touch-pulse'), 150); }
+        }, {passive: true});
+        document.addEventListener('mousedown', () => {
+            const edge = document.getElementById('edge-lighting');
+            if(edge) { edge.classList.add('touch-pulse'); setTimeout(() => edge.classList.remove('touch-pulse'), 150); }
+        });
 
         const bgmAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20R%C5%8Dnin.mp3'); 
         bgmAudio.loop = true; bgmAudio.volume = 0.5; let isMuted = false;
@@ -632,7 +775,7 @@
         // GIAO THỨC INTRO ĐIỆN ẢNH (CINEMATIC)
         // ==========================================
         
-        const cinematicAudio = new Audio('https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/INTRO%20THOAI.WAV');
+        const cinematicAudio = new Audio('https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/INTRO-THOAI.mp3');
         let introReq;
         let introFinished = false;
 
@@ -652,7 +795,6 @@
 
         const climaxTime = 85.5; 
 
-        // Thay đổi 2: Luồng bấm nút an toàn tuyệt đối. Xử lý kẹt mạng tải file WAV
         function startIntro() {
             initAudio(); 
             
@@ -665,7 +807,6 @@
 
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    // Mạng tải xong, Audio bắt đầu chạy
                     btn.style.display = 'none';
                     document.getElementById('skip-btn').style.display = 'block';
                     document.getElementById('intro-bg').classList.add('reveal'); 
@@ -679,14 +820,13 @@
                     
                     checkIntroTime();
                 }).catch(error => {
-                    // Mạng quá lag tải không nổi WAV, hoặc bị Trình duyệt Zalo chặn Audio.
                     console.warn("Media chặn tải: ", error);
                     btn.innerHTML = '[ LỖI TẢI ÂM THANH - BỎ QUA ]';
                     btn.classList.remove('loading-pulse');
                     btn.style.pointerEvents = 'auto';
                     btn.style.borderColor = 'var(--crimson)';
                     btn.style.color = 'var(--crimson)';
-                    btn.onclick = skipIntro; // Cho phép skip thủ công thẳng vào lõi
+                    btn.onclick = skipIntro; 
                 });
             }
         }
@@ -750,38 +890,52 @@
         }
 
         // ==========================================
-        // CÁC HÀM CŨ CỦA LÕI APP
+        // CÁC HÀM APP LÕI BÊN DƯỚI
         // ==========================================
 
         const holoData = { hr: { title: "HEART RATE", desc: "Yêu cầu nhịp tim đạt 160 BPM để mở khóa trạng thái Overdrive.", color: "var(--crimson)" }, weight: { title: "WEIGHT", desc: "Duy trì khung trọng lượng chiến đấu: 63.0 kg - 67.0 kg.", color: "var(--mint)" }, sleep: { title: "SLEEP", desc: "Ngủ phục hồi tối thiểu 7 giờ/đêm không ngoại lệ.", color: "var(--cyan)" }, fat: { title: "FAT (%)", desc: "Giữ tỷ lệ mỡ dưới 13.0%. Kiểm soát nghiêm ngặt bằng dinh dưỡng.", color: "var(--mint)" }, water: { title: "WATER (%)", desc: "Yêu cầu nạp đúng 2.5 Lít nước mỗi ngày (Target thể trạng: 55%).", color: "var(--cyan)" }, steps: { title: "STEPS", desc: "Tối thiểu 6.000 bước vận động mỗi ngày.", color: "var(--amber)" } };
         const holoPopup = document.getElementById('holo-popup');
         
         function openHolo(type) { 
-            playBeep(); const data = holoData[type]; 
-            document.getElementById('holo-title').innerText = data.title; document.getElementById('holo-title').style.color = data.color; document.getElementById('holo-box').style.borderColor = data.color; 
+            playBeep(); 
+            const data = holoData[type]; 
+            document.getElementById('holo-title').innerText = data.title; 
+            document.getElementById('holo-title').style.color = data.color; 
+            document.getElementById('holo-box').style.borderColor = data.color; 
             
             if(isSynced) {
-                let currentVal = parseFloat(document.getElementById(`val-${type}`).innerText); let targetVal = 0, unit = "", msg = "";
+                let currentVal = parseFloat(document.getElementById(`val-${type}`).innerText);
+                let targetVal = 0, unit = "", msg = "";
                 
                 if(type === 'hr') { targetVal = isT1Sunday ? 0 : 160; unit = "BPM"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Thiếu ${(targetVal - currentVal).toFixed(0)} ${unit}. Động cơ chưa đạt trạng thái Overdrive.`; else msg = isT1Sunday ? `✅ VOID REGEN (Chủ Nhật): Miễn trừ nhịp tim.` : `✅ Đạt chuẩn Overdrive T-1.`; }
                 else if(type === 'weight') { targetVal = 67; unit = "KG"; if(currentVal > targetVal) msg = `⚠️ Đóng sổ T-1: Vượt khung chiến đấu ${(currentVal - targetVal).toFixed(1)} ${unit}.`; else if (currentVal < 63) msg = `⚠️ Đóng sổ T-1: Dưới khung chiến đấu ${(63 - currentVal).toFixed(1)} ${unit}.`; else msg = `✅ Thể trạng lý tưởng.`; }
                 else if(type === 'sleep') { targetVal = 7.0; unit = "HRS"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Thiếu ${(targetVal - currentVal).toFixed(1)} ${unit} phục hồi.`; else msg = `✅ Đã tái tạo đủ năng lượng.`; }
                 else if(type === 'fat') { targetVal = 13.0; unit = "%"; if(currentVal > targetVal) msg = `⚠️ Đóng sổ T-1: Tỷ lệ mỡ vượt +${(currentVal - targetVal).toFixed(1)} ${unit}.`; else msg = `✅ Đạt chuẩn tỷ lệ vàng.`; }
                 else if(type === 'water') { 
-                    targetVal = 55.0; unit = "%"; 
-                    if(currentVal < targetVal) { msg = `⚠️ CẢNH BÁO: Đang thiếu ${(targetVal - currentVal).toFixed(1)}${unit} nước trong cơ thể.<br>LỆNH THỰC THI: Nạp đủ 2.5 Lít hôm nay, tuyệt đối không vượt ngưỡng.`; } 
-                    else { msg = `✅ ĐẠT CHUẨN: Đủ nước vận hành.<br>LỆNH THỰC THI: Tiếp tục duy trì nạp 2.5L. Giữ vững kỷ luật.`; }
+                    targetVal = 55.0; 
+                    unit = "%"; 
+                    if(currentVal < targetVal) {
+                        msg = `⚠️ CẢNH BÁO: Đang thiếu ${(targetVal - currentVal).toFixed(1)}${unit} nước trong cơ thể.<br>LỆNH THỰC THI: Nạp đủ 2.5 Lít hôm nay, tuyệt đối không vượt ngưỡng.`; 
+                    } else {
+                        msg = `✅ ĐẠT CHUẨN: Đủ nước vận hành.<br>LỆNH THỰC THI: Tiếp tục duy trì nạp 2.5L. Giữ vững kỷ luật.`; 
+                    }
                 }
                 else if(type === 'steps') { targetVal = isT1Sunday ? 0 : 6000; unit = "STEPS"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Nợ ${(targetVal - currentVal).toFixed(0)} ${unit} vận động.`; else msg = isT1Sunday ? `✅ VOID REGEN (Chủ Nhật): Miễn trừ vận động.` : `✅ Hoàn thành mục tiêu di chuyển.`; }
                 
                 document.getElementById('holo-desc').innerHTML = `
                     <div style="font-size: 0.9rem; margin-bottom: 10px; color: rgba(255,255,255,0.7);">[ MỤC TIÊU CỐT LÕI ]<br>${data.desc}</div>
                     <div style="padding: 10px; border: 1px dashed ${data.color}; background: rgba(0,0,0,0.5);">
-                        <strong style="color: ${data.color}; font-family: var(--font-display); font-size: 1.1rem;">[ DỮ LIỆU T-1 ]</strong><br>${msg}
+                        <strong style="color: ${data.color}; font-family: var(--font-display); font-size: 1.1rem;">[ DỮ LIỆU T-1 ]</strong><br>
+                        ${msg}
                     </div>
                 `;
                 
-                document.getElementById('btn-close-holo').style.display = 'block'; document.getElementById('btn-close-holo').innerText = '[ XÁC NHẬN ]'; document.getElementById('btn-close-holo').style.borderColor = 'rgba(255,255,255,0.3)'; document.getElementById('btn-close-holo').style.color = 'white'; document.getElementById('btn-close-holo').onclick = function() { playBeep(); closeHoloDirect(); };
+                document.getElementById('btn-close-holo').style.display = 'block';
+                document.getElementById('btn-close-holo').innerText = '[ XÁC NHẬN ]';
+                document.getElementById('btn-close-holo').style.borderColor = 'rgba(255,255,255,0.3)';
+                document.getElementById('btn-close-holo').style.color = 'white';
+                document.getElementById('btn-close-holo').onclick = function() { playBeep(); closeHoloDirect(); };
+                
             } else {
                 document.getElementById('holo-desc').innerText = data.desc; 
             }
@@ -792,38 +946,75 @@
         function closeHolo(e) { if(e.target === holoPopup){ playBeep(); closeHoloDirect(); } }
 
         let currentVaultCode = "";
+
         function openVaultMenu() {
-            playBeep(); document.getElementById('holo-title').innerText = "[ KDRIVE SECURE VAULT ]"; document.getElementById('holo-title').style.color = "var(--amber)"; document.getElementById('holo-box').style.borderColor = "var(--amber)";
+            playBeep();
+            document.getElementById('holo-title').innerText = "[ KDRIVE SECURE VAULT ]";
+            document.getElementById('holo-title').style.color = "var(--amber)";
+            document.getElementById('holo-box').style.borderColor = "var(--amber)";
+            
             document.getElementById('holo-desc').innerHTML = `
                 <div style="font-size: 11px; margin-bottom: 15px; color: rgba(255,255,255,0.7); letter-spacing: 1px;">YÊU CẦU XÁC THỰC MÃ OTP ĐỂ TRUY CẬP KDRIVE:</div>
                 <input type="text" id="vault-input" class="vault-input" placeholder="NHẬP MÃ OTP" autocomplete="off">
                 <div id="vault-error" style="color:var(--crimson); font-size:11px; margin-top:12px; display:none; font-weight:bold; letter-spacing:1px; text-shadow: 0 0 5px var(--crimson);">[ ! ] MÃ KHÔNG HỢP LỆ HOẶC ĐÃ BỊ HỦY</div>
             `;
-            document.getElementById('btn-close-holo').style.display = 'block'; document.getElementById('btn-close-holo').innerText = '[ KẾT NỐI KDRIVE ]'; document.getElementById('btn-close-holo').style.borderColor = 'var(--amber)'; document.getElementById('btn-close-holo').style.color = 'var(--amber)';
+            
+            document.getElementById('btn-close-holo').style.display = 'block';
+            document.getElementById('btn-close-holo').innerText = '[ KẾT NỐI KDRIVE ]';
+            document.getElementById('btn-close-holo').style.borderColor = 'var(--amber)';
+            document.getElementById('btn-close-holo').style.color = 'var(--amber)';
             
             document.getElementById('btn-close-holo').onclick = function() {
-                playBeep(); const inputEl = document.getElementById('vault-input'); const inputVal = inputEl.value.trim().toUpperCase();
+                playBeep();
+                const inputEl = document.getElementById('vault-input');
+                const inputVal = inputEl.value.trim().toUpperCase();
+                
                 if(inputVal === currentVaultCode && currentVaultCode !== "") {
-                    playChargeSound(); inputEl.className = "vault-input success"; document.getElementById('holo-title').innerText = "[ XÁC THỰC THÀNH CÔNG ]"; document.getElementById('holo-title').style.color = "var(--mint)"; document.getElementById('holo-box').style.borderColor = "var(--mint)";
+                    playChargeSound(); 
+                    inputEl.className = "vault-input success";
+                    document.getElementById('holo-title').innerText = "[ XÁC THỰC THÀNH CÔNG ]";
+                    document.getElementById('holo-title').style.color = "var(--mint)";
+                    document.getElementById('holo-box').style.borderColor = "var(--mint)";
+                    
                     document.getElementById('holo-desc').innerHTML = `
                         <div style="color:var(--mint); font-family:var(--font-display); font-size:1.2rem; padding: 15px 0; text-shadow: 0 0 10px var(--mint);">ACCESS GRANTED</div>
-                        <div style="width: 100%; height: 2px; background: rgba(0, 255, 157, 0.2); margin-top: 10px; position: relative; overflow: hidden;"><div style="position: absolute; top: 0; left: 0; height: 100%; background: var(--mint); width: 100%; animation: load-bar 1.5s ease-out forwards;"></div></div>
+                        <div style="width: 100%; height: 2px; background: rgba(0, 255, 157, 0.2); margin-top: 10px; position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: 0; left: 0; height: 100%; background: var(--mint); width: 100%; animation: load-bar 1.5s ease-out forwards;"></div>
+                        </div>
                         <div style="font-size:10px; font-family:var(--font-ui); color:var(--mint); margin-top: 10px; animation: blink 0.5s infinite;">Đang thiết lập đường truyền bảo mật tới Kdrive...</div>
                     `;
                     document.getElementById('btn-close-holo').style.display = 'none';
-                    setTimeout(() => { stopChargeSound(); playSlashSound(); closeHoloDirect(); showBeautifulSuccess(); }, 1500);
-                } else { document.getElementById('vault-error').style.display = 'block'; inputEl.className = "vault-input error"; playLockSound(); }
+                    
+                    setTimeout(() => {
+                        stopChargeSound(); playSlashSound();
+                        closeHoloDirect();
+                        showBeautifulSuccess(); 
+                    }, 1500);
+                } else {
+                    document.getElementById('vault-error').style.display = 'block';
+                    inputEl.className = "vault-input error";
+                    playLockSound();
+                }
             };
             
-            holoPopup.classList.add('active'); setTimeout(() => { document.getElementById('vault-input').focus(); }, 100);
+            holoPopup.classList.add('active');
+            setTimeout(() => { document.getElementById('vault-input').focus(); }, 100);
         }
 
         function showBeautifulSuccess() {
             document.body.classList.add('tunnel-vision'); 
-            const overlay = document.createElement('div'); overlay.id = "kdrive-success-overlay"; overlay.style.position = 'fixed'; overlay.style.top = '0'; overlay.style.left = '0'; overlay.style.width = '100vw'; overlay.style.height = '100vh'; overlay.style.background = 'rgba(0, 255, 157, 0.1)'; overlay.style.backdropFilter = 'blur(10px)'; overlay.style.zIndex = '999999'; overlay.style.display = 'flex'; overlay.style.justifyContent = 'center'; overlay.style.alignItems = 'center';
+            
+            const overlay = document.createElement('div');
+            overlay.id = "kdrive-success-overlay";
+            overlay.style.position = 'fixed'; overlay.style.top = '0'; overlay.style.left = '0'; overlay.style.width = '100vw'; overlay.style.height = '100vh';
+            overlay.style.background = 'rgba(0, 255, 157, 0.1)'; overlay.style.backdropFilter = 'blur(10px)'; overlay.style.zIndex = '999999';
+            overlay.style.display = 'flex'; overlay.style.justifyContent = 'center'; overlay.style.alignItems = 'center';
+            
             overlay.innerHTML = `
                 <div style="border: 2px solid var(--mint); background: rgba(5,6,8,0.9); padding: 40px; text-align: center; box-shadow: 0 0 50px rgba(0, 255, 157, 0.3), inset 0 0 30px rgba(0, 255, 157, 0.1); clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);">
-                    <svg viewBox="0 0 24 24" style="width: 70px; height: 70px; fill: var(--mint); margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--mint));"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <svg viewBox="0 0 24 24" style="width: 70px; height: 70px; fill: var(--mint); margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--mint));">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
                     <h2 style="font-family: var(--font-display); color: var(--mint); letter-spacing: 3px; font-size: 26px; margin-bottom: 10px; text-shadow: 0 0 20px var(--mint);">KDRIVE UNLOCKED</h2>
                     <p style="font-family: var(--font-ui); color: #fff; font-size: 15px; opacity: 0.8; margin-bottom: 35px; letter-spacing: 1px;">Hệ thống ngân lượng đã sẵn sàng phục vụ.</p>
                     <button onclick="document.getElementById('kdrive-success-overlay').remove(); document.body.classList.remove('tunnel-vision'); playBeep();" style="background: rgba(0, 255, 157, 0.15); border: 1px solid var(--mint); color: var(--mint); padding: 15px 40px; font-family: var(--font-display); font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 15px rgba(0, 255, 157, 0.4); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);">[ MỞ ỨNG DỤNG KDRIVE ]</button>
@@ -834,53 +1025,95 @@
 
         let currentStreak = parseInt(localStorage.getItem('combat_streak')) || 0;
         let isCommitted = localStorage.getItem('combat_committed') === 'true';
+        
         const startDate = new Date(2026, 6, 19); 
         const activeDays = Math.floor((d.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         let mushinDaysLeft = Math.max(1000 - activeDays, 0);
+        
         document.getElementById('streak-box').innerText = `[ MUSHIN: ${mushinDaysLeft} DAY ]`;
         
         const textElement = document.getElementById('ai-text'); let typeSpeed = 25; window.isScanning = false; let typeAbortController = null;
+
         async function typeTextSafe(lines, speed = typeSpeed, delayAfterLine = 150) {
-            if (typeAbortController) typeAbortController.abort(); typeAbortController = new AbortController(); const signal = typeAbortController.signal;
+            if (typeAbortController) typeAbortController.abort(); 
+            typeAbortController = new AbortController(); const signal = typeAbortController.signal;
             textElement.innerHTML = '';
             for(let i = 0; i < lines.length; i++) {
-                for(let j = 0; j < lines[i].length; j++) { if(signal.aborted) return; textElement.innerHTML += lines[i].charAt(j); await new Promise(r => setTimeout(r, speed)); }
+                for(let j = 0; j < lines[i].length; j++) {
+                    if(signal.aborted) return; textElement.innerHTML += lines[i].charAt(j); await new Promise(r => setTimeout(r, speed));
+                }
                 if(signal.aborted) return; textElement.innerHTML += '<br>'; await new Promise(r => setTimeout(r, delayAfterLine));
             }
         }
 
         function updateMarquee(state) {
-            const mqText = document.getElementById('marquee-text'); const box = document.getElementById('combat-marquee'); const icon = document.getElementById('mq-icon');
-            mqText.style.color = '#ffffff'; mqText.style.textShadow = '0 0 6px rgba(255, 255, 255, 0.8)';
-            if (state === 'standby') { box.style.borderColor = 'var(--amber)'; box.style.background = 'rgba(255, 170, 0, 0.1)'; icon.innerHTML = '🎮'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `CHỜ LỆNH HỆ THỐNG - CHẠM LÕI SCI ĐỂ KẾT NỐI SINH TRẮC`; } 
-            else if (state === 'scanning') { box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.1)'; icon.innerHTML = '📡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `TIẾN TRÌNH ĐỒNG BỘ - ĐANG XỬ LÝ DỮ LIỆU SINH TRẮC`; } 
-            else if (state === 'sunday') { box.style.borderColor = 'var(--mint)'; box.style.background = 'rgba(0, 255, 157, 0.1)'; icon.innerHTML = '🔋'; icon.style.color = 'var(--mint)'; mqText.innerHTML = `GIAO THỨC CHỦ NHẬT - KÍCH HOẠT QUÃNG NGHỈ TÁI TẠO`; } 
-            else if (state === 'shiro') { box.style.borderColor = 'var(--crimson)'; box.style.background = 'rgba(255, 42, 42, 0.15)'; icon.innerHTML = '⚠️'; icon.style.color = 'var(--crimson)'; mqText.innerHTML = `PHONG ĐỘ BÁO ĐỘNG - KHÓA BANKROLL - CHỈ ĐÁNH MICRO HOẶC REVIEW HAND`; } 
-            else if (state === 'chairo') { box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.15)'; icon.innerHTML = '⚔️'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `THỂ TRẠNG ỔN ĐỊNH - MỞ KHÓA BANKROLL TIÊU CHUẨN - MID STAKES SẴN SÀNG`; } 
-            else if (state === 'kuro') { box.style.borderColor = 'var(--neon-pink)'; box.style.background = 'rgba(255, 0, 255, 0.15)'; icon.innerHTML = '🥷'; icon.style.color = 'var(--neon-pink)'; mqText.innerHTML = `TRẠNG THÁI VÔ NGÃ - MỞ KHÓA BANKROLL TỐI ĐA - OVERDRIVE KÍCH HOẠT`; }
+            const mqText = document.getElementById('marquee-text'); 
+            const box = document.getElementById('combat-marquee');
+            const icon = document.getElementById('mq-icon');
+
+            mqText.style.color = '#ffffff'; 
+            mqText.style.textShadow = '0 0 6px rgba(255, 255, 255, 0.8)';
+
+            if (state === 'standby') {
+                box.style.borderColor = 'var(--amber)'; box.style.background = 'rgba(255, 170, 0, 0.1)';
+                icon.innerHTML = '🎮'; icon.style.color = 'var(--amber)';
+                mqText.innerHTML = `CHỜ LỆNH HỆ THỐNG - CHẠM LÕI SCI ĐỂ KẾT NỐI SINH TRẮC`;
+            } else if (state === 'scanning') {
+                box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.1)';
+                icon.innerHTML = '📡'; icon.style.color = 'var(--cyan)';
+                mqText.innerHTML = `TIẾN TRÌNH ĐỒNG BỘ - ĐANG XỬ LÝ DỮ LIỆU SINH TRẮC`;
+            } else if (state === 'sunday') {
+                box.style.borderColor = 'var(--mint)'; box.style.background = 'rgba(0, 255, 157, 0.1)';
+                icon.innerHTML = '🔋'; icon.style.color = 'var(--mint)';
+                mqText.innerHTML = `GIAO THỨC CHỦ NHẬT - KÍCH HOẠT QUÃNG NGHỈ TÁI TẠO`;
+            } else if (state === 'shiro') {
+                box.style.borderColor = 'var(--crimson)'; box.style.background = 'rgba(255, 42, 42, 0.15)';
+                icon.innerHTML = '⚠️'; icon.style.color = 'var(--crimson)';
+                mqText.innerHTML = `PHONG ĐỘ BÁO ĐỘNG - KHÓA BANKROLL - CHỈ ĐÁNH MICRO HOẶC REVIEW HAND`;
+            } else if (state === 'chairo') {
+                box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.15)';
+                icon.innerHTML = '⚔️'; icon.style.color = 'var(--cyan)';
+                mqText.innerHTML = `THỂ TRẠNG ỔN ĐỊNH - MỞ KHÓA BANKROLL TIÊU CHUẨN - MID STAKES SẴN SÀNG`;
+            } else if (state === 'kuro') {
+                box.style.borderColor = 'var(--neon-pink)'; box.style.background = 'rgba(255, 0, 255, 0.15)';
+                icon.innerHTML = '🥷'; icon.style.color = 'var(--neon-pink)';
+                mqText.innerHTML = `TRẠNG THÁI VÔ NGÃ - MỞ KHÓA BANKROLL TỐI ĐA - OVERDRIVE KÍCH HOẠT`;
+            }
         }
 
         function toggleRankMenu() { document.getElementById('rank-overlay').classList.toggle('active'); }
         function toggleTier(id, btnElement) { 
             if(id === 'tier3') { triggerMushinProtocol(btnElement); } else { playSlashSound(); }
-            let star = btnElement.querySelector('.shooting-star'); if(star) { star.classList.remove('active'); void star.offsetWidth; star.classList.add('active'); }
-            const c = document.getElementById(id); c.classList.contains('open') ? c.classList.remove('open') : (document.querySelectorAll('.tier-content').forEach(e=>e.classList.remove('open')), c.classList.add('open')); 
+            let star = btnElement.querySelector('.shooting-star');
+            if(star) { star.classList.remove('active'); void star.offsetWidth; star.classList.add('active'); }
+            const c = document.getElementById(id); 
+            c.classList.contains('open') ? c.classList.remove('open') : (document.querySelectorAll('.tier-content').forEach(e=>e.classList.remove('open')), c.classList.add('open')); 
         }
         
         const dynamicBtn = document.getElementById('dynamic-hold-btn');
         function updateButtonState() {
             const streakBtn = document.getElementById('streak-box');
-            if (isCommitted) { dynamicBtn.className = 'hold-btn state-abort'; dynamicBtn.innerHTML = '[ GIỮ 3S: HỦY CAM KẾT - RESET ]<div id="hold-progress" class="hold-progress"></div>'; if(streakBtn) { streakBtn.classList.remove('alert-unsigned'); streakBtn.style.color = "var(--amber)"; streakBtn.style.borderColor = "var(--amber)"; } } 
-            else { dynamicBtn.className = 'hold-btn state-sign'; dynamicBtn.innerHTML = '[ GIỮ 3S: KÝ CAM KẾT ]<div id="hold-progress" class="hold-progress"></div>'; if(streakBtn) { streakBtn.classList.add('alert-unsigned'); } }
+            if (isCommitted) { 
+                dynamicBtn.className = 'hold-btn state-abort'; dynamicBtn.innerHTML = '[ GIỮ 3S: HỦY CAM KẾT - RESET ]<div id="hold-progress" class="hold-progress"></div>'; 
+                if(streakBtn) {
+                    streakBtn.classList.remove('alert-unsigned');
+                    streakBtn.style.color = "var(--amber)"; streakBtn.style.borderColor = "var(--amber)"; 
+                }
+            } else { 
+                dynamicBtn.className = 'hold-btn state-sign'; dynamicBtn.innerHTML = '[ GIỮ 3S: KÝ CAM KẾT ]<div id="hold-progress" class="hold-progress"></div>'; 
+                if(streakBtn) { streakBtn.classList.add('alert-unsigned'); }
+            }
         }
 
         let holdTimer, startTime=0; 
         function startHold(e) { 
-            e.preventDefault(); startTime = Date.now(); playChargeSound(); dynamicBtn.classList.add('charging'); if(navigator.vibrate) navigator.vibrate([50, 50, 50, 50, 50, 50, 50, 50]); 
+            e.preventDefault(); startTime = Date.now(); playChargeSound(); dynamicBtn.classList.add('charging');
+            if(navigator.vibrate) navigator.vibrate([50, 50, 50, 50, 50, 50, 50, 50]); 
             const prog = document.getElementById('hold-progress'); 
             holdTimer = setInterval(() => { 
                 let p = ((Date.now() - startTime) / 3000) * 100; 
-                if(p>=100){ p=100; clearInterval(holdTimer); stopChargeSound(); playLockSound(); dynamicBtn.classList.remove('charging'); if(navigator.vibrate) navigator.vibrate(300); if(isCommitted) { triggerAbort(); } else { confirmCommitment(); } } 
+                if(p>=100){ p=100; clearInterval(holdTimer); stopChargeSound(); playLockSound(); dynamicBtn.classList.remove('charging');
+                    if(navigator.vibrate) navigator.vibrate(300); if(isCommitted) { triggerAbort(); } else { confirmCommitment(); } } 
                 prog.style.width = p+'%'; 
             }, 50); 
         }
@@ -902,80 +1135,242 @@
             }
         }
 
-        let isSynced = false; let isSafetyUnlocked = false; 
-        function unlockPreScan() { if(isSafetyUnlocked || !isCommitted) return; playLockSound(); isSafetyUnlocked = true; document.getElementById('safety-lock-hud').classList.add('unlocked'); document.body.classList.remove('pre-scan-locked'); typeTextSafe(["[ 🔓 BOO: KHÓA AN TOÀN ĐÃ MỞ ]", ">> MỜI CHẠM LÕI SCI BÊN TRÊN ĐỂ KẾT NỐI."]); }
+        let isSynced = false;
+        let isSafetyUnlocked = false; 
+
+        function unlockPreScan() {
+            if(isSafetyUnlocked || !isCommitted) return;
+            playLockSound();
+            isSafetyUnlocked = true;
+            
+            const lockBox = document.getElementById('safety-lock-hud');
+            lockBox.classList.add('unlocked');
+            
+            document.body.classList.remove('pre-scan-locked');
+            
+            typeTextSafe(["[ 🔓 BOO: KHÓA AN TOÀN ĐÃ MỞ ]", ">> MỜI CHẠM LÕI SCI BÊN TRÊN ĐỂ KẾT NỐI."]);
+        }
         
+        // ==========================================
+        // GIAO THỨC TRÍCH XUẤT API
+        // ==========================================
         async function triggerBioSync() {
             if(!isCommitted) { playBeep(); typeTextSafe(["BOO: TỪ CHỐI LỆNH.", "Yêu cầu ký hợp đồng trong BÍ LỤC trước khi vận hành."]); return; }
             if(window.isScanning) return; window.isScanning = true;
-            document.getElementById('btn-chip-vault').style.display = 'none'; currentVaultCode = "";
-            document.body.classList.remove('standby-mode'); document.body.classList.add('scanning-mode'); updateMarquee('scanning'); playChargeSound(); if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
+            
+            document.getElementById('btn-chip-vault').style.display = 'none';
+            currentVaultCode = "";
+
+            document.body.classList.remove('standby-mode'); document.body.classList.add('scanning-mode');
+            updateMarquee('scanning'); playChargeSound(); if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
+
             await typeTextSafe(["BOO: XÁC NHẬN YÊU CẦU...", "Đang trích xuất Dữ liệu Sinh trắc..."], 20, 200);
+            
             await fetchBioDataReal();
         }
 
         async function fetchBioDataReal() {
             try {
                 const API_URL = "https://script.google.com/macros/s/AKfycbxLBcp8F1-mMMk4V78jMrqjEtrSXQ97fKBe84zzuVB73dfztZ5VOP-jByVpebTdqcsQZA/exec?action=hud";
-                const response = await fetch(API_URL); const resData = await response.json();
+                const response = await fetch(API_URL);
+                const resData = await response.json();
                 
-                stopChargeSound(); document.body.classList.remove('scanning-mode');
-                const ids = ['val-sci', 'val-hr', 'val-weight', 'val-sleep', 'val-fat', 'val-water', 'val-steps']; ids.forEach(id => document.getElementById(id).classList.remove('blinking'));
+                stopChargeSound(); 
+                document.body.classList.remove('scanning-mode');
+                
+                const ids = ['val-sci', 'val-hr', 'val-weight', 'val-sleep', 'val-fat', 'val-water', 'val-steps'];
+                ids.forEach(id => document.getElementById(id).classList.remove('blinking'));
 
                 if (resData.status === 'success') {
-                    document.body.classList.add('sync-complete'); isSynced = true; playSlashSound(); if(navigator.vibrate) navigator.vibrate(200);
+                    document.body.classList.add('sync-complete'); isSynced = true; 
+                    playSlashSound(); if(navigator.vibrate) navigator.vibrate(200);
 
-                    let centerSci = resData.sci_ma30 !== undefined ? resData.sci_ma30 : resData.sci; document.getElementById('val-sci').innerText = centerSci || '---'; document.getElementById('val-hr').innerText = resData.hr || '---'; document.getElementById('val-weight').innerText = resData.weight || '---'; document.getElementById('val-sleep').innerText = resData.sleep || '---'; document.getElementById('val-fat').innerText = resData.fat || '---'; document.getElementById('val-water').innerText = resData.water || '---'; document.getElementById('val-steps').innerText = resData.steps || '---';
+                    // 1. T-1 DATA & LÕI SCI MA30
+                    let centerSci = resData.sci_ma30 !== undefined ? resData.sci_ma30 : resData.sci;
+                    document.getElementById('val-sci').innerText = centerSci || '---'; 
+                    document.getElementById('val-hr').innerText = resData.hr || '---'; 
+                    document.getElementById('val-weight').innerText = resData.weight || '---'; 
+                    document.getElementById('val-sleep').innerText = resData.sleep || '---'; 
+                    document.getElementById('val-fat').innerText = resData.fat || '---'; 
+                    document.getElementById('val-water').innerText = resData.water || '---'; 
+                    document.getElementById('val-steps').innerText = resData.steps || '---';
 
-                    let targetSteps = isSunday ? 0 : 6000; let targetWater = 2.5; let targetSleep = 7.0;
-                    let liveSteps = parseFloat(resData.steps_live !== undefined ? resData.steps_live : resData.steps) || 0; let liveWater = parseFloat(resData.water_live !== undefined ? resData.water_live : resData.water) || 0; let liveSleep = parseFloat(resData.sleep_live !== undefined ? resData.sleep_live : resData.sleep) || 0; let liveHR = parseFloat(resData.hr_live !== undefined ? resData.hr_live : resData.hr) || 0; let liveWeight = parseFloat(resData.weight_live !== undefined ? resData.weight_live : resData.weight) || 0; let liveFat = parseFloat(resData.fat_live !== undefined ? resData.fat_live : resData.fat) || 0;
-                    let defSteps = targetSteps - liveSteps; let defWater = targetWater - liveWater; let defSleep = targetSleep - liveSleep; let liveHtml = '';
+                    // 2. T-0 LIVE RADAR (TÍNH TOÁN MÓN NỢ SINH HỌC)
+                    let targetSteps = isSunday ? 0 : 6000; 
+                    let targetWater = 2.5;
+                    let targetSleep = 7.0;
+
+                    let liveSteps = parseFloat(resData.steps_live !== undefined ? resData.steps_live : resData.steps) || 0;
+                    let liveWater = parseFloat(resData.water_live !== undefined ? resData.water_live : resData.water) || 0;
+                    let liveSleep = parseFloat(resData.sleep_live !== undefined ? resData.sleep_live : resData.sleep) || 0;
                     
-                    if (!isSunday && liveHR > 0 && liveHR < 160) liveHtml += `<span class="metric-item">❤️ Peak: ${liveHR.toFixed(0)}</span>`;
-                    if (defSteps > 0) liveHtml += `<span class="metric-item">👟 +${defSteps.toFixed(0)}</span>`; if (defSleep > 0) liveHtml += `<span class="metric-item">🛌 +${defSleep.toFixed(1)}h</span>`; if (defWater > 0) liveHtml += `<span class="metric-item">💧 +${defWater.toFixed(1)}L</span>`;
-                    if (liveWeight > 67.0) liveHtml += `<span class="metric-item">⚖️ -${(liveWeight - 67.0).toFixed(1)}kg</span>`; else if (liveWeight > 0 && liveWeight < 63.0) liveHtml += `<span class="metric-item">⚖️ +${(63.0 - liveWeight).toFixed(1)}kg</span>`;
-                    if (liveFat > 13.0) liveHtml += `<span class="metric-item">🥓 -${(liveFat - 13.0).toFixed(1)}%</span>`;
+                    let liveHR = parseFloat(resData.hr_live !== undefined ? resData.hr_live : resData.hr) || 0;
+                    let liveWeight = parseFloat(resData.weight_live !== undefined ? resData.weight_live : resData.weight) || 0;
+                    let liveFat = parseFloat(resData.fat_live !== undefined ? resData.fat_live : resData.fat) || 0;
 
-                    const radarBar = document.getElementById('live-radar-bar'); const radarPulse = document.getElementById('live-pulse'); const radarMetrics = document.getElementById('live-metrics');
+                    let defSteps = targetSteps - liveSteps;
+                    let defWater = targetWater - liveWater;
+                    let defSleep = targetSleep - liveSleep;
+
+                    let liveHtml = '';
+                    
+                    // Nhóm Vận Động & Phục Hồi
+                    if (!isSunday && liveHR > 0 && liveHR < 160) {
+                        liveHtml += `<span class="metric-item">❤️ Peak: ${liveHR.toFixed(0)}</span>`;
+                    }
+                    if (defSteps > 0) liveHtml += `<span class="metric-item">👟 +${defSteps.toFixed(0)}</span>`;
+                    if (defSleep > 0) liveHtml += `<span class="metric-item">🛌 +${defSleep.toFixed(1)}h</span>`;
+                    if (defWater > 0) liveHtml += `<span class="metric-item">💧 +${defWater.toFixed(1)}L</span>`;
+                    
+                    // Nhóm Cơ Thể
+                    if (liveWeight > 67.0) {
+                        liveHtml += `<span class="metric-item">⚖️ -${(liveWeight - 67.0).toFixed(1)}kg</span>`;
+                    } else if (liveWeight > 0 && liveWeight < 63.0) {
+                        liveHtml += `<span class="metric-item">⚖️ +${(63.0 - liveWeight).toFixed(1)}kg</span>`;
+                    }
+                    
+                    if (liveFat > 13.0) {
+                        liveHtml += `<span class="metric-item">🥓 -${(liveFat - 13.0).toFixed(1)}%</span>`;
+                    }
+
+                    const radarBar = document.getElementById('live-radar-bar');
+                    const radarPulse = document.getElementById('live-pulse');
+                    const radarMetrics = document.getElementById('live-metrics');
+                    
                     setTimeout(() => radarBar.classList.add('active'), 100);
 
-                    if (liveHtml === '') { radarBar.classList.add('all-clear'); radarPulse.className = 'live-pulse clear'; radarPulse.innerText = '[ 🟢 LIVE ]'; radarMetrics.innerHTML = 'ALL CLEAR - BẠN ĐÃ TRẢ HẾT NỢ SINH HỌC HÔM NAY'; } 
-                    else { radarBar.classList.remove('all-clear'); radarPulse.className = 'live-pulse'; radarPulse.innerText = '[ 🔴 LIVE ]'; radarMetrics.innerHTML = liveHtml; }
+                    if (liveHtml === '') {
+                        radarBar.classList.add('all-clear');
+                        radarPulse.className = 'live-pulse clear';
+                        radarPulse.innerText = '[ 🟢 LIVE ]';
+                        radarMetrics.innerHTML = 'ALL CLEAR - BẠN ĐÃ TRẢ HẾT NỢ SINH HỌC HÔM NAY';
+                    } else {
+                        radarBar.classList.remove('all-clear');
+                        radarPulse.className = 'live-pulse';
+                        radarPulse.innerText = '[ 🔴 LIVE ]';
+                        radarMetrics.innerHTML = liveHtml;
+                    }
 
-                    const statusBanner = document.getElementById('status-banner'); document.body.classList.remove('tier-shiro', 'tier-chairo', 'tier-kuro');
+                    // 3. LOGIC RANK (Dựa trên SCI MA30)
+                    const statusBanner = document.getElementById('status-banner');
+                    document.body.classList.remove('tier-shiro', 'tier-chairo', 'tier-kuro');
+
                     let sciScore = parseFloat(centerSci) || 0;
                     
                     if (sciScore < 50) {
-                        document.body.classList.add('tier-shiro'); statusBanner.innerText = "[ TIER 1: SHIRO - BÁO ĐỘNG ]"; statusBanner.style.color = "var(--crimson)"; statusBanner.style.borderColor = "var(--crimson)"; statusBanner.style.background = "rgba(255, 42, 42, 0.1)"; updateMarquee('shiro'); playLockSound(); 
-                        typeTextSafe([ "[ 📡 BOO: ĐỒNG BỘ HOÀN TẤT ]", "⚠️ CẢNH BÁO: Chỉ số SCI AVG 30D ở mức rệu rã.", "🛑 LỆNH: Khóa Bankroll. Không cấp quyền Vault.", "🔍 (Chạm thông số để xem báo cáo T-1)" ], 20, 200);
-                        if (parseFloat(resData.water) < 55.0) document.querySelector('.pos-rec2').style.animation = "alert-flash 1s infinite alternate"; if (parseFloat(resData.hr) < (isT1Sunday ? 0 : 160)) document.querySelector('.pos-hr').style.animation = "alert-flash 1s infinite alternate"; if (parseFloat(resData.sleep) < 7.0) document.querySelector('.pos-rec1').style.animation = "alert-flash 1s infinite alternate";
+                        document.body.classList.add('tier-shiro');
+                        statusBanner.innerText = "[ TIER 1: SHIRO - BÁO ĐỘNG ]";
+                        statusBanner.style.color = "var(--crimson)"; statusBanner.style.borderColor = "var(--crimson)"; statusBanner.style.background = "rgba(255, 42, 42, 0.1)";
+                        
+                        updateMarquee('shiro'); playLockSound(); 
+                        
+                        typeTextSafe([
+                            "[ 📡 BOO: ĐỒNG BỘ HOÀN TẤT ]",
+                            "⚠️ CẢNH BÁO: Chỉ số SCI AVG 30D ở mức rệu rã.", 
+                            "🛑 LỆNH: Khóa Bankroll. Không cấp quyền Vault.", 
+                            "🔍 (Chạm thông số để xem báo cáo T-1)"
+                        ], 20, 200);
+                        
+                        if (parseFloat(resData.water) < 55.0) document.querySelector('.pos-rec2').style.animation = "alert-flash 1s infinite alternate";
+                        if (parseFloat(resData.hr) < (isT1Sunday ? 0 : 160)) document.querySelector('.pos-hr').style.animation = "alert-flash 1s infinite alternate";
+                        if (parseFloat(resData.sleep) < 7.0) document.querySelector('.pos-rec1').style.animation = "alert-flash 1s infinite alternate";
+                        
                     } else if (sciScore >= 50 && sciScore < 85) {
-                        document.body.classList.add('tier-chairo'); statusBanner.innerText = "[ TIER 2: CHAIRO - TIÊU CHUẨN ]"; statusBanner.style.color = "var(--cyan)"; statusBanner.style.borderColor = "var(--cyan)"; statusBanner.style.background = "rgba(0, 229, 255, 0.1)"; document.querySelectorAll('.data-panel').forEach(el => el.style.animation = 'none'); updateMarquee('chairo');
-                        currentVaultCode = "KAI-" + sciScore + "-" + Math.floor(1000 + Math.random() * 9000); document.getElementById('btn-chip-vault').style.display = 'flex';
-                        typeTextSafe([ "[ 📡 BOO: ĐỒNG BỘ HOÀN TẤT ]", "📊 ĐÁNH GIÁ: Myelin ổn định. Mở khóa Bankroll.", "🔑 MÃ KDRIVE: [" + currentVaultCode + "]", "🛑 LỆNH: Chạm biểu tượng Đồng Chip để truy cập." ], 20, 200);
+                        document.body.classList.add('tier-chairo');
+                        statusBanner.innerText = "[ TIER 2: CHAIRO - TIÊU CHUẨN ]";
+                        statusBanner.style.color = "var(--cyan)"; statusBanner.style.borderColor = "var(--cyan)"; statusBanner.style.background = "rgba(0, 229, 255, 0.1)";
+                        
+                        document.querySelectorAll('.data-panel').forEach(el => el.style.animation = 'none');
+                        updateMarquee('chairo');
+                        
+                        currentVaultCode = "KAI-" + sciScore + "-" + Math.floor(1000 + Math.random() * 9000);
+                        document.getElementById('btn-chip-vault').style.display = 'flex';
+
+                        typeTextSafe([
+                            "[ 📡 BOO: ĐỒNG BỘ HOÀN TẤT ]",
+                            "📊 ĐÁNH GIÁ: Myelin ổn định. Mở khóa Bankroll.",
+                            "🔑 MÃ KDRIVE: [" + currentVaultCode + "]",
+                            "🛑 LỆNH: Chạm biểu tượng Đồng Chip để truy cập."
+                        ], 20, 200);
+                        
                         if (!isMuted && !bgmAudio.paused) bgmAudio.pause();
+                        
                     } else if (sciScore >= 85) {
-                        document.body.classList.add('tier-kuro'); statusBanner.innerText = "[ TIER 3: KURO - VÔ NGÃ ]"; statusBanner.style.color = "var(--neon-pink)"; statusBanner.style.borderColor = "var(--neon-pink)"; statusBanner.style.background = "rgba(255, 0, 255, 0.1)"; updateMarquee('kuro'); triggerMushinProtocol();
-                        currentVaultCode = "KAI-" + sciScore + "-" + Math.floor(1000 + Math.random() * 9000); document.getElementById('btn-chip-vault').style.display = 'flex';
-                        typeTextSafe([ "[ 📡 BOO: ĐỒNG BỘ HOÀN TẤT ]", "🔥 ĐÁNH GIÁ: Trạng thái Vô Ngã. Mở khóa Bankroll tối đa.", "🔑 MÃ KDRIVE: [" + currentVaultCode + "]", "🛑 LỆNH: Chạm biểu tượng Đồng Chip để truy cập." ], 20, 200);
+                        document.body.classList.add('tier-kuro');
+                        statusBanner.innerText = "[ TIER 3: KURO - VÔ NGÃ ]";
+                        statusBanner.style.color = "var(--neon-pink)"; statusBanner.style.borderColor = "var(--neon-pink)"; statusBanner.style.background = "rgba(255, 0, 255, 0.1)";
+                        
+                        updateMarquee('kuro'); triggerMushinProtocol();
+                        
+                        currentVaultCode = "KAI-" + sciScore + "-" + Math.floor(1000 + Math.random() * 9000);
+                        document.getElementById('btn-chip-vault').style.display = 'flex';
+
+                        typeTextSafe([
+                            "[ 📡 BOO: ĐỒNG BỘ HOÀN TẤT ]",
+                            "🔥 ĐÁNH GIÁ: Trạng thái Vô Ngã. Mở khóa Bankroll tối đa.",
+                            "🔑 MÃ KDRIVE: [" + currentVaultCode + "]",
+                            "🛑 LỆNH: Chạm biểu tượng Đồng Chip để truy cập."
+                        ], 20, 200);
+                        
                         if (!isMuted && bgmAudio.paused) { bgmAudio.play().catch(e=>console.log(e)); document.getElementById('icon-sound-on').style.display='block'; document.getElementById('icon-sound-off').style.display='none'; }
                     }
-                } else if (resData.status === 'empty') { typeTextSafe([ "[ 🛑 BOO: TỪ CHỐI TRUY CẬP ]", "⚠️ LỖI: Chưa có dữ liệu sinh trắc trong Sheet.", "🔧 LỆNH: Yêu cầu đồng bộ Health Connect lập tức." ], 20, 150); updateMarquee('standby'); document.body.classList.add('standby-mode'); } 
-                else { typeTextSafe(["[ ❌ BOO: LỖI HỆ THỐNG ]", "⚠️ " + (resData.message || "Truy xuất thất bại.")]); updateMarquee('standby'); document.body.classList.add('standby-mode'); }
+                } else if (resData.status === 'empty') { 
+                    typeTextSafe([
+                        "[ 🛑 BOO: TỪ CHỐI TRUY CẬP ]",
+                        "⚠️ LỖI: Chưa có dữ liệu sinh trắc trong Sheet.",
+                        "🔧 LỆNH: Yêu cầu đồng bộ Health Connect lập tức."
+                    ], 20, 150); 
+                    updateMarquee('standby'); document.body.classList.add('standby-mode');
+                } else {
+                    typeTextSafe(["[ ❌ BOO: LỖI HỆ THỐNG ]", "⚠️ " + (resData.message || "Truy xuất thất bại.")]); 
+                    updateMarquee('standby'); document.body.classList.add('standby-mode');
+                }
             } catch (error) {
-                stopChargeSound(); typeTextSafe(["[ 🚨 BOO: CẢNH BÁO ĐỎ ]", "⚠️ MẤT KẾT NỐI VỚI VỆ TINH GOOGLE."]); updateMarquee('standby'); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
+                stopChargeSound(); 
+                typeTextSafe(["[ 🚨 BOO: CẢNH BÁO ĐỎ ]", "⚠️ MẤT KẾT NỐI VỚI VỆ TINH GOOGLE."]);
+                updateMarquee('standby'); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
             }
             window.isScanning = false;
         }
 
-        document.querySelectorAll('.sub-tier').forEach(details => { details.addEventListener('toggle', (e) => { if (details.open) { document.querySelectorAll('.sub-tier').forEach(other => { if (other !== details) other.removeAttribute('open'); }); } }); });
-        function openFullscreen(imgElement) { playBeep(); const viewer = document.getElementById('img-viewer'); const viewerImg = document.getElementById('viewer-img'); viewerImg.src = imgElement.src; viewer.classList.add('active'); }
-        function closeFullscreen() { playBeep(); document.getElementById('img-viewer').classList.remove('active'); }
+        document.querySelectorAll('.sub-tier').forEach(details => {
+            details.addEventListener('toggle', (e) => {
+                if (details.open) {
+                    document.querySelectorAll('.sub-tier').forEach(other => {
+                        if (other !== details) other.removeAttribute('open');
+                    });
+                }
+            });
+        });
+
+        function openFullscreen(imgElement) {
+            playBeep();
+            const viewer = document.getElementById('img-viewer');
+            const viewerImg = document.getElementById('viewer-img');
+            viewerImg.src = imgElement.src;
+            viewer.classList.add('active');
+        }
+
+        function closeFullscreen() {
+            playBeep();
+            document.getElementById('img-viewer').classList.remove('active');
+        }
 
         function initializeSystem() {
-            initParticles(); document.body.classList.add('standby-mode'); updateButtonState(); updateMarquee('standby'); document.body.classList.add('pre-scan-locked'); 
-            if (isCommitted) { typeTextSafe([ "[ 🛡️ BOO: TƯỜNG LỬA SINH TRẮC KÍCH HOẠT ]", "🎯 MỤC TIÊU: Quản trị rủi ro. Bảo vệ Bankroll tuyệt đối.", "🛑 LỆNH: Triệt tiêu mọi quyết định tài chính cảm xúc." ], 20, 100); } 
-            else { document.body.classList.add('uncommitted'); typeTextSafe(["[ ⚠️ BOO: HỆ THỐNG ĐÓNG BĂNG ]", ">> Yêu cầu: Ký hợp đồng trong BÍ LỤC (Góc phải) trước khi vận hành."]); }
+            initParticles(); document.body.classList.add('standby-mode'); updateButtonState(); updateMarquee('standby');
+            document.body.classList.add('pre-scan-locked'); 
+            
+            if (isCommitted) { 
+                typeTextSafe([
+                    "[ 🛡️ BOO: TƯỜNG LỬA SINH TRẮC KÍCH HOẠT ]",
+                    "🎯 MỤC TIÊU: Quản trị rủi ro. Bảo vệ Bankroll tuyệt đối.",
+                    "🛑 LỆNH: Triệt tiêu mọi quyết định tài chính cảm xúc."
+                ], 20, 100); 
+            } 
+            else { 
+                document.body.classList.add('uncommitted');
+                typeTextSafe(["[ ⚠️ BOO: HỆ THỐNG ĐÓNG BĂNG ]", ">> Yêu cầu: Ký hợp đồng trong BÍ LỤC (Góc phải) trước khi vận hành."]); 
+            }
         }
     </script>
 </body>
