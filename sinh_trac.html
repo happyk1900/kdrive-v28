@@ -26,12 +26,20 @@
         }
 
         /* =========================================
-           LỚP INTRO CỔNG BẢO MẬT (ÉP Z-INDEX TUYỆT ĐỐI)
+           LỚP INTRO ĐIỆN ẢNH BỌC THÉP V4 (TIMING CHUẨN)
            ========================================= */
         #intro-layer { position: fixed; inset: 0; z-index: 100000; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 2s ease; overflow: hidden; }
         
-        #intro-bg { position: absolute; inset: -5%; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/anh%20intro%20(1).jpg?raw=true') center/cover; filter: blur(25px) brightness(0.15) grayscale(0.6); opacity: 0; transition: all 15s ease-out; }
-        #intro-bg.reveal { opacity: 1; filter: blur(6px) brightness(0.35) grayscale(0.2); transform: scale(1.05); }
+        #intro-bg { position: absolute; inset: -5%; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/anh%20intro%20(1).jpg?raw=true') center/cover; filter: blur(25px) brightness(0.15) grayscale(0.6); opacity: 0; transition: all 2s ease-out; }
+        
+        /* Hiệu ứng rõ nét 10s đầu */
+        #intro-bg.focus-mode { opacity: 1; filter: blur(0px) brightness(0.8) grayscale(0); transform: scale(1); transition: all 2s ease-out; }
+        /* Hiệu ứng tối lại sau 10s */
+        #intro-bg.dim-mode { opacity: 1; filter: blur(8px) brightness(0.25) grayscale(0.4); transform: scale(1.05); transition: all 3s ease-out; }
+
+        /* Tiêu đề 10s đầu */
+        #intro-title { position: absolute; z-index: 8; font-family: var(--font-display); font-size: 26px; color: #fff; text-transform: uppercase; letter-spacing: 2px; font-weight: 900; text-align: center; text-shadow: 0 0 15px var(--amber), 0 0 30px var(--amber); opacity: 0; transform: translateY(20px); transition: opacity 2s ease, transform 2s ease; pointer-events: none; width: 90%; }
+        #intro-title.show { opacity: 1; transform: translateY(0); }
 
         #gatekeeper-btn { position: relative; z-index: 999999; pointer-events: auto !important; border: 1px solid rgba(0,229,255,0.5); background: rgba(0,229,255,0.05); color: var(--cyan); padding: 15px 30px; font-family: var(--font-display); font-size: 13px; letter-spacing: 3px; font-weight: bold; cursor: pointer; transition: all 0.3s; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); animation: pulse-gatekeeper 2s infinite alternate; text-align: center; }
         #gatekeeper-btn:active { transform: scale(0.95); }
@@ -49,7 +57,9 @@
         .cine-danger { color: #ff2a2a; font-style: italic; font-weight: 600; text-shadow: 0 0 20px rgba(255,42,42,0.8); }
 
         #intro-flash { position: absolute; inset: 0; background: #ffffff; z-index: 20; opacity: 0; pointer-events: none; transition: opacity 0.1s ease-out; }
-        #intro-punchline { font-family: var(--font-display); font-size: 15px; color: var(--cyan); letter-spacing: 3px; font-weight: 900; text-align: center; text-shadow: 0 0 20px var(--cyan); position: absolute; z-index: 25; opacity: 0; line-height: 1.8; border-top: 1px solid rgba(0,229,255,0.3); padding-top: 15px; }
+        
+        /* Đã đổi font chữ ký thành font thường (Rajdhani) thanh thoát hơn */
+        #intro-punchline { font-family: var(--font-ui), sans-serif; font-size: 17px; color: var(--cyan); letter-spacing: 1px; font-weight: 600; text-align: center; text-shadow: 0 0 10px rgba(0,229,255,0.5); position: absolute; z-index: 25; opacity: 0; line-height: 1.6; border-top: 1px solid rgba(0,229,255,0.3); padding-top: 15px; transition: opacity 1.5s ease; }
 
         #skip-btn { position: absolute; bottom: 30px; right: 30px; z-index: 30; background: transparent; border: none; color: rgba(255,255,255,0.3); font-family: var(--font-display); font-size: 11px; letter-spacing: 1px; cursor: pointer; transition: color 0.3s; display: none; padding: 10px; }
         #skip-btn:active { color: #fff; }
@@ -314,10 +324,12 @@
 </head>
 <body>
 
-    <!-- LỚP INTRO ĐIỆN ẢNH BỌC THÉP -->
+    <!-- LỚP INTRO ĐIỆN ẢNH -->
     <div id="intro-layer">
         <div id="intro-bg"></div>
-        <!-- Bổ sung ontouchstart để nhận diện cảm ứng cực nhạy -->
+        <!-- Thêm dòng chữ mở màn 10s -->
+        <div id="intro-title">Chinh phục vương quốc poker!</div>
+        
         <button id="gatekeeper-btn" onclick="startIntro(event)" ontouchstart="startIntro(event)">[ KHỞI CHẠY GIAO THỨC ]</button>
         <div id="cine-subtitles"></div>
         <button id="skip-btn" onclick="skipIntro()">[ >> BỎ QUA ]</button>
@@ -542,7 +554,6 @@
                 const parentTier = btnElement.nextElementSibling;
                 if(parentTier && parentTier.classList && parentTier.classList.contains('open')) return;
             }
-
             try {
                 initAudio(); 
                 const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
@@ -554,7 +565,6 @@
                 osc.connect(gain); gain.connect(audioCtx.destination);
                 osc.start(); osc.stop(audioCtx.currentTime + 1.5);
             } catch(e){}
-
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 let msg = new SpeechSynthesisUtterance('Mushin'); 
@@ -563,7 +573,6 @@
                 msg.rate = 0.5; 
                 window.speechSynthesis.speak(msg);
             }
-
             const overlay = document.getElementById('rank-overlay');
             overlay.style.animation = 'none';
             void overlay.offsetWidth; 
@@ -605,7 +614,7 @@
         });
 
         // ==========================================
-        // GIAO THỨC INTRO ĐIỆN ẢNH (BỌC THÉP V3)
+        // GIAO THỨC INTRO ĐIỆN ẢNH (TIMING MỚI)
         // ==========================================
         
         let cinematicAudio = null;
@@ -614,22 +623,22 @@
         let introStarted = false;
         let introReq;
         let introFinished = false;
+        let introPunchlineTriggered = false;
 
+        // Đã tịnh tiến các mốc thời gian (+10s) cho khớp đoạn dạo nhạc 10s đầu
         const introSubtitles = [
-            { tIn: 2.0,  tOut: 5.5,  html: 'Xin chào. Tôi là Kai Ripe.' },
-            { tIn: 6.5,  tOut: 11.0, html: 'Mọi quyết định sai lầm nhất của con người...<br>đều bắt nguồn từ khoảnh khắc <span class="cine-highlight">cảm xúc vượt mặt lý trí.</span>' },
-            { tIn: 12.0, tOut: 19.0, html: 'Để chinh phục sự hỗn mang đó, tôi đã tự tay thiết kế một chương trình A.I<br>nhằm đo lường và quản trị rủi ro cho chính bản thân mình.' },
-            { tIn: 20.0, tOut: 28.0, html: 'Và tôi chọn thử nghiệm nó trong một môi trường khắc nghiệt bậc nhất: Poker.<br>Chiến trường của thể lực, trí tuệ, và độ sắc bén đỉnh cao.' },
-            { tIn: 29.0, tOut: 36.0, html: 'Đối với một vận động viên, ranh giới giữa một quyết định thiên tài<br>và sự sụp đổ toàn diện... là vô cùng mong manh.' },
-            { tIn: 38.0, tOut: 46.0, html: 'Triết lý của hệ thống này được xây dựng dựa trên con đường của Miyamoto Musashi:<br>Rèn luyện kỷ luật thép 1.000 ngày để chạm đến <span class="cine-mushin">\'Mushin\' – Trạng thái Vô Ngã.</span>' },
-            { tIn: 47.0, tOut: 53.5, html: 'Tâm trí tĩnh lặng như mặt nước. Không sợ hãi. Không bám chấp.<br>Một quyết định sắc bén... chỉ được vung ra từ một cái đầu lạnh.' },
-            { tIn: 54.5, tOut: 61.5, html: 'Hệ thống này chính là người gác đền cho trạng thái đó.<br>Chỉ khi các chỉ số sinh học đạt ngưỡng tinh anh nhất, bạn mới có quyền thi đấu.' },
-            { tIn: 62.5, tOut: 70.0, html: 'Nếu không? Mọi quyền lực tài chính sẽ bị tước đoạt...<br><span class="cine-danger">để bảo vệ bạn khỏi cảm xúc của chính mình.</span>' },
-            { tIn: 71.0, tOut: 78.0, html: 'Chào mừng bạn đến với K Drive.<br>Hệ thống quản trị rủi ro tài chính bằng sinh trắc học đầu tiên trên thế giới.' },
-            { tIn: 79.0, tOut: 85.0, html: 'Boo A.I – Chuyên gia phân tích dữ liệu Poker... đã kích hoạt.' }
+            { tIn: 12.0, tOut: 15.5, html: 'Xin chào. Tôi là Kai Ripe.' },
+            { tIn: 16.5, tOut: 21.0, html: 'Mọi quyết định sai lầm nhất của con người...<br>đều bắt nguồn từ khoảnh khắc <span class="cine-highlight">cảm xúc vượt mặt lý trí.</span>' },
+            { tIn: 22.0, tOut: 29.0, html: 'Để chinh phục sự hỗn mang đó, tôi đã tự tay thiết kế một chương trình A.I<br>nhằm đo lường và quản trị rủi ro cho chính bản thân mình.' },
+            { tIn: 30.0, tOut: 38.0, html: 'Và tôi chọn thử nghiệm nó trong một môi trường khắc nghiệt bậc nhất: Poker.<br>Chiến trường của thể lực, trí tuệ, và độ sắc bén đỉnh cao.' },
+            { tIn: 39.0, tOut: 46.0, html: 'Đối với một vận động viên, ranh giới giữa một quyết định thiên tài<br>và sự sụp đổ toàn diện... là vô cùng mong manh.' },
+            { tIn: 48.0, tOut: 56.0, html: 'Triết lý của hệ thống này được xây dựng dựa trên con đường của Miyamoto Musashi:<br>Rèn luyện kỷ luật thép 1.000 ngày để chạm đến <span class="cine-mushin">\'Mushin\' – Trạng thái Vô Ngã.</span>' },
+            { tIn: 57.0, tOut: 63.5, html: 'Tâm trí tĩnh lặng như mặt nước. Không sợ hãi. Không bám chấp.<br>Một quyết định sắc bén... chỉ được vung ra từ một cái đầu lạnh.' },
+            { tIn: 64.5, tOut: 71.5, html: 'Hệ thống này chính là người gác đền cho trạng thái đó.<br>Chỉ khi các chỉ số sinh học đạt ngưỡng tinh anh nhất, bạn mới có quyền thi đấu.' },
+            { tIn: 72.5, tOut: 80.0, html: 'Nếu không? Mọi quyền lực tài chính sẽ bị tước đoạt...<br><span class="cine-danger">để bảo vệ bạn khỏi cảm xúc của chính mình.</span>' },
+            { tIn: 81.0, tOut: 88.0, html: 'Chào mừng bạn đến với K Drive.<br>Hệ thống quản trị rủi ro tài chính bằng sinh trắc học đầu tiên trên thế giới.' },
+            { tIn: 89.0, tOut: 96.0, html: 'Boo A.I – Chuyên gia phân tích dữ liệu Poker... đã kích hoạt.' }
         ];
-
-        const climaxTime = 85.5; 
 
         function initAllAudio() {
             if (!cinematicAudio) {
@@ -642,16 +651,11 @@
         }
 
         function startIntro(e) {
-            // Chặn đúp chuột do ontouchstart và onclick gọi cùng lúc
-            if (e && e.type === 'touchstart') {
-                e.preventDefault();
-            }
-            
+            if (e && e.type === 'touchstart') e.preventDefault();
             if(introStarted) return;
             introStarted = true;
 
-            initAudio(); 
-            initAllAudio();
+            initAudio(); initAllAudio();
             
             const btn = document.getElementById('gatekeeper-btn');
             btn.innerHTML = '[ ĐANG GIẢI MÃ TÍN HIỆU... ]';
@@ -663,11 +667,10 @@
                     playPromise.then(() => {
                         startIntroVisuals();
                     }).catch(error => {
-                        console.warn("Zalo chặn media:", error);
                         showSkipFallback(btn);
                     });
                 } else {
-                    startIntroVisuals(); // Cho các trình duyệt đời rất cũ
+                    startIntroVisuals(); 
                 }
             } catch (err) {
                 showSkipFallback(btn);
@@ -677,8 +680,24 @@
         function startIntroVisuals() {
             document.getElementById('gatekeeper-btn').style.display = 'none';
             document.getElementById('skip-btn').style.display = 'block';
-            document.getElementById('intro-bg').classList.add('reveal'); 
             
+            const bg = document.getElementById('intro-bg');
+            const title = document.getElementById('intro-title');
+            
+            // 1. Giai đoạn 10s đầu: Nổi ảnh rõ nét, chữ "Chinh phục vương quốc poker!"
+            bg.classList.add('focus-mode');
+            title.classList.add('show');
+
+            // 2. Sau 10s: Cất chữ, kéo Dim Mode tối ảnh để lên Subtitle
+            setTimeout(() => {
+                if(!introFinished && !introPunchlineTriggered) {
+                    title.classList.remove('show');
+                    bg.classList.remove('focus-mode');
+                    bg.classList.add('dim-mode');
+                }
+            }, 10000); 
+            
+            // Tạo sẵn cấu trúc Text
             const subContainer = document.getElementById('cine-subtitles');
             subContainer.innerHTML = '';
             introSubtitles.forEach((sub, index) => {
@@ -692,19 +711,16 @@
         function showSkipFallback(btn) {
             btn.innerHTML = '[ BỎ QUA - VÀO HỆ THỐNG ]';
             btn.classList.remove('loading-pulse');
-            btn.style.borderColor = 'var(--crimson)';
-            btn.style.color = 'var(--crimson)';
-            
-            // Xóa block trạng thái cũ để ấn tiếp được
+            btn.style.borderColor = 'var(--crimson)'; btn.style.color = 'var(--crimson)';
             introStarted = false; 
-            btn.onclick = skipIntro;
-            btn.ontouchstart = skipIntro;
+            btn.onclick = skipIntro; btn.ontouchstart = skipIntro;
         }
 
         function checkIntroTime() {
             if(!cinematicAudio) return;
             const ct = cinematicAudio.currentTime;
             
+            // Khớp Subtitles
             introSubtitles.forEach((sub, index) => {
                 let el = document.getElementById('sub-' + index);
                 if(el) {
@@ -713,18 +729,23 @@
                 }
             });
             
-            if(ct >= climaxTime && !introFinished) {
-                triggerIntroClimax();
+            // Hiện chữ ký ở giây 98
+            if(ct >= 98.0 && !introPunchlineTriggered) {
+                triggerIntroPunchline();
+            }
+
+            // Thoát hoàn toàn ở giây 112.5 (1 phút 53 giây)
+            if (ct >= 112.5 && !introFinished) {
+                introFinished = true;
+                endIntroSequence();
             } else if (!introFinished) {
                 introReq = requestAnimationFrame(checkIntroTime);
             }
         }
 
-        function triggerIntroClimax() {
-            introFinished = true; cancelAnimationFrame(introReq);
+        function triggerIntroPunchline() {
+            introPunchlineTriggered = true;
             document.getElementById('cine-subtitles').style.display = 'none';
-            document.getElementById('skip-btn').style.display = 'none';
-            
             document.getElementById('intro-flash').style.opacity = '1';
             playBeep(); 
             
@@ -732,12 +753,10 @@
                 document.getElementById('intro-flash').style.opacity = '0';
                 document.getElementById('intro-punchline').style.opacity = '1';
             }, 100);
-            
-            setTimeout(() => { endIntroSequence(); }, 3500);
         }
 
         function skipIntro() {
-            introFinished = true; 
+            introFinished = true; introPunchlineTriggered = true;
             if (introReq) cancelAnimationFrame(introReq); 
             playBeep();
             
