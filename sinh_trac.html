@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Event Horizon Core</title>
-    <!-- BỔ SUNG FONT ROBOTO MONO CHO TERMINAL -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-obsidian: #050608; --mint: #00ff9d; --cyan: #00e5ff;
             --amber: #ffaa00; --violet: #b026ff; --crimson: #ff2a2a;
-            --neon-pink: #ff00ff; --lime: #39ff14; /* MÀU XANH CHUỐI */
+            --neon-pink: #ff00ff; --lime: #39ff14;
             --font-display: 'Orbitron', sans-serif; --font-ui: 'Rajdhani', sans-serif;
             --font-terminal: 'Roboto Mono', monospace;
             --vh: 1vh; 
@@ -35,7 +34,6 @@
         #intro-bg.focus-mode { opacity: 1; filter: blur(0px) brightness(0.8) grayscale(0); transform: scale(1); transition: all 2s ease-out; }
         #intro-bg.dim-mode { opacity: 1; filter: blur(8px) brightness(0.25) grayscale(0.4); transform: scale(1.05); transition: all 3s ease-out; }
 
-        /* Tiêu đề Intro: Bóng đổ sâu, né lá bài */
         #intro-title { 
             position: absolute; 
             bottom: 15%; 
@@ -191,7 +189,7 @@
         body.pre-scan-locked .sci-nexus { pointer-events: none !important; }
         body.uncommitted .safety-hud-box { display: none !important; }
 
-        /* BẢNG YÊU CẦU ĐỒNG BỘ: MÀU CAM AMBER, TEXT TRẮNG, NÚT XANH LIME */
+        /* BẢNG YÊU CẦU ĐỒNG BỘ */
         .safety-hud-box { position: absolute; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5, 6, 8, 0.9); border: 1px solid var(--amber); box-shadow: 0 0 20px rgba(255, 170, 0, 0.1); padding: 20px 15px; backdrop-filter: blur(5px); clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); transition: all 0.5s ease; width: 90%; max-width: 340px; margin-top: 0; }
         .safety-hud-box.unlocked { opacity: 0; pointer-events: none; transform: scale(1.1); display: none !important; }
         .hud-cond { font-family: var(--font-terminal); font-size: 12px; color: #fff; margin-bottom: 12px; text-align: left; width: 100%; display: flex; gap: 8px; font-weight: 600; line-height: 1.4; opacity: 0.9; }
@@ -626,6 +624,7 @@
         let chargeOsc, chargeGain;
         function playChargeSound() {
             try {
+                stopChargeSound(); // Chặn hú kép
                 initAudio();
                 chargeOsc = audioCtx.createOscillator(); chargeGain = audioCtx.createGain();
                 chargeOsc.type = 'square'; chargeOsc.frequency.setValueAtTime(100, audioCtx.currentTime);
@@ -688,7 +687,8 @@
                 cinematicAudio = new Audio('https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/INTRO-THOAI.mp3');
             }
             if (!bgmAudio) {
-                bgmAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20R%C5%8Dnin.mp3');
+                // UPDATE TRACK ÂM THANH THE HIGH STAKES ASCENT
+                bgmAudio = new Audio('https://github.com/happyk1900/Music-ver-1-Poker-abum/raw/refs/heads/main/The_High_Stakes_Ascent.mp4');
                 bgmAudio.loop = true; bgmAudio.volume = 0.5;
             }
         }
@@ -819,9 +819,19 @@
                 layer.style.display = 'none';
                 document.getElementById('main-pwa').style.opacity = '1'; 
                 
-                // Giai đoạn 1: Lõi sạc 3s
+                // Giai đoạn 1: Lõi xoay 3s và KHỞI ĐỘNG BGM
                 document.body.classList.add('core-charging');
-                playChargeSound();
+                
+                if(!bgmAudio) initAllAudio();
+                bgmAudio.currentTime = 0;
+                let playPromise = bgmAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        document.getElementById('icon-sound-on').style.display='block';
+                        document.getElementById('icon-sound-off').style.display='none';
+                        isMuted = false;
+                    }).catch(e=>console.log(e));
+                }
                 
                 setTimeout(() => {
                     // Giai đoạn 2: Sóng xung kích & Lắp ráp thiết giáp 2s
