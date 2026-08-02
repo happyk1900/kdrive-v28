@@ -21,114 +21,85 @@
             background-color: var(--bg-obsidian); color: white;
             font-family: var(--font-ui); overflow: hidden;
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            width: 100vw; 
-            height: 100vh; height: calc(var(--vh, 1vh) * 100); 
+            width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); 
             display: flex; justify-content: center; align-items: center;
         }
 
         /* =========================================
-           LỚP INTRO ĐIỆN ẢNH BỌC THÉP
+           LỚP INTRO ĐIỆN ẢNH & CHUYỂN CẢNH KÉP
            ========================================= */
         #intro-layer { position: fixed; inset: 0; z-index: 100000; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 2s ease; overflow: hidden; }
         
-        /* CONTAINER BAO GỒM ẢNH NỀN VÀ HUD BẰNG CODE */
-        #mushin-bg { position: absolute; inset: 0; z-index: 1; transition: opacity 1.5s ease-out, filter 1.5s ease-out, transform 1.5s ease-out; }
+        /* ẢNH 1: MUSHIN (Ghim tuyệt đối 100% màn hình) */
+        #mushin-bg { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; transition: opacity 1.5s ease-out, filter 1.5s ease-out, transform 1.5s ease-out; }
         #mushin-bg.fade-out { opacity: 0; filter: blur(15px); transform: scale(1.1); pointer-events: none; }
-        
-        /* ẢNH NỀN FULL (Thay link ảnh anh tạo vào đây) */
-        .mushin-clean-image { 
-            position: absolute; inset: -2%; 
-            /* 👇 ANH DÁN LINK ẢNH NÚI TRĂNG CỦA ANH VÀO DƯỚI ĐÂY 👇 */
-            background: url('LINK_ANH_NEN_CỦA_ANH_VÀO_ĐÂY') center/cover no-repeat; 
-            z-index: 1; 
-        }
 
-        /* LỚP HUD QUÂN SỰ BẰNG CODE OVERLAY LÊN TRÊN ẢNH */
-        .mushin-hud-layer { 
-            position: absolute; inset: 0; z-index: 2; pointer-events: none; 
-            color: rgba(0, 229, 255, 0.7); overflow: hidden;
-        }
+        .mushin-clean-image { position: absolute; inset: 0; background-position: center; background-size: cover; background-repeat: no-repeat; z-index: 1; }
+        .mushin-hud-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; color: var(--cyan); }
 
-        /* Lưới chiến thuật (Tactical Grid) */
-        .hud-grid { 
-            position: absolute; inset: 0; 
-            background-image: linear-gradient(rgba(0, 229, 255, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.15) 1px, transparent 1px); 
-            background-size: 8vw 8vw; opacity: 0.8; 
-        }
+        /* MUSHIN HUD OVERLAY (CODE ANIMATION) */
+        .hud-bracket { position: absolute; width: 40px; height: 40px; border: 2px solid transparent; opacity: 0.7; }
+        .hud-bracket.top-left { top: 30px; left: 30px; border-top-color: var(--cyan); border-left-color: var(--cyan); }
+        .hud-bracket.top-right { top: 30px; right: 30px; border-top-color: var(--cyan); border-right-color: var(--cyan); }
+        .hud-bracket.bottom-left { bottom: 30px; left: 30px; border-bottom-color: var(--cyan); border-left-color: var(--cyan); }
+        .hud-bracket.bottom-right { bottom: 30px; right: 30px; border-bottom-color: var(--cyan); border-right-color: var(--cyan); }
 
-        /* Khung Viền 4 Góc (Corner Accents) */
-        .hud-corner { position: absolute; width: 60px; height: 60px; border: 1.5px solid currentColor; opacity: 0.5; }
-        .hud-corner.tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
-        .hud-corner.tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
-        .hud-corner.bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
-        .hud-corner.br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+        .hud-status-bar { position: absolute; top: 40px; right: 50px; display: flex; align-items: center; gap: 10px; }
+        .hud-icon { width: 16px; height: 16px; color: var(--cyan); }
+        .hud-battery { width: 30px; height: 12px; border: 1px solid var(--cyan); position: relative; padding: 1px; }
+        .hud-battery::after { content: ''; position: absolute; right: -4px; top: 2px; width: 2px; height: 6px; background: var(--cyan); }
+        .battery-level { width: 70%; height: 100%; background: var(--cyan); }
 
-        /* Biểu tượng ngắm bắn góc trên trái */
-        .hud-crosshair-tl { position: absolute; top: 40px; left: 40px; width: 25px; height: 25px; animation: spin-slow 15s linear infinite reverse; }
-        
-        /* Trạng thái pin góc trên phải */
-        .hud-battery-box { position: absolute; top: 40px; right: 40px; display: flex; align-items: center; gap: 8px; }
-        .bat-icon { width: 14px; height: 14px; fill: currentColor; animation: blink-slow 2s infinite; }
-        .bat-body { width: 25px; height: 10px; border: 1px solid currentColor; position: relative; padding: 1px; }
-        .bat-body::after { content: ''; position: absolute; right: -3px; top: 2px; width: 2px; height: 4px; background: currentColor; }
-        .bat-fill { width: 80%; height: 100%; background: currentColor; box-shadow: 0 0 5px var(--cyan); }
+        .hud-radar { position: absolute; top: 35%; right: 30px; width: 90px; height: 90px; }
+        .radar-spin { width: 100%; height: 100%; animation: spin-cw 10s linear infinite; }
+        .radar-lbl { position: absolute; font-family: var(--font-display); font-size: 8px; color: var(--cyan); opacity: 0.8; }
+        .radar-lbl.N { top: -10px; left: 50%; transform: translateX(-50%); }
+        .radar-lbl.S { bottom: -10px; left: 50%; transform: translateX(-50%); }
+        .radar-lbl.E { right: -10px; top: 50%; transform: translateY(-50%); }
+        .radar-lbl.W { left: -10px; top: 50%; transform: translateY(-50%); }
 
-        /* Khung đồ thị sóng (Mid Left) */
-        .hud-graph-left { position: absolute; top: 35%; left: 30px; width: 100px; height: 50px; border: 1px solid rgba(0, 229, 255, 0.3); background: rgba(0, 229, 255, 0.02); }
-        .hud-wave { animation: anim-wave 4s linear infinite; stroke-dasharray: 200; }
-        .hud-wave.w2 { animation-duration: 6s; animation-direction: reverse; opacity: 0.5; }
+        .hud-center-target { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; display: flex; justify-content: center; align-items: center; opacity: 0.5; }
+        .target-crosshair { position: absolute; width: 100%; height: 1px; background: rgba(0, 229, 255, 0.4); box-shadow: 0 0 10px var(--cyan); }
+        .target-crosshair::after { content: ''; position: absolute; top: -110px; left: 50%; width: 1px; height: 220px; background: rgba(0, 229, 255, 0.4); box-shadow: 0 0 10px var(--cyan); }
+        .target-box { position: absolute; width: 90px; height: 90px; border: 1px dashed rgba(0, 229, 255, 0.6); }
 
-        /* La Bàn & Đồ thị sóng (Mid Right) */
-        .hud-compass-right { position: absolute; top: 35%; right: 30px; width: 100px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .compass-circle { width: 60px; height: 60px; position: relative; animation: spin-slow 20s linear infinite; }
-        .compass-lbl { position: absolute; font-family: var(--font-display); font-size: 8px; color: var(--cyan); text-shadow: 0 0 5px var(--cyan); }
-        .compass-lbl.n { top: -12px; left: 50%; transform: translateX(-50%); }
-        .compass-lbl.s { bottom: -12px; left: 50%; transform: translateX(-50%); }
-        .compass-lbl.e { right: -12px; top: 50%; transform: translateY(-50%); }
-        .compass-lbl.w { left: -12px; top: 50%; transform: translateY(-50%); }
+        .hud-wave-graph { position: absolute; top: 35%; left: 30px; width: 120px; height: 60px; border: 1px solid rgba(0, 229, 255, 0.2); background: rgba(0, 229, 255, 0.05); }
+        .wave-line-1 { animation: wave-move 3s infinite linear; stroke-dasharray: 200; stroke-dashoffset: 200; }
+        .wave-line-2 { animation: wave-move 4s infinite linear reverse; }
 
-        /* Tâm Ngắm Trung Tâm (Center Target) */
-        .hud-target-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; pointer-events: none; }
-        .t-bracket { position: absolute; width: 50px; height: 50px; border: 1.5px solid currentColor; filter: drop-shadow(0 0 5px var(--cyan)); }
-        .t-bracket.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
-        .t-bracket.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
-        .t-bracket.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
-        .t-bracket.br { bottom: 0; right: 0; border-left: none; border-top: none; }
-        .t-line-x { position: absolute; top: 50%; left: -20px; right: -20px; height: 1px; background: linear-gradient(90deg, transparent, currentColor 20%, currentColor 45%, transparent 45%, transparent 55%, currentColor 55%, currentColor 80%, transparent); opacity: 0.6; }
-        .t-line-y { position: absolute; left: 50%; top: -20px; bottom: -20px; width: 1px; background: linear-gradient(180deg, transparent, currentColor 20%, currentColor 45%, transparent 45%, transparent 55%, currentColor 55%, currentColor 80%, transparent); opacity: 0.6; }
-        .t-circle { position: absolute; inset: 20%; border: 1px dashed currentColor; border-radius: 50%; animation: pulse-scale 3s infinite alternate; opacity: 0.4; }
+        .hud-energy-bar { position: absolute; bottom: 40px; right: 50px; display: flex; gap: 4px; }
+        .energy-cell { width: 15px; height: 8px; border: 1px solid var(--cyan); }
+        .energy-cell.block-fill { background: var(--cyan); box-shadow: 0 0 5px var(--cyan); }
+        .energy-cell.empty { background: transparent; }
 
-        /* Thanh Năng Lượng Góc Dưới (Bottom Right) */
-        .hud-energy { position: absolute; bottom: 40%; right: 40px; display: flex; gap: 4px; padding: 5px; border: 1px solid rgba(0, 229, 255, 0.3); background: rgba(0, 229, 255, 0.05); }
-        .energy-block { width: 10px; height: 12px; border: 1px solid rgba(0, 229, 255, 0.5); }
-        .energy-block.fill { background: currentColor; box-shadow: 0 0 5px var(--cyan); }
-        .energy-block.blink { animation: blink-slow 1s infinite alternate; }
+        @keyframes blink-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes blink-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes blink-random { 0%, 20%, 80%, 100% { background: var(--cyan); } 40%, 60% { background: transparent; } }
+        @keyframes rotate-slow { 0% { transform: rotate(0deg); } 100% { transform: rotate(90deg); } }
+        @keyframes pulse-scale { 0%, 100% { transform: scale(1); opacity: 0.4; } 50% { transform: scale(1.05); opacity: 0.8; } }
+        @keyframes wave-move { 0% { stroke-dashoffset: 200; } 100% { stroke-dashoffset: 0; } }
 
-        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
-        @keyframes anim-wave { 0% { stroke-dashoffset: 200; } 100% { stroke-dashoffset: 0; } }
-        @keyframes pulse-scale { 0% { transform: scale(0.95); opacity: 0.2; } 100% { transform: scale(1.05); opacity: 0.6; } }
-        @keyframes blink-slow { 0% { opacity: 0.3; } 100% { opacity: 1; } }
-
-        /* Ảnh Poker Nền Chờ (Của phase 2) */
-        #intro-bg { position: absolute; inset: -5%; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/anh%20intro%20(1).jpg?raw=true') center/cover; filter: blur(25px) brightness(0.15) grayscale(0.6); opacity: 0; transition: all 2s ease-out; z-index: 2; }
+        /* ẢNH 2: VƯƠNG QUỐC POKER (Lớp nền khi đọc thoại) */
+        #intro-bg { position: absolute; inset: -5%; z-index: 2; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/anh%20intro%20(1).jpg?raw=true') center/cover; filter: blur(25px) brightness(0.15) grayscale(0.6); opacity: 0; transition: all 2s ease-out; }
         #intro-bg.focus-mode { opacity: 1; filter: blur(0px) brightness(0.8) grayscale(0); transform: scale(1); transition: all 2s ease-out; }
         #intro-bg.dim-mode { opacity: 1; filter: blur(8px) brightness(0.25) grayscale(0.4); transform: scale(1.05); transition: all 3s ease-out; }
 
-        #intro-title { position: absolute; bottom: 15%; z-index: 8; font-family: 'Cormorant Garamond', serif; font-size: 38px; color: #ffffff; text-transform: uppercase; letter-spacing: 6px; font-weight: 700; text-align: center; line-height: 1.4; text-shadow: 3px 5px 15px rgba(0, 0, 0, 1), 0 0 40px rgba(0, 0, 0, 0.9); opacity: 0; transform: translateY(20px); transition: opacity 2.5s ease-out, transform 2.5s ease-out; pointer-events: none; width: 90%; }
+        /* Gợn sóng mặt nước */
+        .water-ripple { position: absolute; border-radius: 50%; border: 2px solid rgba(0, 229, 255, 0.6); box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2); transform: translate(-50%, -50%) scale(0); animation: ripple-out 2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; pointer-events: none; z-index: 25; }
+        @keyframes ripple-out { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 8px; } 100% { transform: translate(-50%, -50%) scale(250); opacity: 0; border-width: 1px; } }
+
+        #intro-title { position: absolute; bottom: 15%; z-index: 10; font-family: 'Cormorant Garamond', serif; font-size: 38px; color: #ffffff; text-transform: uppercase; letter-spacing: 6px; font-weight: 700; text-align: center; line-height: 1.4; text-shadow: 3px 5px 15px rgba(0, 0, 0, 1), 0 0 40px rgba(0, 0, 0, 0.9); opacity: 0; transform: translateY(20px); transition: opacity 2.5s ease-out, transform 2.5s ease-out; pointer-events: none; width: 90%; }
         #intro-title.show { opacity: 1; transform: translateY(0); }
 
-        /* NÚT BÍCH (SPADES LOGO) LƠ LỬNG TRÊN CÙNG */
-        #gatekeeper-btn { position: relative; z-index: 999999; pointer-events: auto !important; background: transparent; border: none; outline: none; color: var(--cyan); font-family: var(--font-display); font-size: 13px; letter-spacing: 3px; font-weight: bold; cursor: pointer; transition: all 0.3s; text-align: center; }
-        #gatekeeper-btn img { width: 100px; height: auto; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.4)); animation: pulse-img 2.5s infinite alternate ease-in-out; transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
-        #gatekeeper-btn:active img { transform: scale(0.85); filter: drop-shadow(0 0 30px rgba(0, 229, 255, 0.9)) brightness(1.3); }
-        @keyframes pulse-img { 0% { filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.2)); transform: translateY(0); } 100% { filter: drop-shadow(0 0 25px rgba(0, 229, 255, 0.7)); transform: translateY(-8px); } }
-
-        /* TRẠNG THÁI LOADING BỌC THÉP */
-        #gatekeeper-btn.loading-pulse { padding: 15px 30px; border: 1px solid var(--amber) !important; background: rgba(255, 170, 0, 0.05); color: var(--amber) !important; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); box-shadow: 0 0 15px rgba(255, 170, 0, 0.3) !important; animation: load-blink 1s infinite alternate !important; }
+        /* Nút Khởi Chạy - Layer Đỉnh (z-index: 50) */
+        #gatekeeper-btn { position: relative; z-index: 50; pointer-events: auto !important; background: rgba(0, 229, 255, 0.05); color: var(--cyan); padding: 18px 35px; font-family: var(--font-display); font-size: 13px; letter-spacing: 4px; font-weight: bold; cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1); clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); border: 1px solid rgba(0,229,255,0.4); box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.15), 0 10px 25px rgba(0,0,0,0.8); backdrop-filter: blur(10px); text-align: center; overflow: hidden; }
+        #gatekeeper-btn::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent); transform: rotate(45deg); animation: cinematic-shine 3s infinite; }
+        @keyframes cinematic-shine { 0% { left: -150%; } 100% { left: 150%; } }
+        #gatekeeper-btn:active { transform: scale(0.92); box-shadow: inset 0 0 40px rgba(0, 229, 255, 0.4), 0 0 10px rgba(0,0,0,1); border-color: #fff; color: #fff; }
+        
         .loading-pulse { animation: load-blink 1s infinite alternate !important; border-color: var(--amber) !important; color: var(--amber) !important; box-shadow: 0 0 15px rgba(255,170,0,0.3) !important; }
         @keyframes load-blink { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* CÁC THÀNH PHẦN INTRO CÒN LẠI */
         #cine-subtitles { position: absolute; z-index: 10; width: 90%; max-width: 600px; height: 300px; display: flex; justify-content: center; align-items: center; text-align: center; }
         .cine-text { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #e0e0e0; line-height: 1.6; letter-spacing: 1px; position: absolute; opacity: 0; transform: translateY(15px); transition: opacity 1.5s ease, transform 1.5s ease; text-shadow: 0 0 15px rgba(0,0,0,0.9), 0 0 25px rgba(255,255,255,0.2); }
         .cine-text.active { opacity: 1; transform: translateY(0); }
@@ -137,10 +108,9 @@
         .cine-mushin { color: #b026ff; font-style: italic; font-weight: 600; text-shadow: 0 0 20px rgba(176,38,255,0.8); }
         .cine-danger { color: #ff2a2a; font-style: italic; font-weight: 600; text-shadow: 0 0 20px rgba(255,42,42,0.8); }
 
-        #intro-flash { position: absolute; inset: 0; background: #ffffff; z-index: 20; opacity: 0; pointer-events: none; transition: opacity 0.05s ease-out; }
-        #intro-punchline { font-family: var(--font-ui), sans-serif; font-size: 20px; color: #fff; letter-spacing: 2px; font-weight: 600; text-align: center; text-shadow: 0 0 10px rgba(255,255,255,0.5); position: absolute; z-index: 25; opacity: 0; line-height: 1.6; padding-top: 15px; }
-
-        #skip-btn { position: absolute; bottom: 30px; right: 30px; z-index: 30; background: transparent; border: none; color: rgba(255,255,255,0.3); font-family: var(--font-display); font-size: 11px; letter-spacing: 1px; cursor: pointer; transition: color 0.3s; display: none; padding: 10px; }
+        #intro-flash { position: absolute; inset: 0; background: #ffffff; z-index: 30; opacity: 0; pointer-events: none; transition: opacity 0.05s ease-out; }
+        #intro-punchline { font-family: var(--font-ui), sans-serif; font-size: 20px; color: #fff; letter-spacing: 2px; font-weight: 600; text-align: center; text-shadow: 0 0 10px rgba(255,255,255,0.5); position: absolute; z-index: 35; opacity: 0; line-height: 1.6; padding-top: 15px; }
+        #skip-btn { position: absolute; bottom: 30px; right: 30px; z-index: 40; background: transparent; border: none; color: rgba(255,255,255,0.3); font-family: var(--font-display); font-size: 11px; letter-spacing: 1px; cursor: pointer; transition: color 0.3s; display: none; padding: 10px; }
         #skip-btn:active { color: #fff; }
 
         /* FULLSCREEN BACKGROUNDS (MAIN APP) */
@@ -256,7 +226,6 @@
         body.pre-scan-locked .sci-nexus { pointer-events: none !important; }
         body.uncommitted .safety-hud-box { display: none !important; }
 
-        /* BẢNG YÊU CẦU ĐỒNG BỘ */
         .safety-hud-box { position: absolute; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5, 6, 8, 0.9); border: 1px solid var(--amber); box-shadow: 0 0 20px rgba(255, 170, 0, 0.1); padding: 20px 15px; backdrop-filter: blur(5px); clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); transition: all 0.5s ease; width: 90%; max-width: 340px; margin-top: 0; }
         .safety-hud-box.unlocked { opacity: 0; pointer-events: none; transform: scale(1.1); display: none !important; }
         .hud-cond { font-family: var(--font-terminal); font-size: 12px; color: #fff; margin-bottom: 12px; text-align: left; width: 100%; display: flex; gap: 8px; font-weight: 600; line-height: 1.4; opacity: 0.9; }
@@ -428,77 +397,61 @@
 
     <!-- LỚP INTRO ĐIỆN ẢNH KÉP -->
     <div id="intro-layer">
-        
-        <!-- ============================================== -->
-        <!-- ẢNH 1: BỨC TRANH NÚI TRĂNG (Kèm HUD bằng Code) -->
-        <!-- ============================================== -->
+        <!-- ẢNH 1: MUSHIN (Ghim 100% màn hình, chứa nền sạch và HUD) -->
         <div id="mushin-bg">
-            <div class="mushin-clean-image"></div>
+            <!-- Nền ảnh sạch của anh (Không dính UI) -->
+            <div class="mushin-clean-image" style="background-image: url('LINK_ANH_NUI_TRANG_SACH_CUA_ANH');"></div>
             
+            <!-- LỚP HUD QUÂN SỰ BẰNG CODE (Bao trùm toàn màn hình) -->
             <div class="mushin-hud-layer">
-                <div class="hud-grid"></div>
-                
-                <!-- Góc trên trái -->
-                <div class="hud-crosshair-tl">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1"/><path d="M12 0v4M12 20v4M0 12h4M20 12h4" stroke="currentColor" stroke-width="1"/></svg>
-                </div>
-                
-                <!-- Góc trên phải -->
-                <div class="hud-battery-box">
-                    <svg viewBox="0 0 24 24" class="bat-icon"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    <div class="bat-body"><div class="bat-fill"></div></div>
+                <div class="hud-bracket top-left"></div>
+                <div class="hud-bracket top-right"></div>
+                <div class="hud-bracket bottom-left"></div>
+                <div class="hud-bracket bottom-right"></div>
+
+                <div class="hud-status-bar">
+                    <svg class="hud-icon blink-slow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/></svg>
+                    <div class="hud-battery"><div class="battery-level blink-fast"></div></div>
                 </div>
 
-                <!-- Đồ thị bên trái -->
-                <div class="hud-graph-left">
-                    <svg viewBox="0 0 100 50" preserveAspectRatio="none" style="width:100%; height:100%;">
-                        <path d="M0 25 Q 25 5, 50 25 T 100 25" fill="none" stroke="currentColor" stroke-width="0.5" class="hud-wave"/>
-                        <path d="M0 30 Q 25 15, 50 30 T 100 30" fill="none" stroke="currentColor" stroke-width="0.5" class="hud-wave w2"/>
+                <div class="hud-radar">
+                    <svg viewBox="0 0 100 100" class="radar-spin">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0, 229, 255, 0.3)" stroke-width="1" stroke-dasharray="4 6"/>
+                        <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(0, 229, 255, 0.5)" stroke-width="1"/>
+                        <path d="M50 10 L50 90 M10 50 L90 50" stroke="rgba(0, 229, 255, 0.5)" stroke-width="1"/>
+                        <polygon points="50,15 55,40 45,40" fill="var(--cyan)"/>
+                    </svg>
+                    <div class="radar-lbl N">N</div><div class="radar-lbl S">S</div><div class="radar-lbl E">E</div><div class="radar-lbl W">W</div>
+                </div>
+
+                <div class="hud-center-target">
+                    <div class="target-crosshair pulse-scale"></div>
+                    <div class="target-box rotate-slow"></div>
+                </div>
+
+                <div class="hud-wave-graph">
+                    <svg viewBox="0 0 100 40" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+                        <path d="M0 20 Q 25 5, 50 20 T 100 20" fill="none" stroke="var(--cyan)" stroke-width="1" class="wave-line-1"/>
+                        <path d="M0 25 Q 25 15, 50 25 T 100 25" fill="none" stroke="rgba(0,229,255,0.4)" stroke-width="1" class="wave-line-2"/>
                     </svg>
                 </div>
 
-                <!-- La bàn & Đồ thị bên phải -->
-                <div class="hud-compass-right">
-                    <div class="compass-circle">
-                        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 5"/><path d="M50 10 L50 20 M50 80 L50 90 M10 50 L20 50 M80 50 L90 50" stroke="currentColor" stroke-width="1.5"/><polygon points="50,25 55,45 45,45" fill="currentColor"/></svg>
-                        <span class="compass-lbl n">N</span><span class="compass-lbl s">S</span><span class="compass-lbl e">E</span><span class="compass-lbl w">W</span>
-                    </div>
-                    <svg viewBox="0 0 100 30" preserveAspectRatio="none" style="width:100%; height:30px;">
-                        <path d="M0 15 Q 25 0, 50 15 T 100 15" fill="none" stroke="currentColor" stroke-width="0.5" class="hud-wave"/>
-                    </svg>
+                <div class="hud-energy-bar">
+                    <div class="energy-cell block-fill"></div><div class="energy-cell block-fill"></div><div class="energy-cell block-fill"></div>
+                    <div class="energy-cell block-fill"></div><div class="energy-cell block-fill"></div><div class="energy-cell blink-random"></div>
+                    <div class="energy-cell empty"></div><div class="energy-cell empty"></div>
                 </div>
-
-                <!-- Khung Tâm Ngắm Giữa -->
-                <div class="hud-target-center">
-                    <div class="t-bracket tl"></div><div class="t-bracket tr"></div><div class="t-bracket bl"></div><div class="t-bracket br"></div>
-                    <div class="t-line-x"></div><div class="t-line-y"></div>
-                    <div class="t-circle"></div>
-                </div>
-
-                <!-- Thanh năng lượng góc dưới -->
-                <div class="hud-energy">
-                    <div class="energy-block fill"></div><div class="energy-block fill"></div><div class="energy-block fill"></div>
-                    <div class="energy-block fill"></div><div class="energy-block fill"></div><div class="energy-block blink"></div>
-                    <div class="energy-block"></div><div class="energy-block"></div>
-                </div>
-
-                <!-- Trang trí 4 góc màn hình -->
-                <div class="hud-corner tl"></div><div class="hud-corner tr"></div>
-                <div class="hud-corner bl"></div><div class="hud-corner br"></div>
             </div>
         </div>
-
-        <!-- ============================================== -->
-        <!-- ẢNH 2: VƯƠNG QUỐC POKER (Dành cho đoạn thoại Intro sau đó) -->
-        <!-- ============================================== -->
+        
+        <!-- ẢNH 2: VƯƠNG QUỐC POKER (Lớp nền khi đọc thoại - Nằm dưới Mushin) -->
         <div id="intro-bg"></div>
+        
         <div id="intro-title">CHINH PHỤC VƯƠNG QUỐC POKER!</div>
         
-        <!-- NÚT BÍCH (SPADES LOGO) GỌI LỆNH -->
-        <button id="gatekeeper-btn" onclick="startIntro(event)" ontouchstart="startIntro(event)">
-            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/a%20nut%20bich%20(2).png?raw=true" alt="Khởi chạy">
-        </button>
-
+        <!-- NÚT BẤM (Ghim trên cùng) -->
+        <button id="gatekeeper-btn" onclick="startIntro(event)" ontouchstart="startIntro(event)">[ KHỞI CHẠY GIAO THỨC ]</button>
+        
         <div id="cine-subtitles"></div>
         <button id="skip-btn" onclick="skipIntro()">[ >> BỎ QUA ]</button>
         <div id="intro-flash"></div>
@@ -519,8 +472,8 @@
             <div class="left-controls">
                 <a href="index.html" class="btn-exit" onclick="playBeep()">[ ESC ]</a>
                 <button class="btn-audio" id="btn-audio" onclick="toggleBGM(event)">
-                    <svg id="icon-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                    <svg id="icon-sound-off" viewBox="0 0 24 24" style="display:none;"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.11-.31 2.15-.81 3.09-1.45l2.64 2.64 1.27-1.27L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+                    <svg id="icon-sound-on" viewBox="0 0 24 24" style="display:none;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                    <svg id="icon-sound-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.11-.31 2.15-.81 3.09-1.45l2.64 2.64 1.27-1.27L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
                 </button>
                 <button class="btn-chip" id="btn-chip-vault" onclick="openVaultMenu()" title="Truy cập Kdrive Bankroll">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Zm0-14a6,6,0,1,0,6,6A6,6,0,0,0,12,6Zm0,10a4,4,0,1,1,4-4A4,4,0,0,1,12,16Z"/></svg>
@@ -594,15 +547,9 @@
         </div>
     </div>
 
-    <!-- HOLOGRAM POPUPS -->
-    <div class="holo-popup" id="holo-popup" onclick="closeHolo(event)">
-        <div class="holo-box" id="holo-box">
-            <div class="holo-title" id="holo-title">NAME</div>
-            <div class="holo-desc" id="holo-desc">Nội dung...</div>
-            <button class="btn-close-holo" id="btn-close-holo" onclick="playBeep(); closeHoloDirect()">[ XÁC NHẬN ]</button>
-        </div>
-    </div>
-
+    <!-- HOLOGRAM POPUPS & BÍ LỤC (GIỮ NGUYÊN) -->
+    <div class="holo-popup" id="holo-popup" onclick="closeHolo(event)"><div class="holo-box" id="holo-box"><div class="holo-title" id="holo-title">NAME</div><div class="holo-desc" id="holo-desc">Nội dung...</div><button class="btn-close-holo" id="btn-close-holo" onclick="playBeep(); closeHoloDirect()">[ XÁC NHẬN ]</button></div></div>
+    
     <div class="rank-overlay" id="rank-overlay">
         <div class="rank-header">
             <h2>BÍ LỤC: TIẾN HÓA</h2>
@@ -643,16 +590,6 @@
                         <p style="margin-bottom: 8px;">1.000 ngày ròng rã là giới hạn sinh học khốc liệt nhất để đập nát "Bản ngã" – nguyên căn của mọi cảm xúc sai lầm. Quá trình này thiêu rụi sự kiêu ngạo khi thắng lớn và bóp nghẹt mọi mầm mống của Tilt khi dính Bad Beat. 21 hay 90 ngày rèn luyện chỉ là trò chơi thói quen của kẻ nghiệp dư.</p>
                         <p style="margin-bottom: 0;">Bám trụ qua 1.000 ngày kỷ luật cơ học, hệ thần kinh sẽ biến đổi. Mọi biến số, mọi áp lực trên bàn đấu không còn đi qua màng lọc cảm xúc, mà lập tức hóa thành phản xạ vô điều kiện. Đó là trạng thái Vô Ngã: Nơi cái "Tôi" chết đi, để cỗ máy sinh tồn được kích hoạt.</p>
                     </div>
-
-                    <details class="sub-tier" open>
-                        <summary class="sub-tier-btn" onclick="playSlashSound()">[ + ] MUSASHI - KIẾM SĨ HUYỀN THOẠI (1584 - 1645)</summary>
-                        <div class="sub-tier-content"><p>• <strong>Huyền thoại bất bại:</strong> Miyamoto Musashi (1584 - 1645), kiếm khách vĩ đại nhất lịch sử Nhật Bản. Bằng kỷ luật thép và tư duy vượt thời đại, ông đã trải qua hơn 60 trận sinh tử chiến trong suốt cuộc đời mà chưa một lần nếm mùi thất bại.</p><p>• <strong>Vượt lên trên bạo lực:</strong> Kẻ thù lớn nhất không nằm ở mũi kiếm của đối phương, mà nằm ở chính tâm trí. Sự vĩ đại của Musashi không chỉ ở kỹ năng cơ học cơ bắp, mà ở khả năng giữ được sự tĩnh tại đến đáng sợ ngay giữa lằn ranh sống chết.</p><p>• <strong>Di sản để đời:</strong> Cuối đời, ông lui về hang động Reigandō (Linh Nham Động) để viết nên "Ngũ Luân Thư". Tác phẩm này thực sự được rất nhiều nhà đầu tư, nhà quản lý quỹ, doanh nhân lớn tại Mỹ nghiên cứu như một cẩm nang về quản trị rủi ro.</p><img src="https://github.com/happyk1900/Kai-Ripe/blob/main/huyenthoaiok.jpg?raw=true" class="tier3-img" onclick="openFullscreen(this)" alt="Musashi"></div>
-                    </details>
-
-                    <details class="sub-tier">
-                        <summary class="sub-tier-btn" onclick="playSlashSound()">[ + ] NGŨ LUÂN THƯ (BẢN DỊCH THỰC CHIẾN POKER)</summary>
-                        <div class="sub-tier-content"><p>• <strong>1. Quyển Đất (Nền Tảng & Kỷ Discipline):</strong> Mọi đế chế bắt đầu từ móng. Trong Poker, "Đất" là quản trị Bankroll và chỉ số SCI.</p><p>• <strong>2. Quyển Nước (Sự Linh Hoạt & Tâm Tĩnh):</strong> Tâm trí phải lỏng và tĩnh như nước để thích nghi với mọi phong cách, không bao giờ để một cú Bad Beat làm vẩn đục.</p><p>• <strong>3. Quyển Lửa (Giao Tranh & Áp Đảo):</strong> Nghệ thuật chọn thời điểm công kích. Chiếm lợi thế vị trí (Position), đọc vị điểm yếu.</p><p>• <strong>4. Quyển Gió (Thấu Hiểu Đối Thủ):</strong> Gạt bỏ hội chứng "Fancy Play". Chân lý của binh pháp là sự tối giản: Hiệu quả (EV+) là thước đo duy nhất.</p><p>• <strong>5. Quyển Không (Cảnh Giới Vô Ngã):</strong> Tầng cao nhất của võ đạo. Không hưng phấn khi thắng lớn, không sợ hãi rủi ro.</p></div>
-                    </details>
                 </div>
             </div>
 
@@ -790,7 +727,7 @@
         }, {passive: true});
 
         // ==========================================
-        // GIAO THỨC INTRO ĐIỆN ẢNH VỚI CHUYỂN CẢNH
+        // GIAO THỨC INTRO ĐIỆN ẢNH KÉP & AUDIO
         // ==========================================
         
         let cinematicAudio = null;
@@ -856,10 +793,10 @@
             ripple.style.left = x + 'px'; ripple.style.top = y + 'px';
             document.getElementById('intro-layer').appendChild(ripple);
             
-            // 3. Xóa sổ nền Mushin (Núi Trăng) cùng lớp lưới HUD 
+            // 3. Xóa sổ nền Mushin (Ảnh tĩnh lặng và HUD sẽ vỡ tan)
             document.getElementById('mushin-bg').classList.add('fade-out');
 
-            // 4. Bắt đầu luồng Intro sau 1.2s
+            // 4. Bắt đầu luồng Intro Thoại sau 1.2s
             setTimeout(() => {
                 try {
                     let playPromise = cinematicAudio.play();
