@@ -30,39 +30,106 @@
            LỚP INTRO ĐIỆN ẢNH BỌC THÉP
            ========================================= */
         #intro-layer { position: fixed; inset: 0; z-index: 100000; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 2s ease; overflow: hidden; }
-        #intro-bg { position: absolute; inset: -5%; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/anh%20intro%20(1).jpg?raw=true') center/cover; filter: blur(25px) brightness(0.15) grayscale(0.6); opacity: 0; transition: all 2s ease-out; }
+        
+        /* CONTAINER BAO GỒM ẢNH NỀN VÀ HUD BẰNG CODE */
+        #mushin-bg { position: absolute; inset: 0; z-index: 1; transition: opacity 1.5s ease-out, filter 1.5s ease-out, transform 1.5s ease-out; }
+        #mushin-bg.fade-out { opacity: 0; filter: blur(15px); transform: scale(1.1); pointer-events: none; }
+        
+        /* ẢNH NỀN FULL (Thay link ảnh anh tạo vào đây) */
+        .mushin-clean-image { 
+            position: absolute; inset: -2%; 
+            /* 👇 ANH DÁN LINK ẢNH NÚI TRĂNG CỦA ANH VÀO DƯỚI ĐÂY 👇 */
+            background: url('LINK_ANH_NEN_CỦA_ANH_VÀO_ĐÂY') center/cover no-repeat; 
+            z-index: 1; 
+        }
+
+        /* LỚP HUD QUÂN SỰ BẰNG CODE OVERLAY LÊN TRÊN ẢNH */
+        .mushin-hud-layer { 
+            position: absolute; inset: 0; z-index: 2; pointer-events: none; 
+            color: rgba(0, 229, 255, 0.7); overflow: hidden;
+        }
+
+        /* Lưới chiến thuật (Tactical Grid) */
+        .hud-grid { 
+            position: absolute; inset: 0; 
+            background-image: linear-gradient(rgba(0, 229, 255, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.15) 1px, transparent 1px); 
+            background-size: 8vw 8vw; opacity: 0.8; 
+        }
+
+        /* Khung Viền 4 Góc (Corner Accents) */
+        .hud-corner { position: absolute; width: 60px; height: 60px; border: 1.5px solid currentColor; opacity: 0.5; }
+        .hud-corner.tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+        .hud-corner.tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+        .hud-corner.bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+        .hud-corner.br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+        /* Biểu tượng ngắm bắn góc trên trái */
+        .hud-crosshair-tl { position: absolute; top: 40px; left: 40px; width: 25px; height: 25px; animation: spin-slow 15s linear infinite reverse; }
+        
+        /* Trạng thái pin góc trên phải */
+        .hud-battery-box { position: absolute; top: 40px; right: 40px; display: flex; align-items: center; gap: 8px; }
+        .bat-icon { width: 14px; height: 14px; fill: currentColor; animation: blink-slow 2s infinite; }
+        .bat-body { width: 25px; height: 10px; border: 1px solid currentColor; position: relative; padding: 1px; }
+        .bat-body::after { content: ''; position: absolute; right: -3px; top: 2px; width: 2px; height: 4px; background: currentColor; }
+        .bat-fill { width: 80%; height: 100%; background: currentColor; box-shadow: 0 0 5px var(--cyan); }
+
+        /* Khung đồ thị sóng (Mid Left) */
+        .hud-graph-left { position: absolute; top: 35%; left: 30px; width: 100px; height: 50px; border: 1px solid rgba(0, 229, 255, 0.3); background: rgba(0, 229, 255, 0.02); }
+        .hud-wave { animation: anim-wave 4s linear infinite; stroke-dasharray: 200; }
+        .hud-wave.w2 { animation-duration: 6s; animation-direction: reverse; opacity: 0.5; }
+
+        /* La Bàn & Đồ thị sóng (Mid Right) */
+        .hud-compass-right { position: absolute; top: 35%; right: 30px; width: 100px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .compass-circle { width: 60px; height: 60px; position: relative; animation: spin-slow 20s linear infinite; }
+        .compass-lbl { position: absolute; font-family: var(--font-display); font-size: 8px; color: var(--cyan); text-shadow: 0 0 5px var(--cyan); }
+        .compass-lbl.n { top: -12px; left: 50%; transform: translateX(-50%); }
+        .compass-lbl.s { bottom: -12px; left: 50%; transform: translateX(-50%); }
+        .compass-lbl.e { right: -12px; top: 50%; transform: translateY(-50%); }
+        .compass-lbl.w { left: -12px; top: 50%; transform: translateY(-50%); }
+
+        /* Tâm Ngắm Trung Tâm (Center Target) */
+        .hud-target-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; pointer-events: none; }
+        .t-bracket { position: absolute; width: 50px; height: 50px; border: 1.5px solid currentColor; filter: drop-shadow(0 0 5px var(--cyan)); }
+        .t-bracket.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+        .t-bracket.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+        .t-bracket.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+        .t-bracket.br { bottom: 0; right: 0; border-left: none; border-top: none; }
+        .t-line-x { position: absolute; top: 50%; left: -20px; right: -20px; height: 1px; background: linear-gradient(90deg, transparent, currentColor 20%, currentColor 45%, transparent 45%, transparent 55%, currentColor 55%, currentColor 80%, transparent); opacity: 0.6; }
+        .t-line-y { position: absolute; left: 50%; top: -20px; bottom: -20px; width: 1px; background: linear-gradient(180deg, transparent, currentColor 20%, currentColor 45%, transparent 45%, transparent 55%, currentColor 55%, currentColor 80%, transparent); opacity: 0.6; }
+        .t-circle { position: absolute; inset: 20%; border: 1px dashed currentColor; border-radius: 50%; animation: pulse-scale 3s infinite alternate; opacity: 0.4; }
+
+        /* Thanh Năng Lượng Góc Dưới (Bottom Right) */
+        .hud-energy { position: absolute; bottom: 40%; right: 40px; display: flex; gap: 4px; padding: 5px; border: 1px solid rgba(0, 229, 255, 0.3); background: rgba(0, 229, 255, 0.05); }
+        .energy-block { width: 10px; height: 12px; border: 1px solid rgba(0, 229, 255, 0.5); }
+        .energy-block.fill { background: currentColor; box-shadow: 0 0 5px var(--cyan); }
+        .energy-block.blink { animation: blink-slow 1s infinite alternate; }
+
+        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
+        @keyframes anim-wave { 0% { stroke-dashoffset: 200; } 100% { stroke-dashoffset: 0; } }
+        @keyframes pulse-scale { 0% { transform: scale(0.95); opacity: 0.2; } 100% { transform: scale(1.05); opacity: 0.6; } }
+        @keyframes blink-slow { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* Ảnh Poker Nền Chờ (Của phase 2) */
+        #intro-bg { position: absolute; inset: -5%; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/anh%20intro%20(1).jpg?raw=true') center/cover; filter: blur(25px) brightness(0.15) grayscale(0.6); opacity: 0; transition: all 2s ease-out; z-index: 2; }
         #intro-bg.focus-mode { opacity: 1; filter: blur(0px) brightness(0.8) grayscale(0); transform: scale(1); transition: all 2s ease-out; }
         #intro-bg.dim-mode { opacity: 1; filter: blur(8px) brightness(0.25) grayscale(0.4); transform: scale(1.05); transition: all 3s ease-out; }
 
-        #intro-title { 
-            position: absolute; 
-            bottom: 15%; 
-            z-index: 8; 
-            font-family: 'Cormorant Garamond', serif; 
-            font-size: 38px; 
-            color: #ffffff; 
-            text-transform: uppercase; 
-            letter-spacing: 6px; 
-            font-weight: 700; 
-            text-align: center; 
-            line-height: 1.4;
-            text-shadow: 3px 5px 15px rgba(0, 0, 0, 1), 0 0 40px rgba(0, 0, 0, 0.9); 
-            opacity: 0; 
-            transform: translateY(20px); 
-            transition: opacity 2.5s ease-out, transform 2.5s ease-out; 
-            pointer-events: none; 
-            width: 90%; 
-        }
+        #intro-title { position: absolute; bottom: 15%; z-index: 8; font-family: 'Cormorant Garamond', serif; font-size: 38px; color: #ffffff; text-transform: uppercase; letter-spacing: 6px; font-weight: 700; text-align: center; line-height: 1.4; text-shadow: 3px 5px 15px rgba(0, 0, 0, 1), 0 0 40px rgba(0, 0, 0, 0.9); opacity: 0; transform: translateY(20px); transition: opacity 2.5s ease-out, transform 2.5s ease-out; pointer-events: none; width: 90%; }
         #intro-title.show { opacity: 1; transform: translateY(0); }
 
-        #gatekeeper-btn { position: relative; z-index: 999999; pointer-events: auto !important; border: 1px solid rgba(0,229,255,0.5); background: rgba(0,229,255,0.05); color: var(--cyan); padding: 15px 30px; font-family: var(--font-display); font-size: 13px; letter-spacing: 3px; font-weight: bold; cursor: pointer; transition: all 0.3s; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); animation: pulse-gatekeeper 2s infinite alternate; text-align: center; }
-        #gatekeeper-btn:active { transform: scale(0.95); }
-        @keyframes pulse-gatekeeper { 0% { box-shadow: 0 0 10px rgba(0, 229, 255, 0.1); } 100% { box-shadow: 0 0 30px rgba(0, 229, 255, 0.4); border-color: var(--cyan); } }
-        
+        /* NÚT BÍCH (SPADES LOGO) LƠ LỬNG TRÊN CÙNG */
+        #gatekeeper-btn { position: relative; z-index: 999999; pointer-events: auto !important; background: transparent; border: none; outline: none; color: var(--cyan); font-family: var(--font-display); font-size: 13px; letter-spacing: 3px; font-weight: bold; cursor: pointer; transition: all 0.3s; text-align: center; }
+        #gatekeeper-btn img { width: 100px; height: auto; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.4)); animation: pulse-img 2.5s infinite alternate ease-in-out; transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
+        #gatekeeper-btn:active img { transform: scale(0.85); filter: drop-shadow(0 0 30px rgba(0, 229, 255, 0.9)) brightness(1.3); }
+        @keyframes pulse-img { 0% { filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.2)); transform: translateY(0); } 100% { filter: drop-shadow(0 0 25px rgba(0, 229, 255, 0.7)); transform: translateY(-8px); } }
+
+        /* TRẠNG THÁI LOADING BỌC THÉP */
+        #gatekeeper-btn.loading-pulse { padding: 15px 30px; border: 1px solid var(--amber) !important; background: rgba(255, 170, 0, 0.05); color: var(--amber) !important; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); box-shadow: 0 0 15px rgba(255, 170, 0, 0.3) !important; animation: load-blink 1s infinite alternate !important; }
         .loading-pulse { animation: load-blink 1s infinite alternate !important; border-color: var(--amber) !important; color: var(--amber) !important; box-shadow: 0 0 15px rgba(255,170,0,0.3) !important; }
         @keyframes load-blink { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        #cine-subtitles { position: absolute; z-index: 5; width: 90%; max-width: 600px; height: 300px; display: flex; justify-content: center; align-items: center; text-align: center; }
+        /* CÁC THÀNH PHẦN INTRO CÒN LẠI */
+        #cine-subtitles { position: absolute; z-index: 10; width: 90%; max-width: 600px; height: 300px; display: flex; justify-content: center; align-items: center; text-align: center; }
         .cine-text { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #e0e0e0; line-height: 1.6; letter-spacing: 1px; position: absolute; opacity: 0; transform: translateY(15px); transition: opacity 1.5s ease, transform 1.5s ease; text-shadow: 0 0 15px rgba(0,0,0,0.9), 0 0 25px rgba(255,255,255,0.2); }
         .cine-text.active { opacity: 1; transform: translateY(0); }
         .cine-text.fade-out { opacity: 0; transform: translateY(-15px); }
@@ -76,7 +143,7 @@
         #skip-btn { position: absolute; bottom: 30px; right: 30px; z-index: 30; background: transparent; border: none; color: rgba(255,255,255,0.3); font-family: var(--font-display); font-size: 11px; letter-spacing: 1px; cursor: pointer; transition: color 0.3s; display: none; padding: 10px; }
         #skip-btn:active { color: #fff; }
 
-        /* FULLSCREEN BACKGROUNDS */
+        /* FULLSCREEN BACKGROUNDS (MAIN APP) */
         .tactical-grid-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-obsidian); z-index: 1; perspective: 600px; overflow: hidden; transition: opacity 1.5s ease; }
         .grid-plane { position: absolute; width: 200vw; height: 200vh; left: -50vw; top: 0%; background-image: linear-gradient(rgba(0, 229, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.1) 1px, transparent 1px); background-size: 40px 40px; transform: rotateX(75deg); animation: grid-scroll 10s linear infinite; transition: opacity 1.5s ease; }
         .vignette { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; background: radial-gradient(circle at center, transparent 30%, #050608 90%); transition: all 1.5s ease; }
@@ -209,26 +276,20 @@
         .pos-rec2 { top: 45%; right: 5%; border-color: var(--cyan); } .pos-rec2 .dp-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
         .pos-move { top: 75%; right: 5%; border-color: var(--amber); } .pos-move .dp-val { color: var(--amber); text-shadow: 0 0 10px var(--amber); }
         
-        /* RADAR BAR MÀU LIME GREEN */
         .live-radar-bar { position: relative; z-index: 10; margin: 0 10px 5px; padding: 6px 12px; background: rgba(57, 255, 20, 0.05); border: 1px solid rgba(57, 255, 20, 0.3); border-left: 3px solid var(--lime); font-family: var(--font-terminal); font-size: 11px; font-weight: bold; display: flex; align-items: center; letter-spacing: 1px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%); transition: all 0.5s ease; opacity: 0; display: none; }
         .live-radar-bar.active { opacity: 1; display: flex; }
         .live-pulse { color: var(--lime); animation: pulse-lime 1.2s infinite alternate; margin-right: 12px; white-space: nowrap; text-shadow: 0 0 8px var(--lime); }
         .live-metrics { color: #fff; display: flex; gap: 15px; flex-wrap: wrap; text-shadow: 0 0 3px rgba(255,255,255,0.5); font-family: var(--font-terminal); font-size: 11.5px; font-weight: 600; }
         .metric-item { display: inline-flex; align-items: center; gap: 5px; }
 
-        @keyframes pulse-red { 0% { opacity: 0.5; } 100% { opacity: 1; text-shadow: 0 0 10px var(--crimson); } }
-        @keyframes pulse-green { 0% { opacity: 0.5; } 100% { opacity: 1; text-shadow: 0 0 10px var(--mint); } }
         @keyframes pulse-lime { 0% { opacity: 0.4; text-shadow: 0 0 2px var(--lime); } 100% { opacity: 1; text-shadow: 0 0 12px var(--lime); } }
 
-        /* BOO TERMINAL CÚ PHÁP TÔ MÀU - FONT ROBOTO MONO - VIỀN CHUẨN */
         .terminal-panel { position: relative; z-index: 10; margin: 0 10px 20px; padding: 25px 15px 12px; background: rgba(0, 229, 255, 0.02); border: 1px solid rgba(0, 229, 255, 0.2); border-bottom: 3px solid var(--cyan); clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%); min-height: 125px; flex-shrink: 0; box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05); transition: opacity 1.5s ease, border-color 0.5s, box-shadow 0.5s; }
         .terminal-header { position: absolute; top: 0; left: 20px; font-size: 9px; color: var(--bg-obsidian); background: var(--cyan); padding: 2px 10px; font-weight: bold; letter-spacing: 1px; clip-path: polygon(0 0, 100% 0, calc(100% - 5px) 100%, 0 100%); transition: all 0.5s ease; }
         .typewriter { font-family: var(--font-terminal); font-weight: 500; font-size: 11.5px; line-height: 1.6; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); word-break: break-word; text-align: left; display: inline; }
-        
         .term-prompt { color: dimgray; font-weight: bold; }
         .term-tag { color: var(--cyan); font-weight: bold; }
         .term-msg { color: #ffffff; }
-
         .cursor { display: inline-block; width: 7px; height: 13px; background-color: dimgray; animation: blink 1s step-end infinite; vertical-align: bottom; margin-left: 4px; }
 
         body.standby-mode .data-panel, body.standby-mode .live-radar-bar { opacity: 0.05; pointer-events: none; transform: scale(0.9); transition: all 1.5s ease; filter: grayscale(1); }
@@ -286,7 +347,6 @@
         @keyframes overload-shake { 0% { margin-left: 0; margin-top: 0; } 25% { margin-left: 1px; margin-top: -1px; } 50% { margin-left: -1px; margin-top: 1px; } 75% { margin-left: 1px; margin-top: 1px; } 100% { margin-left: 0; margin-top: 0; } }
         @keyframes shockwave-pulse { 0% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0.6); } 50% { box-shadow: inset 0 0 50px rgba(176, 38, 255, 0.8), 0 0 0 30px rgba(176, 38, 255, 0); } 100% { box-shadow: inset 0 0 20px rgba(176, 38, 255, 0.2), 0 0 0 0 rgba(176, 38, 255, 0); } }
         @keyframes shockwave-pulse-red { 0% { box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.2), 0 0 0 0 rgba(255, 42, 42, 0.6); } 50% { box-shadow: inset 0 0 30px rgba(255, 42, 42, 0.8), 0 0 0 15px rgba(255, 42, 42, 0); } 100% { box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.2), 0 0 0 0 rgba(255, 42, 42, 0); } }
-
         @keyframes mushin-flash { 0% { box-shadow: inset 0 0 0px var(--violet); } 15% { box-shadow: inset 0 0 120px rgba(176, 38, 255, 0.4); } 100% { box-shadow: inset 0 0 0px var(--violet); } }
 
         /* BÍ LỤC (RANK OVERLAY) VÀ HOLOGRAMS */
@@ -366,12 +426,79 @@
 </head>
 <body>
 
-    <!-- LỚP INTRO ĐIỆN ẢNH -->
+    <!-- LỚP INTRO ĐIỆN ẢNH KÉP -->
     <div id="intro-layer">
+        
+        <!-- ============================================== -->
+        <!-- ẢNH 1: BỨC TRANH NÚI TRĂNG (Kèm HUD bằng Code) -->
+        <!-- ============================================== -->
+        <div id="mushin-bg">
+            <div class="mushin-clean-image"></div>
+            
+            <div class="mushin-hud-layer">
+                <div class="hud-grid"></div>
+                
+                <!-- Góc trên trái -->
+                <div class="hud-crosshair-tl">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1"/><path d="M12 0v4M12 20v4M0 12h4M20 12h4" stroke="currentColor" stroke-width="1"/></svg>
+                </div>
+                
+                <!-- Góc trên phải -->
+                <div class="hud-battery-box">
+                    <svg viewBox="0 0 24 24" class="bat-icon"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <div class="bat-body"><div class="bat-fill"></div></div>
+                </div>
+
+                <!-- Đồ thị bên trái -->
+                <div class="hud-graph-left">
+                    <svg viewBox="0 0 100 50" preserveAspectRatio="none" style="width:100%; height:100%;">
+                        <path d="M0 25 Q 25 5, 50 25 T 100 25" fill="none" stroke="currentColor" stroke-width="0.5" class="hud-wave"/>
+                        <path d="M0 30 Q 25 15, 50 30 T 100 30" fill="none" stroke="currentColor" stroke-width="0.5" class="hud-wave w2"/>
+                    </svg>
+                </div>
+
+                <!-- La bàn & Đồ thị bên phải -->
+                <div class="hud-compass-right">
+                    <div class="compass-circle">
+                        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 5"/><path d="M50 10 L50 20 M50 80 L50 90 M10 50 L20 50 M80 50 L90 50" stroke="currentColor" stroke-width="1.5"/><polygon points="50,25 55,45 45,45" fill="currentColor"/></svg>
+                        <span class="compass-lbl n">N</span><span class="compass-lbl s">S</span><span class="compass-lbl e">E</span><span class="compass-lbl w">W</span>
+                    </div>
+                    <svg viewBox="0 0 100 30" preserveAspectRatio="none" style="width:100%; height:30px;">
+                        <path d="M0 15 Q 25 0, 50 15 T 100 15" fill="none" stroke="currentColor" stroke-width="0.5" class="hud-wave"/>
+                    </svg>
+                </div>
+
+                <!-- Khung Tâm Ngắm Giữa -->
+                <div class="hud-target-center">
+                    <div class="t-bracket tl"></div><div class="t-bracket tr"></div><div class="t-bracket bl"></div><div class="t-bracket br"></div>
+                    <div class="t-line-x"></div><div class="t-line-y"></div>
+                    <div class="t-circle"></div>
+                </div>
+
+                <!-- Thanh năng lượng góc dưới -->
+                <div class="hud-energy">
+                    <div class="energy-block fill"></div><div class="energy-block fill"></div><div class="energy-block fill"></div>
+                    <div class="energy-block fill"></div><div class="energy-block fill"></div><div class="energy-block blink"></div>
+                    <div class="energy-block"></div><div class="energy-block"></div>
+                </div>
+
+                <!-- Trang trí 4 góc màn hình -->
+                <div class="hud-corner tl"></div><div class="hud-corner tr"></div>
+                <div class="hud-corner bl"></div><div class="hud-corner br"></div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- ẢNH 2: VƯƠNG QUỐC POKER (Dành cho đoạn thoại Intro sau đó) -->
+        <!-- ============================================== -->
         <div id="intro-bg"></div>
         <div id="intro-title">CHINH PHỤC VƯƠNG QUỐC POKER!</div>
         
-        <button id="gatekeeper-btn" onclick="startIntro(event)" ontouchstart="startIntro(event)">[ KHỞI CHẠY GIAO THỨC ]</button>
+        <!-- NÚT BÍCH (SPADES LOGO) GỌI LỆNH -->
+        <button id="gatekeeper-btn" onclick="startIntro(event)" ontouchstart="startIntro(event)">
+            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/a%20nut%20bich%20(2).png?raw=true" alt="Khởi chạy">
+        </button>
+
         <div id="cine-subtitles"></div>
         <button id="skip-btn" onclick="skipIntro()">[ >> BỎ QUA ]</button>
         <div id="intro-flash"></div>
@@ -591,6 +718,24 @@
             } catch(e){}
         }
 
+        // TẠO TIẾNG GIỌT NƯỚC RƠI "TÓC"
+        function playWaterDrop() {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch(e){}
+        }
+
         function triggerMushinProtocol(btnElement) {
             if(btnElement) {
                 const parentTier = btnElement.nextElementSibling;
@@ -607,14 +752,6 @@
                 osc.connect(gain); gain.connect(audioCtx.destination);
                 osc.start(); osc.stop(audioCtx.currentTime + 1.5);
             } catch(e){}
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                let msg = new SpeechSynthesisUtterance('Mushin'); 
-                msg.lang = 'ja-JP'; 
-                msg.pitch = 0; 
-                msg.rate = 0.5; 
-                window.speechSynthesis.speak(msg);
-            }
             const overlay = document.getElementById('rank-overlay');
             overlay.style.animation = 'none';
             void overlay.offsetWidth; 
@@ -624,7 +761,7 @@
         let chargeOsc, chargeGain;
         function playChargeSound() {
             try {
-                stopChargeSound(); // Chặn hú kép
+                stopChargeSound(); 
                 initAudio();
                 chargeOsc = audioCtx.createOscillator(); chargeGain = audioCtx.createGain();
                 chargeOsc.type = 'square'; chargeOsc.frequency.setValueAtTime(100, audioCtx.currentTime);
@@ -651,18 +788,18 @@
             const edge = document.getElementById('edge-lighting');
             if(edge) { edge.classList.add('touch-pulse'); setTimeout(() => edge.classList.remove('touch-pulse'), 150); }
         }, {passive: true});
-        document.addEventListener('mousedown', () => {
-            const edge = document.getElementById('edge-lighting');
-            if(edge) { edge.classList.add('touch-pulse'); setTimeout(() => edge.classList.remove('touch-pulse'), 150); }
-        });
 
         // ==========================================
-        // GIAO THỨC INTRO ĐIỆN ẢNH (TIMING MỚI NHẤT V5)
+        // GIAO THỨC INTRO ĐIỆN ẢNH VỚI CHUYỂN CẢNH
         // ==========================================
         
         let cinematicAudio = null;
-        let bgmAudio = null;
-        let isMuted = false;
+        let ascentAudio = null;
+        let roninAudio = null;
+        
+        let isAscentActive = false; 
+        let isMuted = true;         
+        
         let introStarted = false;
         let introReq;
         let introFinished = false;
@@ -686,10 +823,13 @@
             if (!cinematicAudio) {
                 cinematicAudio = new Audio('https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/INTRO-THOAI.mp3');
             }
-            if (!bgmAudio) {
-                // UPDATE TRACK ÂM THANH THE HIGH STAKES ASCENT
-                bgmAudio = new Audio('https://github.com/happyk1900/Music-ver-1-Poker-abum/raw/refs/heads/main/The_High_Stakes_Ascent.mp4');
-                bgmAudio.loop = true; bgmAudio.volume = 0.5;
+            if (!ascentAudio) {
+                ascentAudio = new Audio('https://github.com/happyk1900/Music-ver-1-Poker-abum/raw/refs/heads/main/The_High_Stakes_Ascent.mp4');
+                ascentAudio.volume = 0.7;
+            }
+            if (!roninAudio) {
+                roninAudio = new Audio('https://github.com/happyk1900/Music-ver-1-Poker-abum/raw/refs/heads/main/Ronin_BGM_FILE_CUA_ANH.mp3'); 
+                roninAudio.loop = true; roninAudio.volume = 0.5;
             }
         }
 
@@ -700,30 +840,49 @@
 
             initAudio(); initAllAudio();
             
+            // 1. Kích hoạt tiếng Tóc & Nút Loading
+            playWaterDrop();
             const btn = document.getElementById('gatekeeper-btn');
             btn.innerHTML = '[ ĐANG GIẢI MÃ TÍN HIỆU... ]';
             btn.classList.add('loading-pulse');
+            
+            // 2. Tạo sóng lan tỏa
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX || (e.touches ? e.touches[0].clientX : rect.left + rect.width/2);
+            const y = e.clientY || (e.touches ? e.touches[0].clientY : rect.top + rect.height/2);
+            
+            const ripple = document.createElement('div');
+            ripple.className = 'water-ripple';
+            ripple.style.left = x + 'px'; ripple.style.top = y + 'px';
+            document.getElementById('intro-layer').appendChild(ripple);
+            
+            // 3. Xóa sổ nền Mushin (Núi Trăng) cùng lớp lưới HUD 
+            document.getElementById('mushin-bg').classList.add('fade-out');
 
-            try {
-                let playPromise = cinematicAudio.play();
-                if (playPromise !== undefined && typeof playPromise.then === 'function') {
-                    playPromise.then(() => {
-                        startIntroVisuals();
-                    }).catch(error => {
-                        showSkipFallback(btn);
-                    });
-                } else {
-                    startIntroVisuals(); 
+            // 4. Bắt đầu luồng Intro sau 1.2s
+            setTimeout(() => {
+                try {
+                    let playPromise = cinematicAudio.play();
+                    if (playPromise !== undefined && typeof playPromise.then === 'function') {
+                        playPromise.then(() => {
+                            startIntroVisuals();
+                        }).catch(error => {
+                            showSkipFallback(btn);
+                        });
+                    } else {
+                        startIntroVisuals(); 
+                    }
+                } catch (err) {
+                    showSkipFallback(btn);
                 }
-            } catch (err) {
-                showSkipFallback(btn);
-            }
+            }, 1200);
         }
 
         function startIntroVisuals() {
             document.getElementById('gatekeeper-btn').style.display = 'none';
             document.getElementById('skip-btn').style.display = 'block';
             
+            // Đưa ảnh Vương quốc Poker lên làm nền
             const bg = document.getElementById('intro-bg');
             const title = document.getElementById('intro-title');
             
@@ -807,9 +966,6 @@
             endIntroSequence();
         }
 
-        // ==========================================
-        // KHỚP NỐI CHUYỂN CẢNH 5 GIÂY LẮP RÁP UI
-        // ==========================================
         function endIntroSequence() {
             if(cinematicAudio) cinematicAudio.pause();
             const layer = document.getElementById('intro-layer');
@@ -819,22 +975,31 @@
                 layer.style.display = 'none';
                 document.getElementById('main-pwa').style.opacity = '1'; 
                 
-                // Giai đoạn 1: Lõi xoay 3s và KHỞI ĐỘNG BGM
                 document.body.classList.add('core-charging');
                 
-                if(!bgmAudio) initAllAudio();
-                bgmAudio.currentTime = 0;
-                let playPromise = bgmAudio.play();
+                if(!ascentAudio) initAllAudio();
+                ascentAudio.currentTime = 0;
+                let playPromise = ascentAudio.play();
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
+                        isAscentActive = true;
+                        isMuted = false;
                         document.getElementById('icon-sound-on').style.display='block';
                         document.getElementById('icon-sound-off').style.display='none';
-                        isMuted = false;
+                        
+                        setTimeout(() => {
+                            if (isAscentActive) {
+                                ascentAudio.pause();
+                                isAscentActive = false;
+                                isMuted = true;
+                                document.getElementById('icon-sound-on').style.display='none';
+                                document.getElementById('icon-sound-off').style.display='block';
+                            }
+                        }, 30000); 
                     }).catch(e=>console.log(e));
                 }
                 
                 setTimeout(() => {
-                    // Giai đoạn 2: Sóng xung kích & Lắp ráp thiết giáp 2s
                     document.body.classList.remove('core-charging');
                     document.body.classList.add('ui-assembling');
                     const sw = document.getElementById('shockwave');
@@ -845,7 +1010,6 @@
                     setTimeout(playLockSound, 800);
                     
                     setTimeout(() => {
-                        // Hoàn tất 5s
                         document.body.classList.remove('ui-assembling');
                         initializeSystem(); 
                     }, 2000); 
@@ -857,322 +1021,160 @@
 
         function toggleBGM(e) { 
             e.stopPropagation(); 
-            if(!bgmAudio) initAllAudio();
-            if(bgmAudio.paused){ bgmAudio.play(); isMuted=false; document.getElementById('icon-sound-on').style.display='block'; document.getElementById('icon-sound-off').style.display='none'; } 
-            else { bgmAudio.pause(); isMuted=true; document.getElementById('icon-sound-on').style.display='none'; document.getElementById('icon-sound-off').style.display='block'; } 
-        }
+            if(!roninAudio || !ascentAudio) initAllAudio();
+            
+            if (isAscentActive) {
+                ascentAudio.pause();
+                isAscentActive = false;
+                isMuted = true;
+                document.getElementById('icon-sound-on').style.display='none'; 
+                document.getElementById('icon-sound-off').style.display='block';
+                return;
+            }
 
-        // ==========================================
-        // CÁC HÀM APP LÕI BÊN DƯỚI
-        // ==========================================
+            const isTier3 = document.body.classList.contains('tier-kuro');
+            if (!isTier3) {
+                playLockSound(); 
+                return; 
+            }
+
+            if(roninAudio.paused) { 
+                roninAudio.play(); 
+                isMuted = false;
+                document.getElementById('icon-sound-on').style.display='block'; 
+                document.getElementById('icon-sound-off').style.display='none'; 
+            } else { 
+                roninAudio.pause(); 
+                isMuted = true;
+                document.getElementById('icon-sound-on').style.display='none'; 
+                document.getElementById('icon-sound-off').style.display='block'; 
+            } 
+        }
 
         const holoData = { hr: { title: "HEART RATE", desc: "Yêu cầu nhịp tim đạt 160 BPM để mở khóa trạng thái Overdrive.", color: "var(--crimson)" }, weight: { title: "WEIGHT", desc: "Duy trì khung trọng lượng chiến đấu: 63.0 kg - 67.0 kg.", color: "var(--mint)" }, sleep: { title: "SLEEP", desc: "Ngủ phục hồi tối thiểu 7 giờ/đêm không ngoại lệ.", color: "var(--cyan)" }, fat: { title: "FAT (%)", desc: "Giữ tỷ lệ mỡ dưới 13.0%. Kiểm soát nghiêm ngặt bằng dinh dưỡng.", color: "var(--mint)" }, water: { title: "WATER (%)", desc: "Yêu cầu nạp đúng 2.5 Lít nước mỗi ngày (Target thể trạng: 55%).", color: "var(--cyan)" }, steps: { title: "STEPS", desc: "Tối thiểu 6.000 bước vận động mỗi ngày.", color: "var(--amber)" } };
         const holoPopup = document.getElementById('holo-popup');
         
         function openHolo(type) { 
-            playBeep(); 
-            const data = holoData[type]; 
-            document.getElementById('holo-title').innerText = data.title; 
-            document.getElementById('holo-title').style.color = data.color; 
-            document.getElementById('holo-box').style.borderColor = data.color; 
-            
+            playBeep(); const data = holoData[type]; document.getElementById('holo-title').innerText = data.title; document.getElementById('holo-title').style.color = data.color; document.getElementById('holo-box').style.borderColor = data.color; 
             if(isSynced) {
-                let currentVal = parseFloat(document.getElementById(`val-${type}`).innerText);
-                let targetVal = 0, unit = "", msg = "";
-                
+                let currentVal = parseFloat(document.getElementById(`val-${type}`).innerText); let targetVal = 0, unit = "", msg = "";
                 if(type === 'hr') { targetVal = isT1Sunday ? 0 : 160; unit = "BPM"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Thiếu ${(targetVal - currentVal).toFixed(0)} ${unit}. Động cơ chưa đạt trạng thái Overdrive.`; else msg = isT1Sunday ? `✅ VOID REGEN (Chủ Nhật): Miễn trừ nhịp tim.` : `✅ Đạt chuẩn Overdrive T-1.`; }
                 else if(type === 'weight') { targetVal = 67; unit = "KG"; if(currentVal > targetVal) msg = `⚠️ Đóng sổ T-1: Vượt khung chiến đấu ${(currentVal - targetVal).toFixed(1)} ${unit}.`; else if (currentVal < 63) msg = `⚠️ Đóng sổ T-1: Dưới khung chiến đấu ${(63 - currentVal).toFixed(1)} ${unit}.`; else msg = `✅ Thể trạng lý tưởng.`; }
                 else if(type === 'sleep') { targetVal = 7.0; unit = "HRS"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Thiếu ${(targetVal - currentVal).toFixed(1)} ${unit} phục hồi.`; else msg = `✅ Đã tái tạo đủ năng lượng.`; }
                 else if(type === 'fat') { targetVal = 13.0; unit = "%"; if(currentVal > targetVal) msg = `⚠️ Đóng sổ T-1: Tỷ lệ mỡ vượt +${(currentVal - targetVal).toFixed(1)} ${unit}.`; else msg = `✅ Đạt chuẩn tỷ lệ vàng.`; }
-                else if(type === 'water') { 
-                    targetVal = 55.0; 
-                    unit = "%"; 
-                    if(currentVal < targetVal) {
-                        msg = `⚠️ CẢNH BÁO: Đang thiếu ${(targetVal - currentVal).toFixed(1)}${unit} nước trong cơ thể.<br>LỆNH THỰC THI: Nạp đủ 2.5 Lít hôm nay, tuyệt đối không vượt ngưỡng.`; 
-                    } else {
-                        msg = `✅ ĐẠT CHUẨN: Đủ nước vận hành.<br>LỆNH THỰC THI: Tiếp tục duy trì nạp 2.5L. Giữ vững kỷ luật.`; 
-                    }
-                }
+                else if(type === 'water') { targetVal = 55.0; unit = "%"; if(currentVal < targetVal) msg = `⚠️ CẢNH BÁO: Đang thiếu ${(targetVal - currentVal).toFixed(1)}${unit} nước.<br>LỆNH THỰC THI: Nạp đủ 2.5L.`; else msg = `✅ ĐẠT CHUẨN: Đủ nước vận hành.`; }
                 else if(type === 'steps') { targetVal = isT1Sunday ? 0 : 6000; unit = "STEPS"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Nợ ${(targetVal - currentVal).toFixed(0)} ${unit} vận động.`; else msg = isT1Sunday ? `✅ VOID REGEN (Chủ Nhật): Miễn trừ vận động.` : `✅ Hoàn thành mục tiêu di chuyển.`; }
-                
-                document.getElementById('holo-desc').innerHTML = `
-                    <div style="font-size: 0.9rem; margin-bottom: 10px; color: rgba(255,255,255,0.7);">[ MỤC TIÊU CỐT LÕI ]<br>${data.desc}</div>
-                    <div style="padding: 10px; border: 1px dashed ${data.color}; background: rgba(0,0,0,0.5);">
-                        <strong style="color: ${data.color}; font-family: var(--font-display); font-size: 1.1rem;">[ DỮ LIỆU T-1 ]</strong><br>
-                        ${msg}
-                    </div>
-                `;
-                
-                document.getElementById('btn-close-holo').style.display = 'block';
-                document.getElementById('btn-close-holo').innerText = '[ XÁC NHẬN ]';
-                document.getElementById('btn-close-holo').style.borderColor = 'rgba(255,255,255,0.3)';
-                document.getElementById('btn-close-holo').style.color = 'white';
-                document.getElementById('btn-close-holo').onclick = function() { playBeep(); closeHoloDirect(); };
-                
-            } else {
-                document.getElementById('holo-desc').innerText = data.desc; 
-            }
+                document.getElementById('holo-desc').innerHTML = `<div style="font-size: 0.9rem; margin-bottom: 10px; color: rgba(255,255,255,0.7);">[ MỤC TIÊU CỐT LÕI ]<br>${data.desc}</div><div style="padding: 10px; border: 1px dashed ${data.color}; background: rgba(0,0,0,0.5);"><strong style="color: ${data.color}; font-family: var(--font-display); font-size: 1.1rem;">[ DỮ LIỆU T-1 ]</strong><br>${msg}</div>`;
+                document.getElementById('btn-close-holo').style.display = 'block'; document.getElementById('btn-close-holo').innerText = '[ XÁC NHẬN ]'; document.getElementById('btn-close-holo').style.borderColor = 'rgba(255,255,255,0.3)'; document.getElementById('btn-close-holo').style.color = 'white'; document.getElementById('btn-close-holo').onclick = function() { playBeep(); closeHoloDirect(); };
+            } else { document.getElementById('holo-desc').innerText = data.desc; }
             holoPopup.classList.add('active'); 
         }
-        
         function closeHoloDirect() { holoPopup.classList.remove('active'); }
         function closeHolo(e) { if(e.target === holoPopup){ playBeep(); closeHoloDirect(); } }
 
         let currentVaultCode = "";
-
         function openVaultMenu() {
-            playBeep();
-            document.getElementById('holo-title').innerText = "[ KDRIVE SECURE VAULT ]";
-            document.getElementById('holo-title').style.color = "var(--amber)";
-            document.getElementById('holo-box').style.borderColor = "var(--amber)";
-            
-            document.getElementById('holo-desc').innerHTML = `
-                <div style="font-size: 11px; margin-bottom: 15px; color: rgba(255,255,255,0.7); letter-spacing: 1px;">YÊU CẦU XÁC THỰC MÃ OTP ĐỂ TRUY CẬP KDRIVE:</div>
-                <input type="text" id="vault-input" class="vault-input" placeholder="NHẬP MÃ OTP" autocomplete="off">
-                <div id="vault-error" style="color:var(--crimson); font-size:11px; margin-top:12px; display:none; font-weight:bold; letter-spacing:1px; text-shadow: 0 0 5px var(--crimson);">[ ! ] MÃ KHÔNG HỢP LỆ HOẶC ĐÃ BỊ HỦY</div>
-            `;
-            
-            document.getElementById('btn-close-holo').style.display = 'block';
-            document.getElementById('btn-close-holo').innerText = '[ KẾT NỐI KDRIVE ]';
-            document.getElementById('btn-close-holo').style.borderColor = 'var(--amber)';
-            document.getElementById('btn-close-holo').style.color = 'var(--amber)';
-            
+            playBeep(); document.getElementById('holo-title').innerText = "[ KDRIVE SECURE VAULT ]"; document.getElementById('holo-title').style.color = "var(--amber)"; document.getElementById('holo-box').style.borderColor = "var(--amber)";
+            document.getElementById('holo-desc').innerHTML = `<div style="font-size: 11px; margin-bottom: 15px; color: rgba(255,255,255,0.7); letter-spacing: 1px;">YÊU CẦU XÁC THỰC MÃ OTP ĐỂ TRUY CẬP KDRIVE:</div><input type="text" id="vault-input" class="vault-input" placeholder="NHẬP MÃ OTP" autocomplete="off"><div id="vault-error" style="color:var(--crimson); font-size:11px; margin-top:12px; display:none; font-weight:bold; letter-spacing:1px;">[ ! ] MÃ KHÔNG HỢP LỆ</div>`;
+            document.getElementById('btn-close-holo').style.display = 'block'; document.getElementById('btn-close-holo').innerText = '[ KẾT NỐI KDRIVE ]'; document.getElementById('btn-close-holo').style.borderColor = 'var(--amber)'; document.getElementById('btn-close-holo').style.color = 'var(--amber)';
             document.getElementById('btn-close-holo').onclick = function() {
-                playBeep();
-                const inputEl = document.getElementById('vault-input');
-                const inputVal = inputEl.value.trim().toUpperCase();
-                
+                playBeep(); const inputEl = document.getElementById('vault-input'); const inputVal = inputEl.value.trim().toUpperCase();
                 if(inputVal === currentVaultCode && currentVaultCode !== "") {
-                    playChargeSound(); 
-                    inputEl.className = "vault-input success";
-                    document.getElementById('holo-title').innerText = "[ XÁC THỰC THÀNH CÔNG ]";
-                    document.getElementById('holo-title').style.color = "var(--mint)";
-                    document.getElementById('holo-box').style.borderColor = "var(--mint)";
-                    
-                    document.getElementById('holo-desc').innerHTML = `
-                        <div style="color:var(--mint); font-family:var(--font-display); font-size:1.2rem; padding: 15px 0; text-shadow: 0 0 10px var(--mint);">ACCESS GRANTED</div>
-                        <div style="width: 100%; height: 2px; background: rgba(0, 255, 157, 0.2); margin-top: 10px; position: relative; overflow: hidden;">
-                            <div style="position: absolute; top: 0; left: 0; height: 100%; background: var(--mint); width: 100%; animation: load-bar 1.5s ease-out forwards;"></div>
-                        </div>
-                        <div style="font-size:10px; font-family:var(--font-ui); color:var(--mint); margin-top: 10px; animation: blink 0.5s infinite;">Đang thiết lập đường truyền bảo mật tới Kdrive...</div>
-                    `;
+                    playChargeSound(); inputEl.className = "vault-input success";
+                    document.getElementById('holo-title').innerText = "[ XÁC THỰC THÀNH CÔNG ]"; document.getElementById('holo-title').style.color = "var(--mint)"; document.getElementById('holo-box').style.borderColor = "var(--mint)";
+                    document.getElementById('holo-desc').innerHTML = `<div style="color:var(--mint); font-family:var(--font-display); font-size:1.2rem; padding: 15px 0;">ACCESS GRANTED</div><div style="width: 100%; height: 2px; background: rgba(0, 255, 157, 0.2); margin-top: 10px; position: relative; overflow: hidden;"><div style="position: absolute; top: 0; left: 0; height: 100%; background: var(--mint); width: 100%; animation: load-bar 1.5s ease-out forwards;"></div></div>`;
                     document.getElementById('btn-close-holo').style.display = 'none';
-                    
-                    setTimeout(() => {
-                        stopChargeSound(); playSlashSound();
-                        closeHoloDirect();
-                        showBeautifulSuccess(); 
-                    }, 1500);
-                } else {
-                    document.getElementById('vault-error').style.display = 'block';
-                    inputEl.className = "vault-input error";
-                    playLockSound();
-                }
+                    setTimeout(() => { stopChargeSound(); playSlashSound(); closeHoloDirect(); showBeautifulSuccess(); }, 1500);
+                } else { document.getElementById('vault-error').style.display = 'block'; inputEl.className = "vault-input error"; playLockSound(); }
             };
-            
-            holoPopup.classList.add('active');
-            setTimeout(() => { document.getElementById('vault-input').focus(); }, 100);
+            holoPopup.classList.add('active'); setTimeout(() => { document.getElementById('vault-input').focus(); }, 100);
         }
 
         function showBeautifulSuccess() {
             document.body.classList.add('tunnel-vision'); 
-            
-            const overlay = document.createElement('div');
-            overlay.id = "kdrive-success-overlay";
-            overlay.style.position = 'fixed'; overlay.style.top = '0'; overlay.style.left = '0'; overlay.style.width = '100vw'; overlay.style.height = '100vh';
-            overlay.style.background = 'rgba(0, 255, 157, 0.1)'; overlay.style.backdropFilter = 'blur(10px)'; overlay.style.zIndex = '999999';
-            overlay.style.display = 'flex'; overlay.style.justifyContent = 'center'; overlay.style.alignItems = 'center';
-            
-            overlay.innerHTML = `
-                <div style="border: 2px solid var(--mint); background: rgba(5,6,8,0.9); padding: 40px; text-align: center; box-shadow: 0 0 50px rgba(0, 255, 157, 0.3), inset 0 0 30px rgba(0, 255, 157, 0.1); clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);">
-                    <svg viewBox="0 0 24 24" style="width: 70px; height: 70px; fill: var(--mint); margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--mint));">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                    </svg>
-                    <h2 style="font-family: var(--font-display); color: var(--mint); letter-spacing: 3px; font-size: 26px; margin-bottom: 10px; text-shadow: 0 0 20px var(--mint);">KDRIVE UNLOCKED</h2>
-                    <p style="font-family: var(--font-ui); color: #fff; font-size: 15px; opacity: 0.8; margin-bottom: 35px; letter-spacing: 1px;">Hệ thống ngân lượng đã sẵn sàng phục vụ.</p>
-                    <button onclick="document.getElementById('kdrive-success-overlay').remove(); document.body.classList.remove('tunnel-vision'); playBeep();" style="background: rgba(0, 255, 157, 0.15); border: 1px solid var(--mint); color: var(--mint); padding: 15px 40px; font-family: var(--font-display); font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 15px rgba(0, 255, 157, 0.4); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);">[ MỞ ỨNG DỤNG KDRIVE ]</button>
-                </div>
-            `;
+            const overlay = document.createElement('div'); overlay.id = "kdrive-success-overlay"; overlay.style.position = 'fixed'; overlay.style.top = '0'; overlay.style.left = '0'; overlay.style.width = '100vw'; overlay.style.height = '100vh'; overlay.style.background = 'rgba(0, 255, 157, 0.1)'; overlay.style.backdropFilter = 'blur(10px)'; overlay.style.zIndex = '999999'; overlay.style.display = 'flex'; overlay.style.justifyContent = 'center'; overlay.style.alignItems = 'center';
+            overlay.innerHTML = `<div style="border: 2px solid var(--mint); background: rgba(5,6,8,0.9); padding: 40px; text-align: center; box-shadow: 0 0 50px rgba(0, 255, 157, 0.3); clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);"><h2 style="font-family: var(--font-display); color: var(--mint); letter-spacing: 3px; font-size: 26px; margin-bottom: 10px;">KDRIVE UNLOCKED</h2><p style="font-family: var(--font-ui); color: #fff; font-size: 15px; opacity: 0.8; margin-bottom: 35px; letter-spacing: 1px;">Hệ thống ngân lượng đã sẵn sàng.</p><button onclick="document.getElementById('kdrive-success-overlay').remove(); document.body.classList.remove('tunnel-vision'); playBeep();" style="background: rgba(0, 255, 157, 0.15); border: 1px solid var(--mint); color: var(--mint); padding: 15px 40px; font-family: var(--font-display); font-weight: bold; cursor: pointer;">[ MỞ ỨNG DỤNG KDRIVE ]</button></div>`;
             document.body.appendChild(overlay);
         }
 
         let currentStreak = parseInt(localStorage.getItem('combat_streak')) || 0;
         let isCommitted = localStorage.getItem('combat_committed') === 'true';
-        
         const startDate = new Date(2026, 6, 19); 
         const activeDays = Math.floor((d.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         let mushinDaysLeft = Math.max(1000 - activeDays, 0);
-        
         document.getElementById('streak-box').innerText = `[ MUSHIN: ${mushinDaysLeft} DAYS ]`;
         
         const textElement = document.getElementById('ai-text'); let typeSpeed = 25; window.isScanning = false; let typeAbortController = null;
-
-        // CẬP NHẬT CÚ PHÁP TÔ MÀU CHO BOO TERMINAL
         async function typeTextSafe(lines, speed = typeSpeed, delayAfterLine = 150) {
             if (typeAbortController) typeAbortController.abort(); 
-            typeAbortController = new AbortController(); const signal = typeAbortController.signal;
-            textElement.innerHTML = '';
-            
+            typeAbortController = new AbortController(); const signal = typeAbortController.signal; textElement.innerHTML = '';
             for(let i = 0; i < lines.length; i++) {
                 let lineStr = lines[i]; let lineDiv = document.createElement('div'); textElement.appendChild(lineDiv);
-                let match = lineStr.match(/^(>_)\s*(\[[^\]]+\])?(.*)$/);
-                let parts = [];
-                if(match) {
-                    if(match[1]) parts.push({ text: match[1] + " ", class: "term-prompt" });
-                    if(match[2]) parts.push({ text: match[2], class: "term-tag" });
-                    if(match[3]) parts.push({ text: match[3], class: "term-msg" });
-                } else {
-                    parts.push({ text: lineStr, class: "term-msg" });
-                }
-
-                for(let part of parts) {
-                    let span = document.createElement('span'); span.className = part.class; lineDiv.appendChild(span);
-                    for(let j = 0; j < part.text.length; j++) {
-                        if(signal.aborted) return; span.innerHTML += part.text.charAt(j); 
-                        await new Promise(r => setTimeout(r, speed));
-                    }
-                }
+                let match = lineStr.match(/^(>_)\s*(\[[^\]]+\])?(.*)$/); let parts = [];
+                if(match) { if(match[1]) parts.push({ text: match[1] + " ", class: "term-prompt" }); if(match[2]) parts.push({ text: match[2], class: "term-tag" }); if(match[3]) parts.push({ text: match[3], class: "term-msg" }); } 
+                else { parts.push({ text: lineStr, class: "term-msg" }); }
+                for(let part of parts) { let span = document.createElement('span'); span.className = part.class; lineDiv.appendChild(span); for(let j = 0; j < part.text.length; j++) { if(signal.aborted) return; span.innerHTML += part.text.charAt(j); await new Promise(r => setTimeout(r, speed)); } }
                 if(signal.aborted) return; await new Promise(r => setTimeout(r, delayAfterLine));
             }
         }
 
         function updateMarquee(state) {
-            const mqText = document.getElementById('marquee-text'); 
-            const box = document.getElementById('combat-marquee');
-            const icon = document.getElementById('mq-icon');
-
-            mqText.style.color = '#ffffff'; 
-            mqText.style.textShadow = '0 0 6px rgba(255, 255, 255, 0.8)';
-
-            if (state === 'standby') {
-                box.style.borderColor = 'var(--amber)'; box.style.background = 'rgba(255, 170, 0, 0.1)';
-                icon.innerHTML = '📡'; icon.style.color = 'var(--amber)';
-                mqText.innerHTML = `ĐANG KẾT NỐI VỚI LÕI SCI - CHỜ LỆNH HỆ THỐNG...`;
-            } else if (state === 'scanning') {
-                box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.1)';
-                icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)';
-                mqText.innerHTML = `GIAO THỨC ĐỒNG BỘ ĐANG KÍCH HOẠT...`;
-            } else if (state === 'sunday') {
-                box.style.borderColor = 'var(--mint)'; box.style.background = 'rgba(0, 255, 157, 0.1)';
-                icon.innerHTML = '🔋'; icon.style.color = 'var(--mint)';
-                mqText.innerHTML = `GIAO THỨC CHỦ NHẬT - KÍCH HOẠT QUÃNG NGHỈ TÁI TẠO`;
-            } else if (state === 'shiro') {
-                box.style.borderColor = 'var(--crimson)'; box.style.background = 'rgba(255, 42, 42, 0.15)';
-                icon.innerHTML = '🛑'; icon.style.color = 'var(--crimson)';
-                mqText.innerHTML = `CẢNH BÁO VI PHẠM KỶ LUẬT - KHÓA BANKROLL - CHỈ ĐÁNH MICRO HOẶC REVIEW HAND`;
-            } else if (state === 'chairo') {
-                box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.15)';
-                icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)';
-                mqText.innerHTML = `MYELIN ỔN ĐỊNH - MỞ KHÓA BANKROLL TIÊU CHUẨN - MID STAKES SẴN SÀNG`;
-            } else if (state === 'kuro') {
-                box.style.borderColor = 'var(--neon-pink)'; box.style.background = 'rgba(255, 0, 255, 0.15)';
-                icon.innerHTML = '🥷'; icon.style.color = 'var(--neon-pink)';
-                mqText.innerHTML = `TRẠNG THÁI VÔ NGÃ - MỞ KHÓA BANKROLL TỐI ĐA - OVERDRIVE KÍCH HOẠT`;
-            }
+            const mqText = document.getElementById('marquee-text'); const box = document.getElementById('combat-marquee'); const icon = document.getElementById('mq-icon');
+            mqText.style.color = '#ffffff'; mqText.style.textShadow = '0 0 6px rgba(255, 255, 255, 0.8)';
+            if (state === 'standby') { box.style.borderColor = 'var(--amber)'; box.style.background = 'rgba(255, 170, 0, 0.1)'; icon.innerHTML = '📡'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `ĐANG KẾT NỐI VỚI LÕI SCI - CHỜ LỆNH HỆ THỐNG...`; } 
+            else if (state === 'scanning') { box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.1)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `GIAO THỨC ĐỒNG BỘ ĐANG KÍCH HOẠT...`; } 
+            else if (state === 'sunday') { box.style.borderColor = 'var(--mint)'; box.style.background = 'rgba(0, 255, 157, 0.1)'; icon.innerHTML = '🔋'; icon.style.color = 'var(--mint)'; mqText.innerHTML = `GIAO THỨC CHỦ NHẬT - KÍCH HOẠT QUÃNG NGHỈ TÁI TẠO`; } 
+            else if (state === 'shiro') { box.style.borderColor = 'var(--crimson)'; box.style.background = 'rgba(255, 42, 42, 0.15)'; icon.innerHTML = '🛑'; icon.style.color = 'var(--crimson)'; mqText.innerHTML = `CẢNH BÁO VI PHẠM KỶ LUẬT - KHÓA BANKROLL`; } 
+            else if (state === 'chairo') { box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.15)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `MYELIN ỔN ĐỊNH - MỞ KHÓA BANKROLL TIÊU CHUẨN`; } 
+            else if (state === 'kuro') { box.style.borderColor = 'var(--neon-pink)'; box.style.background = 'rgba(255, 0, 255, 0.15)'; icon.innerHTML = '🥷'; icon.style.color = 'var(--neon-pink)'; mqText.innerHTML = `TRẠNG THÁI VÔ NGÃ - MỞ KHÓA BANKROLL TỐI ĐA - OVERDRIVE`; }
         }
 
         function toggleRankMenu() { document.getElementById('rank-overlay').classList.toggle('active'); }
         function toggleTier(id, btnElement) { 
             if(id === 'tier3') { triggerMushinProtocol(btnElement); } else { playSlashSound(); }
-            let star = btnElement.querySelector('.shooting-star');
-            if(star) { star.classList.remove('active'); void star.offsetWidth; star.classList.add('active'); }
-            const c = document.getElementById(id); 
-            c.classList.contains('open') ? c.classList.remove('open') : (document.querySelectorAll('.tier-content').forEach(e=>e.classList.remove('open')), c.classList.add('open')); 
+            let star = btnElement.querySelector('.shooting-star'); if(star) { star.classList.remove('active'); void star.offsetWidth; star.classList.add('active'); }
+            const c = document.getElementById(id); c.classList.contains('open') ? c.classList.remove('open') : (document.querySelectorAll('.tier-content').forEach(e=>e.classList.remove('open')), c.classList.add('open')); 
         }
         
         const dynamicBtn = document.getElementById('dynamic-hold-btn');
         function updateButtonState() {
             const streakBtn = document.getElementById('streak-box');
-            if (isCommitted) { 
-                dynamicBtn.className = 'hold-btn state-abort'; dynamicBtn.innerHTML = '[ GIỮ 3S: HỦY CAM KẾT - RESET ]<div id="hold-progress" class="hold-progress"></div>'; 
-                if(streakBtn) {
-                    streakBtn.classList.remove('alert-unsigned');
-                    streakBtn.style.color = "var(--amber)"; streakBtn.style.borderColor = "var(--amber)"; 
-                }
-            } else { 
-                dynamicBtn.className = 'hold-btn state-sign'; dynamicBtn.innerHTML = '[ GIỮ 3S: KÝ CAM KẾT ]<div id="hold-progress" class="hold-progress"></div>'; 
-                if(streakBtn) { streakBtn.classList.add('alert-unsigned'); }
-            }
+            if (isCommitted) { dynamicBtn.className = 'hold-btn state-abort'; dynamicBtn.innerHTML = '[ GIỮ 3S: HỦY CAM KẾT ]<div id="hold-progress" class="hold-progress"></div>'; if(streakBtn) { streakBtn.classList.remove('alert-unsigned'); streakBtn.style.color = "var(--amber)"; streakBtn.style.borderColor = "var(--amber)"; } } 
+            else { dynamicBtn.className = 'hold-btn state-sign'; dynamicBtn.innerHTML = '[ GIỮ 3S: KÝ CAM KẾT ]<div id="hold-progress" class="hold-progress"></div>'; if(streakBtn) { streakBtn.classList.add('alert-unsigned'); } }
         }
 
         let holdTimer, startTime=0; 
-        function startHold(e) { 
-            e.preventDefault(); startTime = Date.now(); playChargeSound(); dynamicBtn.classList.add('charging');
-            if(navigator.vibrate) navigator.vibrate([50, 50, 50, 50, 50, 50, 50, 50]); 
-            const prog = document.getElementById('hold-progress'); 
-            holdTimer = setInterval(() => { 
-                let p = ((Date.now() - startTime) / 3000) * 100; 
-                if(p>=100){ p=100; clearInterval(holdTimer); stopChargeSound(); playLockSound(); dynamicBtn.classList.remove('charging');
-                    if(navigator.vibrate) navigator.vibrate(300); if(isCommitted) { triggerAbort(); } else { confirmCommitment(); } } 
-                prog.style.width = p+'%'; 
-            }, 50); 
-        }
+        function startHold(e) { e.preventDefault(); startTime = Date.now(); playChargeSound(); dynamicBtn.classList.add('charging'); if(navigator.vibrate) navigator.vibrate([50, 50, 50, 50]); const prog = document.getElementById('hold-progress'); holdTimer = setInterval(() => { let p = ((Date.now() - startTime) / 3000) * 100; if(p>=100){ p=100; clearInterval(holdTimer); stopChargeSound(); playLockSound(); dynamicBtn.classList.remove('charging'); if(navigator.vibrate) navigator.vibrate(300); if(isCommitted) { triggerAbort(); } else { confirmCommitment(); } } prog.style.width = p+'%'; }, 50); }
         function cancelHold() { clearInterval(holdTimer); stopChargeSound(); dynamicBtn.classList.remove('charging'); if(navigator.vibrate) navigator.vibrate(0); const prog = document.getElementById('hold-progress'); if(prog) prog.style.width = '0%'; }
         function confirmCommitment() { localStorage.setItem('combat_committed', 'true'); if(currentStreak===0) localStorage.setItem('combat_streak', 1); location.reload(); }
         function triggerAbort() { localStorage.removeItem('combat_committed'); localStorage.setItem('combat_streak', 0); location.reload(); }
-        
-        dynamicBtn.addEventListener('mousedown', startHold); dynamicBtn.addEventListener('mouseup', cancelHold); dynamicBtn.addEventListener('mouseleave', cancelHold); 
-        dynamicBtn.addEventListener('touchstart', startHold, {passive: false}); dynamicBtn.addEventListener('touchend', cancelHold);
+        dynamicBtn.addEventListener('mousedown', startHold); dynamicBtn.addEventListener('mouseup', cancelHold); dynamicBtn.addEventListener('mouseleave', cancelHold); dynamicBtn.addEventListener('touchstart', startHold, {passive: false}); dynamicBtn.addEventListener('touchend', cancelHold);
 
         function initParticles() {
             const matrix = document.getElementById('particle-matrix'); const colors = ['#00ff9d', '#00e5ff', '#b026ff']; 
-            for(let i = 0; i < 45; i++) {
-                let wrapper = document.createElement('div'); wrapper.className = 'particle-wrap'; let angle = Math.random() * 360; wrapper.style.transform = `rotate(${angle}deg)`;
-                let p = document.createElement('div'); p.className = 'particle'; p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; p.style.boxShadow = `0 0 8px ${p.style.backgroundColor}`;
-                let duration = 2.5 + Math.random() * 3; let delay = Math.random() * 5; p.style.animation = `particle-inward ${duration}s infinite ${delay}s linear`;
-                if(Math.random() > 0.85) p.classList.add('red-alert-potential');
-                wrapper.appendChild(p); matrix.appendChild(wrapper);
-            }
+            for(let i = 0; i < 45; i++) { let wrapper = document.createElement('div'); wrapper.className = 'particle-wrap'; let angle = Math.random() * 360; wrapper.style.transform = `rotate(${angle}deg)`; let p = document.createElement('div'); p.className = 'particle'; p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; p.style.boxShadow = `0 0 8px ${p.style.backgroundColor}`; let duration = 2.5 + Math.random() * 3; let delay = Math.random() * 5; p.style.animation = `particle-inward ${duration}s infinite ${delay}s linear`; if(Math.random() > 0.85) p.classList.add('red-alert-potential'); wrapper.appendChild(p); matrix.appendChild(wrapper); }
         }
 
-        let isSynced = false;
-        let isSafetyUnlocked = false; 
-
-        function unlockPreScan() {
-            if(isSafetyUnlocked || !isCommitted) return;
-            playLockSound();
-            isSafetyUnlocked = true;
-            
-            const lockBox = document.getElementById('safety-lock-hud');
-            lockBox.classList.add('unlocked');
-            
-            document.body.classList.remove('pre-scan-locked');
-            document.getElementById('live-radar-bar').classList.add('active'); // Bật Alert xanh chuối
-            
-            typeTextSafe([
-                ">_ [ HỆ THỐNG ]: CẤP QUYỀN KẾT NỐI.", 
-                ">_ [ CHỈ THỊ ]: MỜI CHẠM LÕI SCI BÊN TRÊN ĐỂ ĐỒNG BỘ."
-            ]);
-        }
+        let isSynced = false; let isSafetyUnlocked = false; 
+        function unlockPreScan() { if(isSafetyUnlocked || !isCommitted) return; playLockSound(); isSafetyUnlocked = true; document.getElementById('safety-lock-hud').classList.add('unlocked'); document.body.classList.remove('pre-scan-locked'); document.getElementById('live-radar-bar').classList.add('active'); typeTextSafe([">_ [ HỆ THỐNG ]: CẤP QUYỀN KẾT NỐI.", ">_ [ CHỈ THỊ ]: MỜI CHẠM LÕI SCI BÊN TRÊN ĐỂ ĐỒNG BỘ."]); }
         
-        // ==========================================
-        // GIAO THỨC TRÍCH XUẤT API (NGUYÊN BẢN 100%)
-        // ==========================================
         async function triggerBioSync() {
             if(!isCommitted) { playBeep(); typeTextSafe([">_ [ TỪ CHỐI ]: YÊU CẦU KÝ HỢP ĐỒNG TRƯỚC KHI VẬN HÀNH."]); return; }
             if(window.isScanning) return; window.isScanning = true;
-            
-            document.getElementById('btn-chip-vault').style.display = 'none';
-            currentVaultCode = "";
-
+            document.getElementById('btn-chip-vault').style.display = 'none'; currentVaultCode = "";
             document.body.classList.remove('standby-mode'); document.body.classList.add('scanning-mode');
             updateMarquee('scanning'); playChargeSound(); if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
-
             await typeTextSafe([">_ [ HỆ THỐNG ]: XÁC NHẬN YÊU CẦU...", ">_ [ GIAO THỨC ]: ĐANG TRÍCH XUẤT DỮ LIỆU SINH TRẮC..."], 20, 200);
-            
             await fetchBioDataReal();
         }
 
         async function fetchBioDataReal() {
             try {
-                // ĐÃ TRẢ LẠI API CỦA ANH
                 const API_URL = "https://script.google.com/macros/s/AKfycbxLBcp8F1-mMMk4V78jMrqjEtrSXQ97fKBe84zzuVB73dfztZ5VOP-jByVpebTdqcsQZA/exec?action=hud";
                 const response = await fetch(API_URL);
                 const resData = await response.json();
                 
-                stopChargeSound(); 
-                document.body.classList.remove('scanning-mode');
-                
+                stopChargeSound(); document.body.classList.remove('scanning-mode');
                 const ids = ['val-sci', 'val-hr', 'val-weight', 'val-sleep', 'val-fat', 'val-water', 'val-steps'];
                 ids.forEach(id => document.getElementById(id).classList.remove('blinking'));
 
@@ -1182,187 +1184,65 @@
 
                     let centerSci = resData.sci_ma30 !== undefined ? resData.sci_ma30 : resData.sci;
                     document.getElementById('val-sci').innerText = centerSci || '---'; 
-                    document.getElementById('val-hr').innerText = resData.hr || '---'; 
-                    document.getElementById('val-weight').innerText = resData.weight || '---'; 
-                    document.getElementById('val-sleep').innerText = resData.sleep || '---'; 
-                    document.getElementById('val-fat').innerText = resData.fat || '---'; 
-                    document.getElementById('val-water').innerText = resData.water || '---'; 
-                    document.getElementById('val-steps').innerText = resData.steps || '---';
-
-                    let targetSteps = isSunday ? 0 : 6000; 
-                    let targetWater = 2.5;
-                    let targetSleep = 7.0;
-
-                    let liveSteps = parseFloat(resData.steps_live !== undefined ? resData.steps_live : resData.steps) || 0;
-                    let liveWater = parseFloat(resData.water_live !== undefined ? resData.water_live : resData.water) || 0;
-                    let liveSleep = parseFloat(resData.sleep_live !== undefined ? resData.sleep_live : resData.sleep) || 0;
+                    document.getElementById('val-hr').innerText = resData.hr || '---'; document.getElementById('val-weight').innerText = resData.weight || '---'; document.getElementById('val-sleep').innerText = resData.sleep || '---'; document.getElementById('val-fat').innerText = resData.fat || '---'; document.getElementById('val-water').innerText = resData.water || '---'; document.getElementById('val-steps').innerText = resData.steps || '---';
                     
-                    let liveHR = parseFloat(resData.hr_live !== undefined ? resData.hr_live : resData.hr) || 0;
-                    let liveWeight = parseFloat(resData.weight_live !== undefined ? resData.weight_live : resData.weight) || 0;
-                    let liveFat = parseFloat(resData.fat_live !== undefined ? resData.fat_live : resData.fat) || 0;
-
-                    let defSteps = targetSteps - liveSteps;
-                    let defWater = targetWater - liveWater;
-                    let defSleep = targetSleep - liveSleep;
-
+                    let targetSteps = isSunday ? 0 : 6000; let targetWater = 2.5; let targetSleep = 7.0;
+                    let liveSteps = parseFloat(resData.steps_live !== undefined ? resData.steps_live : resData.steps) || 0; let liveWater = parseFloat(resData.water_live !== undefined ? resData.water_live : resData.water) || 0; let liveSleep = parseFloat(resData.sleep_live !== undefined ? resData.sleep_live : resData.sleep) || 0;
+                    let liveHR = parseFloat(resData.hr_live !== undefined ? resData.hr_live : resData.hr) || 0; let liveWeight = parseFloat(resData.weight_live !== undefined ? resData.weight_live : resData.weight) || 0; let liveFat = parseFloat(resData.fat_live !== undefined ? resData.fat_live : resData.fat) || 0;
+                    let defSteps = targetSteps - liveSteps; let defWater = targetWater - liveWater; let defSleep = targetSleep - liveSleep;
                     let liveHtml = '';
                     
-                    if (!isSunday && liveHR > 0 && liveHR < 160) {
-                        liveHtml += `<span class="metric-item">HR: Peak ${liveHR.toFixed(0)}</span>`;
-                    }
+                    if (!isSunday && liveHR > 0 && liveHR < 160) liveHtml += `<span class="metric-item">HR: Peak ${liveHR.toFixed(0)}</span>`;
                     if (defSteps > 0) liveHtml += `<span class="metric-item">STEPS: +${defSteps.toFixed(0)}</span>`;
                     if (defSleep > 0) liveHtml += `<span class="metric-item">SLP: +${defSleep.toFixed(1)}h</span>`;
                     if (defWater > 0) liveHtml += `<span class="metric-item">H2O: +${defWater.toFixed(1)}L</span>`;
-                    
-                    if (liveWeight > 67.0) {
-                        liveHtml += `<span class="metric-item">WGT: -${(liveWeight - 67.0).toFixed(1)}kg</span>`;
-                    } else if (liveWeight > 0 && liveWeight < 63.0) {
-                        liveHtml += `<span class="metric-item">WGT: +${(63.0 - liveWeight).toFixed(1)}kg</span>`;
-                    }
-                    
-                    if (liveFat > 13.0) {
-                        liveHtml += `<span class="metric-item">FAT: -${(liveFat - 13.0).toFixed(1)}%</span>`;
-                    }
+                    if (liveWeight > 67.0) liveHtml += `<span class="metric-item">WGT: -${(liveWeight - 67.0).toFixed(1)}kg</span>`;
+                    else if (liveWeight > 0 && liveWeight < 63.0) liveHtml += `<span class="metric-item">WGT: +${(63.0 - liveWeight).toFixed(1)}kg</span>`;
+                    if (liveFat > 13.0) liveHtml += `<span class="metric-item">FAT: -${(liveFat - 13.0).toFixed(1)}%</span>`;
 
-                    const radarBar = document.getElementById('live-radar-bar');
-                    const radarPulse = document.getElementById('live-pulse');
-                    const radarMetrics = document.getElementById('live-metrics');
-                    
+                    const radarBar = document.getElementById('live-radar-bar'); const radarPulse = document.getElementById('live-pulse'); const radarMetrics = document.getElementById('live-metrics');
                     setTimeout(() => radarBar.classList.add('active'), 100);
+                    if (liveHtml === '') { radarPulse.innerText = '[ 🟢 ALERT ]'; radarMetrics.innerHTML = 'H2O: OK | SLP: OK | HR: OK - KHÔNG CÒN NỢ SINH HỌC'; } 
+                    else { radarPulse.innerText = '[ 🟢 ALERT ]'; radarMetrics.innerHTML = liveHtml; }
 
-                    if (liveHtml === '') {
-                        radarBar.classList.add('all-clear');
-                        radarPulse.className = 'live-pulse clear';
-                        radarPulse.innerText = '[ 🟢 ALERT ]';
-                        radarMetrics.innerHTML = 'H2O: OK | SLP: OK | HR: OK - KHÔNG CÒN NỢ SINH HỌC';
-                    } else {
-                        radarBar.classList.remove('all-clear');
-                        radarPulse.className = 'live-pulse';
-                        radarPulse.innerText = '[ 🟢 ALERT ]';
-                        radarMetrics.innerHTML = liveHtml;
-                    }
-
-                    const statusBanner = document.getElementById('status-banner');
-                    document.body.classList.remove('tier-shiro', 'tier-chairo', 'tier-kuro');
-
+                    const statusBanner = document.getElementById('status-banner'); document.body.classList.remove('tier-shiro', 'tier-chairo', 'tier-kuro');
                     let sciScore = parseFloat(centerSci) || 0;
                     
                     if (sciScore < 50) {
-                        document.body.classList.add('tier-shiro');
-                        statusBanner.innerText = "[ ☢️ TIER 1: SHIRO - BÁO ĐỘNG ]";
-                        statusBanner.style.color = "#ffffff"; 
-                        statusBanner.style.borderColor = "var(--crimson)"; 
-                        statusBanner.style.background = "rgba(255, 42, 42, 0.4)";
-                        
+                        document.body.classList.add('tier-shiro'); statusBanner.innerText = "[ ☢️ TIER 1: SHIRO - BÁO ĐỘNG ]"; statusBanner.style.color = "#ffffff"; statusBanner.style.borderColor = "var(--crimson)"; statusBanner.style.background = "rgba(255, 42, 42, 0.4)";
                         updateMarquee('shiro'); playLockSound(); 
-                        
-                        typeTextSafe([
-                            ">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.",
-                            ">_ [ CẢNH BÁO ]: SCI 30 NGÀY DƯỚI NGƯỠNG AN TOÀN.", 
-                            ">_ [ CHỈ THỊ ]: KHÓA BANKROLL. TỪ CHỐI CẤP QUYỀN VAULT.", 
-                            ">_ [ HƯỚNG DẪN ]: CHẠM CHỈ SỐ ĐỂ XEM BÁO CÁO T-1."
-                        ], 20, 200);
-                        
-                        if (parseFloat(resData.water) < 55.0) document.querySelector('.pos-rec2').style.animation = "alert-flash 1s infinite alternate";
-                        if (parseFloat(resData.hr) < (isT1Sunday ? 0 : 160)) document.querySelector('.pos-hr').style.animation = "alert-flash 1s infinite alternate";
-                        if (parseFloat(resData.sleep) < 7.0) document.querySelector('.pos-rec1').style.animation = "alert-flash 1s infinite alternate";
-                        
+                        typeTextSafe([">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.", ">_ [ CẢNH BÁO ]: SCI DƯỚI NGƯỠNG.", ">_ [ CHỈ THỊ ]: KHÓA BANKROLL."], 20, 200);
                     } else if (sciScore >= 50 && sciScore < 85) {
-                        document.body.classList.add('tier-chairo');
-                        statusBanner.innerText = "[ TIER 2: CHAIRO - TIÊU CHUẨN ]";
-                        statusBanner.style.color = "var(--cyan)"; statusBanner.style.borderColor = "var(--cyan)"; statusBanner.style.background = "rgba(0, 229, 255, 0.1)";
-                        
-                        document.querySelectorAll('.data-panel').forEach(el => el.style.animation = 'none');
-                        updateMarquee('chairo');
-                        
-                        currentVaultCode = "KAI-" + sciScore + "-" + Math.floor(1000 + Math.random() * 9000);
-                        document.getElementById('btn-chip-vault').style.display = 'flex';
-
-                        typeTextSafe([
-                            ">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.",
-                            ">_ [ PHÂN TÍCH ]: MYELIN ỔN ĐỊNH. MỞ KHÓA BANKROLL.",
-                            ">_ [ KDRIVE OTP ]: " + currentVaultCode,
-                            ">_ [ CHỈ THỊ ]: CHẠM ĐỒNG CHIP ĐỂ TRUY CẬP."
-                        ], 20, 200);
-                        
-                        if (!isMuted && !bgmAudio.paused) bgmAudio.pause();
-                        
+                        document.body.classList.add('tier-chairo'); statusBanner.innerText = "[ TIER 2: CHAIRO - TIÊU CHUẨN ]"; statusBanner.style.color = "var(--cyan)"; statusBanner.style.borderColor = "var(--cyan)"; statusBanner.style.background = "rgba(0, 229, 255, 0.1)";
+                        document.querySelectorAll('.data-panel').forEach(el => el.style.animation = 'none'); updateMarquee('chairo');
+                        currentVaultCode = "KAI-" + sciScore + "-" + Math.floor(1000 + Math.random() * 9000); document.getElementById('btn-chip-vault').style.display = 'flex';
+                        typeTextSafe([">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.", ">_ [ PHÂN TÍCH ]: MỞ KHÓA BANKROLL.", ">_ [ KDRIVE OTP ]: " + currentVaultCode, ">_ [ CHỈ THỊ ]: CHẠM ĐỒNG CHIP ĐỂ TRUY CẬP."], 20, 200);
                     } else if (sciScore >= 85) {
-                        document.body.classList.add('tier-kuro');
-                        statusBanner.innerText = "[ TIER 3: KURO - VÔ NGÃ ]";
-                        statusBanner.style.color = "var(--neon-pink)"; statusBanner.style.borderColor = "var(--neon-pink)"; statusBanner.style.background = "rgba(255, 0, 255, 0.1)";
-                        
+                        document.body.classList.add('tier-kuro'); statusBanner.innerText = "[ TIER 3: KURO - VÔ NGÃ ]"; statusBanner.style.color = "var(--neon-pink)"; statusBanner.style.borderColor = "var(--neon-pink)"; statusBanner.style.background = "rgba(255, 0, 255, 0.1)";
                         updateMarquee('kuro'); triggerMushinProtocol();
-                        
-                        currentVaultCode = "KAI-" + sciScore + "-" + Math.floor(1000 + Math.random() * 9000);
-                        document.getElementById('btn-chip-vault').style.display = 'flex';
-
-                        typeTextSafe([
-                            ">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.",
-                            ">_ [ PHÂN TÍCH ]: TRẠNG THÁI VÔ NGÃ. OVERDRIVE.",
-                            ">_ [ KDRIVE OTP ]: " + currentVaultCode,
-                            ">_ [ CHỈ THỊ ]: CHẠM ĐỒNG CHIP ĐỂ TRUY CẬP."
-                        ], 20, 200);
-                        
-                        if (!isMuted && bgmAudio.paused) { bgmAudio.play().catch(e=>console.log(e)); document.getElementById('icon-sound-on').style.display='block'; document.getElementById('icon-sound-off').style.display='none'; }
+                        currentVaultCode = "KAI-" + sciScore + "-" + Math.floor(1000 + Math.random() * 9000); document.getElementById('btn-chip-vault').style.display = 'flex';
+                        typeTextSafe([">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.", ">_ [ PHÂN TÍCH ]: TRẠNG THÁI VÔ NGÃ. OVERDRIVE.", ">_ [ KDRIVE OTP ]: " + currentVaultCode, ">_ [ CHỈ THỊ ]: CHẠM ĐỒNG CHIP ĐỂ TRUY CẬP."], 20, 200);
                     }
                 } else if (resData.status === 'empty') { 
-                    typeTextSafe([
-                        ">_ [ LỖI ]: TỪ CHỐI TRUY CẬP.",
-                        ">_ [ CẢNH BÁO ]: CHƯA CÓ DỮ LIỆU SINH TRẮC.",
-                        ">_ [ HƯỚNG DẪN ]: YÊU CẦU ĐỒNG BỘ HEALTH CONNECT."
-                    ], 20, 150); 
-                    updateMarquee('standby'); document.body.classList.add('standby-mode');
+                    typeTextSafe([">_ [ LỖI ]: TỪ CHỐI TRUY CẬP.", ">_ [ CẢNH BÁO ]: CHƯA CÓ DỮ LIỆU SINH TRẮC.", ">_ [ HƯỚNG DẪN ]: YÊU CẦU ĐỒNG BỘ HEALTH CONNECT."], 20, 150); updateMarquee('standby'); document.body.classList.add('standby-mode');
                 } else {
-                    typeTextSafe([">_ [ LỖI HỆ THỐNG ]: " + (resData.message || "TRUY XUẤT THẤT BẠI.")]); 
-                    updateMarquee('standby'); document.body.classList.add('standby-mode');
+                    typeTextSafe([">_ [ LỖI HỆ THỐNG ]: " + (resData.message || "TRUY XUẤT THẤT BẠI.")]); updateMarquee('standby'); document.body.classList.add('standby-mode');
                 }
             } catch (error) {
-                stopChargeSound(); 
-                typeTextSafe([">_ [ CẢNH BÁO ĐỎ ]: MẤT KẾT NỐI VỚI VỆ TINH."]);
-                updateMarquee('standby'); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
+                stopChargeSound(); typeTextSafe([">_ [ CẢNH BÁO ĐỎ ]: MẤT KẾT NỐI VỚI VỆ TINH."]); updateMarquee('standby'); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
             }
             window.isScanning = false;
         }
 
-        document.querySelectorAll('.sub-tier').forEach(details => {
-            details.addEventListener('toggle', (e) => {
-                if (details.open) {
-                    document.querySelectorAll('.sub-tier').forEach(other => {
-                        if (other !== details) other.removeAttribute('open');
-                    });
-                }
-            });
-        });
-
-        function openFullscreen(imgElement) {
-            playBeep();
-            const viewer = document.getElementById('img-viewer');
-            const viewerImg = document.getElementById('viewer-img');
-            viewerImg.src = imgElement.src;
-            viewer.classList.add('active');
-        }
-
-        function closeFullscreen() {
-            playBeep();
-            document.getElementById('img-viewer').classList.remove('active');
-        }
+        document.querySelectorAll('.sub-tier').forEach(details => { details.addEventListener('toggle', (e) => { if (details.open) { document.querySelectorAll('.sub-tier').forEach(other => { if (other !== details) other.removeAttribute('open'); }); } }); });
+        function openFullscreen(imgElement) { playBeep(); const viewer = document.getElementById('img-viewer'); document.getElementById('viewer-img').src = imgElement.src; viewer.classList.add('active'); }
+        function closeFullscreen() { playBeep(); document.getElementById('img-viewer').classList.remove('active'); }
 
         function initializeSystem() {
             initParticles(); document.body.classList.add('standby-mode'); updateButtonState(); updateMarquee('standby');
             document.body.classList.add('pre-scan-locked'); 
-            
-            if (isCommitted) { 
-                typeTextSafe([
-                    ">_ [ SYS.FIREWALL ]: ONLINE",
-                    ">_ [ MỤC TIÊU ]: BẢO VỆ BANKROLL. QUẢN TRỊ RỦI RO.",
-                    ">_ [ CHỈ LỆNH ]: TRIỆT TIÊU QUYẾT ĐỊNH CẢM XÚC."
-                ], 20, 100); 
-            } 
-            else { 
-                document.body.classList.add('uncommitted');
-                typeTextSafe([">_ [ HỆ THỐNG ĐÓNG BĂNG ]", ">_ [ YÊU CẦU ]: KÝ HỢP ĐỒNG TRONG BÍ LỤC TRƯỚC KHI VẬN HÀNH."]); 
-            }
+            if (isCommitted) { typeTextSafe([">_ [ SYS.FIREWALL ]: ONLINE", ">_ [ MỤC TIÊU ]: BẢO VỆ BANKROLL. QUẢN TRỊ RỦI RO.", ">_ [ CHỈ LỆNH ]: TRIỆT TIÊU QUYẾT ĐỊNH CẢM XÚC."], 20, 100); } 
+            else { document.body.classList.add('uncommitted'); typeTextSafe([">_ [ HỆ THỐNG ĐÓNG BĂNG ]", ">_ [ YÊU CẦU ]: KÝ HỢP ĐỒNG TRONG BÍ LỤC TRƯỚC KHI VẬN HÀNH."]); }
         }
     </script>
 </body>
