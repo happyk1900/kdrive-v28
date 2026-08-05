@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Event Horizon Core</title>
-    <!-- Bổ sung font Great Vibes cho chữ ký mềm mại quyền lực -->
+    <!-- Font Great Vibes cho chữ ký mềm mại quyền lực -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Great+Vibes&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -36,7 +36,6 @@
         #mushin-bg.fade-out { opacity: 0; filter: blur(15px); transform: scale(1.1); pointer-events: none; }
 
         .mushin-clean-image { position: absolute; inset: 0; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/bich%20nen.png?raw=true') center/cover no-repeat; z-index: 1; }
-        /* Phủ vignette bóng râm 4 góc tạo chiều sâu điện ảnh */
         .mushin-clean-image::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.9) 100%); z-index: 2; pointer-events: none; }
 
         /* ẢNH 2: VƯƠNG QUỐC POKER (Lớp nền khi đọc thoại) */
@@ -44,12 +43,12 @@
         #intro-bg.focus-mode { opacity: 1; filter: blur(0px) brightness(0.8) grayscale(0); transform: scale(1); transition: all 2s ease-out; }
         #intro-bg.dim-mode { opacity: 1; filter: blur(8px) brightness(0.25) grayscale(0.4); transform: scale(1.05); transition: all 3s ease-out; }
 
-        /* ẢNH 3: CROSSFADE GIÂY 88 (Bàn tay & Chiếc nhẫn) */
+        /* ẢNH 3: CROSSFADE GIÂY 86 (Bàn tay & Chiếc nhẫn) */
         #ring-bg { position: absolute; inset: 0; z-index: 3; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/20260804_031243%20(1).jpg?raw=true') center/cover no-repeat; opacity: 0; pointer-events: none; filter: grayscale(0.4) contrast(1.3) brightness(0.7) hue-rotate(190deg); transition: opacity 2s ease-in-out; }
         #ring-bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 40%, transparent 20%, rgba(0,0,0,0.95) 90%); z-index: 4; }
         #ring-bg.active { opacity: 1; }
 
-        /* CHỮ KÝ KAI RIPE (Quyền lực ngầm - Hiện ra ở giây 89) */
+        /* CHỮ KÝ KAI RIPE (Quyền lực ngầm - Hiện ra ở giây 88) */
         #kai-signature { font-family: 'Great Vibes', cursive; font-size: min(22vw, 100px); color: #ffffff; position: absolute; z-index: 35; bottom: 15%; width: 100%; text-align: center; opacity: 0; transform: scale(2); text-shadow: 0 0 15px rgba(0, 229, 255, 0.8), 0 0 30px rgba(0, 229, 255, 0.6), 0 0 60px rgba(0, 229, 255, 0.4); transition: opacity 0.5s ease-out, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; }
         #kai-signature.stamp { opacity: 1; transform: scale(1); }
 
@@ -376,10 +375,10 @@
         <!-- ẢNH 2: VƯƠNG QUỐC POKER (Lớp nền khi đọc thoại - Nằm dưới Mushin) -->
         <div id="intro-bg"></div>
 
-        <!-- ẢNH 3: BÀN TAY & CHIẾC NHẪN (Crossfade ở giây 88) -->
+        <!-- ẢNH 3: BÀN TAY & CHIẾC NHẪN (Crossfade ở giây 86) -->
         <div id="ring-bg"></div>
         
-        <!-- CHỮ KÝ CÁ NHÂN (Hiển thị quyền lực ngầm) -->
+        <!-- CHỮ KÝ CÁ NHÂN (Hiển thị quyền lực ngầm ở giây 88) -->
         <div id="kai-signature">Kai Ripe</div>
 
         <div id="intro-title">CHINH PHỤC VƯƠNG QUỐC POKER!</div>
@@ -676,17 +675,19 @@
         let introReq;
         let introFinished = false;
         let introPunchlineTriggered = false;
+        let introPunchlineFaded = false;
         let introCrossfadeTriggered = false;
+        let introSignatureTriggered = false;
 
         const introSubtitles = [
-            { tIn: 9.0, tOut: 11.5, html: 'Xin chào. ...... Tôi là Kai Ripe.' },
-            { tIn: 12.0, tOut: 16.5, html: 'Những quyết định sai lầm lớn nhất tôi từng vấp phải,<br>... đều là khi <span class="cine-highlight">cảm xúc, vượt mặt lý trí.</span>' },
-            { tIn: 17.0, tOut: 26.5, html: 'Để kiểm soát sự hỗn mang đó, ... tôi đã tự tay kiến tạo một hệ thống Trí tuệ Nhân tạo.<br>Một màng lọc đo lường, và quản trị rủi ro, cho chính bản thân mình.' },
-            { tIn: 27.0, tOut: 34.5, html: 'Nguyên mẫu công nghệ này, ... được đem thử nghiệm ở một trong những đấu trường khắc nghiệt nhất:<br>Thể thao trí tuệ, hệ thống giải đấu Poker Tournament.' },
-            { tIn: 35.0, tOut: 49.5, html: 'Đó, không đơn thuần là những lá bài. ... Mà là chuỗi những quyết định tài chính lạnh lùng, chớp nhoáng.<br>Là nơi vắt kiệt thể lực, ... đòi hỏi độ sắc bén, sự bền bỉ,<br>và sức chịu đựng áp lực tột độ, của một vận động viên thực thụ.' },
-            { tIn: 50.0, tOut: 63.5, html: 'Cốt lõi của hệ thống này, ... bước ra từ triết lý của kiếm khách huyền thoại Miyamoto Musashi:<br>Một ngàn ngày, rèn luyện kỷ luật thép.<br>Một ngàn ngày... để chạm tới <span class="cine-mushin">Mushin. ... Trạng thái Vô Ngã.</span>' },
-            { tIn: 64.0, tOut: 76.5, html: 'Bạn biết đấy... Có thể, chức vô địch Poker thế giới vẫn còn quá xa vời.<br>Nhưng tôi biết chắc chắn rằng, ... nhiệm vụ đầu tiên tôi cần vượt qua,<br>đó là chiến thắng chính bản thân mình. ... Trong một ván bài, với K Drive.' },
-            { tIn: 77.0, tOut: 81.5, html: 'Nơi mọi dao động tâm trí...<br><span class="cine-danger">đều được định lượng, bằng dữ liệu.</span>' }
+            { tIn: 9.0, tOut: 11.5, html: 'Xin chào. Tôi là Kai Ripe.' },
+            { tIn: 12.0, tOut: 16.5, html: 'Những quyết định sai lầm lớn nhất tôi từng vấp phải, đều là khi <span class="cine-highlight">cảm xúc vượt mặt lý trí.</span>' },
+            { tIn: 17.0, tOut: 26.5, html: 'Để kiểm soát sự hỗn mang đó, tôi đã tự tay kiến tạo một hệ thống Trí tuệ Nhân tạo.<br>Một màng lọc đo lường và quản trị rủi ro cho chính bản thân mình.' },
+            { tIn: 27.0, tOut: 34.5, html: 'Nguyên mẫu công nghệ này được đem thử nghiệm ở một trong những đấu trường khắc nghiệt nhất:<br>Thể thao trí tuệ, hệ thống giải đấu Poker Tournament.' },
+            { tIn: 35.0, tOut: 49.5, html: 'Đó không đơn thuần là những lá bài. Mà là chuỗi những quyết định tài chính lạnh lùng, chớp nhoáng.<br>Là nơi vắt kiệt thể lực, đòi hỏi độ sắc bén, sự bền bỉ, và sức chịu đựng áp lực tột độ của một vận động viên thực thụ.' },
+            { tIn: 50.0, tOut: 63.5, html: 'Cốt lõi của hệ thống này bước ra từ triết lý của kiếm khách huyền thoại Miyamoto Musashi:<br>Một ngàn ngày rèn luyện kỷ luật thép.<br>Một ngàn ngày... để chạm tới <span class="cine-mushin">Mushin. Trạng thái Vô Ngã.</span>' },
+            { tIn: 64.0, tOut: 76.5, html: 'Bạn biết đấy... Có thể chức vô địch Poker thế giới vẫn còn quá xa vời.<br>Nhưng tôi biết chắc chắn rằng, nhiệm vụ đầu tiên tôi cần vượt qua, đó là chiến thắng chính bản thân mình.<br>Trong một ván bài, với K Drive.' },
+            { tIn: 77.0, tOut: 81.5, html: 'Nơi mọi dao động tâm trí...<br><span class="cine-danger">đều được định lượng bằng dữ liệu.</span>' }
         ];
 
         function initAllAudio() {
@@ -793,11 +794,33 @@
             });
             
             if(ct >= 82.0 && !introPunchlineTriggered) {
-                triggerIntroPunchline();
+                introPunchlineTriggered = true;
+                document.getElementById('cine-subtitles').style.display = 'none';
+                document.getElementById('intro-flash').style.opacity = '1';
+                playBeep(); 
+                
+                setTimeout(() => {
+                    document.getElementById('intro-flash').style.opacity = '0';
+                    document.getElementById('intro-punchline').style.opacity = '1';
+                }, 50);
             }
 
-            if(ct >= 88.0 && !introCrossfadeTriggered) {
-                triggerCrossfade();
+            if(ct >= 84.0 && !introPunchlineFaded) {
+                introPunchlineFaded = true;
+                document.getElementById('intro-punchline').classList.add('fade-out');
+            }
+
+            if(ct >= 86.0 && !introCrossfadeTriggered) {
+                introCrossfadeTriggered = true;
+                document.getElementById('mushin-bg').style.opacity = '0';
+                document.getElementById('intro-bg').style.opacity = '0';
+                document.getElementById('ring-bg').classList.add('active');
+            }
+
+            if(ct >= 88.0 && !introSignatureTriggered) {
+                introSignatureTriggered = true;
+                document.getElementById('kai-signature').classList.add('stamp');
+                playSlashSound(); 
             }
 
             if (ct >= 95.0 && !introFinished) {
@@ -808,35 +831,10 @@
             }
         }
 
-        function triggerIntroPunchline() {
-            introPunchlineTriggered = true;
-            document.getElementById('cine-subtitles').style.display = 'none';
-            document.getElementById('intro-flash').style.opacity = '1';
-            playBeep(); 
-            
-            setTimeout(() => {
-                document.getElementById('intro-flash').style.opacity = '0';
-                document.getElementById('intro-punchline').style.opacity = '1';
-            }, 50);
-        }
-
-        function triggerCrossfade() {
-            introCrossfadeTriggered = true;
-            
-            document.getElementById('mushin-bg').style.opacity = '0';
-            document.getElementById('intro-bg').style.opacity = '0';
-            document.getElementById('intro-punchline').classList.add('fade-out');
-
-            document.getElementById('ring-bg').classList.add('active');
-
-            setTimeout(() => {
-                document.getElementById('kai-signature').classList.add('stamp');
-                playSlashSound(); 
-            }, 1000);
-        }
-
         function skipIntro() {
-            introFinished = true; introPunchlineTriggered = true; introCrossfadeTriggered = true;
+            introFinished = true; introPunchlineTriggered = true; 
+            introPunchlineFaded = true; introCrossfadeTriggered = true; introSignatureTriggered = true;
+            
             if (introReq) cancelAnimationFrame(introReq); 
             playBeep();
             
