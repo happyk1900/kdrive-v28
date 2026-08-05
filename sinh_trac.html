@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Event Horizon Core</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bổ sung font Great Vibes cho chữ ký mềm mại quyền lực -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Great+Vibes&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-obsidian: #050608; --mint: #00ff9d; --cyan: #00e5ff;
@@ -43,6 +44,15 @@
         #intro-bg.focus-mode { opacity: 1; filter: blur(0px) brightness(0.8) grayscale(0); transform: scale(1); transition: all 2s ease-out; }
         #intro-bg.dim-mode { opacity: 1; filter: blur(8px) brightness(0.25) grayscale(0.4); transform: scale(1.05); transition: all 3s ease-out; }
 
+        /* ẢNH 3: CROSSFADE GIÂY 88 (Bàn tay & Chiếc nhẫn) */
+        #ring-bg { position: absolute; inset: 0; z-index: 3; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/20260804_031243%20(1).jpg?raw=true') center/cover no-repeat; opacity: 0; pointer-events: none; filter: grayscale(0.4) contrast(1.3) brightness(0.7) hue-rotate(190deg); transition: opacity 2s ease-in-out; }
+        #ring-bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 40%, transparent 20%, rgba(0,0,0,0.95) 90%); z-index: 4; }
+        #ring-bg.active { opacity: 1; }
+
+        /* CHỮ KÝ KAI RIPE (Quyền lực ngầm - Hiện ra ở giây 89) */
+        #kai-signature { font-family: 'Great Vibes', cursive; font-size: min(22vw, 100px); color: #ffffff; position: absolute; z-index: 35; bottom: 15%; width: 100%; text-align: center; opacity: 0; transform: scale(2); text-shadow: 0 0 15px rgba(0, 229, 255, 0.8), 0 0 30px rgba(0, 229, 255, 0.6), 0 0 60px rgba(0, 229, 255, 0.4); transition: opacity 0.5s ease-out, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; }
+        #kai-signature.stamp { opacity: 1; transform: scale(1); }
+
         /* Gợn sóng mặt nước */
         .water-ripple { position: absolute; border-radius: 50%; border: 2px solid rgba(0, 229, 255, 0.6); box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2); transform: translate(-50%, -50%) scale(0); animation: ripple-out 2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; pointer-events: none; z-index: 25; }
         @keyframes ripple-out { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 8px; } 100% { transform: translate(-50%, -50%) scale(250); opacity: 0; border-width: 1px; } }
@@ -69,7 +79,8 @@
         .cine-danger { color: #ff2a2a; font-style: italic; font-weight: 600; text-shadow: 0 0 20px rgba(255,42,42,0.8); }
 
         #intro-flash { position: absolute; inset: 0; background: #ffffff; z-index: 30; opacity: 0; pointer-events: none; transition: opacity 0.05s ease-out; }
-        #intro-punchline { font-family: var(--font-ui), sans-serif; font-size: 20px; color: #fff; letter-spacing: 2px; font-weight: 600; text-align: center; text-shadow: 0 0 10px rgba(255,255,255,0.5); position: absolute; z-index: 35; opacity: 0; line-height: 1.6; padding-top: 15px; }
+        #intro-punchline { font-family: var(--font-ui), sans-serif; font-size: 20px; color: #fff; letter-spacing: 2px; font-weight: 600; text-align: center; text-shadow: 0 0 10px rgba(255,255,255,0.5); position: absolute; z-index: 35; opacity: 0; line-height: 1.6; padding-top: 15px; transition: opacity 1s ease-out; }
+        #intro-punchline.fade-out { opacity: 0; }
         #skip-btn { position: absolute; bottom: 30px; right: 30px; z-index: 40; background: transparent; border: none; color: rgba(255,255,255,0.3); font-family: var(--font-display); font-size: 11px; letter-spacing: 1px; cursor: pointer; transition: color 0.3s; display: none; padding: 10px; }
         #skip-btn:active { color: #fff; }
 
@@ -359,13 +370,18 @@
     <div id="intro-layer">
         <!-- ẢNH 1: MUSHIN (Ghim 100% màn hình, Tĩnh lặng tuyệt đối) -->
         <div id="mushin-bg">
-            <!-- Nền ảnh tĩnh lặng -->
             <div class="mushin-clean-image"></div>
         </div>
         
         <!-- ẢNH 2: VƯƠNG QUỐC POKER (Lớp nền khi đọc thoại - Nằm dưới Mushin) -->
         <div id="intro-bg"></div>
+
+        <!-- ẢNH 3: BÀN TAY & CHIẾC NHẪN (Crossfade ở giây 88) -->
+        <div id="ring-bg"></div>
         
+        <!-- CHỮ KÝ CÁ NHÂN (Hiển thị quyền lực ngầm) -->
+        <div id="kai-signature">Kai Ripe</div>
+
         <div id="intro-title">CHINH PHỤC VƯƠNG QUỐC POKER!</div>
         
         <!-- NÚT BẤM (Trung tâm tuyệt đối) -->
@@ -377,8 +393,7 @@
         <button id="skip-btn" onclick="skipIntro()">[ >> BỎ QUA ]</button>
         <div id="intro-flash"></div>
         <div id="intro-punchline">
-            Hà Nội, 08.2026<br>
-            KAI RIPE.
+            Hà Nội, tháng 8 năm 2026
         </div>
     </div>
 
@@ -661,23 +676,22 @@
         let introReq;
         let introFinished = false;
         let introPunchlineTriggered = false;
+        let introCrossfadeTriggered = false;
 
         const introSubtitles = [
-            { tIn: 10.0, tOut: 11.8, html: 'Xin chào. Tôi là Kai Ripe.' },
-            { tIn: 12.0, tOut: 20.5, html: 'Nhìn lại cuộc đời mình, tôi nhận ra rằng, mọi sai lầm lớn nhất tôi gặp phải...<br>đều bắt nguồn từ những khoảnh khắc, mà <span class="cine-highlight">cảm xúc lấn áp lý trí.</span>' },
-            { tIn: 21.0, tOut: 29.5, html: 'Để kiểm soát sự hỗn mang đó, tôi đã tự tay kiến tạo một hệ thống Trí tuệ Nhân tạo,<br>một màng lọc đo lường và quản trị rủi ro cho chính bản thân mình.' },
-            { tIn: 30.0, tOut: 36.5, html: 'Nguyên mẫu công nghệ này được đem thử nghiệm ở một trong những đấu trường khắc nghiệt nhất:<br>Thể thao trí tuệ Poker.' },
-            { tIn: 37.0, tOut: 46.5, html: 'Đó không đơn thuần là những lá bài. Đó là nơi vắt kiệt thể lực, đòi hỏi độ sắc bén,<br>sự bền bỉ, và sức chịu đựng áp lực tột độ của một vận động viên thực thụ.' },
-            { tIn: 47.0, tOut: 61.5, html: 'Cốt lõi của hệ thống này, bước ra từ triết lý của kiếm khách huyền thoại Miyamoto Musashi:<br>Một ngàn ngày rèn luyện kỷ luật thép.<br>Một ngàn ngày... để chạm tới <span class="cine-mushin">Mushin, Trạng thái Vô Ngã.</span>' },
-            { tIn: 62.0, tOut: 64.5, html: 'Bạn biết đấy...' },
-            { tIn: 65.0, tOut: 69.5, html: 'Có thể tôi không chiến thắng tại giải vô địch Poker thế giới.<br>Nhưng chắc chắn một điều, tôi sẽ đánh bại bản ngã của chính mình.' },
-            { tIn: 70.0, tOut: 74.5, html: 'Chào mừng đến với K Drive,<br>Chương trình quản trị rủi ro bằng sinh trắc học.' },
-            { tIn: 75.0, tOut: 80.0, html: 'Nơi mọi dao động tâm trí...<br><span class="cine-danger">đều được định lượng bằng dữ liệu.</span>' }
+            { tIn: 9.0, tOut: 11.5, html: 'Xin chào. ...... Tôi là Kai Ripe.' },
+            { tIn: 12.0, tOut: 16.5, html: 'Những quyết định sai lầm lớn nhất tôi từng vấp phải,<br>... đều là khi <span class="cine-highlight">cảm xúc, vượt mặt lý trí.</span>' },
+            { tIn: 17.0, tOut: 26.5, html: 'Để kiểm soát sự hỗn mang đó, ... tôi đã tự tay kiến tạo một hệ thống Trí tuệ Nhân tạo.<br>Một màng lọc đo lường, và quản trị rủi ro, cho chính bản thân mình.' },
+            { tIn: 27.0, tOut: 34.5, html: 'Nguyên mẫu công nghệ này, ... được đem thử nghiệm ở một trong những đấu trường khắc nghiệt nhất:<br>Thể thao trí tuệ, hệ thống giải đấu Poker Tournament.' },
+            { tIn: 35.0, tOut: 49.5, html: 'Đó, không đơn thuần là những lá bài. ... Mà là chuỗi những quyết định tài chính lạnh lùng, chớp nhoáng.<br>Là nơi vắt kiệt thể lực, ... đòi hỏi độ sắc bén, sự bền bỉ,<br>và sức chịu đựng áp lực tột độ, của một vận động viên thực thụ.' },
+            { tIn: 50.0, tOut: 63.5, html: 'Cốt lõi của hệ thống này, ... bước ra từ triết lý của kiếm khách huyền thoại Miyamoto Musashi:<br>Một ngàn ngày, rèn luyện kỷ luật thép.<br>Một ngàn ngày... để chạm tới <span class="cine-mushin">Mushin. ... Trạng thái Vô Ngã.</span>' },
+            { tIn: 64.0, tOut: 76.5, html: 'Bạn biết đấy... Có thể, chức vô địch Poker thế giới vẫn còn quá xa vời.<br>Nhưng tôi biết chắc chắn rằng, ... nhiệm vụ đầu tiên tôi cần vượt qua,<br>đó là chiến thắng chính bản thân mình. ... Trong một ván bài, với K Drive.' },
+            { tIn: 77.0, tOut: 81.5, html: 'Nơi mọi dao động tâm trí...<br><span class="cine-danger">đều được định lượng, bằng dữ liệu.</span>' }
         ];
 
         function initAllAudio() {
             if (!cinematicAudio) {
-                cinematicAudio = new Audio('https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/Kai%20intro%20full.MP3');
+                cinematicAudio = new Audio('https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/Kai%20Ring%20full.MP3');
             }
             if (!ascentAudio) {
                 ascentAudio = new Audio('https://github.com/happyk1900/Music-ver-1-Poker-abum/raw/refs/heads/main/The_High_Stakes_Ascent.mp4');
@@ -778,11 +792,15 @@
                 }
             });
             
-            if(ct >= 81.0 && !introPunchlineTriggered) {
+            if(ct >= 82.0 && !introPunchlineTriggered) {
                 triggerIntroPunchline();
             }
 
-            if (ct >= 88.0 && !introFinished) {
+            if(ct >= 88.0 && !introCrossfadeTriggered) {
+                triggerCrossfade();
+            }
+
+            if (ct >= 95.0 && !introFinished) {
                 introFinished = true;
                 endIntroSequence();
             } else if (!introFinished) {
@@ -802,8 +820,23 @@
             }, 50);
         }
 
+        function triggerCrossfade() {
+            introCrossfadeTriggered = true;
+            
+            document.getElementById('mushin-bg').style.opacity = '0';
+            document.getElementById('intro-bg').style.opacity = '0';
+            document.getElementById('intro-punchline').classList.add('fade-out');
+
+            document.getElementById('ring-bg').classList.add('active');
+
+            setTimeout(() => {
+                document.getElementById('kai-signature').classList.add('stamp');
+                playSlashSound(); 
+            }, 1000);
+        }
+
         function skipIntro() {
-            introFinished = true; introPunchlineTriggered = true;
+            introFinished = true; introPunchlineTriggered = true; introCrossfadeTriggered = true;
             if (introReq) cancelAnimationFrame(introReq); 
             playBeep();
             
@@ -838,7 +871,6 @@
                         document.getElementById('icon-sound-on').style.display='block';
                         document.getElementById('icon-sound-off').style.display='none';
                         
-                        // LẮNG NGHE SỰ KIỆN NHẠC ASCENT KẾT THÚC TỰ NHIÊN
                         ascentAudio.onended = () => {
                             isAscentActive = false;
                             isMuted = true;
@@ -872,7 +904,6 @@
             e.stopPropagation(); 
             if(!roninAudio || !ascentAudio) initAllAudio();
             
-            // LOGIC CÔNG TẮC ĐIỀU KHIỂN NHẠC ASCENT & RONIN
             if (isAscentActive) {
                 if (!ascentAudio.paused) {
                     ascentAudio.pause();
@@ -888,7 +919,6 @@
                 return;
             }
 
-            // ĐÃ GỠ KHÓA TIER 3 - CHO PHÉP BẬT RONIN BẤT CỨ LÚC NÀO SAU KHI ASCENT CHẠY XONG
             if(roninAudio.paused) { 
                 roninAudio.play(); 
                 isMuted = false;
