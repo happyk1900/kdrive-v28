@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Event Horizon Core</title>
-    <!-- Font Great Vibes cho chữ ký mềm mại quyền lực -->
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Great+Vibes&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Đã thêm Chakra Petch & Be Vietnam Pro hỗ trợ hoàn hảo tiếng Việt -->
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Great+Vibes&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-obsidian: #050608; --mint: #00ff9d; --cyan: #00e5ff;
             --amber: #ffaa00; --violet: #b026ff; --crimson: #ff2a2a;
             --neon-pink: #ff00ff; --lime: #39ff14;
-            --font-display: 'Orbitron', sans-serif; --font-ui: 'Rajdhani', sans-serif;
+            --font-display: 'Chakra Petch', sans-serif; /* Phông sắc bén cho UI */
+            --font-ui: 'Be Vietnam Pro', sans-serif; /* Phông trung tính, dễ đọc cho nội dung */
             --font-terminal: 'Roboto Mono', monospace;
             --vh: 1vh; 
         }
@@ -31,35 +32,29 @@
            ========================================= */
         #intro-layer { position: fixed; inset: 0; z-index: 100000; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 2s ease; overflow: hidden; }
         
-        /* ẢNH 1: MUSHIN (Ghim tuyệt đối 100% màn hình, Tĩnh lặng tuyệt đối) */
         #mushin-bg { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; transition: opacity 1.5s ease-out, filter 1.5s ease-out, transform 1.5s ease-out; }
         #mushin-bg.fade-out { opacity: 0; filter: blur(15px); transform: scale(1.1); pointer-events: none; }
 
         .mushin-clean-image { position: absolute; inset: 0; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/QUYEN%20DAT%20(2).png?raw=true') center/cover no-repeat; z-index: 1; }
         .mushin-clean-image::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.9) 100%); z-index: 2; pointer-events: none; }
 
-        /* ẢNH 2: VƯƠNG QUỐC POKER (Lớp nền khi đọc thoại) */
         #intro-bg { position: absolute; inset: -5%; z-index: 2; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/anh%20intro%20(1).jpg?raw=true') center/cover; filter: blur(25px) brightness(0.15) grayscale(0.6); opacity: 0; transition: all 2s ease-out; }
         #intro-bg.focus-mode { opacity: 1; filter: blur(0px) brightness(0.8) grayscale(0); transform: scale(1); transition: all 2s ease-out; }
         #intro-bg.dim-mode { opacity: 1; filter: blur(8px) brightness(0.25) grayscale(0.4); transform: scale(1.05); transition: all 3s ease-out; }
 
-        /* ẢNH 3: CROSSFADE GIÂY 86 (Bàn tay & Chiếc nhẫn) */
         #ring-bg { position: absolute; inset: 0; z-index: 3; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/20260804_031243%20(1).jpg?raw=true') center/cover no-repeat; opacity: 0; pointer-events: none; filter: grayscale(0.4) contrast(1.3) brightness(0.7) hue-rotate(190deg); transition: opacity 2s ease-in-out; }
         #ring-bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 40%, transparent 20%, rgba(0,0,0,0.95) 90%); z-index: 4; }
         #ring-bg.active { opacity: 1; }
 
-        /* CHỮ KÝ KAI RIPE (Quyền lực ngầm - Hiện ra ở giây 88) */
         #kai-signature { font-family: 'Great Vibes', cursive; font-size: min(22vw, 100px); color: #ffffff; position: absolute; z-index: 35; bottom: 15%; width: 100%; text-align: center; opacity: 0; transform: scale(2); text-shadow: 0 0 15px rgba(0, 229, 255, 0.8), 0 0 30px rgba(0, 229, 255, 0.6), 0 0 60px rgba(0, 229, 255, 0.4); transition: opacity 0.5s ease-out, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; }
         #kai-signature.stamp { opacity: 1; transform: scale(1); }
 
-        /* Gợn sóng mặt nước */
         .water-ripple { position: absolute; border-radius: 50%; border: 2px solid rgba(0, 229, 255, 0.6); box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2); transform: translate(-50%, -50%) scale(0); animation: ripple-out 2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; pointer-events: none; z-index: 25; }
         @keyframes ripple-out { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 8px; } 100% { transform: translate(-50%, -50%) scale(250); opacity: 0; border-width: 1px; } }
 
         #intro-title { position: absolute; bottom: 15%; z-index: 10; font-family: 'Cormorant Garamond', serif; font-size: 38px; color: #ffffff; text-transform: uppercase; letter-spacing: 6px; font-weight: 700; text-align: center; line-height: 1.4; text-shadow: 3px 5px 15px rgba(0, 0, 0, 1), 0 0 40px rgba(0, 0, 0, 0.9); opacity: 0; transform: translateY(20px); transition: opacity 2.5s ease-out, transform 2.5s ease-out; pointer-events: none; width: 90%; }
         #intro-title.show { opacity: 1; transform: translateY(0); }
 
-        /* Nút Khởi Chạy - Trọng tâm tuyệt đối (Cân bằng đường chân trời) */
         .gatekeeper-wrapper { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; width: 100%; display: flex; justify-content: center; pointer-events: none; }
         #gatekeeper-btn { pointer-events: auto; background: rgba(0, 229, 255, 0.05); color: var(--cyan); padding: 18px 35px; font-family: var(--font-display); font-size: 13px; letter-spacing: 4px; font-weight: bold; cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1); clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); border: 1px solid rgba(0,229,255,0.4); box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.15), 0 10px 25px rgba(0,0,0,0.8); backdrop-filter: blur(10px); text-align: center; overflow: hidden; position: relative; }
         #gatekeeper-btn::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent); transform: rotate(45deg); animation: cinematic-shine 3s infinite; }
@@ -89,7 +84,6 @@
         .vignette { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; background: radial-gradient(circle at center, transparent 30%, #050608 90%); transition: all 1.5s ease; }
         @keyframes grid-scroll { 0% { background-position: 0 0; } 100% { background-position: 0 40px; } }
 
-        /* CHOREOGRAPHY 5S: HIỆU ỨNG SÓNG VÀ TRƯỢT GIAO DIỆN */
         .shockwave { position: fixed; top: 50%; left: 50%; width: 10px; height: 10px; background: transparent; border: 4px solid var(--cyan); border-radius: 50%; transform: translate(-50%, -50%); z-index: 4; opacity: 0; pointer-events: none; }
         .shockwave.active { animation: shockwave-boom 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
         @keyframes shockwave-boom { 0% { width: 10px; height: 10px; opacity: 1; border-width: 15px; } 100% { width: 150vw; height: 150vw; opacity: 0; border-width: 1px; } }
@@ -302,36 +296,42 @@
         .rank-header h2 { font-family: var(--font-display); color: var(--cyan); font-size: 1.1rem; letter-spacing: 2px; }
         .tier-list { width: 100%; max-width: 420px; flex-grow: 1; overflow-y: auto; padding: 20px; }
         
-        .tier-item { position: relative; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; background: rgba(255,255,255,0.02); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); overflow: hidden; }
-        .tier-btn { position: relative; z-index: 2; width: 100%; background: transparent; padding: 15px; text-align: left; font-family: var(--font-display); font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
+        .tier-item { position: relative; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; background: rgba(15, 23, 42, 0.4); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); overflow: hidden; }
         
+        /* CẬP NHẬT GIAO DIỆN NÚT THEO QUY CHUẨN MỚI */
+        .tier-btn { position: relative; z-index: 2; width: 100%; background: transparent; padding: 15px; text-align: left; font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; color: #F8FAFC; text-shadow: none; letter-spacing: 0.5px; }
+        .tier-prefix { color: #94A3B8; font-weight: 500; margin-right: 4px; }
+        .tier-name { color: #FFFFFF; font-weight: 700; text-transform: uppercase; }
+
         .shooting-star { position: absolute; bottom: 0; left: -150px; width: 150px; height: 2px; background: linear-gradient(90deg, transparent, currentColor, #fff); box-shadow: 0 0 10px currentColor; z-index: 3; opacity: 0; pointer-events: none; }
         .shooting-star.active { animation: sweep 0.5s ease-out forwards; }
         @keyframes sweep { 0% { left: -150px; opacity: 1; } 100% { left: 100%; opacity: 0; } }
 
-        .tier-shiro { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3); border-left: 3px solid #fff; }
-        .tier-chairo { color: var(--amber); text-shadow: 0 0 5px rgba(255, 170, 0, 0.5); border-left: 3px solid var(--amber); }
-        .tier-kuro { color: #a9b1d6; text-shadow: 0 0 10px rgba(176, 38, 255, 0.8); border-left: 3px solid #b026ff; font-weight: bold; background: rgba(10, 10, 15, 0.6); }
-        .tier-void { color: var(--cyan); text-shadow: 0 0 8px rgba(0, 229, 255, 0.5); border-left: 3px solid var(--cyan); }
-        
-        /* Bổ sung class màu cho Đạo và Trí */
-        .tier-dao { color: var(--lime); text-shadow: 0 0 8px rgba(57, 255, 20, 0.5); border-left: 3px solid var(--lime); }
-        .tier-tri { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.6); border-left: 3px solid #fff; font-weight: bold; background: rgba(255,255,255,0.05); }
+        /* TÍN HIỆU VIỀN TRÁI VÀ NỀN KHÔNG PHÁT SÁNG */
+        .tier-core { border-left: 3px solid #94A3B8; background: linear-gradient(90deg, rgba(148,163,184,0.05) 0%, transparent 100%); }
+        .tier-shiro { border-left: 3px solid #FFFFFF; background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, transparent 100%); }
+        .tier-chairo { border-left: 3px solid var(--amber); background: linear-gradient(90deg, rgba(255,170,0,0.05) 0%, transparent 100%); }
+        .tier-kuro { border-left: 3px solid var(--violet); background: linear-gradient(90deg, rgba(176,38,255,0.08) 0%, transparent 100%); }
+        .tier-void { border-left: 3px solid var(--cyan); background: linear-gradient(90deg, rgba(0,229,255,0.05) 0%, transparent 100%); }
+        .tier-dao { border-left: 3px solid #10b981; background: linear-gradient(90deg, rgba(16,185,129,0.05) 0%, transparent 100%); }
+        .tier-tri { border-left: 3px solid #FFFFFF; background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, transparent 100%); }
 
-        .tier-content { position: relative; z-index: 2; padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.3s ease; font-size: 0.9rem; color: #d0d5e0; line-height: 1.6; opacity: 0; }
+        /* NỘI DUNG RÕ RÀNG, SẮC NÉT, KHÔNG BLUR */
+        .tier-content { position: relative; z-index: 2; padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.3s ease; font-family: var(--font-ui); font-size: 0.95rem; color: #E2E8F0; line-height: 1.6; letter-spacing: 0.2px; opacity: 0; text-shadow: none; }
         .tier-content.open { max-height: 900px; padding-bottom: 15px; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px; opacity: 1; overflow-y: auto; }
-        .tier-content p { margin-bottom: 10px; } .tier-content strong { color: var(--cyan); }
+        .tier-content p { margin-bottom: 12px; } 
+        .tier-content strong { color: #F8FAFC; font-weight: 600; }
         
-        .directive-line { font-family: var(--font-display); font-size: 0.8rem; font-weight: bold; padding: 6px 12px; margin-bottom: 10px; background: transparent; border-left: 2px solid; letter-spacing: 1px; display: block; text-shadow: 0 0 8px currentColor; }
-        .dir-chairo { color: var(--amber); border-color: var(--amber); }
-        .dir-void { color: var(--cyan); border-color: var(--cyan); }
-        .dir-dao { color: var(--lime); border-color: var(--lime); }
-        .dir-tri { color: #fff; border-color: #fff; }
+        .directive-line { font-family: var(--font-display); font-size: 0.85rem; font-weight: 600; padding: 6px 12px; margin-bottom: 12px; background: rgba(255,255,255,0.02); border-left: 2px solid; letter-spacing: 1px; display: inline-block; text-shadow: none; opacity: 0.9; }
+        .dir-chairo { border-color: var(--amber); color: var(--amber); }
+        .dir-void { border-color: var(--cyan); color: var(--cyan); }
+        .dir-dao { border-color: #10b981; color: #10b981; }
+        .dir-tri { border-color: #FFFFFF; color: #FFFFFF; }
 
         .t1-objective { font-family: var(--font-ui); font-size: 0.95rem; font-weight: 700; margin-bottom: 15px; line-height: 1.5; text-transform: uppercase; letter-spacing: 0.5px; }
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
         .stat-box { background: rgba(255,255,255,0.03); border: 1px solid; padding: 10px 4px; text-align: center; font-family: var(--font-display); font-size: 0.75rem; font-weight: bold; clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px); }
-        .stat-cyan { border-color: rgba(0, 229, 255, 0.3); color: var(--cyan); text-shadow: 0 0 5px rgba(0, 229, 255, 0.4); }
+        .stat-cyan { border-color: rgba(0, 229, 255, 0.3); color: var(--cyan); }
         .t1-warning { background: rgba(255, 42, 42, 0.05); border-left: 2px solid var(--crimson); padding: 12px; font-size: 0.9rem; line-height: 1.5; color: #e0e0e0; margin-top: 15px; }
         .t1-warning strong { color: var(--crimson); font-family: var(--font-display); letter-spacing: 1px; }
 
@@ -346,7 +346,6 @@
             cursor: pointer;
             clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
             transition: all 0.3s;
-            text-shadow: 0 0 5px var(--violet);
             white-space: nowrap;
         }
         .btn-play-lore.playing {
@@ -354,14 +353,13 @@
             animation: lore-pulse 1s infinite alternate;
             color: var(--mint); 
             border-color: var(--mint);
-            text-shadow: 0 0 5px var(--mint);
         }
         @keyframes lore-pulse { 0% { box-shadow: 0 0 5px var(--violet); } 100% { box-shadow: 0 0 15px var(--violet); } }
 
         .img-viewer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .img-viewer.active { opacity: 1; pointer-events: auto; }
         .img-viewer img { max-width: 100vw; max-height: 100vh; object-fit: contain; }
-        .btn-close-img { position: absolute; top: 25px; right: 25px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid var(--violet); padding: 10px 20px; font-family: var(--font-display); font-size: 1rem; cursor: pointer; z-index: 100000; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); text-shadow: 0 0 5px var(--violet); transition: all 0.2s; }
+        .btn-close-img { position: absolute; top: 25px; right: 25px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid var(--violet); padding: 10px 20px; font-family: var(--font-display); font-size: 1rem; cursor: pointer; z-index: 100000; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); transition: all 0.2s; }
         .btn-close-img:active { transform: scale(0.95); background: rgba(176, 38, 255, 0.3); }
 
         .rank-footer { position: absolute; bottom: 0; left: 0; width: 100vw; z-index: 55; padding: 12px 20px calc(15px + env(safe-area-inset-bottom)); background: #050608; border-top: 1px solid rgba(255,255,255,0.15); display: flex; justify-content: center;}
@@ -371,7 +369,7 @@
         .hold-btn.state-abort { border: 1px solid var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.05); }
         .hold-btn.state-abort .hold-progress { background: rgba(255, 42, 42, 0.35); }
         .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; z-index: -1; transition: background 0.3s; }
-        .hold-btn.charging { animation: shake 0.1s infinite; filter: brightness(1.3); text-shadow: 0 0 5px currentColor; }
+        .hold-btn.charging { animation: shake 0.1s infinite; filter: brightness(1.3); }
 
         .vault-input { width: 100%; background: rgba(255, 170, 0, 0.05); border: 1px solid var(--amber); color: var(--amber); text-align: center; padding: 15px; font-family: var(--font-display); font-size: 22px; font-weight: 900; letter-spacing: 4px; outline: none; text-transform: uppercase; transition: all 0.3s ease; box-shadow: inset 0 0 15px rgba(255, 170, 0, 0.1); }
         .vault-input:focus { background: rgba(255, 170, 0, 0.15); box-shadow: inset 0 0 20px rgba(255, 170, 0, 0.3), 0 0 10px rgba(255, 170, 0, 0.5); }
@@ -505,10 +503,12 @@
             
             <!-- MODULE 0 -->
             <div class="tier-item">
-                <button class="tier-btn tier-shiro" onclick="toggleTier('mod0', this)">[ MODULE 0: HỒ SƠ LÕI - MUSASHI ] <span>▼</span><div class="shooting-star"></div></button>
+                <button class="tier-btn tier-core" onclick="toggleTier('mod0', this)">
+                    <div><span class="tier-prefix">CORE :</span> <span class="tier-name">HỒ SƠ LÕI</span></div> <span>▼</span><div class="shooting-star"></div>
+                </button>
                 <div class="tier-content" id="mod0">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div class="directive-line" style="color: #fff; border-color: #fff; margin-bottom:0;">[ NGUỒN GỐC K DRIVE: MÀNG LỌC TƯ TƯỞNG ]</div>
+                        <div class="directive-line" style="color: #94A3B8; border-color: #94A3B8; margin-bottom:0;">NGUỒN GỐC K DRIVE: MÀNG LỌC TƯ TƯỞNG</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('mod0', event)">🔊 PHÁT</button>
                     </div>
                     <p>• <strong>Thông tin lõi:</strong> Miyamoto Musashi (1584 - 1645). Sinh tồn 61 năm trong kỷ nguyên đẫm máu.</p>
@@ -522,10 +522,12 @@
 
             <!-- TIER 1 -->
             <div class="tier-item">
-                <button class="tier-btn tier-shiro" onclick="toggleTier('tier1', this)">[ TIER 1: CHIẾN BINH - SHIRO ] <span>▼</span><div class="shooting-star"></div></button>
+                <button class="tier-btn tier-shiro" onclick="toggleTier('tier1', this)">
+                    <div><span class="tier-prefix">TIER 1 :</span> <span class="tier-name">CHIẾN BINH (SHIRO)</span></div> <span>▼</span><div class="shooting-star"></div>
+                </button>
                 <div class="tier-content" id="tier1">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div class="directive-line" style="color: var(--crimson); border-color: var(--crimson); margin-bottom:0;">[ QUẢN TRỊ BANKROLL: BÁO ĐỘNG ]</div>
+                        <div class="directive-line" style="color: var(--crimson); border-color: var(--crimson); margin-bottom:0;">QUẢN TRỊ BANKROLL: BÁO ĐỘNG</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('tier1', event)">🔊 PHÁT</button>
                     </div>
                     <p>• <strong>Chỉ số SCI:</strong> Trung bình < 50.</p>
@@ -539,10 +541,12 @@
 
             <!-- TIER 2 -->
             <div class="tier-item">
-                <button class="tier-btn tier-chairo" onclick="toggleTier('tier2', this)">[ TIER 2: TINH ANH - CHAIRO ] <span>▼</span><div class="shooting-star"></div></button>
+                <button class="tier-btn tier-chairo" onclick="toggleTier('tier2', this)">
+                    <div><span class="tier-prefix">TIER 2 :</span> <span class="tier-name">TINH ANH (CHAIRO)</span></div> <span>▼</span><div class="shooting-star"></div>
+                </button>
                 <div class="tier-content" id="tier2">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div class="directive-line dir-chairo" style="margin-bottom:0;">[ QUẢN TRỊ BANKROLL: TIÊU CHUẨN ]</div>
+                        <div class="directive-line dir-chairo" style="margin-bottom:0;">QUẢN TRỊ BANKROLL: TIÊU CHUẨN</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('tier2', event)">🔊 PHÁT</button>
                     </div>
                     <p>• <strong>Chỉ số SCI:</strong> Trung bình từ 50 đến 84.</p>
@@ -556,10 +560,12 @@
 
             <!-- TIER 3 -->
             <div class="tier-item">
-                <button class="tier-btn tier-kuro" onclick="toggleTier('tier3', this)">[ TIER 3: VÔ NGÃ - KURO ] <span>▼</span><div class="shooting-star"></div></button>
+                <button class="tier-btn tier-kuro" onclick="toggleTier('tier3', this)">
+                    <div><span class="tier-prefix">TIER 3 :</span> <span class="tier-name">VÔ NGÃ (KURO)</span></div> <span>▼</span><div class="shooting-star"></div>
+                </button>
                 <div class="tier-content" id="tier3">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div class="directive-line" style="color: var(--violet); border-color: var(--violet); margin-bottom:0;">[ QUẢN TRỊ BANKROLL: TỐI THƯỢNG ]</div>
+                        <div class="directive-line" style="color: var(--violet); border-color: var(--violet); margin-bottom:0;">QUẢN TRỊ BANKROLL: TỐI THƯỢNG</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('tier3', event)">🔊 PHÁT</button>
                     </div>
                     <p>• <strong>Chỉ số SCI:</strong> Trung bình >= 85.</p>
@@ -573,10 +579,12 @@
 
             <!-- PROTOCOL: VOID REGEN -->
             <div class="tier-item">
-                <button class="tier-btn tier-void" onclick="toggleTier('mod4', this)">[ PROTOCOL: VOID REGEN - NGHỈ NGƠI ] <span>▼</span><div class="shooting-star"></div></button>
+                <button class="tier-btn tier-void" onclick="toggleTier('mod4', this)">
+                    <div><span class="tier-prefix">REGEN :</span> <span class="tier-name">GIAO THỨC XẢ TẢI</span></div> <span>▼</span><div class="shooting-star"></div>
+                </button>
                 <div class="tier-content" id="mod4">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div class="directive-line dir-void" style="margin-bottom:0;">[ GIAO THỨC CHỦ NHẬT: TẮT NGUỒN TOÀN DIỆN ]</div>
+                        <div class="directive-line dir-void" style="margin-bottom:0;">GIAO THỨC CHỦ NHẬT: TẮT NGUỒN TOÀN DIỆN</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('tier4', event)">🔊 PHÁT</button>
                     </div>
                     <p>• <strong>Chu kỳ kích hoạt:</strong> Chủ Nhật hàng tuần.</p>
@@ -589,10 +597,12 @@
 
             <!-- MODULE 5 -->
             <div class="tier-item">
-                <button class="tier-btn tier-dao" onclick="toggleTier('mod5', this)">[ MODULE 5: NGŨ LUÂN THƯ - ĐẠO ] <span>▼</span><div class="shooting-star"></div></button>
+                <button class="tier-btn tier-dao" onclick="toggleTier('mod5', this)">
+                    <div><span class="tier-prefix">PATH :</span> <span class="tier-name">NGŨ LUÂN THƯ (ĐẠO)</span></div> <span>▼</span><div class="shooting-star"></div>
+                </button>
                 <div class="tier-content" id="mod5">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div class="directive-line dir-dao" style="margin-bottom:0;">[ BẢN DỊCH MÃ MUSASHI: TRIẾT LÝ K DRIVE ]</div>
+                        <div class="directive-line dir-dao" style="margin-bottom:0;">BẢN DỊCH MÃ MUSASHI: TRIẾT LÝ K DRIVE</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('mod5', event)">🔊 PHÁT</button>
                     </div>
                     <p>• <strong>Giao thức Địa (Nền tảng):</strong> Kỷ luật thể chất SCI & Quản trị Bankroll. Đất rệu rã, chiến thuật vô nghĩa.</p>
@@ -606,10 +616,12 @@
 
             <!-- MODULE 6 -->
             <div class="tier-item">
-                <button class="tier-btn tier-tri" onclick="toggleTier('mod6', this)">[ MODULE 6: KHẾ ƯỚC 1000 NGÀY - TRÍ ] <span>▼</span><div class="shooting-star"></div></button>
+                <button class="tier-btn tier-tri" onclick="toggleTier('mod6', this)">
+                    <div><span class="tier-prefix">PACT :</span> <span class="tier-name">KHẾ ƯỚC 1000 NGÀY (TRÍ)</span></div> <span>▼</span><div class="shooting-star"></div>
+                </button>
                 <div class="tier-content" id="mod6">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div class="directive-line dir-tri" style="margin-bottom:0;">[ LUẬT SINH - TỬ: THỬ THÁCH SINH TỒN ]</div>
+                        <div class="directive-line dir-tri" style="margin-bottom:0;">LUẬT SINH - TỬ: THỬ THÁCH SINH TỒN</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('mod6', event)">🔊 PHÁT</button>
                     </div>
                     <p>• <strong>Trích dẫn tối thượng:</strong> "Thiên nhật chi kê vi Đạo, Vạn nhật chi kê vi Thần."</p>
