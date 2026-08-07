@@ -1369,123 +1369,121 @@
         }
 
         // ==========================================
-        // GIAO THỨC GIỌNG NÓI BOO A.I (TEXT TO SPEECH) - HEO CON ỦN ỈN
+        // GIAO THỨC GIỌNG NÓI BOO A.I - NHẬN DIỆN 4 TRẠNG THÁI (PITCH 2.0 HEO CON)
         // ==========================================
-        let booUtterance = null;
-        
+        let booSynthesis = window.speechSynthesis;
+        let booVoice = null;
+
+        function loadBooVoices() {
+            let voices = booSynthesis.getVoices();
+            // Ưu tiên tìm giọng nữ tiếng Việt nếu có
+            booVoice = voices.find(v => (v.lang.includes('vi') || v.lang.includes('VN')) && 
+                (v.name.toLowerCase().includes('female') || v.name.includes('Linh') || v.name.includes('HoaiMy') || v.name.includes('Google'))) 
+                || voices.find(v => v.lang.includes('vi')) || voices[0];
+        }
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadBooVoices;
+        }
+
         function playBooReport() {
-            playBeep();
             const pig = document.getElementById('boo-mascot');
             const header = document.getElementById('term-head');
-            
-            // Nếu đang đọc thì dừng lại
-            if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
+
+            // Ngừng đọc nếu đang đọc
+            if (booSynthesis.speaking) {
+                booSynthesis.cancel();
                 if (pig) pig.classList.remove('reading');
                 header.style.background = 'var(--cyan)';
                 header.style.color = 'var(--bg-obsidian)';
                 return;
             }
 
-            let finalSpeech = "";
+            playBeep();
+            let isCommitted = localStorage.getItem('combat_committed') === 'true';
+            let textToRead = "";
 
-            // CHẶN BÁO CÁO NẾU CHƯA QUÉT DỮ LIỆU SINH TRẮC
-            if (!isSynced) {
-                finalSpeech = "Ủn ỉn... ủn ỉn... Anh Kai chưa chạm tay đồng bộ sinh trắc mà bắt Boo báo cáo là sao? Mau đưa tay đây quét lẹ đi rồi Boo tính sổ sau nha! Ủn ỉn!";
-            } else {
-                // ĐÃ QUÉT DỮ LIỆU - XỬ LÝ KỊCH BẢN
-                let sci = document.getElementById('val-sci').innerText || "chưa rõ";
-                let isShiro = document.body.classList.contains('tier-shiro');
-                let isChairo = document.body.classList.contains('tier-chairo');
-                let isKuro = document.body.classList.contains('tier-kuro');
+            // --- QUÉT TRẠNG THÁI 1: CHƯA KÝ KẾT ---
+            if (!isCommitted) {
+                textToRead = "Éc éc! Hệ thống đang đóng băng rùi nha! Kỷ luật bằng không. Yêu cầu anh Kai chạm giữ 3 giây ký hợp đồng trong Bí lục đi rồi Boo mới làm việc! Ủn ỉn!";
+            }
+            // --- QUÉT TRẠNG THÁI 2: CHỜ ĐỒNG BỘ THIẾT BỊ ---
+            else if (document.body.classList.contains('pre-scan-locked')) {
+                textToRead = "Éc éc! Tường lửa on lai. Mục tiêu bảo vệ Banh rô. Yêu cầu chủ nhân thiết lập kết nối đồng bộ Xờ mát goát và Xờ mát sờ keo ngay đi nha! Ủn ỉn!";
+            }
+            // --- QUÉT TRẠNG THÁI 3 & 4: ĐÃ QUÉT HOẶC BỊ LỖI ---
+            else if (document.body.classList.contains('sync-complete') || document.body.classList.contains('tier-shiro')) { 
+                let statusText = document.getElementById('status-banner').innerText;
                 
-                let rankStr = "";
-                let endStr = "";
-                
-                if (isShiro) {
-                    rankStr = `Trời ơi là trời, chỉ số Sờ Cờ Y của anh Kai rớt thảm hại còn có ${sci} thôi kìa! Phong độ rệu rã quá đi mất! Boo giận rồi nha, Boo phạt khóa Băng rôn luôn, cấm chơi!`;
-                    endStr = "Liệu mà làm đi nha không Boo dỗi á, không chơi với anh Kai nữa đâu! Ủn ỉn!";
-                } else if (isChairo) {
-                    rankStr = `Chỉ số Sờ Cờ Y của anh Kai đang ở mức ${sci} nha. Tinh anh Chai rô rồi cơ đấy! Boo mở khóa Băng rôn tiêu chuẩn cho đó, nhưng mà liệu hồn đừng có lười biếng nha!`;
-                    endStr = "Nhớ lời Boo dặn đó nha! Ủn ỉn!";
-                } else if (isKuro) {
-                    rankStr = `Wow wow! Chỉ số Sờ Cờ Y của anh Kai lên tận ${sci} luôn! Trạng thái Vô Ngã đỉnh quá đi! Boo kích hoạt Ốp vơ đờ rai, mở Băng rôn tối đa cho anh Kai luôn nè. Boo ưng nha!`;
-                    endStr = "Tiêu diệt bàn chơi đi anh Kai ơi! Ủn ỉn!";
+                // Trạng thái 3: Lỗi trống sinh trắc
+                if (statusText.includes("LỖI ĐỒNG BỘ")) {
+                    textToRead = "Éc éc! Lỗi đồng bộ rồi! Trống dữ liệu sinh trắc trọng lượng cơ thể. Cấm đánh giải. Lên cân ngay lập tức cho Boo! Ủn ỉn!";
                 } else {
-                    rankStr = `Chỉ số Sờ Cờ Y là ${sci}. Đang chờ phân cấp.`;
-                    endStr = "Ủn ỉn!";
-                }
-
-                let alertText = document.getElementById('live-metrics').innerText || "";
-                let metricsStr = "";
-                if (alertText.includes("KHÔNG CÒN NỢ") || alertText === "") {
-                    metricsStr = "Không nợ nần sinh lý gì luôn, sạch sẽ gọn gàng, anh Kai ngoan quá trời!";
-                } else {
-                    // Vietsub các thuật ngữ để bé Heo đọc nũng nịu, mượt mà hơn
-                    let cleanAlert = alertText
-                        .replace(/STEPS:\s*\+([0-9.]+)/g, "nợ Boo $1 bước chân")
-                        .replace(/SLP:\s*\+([0-9.]+)h/g, "ngủ thiếu $1 giờ")
-                        .replace(/H2O:\s*\+([0-9.]+)L/g, "phải uống ngay $1 lít nước")
-                        .replace(/WGT:\s*\-([0-9.]+)kg/g, "phải giảm $1 kí")
-                        .replace(/WGT:\s*\+([0-9.]+)kg/g, "phải tăng $1 kí")
-                        .replace(/FAT:\s*\-([0-9.]+)%/g, "phải giảm $1 phần trăm mỡ")
-                        .replace(/HR:\s*Peak\s*([0-9]+)/g, "nhịp tim thì lẹt đẹt mới đạt $1");
+                    // Trạng thái 4: Vận hành bình thường (Có SCI)
+                    let sci = document.getElementById('val-sci').innerText;
+                    let rankStr = "";
                     
-                    cleanAlert = cleanAlert.replace(/\|/g, ", rồi ");
-                    metricsStr = `Ủa mà khoan, nhìn đống nợ sinh học kìa! Bắt đền anh Kai đó, ${cleanAlert}! Anh Kai hư quá à!`;
+                    if (document.body.classList.contains('tier-shiro')) {
+                        rankStr = `Trời ơi, chỉ số Sờ Cờ Y rớt thảm hại còn có ${sci} thôi kìa! Phong độ rệu rã quá. Boo phạt khóa Banh rô luôn, cấm chơi!`;
+                    } else if (document.body.classList.contains('tier-chairo')) {
+                        rankStr = `Chỉ số Sờ Cờ Y đang ở mức ${sci}. Tinh anh Chai rô rồi cơ đấy! Boo mở khóa Banh rô tiêu chuẩn cho nha!`;
+                    } else if (document.body.classList.contains('tier-kuro')) {
+                        rankStr = `Wow wow! Chỉ số Sờ Cờ Y lên tận ${sci} luôn! Vô Ngã đỉnh quá đi! Boo mở Banh rô tối đa, Ốp vờ đờ rai luôn nè!`;
+                    }
+
+                    let alertText = document.getElementById('live-metrics').innerText || "";
+                    let metricsStr = "";
+                    if (alertText.includes("KHÔNG CÒN NỢ") || alertText === "") {
+                        metricsStr = "Không nợ nần sinh lý gì luôn, anh Kai ngoan quá trời!";
+                    } else {
+                        let cleanAlert = alertText
+                            .replace(/STEPS:\s*\+([0-9.]+)/g, "nợ $1 bước chân")
+                            .replace(/SLP:\s*\+([0-9.]+)h/g, "thiếu $1 giờ ngủ")
+                            .replace(/H2O:\s*\+([0-9.]+)L/g, "thiếu $1 lít nước")
+                            .replace(/WGT:\s*\-([0-9.]+)kg/g, "phải giảm $1 kí")
+                            .replace(/WGT:\s*\+([0-9.]+)kg/g, "phải tăng $1 kí")
+                            .replace(/FAT:\s*\-([0-9.]+)%/g, "phải giảm $1 phần trăm mỡ")
+                            .replace(/HR:\s*Peak\s*([0-9]+)/g, "nhịp tim lẹt đẹt đạt $1");
+                        
+                        cleanAlert = cleanAlert.replace(/\|/g, ", và ");
+                        metricsStr = `Ủa mà khoan, nhìn đống nợ sinh học kìa! Trả ngay cho Boo: ${cleanAlert}! Trả nợ ngay!`;
+                    }
+
+                    let termStr = document.getElementById('ai-text').innerText;
+                    termStr = termStr.replace(/>_/g, "").replace(/\[.*?\]:/g, "").trim();
+                    if(!termStr) termStr = "Đang chờ lệnh từ hệ thống.";
+
+                    textToRead = `Éc éc... ${rankStr} ${metricsStr} Nghe kĩ nè: ${termStr}. Ủn ỉn!`;
                 }
-
-                let termStr = document.getElementById('ai-text').innerText;
-                termStr = termStr.replace(/>_/g, "").replace(/\[.*?\]:/g, "").trim();
-                if(!termStr) termStr = "Đang chờ lệnh từ hệ thống.";
-
-                finalSpeech = `Ủn ỉn... ủn ỉn... ${rankStr} ${metricsStr} Thông báo hệ thống nè: ${termStr}. ${endStr}`;
+            } else {
+                textToRead = "Ủn ỉn. Boo đang chờ hệ thống xử lý nha!";
             }
 
-            // 2. Cấu hình giọng đọc (Giọng chuẩn, không bóp méo pitch)
-            booUtterance = new SpeechSynthesisUtterance(finalSpeech);
-            booUtterance.lang = 'vi-VN';
-            booUtterance.pitch = 1.0; // TRẢ VỀ GIỌNG CHUẨN TỰ NHIÊN
-            booUtterance.rate = 1.15; // Tốc độ hơi nhanh
+            let utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.lang = 'vi-VN';
+            utterance.pitch = 2.0; // Bóp giọng éc éc siêu chóe
+            utterance.rate = 1.15; // Nhịp đọc nhanh nhảu
+            if (booVoice) utterance.voice = booVoice;
 
-            // Ưu tiên chọn giọng nữ (Female) nếu trình duyệt hỗ trợ
-            let voices = window.speechSynthesis.getVoices();
-            let viVoices = voices.filter(v => v.lang.includes('vi') || v.lang.includes('VN'));
-            
-            // Tìm giọng có tên gợi ý là Nữ
-            let femaleVoice = viVoices.find(v => v.name.toLowerCase().includes('female') || v.name.includes('Linh') || v.name.includes('HoaiMy') || v.name.includes('Google'));
-            
-            if (femaleVoice) {
-                booUtterance.voice = femaleVoice;
-            } else if (viVoices.length > 0) {
-                booUtterance.voice = viVoices[0]; 
-            }
-
-            booUtterance.onstart = function() {
+            utterance.onstart = function() {
                 if (pig) pig.classList.add('reading');
                 header.style.background = 'var(--neon-pink)';
                 header.style.color = '#fff';
             };
 
-            booUtterance.onend = function() {
+            utterance.onend = function() {
                 if (pig) pig.classList.remove('reading');
                 header.style.background = 'var(--cyan)';
                 header.style.color = 'var(--bg-obsidian)';
             };
             
-            booUtterance.onerror = function() {
+            utterance.onerror = function() {
                 if (pig) pig.classList.remove('reading');
                 header.style.background = 'var(--cyan)';
                 header.style.color = 'var(--bg-obsidian)';
             };
 
-            window.speechSynthesis.speak(booUtterance);
+            booSynthesis.speak(utterance);
         }
-        
-        // Đảm bảo trình duyệt load sẵn giọng đọc
-        window.speechSynthesis.onvoiceschanged = function() {
-            window.speechSynthesis.getVoices();
-        };
     </script>
 </body>
 </html>
