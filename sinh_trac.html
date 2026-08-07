@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Event Horizon Core</title>
     <!-- Đã thêm Chakra Petch & Be Vietnam Pro hỗ trợ hoàn hảo tiếng Việt -->
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Great+Vibes&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Great+Vibes&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-obsidian: #050608; --mint: #00ff9d; --cyan: #00e5ff;
@@ -381,6 +381,15 @@
         .vault-input.success { border-color: var(--mint); color: var(--mint); background: rgba(0, 255, 157, 0.1); box-shadow: inset 0 0 20px rgba(0, 255, 157, 0.3); }
 
         @keyframes load-bar { 0% { width: 0%; } 100% { width: 100%; } }
+
+        /* HIỆU ỨNG ICON BOO (MŨI HEO) MỚI */
+        #term-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; transition: all 0.3s ease; }
+        #term-head:active { transform: scale(0.98); background: #fff; color: var(--bg-obsidian); }
+        .boo-pig-nose { font-size: 13px; display: inline-block; animation: pig-breathe 1s infinite alternate cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 0 5px rgba(255, 0, 255, 0.6)); transition: transform 0.2s; }
+        .boo-pig-nose.reading { animation: pig-speak 0.15s infinite alternate !important; filter: drop-shadow(0 0 15px var(--neon-pink)) brightness(1.5); }
+        @keyframes pig-breathe { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(-2px) scale(1.15); } }
+        @keyframes pig-speak { 0% { transform: scale(0.9) rotate(-15deg); } 100% { transform: scale(1.25) rotate(15deg); } }
+
     </style>
 </head>
 <body>
@@ -488,8 +497,9 @@
             <span class="live-metrics" id="live-metrics"></span>
         </div>
 
+        <!-- MŨI HEO BOO TTS TẠI ĐÂY -->
         <div class="terminal-panel">
-            <div class="terminal-header" id="term-head">BOO: PHÂN TÍCH CHIẾN THUẬT</div>
+            <div class="terminal-header" id="term-head" onclick="playBooReport()">BOO: PHÂN TÍCH CHIẾN THUẬT <span class="boo-pig-nose" id="boo-mascot">🐽</span></div>
             <div class="typewriter" id="ai-text"></div><span class="cursor"></span>
         </div>
     </div>
@@ -1357,6 +1367,122 @@
                 currentLore = null;
             };
         }
+
+        // ==========================================
+        // GIAO THỨC GIỌNG NÓI BOO A.I (TEXT TO SPEECH) - HEO CON ỦN ỈN
+        // ==========================================
+        let booUtterance = null;
+        
+        function playBooReport() {
+            playBeep();
+            const pig = document.getElementById('boo-mascot');
+            const header = document.getElementById('term-head');
+            
+            // Nếu đang đọc thì dừng lại
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                if (pig) pig.classList.remove('reading');
+                header.style.background = 'var(--cyan)';
+                header.style.color = 'var(--bg-obsidian)';
+                return;
+            }
+
+            // 1. Trích xuất dữ liệu UI
+            let sci = document.getElementById('val-sci').innerText || "chưa rõ";
+            let isShiro = document.body.classList.contains('tier-shiro');
+            let isChairo = document.body.classList.contains('tier-chairo');
+            let isKuro = document.body.classList.contains('tier-kuro');
+            
+            let rankStr = "";
+            let endStr = "";
+            
+            if (isShiro) {
+                rankStr = `Trời ơi là trời, chỉ số Sờ Cờ Y của anh Kai rớt thảm hại còn có ${sci} thôi kìa! Phong độ rệu rã quá đi mất! Boo giận rồi nha, Boo phạt khóa Băng rôn luôn, cấm chơi!`;
+                endStr = "Liệu mà làm đi nha không Boo dỗi á, không chơi với anh Kai nữa đâu! Ủn ỉn!";
+            } else if (isChairo) {
+                rankStr = `Chỉ số Sờ Cờ Y của anh Kai đang ở mức ${sci} nha. Tinh anh Chai rô rồi cơ đấy! Boo mở khóa Băng rôn tiêu chuẩn cho đó, nhưng mà liệu hồn đừng có lười biếng nha!`;
+                endStr = "Nhớ lời Boo dặn đó nha! Ủn ỉn!";
+            } else if (isKuro) {
+                rankStr = `Wow wow! Chỉ số Sờ Cờ Y của anh Kai lên tận ${sci} luôn! Trạng thái Vô Ngã đỉnh quá đi! Boo kích hoạt Ốp vơ đờ rai, mở Băng rôn tối đa cho anh Kai luôn nè. Boo ưng nha!`;
+                endStr = "Tiêu diệt bàn chơi đi anh Kai ơi! Ủn ỉn!";
+            } else {
+                rankStr = `Chỉ số Sờ Cờ Y là ${sci}. Đang chờ phân cấp.`;
+                endStr = "Ủn ỉn!";
+            }
+
+            let alertText = document.getElementById('live-metrics').innerText || "";
+            let metricsStr = "";
+            if (alertText.includes("KHÔNG CÒN NỢ") || alertText === "") {
+                metricsStr = "Không nợ nần sinh lý gì luôn, sạch sẽ gọn gàng, anh Kai ngoan quá trời!";
+            } else {
+                // Vietsub các thuật ngữ để bé Heo đọc nũng nịu, mượt mà hơn
+                let cleanAlert = alertText
+                    .replace(/STEPS:\s*\+([0-9.]+)/g, "nợ Boo $1 bước chân")
+                    .replace(/SLP:\s*\+([0-9.]+)h/g, "ngủ thiếu $1 giờ")
+                    .replace(/H2O:\s*\+([0-9.]+)L/g, "phải uống ngay $1 lít nước")
+                    .replace(/WGT:\s*\-([0-9.]+)kg/g, "phải giảm $1 kí")
+                    .replace(/WGT:\s*\+([0-9.]+)kg/g, "phải tăng $1 kí")
+                    .replace(/FAT:\s*\-([0-9.]+)%/g, "phải giảm $1 phần trăm mỡ")
+                    .replace(/HR:\s*Peak\s*([0-9]+)/g, "nhịp tim thì lẹt đẹt mới đạt $1");
+                
+                // Thay dấu " | " bằng cụm từ nối để giọng đọc không bị khựng
+                cleanAlert = cleanAlert.replace(/\|/g, ", rồi ");
+                
+                metricsStr = `Ủa mà khoan, nhìn đống nợ sinh học kìa! Bắt đền anh Kai đó, ${cleanAlert}! Anh Kai hư quá à!`;
+            }
+
+            // Trích xuất chữ trong Terminal
+            let termStr = document.getElementById('ai-text').innerText;
+            termStr = termStr.replace(/>_/g, "").replace(/\[.*?\]:/g, "").trim();
+            if(!termStr) termStr = "Đang chờ lệnh từ hệ thống.";
+
+            // Ghép kịch bản hoàn chỉnh
+            let finalSpeech = `Ủn ỉn... ủn ỉn... ${rankStr} ${metricsStr} Thông báo hệ thống nè: ${termStr}. ${endStr}`;
+
+            // 2. Cấu hình giọng đọc (Giọng nữ, pitch cao = heo con the thé)
+            booUtterance = new SpeechSynthesisUtterance(finalSpeech);
+            booUtterance.lang = 'vi-VN';
+            booUtterance.pitch = 2.0; // Ép giọng the thé (Mức cao nhất)
+            booUtterance.rate = 1.15; // Tốc độ hơi nhanh
+
+            // Ưu tiên chọn giọng nữ (Female) nếu trình duyệt hỗ trợ
+            let voices = window.speechSynthesis.getVoices();
+            let viVoices = voices.filter(v => v.lang.includes('vi') || v.lang.includes('VN'));
+            
+            // Tìm giọng có tên gợi ý là Nữ
+            let femaleVoice = viVoices.find(v => v.name.toLowerCase().includes('female') || v.name.includes('Linh') || v.name.includes('HoaiMy') || v.name.includes('Google'));
+            
+            if (femaleVoice) {
+                booUtterance.voice = femaleVoice;
+            } else if (viVoices.length > 0) {
+                booUtterance.voice = viVoices[0]; // Lấy tạm giọng VN đầu tiên nếu không phân biệt được
+            }
+
+            booUtterance.onstart = function() {
+                if (pig) pig.classList.add('reading');
+                header.style.background = 'var(--neon-pink)';
+                header.style.color = '#fff';
+            };
+
+            booUtterance.onend = function() {
+                if (pig) pig.classList.remove('reading');
+                header.style.background = 'var(--cyan)';
+                header.style.color = 'var(--bg-obsidian)';
+            };
+            
+            booUtterance.onerror = function() {
+                if (pig) pig.classList.remove('reading');
+                header.style.background = 'var(--cyan)';
+                header.style.color = 'var(--bg-obsidian)';
+            };
+
+            window.speechSynthesis.speak(booUtterance);
+        }
+        
+        // Đảm bảo trình duyệt load sẵn giọng đọc
+        window.speechSynthesis.onvoiceschanged = function() {
+            window.speechSynthesis.getVoices();
+        };
     </script>
 </body>
 </html>
