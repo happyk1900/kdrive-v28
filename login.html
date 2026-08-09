@@ -20,11 +20,8 @@
         .radar-line { width: 100%; height: 2px; background: rgba(0, 229, 255, 0.5); box-shadow: 0 0 30px rgba(0, 229, 255, 1); position: absolute; top: -10px; animation: globalScan 8s linear infinite; }
         @keyframes globalScan { 0% { top: -10px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
-        /* 
-         * THAY ĐỔI VỊ TRÍ: 
-         * Đổi top: 50% thành top: 25% để đẩy cả 2 cụm giao diện lên vùng trời trống
-         */
-        .central-hud-container { position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 190px; z-index: 90; pointer-events: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.4s ease; opacity: 1; }
+        /* 1. KHUNG K-DRIVE: Neo ở 30% để có không gian điện ảnh */
+        .central-hud-container { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 190px; z-index: 90; pointer-events: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.4s ease; opacity: 1; }
         .glass-layer { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: rgba(5, 10, 15, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 4px; z-index: 1; pointer-events: none; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
         .hud-text.main { position: relative; font-size: 34px; font-weight: 700; color: #fff; letter-spacing: 5px; text-shadow: 0 0 15px rgba(0, 229, 255, 0.8); z-index: 2; pointer-events: none; margin-top: -10px; text-align: center; width: 100%; display: inline-block; overflow: hidden;}
         .hud-text.main::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent); animation: quantumShine 3.5s infinite; transform: skewX(-20deg); }
@@ -35,8 +32,8 @@
         .hud-action-btn.top-left { top: 18px; left: 18px; } 
         .hud-action-btn.bottom-right { bottom: 18px; right: 18px; }
         
-        /* Bảng Đăng Nhập cũng đẩy lên top: 25% */
-        .gateway-popup { position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 12, 18, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 4px; padding: 30px 20px; z-index: 99999; display: none; flex-direction: column; align-items: center; box-shadow: 0 0 40px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 229, 255, 0.05); width: 90%; max-width: 350px; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
+        /* 2. BẢNG SƠN MÔN: Trả về 50% để tránh lẹm viền và né bàn phím ảo */
+        .gateway-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 12, 18, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 4px; padding: 30px 20px; z-index: 99999; display: none; flex-direction: column; align-items: center; box-shadow: 0 0 40px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 229, 255, 0.05); width: 90%; max-width: 350px; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
         .gateway-popup h2 { color: #fff; font-size: 20px; letter-spacing: 4px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(0,229,255,0.6); text-transform: uppercase; border-bottom: 1px solid rgba(0, 229, 255, 0.3); padding-bottom: 10px; width: 100%; text-align: center; }
         
         .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
@@ -64,10 +61,37 @@
         .change-pass-link:hover { color: #00e5ff; }
 
         body.popups-active .central-hud-container { pointer-events: none !important; opacity: 0 !important; transform: translate(-50%, -50%) scale(0.9); }
+        body.popups-active .cinematic-slogan { opacity: 0; transition: 0.5s; } /* Ẩn slogan khi mở bảng */
+
+        /* 3. CSS CHO SLOGAN ĐIỆN ẢNH (MỚI) */
+        .cinematic-slogan {
+            position: absolute;
+            bottom: 18%; /* Vị trí ngang hông/đùi của Samurai */
+            width: 100%;
+            text-align: center;
+            z-index: 5;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        .slogan-line {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
+        }
+        .slogan-highlight {
+            color: #00e5ff;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+        }
     </style>
 </head>
 <body>
-    <!-- KHO ÂM THANH NỘI MÔN -->
     <audio id="sfx-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
     <audio id="sfx-error" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
     <audio id="sfx-success" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
@@ -76,6 +100,12 @@
     <div class="kdrive-image-wrapper" id="mainWrapper">
         <div class="global-radar"><div class="radar-line"></div></div>
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/bushido%20(1).png?raw=true" class="kdrive-bg-target" id="kdriveBg">
+
+        <!-- SLOGAN ĐIỆN ẢNH -->
+        <div class="cinematic-slogan">
+            <div class="slogan-line">TĨNH LẶNG NHƯ SƠN <span class="slogan-highlight">·</span> HÓA ĐÁ TÂM CAN</div>
+            <div class="slogan-line">CHỈ XUẤT KIẾM KHI <span class="slogan-highlight">CỰC PHẨM</span> TẠI TAY</div>
+        </div>
 
         <div id="protocolGuide" class="central-hud-container">
             <div class="glass-layer"></div>
@@ -141,7 +171,6 @@
         const EYE_CLOSED = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
         const EYE_OPEN = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
 
-        // --- HỆ THỐNG ÂM THANH ---
         function playSound(type) {
             let audioMap = {
                 'click': document.getElementById('sfx-click'),
@@ -155,7 +184,6 @@
             }
         }
 
-        // Bắt sự kiện gõ phím
         document.querySelectorAll('.login-input').forEach(input => {
             input.addEventListener('input', () => playSound('type'));
         });
@@ -191,7 +219,6 @@
             else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } 
         }
 
-        // --- KẾT NỐI CHUẨN JSONP ---
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec';
 
         function submitLogin() {
@@ -223,7 +250,6 @@
                     statusEl.style.color = "#00e5ff";
                     document.getElementById('mainWrapper').classList.add('shake-active');
                     
-                    // Cấp vé thông hành và di chuyển
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('currentUser', acc);
                     
