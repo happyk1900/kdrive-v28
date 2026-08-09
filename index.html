@@ -53,6 +53,15 @@
         .rank-rookie .led-spinner { color: #a0a0a0; border: 2px solid #a0a0a0; animation: breatheGlow 3s ease-in-out infinite; }
         .rank-rookie .popup-inner-content { box-shadow: inset 0 0 20px rgba(160, 160, 160, 0.1); }
         .rank-rookie { box-shadow: 0 0 20px rgba(160, 160, 160, 0.2) !important; }
+
+        /* BẢN VÁ CHỐNG KẸT PHIÊN: Ẩn hoàn toàn bộ khung đăng nhập cũ để đi thẳng vào Nội Thành */
+        #protocolGuide,
+        #loginPanelContainer { 
+            display: none !important; 
+            opacity: 0 !important; 
+            pointer-events: none !important; 
+            z-index: -999 !important;
+        }
     </style>
 </head>
 <body>
@@ -125,11 +134,7 @@
         <button class="touch-zone border-red" id="node-mini-dia" onclick="triggerStaticNode(this)"></button>
 
         <div id="protocolGuide" class="central-hud-container">
-            <div class="glass-layer"></div>
-            <div class="hud-action-btn top-left" onclick="showLoginPanel()">[ ĐĂNG NHẬP ]</div>
-            <div class="hud-action-btn bottom-right" onclick="showNinjaInfo()">[ INFO ]</div>
-            <div class="hud-text main">K-INFO</div>
-            <div id="hudGuardWarning" class="hud-warning-text"></div>
+            <!-- Đã được ẩn bằng CSS để không xung đột với login.html -->
         </div>
 
         <div id="welcomeHologram" class="welcome-hologram-banner">
@@ -149,82 +154,7 @@
     </div>
 
     <div class="gateway-popup" id="loginPanelContainer">
-        <div class="close-btn" onclick="closeLoginPanel()">X</div>
-        
-        <div id="panel-login" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <h2>TRẠM KIỂM SOÁT</h2>
-            <div class="input-wrapper" style="margin-bottom: 12px;">
-                <input type="text" id="accInput" class="login-input" placeholder="[ TÀI KHOẢN ]">
-            </div>
-            <div class="input-wrapper">
-                <input type="password" id="passcodeInput" class="login-input" placeholder="[ MẬT MÃ ]">
-                <span class="eye-icon" onclick="togglePass('passcodeInput', this)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
-            </div>
-            <div class="account-options-row">
-                <label class="remember-container"><input type="checkbox" id="rememberMeCheck" class="remember-checkbox" checked> Ghi nhớ mã</label>
-                <div style="display: flex; gap: 10px;">
-                    <span class="change-pass-link" onclick="openChangePassPanel()">[ Đổi ]</span>
-                    <span class="change-pass-link" onclick="switchPanel('forgot')" style="color: #00e5ff;">[ Quên ]</span>
-                </div>
-            </div>
-            <button class="login-btn-submit" onclick="submitLogin()">XÁC NHẬN</button>
-            <div id="loginStatus" style="margin-top: 15px; font-weight: bold; text-align: center;"></div>
-            
-            <div style="margin-top: 20px; text-align: center; width: 100%; border-top: 1px dashed rgba(0, 255, 136, 0.3); padding-top: 15px;">
-                <span style="color: #d2d2d2; font-size: 11px;">[ CHƯA CÓ DỮ LIỆU? ]</span><br>
-                <span onclick="switchPanel('register')" style="color: #00ff88; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: underline; text-shadow: 0 0 5px rgba(0,255,136,0.5); display: inline-block; margin-top: 5px;">➔ KÍCH HOẠT TÀI KHOẢN MỚI</span>
-            </div>
-        </div>
-
-        <div id="panel-register" style="width: 100%; display: none; flex-direction: column; align-items: center;">
-            <h2 style="color: #00e5ff; text-shadow: 0 0 15px rgba(0,229,255,0.6);">TẠO HỒ SƠ MỚI</h2>
-            <div class="input-wrapper" style="margin-bottom: 4px;">
-                <input type="text" id="regId" class="login-input" placeholder="[ TÊN ĐỊNH DANH ] *" style="border-color: #00e5ff; color: #00e5ff;" oninput="validateLive('id')" onfocus="document.getElementById('rule-id').style.display='block'; validateLive('id');" onblur="document.getElementById('rule-id').style.display='none';">
-            </div>
-            <div id="rule-id" class="rule-tooltip" style="border-color: #00e5ff; color: #00e5ff;">Tên: 6-15 ký tự, CHỈ chữ cái và số, KHÔNG dấu cách.</div>
-            <div class="input-wrapper" style="margin-bottom: 4px;">
-                <input type="password" id="regPass" class="login-input" placeholder="[ MẬT MÃ MẠNH ] *" style="border-color: #00e5ff; color: #00e5ff;" oninput="validateLive('pass')" onfocus="document.getElementById('rule-pass').style.display='block'; validateLive('pass');" onblur="document.getElementById('rule-pass').style.display='none';">
-                <span class="eye-icon" style="color: #00e5ff;" onclick="togglePass('regPass', this)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
-            </div>
-            <div id="rule-pass" class="rule-tooltip" style="border-color: #00e5ff; color: #00e5ff;">Pass: Tối thiểu 8 ký tự, CÓ chữ HOA, chữ thường, số & ký tự đặc biệt (@,#,!,...).</div>
-            <div class="input-wrapper">
-                <input type="password" id="regPassConf" class="login-input" placeholder="[ XÁC NHẬN MẬT MÃ ] *" style="border-color: #00e5ff; color: #00e5ff;" oninput="validateLive('conf')">
-                <span class="eye-icon" style="color: #00e5ff;" onclick="togglePass('regPassConf', this)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
-            </div>
-            <div class="input-wrapper" style="margin-bottom: 4px;"><input type="email" id="regEmail" class="login-input" placeholder="[ EMAIL KHÔI PHỤC ] *" style="border-color: #00e5ff; color: #00e5ff;"></div>
-            <div class="input-wrapper" style="margin-bottom: 4px;"><input type="tel" id="regPhone" class="login-input" placeholder="[ SỐ ĐIỆN THOẠI ] *" style="border-color: #00e5ff; color: #00e5ff;"></div>
-            <div class="input-wrapper" style="margin-bottom: 4px;"><input type="text" id="regAlias" class="login-input" placeholder="[ BIỆT DANH CHIẾN ĐẤU ]" style="border-color: #00e5ff; color: #00e5ff;"></div>
-            <div class="input-wrapper"><input type="text" id="regRef" class="login-input" placeholder="[ MẬT MÃ GIỚI THIỆU - Tùy chọn ]" style="border-color: #00e5ff; color: #00e5ff;"></div>
-            
-            <button class="login-btn-submit" style="background: linear-gradient(90deg, #00b3e6, #00e5ff); color: #000; margin-top: 5px; box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);" onclick="processRegistration()">TIẾP TỤC ĐỒNG BỘ</button>
-            <div id="regStatus" style="margin-top: 10px; font-weight: bold; text-align: center; font-size: 11px;"></div>
-            <span onclick="switchPanel('login')" style="color: #ff3333; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline; margin-top: 15px;">[ QUAY LẠI CỔNG ĐĂNG NHẬP ]</span>
-        </div>
-
-        <div id="panel-otp" style="width: 100%; display: none; flex-direction: column; align-items: center;">
-            <h2 style="color: #ffd700; text-shadow: 0 0 15px rgba(255,215,0,0.6);">GIẢI MÃ BẢO MẬT</h2>
-            <div style="text-align: center; font-size: 12px; color: #d2d2d2; margin-bottom: 15px; line-height: 1.5;">BOO đang chờ tín hiệu giải mã.<br>Mật thư sẽ tự hủy sau: <span id="otpTimer" style="color: #ff3333; font-weight: bold; font-size: 16px;">59s</span></div>
-            <input type="number" id="otpInput" class="login-input" placeholder="[ _ _ _ _ _ _ ]" style="border-color: #ffd700; color: #ffd700; font-size: 24px; letter-spacing: 5px; text-align: center; padding: 15px; margin-bottom: 12px; box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.1);">
-            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 15px;">
-                <button class="login-btn-submit" style="background: rgba(0, 104, 255, 0.2); border: 1px solid #0068ff; color: #0068ff; font-size: 12px; padding: 10px; box-shadow: none;" onclick="requestOTP('zalo')">💬 QUA ZALO</button>
-                <button class="login-btn-submit" style="background: rgba(36, 161, 222, 0.2); border: 1px solid #24a1de; color: #24a1de; font-size: 12px; padding: 10px; box-shadow: none;" onclick="requestOTP('tele')">✈️ QUA TELE</button>
-            </div>
-            <div id="emergencyCallZone" style="width: 100%; text-align: center; display: none; flex-direction: column; gap: 8px;">
-                <div style="color: #ff3333; font-size: 11px; font-weight: bold; animation: blinkWarning 0.6s infinite;">[ ⚠️ KẾT NỐI MẠNG LƯỚI THẤT BẠI ]</div>
-                <button class="login-btn-submit" style="background: linear-gradient(90deg, #cc0000, #ff3333); color: #fff; font-size: 13px; box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);" onclick="triggerVoiceOTP()">📞 KÍCH HOẠT LỆNH GỌI</button>
-            </div>
-            <button class="login-btn-submit" style="background: linear-gradient(90deg, #ccaa00, #ffd700); color: #000; margin-top: 15px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);" id="btnFinishReg" onclick="submitOTP()">HOÀN TẤT GHI DANH</button>
-            <div id="otpStatus" style="margin-top: 10px; font-weight: bold; text-align: center; font-size: 12px;"></div>
-        </div>
-
-        <div id="panel-forgot" style="width: 100%; display: none; flex-direction: column; align-items: center;">
-            <h2 style="color: #00e5ff; text-shadow: 0 0 15px rgba(0,229,255,0.6);">KHÔI PHỤC MÃ</h2>
-            <div style="text-align: center; font-size: 12px; color: #d2d2d2; margin-bottom: 15px;">Nhập Email bạn đã dùng để đăng ký. BOO sẽ gửi Mật mã tạm thời đến hòm thư của bạn.</div>
-            <input type="email" id="fgEmail" class="login-input" placeholder="[ NHẬP EMAIL CỦA BẠN ]" style="border-color: #00e5ff; color: #00e5ff; margin-bottom: 12px;">
-            <button class="login-btn-submit" style="background: linear-gradient(90deg, #00b3e6, #00e5ff); color: #000; box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);" onclick="submitForgotPass()">GỬI LỆNH KHÔI PHỤC</button>
-            <div id="fgStatus" style="margin-top: 15px; font-weight: bold; text-align: center; font-size: 12px;"></div>
-            <span onclick="switchPanel('login')" style="color: #ff3333; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline; margin-top: 15px;">[ QUAY LẠI CỔNG ĐĂNG NHẬP ]</span>
-        </div>
+        <!-- Lõi đăng nhập cũ đã được tàng hình để tránh nhập lặp -->
     </div>
 
     <div class="gateway-popup" id="changePassPanel" style="border-color: #ff9900; box-shadow: 0 0 50px rgba(255, 153, 0, 0.4), inset 0 0 20px rgba(255, 153, 0, 0.1);">
@@ -287,6 +217,11 @@
                     .catch((err) => console.log('Lỗi Service Worker: ', err));
             });
         }
+        
+        // Mở khóa tương tác màn hình ngay lập tức (Nếu hệ thống cũ có lỡ khóa)
+        setTimeout(() => {
+            document.body.classList.remove('popups-active');
+        }, 300);
     </script>
 </body>
 </html>
