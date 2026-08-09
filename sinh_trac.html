@@ -123,16 +123,83 @@
         .sys-info span { color: var(--cyan); font-weight: bold; }
         .ctrl-group { display: flex; flex-direction: column; align-items: flex-end; margin-top: 10px; gap: 6px; }
         
+        /* ==========================================================
+           HỆ THỐNG KHUNG TRẠNG THÁI TIẾN HÓA (EVOLUTION STATUS BADGE)
+           ========================================================== */
         .streak-box, .sci-lbl, .fingerprint-wrapper { transition: opacity 0.4s ease; }
-        .streak-box { position: relative; overflow: hidden; border: 1px solid var(--amber); background: linear-gradient(135deg, rgba(255, 170, 0, 0.15) 0%, rgba(255, 170, 0, 0.35) 100%); color: #fff; padding: 8px 18px; font-family: var(--font-display); font-size: 13.5px; font-weight: 900; letter-spacing: 1.5px; cursor: pointer; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); transition: all 0.3s ease; box-shadow: 0 0 15px rgba(255, 170, 0, 0.5), inset 0 0 8px rgba(255, 170, 0, 0.3); text-shadow: 0 0 10px var(--amber); }
-        .streak-box::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,0.4), rgba(255,255,255,0)); transform: rotate(45deg); animation: btn-shine 3s infinite ease-in-out; }
-        @keyframes btn-shine { 0% { left: -150%; } 100% { left: 150%; } }
+        
+        /* Gốc: Chứa cấu trúc định dạng chung của chiếc khung */
+        .streak-box { 
+            position: relative; overflow: hidden; padding: 8px 18px; font-family: var(--font-display); 
+            font-size: 13.5px; font-weight: 900; letter-spacing: 1.5px; cursor: pointer; 
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); 
+            transition: all 0.5s ease; text-align: center;
+        }
         .streak-box:active { transform: scale(0.95); }
-        @keyframes flash-unsigned { 0%, 100% { background: rgba(255, 170, 0, 0.15); box-shadow: 0 0 12px rgba(255, 170, 0, 0.3); transform: scale(1); } 50% { background: rgba(255, 170, 0, 0.5); box-shadow: 0 0 25px var(--amber); transform: scale(1.05); color: #fff; } }
-        .alert-unsigned { animation: flash-unsigned 1.2s infinite ease-in-out !important; border: 2px solid var(--amber) !important; font-weight: bold; }
 
-        .streak-cleansing { border-color: var(--cyan) !important; color: var(--cyan) !important; text-shadow: 0 0 10px var(--cyan) !important; box-shadow: 0 0 15px rgba(0, 229, 255, 0.3), inset 0 0 8px rgba(0, 229, 255, 0.2) !important; background: linear-gradient(135deg, rgba(0, 229, 255, 0.05) 0%, rgba(0, 229, 255, 0.15) 100%) !important; }
-        .streak-mushin { border-color: var(--neon-pink) !important; color: #fff !important; text-shadow: 0 0 10px var(--neon-pink) !important; box-shadow: 0 0 15px rgba(255, 0, 255, 0.5), inset 0 0 8px rgba(255, 0, 255, 0.3) !important; background: linear-gradient(135deg, rgba(255, 0, 255, 0.15) 0%, rgba(255, 0, 255, 0.35) 100%) !important; }
+        /* Cấp 0: CHƯA NHẬP MÔN - Xám xịt, tĩnh lặng mộc mạc */
+        .alert-unsigned { 
+            background: rgba(100, 100, 100, 0.1) !important; 
+            border: 1px solid rgba(150, 150, 150, 0.3) !important; 
+            color: #888 !important; text-shadow: none !important; box-shadow: none !important; 
+        }
+
+        /* Cấp 1: ĐANG THANH TẨY - Trắng sương mai tinh khiết, có bọt sương lơ lửng */
+        .streak-cleansing { 
+            border-color: rgba(255,255,255,0.8) !important; color: #fff !important; 
+            text-shadow: 0 0 8px #fff !important; 
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.2), 0 0 10px rgba(255,255,255,0.4) !important; 
+            background: rgba(255,255,255,0.1) !important; 
+        }
+        .streak-cleansing::before { 
+            content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; 
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%); 
+            background-size: 10px 10px; animation: snow-drift 4s linear infinite; 
+            opacity: 0.3; pointer-events: none;
+        }
+        @keyframes snow-drift { 0% { transform: translateY(0); } 100% { transform: translateY(20px); } }
+
+        /* Cấp 2: ĐẠO HẠNH ỔN ĐỊNH - Tia sáng quét viền sắc lẹm của Katana */
+        .streak-stable { 
+            border-color: var(--cyan) !important; color: var(--cyan) !important; 
+            text-shadow: 0 0 10px var(--cyan) !important; 
+            box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.3), 0 0 10px rgba(0, 229, 255, 0.2) !important; 
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), rgba(0, 229, 255, 0.15)) !important; 
+        }
+        .streak-stable::after { 
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; 
+            background: linear-gradient(to right, transparent, rgba(0,229,255,0.5), transparent); 
+            transform: rotate(45deg); animation: btn-shine-fast 2s infinite ease-in-out; 
+        }
+        @keyframes btn-shine-fast { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* Cấp 3 + Đỉnh Cao: VÔ NGÃ / MUSHIN - Tím uy lực và Vàng hoàng kim, nhịp thở nội công */
+        .streak-mushin { 
+            border-color: var(--amber) !important; color: var(--amber) !important; 
+            text-shadow: 0 0 15px var(--amber), 0 0 5px #fff !important; 
+            box-shadow: inset 0 0 20px rgba(255,170,0,0.5), 0 5px 15px rgba(0,0,0,0.9), 0 0 20px rgba(255,170,0,0.4) !important; 
+            background: linear-gradient(135deg, rgba(255,170,0,0.2), rgba(255,0,255,0.2)) !important; 
+            border-width: 2px !important; transform: scale(1.02); 
+            animation: mushin-breath 1.5s infinite alternate; overflow: visible; 
+        }
+        @keyframes mushin-breath { 
+            0% { box-shadow: inset 0 0 20px rgba(255,170,0,0.4), 0 5px 15px rgba(0,0,0,0.9); } 
+            100% { box-shadow: inset 0 0 40px rgba(255,170,0,0.8), 0 5px 25px rgba(255,0,255,0.6); border-color: var(--neon-pink) !important; color: #fff !important; text-shadow: 0 0 15px var(--neon-pink) !important; } 
+        }
+
+        /* Đặc biệt: HOÀN NGUYÊN (Chủ Nhật) - Xanh lục bảo chữa lành, sóng nước */
+        .streak-regen { 
+            border-color: var(--mint) !important; color: var(--mint) !important; 
+            text-shadow: 0 0 10px var(--mint) !important; 
+            box-shadow: inset 0 0 15px rgba(0,255,157,0.3) !important; 
+            background: rgba(0,255,157,0.1) !important; 
+            animation: water-ripple-btn 2s infinite ease-out; 
+        }
+        @keyframes water-ripple-btn { 
+            0% { box-shadow: inset 0 0 15px rgba(0,255,157,0.3), 0 0 0 0 rgba(0,255,157,0.4); } 
+            100% { box-shadow: inset 0 0 15px rgba(0,255,157,0.1), 0 0 0 15px rgba(0,255,157,0); } 
+        }
+        /* ========================================================== */
 
         .banner-wrapper { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 0px; transition: opacity 0.5s ease, transform 0.5s ease; }
         .status-banner { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 2px; padding: 6px 20px; text-align: center; border: 1px solid var(--amber); color: var(--amber); background: rgba(255, 170, 0, 0.1); clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); transition: all 0.5s ease; }
@@ -451,7 +518,7 @@
         .fb-val.mint { color: var(--mint); text-shadow: 0 0 15px var(--mint); }
 
         /* ========================================================
-           BUSHIDO EASTER EGG (CHỈ THÊM CSS MỚI, KHÔNG SỬA CODE CŨ)
+           BUSHIDO EASTER EGG (DẤU TRIỆN & MÁU)
            ======================================================== */
         .bushido-signature { 
             text-align: center; margin: 40px auto 30px; padding: 20px; 
@@ -475,18 +542,11 @@
             position: relative; text-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
         }
         
-        /* Hiệu ứng giọt máu rỉ xuống */
         .eng-sub::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 0px;
+            content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            width: 2px; height: 0px;
             background: linear-gradient(to bottom, #b30000, #ff2a2a);
-            box-shadow: 0 0 5px #ff2a2a;
-            border-radius: 2px;
+            box-shadow: 0 0 5px #ff2a2a; border-radius: 2px;
             animation: bloodDrip 3.5s infinite cubic-bezier(0.4, 0, 1, 1);
         }
         @keyframes bloodDrip {
@@ -605,7 +665,7 @@
             <a href="#" class="combat-marquee-box" id="combat-marquee">
                 <div class="mq-icon-fixed" id="mq-icon">📡</div>
                 <div class="mq-text-container">
-                    <span class="marquee-text" id="marquee-text">ĐANG KẾT NỐI VỚI LÕI SCI - CHỜ LỆNH HỆ THỐNG...</span>
+                    <span class="marquee-text" id="marquee-text">ĐANG CẢM NHẬN KHÍ TỨC TỪ LÕI SCI - CHỜ MẬT LỆNH...</span>
                 </div>
             </a>
         </div>
@@ -675,9 +735,10 @@
         </div>
         
         <div class="tier-list">
+            
             <div class="tier-item">
                 <button class="tier-btn tier-tri" onclick="toggleTier('mod6', this)">
-                    <div><span class="tier-prefix">PACT :</span> <span class="tier-name">KHẾ ƯỚC 1000 NGÀY (ĐẠO)</span></div> <span>▼</span><div class="shooting-star"></div>
+                    <div><span class="tier-prefix">PACT :</span> <span class="tier-name">KHẾ ƯỚC 1000 NGÀY (TẬN TÂM)</span></div> <span>▼</span><div class="shooting-star"></div>
                 </button>
                 <div class="tier-content" id="mod6">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -689,122 +750,116 @@
                     <p>• <strong>3. A.I BOO:</strong> Thực thể giám sát lộ trình độc quyền dựa trên triết lý Ngũ Luân Thư. Ngừng tự suy diễn. Kỷ luật là phục tùng dữ liệu tuyệt đối.</p>
                     <p>• <strong>4. LUẬT SINH TỬ:</strong> Đếm ngược 1000 ngày chỉ kích hoạt khi SCI đạt ngưỡng Vô Ngã. Một lần đánh mất kỷ luật = <strong>RESET VỀ SỐ KHÔNG.</strong> Mọi nỗ lực bị nghiền nát.</p>
                     <div class="t1-warning" style="border-color: var(--amber); background: rgba(255, 170, 0, 0.05); color: #e0e0e0; font-size: 0.85rem; font-style: italic; margin-top: 15px;">
-                        <strong>[ CẢNH BÁO ]:</strong> Khế ước không dành cho kẻ yếu bóng vía. Đọc kỹ ranh giới các cấp độ giấy phép bên dưới. Tự chiêm nghiệm. Chọn đối mặt, hoặc rời đi.
+                        <strong>[ CẢNH BÁO ]:</strong> Sự tận tâm không có chỗ cho những lý do. Đọc kỹ ranh giới các cấp độ giấy phép bên dưới. Chọn đối mặt, hoặc rời đi.
                     </div>
                 </div>
             </div>
 
-            <!-- TIER 1 -->
             <div class="tier-item">
                 <button class="tier-btn tier-shiro" onclick="toggleTier('tier1', this)">
-                    <div><span class="tier-prefix">TIER 1 :</span> <span class="tier-name">CHIẾN BINH (SHIRO)</span></div> <span>▼</span><div class="shooting-star"></div>
+                    <div><span class="tier-prefix">TIER 1 :</span> <span class="tier-name">CHIẾN BINH (CAN ĐẢM)</span></div> <span>▼</span><div class="shooting-star"></div>
                 </button>
                 <div class="tier-content" id="tier1">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div class="directive-line" style="color: var(--crimson); border-color: var(--crimson); margin-bottom:0;">QUẢN TRỊ KỶ LUẬT: ĐÌNH CHỈ</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('tier1', event)">🔊 PHÁT</button>
                     </div>
-                    <p>• <strong>Chỉ số SCI:</strong> Dưới 50.</p>
-                    <p>• <strong>Trạng thái:</strong> Thân xác rệu rã, phản xạ chậm nhịp.</p>
-                    <p>• <strong>Lệnh hệ thống:</strong> Tước quyền thi đấu. Cấm tuyệt đối việc tham gia các giải đấu lớn. Khóa kho thẻ chiến đấu.</p>
-                    <p>• <strong>Giao thức phục hồi (6/6):</strong> Nhịp tim chạm ngưỡng vận động mạnh | Vận động đủ bước | Ngủ đủ giấc | Kiểm soát cân nặng | Tỷ lệ mỡ tiêu chuẩn | Đảm bảo lượng nước.</p>
-                    <p>• <strong>Ghi chú:</strong> Động lực là rác rưởi, kỷ luật cơ học là vũ khí.</p>
+                    <p>• <strong>1. CAN ĐẢM NHÌN NHẬN (CHỈ SỐ SCI):</strong> Dưới 50.</p>
+                    <p>• <strong>2. CAN ĐẢM ĐỐI DIỆN (TRẠNG THÁI):</strong> Thân xác rệu rã, phản xạ chậm nhịp. Dám nhìn thẳng vào sự sa sút của bản thân mà không trốn tránh.</p>
+                    <p>• <strong>3. CAN ĐẢM CHẤP NHẬN (LỆNH HỆ THỐNG):</strong> Tước quyền thi đấu. Cấm tuyệt đối việc tham gia <strong>BẤT KỲ</strong> giải đấu nào, dù lớn hay nhỏ. Khóa kho thẻ chiến đấu.</p>
+                    <p>• <strong>4. CAN ĐẢM TÁI TẠO (GIAO THỨC 6/6):</strong> Bắt buộc hoàn thành: Nhịp tim chạm ngưỡng vận động mạnh | Vận động đủ bước | Ngủ đủ giấc | Kiểm soát cân nặng | Tỷ lệ mỡ tiêu chuẩn | Đảm bảo lượng nước.</p>
+                    <p>• <strong>5. CAN ĐẢM THỰC THI (GHI CHÚ):</strong> Động lực là rác rưởi, kỷ luật cơ học là vũ khí. Kẻ can đảm dùng kỷ luật để tự kéo mình lên từ đáy vực.</p>
                 </div>
             </div>
 
-            <!-- TIER 2 -->
             <div class="tier-item">
                 <button class="tier-btn tier-chairo" onclick="toggleTier('tier2', this)">
-                    <div><span class="tier-prefix">TIER 2 :</span> <span class="tier-name">TINH ANH (CHAIRO)</span></div> <span>▼</span><div class="shooting-star"></div>
+                    <div><span class="tier-prefix">TIER 2 :</span> <span class="tier-name">TINH ANH (CÔNG LÝ)</span></div> <span>▼</span><div class="shooting-star"></div>
                 </button>
                 <div class="tier-content" id="tier2">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div class="directive-line dir-chairo" style="margin-bottom:0;">QUẢN TRỊ KỶ LUẬT: TIÊU CHUẨN</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('tier2', event)">🔊 PHÁT</button>
                     </div>
-                    <p>• <strong>Chỉ số SCI:</strong> Từ 50 đến 84.</p>
-                    <p>• <strong>Trạng thái:</strong> Lớp vỏ thần kinh và dòng năng lượng ổn định.</p>
-                    <p>• <strong>Lệnh hệ thống:</strong> Cấp Thẻ C (SCI 50-69) hoặc Thẻ A (SCI 70-84).</p>
-                    <p>• <strong>Giao thức duy trì:</strong> Đánh giải vừa tầm, bảo toàn chiến thắng và duy trì nhịp độ cơ thể ở mức tiêu chuẩn.</p>
-                    <p>• <strong>Ghi chú:</strong> Kiên nhẫn tích lũy đạn dược, tuyệt đối không nóng vội đốt cháy giai đoạn.</p>
+                    <p>• <strong>1. CÔNG LÝ ĐỊNH LƯỢNG (CHỈ SỐ SCI):</strong> Từ 50 đến 84.</p>
+                    <p>• <strong>2. CÔNG LÝ CÂN BẰNG (TRẠNG THÁI):</strong> Lớp vỏ thần kinh và dòng năng lượng ổn định. Nền tảng hoàn hảo để đưa ra những phán quyết khách quan, không bị cảm xúc chi phối.</p>
+                    <p>• <strong>3. CÔNG LÝ THỰC THI (LỆNH HỆ THỐNG):</strong> Cấp Thẻ C (SCI 50-69) hoặc Thẻ A (SCI 70-84). Quyền lợi được phân bổ công bằng, tuyệt đối tương xứng với năng lực thực tế.</p>
+                    <p>• <strong>4. CÔNG LÝ BẢO TOÀN (GIAO THỨC DUY TRÌ):</strong> Đánh giải vừa tầm, bảo toàn chiến thắng và duy trì nhịp độ cơ thể ở mức tiêu chuẩn. Không tham lam đánh vượt giới hạn cho phép.</p>
+                    <p>• <strong>5. CÔNG LÝ KỶ LUẬT (GHI CHÚ):</strong> Kiên nhẫn tích lũy đạn dược, tuyệt đối không nóng vội đốt cháy giai đoạn. Tôn trọng sự thật của dữ liệu, không cưỡng cầu.</p>
                 </div>
             </div>
 
-            <!-- TIER 3 -->
             <div class="tier-item">
                 <button class="tier-btn tier-kuro" onclick="toggleTier('tier3', this)">
-                    <div><span class="tier-prefix">TIER 3 :</span> <span class="tier-name">VÔ NGÃ (KURO)</span></div> <span>▼</span><div class="shooting-star"></div>
+                    <div><span class="tier-prefix">TIER 3 :</span> <span class="tier-name">VÔ NGÃ (DANH DỰ)</span></div> <span>▼</span><div class="shooting-star"></div>
                 </button>
                 <div class="tier-content" id="tier3">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div class="directive-line" style="color: var(--violet); border-color: var(--violet); margin-bottom:0;">QUẢN TRỊ KỶ LUẬT: TỐI THƯỢNG</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('tier3', event)">🔊 PHÁT</button>
                     </div>
-                    <p>• <strong>Chỉ số SCI:</strong> Từ 85 trở lên.</p>
-                    <p>• <strong>Trạng thái:</strong> Vô Ngã (Mushin) - Lớp vỏ Myelin tối ưu. Phản xạ sắc bén hoàn hảo.</p>
-                    <p>• <strong>Lệnh hệ thống:</strong> Cấp đặc quyền Thẻ S (SCI >= 85) để càn quét High Roller.</p>
-                    <p>• <strong>Đỉnh cao tối thượng (Thẻ Gold):</strong> Duy trì sự bất bại và kỷ luật sắt đá suốt 1000 ngày Mushin liên tục. Phá vỡ giới hạn hệ thống để nhận <strong>THẺ GOLD HUYỀN THOẠI</strong> — Giấy thông hành bước ra đấu trường quốc tế WSOP (World Series of Poker).</p>
-                    <p>• <strong>Ghi chú:</strong> Kỷ luật tạo nên tự do. Một lần buông thả = Reset về số không. Giữ vững cái đầu lạnh để chạm tay vào vinh quang tối cao.</p>
+                    <p>• <strong>1. DANH DỰ XỨNG TẦM (CHỈ SỐ SCI):</strong> Từ 85 trở lên.</p>
+                    <p>• <strong>2. DANH DỰ HIỆN DIỆN (TRẠNG THÁI):</strong> Vô Ngã (Mushin) - Lớp vỏ Myelin tối ưu. Phản xạ sắc bén hoàn hảo.</p>
+                    <p>• <strong>3. DANH DỰ THỰC THI (LỆNH HỆ THỐNG):</strong> Cấp đặc quyền Thẻ S (SCI >= 85) để càn quét High Roller.</p>
+                    <p>• <strong>4. DANH DỰ TỐI THƯỢNG (ĐỈNH CAO THẺ GOLD):</strong> Duy trì sự bất bại và kỷ luật sắt đá suốt 1000 ngày Mushin liên tục. Phá vỡ giới hạn hệ thống để nhận <strong>THẺ GOLD HUYỀN THOẠI</strong> — Giấy thông hành bước ra đấu trường quốc tế WSOP.</p>
+                    <p>• <strong>5. DANH DỰ KHẮC KỶ (GHI CHÚ):</strong> Kỷ luật tạo nên tự do. Một lần buông thả = Reset về số không. Giữ vững cái đầu lạnh để chạm tay vào vinh quang tối cao.</p>
                 </div>
             </div>
 
-            <!-- PROTOCOL: VOID REGEN -->
             <div class="tier-item">
                 <button class="tier-btn tier-void" onclick="toggleTier('mod4', this)">
-                    <div><span class="tier-prefix">REGEN :</span> <span class="tier-name">GIAO THỨC XẢ TẢI</span></div> <span>▼</span><div class="shooting-star"></div>
+                    <div><span class="tier-prefix">REGEN :</span> <span class="tier-name">GIAO THỨC XẢ TẢI (NHÂN TỪ)</span></div> <span>▼</span><div class="shooting-star"></div>
                 </button>
                 <div class="tier-content" id="mod4">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div class="directive-line dir-void" style="margin-bottom:0;">GIAO THỨC CHỦ NHẬT: TẮT NGUỒN TOÀN DIỆN</div>
+                        <div class="directive-line dir-void" style="margin-bottom:0;">GIAO THỨC HOÀN NGUYÊN: TẮT NGUỒN TOÀN DIỆN</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('tier4', event)">🔊 PHÁT</button>
                     </div>
-                    <p>• <strong>Chu kỳ kích hoạt:</strong> Chủ Nhật hàng tuần.</p>
-                    <p>• <strong>Trạng thái:</strong> Tắt nguồn (Zero Poker).</p>
-                    <p>• <strong>Lệnh hệ thống (Xả tải):</strong> Gỡ bỏ giới hạn nhịp tim và bước chân. Cơ thể hạ nhiệt, chữa lành sợi cơ.</p>
-                    <p>• <strong>Giao thức tâm trí:</strong> Khóa toàn bộ Thẻ chiến đấu. Tuyệt đối không chạm vào Poker. Bắt buộc xem một bộ phim để xả rỗng nơ-ron thần kinh.</p>
-                    <p>• <strong>Luật cứng (Giấc ngủ):</strong> Giấc ngủ vẫn là "Thánh địa" bất khả xâm phạm.</p>
+                    <p>• <strong>1. NHÂN TỪ KHỞI TẠO (CHU KỲ KÍCH HOẠT):</strong> Chủ Nhật hàng tuần.</p>
+                    <p>• <strong>2. NHÂN TỪ BUÔNG BỎ (TRẠNG THÁI):</strong> Tắt nguồn (Zero Poker).</p>
+                    <p>• <strong>3. NHÂN TỪ CHỮA LÀNH (LỆNH HỆ THỐNG - XẢ TẢI):</strong> Gỡ bỏ giới hạn nhịp tim và bước chân. Cơ thể hạ nhiệt, chữa lành sợi cơ.</p>
+                    <p>• <strong>4. NHÂN TỪ XẢ RỖNG (GIAO THỨC TÂM TRÍ):</strong> Khóa toàn bộ Thẻ chiến đấu. Tuyệt đối không chạm vào Poker. Bắt buộc xem một bộ phim để xả rỗng nơ-ron thần kinh.</p>
+                    <p>• <strong>5. NHÂN TỪ BẢO VỆ (LUẬT CỨNG - GIẤC NGỦ):</strong> Giấc ngủ vẫn là "Thánh địa" bất khả xâm phạm. Xả tải thần kinh nhưng tuyệt đối không phá vỡ nhịp sinh học cốt lõi.</p>
                 </div>
             </div>
             
             <div class="tier-item">
                 <button class="tier-btn tier-core" onclick="toggleTier('mod0', this)">
-                    <div><span class="tier-prefix">CORE :</span> <span class="tier-name">HỒ SƠ KIẾM THÁNH</span></div> <span>▼</span><div class="shooting-star"></div>
+                    <div><span class="tier-prefix">CORE :</span> <span class="tier-name">HỒ SƠ KIẾM THÁNH (TÔN TRỌNG)</span></div> <span>▼</span><div class="shooting-star"></div>
                 </button>
                 <div class="tier-content" id="mod0">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div class="directive-line" style="color: #94A3B8; border-color: #94A3B8; margin-bottom:0;">NGUỒN GỐC K DRIVE: MÀNG LỌC TƯ TƯỞNG</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('mod0', event)">🔊 PHÁT</button>
                     </div>
-                    <p>• <strong>Thông tin lõi:</strong> Miyamoto Musashi (1584 - 1645). Sinh tồn 61 năm trong kỷ nguyên đẫm máu.</p>
-                    <p>• <strong>Nền tảng triết lý:</strong> Ngũ Luân Thư. Vứt bỏ cảm xúc. Vận hành bằng kỷ luật và dữ liệu.</p>
-                    <p>• <strong>Mục tiêu tối thượng:</strong> Vô địch thế giới - Giải đấu quốc tế WSOP.</p>
-                    <p>• <strong>Lệnh hệ thống:</strong> Chuyển thể triết lý sinh tồn thành nghệ thuật quản trị rủi ro và chế ngự bản ngã trên đấu trường Poker.</p>
-                    <p>• <strong>Giao thức bắt buộc:</strong> Buộc phải sống sót qua Tier 1, bứt phá Tier 2, làm chủ Tier 3. Thấu triệt Đạo và hoàn thành Khế ước sinh tử để vươn tới đỉnh cao thế giới.</p>
-                    <p>• <strong>Ghi chú:</strong> Mọi ảo tưởng dừng lại ở đây. Không có đường tắt để chạm tay vào đỉnh cao.</p>
+                    <p>• <strong>1. TÔN TRỌNG TIỀN NHÂN (THÔNG TIN LÕI):</strong> Miyamoto Musashi (1584 - 1645). Sinh tồn 61 năm trong kỷ nguyên đẫm máu.</p>
+                    <p>• <strong>2. TÔN TRỌNG TRIẾT LÝ (NỀN TẢNG TRIẾT LÝ):</strong> Ngũ Luân Thư. Vứt bỏ cảm xúc. Vận hành bằng kỷ luật và dữ liệu.</p>
+                    <p>• <strong>3. TÔN TRỌNG ĐÍCH ĐẾN (MỤC TIÊU TỐI THƯỢNG):</strong> Vô địch thế giới - Giải đấu quốc tế WSOP.</p>
+                    <p>• <strong>4. TÔN TRỌNG THỰC THI (LỆNH HỆ THỐNG):</strong> Chuyển thể triết lý sinh tồn thành nghệ thuật quản trị rủi ro và chế ngự bản ngã trên đấu trường Poker.</p>
+                    <p>• <strong>5. TÔN TRỌNG LỘ TRÌNH (GIAO THỨC BẮT BUỘC):</strong> Buộc phải sống sót qua Tier 1, bứt phá Tier 2, làm chủ Tier 3. Thấu triệt Đạo và hoàn thành Khế ước sinh tử để vươn tới đỉnh cao thế giới.</p>
+                    <p>• <strong>6. TÔN TRỌNG SỰ THẬT (GHI CHÚ):</strong> Mọi ảo tưởng dừng lại ở đây. Không có đường tắt để chạm tay vào đỉnh cao.</p>
                 </div>
             </div>
 
             <div class="tier-item">
                 <button class="tier-btn tier-dao" onclick="toggleTier('mod5', this)">
-                    <div><span class="tier-prefix">PATH :</span> <span class="tier-name">NGŨ LUÂN THƯ (TRÍ)</span></div> <span>▼</span><div class="shooting-star"></div>
+                    <div><span class="tier-prefix">PATH :</span> <span class="tier-name">NGŨ LUÂN THƯ (CHÂN THÀNH)</span></div> <span>▼</span><div class="shooting-star"></div>
                 </button>
                 <div class="tier-content" id="mod5">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div class="directive-line dir-dao" style="margin-bottom:0;">BẢN DỊCH MÃ MUSASHI: TRIẾT LÝ K DRIVE</div>
                         <button class="btn-play-lore" onclick="toggleLoreAudio('mod5', event)">🔊 PHÁT</button>
                     </div>
-                    <p>• <strong>Giao thức Địa (Nền tảng):</strong> Kỷ luật thể chất SCI & Quản trị Stack. Đất rệu rã, chiến thuật vô nghĩa.</p>
-                    <p>• <strong>Giao thức Thủy (Thích nghi):</strong> Biến ảo theo Stack size. Kiểm soát Tilt. Tĩnh lặng tuyệt đối trước Bad Beat.</p>
-                    <p>• <strong>Giao thức Hỏa (Áp đảo):</strong> Bùng nổ Aggression & khai thác ICM. Thiêu rụi Stack của kẻ yếu tim.</p>
-                    <p>• <strong>Giao thức Phong (Thấu hiểu):</strong> Range Reading & Profiling. Thấu hiểu Meta-game, không đi ngược chiều gió.</p>
-                    <p>• <strong>Giao thức Không (Vô Ngã):</strong> A-Game tuyệt đối. Diệt trừ Bản ngã. Quyết định tự động hóa qua Dữ liệu và Xác suất.</p>
-                    <p>• <strong>Ghi chú:</strong> Thấu hiểu triết lý để kiểm soát thế trận. Triết lý là lõi, thực chiến là vỏ. Đồng bộ hóa 100%.</p>
+                    <p>• <strong>1. GIAO THỨC ĐỊA (NỀN TẢNG):</strong> Kỷ luật thể chất SCI & Quản trị Stack. Đất rệu rã, chiến thuật vô nghĩa.</p>
+                    <p>• <strong>2. GIAO THỨC THỦY (THÍCH NGHI):</strong> Biến ảo theo Stack size. Kiểm soát Tilt. Tĩnh lặng tuyệt đối trước Bad Beat.</p>
+                    <p>• <strong>3. GIAO THỨC HỎA (ÁP ĐẢO):</strong> Bùng nổ Aggression & khai thác ICM. Thiêu rụi Stack của kẻ yếu tim.</p>
+                    <p>• <strong>4. GIAO THỨC PHONG (THẤU HIỂU):</strong> Range Reading & Profiling. Thấu hiểu Meta-game, không đi ngược chiều gió.</p>
+                    <p>• <strong>5. GIAO THỨC KHÔNG (VÔ NGÃ):</strong> A-Game tuyệt đối. Diệt trừ Bản ngã. Quyết định tự động hóa qua Dữ liệu và Xác suất.</p>
+                    <p>• <strong>6. GHI CHÚ:</strong> Sự <strong>chân thành</strong> tuyệt đối với bản ngã và dữ liệu là chìa khóa để thấu hiểu triết lý. Triết lý là lõi, thực chiến là vỏ. Đồng bộ hóa 100%.</p>
                 </div>
             </div>
 
-            <!-- ===================================== -->
-            <!-- NÚT BẤM BÍ MẬT EASTER EGG (CHỈ THÊM VÀO, KHÔNG PHÁ CODE GỐC) -->
-            <!-- ===================================== -->
+            <!-- NÚT BẤM BÍ MẬT EASTER EGG (DẤU TRIỆN & MÁU) -->
             <div class="bushido-signature" onclick="openBushidoFullscreen()">
                 <div class="kanji-shine">武士道</div>
                 <div class="eng-sub">B U S H I D O</div>
@@ -822,9 +877,7 @@
         <img id="viewer-img" src="" alt="View">
     </div>
 
-    <!-- ===================================== -->
     <!-- MÀN HÌNH FULLSCREEN (BUSHIDO LÕI) ĐỘC LẬP -->
-    <!-- ===================================== -->
     <div id="bushido-fullscreen" class="bushido-fs-overlay" onclick="activateBushidoMode(event)">
         <button class="btn-exit-fs" onclick="closeBushidoFullscreen(event)">[ ĐÓNG ]</button>
         <div class="musashi-fs-bg" id="fs-musashi-bg"></div>
@@ -856,7 +909,7 @@
         </div>
     </div>
 
-    <!-- FORM NHẬP DỮ LIỆU SINH TRẮC LÕI (SỬ DỤNG SELECT CUỘN NATIVE) -->
+    <!-- FORM NHẬP DỮ LIỆU SINH TRẮC LÕI -->
     <div id="onboarding-popup">
         <div class="cyber-led-wrapper" id="ob-wrapper">
             <div class="ob-box" id="ob-box-content">
@@ -1177,12 +1230,12 @@
             if(isSynced) {
                 let currentVal = parseFloat(document.getElementById(`val-${type}`).innerText); let targetVal = 0, unit = "", msg = "";
                 
-                if(type === 'hr') { targetVal = isT1Sunday ? 0 : t_hr; unit = "BPM"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Thiếu ${(targetVal - currentVal).toFixed(0)} ${unit}. Động cơ chưa đạt trạng thái Overdrive.`; else msg = isT1Sunday ? `✅ VOID REGEN (Chủ Nhật): Miễn trừ nhịp tim.` : `✅ Đạt chuẩn Overdrive T-1.`; }
+                if(type === 'hr') { targetVal = isT1Sunday ? 0 : t_hr; unit = "BPM"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Thiếu ${(targetVal - currentVal).toFixed(0)} ${unit}. Động cơ chưa đạt trạng thái Overdrive.`; else msg = isT1Sunday ? `✅ HOÀN NGUYÊN (Chủ Nhật): Miễn trừ nhịp tim.` : `✅ Đạt chuẩn Overdrive T-1.`; }
                 else if(type === 'weight') { targetVal = t_weight; unit = "KG"; if(currentVal > targetVal + 0.5) msg = `⚠️ Đóng sổ T-1: Vượt ngưỡng tối ưu ${(currentVal - targetVal).toFixed(1)} ${unit}.`; else if (currentVal < targetVal - 0.5) msg = `⚠️ Đóng sổ T-1: Dưới ngưỡng tối ưu ${(targetVal - currentVal).toFixed(1)} ${unit}.`; else msg = `✅ Thể trạng lý tưởng.`; }
                 else if(type === 'sleep') { targetVal = 7.0; unit = "HRS"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Thiếu ${(targetVal - currentVal).toFixed(1)} ${unit} phục hồi.`; else msg = `✅ Đã tái tạo đủ năng lượng.`; }
                 else if(type === 'fat') { targetVal = t_fat; unit = "%"; if(currentVal > targetVal) msg = `⚠️ Đóng sổ T-1: Tỷ lệ mỡ vượt +${(currentVal - targetVal).toFixed(1)} ${unit}.`; else msg = `✅ Đạt chuẩn tỷ lệ vàng.`; }
                 else if(type === 'water') { targetVal = 55.0; unit = "%"; if(currentVal < targetVal) msg = `⚠️ CẢNH BÁO: Đang thiếu ${(targetVal - currentVal).toFixed(1)}${unit} nước.<br>LỆNH THỰC THI: Đi nạp thêm 2.5 Lít nước.`; else msg = `✅ ĐẠT CHUẨN: Đủ nước vận hành.`; }
-                else if(type === 'steps') { targetVal = isT1Sunday ? 0 : 6000; unit = "STEPS"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Nợ ${(targetVal - currentVal).toFixed(0)} ${unit} vận động.`; else msg = isT1Sunday ? `✅ VOID REGEN (Chủ Nhật): Miễn trừ vận động.` : `✅ Hoàn thành mục tiêu di chuyển.`; }
+                else if(type === 'steps') { targetVal = isT1Sunday ? 0 : 6000; unit = "STEPS"; if(currentVal < targetVal) msg = `⚠️ Đóng sổ T-1: Nợ ${(targetVal - currentVal).toFixed(0)} ${unit} vận động.`; else msg = isT1Sunday ? `✅ HOÀN NGUYÊN (Chủ Nhật): Miễn trừ vận động.` : `✅ Hoàn thành mục tiêu di chuyển.`; }
                 
                 document.getElementById('holo-desc').innerHTML = `<div style="font-size: 0.9rem; margin-bottom: 10px; color: rgba(255,255,255,0.7);">[ MỤC TIÊU CỐT LÕI ]<br>${data.desc}</div><div style="padding: 10px; border: 1px dashed ${data.color}; background: rgba(0,0,0,0.5);"><strong style="color: ${data.color}; font-family: var(--font-display); font-size: 1.1rem;">[ DỮ LIỆU T-1 ]</strong><br>${msg}</div>`;
                 document.getElementById('btn-close-holo').style.display = 'block'; document.getElementById('btn-close-holo').innerText = '[ XÁC NHẬN ]'; document.getElementById('btn-close-holo').style.borderColor = 'rgba(255,255,255,0.3)'; document.getElementById('btn-close-holo').style.color = 'white'; document.getElementById('btn-close-holo').onclick = function() { playBeep(); closeHoloDirect(); };
@@ -1293,48 +1346,66 @@
 
         let isCommitted = localStorage.getItem('combat_committed') === 'true';
 
+        // UPDATE UI TIẾN HÓA
         function updateStreakBoxUI(sciScore = null) {
             const streakBox = document.getElementById('streak-box');
             if (!streakBox) return;
             let committed = localStorage.getItem('combat_committed') === 'true';
             
             if (!committed) {
-                streakBox.innerText = '[ CHƯA KÝ KẾT ]';
+                streakBox.innerText = '[ CHƯA NHẬP MÔN ]';
                 streakBox.className = 'streak-box alert-unsigned';
                 return;
             }
 
-            if (sciScore !== null) { 
-                if (sciScore < 85) {
+            if (isSunday) { 
+                streakBox.innerText = '[ HOÀN NGUYÊN ]';
+                streakBox.className = 'streak-box streak-regen';
+            } else if (sciScore !== null) { 
+                if (sciScore < 50) {
                     localStorage.removeItem('mushin_start_date');
                     streakBox.innerText = '[ ĐANG THANH TẨY ]';
                     streakBox.className = 'streak-box streak-cleansing';
+                } else if (sciScore < 85) {
+                    localStorage.removeItem('mushin_start_date');
+                    streakBox.innerText = '[ ĐẠO HẠNH ỔN ĐỊNH ]';
+                    streakBox.className = 'streak-box streak-stable';
                 } else {
                     let startDateStr = localStorage.getItem('mushin_start_date');
                     const today = new Date(); today.setHours(0,0,0,0);
                     
                     if (!startDateStr) {
                         localStorage.setItem('mushin_start_date', today.toISOString());
-                        streakBox.innerText = '[ MUSHIN: 1000 DAYS ]';
+                        streakBox.innerText = '[ VÔ NGÃ: 1000 NGÀY ]';
                     } else {
                         const startDate = new Date(startDateStr); startDate.setHours(0,0,0,0);
                         const diffTime = Math.abs(today - startDate);
                         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                         let daysLeft = Math.max(1000 - diffDays, 0);
-                        streakBox.innerText = `[ MUSHIN: ${daysLeft} DAYS ]`;
+                        streakBox.innerText = `[ MUSHIN: ${daysLeft} NGÀY ]`;
                     }
                     streakBox.className = 'streak-box streak-mushin';
                 }
             } else { 
-                let startDateStr = localStorage.getItem('mushin_start_date');
-                if (startDateStr) {
-                    const today = new Date(); today.setHours(0,0,0,0);
-                    const startDate = new Date(startDateStr); startDate.setHours(0,0,0,0);
-                    const diffTime = Math.abs(today - startDate);
-                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                    let daysLeft = Math.max(1000 - diffDays, 0);
-                    streakBox.innerText = `[ MUSHIN: ${daysLeft} DAYS ]`;
+                let savedSci = parseFloat(localStorage.getItem('sci_today'));
+                let displaySci = !isNaN(savedSci) ? savedSci : 0; 
+                
+                if (displaySci >= 85) {
+                    let startDateStr = localStorage.getItem('mushin_start_date');
+                    if (startDateStr) {
+                        const today = new Date(); today.setHours(0,0,0,0);
+                        const startDate = new Date(startDateStr); startDate.setHours(0,0,0,0);
+                        const diffTime = Math.abs(today - startDate);
+                        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                        let daysLeft = Math.max(1000 - diffDays, 0);
+                        streakBox.innerText = `[ MUSHIN: ${daysLeft} NGÀY ]`;
+                    } else {
+                        streakBox.innerText = '[ VÔ NGÃ ]';
+                    }
                     streakBox.className = 'streak-box streak-mushin';
+                } else if (displaySci >= 50) {
+                    streakBox.innerText = '[ ĐẠO HẠNH ỔN ĐỊNH ]';
+                    streakBox.className = 'streak-box streak-stable';
                 } else {
                     streakBox.innerText = '[ ĐANG THANH TẨY ]';
                     streakBox.className = 'streak-box streak-cleansing';
@@ -1371,13 +1442,13 @@
         function updateMarquee(state) {
             const mqText = document.getElementById('marquee-text'); const box = document.getElementById('combat-marquee'); const icon = document.getElementById('mq-icon');
             mqText.style.color = '#ffffff'; mqText.style.textShadow = '0 0 6px rgba(255, 255, 255, 0.8)';
-            if (state === 'standby') { box.style.borderColor = 'var(--amber)'; box.style.background = 'rgba(255, 170, 0, 0.1)'; icon.innerHTML = '📡'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `ĐANG KẾT NỐI VỚI LÕI SCI - CHỜ LỆNH HỆ THỐNG...`; } 
-            else if (state === 'scanning') { box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.1)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `GIAO THỨC ĐỒNG BỘ ĐANG KÍCH HOẠT...`; } 
-            else if (state === 'error') { box.style.borderColor = 'var(--amber)'; box.style.background = 'rgba(255, 170, 0, 0.15)'; icon.innerHTML = '⚠️'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `MẤT TÍN HIỆU ĐẦU VÀO - CHỜ KẾT NỐI LẠI THIẾT BỊ`; } 
-            else if (state === 'sunday') { box.style.borderColor = 'var(--mint)'; box.style.background = 'rgba(0, 255, 157, 0.1)'; icon.innerHTML = '🔋'; icon.style.color = 'var(--mint)'; mqText.innerHTML = `GIAO THỨC CHỦ NHẬT - KÍCH HOẠT QUÃNG NGHỈ TÁI TẠO`; } 
-            else if (state === 'shiro') { box.style.borderColor = 'var(--crimson)'; box.style.background = 'rgba(255, 42, 42, 0.15)'; icon.innerHTML = '🛑'; icon.style.color = 'var(--crimson)'; mqText.innerHTML = `CẢNH BÁO VI PHẠM KỶ LUẬT - ĐÌNH CHỈ THI ĐẤU - KHÓA THẺ`; } 
-            else if (state === 'chairo') { box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.15)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `MYELIN ỔN ĐỊNH - CẤP THẺ C HOẶC THẺ A`; } 
-            else if (state === 'kuro') { box.style.borderColor = 'var(--neon-pink)'; box.style.background = 'rgba(255, 0, 255, 0.15)'; icon.innerHTML = '🥷'; icon.style.color = 'var(--neon-pink)'; mqText.innerHTML = `TRẠNG THÁI VÔ NGÃ - CẤP ĐẶC QUYỀN THẺ S - OVERDRIVE`; }
+            if (state === 'standby') { box.style.borderColor = 'var(--amber)'; box.style.background = 'rgba(255, 170, 0, 0.1)'; icon.innerHTML = '📡'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `ĐANG CẢM NHẬN KHÍ TỨC TỪ LÕI SCI - CHỜ MẬT LỆNH...`; } 
+            else if (state === 'scanning') { box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.1)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `HUYẾT THỆ ĐANG KIẾN TẠO KẾT NỐI NƠ-RON...`; } 
+            else if (state === 'error') { box.style.borderColor = 'var(--amber)'; box.style.background = 'rgba(255, 170, 0, 0.15)'; icon.innerHTML = '⚠️'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `MẤT KẾT NỐI PHÁP KHÍ - TÂM TRÍ VÀ THỂ XÁC ĐANG CHIA LÌA`; } 
+            else if (state === 'sunday') { box.style.borderColor = 'var(--mint)'; box.style.background = 'rgba(0, 255, 157, 0.1)'; icon.innerHTML = '🔋'; icon.style.color = 'var(--mint)'; mqText.innerHTML = `GIAO THỨC HOÀN NGUYÊN - BẾ QUAN TỎA CẢNG TÁI TẠO NỘI CÔNG`; } 
+            else if (state === 'shiro') { box.style.borderColor = 'var(--crimson)'; box.style.background = 'rgba(255, 42, 42, 0.15)'; icon.innerHTML = '🛑'; icon.style.color = 'var(--crimson)'; mqText.innerHTML = `ĐẠO HẠNH SUY ĐỒI - CẤM XUẤT QUÂN - PHONG ẤN KHO THẺ`; } 
+            else if (state === 'chairo') { box.style.borderColor = 'var(--cyan)'; box.style.background = 'rgba(0, 229, 255, 0.15)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `KHÍ HUYẾT LƯU THÔNG - MỞ KHÓA THẺ C VÀ THẺ A`; } 
+            else if (state === 'kuro') { box.style.borderColor = 'var(--neon-pink)'; box.style.background = 'rgba(255, 0, 255, 0.15)'; icon.innerHTML = '🥷'; icon.style.color = 'var(--neon-pink)'; mqText.innerHTML = `CẢNH GIỚI VÔ NGÃ - ĐỘT PHÁ GIỚI HẠN - BAN ĐẶC QUYỀN THẺ S`; }
         }
 
         function toggleRankMenu() { document.getElementById('rank-overlay').classList.toggle('active'); }
@@ -1454,7 +1525,7 @@
                                  <div id="fusion-text" class="fusion-text"></div>`;
                 typeTextSafe([
                     ">_ [ K-DRIVE ]: TÍCH HỢP DỮ LIỆU... HOÀN TẤT.", 
-                    ">_ [ A.I BOO ]: Màng lọc sinh trắc học mở khóa. Quá trình dung hợp thần kinh bắt đầu..."
+                    ">_ [ ĐẠO SƯ BOO ]: Màng lọc sinh trắc học mở khóa. Quá trình dung hợp thần kinh bắt đầu..."
                 ], 30, 200, document.getElementById('fusion-text'));
             }, 2500);
 
@@ -1475,7 +1546,7 @@
                 setTimeout(() => {
                     playSlashSound();
                     typeTextSafe([
-                        ">_ [ A.I BOO ]: Kỷ luật của hệ thống là nhịp đập của cậu. KHẾ ƯỚC CHÍNH THỨC CÓ HIỆU LỰC."
+                        ">_ [ ĐẠO SƯ BOO ]: Kỷ luật là thanh gươm của cậu. KHẾ ƯỚC CHÍNH THỨC CÓ HIỆU LỰC."
                     ], 20, 100, document.getElementById('fusion-verdict'));
                 }, 1200);
 
@@ -1509,7 +1580,7 @@
                     updateStreakBoxUI();
                     updateMarquee('standby');
                     
-                    typeTextSafe([">_ [ SYS.FIREWALL ]: ONLINE", ">_ [ MỤC TIÊU ]: BẢO VỆ TÂM TRÍ. QUẢN TRỊ RỦI RO.", ">_ [ CHỈ LỆNH ]: TRIỆT TIÊU QUYẾT ĐỊNH CẢM XÚC."], 20, 100);
+                    typeTextSafe([">_ [ HÀNG RÀO TÂM TRÍ ]: ONLINE", ">_ [ MỤC TIÊU ]: BẢO VỆ TÂM TRÍ. QUẢN TRỊ RỦI RO.", ">_ [ MẬT LỆNH ]: TRIỆT TIÊU QUYẾT ĐỊNH CẢM XÚC."], 20, 100);
                     
                 }, 100);
             }, 10500);
@@ -1537,15 +1608,15 @@
         }
 
         let isSynced = false; let isSafetyUnlocked = false; 
-        function unlockPreScan() { if(isSafetyUnlocked || !isCommitted) return; playLockSound(); isSafetyUnlocked = true; document.getElementById('safety-lock-hud').classList.add('unlocked'); document.body.classList.remove('pre-scan-locked'); document.getElementById('live-radar-bar').classList.add('active'); typeTextSafe([">_ [ HỆ THỐNG ]: CẤP QUYỀN KẾT NỐI.", ">_ [ CHỈ THỊ ]: MỜI CHẠM LÕI SCI BÊN TRÊN ĐỂ ĐỒNG BỘ."]); }
+        function unlockPreScan() { if(isSafetyUnlocked || !isCommitted) return; playLockSound(); isSafetyUnlocked = true; document.getElementById('safety-lock-hud').classList.add('unlocked'); document.body.classList.remove('pre-scan-locked'); document.getElementById('live-radar-bar').classList.add('active'); typeTextSafe([">_ [ K-DRIVE ]: CẤP QUYỀN KẾT NỐI.", ">_ [ CHỈ THỊ ]: MỜI CHẠM LÕI SCI BÊN TRÊN ĐỂ ĐỒNG BỘ."]); }
         
         async function triggerBioSync() {
-            if(!isCommitted) { playBeep(); typeTextSafe([">_ [ TỪ CHỐI ]: YÊU CẦU KÝ HỢP ĐỒNG TRƯỚC KHI VẬN HÀNH."]); return; }
+            if(!isCommitted) { playBeep(); typeTextSafe([">_ [ TỪ CHỐI ]: YÊU CẦU LẬP HUYẾT THỆ TRƯỚC KHI XUẤT GƯƠM."]); return; }
             if(window.isScanning) return; window.isScanning = true;
             document.getElementById('btn-chip-vault').style.display = 'none'; currentPassCode = "";
             document.body.classList.remove('standby-mode'); document.body.classList.add('scanning-mode');
             updateMarquee('scanning'); playChargeSound(); if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
-            await typeTextSafe([">_ [ HỆ THỐNG ]: XÁC NHẬN YÊU CẦU...", ">_ [ GIAO THỨC ]: ĐANG TRÍCH XUẤT DỮ LIỆU SINH TRẮC..."], 20, 200);
+            await typeTextSafe([">_ [ K-DRIVE ]: XÁC NHẬN YÊU CẦU...", ">_ [ GIAO THỨC ]: ĐANG TRÍCH XUẤT DỮ LIỆU SINH TRẮC..."], 20, 200);
             await fetchBioDataReal();
         }
 
@@ -1603,7 +1674,7 @@
                     
                     if (isDisconnected) {
                         document.body.classList.add('tier-shiro'); 
-                        statusBanner.innerText = "[ ⚠️ MẤT KẾT NỐI THIẾT BỊ NGOẠI VI ]"; 
+                        statusBanner.innerText = "[ ⚠️ MẤT KẾT NỐI PHÁP KHÍ ĐO LƯỜNG ]"; 
                         statusBanner.style.color = "var(--amber)"; 
                         statusBanner.style.borderColor = "var(--amber)"; 
                         statusBanner.style.background = "rgba(255, 170, 0, 0.15)";
@@ -1612,9 +1683,9 @@
                         document.getElementById('live-radar-bar').style.display = 'none';
 
                         typeTextSafe([
-                            ">_ [ HỆ THỐNG ]: KHÔNG TÌM THẤY TÍN HIỆU ĐẦU VÀO.", 
-                            ">_ [ CẢNH BÁO ]: TOÀN BỘ DỮ LIỆU SINH TRẮC ĐANG TRỐNG.", 
-                            ">_ [ CHỈ THỊ ]: KIỂM TRA KẾT NỐI ĐỒNG HỒ, CÂN VÀ HEALTH CONNECT."
+                            ">_ [ K-DRIVE ]: BẶT VÔ ÂM TÍN. KHÔNG CẢM NHẬN ĐƯỢC SINH KHÍ.", 
+                            ">_ [ CẢNH BÁO ]: TOÀN BỘ DỮ LIỆU ĐO LƯỜNG ĐANG TRỐNG RỖNG.", 
+                            ">_ [ CHỈ THỊ ]: KHÔI PHỤC KẾT NỐI CÁC PHÁP KHÍ ĐO LƯỜNG (ĐỒNG HỒ, CÂN)."
                         ], 20, 200);
                     } 
                     else {
@@ -1634,41 +1705,41 @@
                         const radarBar = document.getElementById('live-radar-bar'); const radarPulse = document.getElementById('live-pulse'); const radarMetrics = document.getElementById('live-metrics');
                         setTimeout(() => { radarBar.style.display = 'flex'; radarBar.classList.add('active'); }, 100);
                         
-                        if (liveHtml === '') { radarPulse.innerText = '[ 🟢 ALERT ]'; radarMetrics.innerHTML = 'H2O: OK | SLP: OK | WGT: OK - KHÔNG CÒN NỢ SINH HỌC'; } 
+                        if (liveHtml === '') { radarPulse.innerText = '[ 🟢 ALERT ]'; radarMetrics.innerHTML = 'H2O: OK | SLP: OK | WGT: OK - KHÔNG CÒN NỢ SINH LÝ'; } 
                         else { radarPulse.innerText = '[ 🔴 ALERT ]'; radarMetrics.innerHTML = liveHtml; }
 
                         // PHÂN CẤP THẺ CHIẾN ĐẤU THEO SCI (C: 50-69, A: 70-84, S: >=85)
                         if (sciScore < 50) {
-                            document.body.classList.add('tier-shiro'); statusBanner.innerText = "[ ☢️ TIER 1: SHIRO - ĐÌNH CHỈ ]"; statusBanner.style.color = "#ffffff"; statusBanner.style.borderColor = "var(--crimson)"; statusBanner.style.background = "rgba(255, 42, 42, 0.4)";
+                            document.body.classList.add('tier-shiro'); statusBanner.innerText = "[ ☢️ TIER 1: THANH TẨY - ĐÌNH CHỈ ]"; statusBanner.style.color = "#ffffff"; statusBanner.style.borderColor = "var(--crimson)"; statusBanner.style.background = "rgba(255, 42, 42, 0.4)";
                             updateMarquee('shiro'); playLockSound(); 
-                            typeTextSafe([">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.", ">_ [ CẢNH BÁO ]: SCI DƯỚI 50. ĐÌNH CHỈ THI ĐẤU.", ">_ [ CHỈ THỊ ]: KHÓA KHO THẺ. Ở NHÀ THANH TẨY."], 20, 200);
+                            typeTextSafe([">_ [ K-DRIVE ]: TRUYỀN CÔNG HOÀN TẤT.", ">_ [ PHÁN QUYẾT ]: SCI DƯỚI 50. ĐẠO HẠNH SUY ĐỒI.", ">_ [ CHỈ THỊ ]: PHONG ẤN KHO THẺ. NGOAN NGOÃN Ở NHÀ THANH TẨY!"], 20, 200);
                         } else if (sciScore >= 50 && sciScore < 70) {
-                            document.body.classList.add('tier-chairo'); statusBanner.innerText = "[ TIER 2: CHAIRO - THẺ C ]"; statusBanner.style.color = "var(--cyan)"; statusBanner.style.borderColor = "var(--cyan)"; statusBanner.style.background = "rgba(0, 229, 255, 0.1)";
+                            document.body.classList.add('tier-chairo'); statusBanner.innerText = "[ TIER 2: ĐẠO HẠNH ỔN ĐỊNH - THẺ C ]"; statusBanner.style.color = "var(--cyan)"; statusBanner.style.borderColor = "var(--cyan)"; statusBanner.style.background = "rgba(0, 229, 255, 0.1)";
                             document.querySelectorAll('.data-panel').forEach(el => el.style.animation = 'none'); updateMarquee('chairo');
                             currentPassCode = "KAI-C-" + Math.floor(1000 + Math.random() * 9000); 
                             document.getElementById('btn-chip-vault').style.display = 'flex';
-                            typeTextSafe([">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.", ">_ [ PHÂN TÍCH ]: SCI 50-69. CẤP THẺ C.", ">_ [ MÃ XUẤT QUÂN ]: " + currentPassCode, ">_ [ CHỈ THỊ ]: NHẬP MÃ ĐỂ NHẬN THẺ C ĐÁNH LOW STAKES."], 20, 200);
+                            typeTextSafe([">_ [ K-DRIVE ]: TRUYỀN CÔNG HOÀN TẤT.", ">_ [ ĐÁNH GIÁ ]: SCI 50-69. KHÍ HUYẾT LƯU THÔNG TỐT.", ">_ [ MÃ XUẤT QUÂN ]: " + currentPassCode, ">_ [ CHỈ THỊ ]: NHẬN THẺ C. XUẤT QUÂN ĐÁNH CÁC GIẢI VỪA TẦM."], 20, 200);
                         } else if (sciScore >= 70 && sciScore < 85) {
-                            document.body.classList.add('tier-chairo'); statusBanner.innerText = "[ TIER 2: CHAIRO - THẺ A ]"; statusBanner.style.color = "var(--cyan)"; statusBanner.style.borderColor = "var(--cyan)"; statusBanner.style.background = "rgba(0, 229, 255, 0.1)";
+                            document.body.classList.add('tier-chairo'); statusBanner.innerText = "[ TIER 2: ĐẠO HẠNH ỔN ĐỊNH - THẺ A ]"; statusBanner.style.color = "var(--cyan)"; statusBanner.style.borderColor = "var(--cyan)"; statusBanner.style.background = "rgba(0, 229, 255, 0.1)";
                             document.querySelectorAll('.data-panel').forEach(el => el.style.animation = 'none'); updateMarquee('chairo');
                             currentPassCode = "KAI-A-" + Math.floor(1000 + Math.random() * 9000); 
                             document.getElementById('btn-chip-vault').style.display = 'flex';
-                            typeTextSafe([">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.", ">_ [ PHÂN TÍCH ]: SCI 70-84. CẤP THẺ A.", ">_ [ MÃ XUẤT QUÂN ]: " + currentPassCode, ">_ [ CHỈ THỊ ]: NHẬP MÃ ĐỂ NHẬN THẺ A ĐÁNH MID STAKES."], 20, 200);
+                            typeTextSafe([">_ [ K-DRIVE ]: TRUYỀN CÔNG HOÀN TẤT.", ">_ [ ĐÁNH GIÁ ]: SCI 70-84. KHÍ HUYẾT LƯU THÔNG TỐT.", ">_ [ MÃ XUẤT QUÂN ]: " + currentPassCode, ">_ [ CHỈ THỊ ]: NHẬN THẺ A. XUẤT QUÂN ĐÁNH CÁC GIẢI VỪA TẦM."], 20, 200);
                         } else if (sciScore >= 85) {
-                            document.body.classList.add('tier-kuro'); statusBanner.innerText = "[ TIER 3: KURO - THẺ S ]"; statusBanner.style.color = "var(--neon-pink)"; statusBanner.style.borderColor = "var(--neon-pink)"; statusBanner.style.background = "rgba(255, 0, 255, 0.1)";
+                            document.body.classList.add('tier-kuro'); statusBanner.innerText = "[ TIER 3: VÔ NGÃ - THẺ S ]"; statusBanner.style.color = "var(--neon-pink)"; statusBanner.style.borderColor = "var(--neon-pink)"; statusBanner.style.background = "rgba(255, 0, 255, 0.1)";
                             updateMarquee('kuro'); triggerMushinProtocol();
                             currentPassCode = "KAI-S-" + Math.floor(1000 + Math.random() * 9000); 
                             document.getElementById('btn-chip-vault').style.display = 'flex';
-                            typeTextSafe([">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.", ">_ [ PHÂN TÍCH ]: SCI >= 85. CẤP THẺ S.", ">_ [ MÃ XUẤT QUÂN ]: " + currentPassCode, ">_ [ CHỈ THỊ ]: NHẬP MÃ ĐỂ NHẬN THẺ S CÀN QUÉT HIGH ROLLER."], 20, 200);
+                            typeTextSafe([">_ [ K-DRIVE ]: TRUYỀN CÔNG HOÀN TẤT.", ">_ [ ĐỘT PHÁ ]: SCI >= 85. TÂM TRÍ ĐẠT NGƯỠNG VÔ NGÃ.", ">_ [ MÃ XUẤT QUÂN ]: " + currentPassCode, ">_ [ CHỈ THỊ ]: NHẬN THẺ S. TUỐT GƯƠM CÀN QUÉT HIGH ROLLER!"], 20, 200);
                         }
                     }
                 } else if (resData.status === 'empty') { 
-                    typeTextSafe([">_ [ LỖI ]: TỪ CHỐI TRUY CẬP.", ">_ [ CẢNH BÁO ]: CHƯA CÓ DỮ LIỆU SINH TRẮC.", ">_ [ HƯỚNG DẪN ]: YÊU CẦU ĐỒNG BỘ HEALTH CONNECT."], 20, 150); updateMarquee('standby'); document.body.classList.add('standby-mode');
+                    typeTextSafe([">_ [ LỖI ]: TỪ CHỐI TRUY CẬP.", ">_ [ CẢNH BÁO ]: CHƯA CÓ DỮ LIỆU ĐO LƯỜNG.", ">_ [ HƯỚNG DẪN ]: YÊU CẦU ĐỒNG BỘ HEALTH CONNECT."], 20, 150); updateMarquee('standby'); document.body.classList.add('standby-mode');
                 } else {
                     typeTextSafe([">_ [ LỖI HỆ THỐNG ]: " + (resData.message || "TRUY XUẤT THẤT BẠI.")]); updateMarquee('standby'); document.body.classList.add('standby-mode');
                 }
             } catch (error) {
-                stopChargeSound(); typeTextSafe([">_ [ CẢNH BÁO ĐỎ ]: MẤT KẾT NỐI VỚI VỆ TINH."]); updateMarquee('standby'); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
+                stopChargeSound(); typeTextSafe([">_ [ CẢNH BÁO ĐỎ ]: MẤT KẾT NỐI VỚI LÕI SCI."]); updateMarquee('standby'); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
             }
             window.isScanning = false;
         }
@@ -1680,8 +1751,8 @@
         function initializeSystem() {
             initParticles(); document.body.classList.add('standby-mode'); updateButtonState(); updateMarquee('standby');
             document.body.classList.add('pre-scan-locked'); updateStreakBoxUI();
-            if (isCommitted) { typeTextSafe([">_ [ SYS.FIREWALL ]: ONLINE", ">_ [ MỤC TIÊU ]: BẢO VỆ TÂM TRÍ. QUẢN TRỊ RỦI RO.", ">_ [ CHỈ LỆNH ]: TRIỆT TIÊU QUYẾT ĐỊNH CẢM XÚC."], 20, 100); } 
-            else { document.body.classList.add('uncommitted'); typeTextSafe([">_ [ HỆ THỐNG ĐÓNG BĂNG ]", ">_ [ YÊU CẦU ]: KÝ HỢP ĐỒNG TRONG BÍ LỤC TRƯỚC KHI VẬN HÀNH."]); }
+            if (isCommitted) { typeTextSafe([">_ [ HÀNG RÀO TÂM TRÍ ]: ONLINE", ">_ [ MỤC TIÊU ]: BẢO VỆ TÂM TRÍ. QUẢN TRỊ RỦI RO.", ">_ [ MẬT LỆNH ]: TRIỆT TIÊU QUYẾT ĐỊNH CẢM XÚC."], 20, 100); } 
+            else { document.body.classList.add('uncommitted'); typeTextSafe([">_ [ KIẾM ĐẠO CHƯA MỞ ]", ">_ [ YÊU CẦU ]: LẬP HUYẾT THỆ TRONG BÍ LỤC TRƯỚC KHI XUẤT GƯƠM."]); }
         }
 
         const loreAudios = {
@@ -1714,6 +1785,7 @@
 
         let booUtterance = null;
         
+        /* CẬP NHẬT TẨY NÃO MỎ HỖN BOO - CHUẨN KIẾM ĐẠO */
         function playBooReport() {
             const pig = document.getElementById('boo-mascot'); const header = document.getElementById('term-head');
             if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); if (pig) pig.classList.remove('reading'); header.style.background = 'var(--cyan)'; header.style.color = 'var(--bg-obsidian)'; return; }
@@ -1722,54 +1794,54 @@
             let finalSpeech = ""; let isCommitted = localStorage.getItem('combat_committed') === 'true';
 
             if (!isCommitted) { 
-                finalSpeech = "Màn hình tối thui thế này nhìn cái gì? Lười đến mức không bấm nổi cái hợp đồng à? Giữ 3 giây ký lẹ lên cho tôi nhờ!"; 
+                finalSpeech = "Màn hình tối thui thế này định luyện công trong bóng tối à? Lười đến mức không nhấc nổi tay để lập Huyết Thệ thì bao giờ mới chạm tay vào cúp được? Cứ thong thả thế này thì lúc ra sân đấu người ta hốt cúp xong hết rồi đấy!"; 
             } 
             else if (document.body.classList.contains('pre-scan-locked')) { 
-                finalSpeech = "Tường lửa đã kích hoạt! Còn không mau bấm xác nhận kết nối đồng hồ và cân thông minh đi? Hay chờ tôi nhắc?"; 
+                finalSpeech = "Tường lửa đã kích hoạt! Còn không mau chạm vào lõi để truyền tâm niệm đi? Hay chờ ta phải rút kiếm ra nhắc nhở?"; 
             } 
             else if (!document.body.classList.contains('sync-complete') && !document.body.classList.contains('tier-shiro') && !document.body.classList.contains('tier-chairo') && !document.body.classList.contains('tier-kuro')) {
                 let termStr = document.getElementById('ai-text').innerText; termStr = termStr.replace(/>_/g, "").replace(/\[.*?\]:/g, "").trim(); termStr = termStr.replace(/SCI/g, "Éc xi ai");
                 if (!termStr) termStr = "Mời chạm lõi Éc xi ai bên trên để đồng bộ";
-                finalSpeech = `Cấp quyền xong thì nhấc cái tay lên. Lệnh hệ thống rành rành ra kìa: ${termStr}. Chạm ngón tay vào để tôi còn làm việc!`;
+                finalSpeech = `Cấp quyền xong thì nhấc cái tay lên. Mật lệnh rành rành ra kìa: ${termStr}. Chạm ngón tay vào để ta còn làm việc!`;
             } 
             else if (document.getElementById('status-banner').innerText.includes('MẤT KẾT NỐI')) {
-                finalSpeech = "Bảng dữ liệu trống trơn thế này cậu định lừa ai? Tín hiệu từ đồng hồ và cân thông minh mất sạch rồi kìa. Làm ơn kiểm tra lại kết nối bờ lu tút và đồng bộ app ngay đi!";
+                finalSpeech = "Bảng dữ liệu trống trơn thế này định giấu giếm tu vi à? Không đo lường được thể trạng thì lấy gì mà chiến đấu? Mau kiểm tra lại các pháp khí kết nối đo lường đi!";
             }
             else {
                 let sciText = document.getElementById('val-sci').innerText; let sciT = parseFloat(sciText) || 0; let sciY = parseFloat(localStorage.getItem('sci_yesterday'));
                 let trendStr = "";
                 if (!isNaN(sciY) && sciY > 0) {
-                    if (sciT < sciY) trendStr = `Hôm qua vừa được ${sciY} điểm, nay tụt cái rụp xuống ${sciT}. Ăn tàn phá hoại kiểu gì mà phong độ đi lùi thế hả anh Kai?`;
-                    else if (sciT > sciY) trendStr = `Ê, nay Éc xi ai nhích lên được ${sciT} điểm so với hôm qua rồi kìa. Thấy chưa, cứ chịu khó kỷ luật là người ngợm nó khác ngay.`;
-                    else trendStr = `Éc xi ai ${sciT} điểm, y xì đúc hôm qua chả xê dịch tí nào. Sống kiểu an toàn thế này thì bao giờ mới chạm tay vào cúp hả trời?`;
+                    if (sciT < sciY) trendStr = `Hôm qua vừa được ${sciY} điểm, nay tụt cái rụp xuống ${sciT}. Tu luyện kiểu gì mà đạo hạnh đi lùi thế hả anh Kai?`;
+                    else if (sciT > sciY) trendStr = `Ê, nay Éc xi ai nhích lên được ${sciT} điểm so với hôm qua rồi kìa. Thấy chưa, cứ chịu khó kỷ luật là nội công nó thâm hậu ngay.`;
+                    else trendStr = `Éc xi ai ${sciT} điểm, y xì đúc hôm qua chả xê dịch tí nào. Luyện võ kiểu nhàn hạ thế này thì bao giờ mới xưng bá thiên hạ hả trời?`;
                 } else {
                     if(sciT < 50) trendStr = `Éc xi ai rớt thảm hại còn có ${sciT}.`; else if(sciT < 85) trendStr = `Éc xi ai hiện tại là ${sciT} điểm.`; else trendStr = `Éc xi ai lên tận ${sciT} điểm! Xuất sắc!`;
                 }
 
                 let rankStr = "";
-                if (document.body.classList.contains('tier-shiro')) rankStr = "Điểm kém thế này cấm tiệt vác mặt đi chiến Poker nhé! Kho thẻ đã bị khóa chặt.";
-                else if (document.body.classList.contains('tier-chairo')) rankStr = "Tạm ổn đấy, mở khóa Thẻ C và Thẻ A cho anh rồi đấy, đi đánh giải vừa tầm đi.";
-                else if (document.body.classList.contains('tier-kuro')) rankStr = "Chà, vô ngã rồi cơ đấy. Kích hoạt đặc quyền Thẻ S, xách bài đi càn quét High Roller thôi!";
+                if (document.body.classList.contains('tier-shiro')) rankStr = "Thân xác rệu rã thế này ra sân chỉ để làm phong phú thêm bảng thành tích cho đối thủ thôi. Quay về Thanh Tẩy gột rửa lại tâm trí cho sáng sủa đi đã!";
+                else if (document.body.classList.contains('tier-chairo')) rankStr = "Khí huyết lưu thông ổn định rồi đấy. Mở khóa Thẻ C và Thẻ A, cứ thong thả mà đánh giải vừa tầm, tích lũy nội công đi.";
+                else if (document.body.classList.contains('tier-kuro')) rankStr = "Phong độ nay bén như gươm tuốt vỏ nhỉ. Đạt cảnh giới Vô Ngã rồi. Xách bảo kiếm ra càn quét High Roller thôi, nhưng đừng có kiêu ngạo quá mà ngã ngựa nhé!";
 
                 let alertText = document.getElementById('live-metrics').innerText || ""; let metricsStr = "";
-                if (alertText.includes("KHÔNG CÒN NỢ") || alertText === "") { metricsStr = "Hôm nay sạch nợ sinh lý, ngoan đấy."; } 
+                if (alertText.includes("KHÔNG CÒN NỢ") || alertText === "") { metricsStr = "Hôm nay sạch nợ sinh lý, gân cốt dẻo dai, ngoan đấy."; } 
                 else {
                     let cleanAlert = alertText
-                        .replace(/HR:\s*Pk<([0-9]+)/g, "nhịp tim thì lẹt đẹt chưa chạm ngưỡng $1, ")
-                        .replace(/STP:\s*\+([0-9.]+)/g, "nợ đầm đìa $1 bước chân, ")
-                        .replace(/SLP:\s*NỢ\s*([0-9.]+)h/g, "ngủ thiếu $1 giờ, ")
-                        .replace(/WGT:\s*\+([0-9.]+)kg/g, "cân nặng đang hụt mất $1 kí, ")
-                        .replace(/WGT:\s*\-([0-9.]+)kg/g, "cơ thể dư mỡ cần giảm $1 kí, ")
-                        .replace(/FAT:\s*\-([0-9.]+)%/g, "cần giảm $1 phần trăm mỡ, ")
-                        .replace(/H2O:\s*\+2\.5L/g, "nước trong cơ thể báo động đỏ, đi nạp ngay 2 phẩy 5 lít nước vào, ");
+                        .replace(/HR:\s*Pk<([0-9]+)/g, "nhịp tim thì chưa đủ độ nhiệt, ")
+                        .replace(/STP:\s*\+([0-9.]+)/g, "còn thiếu nợ $1 bước chân, ")
+                        .replace(/SLP:\s*NỢ\s*([0-9.]+)h/g, "giấc ngủ còn chắp vá thiếu $1 giờ, ")
+                        .replace(/WGT:\s*\+([0-9.]+)kg/g, "cơ thể còn mang vác nhiều tà khí thừa $1 kí, ")
+                        .replace(/WGT:\s*\-([0-9.]+)kg/g, "người ngợm mỏng manh thiếu $1 kí, ")
+                        .replace(/FAT:\s*\-([0-9.]+)%/g, "lượng mỡ che mờ lý trí còn thừa $1 phần trăm, ")
+                        .replace(/H2O:\s*\+2\.5L/g, "nội công khô cạn báo động đỏ, mau nạp thêm nước vào, ");
                     let parts = cleanAlert.split('|').map(p => p.trim()).filter(p => p);
                     cleanAlert = parts.join(" ").replace(/,\s*$/, "").replace(/\s{2,}/g, " ");
-                    metricsStr = `Đã thế còn ${cleanAlert}! Thích nằm trương thây ra đấy không?`;
+                    metricsStr = `Đã thế còn ${cleanAlert}! Định vác cái thân tàn tạ này lên sàn đấu à?`;
                 }
 
                 let termStr = document.getElementById('ai-text').innerText; termStr = termStr.replace(/>_/g, "").replace(/\[.*?\]:/g, "").trim(); termStr = termStr.replace(/SCI/g, "Éc xi ai");
-                if(!termStr) termStr = "Đang chờ chỉ thị.";
-                finalSpeech = `${trendStr} ${rankStr} ${metricsStr} Nghe cho kỹ lệnh hệ thống nè: ${termStr}.`;
+                if(!termStr) termStr = "Đang chờ mật lệnh.";
+                finalSpeech = `${trendStr} ${rankStr} ${metricsStr} Nghe cho kỹ mật lệnh hệ thống nè: ${termStr}.`;
             }
 
             booUtterance = new SpeechSynthesisUtterance(finalSpeech); booUtterance.lang = 'vi-VN'; booUtterance.pitch = 1.0; booUtterance.rate = 1.15;
