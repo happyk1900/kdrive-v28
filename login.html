@@ -20,7 +20,6 @@
         .radar-line { width: 100%; height: 2px; background: rgba(0, 229, 255, 0.5); box-shadow: 0 0 30px rgba(0, 229, 255, 1); position: absolute; top: -10px; animation: globalScan 8s linear infinite; }
         @keyframes globalScan { 0% { top: -10px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
-        /* CSS MÀN HÌNH CHỜ K-INFO */
         .central-hud-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 190px; z-index: 90; pointer-events: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.4s ease; opacity: 1; }
         .glass-layer { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: rgba(5, 10, 15, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 4px; z-index: 1; pointer-events: none; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
         .hud-text.main { position: relative; font-size: 34px; font-weight: 700; color: #fff; letter-spacing: 5px; text-shadow: 0 0 15px rgba(0, 229, 255, 0.8); z-index: 2; pointer-events: none; margin-top: -10px; text-align: center; width: 100%; display: inline-block; overflow: hidden;}
@@ -32,7 +31,6 @@
         .hud-action-btn.top-left { top: 18px; left: 18px; } 
         .hud-action-btn.bottom-right { bottom: 18px; right: 18px; }
         
-        /* CSS CÁC BẢNG ĐĂNG NHẬP (CYBER SAMURAI STYLE) */
         .gateway-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 12, 18, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 4px; padding: 30px 20px; z-index: 99999; display: none; flex-direction: column; align-items: center; box-shadow: 0 0 40px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 229, 255, 0.05); width: 90%; max-width: 350px; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
         .gateway-popup h2 { color: #fff; font-size: 20px; letter-spacing: 4px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(0,229,255,0.6); text-transform: uppercase; border-bottom: 1px solid rgba(0, 229, 255, 0.3); padding-bottom: 10px; width: 100%; text-align: center; }
         
@@ -83,10 +81,10 @@
             <div id="panel-login" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
                 <h2>[ SƠN MÔN YẾT KIẾN ]</h2>
                 <div class="input-wrapper">
-                    <input type="text" id="accInput" class="login-input" placeholder="[ DANH TÍNH LỮ KHÁCH ]">
+                    <input type="text" id="accInput" class="login-input" placeholder="[ DANH TÍNH NỘI MÔN ]">
                 </div>
                 <div class="input-wrapper">
-                    <input type="password" id="passcodeInput" class="login-input" placeholder="[ MẬT ẤN BẢO MỆNH ]">
+                    <input type="password" id="passcodeInput" class="login-input" placeholder="[ ẤN KÝ BÍ MẬT ]">
                     <span class="eye-icon" onclick="togglePass('passcodeInput', this)">
                         <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     </span>
@@ -149,7 +147,7 @@
             else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } 
         }
 
-        // --- KẾT NỐI API THỰC TẾ ---
+        // --- KẾT NỐI API THỰC TẾ BẰNG POST ĐỂ VƯỢT LỖI CORS ---
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec';
 
         function submitLogin() {
@@ -165,24 +163,27 @@
                 return; 
             }
             
-            // Giữ nguyên câu thoại cực chất của anh
             statusEl.innerHTML = "🛰️ BOO ĐANG KIỂM CHỨNG ẤN KÝ NỘI MÔN..."; 
             statusEl.style.color = "#00e5ff";
             
-            // Gửi dữ liệu lên Google Sheets để kiểm tra
-            fetch(`${scriptURL}?username=${encodeURIComponent(acc)}&password=${encodeURIComponent(code)}`)
+            // Đóng gói dữ liệu để không bị Google chặn
+            const dataForm = new URLSearchParams();
+            dataForm.append('username', acc);
+            dataForm.append('password', code);
+
+            fetch(scriptURL, {
+                method: 'POST',
+                body: dataForm
+            })
             .then(response => response.json())
             .then(data => {
-                // Tùy theo App Script của anh trả về 'success' hay 'thanh_cong'
-                if(data.result === "success" || data.status === "success" || data.success === true) {
+                if(data.result === "success" || data.status === "success" || data.success === true || data.ket_qua === "thanh_cong") {
                     statusEl.innerHTML = "✅ ẤN KÝ TƯƠNG HỢP. ĐANG TIẾN NHẬP SƠN MÔN..."; 
                     statusEl.style.color = "#00e5ff";
                     document.getElementById('mainWrapper').classList.add('shake-active');
                     
-                    // Chuyển hướng sang index.html sau 1.5 giây
                     setTimeout(() => { window.location.href = 'index.html'; }, 1500);
                 } else {
-                    // Áp dụng câu cảnh báo mới
                     statusEl.innerHTML = "❌ Sai ấn ký nội môn! Kẻ xông bậy không thể bước qua Kết nối đường Sơn môn."; 
                     statusEl.style.color = "#ff3333";
                     document.getElementById('loginPanelContainer').classList.add('shake-active');
@@ -190,7 +191,6 @@
                 }
             })
             .catch(error => {
-                // Áp dụng câu báo lỗi đường truyền
                 statusEl.innerHTML = "❌ Kết nối đường Sơn môn đang bị phong tỏa! Hãy thử lại."; 
                 statusEl.style.color = "#ff3333";
                 document.getElementById('loginPanelContainer').classList.add('shake-active');
