@@ -147,7 +147,7 @@
             else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } 
         }
 
-        // --- KẾT NỐI API THỰC TẾ BẰNG POST ĐỂ VƯỢT LỖI CORS ---
+        // --- KẾT NỐI CHUẨN JSONP ---
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec';
 
         function submitLogin() {
@@ -156,7 +156,7 @@
             var statusEl = document.getElementById('loginStatus');
             
             if(acc === "" || code === "") { 
-                statusEl.innerHTML = "❌ Lười biếng! Nhập danh tính và mật ấn vào!"; 
+                statusEl.innerHTML = "❌ Nhập đủ danh tính và ấn ký!"; 
                 statusEl.style.color = "#ff3333"; 
                 document.getElementById('loginPanelContainer').classList.add('shake-active');
                 setTimeout(() => document.getElementById('loginPanelContainer').classList.remove('shake-active'), 600);
@@ -166,37 +166,44 @@
             statusEl.innerHTML = "🛰️ BOO ĐANG KIỂM CHỨNG ẤN KÝ NỘI MÔN..."; 
             statusEl.style.color = "#00e5ff";
             
-            // Đóng gói dữ liệu để không bị Google chặn
-            const dataForm = new URLSearchParams();
-            dataForm.append('username', acc);
-            dataForm.append('password', code);
-
-            fetch(scriptURL, {
-                method: 'POST',
-                body: dataForm
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.result === "success" || data.status === "success" || data.success === true || data.ket_qua === "thanh_cong") {
-                    statusEl.innerHTML = "✅ ẤN KÝ TƯƠNG HỢP. ĐANG TIẾN NHẬP SƠN MÔN..."; 
+            // 1. Khởi tạo tên Callback ngẫu nhiên cho chuẩn JSONP
+            var callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+            
+            // 2. Thiết lập hàm đón kết quả từ Google Sheets
+            window[callbackName] = function(data) {
+                delete window[callbackName]; // Dọn dẹp sau khi nhận thư
+                
+                if(data.success === true) {
+                    statusEl.innerHTML = "✅ TƯƠNG HỢP! ĐANG TIẾN NHẬP SƠN MÔN..."; 
                     statusEl.style.color = "#00e5ff";
                     document.getElementById('mainWrapper').classList.add('shake-active');
                     
+                    // Chuyển sang trang chính
                     setTimeout(() => { window.location.href = 'index.html'; }, 1500);
                 } else {
-                    statusEl.innerHTML = "❌ Sai ấn ký nội môn! Kẻ xông bậy không thể bước qua Kết nối đường Sơn môn."; 
+                    // Hiển thị trực tiếp câu báo lỗi từ App Script của anh
+                    statusEl.innerHTML = "❌ " + (data.msg || "Sai ấn ký nội môn!"); 
                     statusEl.style.color = "#ff3333";
                     document.getElementById('loginPanelContainer').classList.add('shake-active');
                     setTimeout(() => document.getElementById('loginPanelContainer').classList.remove('shake-active'), 600);
                 }
-            })
-            .catch(error => {
-                statusEl.innerHTML = "❌ Kết nối đường Sơn môn đang bị phong tỏa! Hãy thử lại."; 
+            };
+
+            // 3. Tạo lệnh gọi JSONP phù hợp 100% với doGet của anh
+            var url = scriptURL + "?action=checkLogin" + 
+                      "&username=" + encodeURIComponent(acc) + 
+                      "&password=" + encodeURIComponent(code) + 
+                      "&deviceId=Mushi1000_Mobile" + 
+                      "&callback=" + callbackName;
+
+            // 4. Phóng tín hiệu đi để vượt mọi lỗi CORS
+            var script = document.createElement('script');
+            script.src = url;
+            script.onerror = function() {
+                statusEl.innerHTML = "❌ Kết nối đường Sơn môn bị phong tỏa!"; 
                 statusEl.style.color = "#ff3333";
-                document.getElementById('loginPanelContainer').classList.add('shake-active');
-                setTimeout(() => document.getElementById('loginPanelContainer').classList.remove('shake-active'), 600);
-                console.error('Lỗi Sơn Môn:', error);
-            });
+            };
+            document.body.appendChild(script);
         }
 
         function processRegistration() { document.getElementById('regStatus').innerHTML = "Tính năng này đang được rèn dũa!"; document.getElementById('regStatus').style.color = "#00e5ff"; }
