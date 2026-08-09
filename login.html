@@ -20,7 +20,11 @@
         .radar-line { width: 100%; height: 2px; background: rgba(0, 229, 255, 0.5); box-shadow: 0 0 30px rgba(0, 229, 255, 1); position: absolute; top: -10px; animation: globalScan 8s linear infinite; }
         @keyframes globalScan { 0% { top: -10px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
-        .central-hud-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 190px; z-index: 90; pointer-events: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.4s ease; opacity: 1; }
+        /* 
+         * THAY ĐỔI VỊ TRÍ: 
+         * Đổi top: 50% thành top: 25% để đẩy cả 2 cụm giao diện lên vùng trời trống
+         */
+        .central-hud-container { position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 190px; z-index: 90; pointer-events: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.4s ease; opacity: 1; }
         .glass-layer { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: rgba(5, 10, 15, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 4px; z-index: 1; pointer-events: none; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
         .hud-text.main { position: relative; font-size: 34px; font-weight: 700; color: #fff; letter-spacing: 5px; text-shadow: 0 0 15px rgba(0, 229, 255, 0.8); z-index: 2; pointer-events: none; margin-top: -10px; text-align: center; width: 100%; display: inline-block; overflow: hidden;}
         .hud-text.main::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent); animation: quantumShine 3.5s infinite; transform: skewX(-20deg); }
@@ -31,7 +35,8 @@
         .hud-action-btn.top-left { top: 18px; left: 18px; } 
         .hud-action-btn.bottom-right { bottom: 18px; right: 18px; }
         
-        .gateway-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 12, 18, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 4px; padding: 30px 20px; z-index: 99999; display: none; flex-direction: column; align-items: center; box-shadow: 0 0 40px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 229, 255, 0.05); width: 90%; max-width: 350px; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
+        /* Bảng Đăng Nhập cũng đẩy lên top: 25% */
+        .gateway-popup { position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 12, 18, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 4px; padding: 30px 20px; z-index: 99999; display: none; flex-direction: column; align-items: center; box-shadow: 0 0 40px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 229, 255, 0.05); width: 90%; max-width: 350px; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
         .gateway-popup h2 { color: #fff; font-size: 20px; letter-spacing: 4px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(0,229,255,0.6); text-transform: uppercase; border-bottom: 1px solid rgba(0, 229, 255, 0.3); padding-bottom: 10px; width: 100%; text-align: center; }
         
         .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
@@ -62,6 +67,11 @@
     </style>
 </head>
 <body>
+    <!-- KHO ÂM THANH NỘI MÔN -->
+    <audio id="sfx-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+    <audio id="sfx-error" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="sfx-success" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+    <audio id="sfx-type" src="https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3"></audio>
 
     <div class="kdrive-image-wrapper" id="mainWrapper">
         <div class="global-radar"><div class="radar-line"></div></div>
@@ -105,6 +115,7 @@
                 </div>
             </div>
 
+            <!-- Các phần đăng ký/quên pass ẩn bên dưới -->
             <div id="panel-register" style="width: 100%; display: none; flex-direction: column; align-items: center;">
                 <h2>[ LẬP THỆ TÂN ĐỒ ]</h2>
                 <div class="input-wrapper"><input type="text" id="regId" class="login-input" placeholder="[ TÔN DANH ] *"></div>
@@ -124,24 +135,57 @@
                 <span onclick="switchPanel('login')" style="color: rgba(255,255,255,0.4); font-size: 11px; cursor: pointer; margin-top: 15px; letter-spacing: 1px;">[ QUAY LẠI SƠN MÔN ]</span>
             </div>
         </div>
-
     </div>
 
     <script>
         const EYE_CLOSED = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
         const EYE_OPEN = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
 
+        // --- HỆ THỐNG ÂM THANH ---
+        function playSound(type) {
+            let audioMap = {
+                'click': document.getElementById('sfx-click'),
+                'error': document.getElementById('sfx-error'),
+                'success': document.getElementById('sfx-success'),
+                'type': document.getElementById('sfx-type')
+            };
+            if(audioMap[type]) {
+                audioMap[type].currentTime = 0;
+                audioMap[type].play().catch(e => console.log('Âm thanh bị chặn bởi trình duyệt:', e));
+            }
+        }
+
+        // Bắt sự kiện gõ phím
+        document.querySelectorAll('.login-input').forEach(input => {
+            input.addEventListener('input', () => playSound('type'));
+        });
+
         function lockInteraction() { document.body.classList.add('popups-active'); }
         function unlockInteraction() { document.body.classList.remove('popups-active'); }
-        function showLoginPanel() { document.getElementById('loginPanelContainer').style.display = 'flex'; switchPanel('login'); lockInteraction(); }
-        function closeLoginPanel() { document.getElementById('loginPanelContainer').style.display = 'none'; unlockInteraction(); }
+        
+        function showLoginPanel() { 
+            playSound('click');
+            document.getElementById('loginPanelContainer').style.display = 'flex'; 
+            switchPanel('login'); 
+            lockInteraction(); 
+        }
+        
+        function closeLoginPanel() { 
+            playSound('click');
+            document.getElementById('loginPanelContainer').style.display = 'none'; 
+            unlockInteraction(); 
+        }
+        
         function switchPanel(panelName) { 
+            playSound('click');
             document.getElementById('panel-login').style.display = 'none'; 
             document.getElementById('panel-register').style.display = 'none'; 
             document.getElementById('panel-forgot').style.display = 'none'; 
             document.getElementById('panel-' + panelName).style.display = 'flex'; 
         }
+        
         function togglePass(inputId, iconEl) { 
+            playSound('click');
             let inp = document.getElementById(inputId); 
             if(inp.type === 'password') { inp.type = 'text'; iconEl.innerHTML = EYE_CLOSED; } 
             else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } 
@@ -151,11 +195,13 @@
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec';
 
         function submitLogin() {
+            playSound('click');
             var acc = document.getElementById('accInput').value.trim(); 
             var code = document.getElementById('passcodeInput').value.trim(); 
             var statusEl = document.getElementById('loginStatus');
             
             if(acc === "" || code === "") { 
+                playSound('error');
                 statusEl.innerHTML = "❌ Nhập đủ danh tính và ấn ký!"; 
                 statusEl.style.color = "#ff3333"; 
                 document.getElementById('loginPanelContainer').classList.add('shake-active');
@@ -166,22 +212,24 @@
             statusEl.innerHTML = "🛰️ BOO ĐANG KIỂM CHỨNG ẤN KÝ NỘI MÔN..."; 
             statusEl.style.color = "#00e5ff";
             
-            // 1. Khởi tạo tên Callback ngẫu nhiên cho chuẩn JSONP
             var callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
             
-            // 2. Thiết lập hàm đón kết quả từ Google Sheets
             window[callbackName] = function(data) {
-                delete window[callbackName]; // Dọn dẹp sau khi nhận thư
+                delete window[callbackName]; 
                 
                 if(data.success === true) {
+                    playSound('success');
                     statusEl.innerHTML = "✅ TƯƠNG HỢP! ĐANG TIẾN NHẬP SƠN MÔN..."; 
                     statusEl.style.color = "#00e5ff";
                     document.getElementById('mainWrapper').classList.add('shake-active');
                     
-                    // Chuyển sang trang chính
-                    setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+                    // Cấp vé thông hành và di chuyển
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('currentUser', acc);
+                    
+                    setTimeout(() => { window.location.href = 'index.html?v=' + new Date().getTime(); }, 1500);
                 } else {
-                    // Hiển thị trực tiếp câu báo lỗi từ App Script của anh
+                    playSound('error');
                     statusEl.innerHTML = "❌ " + (data.msg || "Sai ấn ký nội môn!"); 
                     statusEl.style.color = "#ff3333";
                     document.getElementById('loginPanelContainer').classList.add('shake-active');
@@ -189,25 +237,24 @@
                 }
             };
 
-            // 3. Tạo lệnh gọi JSONP phù hợp 100% với doGet của anh
             var url = scriptURL + "?action=checkLogin" + 
                       "&username=" + encodeURIComponent(acc) + 
                       "&password=" + encodeURIComponent(code) + 
                       "&deviceId=Mushi1000_Mobile" + 
                       "&callback=" + callbackName;
 
-            // 4. Phóng tín hiệu đi để vượt mọi lỗi CORS
             var script = document.createElement('script');
             script.src = url;
             script.onerror = function() {
+                playSound('error');
                 statusEl.innerHTML = "❌ Kết nối đường Sơn môn bị phong tỏa!"; 
                 statusEl.style.color = "#ff3333";
             };
             document.body.appendChild(script);
         }
 
-        function processRegistration() { document.getElementById('regStatus').innerHTML = "Tính năng này đang được rèn dũa!"; document.getElementById('regStatus').style.color = "#00e5ff"; }
-        function submitForgotPass() { document.getElementById('fgStatus').innerHTML = "Đang gửi mật thư khôi phục!"; document.getElementById('fgStatus').style.color = "#00e5ff"; }
+        function processRegistration() { playSound('click'); document.getElementById('regStatus').innerHTML = "Tính năng này đang được rèn dũa!"; document.getElementById('regStatus').style.color = "#00e5ff"; }
+        function submitForgotPass() { playSound('click'); document.getElementById('fgStatus').innerHTML = "Đang gửi mật thư khôi phục!"; document.getElementById('fgStatus').style.color = "#00e5ff"; }
     </script>
 </body>
 </html>
