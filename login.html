@@ -107,7 +107,6 @@
                 </div>
             </div>
 
-            <!-- Các màn hình Đăng ký, OTP, Quên mật khẩu được tinh chỉnh tương tự -->
             <div id="panel-register" style="width: 100%; display: none; flex-direction: column; align-items: center;">
                 <h2>[ LẬP THỆ TÂN ĐỒ ]</h2>
                 <div class="input-wrapper"><input type="text" id="regId" class="login-input" placeholder="[ TÔN DANH ] *"></div>
@@ -131,9 +130,11 @@
     </div>
 
     <script>
-        // JS Core Logic giữ nguyên, chỉ thay đổi text hiển thị của Boo
         const EYE_CLOSED = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
         const EYE_OPEN = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+
+        // ĐƯỜNG DẪN TỚI GOOGLE APPS SCRIPT CỦA ANH
+        const API_URL = "https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec";
 
         function lockInteraction() { document.body.classList.add('popups-active'); }
         function unlockInteraction() { document.body.classList.remove('popups-active'); }
@@ -151,7 +152,7 @@
             else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } 
         }
 
-        // Tích hợp văn phong mỏ hỗn của Boo
+        // TÍCH HỢP TRỰC TIẾP API ĐỂ ĐỐI CHIẾU DỮ LIỆU
         function submitLogin() {
             var acc = document.getElementById('accInput').value.trim(); 
             var code = document.getElementById('passcodeInput').value.trim(); 
@@ -165,24 +166,36 @@
                 return; 
             }
             
-            statusEl.innerHTML = "🛰️ BOO ĐANG KIỂM CHỨNG TÂM TRÍ..."; 
+            statusEl.innerHTML = "🛰️ ĐANG KẾT NỐI SƠN MÔN..."; 
             statusEl.style.color = "#00e5ff";
             
-            // GIẢ LẬP ĐĂNG NHẬP (Chờ API thực tế của anh)
-            setTimeout(() => {
-                if(acc === "Kai" && code === "123") {
-                    statusEl.innerHTML = "✅ CHÂN TÂM ĐÃ RÕ. ĐANG MỞ CỔNG THỜI GIAN..."; 
-                    statusEl.style.color = "#00e5ff";
-                    document.getElementById('mainWrapper').classList.add('shake-active');
-                    // Chuyển hướng sang index để chạy kịch bản thời thế kỷ 17
-                    setTimeout(() => { window.location.href = 'index.html'; }, 1500);
-                } else {
-                    statusEl.innerHTML = "❌ Lóng ngóng thế này sao càn quét nổi các bàn đấu ở Hà Nội? Nhập lại!"; 
+            // Xây dựng URL để gọi về App Script dạng GET parameters
+            var fetchUrl = API_URL + "?action=login&username=" + encodeURIComponent(acc) + "&password=" + encodeURIComponent(code);
+
+            fetch(fetchUrl)
+                .then(response => response.json()) // Đọc dữ liệu trả về từ Google Sheets
+                .then(data => {
+                    // Kiểm tra kết quả, giả định script trả về { "result": "success" } hoặc { "status": "success" }
+                    if(data.result === "success" || data.status === "success" || data.ket_qua === "thanh_cong") {
+                        statusEl.innerHTML = "✅ CHÂN TÂM ĐÃ RÕ. ĐANG MỞ CỔNG THỜI GIAN..."; 
+                        statusEl.style.color = "#00e5ff";
+                        document.getElementById('mainWrapper').classList.add('shake-active');
+                        
+                        // ĐÂY CHÍNH LÀ LỆNH CHUYỂN HƯỚNG VÀO TRUNG TÂM (index.html)
+                        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+                    } else {
+                        // Nếu sai, gọi thẳng câu khịa
+                        statusEl.innerHTML = "❌ Lóng ngóng thế này sao càn quét nổi các bàn đấu ở Hà Nội? Nhập lại!"; 
+                        statusEl.style.color = "#ff3333";
+                        document.getElementById('loginPanelContainer').classList.add('shake-active');
+                        setTimeout(() => document.getElementById('loginPanelContainer').classList.remove('shake-active'), 600);
+                    }
+                })
+                .catch(error => {
+                    // Nếu đường truyền hoặc mạng bị lỗi
+                    statusEl.innerHTML = "❌ Lỗi đường truyền Huyết Thệ! Hãy thử lại."; 
                     statusEl.style.color = "#ff3333";
-                    document.getElementById('loginPanelContainer').classList.add('shake-active');
-                    setTimeout(() => document.getElementById('loginPanelContainer').classList.remove('shake-active'), 600);
-                }
-            }, 1000);
+                });
         }
 
         function processRegistration() { document.getElementById('regStatus').innerHTML = "Tính năng này đang được rèn dũa!"; document.getElementById('regStatus').style.color = "#00e5ff"; }
