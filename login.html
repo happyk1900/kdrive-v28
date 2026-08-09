@@ -98,7 +98,7 @@
                         <span class="change-pass-link" onclick="switchPanel('forgot')" style="color: #ff3333;">[ Quên ]</span>
                     </div>
                 </div>
-                <button class="login-btn-submit" onclick="submitLogin()">KHAI MỞ HUYẾT THỆ</button>
+                <button class="login-btn-submit" onclick="submitLogin()">[ TIẾN NHẬP SƠN MÔN ]</button>
                 <div id="loginStatus" style="margin-top: 15px; font-weight: bold; text-align: center; font-size: 11px; letter-spacing: 1px; line-height: 1.5;"></div>
                 
                 <div style="margin-top: 25px; text-align: center; width: 100%; border-top: 1px solid rgba(0, 229, 255, 0.2); padding-top: 15px;">
@@ -133,9 +133,6 @@
         const EYE_CLOSED = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
         const EYE_OPEN = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
 
-        // ĐƯỜNG DẪN TỚI GOOGLE APPS SCRIPT CỦA ANH
-        const API_URL = "https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec";
-
         function lockInteraction() { document.body.classList.add('popups-active'); }
         function unlockInteraction() { document.body.classList.remove('popups-active'); }
         function showLoginPanel() { document.getElementById('loginPanelContainer').style.display = 'flex'; switchPanel('login'); lockInteraction(); }
@@ -152,7 +149,9 @@
             else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } 
         }
 
-        // TÍCH HỢP TRỰC TIẾP API ĐỂ ĐỐI CHIẾU DỮ LIỆU
+        // --- KẾT NỐI API THỰC TẾ ---
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec';
+
         function submitLogin() {
             var acc = document.getElementById('accInput').value.trim(); 
             var code = document.getElementById('passcodeInput').value.trim(); 
@@ -166,36 +165,38 @@
                 return; 
             }
             
-            statusEl.innerHTML = "🛰️ ĐANG KẾT NỐI SƠN MÔN..."; 
+            // Giữ nguyên câu thoại cực chất của anh
+            statusEl.innerHTML = "🛰️ BOO ĐANG KIỂM CHỨNG ẤN KÝ NỘI MÔN..."; 
             statusEl.style.color = "#00e5ff";
             
-            // Xây dựng URL để gọi về App Script dạng GET parameters
-            var fetchUrl = API_URL + "?action=login&username=" + encodeURIComponent(acc) + "&password=" + encodeURIComponent(code);
-
-            fetch(fetchUrl)
-                .then(response => response.json()) // Đọc dữ liệu trả về từ Google Sheets
-                .then(data => {
-                    // Kiểm tra kết quả, giả định script trả về { "result": "success" } hoặc { "status": "success" }
-                    if(data.result === "success" || data.status === "success" || data.ket_qua === "thanh_cong") {
-                        statusEl.innerHTML = "✅ CHÂN TÂM ĐÃ RÕ. ĐANG MỞ CỔNG THỜI GIAN..."; 
-                        statusEl.style.color = "#00e5ff";
-                        document.getElementById('mainWrapper').classList.add('shake-active');
-                        
-                        // ĐÂY CHÍNH LÀ LỆNH CHUYỂN HƯỚNG VÀO TRUNG TÂM (index.html)
-                        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
-                    } else {
-                        // Nếu sai, gọi thẳng câu khịa
-                        statusEl.innerHTML = "❌ Lóng ngóng thế này sao càn quét nổi các bàn đấu ở Hà Nội? Nhập lại!"; 
-                        statusEl.style.color = "#ff3333";
-                        document.getElementById('loginPanelContainer').classList.add('shake-active');
-                        setTimeout(() => document.getElementById('loginPanelContainer').classList.remove('shake-active'), 600);
-                    }
-                })
-                .catch(error => {
-                    // Nếu đường truyền hoặc mạng bị lỗi
-                    statusEl.innerHTML = "❌ Lỗi đường truyền Huyết Thệ! Hãy thử lại."; 
+            // Gửi dữ liệu lên Google Sheets để kiểm tra
+            fetch(`${scriptURL}?username=${encodeURIComponent(acc)}&password=${encodeURIComponent(code)}`)
+            .then(response => response.json())
+            .then(data => {
+                // Tùy theo App Script của anh trả về 'success' hay 'thanh_cong'
+                if(data.result === "success" || data.status === "success" || data.success === true) {
+                    statusEl.innerHTML = "✅ ẤN KÝ TƯƠNG HỢP. ĐANG TIẾN NHẬP SƠN MÔN..."; 
+                    statusEl.style.color = "#00e5ff";
+                    document.getElementById('mainWrapper').classList.add('shake-active');
+                    
+                    // Chuyển hướng sang index.html sau 1.5 giây
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+                } else {
+                    // Áp dụng câu cảnh báo mới
+                    statusEl.innerHTML = "❌ Sai ấn ký nội môn! Kẻ xông bậy không thể bước qua Kết nối đường Sơn môn."; 
                     statusEl.style.color = "#ff3333";
-                });
+                    document.getElementById('loginPanelContainer').classList.add('shake-active');
+                    setTimeout(() => document.getElementById('loginPanelContainer').classList.remove('shake-active'), 600);
+                }
+            })
+            .catch(error => {
+                // Áp dụng câu báo lỗi đường truyền
+                statusEl.innerHTML = "❌ Kết nối đường Sơn môn đang bị phong tỏa! Hãy thử lại."; 
+                statusEl.style.color = "#ff3333";
+                document.getElementById('loginPanelContainer').classList.add('shake-active');
+                setTimeout(() => document.getElementById('loginPanelContainer').classList.remove('shake-active'), 600);
+                console.error('Lỗi Sơn Môn:', error);
+            });
         }
 
         function processRegistration() { document.getElementById('regStatus').innerHTML = "Tính năng này đang được rèn dũa!"; document.getElementById('regStatus').style.color = "#00e5ff"; }
