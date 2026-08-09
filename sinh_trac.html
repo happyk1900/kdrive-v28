@@ -88,8 +88,8 @@
         body.ui-assembling .terminal-panel { animation: slide-up 1s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         body.ui-assembling .data-panel { animation: pop-out 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes drop-down { 0% { transform: translateY(-100px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-        /* Đã fix lại tâm ở translateY(-50px) để không bị lệch */
-        @keyframes drop-down-center { 0% { transform: translate(-50%, -50%) translateY(-50px) scale(0.9); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+        /* ĐÃ SỬA LẠI CHO KHỚP VỚI TỌA ĐỘ TRUNG TÂM */
+        @keyframes drop-down-center { 0% { transform: translate(-50%, -100px) scale(0.9); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
         @keyframes slide-up { 0% { transform: translateY(150px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
         @keyframes pop-out { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
@@ -107,7 +107,8 @@
         .edge-lighting.touch-pulse { filter: brightness(2.5); transition: filter 0.1s ease; }
 
         .pwa-container { width: 100%; max-width: 420px; height: 100%; max-height: 900px; position: relative; background: transparent; display: flex; flex-direction: column; z-index: 10; opacity: 0; transition: opacity 2s ease; }
-        .top-row { position: relative; z-index: 10; padding: 15px 15px 10px; display: flex; justify-content: space-between; align-items: flex-start; transition: opacity 1.5s ease; }
+        /* TĂNG Z-INDEX LÊN 100 ĐỂ KHÔNG BỊ ĐÈ */
+        .top-row { position: relative; z-index: 100; padding: 15px 15px 10px; display: flex; justify-content: space-between; align-items: flex-start; transition: opacity 1.5s ease; }
         .left-controls { display: flex; flex-direction: column; gap: 10px; transition: opacity 1.5s ease; }
         .btn-exit, .btn-audio, .btn-chip { background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0,229,255,0.3); color: var(--cyan); transition: all 0.3s ease; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
         .btn-exit { text-decoration: none; font-family: var(--font-display); font-size: 10px; font-weight: bold; letter-spacing: 1px; padding: 5px 12px; width: fit-content; }
@@ -188,10 +189,9 @@
         body.pre-scan-locked .sci-nexus { pointer-events: none !important; }
         body.uncommitted .safety-hud-box { display: none !important; }
 
-        /* ĐÃ FIX LỖI LỆCH TÂM Ở CLASS NÀY (BỔ SUNG TRANSFORM: TRANSLATE) */
+        /* ĐÃ FIX: Chốt tọa độ trung tâm, chống kéo lệch trên điện thoại */
         .safety-hud-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5, 6, 8, 0.9); border: 1px solid var(--amber); box-shadow: 0 0 20px rgba(255, 170, 0, 0.1); padding: 20px 15px; backdrop-filter: blur(5px); clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); transition: all 0.5s ease; width: 90%; max-width: 340px; margin-top: 0; }
         .safety-hud-box.unlocked { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(1.1); display: none !important; }
-        
         .hud-cond { font-family: var(--font-terminal); font-size: 12px; color: #fff; margin-bottom: 12px; text-align: left; width: 100%; display: flex; gap: 8px; font-weight: 600; line-height: 1.4; opacity: 0.9; }
         .hud-cond span.prefix { color: var(--amber); font-weight: 700; }
         .hud-cond span.device { color: #fff; font-weight: 700; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
@@ -259,22 +259,8 @@
         .holo-popup { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(12px); z-index: 60; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .holo-popup.active { opacity: 1; pointer-events: auto; }
         
-        .holo-box { 
-            width: 92%; max-width: 400px; 
-            background: radial-gradient(circle at center, #0a0d16 0%, #020305 100%); 
-            padding: 22px; border-radius: 0; 
-            border: 1px solid var(--amber); 
-            text-align: center; 
-            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); 
-            max-height: 85vh; overflow: hidden; /* CỐ ĐỊNH HOÀN TOÀN, KHÔNG BẬT THANH CUỘN THÔ */
-            box-shadow: inset 0 0 50px rgba(255, 170, 0, 0.2), 0 0 60px rgba(0,0,0,0.95);
-            position: relative;
-        }
-        .holo-box::before {
-            content: ''; position: absolute; top: -100%; left: -100%; width: 300%; height: 300%;
-            background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.04) 50%, transparent 60%);
-            animation: scanlight 6s infinite linear; pointer-events: none;
-        }
+        .holo-box { width: 92%; max-width: 400px; background: radial-gradient(circle at center, #0a0d16 0%, #020305 100%); padding: 22px; border-radius: 0; border: 1px solid var(--amber); text-align: center; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); max-height: 85vh; overflow: hidden; box-shadow: inset 0 0 50px rgba(255, 170, 0, 0.2), 0 0 60px rgba(0,0,0,0.95); position: relative; }
+        .holo-box::before { content: ''; position: absolute; top: -100%; left: -100%; width: 300%; height: 300%; background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.04) 50%, transparent 60%); animation: scanlight 6s infinite linear; pointer-events: none; }
         @keyframes scanlight { 0% { transform: translateY(-50%) translateX(-50%); } 100% { transform: translateY(50%) translateX(50%); } }
 
         .golden-dust-container { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
@@ -365,61 +351,92 @@
         @keyframes lore-pulse { 0% { box-shadow: 0 0 5px var(--violet); } 100% { box-shadow: 0 0 15px var(--violet); } }
 
         /* ========================================================
-           BUSHIDO EASTER EGG BUTTON
+           BUSHIDO EASTER EGG (NÚT BẤM BÍ MẬT - KHÔNG CÓ KHUNG)
            ======================================================== */
-        .bushido-trigger { text-align: center; margin: 30px 0 20px 0; cursor: pointer; padding: 10px; position: relative; z-index: 10; }
-        .bushido-trigger .kanji { font-size: 32px; font-weight: bold; letter-spacing: 10px; background: linear-gradient(120deg, rgba(0, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.9) 50%, rgba(0, 255, 255, 0.1) 60%); background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text; animation: bladeShine 3s linear infinite; }
-        .bushido-trigger .eng { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 12px; margin-top: 8px; font-weight: 500; }
+        .bushido-signature { 
+            text-align: center; margin: 40px auto 30px; padding: 20px; 
+            cursor: pointer; position: relative; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        .kanji-shine { 
+            font-size: 36px; font-weight: bold; letter-spacing: 12px; 
+            background: linear-gradient(120deg, rgba(0, 255, 255, 0.1) 0%, rgba(0, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.9) 50%, rgba(0, 255, 255, 0.1) 60%, rgba(0, 255, 255, 0.1) 100%); 
+            background-size: 200% auto; color: transparent; 
+            -webkit-background-clip: text; background-clip: text; 
+            animation: bladeShine 3s linear infinite; 
+        }
+        .eng-sub { 
+            font-size: 11px; color: rgba(255, 255, 255, 0.4); margin-top: 10px; 
+            letter-spacing: 15px; font-weight: 500; text-transform: uppercase; 
+        }
         @keyframes bladeShine { to { background-position: 200% center; } }
 
-        /* ========================================================
-           BUSHIDO FULLSCREEN EXPERIENCE (HUYẾT THỆ 3D)
-           ======================================================== */
-        #bushido-fs { position: fixed; inset: 0; background: #000; z-index: 999999; display: none; opacity: 0; transition: opacity 1.5s ease; overflow: hidden; cursor: crosshair; }
-        #bushido-fs.active { display: block; opacity: 1; }
+        /* LỚP MÀN HÌNH FULLSCREEN (BUSHIDO 3D INTERACTIVE) */
+        .bushido-fs-overlay { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            background: #000; z-index: 999999; display: flex; justify-content: center; align-items: center; 
+            opacity: 0; pointer-events: none; transition: opacity 1s ease; overflow: hidden; 
+        }
+        .bushido-fs-overlay.active { opacity: 1; pointer-events: auto; }
         
-        .b-bg-wrapper { position: absolute; inset: -10%; z-index: 1; perspective: 1000px; }
-        .b-musashi-bg { width: 100%; height: 100%; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/bushido%20(1).png?raw=true') center bottom / cover no-repeat; filter: brightness(0.25) grayscale(0.7); transition: filter 2s ease, transform 0.2s ease-out; transform-origin: center bottom; }
+        .musashi-fs-bg { 
+            position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; 
+            background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/bushido%20(1).png?raw=true'); 
+            background-size: cover; background-position: center 20%; 
+            transform-origin: center center; filter: brightness(0.2) grayscale(0.8); 
+            transition: filter 1.5s ease-out; z-index: 1; 
+        }
         
-        /* Mặt trăng neo cứng ở top 10% (trên bầu trời) */
-        .b-moon { position: absolute; top: 10%; right: 20%; width: 70px; height: 70px; border-radius: 50%; box-shadow: -15px 15px 0 0 var(--cyan); filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.5)); z-index: 2; opacity: 0; transition: opacity 2s ease; transform-origin: center; }
+        /* Mặt trăng Neo chặt ở phần đỉnh bầu trời, không rớt xuống phố */
+        .cyber-moon-fs { 
+            position: absolute; top: 8%; right: 20%; width: 80px; height: 80px; 
+            border-radius: 50%; box-shadow: -15px 15px 0 0 var(--cyan); 
+            filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.5)); z-index: 2; 
+            opacity: 0; transition: opacity 1.5s ease-in; 
+        }
+        
+        /* Điện xẹt u ám */
+        .static-lightning-fs { 
+            position: absolute; inset: 0; box-shadow: inset 0 0 40px rgba(0,229,255,0.3); 
+            background: rgba(0,229,255,0.05); animation: staticFlicker 0.15s infinite alternate; 
+            z-index: 3; pointer-events: none; transition: opacity 0.3s; 
+        }
+        
+        .slogan-container-fs { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            text-align: center; z-index: 4; width: 90%; transition: opacity 0.5s ease-out; pointer-events: none; 
+        }
+        .slogan-jp-fs { font-size: 26px; font-weight: bold; color: rgba(255,255,255,0.7); letter-spacing: 5px; margin-bottom: 15px; text-shadow: 0 0 15px var(--cyan); }
+        .slogan-vi-fs { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-style: italic; color: #fff; text-shadow: 0 0 10px var(--cyan); letter-spacing: 2px; }
 
-        /* Tĩnh điện xẹt quanh người */
-        .b-static { position: absolute; inset: 0; z-index: 3; box-shadow: inset 0 0 50px rgba(0,229,255,0.4); background: rgba(0,229,255,0.05); animation: staticFlicker 0.12s infinite alternate; pointer-events: none; transition: opacity 0.3s ease; }
-        @keyframes staticFlicker { 0% { opacity: 0.1; box-shadow: inset 0 0 20px rgba(0,229,255,0.2); } 100% { opacity: 0.75; box-shadow: inset 0 0 80px rgba(0,229,255,0.8); } }
-
-        /* Slogan chờ đợi */
-        .b-slogan { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 4; width: 90%; transition: opacity 0.5s ease; pointer-events: none; }
-        .b-slogan .jp { font-size: 24px; color: rgba(255,255,255,0.6); letter-spacing: 6px; text-shadow: 0 0 15px var(--cyan); margin-bottom: 15px; }
-        .b-slogan .vi { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-style: italic; color: #fff; text-shadow: 0 0 10px var(--cyan); letter-spacing: 2px; }
-
-        /* Lớp Mask và Cuộn chữ Huyết Thệ */
-        .b-mask { position: absolute; inset: 0; z-index: 5; -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 25%, black 75%, transparent 95%); display: flex; justify-content: center; pointer-events: none; opacity: 0; filter: blur(12px); transition: opacity 1.5s ease, filter 0.8s ease; }
-        .b-text { position: absolute; bottom: -120%; width: 85%; max-width: 500px; text-align: center; color: var(--crimson); text-shadow: 0 0 15px rgba(255, 42, 42, 0.8); }
-        .b-text-inner { padding-bottom: 80vh; }
+        .fade-mask-fs { 
+            position: absolute; inset: 0; 
+            -webkit-mask-image: linear-gradient(to bottom, transparent 10%, black 35%, black 65%, transparent 90%); 
+            mask-image: linear-gradient(to bottom, transparent 10%, black 35%, black 65%, transparent 90%); 
+            z-index: 5; opacity: 0; filter: blur(15px); pointer-events: none; 
+            transition: opacity 0.8s ease-in, filter 0.8s ease; display: flex; justify-content: center; 
+        }
         
-        .b-title { font-size: 28px; letter-spacing: 12px; font-weight: bold; margin-bottom: 50px; text-shadow: 0 0 20px var(--crimson); }
-        .b-title span { font-size: 13px; letter-spacing: 12px; color: rgba(255,42,42,0.8); display: block; margin-top: 10px; }
-        .b-stanza { margin-bottom: 40px; }
-        .b-stanza .jp { font-size: 18px; font-weight: bold; letter-spacing: 2px; margin-bottom: 12px; }
-        .b-stanza .vi { font-family: var(--font-ui); font-size: 12px; color: rgba(255,255,255,0.8); line-height: 1.8; text-shadow: none; font-weight: 500; text-align: justify; padding: 0 15px; }
+        .scrolling-text-fs { position: absolute; bottom: -130%; width: 85%; max-width: 500px; color: #ff2a2a; text-shadow: 0 0 15px rgba(255, 42, 42, 0.8); }
+        .blood-title-fs { text-align: center; font-size: 32px; font-weight: bold; margin-bottom: 50px; letter-spacing: 10px; color: var(--crimson); text-shadow: 0 0 15px var(--crimson), 0 0 30px var(--crimson); }
+        .blood-title-fs span { font-size: 14px; letter-spacing: 12px; color: rgba(255,42,42,0.8); display: block; margin-top: 10px; font-family: var(--font-display); }
+        
+        .blood-stanza-fs { margin-bottom: 40px; text-align: center; }
+        .blood-stanza-fs .jp { font-size: 22px; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; color: var(--crimson); text-shadow: 0 0 10px var(--crimson); }
+        .blood-stanza-fs .vi { font-family: var(--font-ui); font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.8; text-shadow: 0 0 5px rgba(0,0,0,0.8); text-align: justify; padding: 0 20px; font-weight: 500; }
 
-        /* TRẠNG THÁI: GIÁC NGỘ (KÍCH HOẠT 3D & NHẠC) */
-        #bushido-fs.awakened .b-musashi-bg { filter: brightness(0.8) grayscale(0.2); }
-        #bushido-fs.awakened .b-static { opacity: 0; display: none; }
-        #bushido-fs.awakened .b-slogan { opacity: 0; display: none; }
-        #bushido-fs.awakened .b-moon { opacity: 1; filter: drop-shadow(0 0 15px var(--cyan)) drop-shadow(0 0 25px rgba(0, 229, 255, 0.5)); animation: moonFloat 15s ease-in-out infinite alternate; }
-        #bushido-fs.awakened .b-text { animation: bloodScroll 35s linear forwards; }
-        #bushido-fs.awakened .b-mask.sharp { opacity: 1; filter: blur(0px); }
-        #bushido-fs.awakened .b-mask.blurred { opacity: 0.4; filter: blur(8px); }
+        .btn-exit-fs { position: absolute; top: 25px; right: 25px; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); padding: 8px 15px; font-family: var(--font-display); font-size: 12px; letter-spacing: 2px; z-index: 10; cursor: pointer; transition: all 0.3s; }
+        .btn-exit-fs:active { color: #fff; border-color: #fff; background: rgba(255,255,255,0.1); }
+
+        /* Trạng thái đã kích hoạt (Awakened) */
+        .bushido-fs-overlay.awakened .musashi-fs-bg { filter: brightness(0.8) grayscale(0.2); }
+        .bushido-fs-overlay.awakened .cyber-moon-fs { opacity: 1; animation: moonFloatFs 18s ease-in-out infinite alternate; }
+        .bushido-fs-overlay.awakened .scrolling-text-fs { animation: scrollUpBloodFs 30s linear forwards; }
         
-        @keyframes bloodScroll { 0% { bottom: -120%; } 100% { bottom: 100%; } }
-        /* Trăng chỉ trôi ngang sang trái/phải và zoom nhẹ, không rơi xuống dưới */
-        @keyframes moonFloat { 0% { transform: translateX(0) scale(1); } 100% { transform: translateX(-35px) scale(1.08); } }
-        
-        /* Nút Đóng */
-        .b-close { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.6); font-family: var(--font-display); font-size: 11px; font-weight: bold; z-index: 10; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); padding: 6px 12px; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
-        .b-close:active { background: var(--crimson); color: #fff; border-color: var(--crimson); }
+        @keyframes scrollUpBloodFs { 0% { bottom: -120%; } 100% { bottom: 120%; } }
+        /* Mặt trăng chỉ trôi X và Scale, ép biên độ Y lại để không rơi xuống phố */
+        @keyframes moonFloatFs { 0% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(-30px, 5px) scale(1.08); } 100% { transform: translate(20px, -5px) scale(0.95); } }
+        /* ======================================================== */
 
         .rank-footer { position: absolute; bottom: 0; left: 0; width: 100vw; z-index: 55; padding: 12px 20px calc(15px + env(safe-area-inset-bottom)); background: #050608; border-top: 1px solid rgba(255,255,255,0.15); display: flex; justify-content: center;}
         .hold-btn { width: 100%; max-width: 420px; padding: 15px; font-family: var(--font-display); font-size: 0.85rem; font-weight: bold; letter-spacing: 1px; position: relative; overflow: hidden; cursor: pointer; touch-action: none; transition: all 0.3s; }
@@ -435,8 +452,10 @@
         .vault-input:focus { background: rgba(255, 170, 0, 0.15); box-shadow: inset 0 0 20px rgba(255, 170, 0, 0.3), 0 0 10px rgba(255, 170, 0, 0.5); }
         .vault-input.error { border-color: var(--crimson); color: var(--crimson); background: rgba(255, 42, 42, 0.1); box-shadow: inset 0 0 20px rgba(255, 42, 42, 0.3); animation: overload-shake 0.3s ease-in-out; }
         .vault-input.success { border-color: var(--mint); color: var(--mint); background: rgba(0, 255, 157, 0.1); box-shadow: inset 0 0 20px rgba(0, 255, 157, 0.3); }
+
         @keyframes load-bar { 0% { width: 0%; } 100% { width: 100%; } }
 
+        /* HIỆU ỨNG ICON BOO (MŨI HEO) */
         #term-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; transition: all 0.3s ease; }
         #term-head:active { transform: scale(0.98); background: #fff; color: var(--bg-obsidian); }
         .boo-pig-nose { font-size: 13px; display: inline-block; animation: pig-breathe 1s infinite alternate cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 0 5px rgba(255, 0, 255, 0.6)); transition: transform 0.2s; }
@@ -577,7 +596,6 @@
                 </div>
             </div>
 
-            <!-- ĐÃ FIX LỖI LỆCH TÂM -->
             <div id="safety-lock-hud" class="safety-hud-box">
                 <div class="hud-cond"><span class="prefix">_ YÊU CẦU ĐỒNG BỘ:</span> <span class="device">SMARTWATCH.</span></div>
                 <div class="hud-cond"><span class="prefix">_ YÊU CẦU ĐỒNG BỘ:</span> <span class="device">SMART SCALE.</span></div>
@@ -619,7 +637,6 @@
         
         <div class="tier-list">
             
-            <!-- 1. PACT -->
             <div class="tier-item">
                 <button class="tier-btn tier-tri" onclick="toggleTier('mod6', this)">
                     <div><span class="tier-prefix">PACT :</span> <span class="tier-name">KHẾ ƯỚC 1000 NGÀY (TẬN TÂM)</span></div> <span>▼</span><div class="shooting-star"></div>
@@ -639,7 +656,6 @@
                 </div>
             </div>
 
-            <!-- 2. TIER 1 -->
             <div class="tier-item">
                 <button class="tier-btn tier-shiro" onclick="toggleTier('tier1', this)">
                     <div><span class="tier-prefix">TIER 1 :</span> <span class="tier-name">CHIẾN BINH (CAN ĐẢM)</span></div> <span>▼</span><div class="shooting-star"></div>
@@ -657,7 +673,6 @@
                 </div>
             </div>
 
-            <!-- 3. TIER 2 -->
             <div class="tier-item">
                 <button class="tier-btn tier-chairo" onclick="toggleTier('tier2', this)">
                     <div><span class="tier-prefix">TIER 2 :</span> <span class="tier-name">TINH ANH (CÔNG LÝ)</span></div> <span>▼</span><div class="shooting-star"></div>
@@ -675,7 +690,6 @@
                 </div>
             </div>
 
-            <!-- 4. TIER 3 -->
             <div class="tier-item">
                 <button class="tier-btn tier-kuro" onclick="toggleTier('tier3', this)">
                     <div><span class="tier-prefix">TIER 3 :</span> <span class="tier-name">VÔ NGÃ (DANH DỰ)</span></div> <span>▼</span><div class="shooting-star"></div>
@@ -693,7 +707,6 @@
                 </div>
             </div>
 
-            <!-- 5. REGEN -->
             <div class="tier-item">
                 <button class="tier-btn tier-void" onclick="toggleTier('mod4', this)">
                     <div><span class="tier-prefix">REGEN :</span> <span class="tier-name">GIAO THỨC XẢ TẢI (NHÂN TỪ)</span></div> <span>▼</span><div class="shooting-star"></div>
@@ -711,7 +724,6 @@
                 </div>
             </div>
             
-            <!-- 6. CORE -->
             <div class="tier-item">
                 <button class="tier-btn tier-core" onclick="toggleTier('mod0', this)">
                     <div><span class="tier-prefix">CORE :</span> <span class="tier-name">HỒ SƠ KIẾM THÁNH (TÔN TRỌNG)</span></div> <span>▼</span><div class="shooting-star"></div>
@@ -730,7 +742,6 @@
                 </div>
             </div>
 
-            <!-- 7. PATH -->
             <div class="tier-item">
                 <button class="tier-btn tier-dao" onclick="toggleTier('mod5', this)">
                     <div><span class="tier-prefix">PATH :</span> <span class="tier-name">NGŨ LUÂN THƯ (CHÂN THÀNH)</span></div> <span>▼</span><div class="shooting-star"></div>
@@ -749,10 +760,12 @@
                 </div>
             </div>
 
-            <!-- NÚT KÍCH HOẠT EASTER EGG (NẰM DƯỚI ĐÁY BÍ LỤC) -->
-            <div class="bushido-trigger" onclick="openBushidoFS()">
-                <div class="kanji">武士道</div>
-                <div class="eng">BUSHIDO</div>
+            <!-- ===================================== -->
+            <!-- NÚT BẤM BÍ MẬT EASTER EGG (KHÔNG KHUNG) -->
+            <!-- ===================================== -->
+            <div class="bushido-signature" onclick="openBushidoFullscreen()">
+                <div class="kanji-shine">武士道</div>
+                <div class="eng-sub">B U S H I D O</div>
             </div>
 
         </div>
@@ -761,45 +774,57 @@
         </div>
     </div>
 
-    <!-- KHUNG FULLSCREEN CHO HUYẾT THỆ VÕ SĨ ĐẠO -->
-    <div id="bushido-fs" onclick="awakenBushido()">
-        <div class="b-close" onclick="closeBushidoFS(event)">[ ĐÓNG ]</div>
-        <div class="b-bg-wrapper">
-            <div class="b-musashi-bg" id="b-musashi-bg"></div>
+    <!-- ===================================== -->
+    <!-- MÀN HÌNH FULLSCREEN (BUSHIDO LÕI)   -->
+    <!-- ===================================== -->
+    <div id="bushido-fullscreen" class="bushido-fs-overlay" onclick="activateBushidoMode(event)">
+        <button class="btn-exit-fs" onclick="closeBushidoFullscreen(event)">[ ĐÓNG ]</button>
+        
+        <!-- Khung ảnh 3D -->
+        <div class="musashi-fs-bg" id="fs-musashi-bg"></div>
+        
+        <!-- Mặt trăng Neo chặt ở phần đỉnh bầu trời, không rớt xuống phố -->
+        <div class="cyber-moon-fs" id="fs-cyber-moon"></div>
+        
+        <!-- Lưới điện xẹt (Ngưng khi kích hoạt) -->
+        <div class="static-lightning-fs" id="fs-static-lightning"></div>
+        
+        <!-- Slogan mời gọi (Mất đi khi kích hoạt) -->
+        <div class="slogan-container-fs" id="fs-slogan-container">
+            <div class="slogan-jp-fs">自我に触れ、真理を悟る</div>
+            <div class="slogan-vi-fs">Chạm vào bản ngã - Ngộ ra chân lý</div>
         </div>
-        <!-- Trăng neo cứng ở 10% từ trên xuống -->
-        <div class="b-moon"></div>
-        <div class="b-static" id="b-static"></div>
-        <div class="b-slogan" id="b-slogan">
-            <div class="jp">自我に触れ、真理を悟る</div>
-            <div class="vi">Chạm vào bản ngã - Ngộ ra chân lý</div>
-        </div>
-        <div class="b-mask" id="b-mask">
-            <div class="b-text" id="b-text">
-                <div class="b-text-inner">
-                    <div class="b-title">武 士 道<br><span>B U S H I D O</span></div>
-                    <div class="b-stanza">
-                        <div class="jp">闘技場において、武士道は虚飾にあらず。</div>
-                        <div class="vi">• Bản chất của Đạo: Trên bàn đấu, Bushido không phải là triết lý viển vông. Nó là sự tàn nhẫn tuyệt đối với chính bản ngã của mình. Không ngụy biện, không đổ lỗi.</div>
-                    </div>
-                    <div class="b-stanza">
-                        <div class="jp">一つ欠ければ、全てが崩壊する。</div>
-                        <div class="vi">• Sự hợp nhất: Mất Tận Tâm, Can Đảm thành liều lĩnh. Mất Kỷ Luật, Công Lý thành ảo tưởng. Thiếu một mảnh ghép, hệ thống K-Drive sẽ sụp đổ và đào thải bạn.</div>
-                    </div>
-                    <div class="b-stanza">
-                        <div class="jp">刀は無情なり、驕りを焼き尽くす。</div>
-                        <div class="vi">• Lưỡi gươm phán quyết: K-Drive chỉ ghi nhận Dữ liệu. Đánh bạc bằng cảm xúc là phản bội lại Đạo. Thanh Katana này rất vô tình: Nó thiêu rụi mọi cái tôi kiêu ngạo.</div>
-                    </div>
-                    <div class="b-stanza">
-                        <div class="jp">規律こそが、自由への唯一の道。</div>
-                        <div class="vi">• Lời răn cuối: Thà ngồi ngoài (Sit Out) bảo toàn Bankroll, tuyệt đối không vung tiền trong cơn điên (Tilt). Kỷ luật là con đường duy nhất dẫn đến vinh quang.</div>
-                    </div>
+
+        <!-- Nội dung huyết thệ (Xổ ra và hiển thị rõ khi Tĩnh Lặng) -->
+        <div class="fade-mask-fs" id="fs-blood-mask">
+            <div class="scrolling-text-fs" id="fs-blood-text">
+                <p class="blood-title-fs">武 士 道<br><span>B U S H I D O</span></p>
+                
+                <div class="blood-stanza-fs">
+                    <p class="jp">闘技場において、武士道は虚飾にあらず。</p>
+                    <p class="vi">• Bản chất của Đạo: Trên bàn đấu, Bushido không phải là triết lý viển vông. Nó là sự tàn nhẫn tuyệt đối với chính bản ngã của mình. Không ngụy biện, không đổ lỗi.</p>
+                </div>
+                
+                <div class="blood-stanza-fs">
+                    <p class="jp">一つ欠ければ、全てが崩壊する。</p>
+                    <p class="vi">• Sự hợp nhất: Mất Tận Tâm, Can Đảm thành liều lĩnh. Mất Kỷ Luật, Công Lý thành ảo tưởng. Thiếu một mảnh ghép, hệ thống K-Drive sẽ sụp đổ và đào thải bạn.</p>
+                </div>
+                
+                <div class="blood-stanza-fs">
+                    <p class="jp">刀は無情なり、驕りを焼き尽くす。</p>
+                    <p class="vi">• Lưỡi gươm phán quyết: K-Drive chỉ ghi nhận Dữ liệu. Đánh bạc bằng cảm xúc là phản bội lại Đạo. Thanh Katana này rất vô tình: Nó thiêu rụi mọi cái tôi kiêu ngạo.</p>
+                </div>
+                
+                <div class="blood-stanza-fs">
+                    <p class="jp">規律こそが、自由への唯一の道。</p>
+                    <p class="vi">• Lời răn cuối: Thà ngồi ngoài (Sit Out) bảo toàn Bankroll, tuyệt đối không vung tiền trong cơn điên (Tilt). Kỷ luật là con đường duy nhất dẫn đến vinh quang.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- KHUNG XEM ẢNH FULLSCREEN -->
+
+    <!-- KHUNG XEM ẢNH FULLSCREEN (CŨ) -->
     <div class="img-viewer" id="img-viewer">
         <button class="btn-close-img" onclick="closeFullscreen()">[ ĐÓNG ]</button>
         <img id="viewer-img" src="" alt="View">
@@ -894,9 +919,9 @@
                 initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
                 osc.type = 'sawtooth'; osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.15);
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.15);
             } catch(e){}
         }
 
@@ -982,7 +1007,7 @@
             if(edge) { edge.classList.add('touch-pulse'); setTimeout(() => edge.classList.remove('touch-pulse'), 150); }
         }, {passive: true});
         
-        let cinematicAudio = null, ascentAudio = null, roninAudio = null, bushidoMusic = null;
+        let cinematicAudio = null, ascentAudio = null, roninAudio = null;
         let isAscentActive = false, isMuted = true, introStarted = false, introReq;
         let introFinished = false, introPunchlineTriggered = false, introPunchlineFaded = false, introCrossfadeTriggered = false, introSignatureTriggered = false;
 
@@ -1001,7 +1026,6 @@
             if (!cinematicAudio) { cinematicAudio = new Audio('https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/0801.MP3'); }
             if (!ascentAudio) { ascentAudio = new Audio('https://github.com/happyk1900/Music-ver-1-Poker-abum/raw/refs/heads/main/The_High_Stakes_Ascent.mp4'); ascentAudio.volume = 0.7; }
             if (!roninAudio) { roninAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20R%C5%8Dnin.mp3'); roninAudio.loop = true; roninAudio.volume = 0.5; }
-            if (!bushidoMusic) { bushidoMusic = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai-Ripe%20Night.mp3'); bushidoMusic.loop = true; bushidoMusic.volume = 0.8; }
         }
 
         function startIntro(e) {
@@ -1102,140 +1126,8 @@
             else { roninAudio.pause(); isMuted = true; document.getElementById('icon-sound-on').style.display='none'; document.getElementById('icon-sound-off').style.display='block'; } 
         }
 
-        /* ========================================================
-           LOGIC: HUYẾT THỆ VÕ SĨ ĐẠO (BUSHIDO 3D INTERACTIVE)
-           ======================================================== */
-        
-        let isBushidoActive = false;
-        let electricHumOsc = null;
-        let bTargetX = 0, bTargetY = 0, bCurX = 0, bCurY = 0;
-        let bParallaxReq;
-        let bStillFrames = 0;
-
-        function playElectricalHum() {
-            try {
-                initAudio();
-                if(electricHumOsc) return; 
-                electricHumOsc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                electricHumOsc.type = 'sawtooth';
-                electricHumOsc.frequency.value = 50; 
-                
-                let humInterval = setInterval(() => {
-                    if(!electricHumOsc) { clearInterval(humInterval); return; }
-                    electricHumOsc.frequency.setValueAtTime(Math.random() * 80 + 40, audioCtx.currentTime);
-                }, 100);
-                
-                gain.gain.value = 0.05;
-                electricHumOsc.connect(gain);
-                gain.connect(audioCtx.destination);
-                electricHumOsc.start();
-            } catch(e) {}
-        }
-
-        function stopElectricalHum() {
-            if(electricHumOsc) {
-                try {
-                    electricHumOsc.stop();
-                    electricHumOsc.disconnect();
-                } catch(e) {}
-                electricHumOsc = null;
-            }
-        }
-
-        // Bấm chữ Bushido dưới đáy Bí Lục để vào Fullscreen
-        function openBushidoFS() {
-            initAllAudio();
-            document.getElementById('bushido-fs').style.display = 'block';
-            setTimeout(() => { document.getElementById('bushido-fs').classList.add('active'); }, 50);
-            playElectricalHum();
-            
-            // Dừng các nhạc khác nếu đang chạy
-            if(roninAudio && !roninAudio.paused) roninAudio.pause();
-            if(ascentAudio && !ascentAudio.paused) ascentAudio.pause();
-        }
-
-        // Đóng Fullscreen Huyết thệ
-        function closeBushidoFS(e) {
-            e.stopPropagation();
-            stopElectricalHum();
-            if(bushidoMusic) { bushidoMusic.pause(); bushidoMusic.currentTime = 0; }
-            document.getElementById('bushido-fs').classList.remove('active');
-            setTimeout(() => { 
-                document.getElementById('bushido-fs').style.display = 'none'; 
-                document.getElementById('bushido-fs').classList.remove('awakened');
-                isBushidoActive = false;
-                if(bParallaxReq) { cancelAnimationFrame(bParallaxReq); bParallaxReq = null; }
-            }, 1500);
-            
-            // Bật lại nhạc cũ nếu trước đó đang bật
-            if(!isMuted && roninAudio) roninAudio.play();
-        }
-
-        // Chạm vào Musashi để Kích hoạt 3D và rơi Nhạc
-        function awakenBushido() {
-            if(isBushidoActive) return;
-            isBushidoActive = true;
-            
-            stopElectricalHum();
-            playSlashSound(); // Tiếng chém kiếm!
-            
-            // Thả nhạc (Drop Music) ngay sau nhịp chém kiếm
-            setTimeout(() => { if(bushidoMusic) bushidoMusic.play(); }, 300);
-            
-            document.getElementById('bushido-fs').classList.add('awakened');
-            
-            // Kích hoạt Parallax tracking
-            startBushidoParallax();
-        }
-
-        function startBushidoParallax() {
-            const fsContainer = document.getElementById('bushido-fs');
-            if (window.DeviceOrientationEvent) {
-                window.addEventListener('deviceorientation', (e) => {
-                    let x = e.gamma || 0; let y = e.beta || 0;
-                    if (x > 30) x = 30; if (x < -30) x = -30;
-                    if (y > 60) y = 60; if (y < 0) y = 0;
-                    bTargetX = (x / 30) * 12; bTargetY = ((y - 30) / 30) * 12;
-                });
-            }
-            fsContainer.addEventListener('mousemove', (e) => {
-                const w = window.innerWidth; const h = window.innerHeight;
-                bTargetX = ((e.clientX - w / 2) / (w / 2)) * 12;
-                bTargetY = ((e.clientY - h / 2) / (h / 2)) * 12;
-            });
-
-            bParallaxReq = requestAnimationFrame(updateBushidoParallax);
-        }
-
-        function updateBushidoParallax() {
-            if(!isBushidoActive) return;
-
-            const dx = bTargetX - bCurX; const dy = bTargetY - bCurY;
-            bCurX += dx * 0.1; bCurY += dy * 0.1;
-            const v = Math.sqrt(dx*dx + dy*dy);
-            
-            const bg = document.getElementById('b-musashi-bg');
-            bg.style.transform = `rotateY(${bCurX}deg) rotateX(${-bCurY}deg) scale(1.15)`;
-            
-            const bloodMask = document.getElementById('b-mask');
-            if (v > 0.5) {
-                bStillFrames = 0;
-                bloodMask.className = 'b-mask blurred';
-            } else {
-                bStillFrames++;
-                if (bStillFrames > 60) { // Đứng yên khoảng 1 giây -> Rõ nét
-                    bloodMask.className = 'b-mask sharp';
-                } else {
-                    bloodMask.className = 'b-mask blurred';
-                }
-            }
-            bParallaxReq = requestAnimationFrame(updateBushidoParallax);
-        }
-
-        /* ======================================================== */
-
         const holoPopup = document.getElementById('holo-popup');
+        
         function openHolo(type) { 
             playBeep(); 
             let t_hr = parseInt(localStorage.getItem('kdrive_target_hr')) || 140;
@@ -1462,6 +1354,201 @@
             else if (state === 'kuro') { box.style.borderColor = 'var(--neon-pink)'; box.style.background = 'rgba(255, 0, 255, 0.15)'; icon.innerHTML = '🥷'; icon.style.color = 'var(--neon-pink)'; mqText.innerHTML = `TRẠNG THÁI VÔ NGÃ - CẤP ĐẶC QUYỀN THẺ S - OVERDRIVE`; }
         }
 
+        // ==========================================
+        // KHỐI LOGIC MỚI CHO BÍ LỤC VÀ BUSHIDO
+        // ==========================================
+        
+        let isBushidoActive = false;
+        let electricHumOsc = null;
+        let pTargetX = 0, pTargetY = 0, pCurrentX = 0, pCurrentY = 0;
+        let pVelocity = 0, stillTimer = 0;
+        let parallaxReqId = null;
+
+        // BẢN NHẠC NỀN CHO HUYẾT THỆ (Anh thay link nhạc của anh vào đây nhé)
+        let bushidoMusic = new Audio(''); // <-- THÊM LINK NHẠC VÀO GIỮA DẤU NHÁY ĐƠN
+        bushidoMusic.loop = true;
+        bushidoMusic.volume = 0.8;
+
+        function openBushidoFullscreen() {
+            playBeep();
+            
+            // Đóng menu Bí Lục lại
+            document.getElementById('rank-overlay').classList.remove('active');
+            
+            // Mở màn hình Fullscreen
+            const fsOverlay = document.getElementById('bushido-fullscreen');
+            fsOverlay.classList.add('active');
+            
+            // Bật trường tĩnh điện u ám
+            playElectricalHum();
+        }
+
+        function closeBushidoFullscreen(e) {
+            e.stopPropagation();
+            playBeep();
+            
+            // Reset toàn bộ
+            isBushidoActive = false;
+            stopElectricalHum();
+            bushidoMusic.pause();
+            bushidoMusic.currentTime = 0;
+            
+            const fsOverlay = document.getElementById('bushido-fullscreen');
+            fsOverlay.classList.remove('active');
+            fsOverlay.classList.remove('awakened');
+            
+            document.getElementById('fs-static-lightning').style.display = 'block';
+            document.getElementById('fs-slogan-container').style.opacity = '1';
+            
+            if (parallaxReqId) {
+                cancelAnimationFrame(parallaxReqId);
+                parallaxReqId = null;
+            }
+            
+            // Mở lại bảng xếp hạng (Tùy chọn)
+            document.getElementById('rank-overlay').classList.add('active');
+        }
+
+        function toggleRankMenu() { 
+            const overlay = document.getElementById('rank-overlay');
+            overlay.classList.toggle('active'); 
+        }
+
+        function toggleTier(id, btnElement) { 
+            if(id === 'tier3') { triggerMushinProtocol(btnElement); } else { playSlashSound(); }
+            let star = btnElement.querySelector('.shooting-star'); if(star) { star.classList.remove('active'); void star.offsetWidth; star.classList.add('active'); }
+            const c = document.getElementById(id); c.classList.contains('open') ? c.classList.remove('open') : (document.querySelectorAll('.tier-content').forEach(e=>e.classList.remove('open')), c.classList.add('open')); 
+        }
+
+        function playElectricalHum() {
+            try {
+                initAudio();
+                if(electricHumOsc) stopElectricalHum();
+                electricHumOsc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                electricHumOsc.type = 'sawtooth';
+                electricHumOsc.frequency.value = 50; 
+                
+                let humInterval = setInterval(() => {
+                    if(!electricHumOsc) { clearInterval(humInterval); return; }
+                    electricHumOsc.frequency.setValueAtTime(Math.random() * 80 + 40, audioCtx.currentTime);
+                }, 100);
+                
+                gain.gain.value = 0.05;
+                electricHumOsc.connect(gain);
+                gain.connect(audioCtx.destination);
+                electricHumOsc.start();
+            } catch(e) {}
+        }
+
+        function stopElectricalHum() {
+            if(electricHumOsc) {
+                try {
+                    electricHumOsc.stop();
+                    electricHumOsc.disconnect();
+                } catch(e) {}
+                electricHumOsc = null;
+            }
+        }
+
+        function activateBushidoMode(e) {
+            // Nếu bấm nhầm nút Đóng thì không chạy cái này
+            if(e.target.className === 'btn-exit-fs') return;
+            
+            if (isBushidoActive) return;
+            isBushidoActive = true;
+            
+            // Cắt điện, phát âm thanh chém kiếm
+            playSlashSound();
+            stopElectricalHum();
+            
+            // PHÁT NHẠC NỀN HUYẾT THỆ CỦA ANH Ở ĐÂY
+            try {
+                if(bushidoMusic.src && bushidoMusic.src !== window.location.href) {
+                    bushidoMusic.play();
+                }
+            } catch(err) {}
+            
+            // Đánh thức khối 3D Fullscreen
+            const fsOverlay = document.getElementById('bushido-fullscreen');
+            document.getElementById('fs-static-lightning').style.display = 'none';
+            document.getElementById('fs-slogan-container').style.opacity = '0';
+            fsOverlay.classList.add('awakened');
+            
+            // Kích hoạt Parallax tracking
+            startParallaxTracking();
+        }
+
+        function startParallaxTracking() {
+            const container = document.getElementById('bushido-fullscreen');
+            
+            // Xử lý Cảm biến nghiêng (Device Orientation cho Mobile)
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', (e) => {
+                    let x = e.gamma || 0; 
+                    let y = e.beta || 0;
+                    
+                    if (x > 30) x = 30; if (x < -30) x = -30;
+                    if (y > 60) y = 60; if (y < 0) y = 0;
+                    
+                    pTargetX = (x / 30) * 15; 
+                    pTargetY = ((y - 30) / 30) * 15;
+                });
+            }
+            
+            // Xử lý Cảm biến chuột (Desktop Fallback)
+            container.addEventListener('mousemove', (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                pTargetX = (x / (rect.width / 2)) * 15;
+                pTargetY = (y / (rect.height / 2)) * 15;
+            });
+
+            parallaxReqId = requestAnimationFrame(renderParallax);
+        }
+
+        function renderParallax() {
+            if(!isBushidoActive) return;
+
+            const dx = pTargetX - pCurrentX;
+            const dy = pTargetY - pCurrentY;
+            
+            // Gia tốc làm mượt
+            pCurrentX += dx * 0.1;
+            pCurrentY += dy * 0.1;
+            
+            pVelocity = Math.sqrt(dx*dx + dy*dy);
+            
+            const bloodMask = document.getElementById('fs-blood-mask');
+            const bg = document.getElementById('fs-musashi-bg');
+            
+            // Xoay 3D
+            bg.style.transform = `perspective(1000px) rotateY(${pCurrentX}deg) rotateX(${-pCurrentY}deg) scale(1.15)`;
+            
+            // Test độ Tĩnh Lặng (Stillness) để giải phong ấn
+            if (pVelocity > 0.6) {
+                stillTimer = 0;
+                bloodMask.style.opacity = '0.2';
+                bloodMask.style.filter = 'blur(12px)';
+            } else {
+                stillTimer += 16;
+                if (stillTimer > 1000) { 
+                    // Chạm cảnh giới Tĩnh - Chữ sắc nét
+                    bloodMask.style.opacity = '1';
+                    bloodMask.style.filter = 'blur(0px)';
+                } else {
+                    bloodMask.style.opacity = '0.5';
+                    bloodMask.style.filter = 'blur(5px)';
+                }
+            }
+            
+            parallaxReqId = requestAnimationFrame(renderParallax);
+        }
+        
+        // ==========================================
+        
         const dynamicBtn = document.getElementById('dynamic-hold-btn');
         function updateButtonState() {
             const streakBtn = document.getElementById('streak-box');
@@ -1476,6 +1563,7 @@
         function confirmCommitment() { 
             playBeep();
             document.getElementById('rank-overlay').classList.remove('active');
+            stopElectricalHum();
             document.getElementById('onboarding-popup').classList.add('active'); 
         }
 
@@ -1590,6 +1678,7 @@
             }, 10500);
         }
 
+        // RESET SẠCH SẼ BỘ ĐẾM KHI HỦY CAM KẾT ĐỂ TEST TỪ ĐẦU
         function triggerAbort() { 
             localStorage.removeItem('combat_committed'); 
             localStorage.removeItem('mushin_start_date'); 
