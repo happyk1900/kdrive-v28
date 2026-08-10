@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>K-Drive: Sơn Môn Yết Kiến</title>
     
-    <!-- TÍCH HỢP 2 FONT VIỆT HÓA HOÀN HẢO: Space Grotesk (Giao diện) & Montserrat (Phụ đề điện ảnh) -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- TÍCH HỢP FONT: Space Grotesk (Giao diện) & Playfair Display (Phụ đề triết lý Serif) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: none; }
@@ -35,38 +35,55 @@
         @keyframes glowArrow { 0% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0); } 100% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0.8); } }
 
         /* HỆ THỐNG PHỤ ĐỀ ĐIỆN ẢNH (CINEMATIC SUBTITLES) */
-        .cinematic-sub-container { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; text-align: center; z-index: 100; pointer-events: none; display: none; }
+        .cinematic-sub-container { position: absolute; top: 18%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; text-align: center; z-index: 100; pointer-events: none; display: none; }
+        
         .sub-text-item { 
-            font-family: 'Montserrat', sans-serif; /* Font chuẩn điện ảnh */
-            color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 1.5px; line-height: 1.6; 
-            text-shadow: 0 0 10px rgba(0, 229, 255, 0.8), 0 0 25px rgba(0, 229, 255, 0.4); 
-            opacity: 0; transform: scale(0.95); 
-            transition: opacity 0.8s ease, transform 4s ease-out; /* Hiệu ứng từ từ rõ nét và to dần */
-            text-transform: uppercase; 
+            font-family: 'Playfair Display', serif; /* Đổi sang font chữ triết lý, có chân */
+            color: #f8f9fa; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; line-height: 1.6; 
+            /* Căn giữa thông minh, không rớt chữ mồ côi */
+            text-wrap: balance; 
+            /* Dập bóng đen mạnh phía sau để tách chữ khỏi nền trời sáng */
+            text-shadow: 0px 2px 5px rgba(0,0,0,0.9), 0px 0px 15px rgba(0,0,0,1); 
+            opacity: 0; transform: scale(0.98); 
+            transition: opacity 0.8s ease, transform 4s ease-out; 
         }
-        .sub-text-item.active { opacity: 1; transform: scale(1.02); }
+        .sub-text-item.active { opacity: 1; transform: scale(1); }
 
-        /* NÚT TIẾN NHẬP NGAY (BỎ QUA KHAI MỞ) */
+        /* Tiêu đề Khai mở (Màu đỏ, in hoa, phông Cyberpunk) */
+        .sub-text-item.is-title {
+            font-family: 'Space Grotesk', sans-serif;
+            color: #ff3333; font-size: 16px; font-weight: 700; text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.8), 0 2px 4px rgba(0,0,0,0.9);
+            letter-spacing: 2px;
+        }
+
+        /* Highlight Từ Khóa */
+        .hl-purple { color: #d946ef; font-weight: 600; text-shadow: 0 0 10px rgba(217, 70, 239, 0.7), 0 2px 4px rgba(0,0,0,0.8); }
+        .hl-cyan { color: #00e5ff; font-weight: 600; text-shadow: 0 0 10px rgba(0, 229, 255, 0.7), 0 2px 4px rgba(0,0,0,0.8); }
+        .hl-red { color: #ff3333; font-weight: 700; text-shadow: 0 0 10px rgba(255, 51, 51, 0.7), 0 2px 4px rgba(0,0,0,0.8); }
+
+        /* NÚT TIẾN NHẬP NGAY */
         .skip-intro-btn { 
-            position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); 
+            position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); 
             background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0, 229, 255, 0.5); 
-            color: rgba(0, 229, 255, 0.8); padding: 12px 25px; font-size: 12px; font-weight: 700; 
+            color: rgba(0, 229, 255, 0.8); padding: 10px 25px; font-size: 12px; font-weight: 700; 
             letter-spacing: 3px; border-radius: 4px; cursor: pointer; z-index: 101; display: none; 
             backdrop-filter: blur(5px); transition: 0.4s; font-family: 'Space Grotesk', sans-serif;
+            white-space: nowrap; /* Ép không xuống dòng */
             text-shadow: 0 0 8px rgba(0,229,255,0.4); box-shadow: inset 0 0 10px rgba(0,229,255,0.1);
         }
         .skip-intro-btn:hover { background: rgba(0, 229, 255, 0.2); color: #fff; border-color: #00e5ff; box-shadow: 0 0 20px rgba(0,229,255,0.4); text-shadow: 0 0 10px #fff; }
 
         /* HIỆU ỨNG CHỚP SÁNG CHUYỂN CẢNH (WHITEOUT) */
-        .whiteout-flash { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #e0f7fa; z-index: 90000; opacity: 0; pointer-events: none; transition: opacity 0.8s ease-in-out; }
-        .whiteout-flash.active { opacity: 0.9; }
+        .whiteout-flash { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #e0f7fa; z-index: 90000; opacity: 0; pointer-events: none; transition: opacity 0.5s ease-in-out; }
+        .whiteout-flash.active { opacity: 0.95; }
 
         /* DASHBOARD ĐĂNG NHẬP */
         .gateway-popup { 
             position: absolute; top: 35%; left: 50%; width: 90%; max-width: 350px; 
             border-radius: 8px; overflow: hidden; padding: 2px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.2);
-            z-index: 99999; opacity: 0; transform: translate(-50%, -25%) scale(0.95); pointer-events: none;
-            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 99999; opacity: 0; transform: translate(-50%, -20%) scale(0.95); pointer-events: none;
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .gateway-popup.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
         
@@ -108,6 +125,9 @@
 
     <!-- FILE VOICE MỚI CỦA ANH -->
     <audio id="sysAudio" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/KHAIMO.MP3" preload="auto"></audio>
+    
+    <!-- ÂM THANH SFX KHI CHUYỂN CẢNH (Nhịp Đánh Thức) -->
+    <audio id="sfxTransition" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
 
     <div class="kdrive-image-wrapper" id="mainWrapper">
         <div class="global-radar"><div class="radar-line"></div></div>
@@ -157,7 +177,7 @@
                     </div>
                 </div>
 
-                <!-- Bảng 2, 3, 4 ẩn đi (Lập Thệ, Quên MK, Kiếm Thánh) -->
+                <!-- Bảng 2, 3, 4 ẩn đi -->
                 <div id="panel-register" style="width: 100%; display: none; flex-direction: column; align-items: center;">
                     <h2>[ LẬP THỆ TÂN ĐỒ ]</h2>
                     <div class="input-wrapper"><input type="text" id="regId" class="login-input" placeholder="[ TÔN DANH ] *"></div>
@@ -191,22 +211,22 @@
     </div>
 
     <script>
-        // --- TIMELINE ĐÃ CHỐT TỪNG GIÂY ---
+        // --- TIMELINE ĐÃ PHÂN TÁCH TIÊU ĐỀ VÀ HIGHLIGHT TỪ KHÓA ---
         const subTimeline = [
-            { start: 0, end: 4, text: "THÔNG ĐIỆP KHAI MỞ" },
-            { start: 5, end: 7, text: "TIỀN ĐIỀU KIỆN VÀ HUYẾT THỆ" },
-            { start: 8, end: 10, text: "K-Drive không phải là một ứng dụng thông thường." },
+            { start: 0, end: 4, text: "THÔNG ĐIỆP KHAI MỞ", isTitle: true },
+            { start: 5, end: 7, text: "TIỀN ĐIỀU KIỆN VÀ HUYẾT THỆ", isTitle: true },
+            { start: 8, end: 10, text: "<span class='hl-cyan'>K-Drive</span> không phải là một ứng dụng thông thường." },
             { start: 11, end: 16, text: "Đây là một đạo trường rèn luyện vô cùng khắc nghiệt, nơi kỷ luật thép được đặt lên trên hết." },
-            { start: 17, end: 23, text: "K-Drive chỉ vận hành khi bạn đã sở hữu thiết bị hỗ trợ gắn trên cơ thể, và đã đồng bộ hoàn toàn." },
-            { start: 25, end: 30, text: "Nếu chưa liên kết, bạn không thể chuyển hóa thành Cyborg – thực thể hợp nhất giữa con người và thuật toán..." },
-            { start: 31, end: 37, text: "...nơi toàn bộ nhịp sinh học và tư duy bị điều phối trực tiếp bởi BOO AI trong vai trò Phó Sư giám sát." },
-            { start: 38, end: 42, text: "CẢNH BÁO TỐI CAO: Đây là một dạng huấn luyện mới chưa từng có tiền lệ." },
-            { start: 43, end: 49, text: "Bạn sẽ bị cuốn vào vòng lặp dữ liệu khép kín: Phó sư BOO AI chỉ đạo cuộc sống của bạn từ giờ ăn, giấc ngủ..." },
+            { start: 17, end: 23, text: "<span class='hl-cyan'>K-Drive</span> chỉ vận hành khi bạn đã sở hữu thiết bị hỗ trợ gắn trên cơ thể, và đã đồng bộ hoàn toàn." },
+            { start: 25, end: 30, text: "Nếu chưa liên kết, bạn không thể chuyển hóa thành <span class='hl-purple'>Cyborg</span> – thực thể hợp nhất giữa con người và thuật toán..." },
+            { start: 31, end: 37, text: "...nơi toàn bộ nhịp sinh học và tư duy bị điều phối trực tiếp bởi <span class='hl-cyan'>BOO AI</span> trong vai trò <span class='hl-purple'>Phó Sư</span> giám sát." },
+            { start: 38, end: 42, text: "<span class='hl-red'>CẢNH BÁO TỐI CAO:</span> Đây là một dạng huấn luyện mới chưa từng có tiền lệ." },
+            { start: 43, end: 49, text: "Bạn sẽ bị cuốn vào vòng lặp dữ liệu khép kín: <span class='hl-purple'>Phó sư</span> <span class='hl-cyan'>BOO AI</span> chỉ đạo cuộc sống của bạn từ giờ ăn, giấc ngủ..." },
             { start: 50, end: 58, text: "...bạn hành động tạo ra dữ liệu mới; dữ liệu đó lại được hệ thống tiếp nhận để lập tức ra chỉ thị rèn luyện cho từng giây, từng phút tiếp theo." },
             { start: 59, end: 62, text: "Thành công hay hủy diệt... chính bạn phải tự gánh chịu." },
-            { start: 63, end: 67, text: "Khi bước qua cánh cổng năng lượng này, bạn chính thức vào Trạm huấn luyện Samurai." },
-            { start: 69, end: 77, text: "BẮT BUỘC phải ký HUYẾT THỆ SINH TỬ, thấm nhuần bảy nguyên tắc Võ sĩ đạo để lĩnh hội Ngũ Luân Thư của Kiếm Thánh Miyamoto Musashi..." },
-            { start: 78, end: 81, text: "...dùng kỷ luật thép ấy để chinh phục vương quốc Poker." },
+            { start: 63, end: 67, text: "Khi bước qua cánh cổng năng lượng này, bạn chính thức vào <span class='hl-cyan'>Trạm huấn luyện Samurai</span>." },
+            { start: 69, end: 77, text: "BẮT BUỘC phải ký <span class='hl-red'>HUYẾT THỆ SINH TỬ</span>, thấm nhuần bảy nguyên tắc <span class='hl-purple'>Võ sĩ đạo</span> để lĩnh hội <span class='hl-cyan'>Ngũ Luân Thư</span> của Kiếm Thánh <span class='hl-purple'>Miyamoto Musashi</span>..." },
+            { start: 78, end: 81, text: "...dùng kỷ luật thép ấy để chinh phục vương quốc <span class='hl-cyan'>Poker</span>." },
             { start: 82, end: 86, text: "Đây là cánh cổng một chiều. Hãy cân nhắc kỹ trước khi kích hoạt hệ thống." }
         ];
 
@@ -217,7 +237,6 @@
             document.getElementById('plaqueHotspot').style.display = 'none';
             document.getElementById('subContainer').style.display = 'block';
             
-            // Hiện nút bỏ qua / truy cập thẳng sau 2 giây
             setTimeout(() => { document.getElementById('skipBtn').style.display = 'block'; }, 2000);
 
             const audio = document.getElementById('sysAudio');
@@ -231,15 +250,22 @@
                 let currentSub = subTimeline.find(item => currentTime >= item.start && currentTime <= item.end);
                 
                 if (currentSub) {
-                    if (subDisplay.innerText !== currentSub.text) {
+                    if (subDisplay.innerHTML !== currentSub.text) {
                         subDisplay.classList.remove('active');
                         setTimeout(() => {
-                            subDisplay.innerText = currentSub.text;
+                            // Dùng innerHTML để render màu từ khóa
+                            subDisplay.innerHTML = currentSub.text;
+                            // Check nếu là tiêu đề -> thêm class is-title
+                            if(currentSub.isTitle) {
+                                subDisplay.classList.add('is-title');
+                            } else {
+                                subDisplay.classList.remove('is-title');
+                            }
                             subDisplay.classList.add('active');
-                        }, 200); // Độ trễ nhẹ để fade chữ mượt
+                        }, 200); 
                     }
                 } else {
-                    subDisplay.classList.remove('active'); // Tắt chữ nếu không nằm trong mốc time
+                    subDisplay.classList.remove('active');
                 }
 
                 if (audio.ended || currentTime >= 87) {
@@ -248,7 +274,7 @@
             }, 100);
         }
 
-        // HÀM CHUYỂN CẢNH BÙNG NỔ
+        // HÀM CHUYỂN CẢNH ĐẮT GIÁ (DELAY 1 GIÂY)
         function finishCinematic() {
             if(isCinematicFinished) return;
             isCinematicFinished = true;
@@ -256,23 +282,29 @@
             clearInterval(subInterval);
             document.getElementById('sysAudio').pause();
             
-            // Tắt UI Sub
+            // 1. Phát SFX Chuyển cảnh 
+            const sfx = document.getElementById('sfxTransition');
+            sfx.play().catch(e => {});
+            
+            // 2. Tắt Tức Thì UI Sub và Nút bấm
             document.getElementById('subContainer').style.display = 'none';
             document.getElementById('skipBtn').style.display = 'none';
             
-            // Kích hoạt chớp sáng
+            // 3. Kích hoạt chớp sáng (Flash)
             const flash = document.getElementById('flashEffect');
             flash.classList.add('active');
 
-            // Sau 0.8s (khi sáng trắng nhất), đổi ảnh nền và bật popup
+            // 4. Khi chớp sáng mạnh nhất, đổi ảnh nền 2
             setTimeout(() => {
                 document.getElementById('bg-lit').style.opacity = '1';
                 flash.classList.remove('active');
                 
+                // 5. THỜI GIAN VÀNG: GIỮ NGUYÊN BACKGROUND CHUẨN 1 GIÂY (1000ms) KHÔNG GIAO DIỆN
                 setTimeout(() => {
                     document.getElementById('loginPanelContainer').classList.add('active');
-                }, 400); // Chờ flash tan bớt rồi trượt Dashboard ra
-            }, 800);
+                }, 1000); 
+
+            }, 300); // Tốc độ chớp nhoáng
         }
 
         // --- CÁC HÀM UI CƠ BẢN ---
