@@ -7,7 +7,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>K-Drive: Sơn Môn Yết Kiến</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- TÍCH HỢP 2 FONT VIỆT HÓA HOÀN HẢO: Space Grotesk (Giao diện) & Montserrat (Phụ đề điện ảnh) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: none; }
         body { background-color: #000; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Space Grotesk', sans-serif; }
@@ -16,73 +19,62 @@
         
         .kdrive-image-wrapper { position: relative; width: 100vw; height: 100vh; max-width: 430px; background-color: #000; overflow: hidden; }
         
-        /* HỆ THỐNG ẢNH NỀN KÉP (CROSSFADE) */
+        /* HỆ THỐNG ẢNH NỀN KÉP */
         .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; filter: brightness(0.9) contrast(1.1); }
         #bg-unlit { z-index: 1; opacity: 1; }
-        #bg-lit { z-index: 2; opacity: 0; transition: opacity 1.2s ease-in-out; }
+        #bg-lit { z-index: 2; opacity: 0; transition: opacity 1.5s ease-in-out; }
 
         .global-radar { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; overflow: hidden; mix-blend-mode: overlay; }
         .radar-line { width: 100%; height: 2px; background: rgba(0, 229, 255, 0.5); box-shadow: 0 0 30px rgba(0, 229, 255, 1); position: absolute; top: -10px; animation: globalScan 8s linear infinite; }
         @keyframes globalScan { 0% { top: -10px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
-        /* ĐIỂM CHẠM VÀO BIA ĐÁ (HOTSPOT) */
-        #plaqueHotspot {
-            position: absolute;
-            top: 35%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 120px;
-            z-index: 10;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .hotspot-arrow {
-            width: 30px;
-            height: 30px;
-            border-right: 3px solid rgba(255, 51, 51, 0.8);
-            border-bottom: 3px solid rgba(255, 51, 51, 0.8);
-            transform: rotate(45deg);
-            animation: bounceArrow 2s infinite ease-in-out, glowArrow 2s infinite alternate;
-        }
+        /* ĐIỂM CHẠM VÀO BIA ĐÁ */
+        #plaqueHotspot { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 120px; z-index: 10; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        .hotspot-arrow { width: 30px; height: 30px; border-right: 3px solid rgba(255, 51, 51, 0.8); border-bottom: 3px solid rgba(255, 51, 51, 0.8); transform: rotate(45deg); animation: bounceArrow 2s infinite ease-in-out, glowArrow 2s infinite alternate; }
         @keyframes bounceArrow { 0%, 100% { transform: translateY(-10px) rotate(45deg); } 50% { transform: translateY(10px) rotate(45deg); } }
         @keyframes glowArrow { 0% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0); } 100% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0.8); } }
 
-        /* DASHBOARD - KÍNH & LED */
-        .gateway-popup { 
-            position: absolute; top: 35%; left: 50%; 
-            width: 90%; max-width: 350px; 
-            border-radius: 8px; overflow: hidden; padding: 2px;
-            box-shadow: 0 0 40px rgba(0, 229, 255, 0.2);
-            z-index: 99999; opacity: 0;
-            transform: translate(-50%, -30%) scale(0.95);
-            pointer-events: none;
-            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        /* HỆ THỐNG PHỤ ĐỀ ĐIỆN ẢNH (CINEMATIC SUBTITLES) */
+        .cinematic-sub-container { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; text-align: center; z-index: 100; pointer-events: none; display: none; }
+        .sub-text-item { 
+            font-family: 'Montserrat', sans-serif; /* Font chuẩn điện ảnh */
+            color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 1.5px; line-height: 1.6; 
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.8), 0 0 25px rgba(0, 229, 255, 0.4); 
+            opacity: 0; transform: scale(0.95); 
+            transition: opacity 0.8s ease, transform 4s ease-out; /* Hiệu ứng từ từ rõ nét và to dần */
+            text-transform: uppercase; 
         }
+        .sub-text-item.active { opacity: 1; transform: scale(1.02); }
 
+        /* NÚT TIẾN NHẬP NGAY (BỎ QUA KHAI MỞ) */
+        .skip-intro-btn { 
+            position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); 
+            background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0, 229, 255, 0.5); 
+            color: rgba(0, 229, 255, 0.8); padding: 12px 25px; font-size: 12px; font-weight: 700; 
+            letter-spacing: 3px; border-radius: 4px; cursor: pointer; z-index: 101; display: none; 
+            backdrop-filter: blur(5px); transition: 0.4s; font-family: 'Space Grotesk', sans-serif;
+            text-shadow: 0 0 8px rgba(0,229,255,0.4); box-shadow: inset 0 0 10px rgba(0,229,255,0.1);
+        }
+        .skip-intro-btn:hover { background: rgba(0, 229, 255, 0.2); color: #fff; border-color: #00e5ff; box-shadow: 0 0 20px rgba(0,229,255,0.4); text-shadow: 0 0 10px #fff; }
+
+        /* HIỆU ỨNG CHỚP SÁNG CHUYỂN CẢNH (WHITEOUT) */
+        .whiteout-flash { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #e0f7fa; z-index: 90000; opacity: 0; pointer-events: none; transition: opacity 0.8s ease-in-out; }
+        .whiteout-flash.active { opacity: 0.9; }
+
+        /* DASHBOARD ĐĂNG NHẬP */
+        .gateway-popup { 
+            position: absolute; top: 35%; left: 50%; width: 90%; max-width: 350px; 
+            border-radius: 8px; overflow: hidden; padding: 2px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.2);
+            z-index: 99999; opacity: 0; transform: translate(-50%, -25%) scale(0.95); pointer-events: none;
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
         .gateway-popup.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
         
-        .gateway-popup::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: conic-gradient(transparent, transparent, transparent, #00e5ff);
-            animation: border-rotate 4s linear infinite; z-index: 1;
-        }
-
-        .gateway-popup::after {
-            content: ''; position: absolute; inset: 2px; border-radius: 6px;
-            background: rgba(4, 13, 18, 0.75); 
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            animation: glass-breathe 4s ease-in-out infinite alternate; z-index: 2;
-        }
+        .gateway-popup::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, transparent, transparent, #00e5ff); animation: border-rotate 4s linear infinite; z-index: 1; }
+        .gateway-popup::after { content: ''; position: absolute; inset: 2px; border-radius: 6px; background: rgba(4, 13, 18, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); animation: glass-breathe 4s ease-in-out infinite alternate; z-index: 2; }
 
         @keyframes border-rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes glass-breathe {
-            0% { background: rgba(4, 13, 18, 0.7); box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.05); }
-            100% { background: rgba(0, 30, 40, 0.85); box-shadow: inset 0 0 30px rgba(0, 229, 255, 0.15); }
-        }
+        @keyframes glass-breathe { 0% { background: rgba(4, 13, 18, 0.7); box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.05); } 100% { background: rgba(0, 30, 40, 0.85); box-shadow: inset 0 0 30px rgba(0, 229, 255, 0.15); } }
 
         .gateway-content { position: relative; z-index: 10; width: 100%; height: 100%; padding: 25px 20px; display: flex; flex-direction: column; align-items: center; }
         .gateway-content h2 { color: #fff; font-size: 20px; letter-spacing: 4px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(0,229,255,0.6); text-transform: uppercase; border-bottom: 1px solid rgba(0, 229, 255, 0.3); padding-bottom: 10px; width: 100%; text-align: center; }
@@ -114,27 +106,37 @@
 </head>
 <body>
 
-    <audio id="sysAudio" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto"></audio>
+    <!-- FILE VOICE MỚI CỦA ANH -->
+    <audio id="sysAudio" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/KHAIMO.MP3" preload="auto"></audio>
 
     <div class="kdrive-image-wrapper" id="mainWrapper">
         <div class="global-radar"><div class="radar-line"></div></div>
         
+        <!-- NỀN CHƯA KÍCH HOẠT VÀ ĐÃ KÍCH HOẠT -->
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Logic%201%20nen.png?raw=true" id="bg-unlit" class="kdrive-bg-target">
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/logic%202%20nen.png?raw=true" id="bg-lit" class="kdrive-bg-target">
 
-        <div id="plaqueHotspot" onclick="activateSystem()" class="sound-btn">
+        <!-- LỚP FLASH CHUYỂN CẢNH -->
+        <div class="whiteout-flash" id="flashEffect"></div>
+
+        <!-- MŨI TÊN HOTSPOT -->
+        <div id="plaqueHotspot" onclick="startCinematicIntro()" class="sound-btn">
             <div class="hotspot-arrow"></div>
         </div>
 
+        <!-- CONTAINER PHỤ ĐỀ VÀ NÚT TIẾN NHẬP -->
+        <div class="cinematic-sub-container" id="subContainer">
+            <div id="subTextDisplay" class="sub-text-item"></div>
+        </div>
+        <button class="skip-intro-btn sound-btn" id="skipBtn" onclick="finishCinematic()">[ TIẾN NHẬP NGAY ]</button>
+
+        <!-- DASHBOARD ĐĂNG NHẬP -->
         <div class="gateway-popup" id="loginPanelContainer">
             <div class="gateway-content">
                 
-                <!-- Bảng 1: Sơn Môn Yết Kiến -->
                 <div id="panel-login" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
                     <h2>[ SƠN MÔN YẾT KIẾN ]</h2>
-                    <div class="input-wrapper">
-                        <input type="text" id="accInput" class="login-input" placeholder="[ DANH TÍNH NỘI MÔN ]">
-                    </div>
+                    <div class="input-wrapper"><input type="text" id="accInput" class="login-input" placeholder="[ DANH TÍNH NỘI MÔN ]"></div>
                     <div class="input-wrapper">
                         <input type="password" id="passcodeInput" class="login-input" placeholder="[ ẤN KÝ BÍ MẬT ]">
                         <span class="eye-icon sound-btn" onclick="togglePass('passcodeInput', this)">
@@ -149,14 +151,13 @@
                     </div>
                     <button class="login-btn-submit sound-btn" onclick="submitLogin()">[ TIẾN NHẬP SƠN MÔN ]</button>
                     <div id="loginStatus" style="margin-top: 15px; font-weight: bold; text-align: center; font-size: 11px; letter-spacing: 1px; line-height: 1.5;"></div>
-                    
                     <div class="bottom-links">
                         <span class="sub-link sound-btn" onclick="switchPanel('register')">[ LẬP THỆ ]</span>
                         <span class="sub-link sound-btn" onclick="switchPanel('musashi')" style="color: #00e5ff;">[ KIẾM THÁNH ]</span>
                     </div>
                 </div>
 
-                <!-- Bảng 2: Lập Thệ Tân Đồ -->
+                <!-- Bảng 2, 3, 4 ẩn đi (Lập Thệ, Quên MK, Kiếm Thánh) -->
                 <div id="panel-register" style="width: 100%; display: none; flex-direction: column; align-items: center;">
                     <h2>[ LẬP THỆ TÂN ĐỒ ]</h2>
                     <div class="input-wrapper"><input type="text" id="regId" class="login-input" placeholder="[ TÔN DANH ] *"></div>
@@ -167,7 +168,6 @@
                     <div class="bottom-links"><span class="sub-link sound-btn" onclick="switchPanel('login')">➔ QUAY LẠI SƠN MÔN</span></div>
                 </div>
                 
-                <!-- Bảng 3: Quên Mật Ấn -->
                 <div id="panel-forgot" style="width: 100%; display: none; flex-direction: column; align-items: center;">
                     <h2>[ KHÔI PHỤC MẬT ẤN ]</h2>
                     <input type="email" id="fgEmail" class="login-input" placeholder="[ NHẬP THƯ TÍN CỦA BẠN ]" style="margin-bottom: 12px;">
@@ -176,13 +176,12 @@
                     <div class="bottom-links"><span class="sub-link sound-btn" onclick="switchPanel('login')">➔ QUAY LẠI SƠN MÔN</span></div>
                 </div>
 
-                <!-- Bảng 4: Về Kiếm Thánh -->
                 <div id="panel-musashi" style="width: 100%; display: none; flex-direction: column; align-items: center; text-align: center;">
                     <h2 style="font-size: 18px;">[ KIẾM THÁNH MUSASHI ]</h2>
                     <div style="color: #fff; font-size: 13px; line-height: 1.6; margin-bottom: 25px; text-shadow: 0 0 5px rgba(0,229,255,0.3); text-align: justify;">
                         Sự hợp nhất tuyệt đối giữa con người và thuật toán lượng tử.<br><br>
-                        Tại Trạm huấn luyện Cyborg này, bạn sẽ bị cuốn vào vòng lặp dữ liệu khép kín, nơi <strong>BOO AI</strong> điều phối mọi nhịp sống và tư duy.<br><br>
-                        Sẵn sàng ký <strong>HUYẾT THỆ SINH TỬ</strong>, thấm nhuần 7 nguyên tắc Võ sĩ đạo để lĩnh hội <strong>Ngũ Luân Thư</strong> của Kiếm Thánh Miyamoto Musashi – Dùng kỷ luật thép chinh phục Vương quốc Poker.
+                        Tại đạo trường này, bạn chịu sự điều phối trực tiếp của BOO AI trong vai trò Phó Sư giám sát.<br><br>
+                        Ký HUYẾT THỆ SINH TỬ, thấm nhuần 7 nguyên tắc Võ sĩ đạo để lĩnh hội Ngũ Luân Thư – Dùng kỷ luật thép chinh phục Vương quốc Poker.
                     </div>
                     <div class="bottom-links"><span class="sub-link sound-btn" onclick="switchPanel('login')">➔ QUAY LẠI SƠN MÔN</span></div>
                 </div>
@@ -192,41 +191,91 @@
     </div>
 
     <script>
-        // --- HỆ THỐNG ÂM THANH CYBERPUNK ---
-        const sndHover = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-        const sndClick = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
-        const sndError = new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3');
-        const sndSuccess = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3');
-        sndHover.volume = 0.2; sndClick.volume = 0.4; sndError.volume = 0.5; sndSuccess.volume = 0.5;
+        // --- TIMELINE ĐÃ CHỐT TỪNG GIÂY ---
+        const subTimeline = [
+            { start: 0, end: 4, text: "THÔNG ĐIỆP KHAI MỞ" },
+            { start: 5, end: 7, text: "TIỀN ĐIỀU KIỆN VÀ HUYẾT THỆ" },
+            { start: 8, end: 10, text: "K-Drive không phải là một ứng dụng thông thường." },
+            { start: 11, end: 16, text: "Đây là một đạo trường rèn luyện vô cùng khắc nghiệt, nơi kỷ luật thép được đặt lên trên hết." },
+            { start: 17, end: 23, text: "K-Drive chỉ vận hành khi bạn đã sở hữu thiết bị hỗ trợ gắn trên cơ thể, và đã đồng bộ hoàn toàn." },
+            { start: 25, end: 30, text: "Nếu chưa liên kết, bạn không thể chuyển hóa thành Cyborg – thực thể hợp nhất giữa con người và thuật toán..." },
+            { start: 31, end: 37, text: "...nơi toàn bộ nhịp sinh học và tư duy bị điều phối trực tiếp bởi BOO AI trong vai trò Phó Sư giám sát." },
+            { start: 38, end: 42, text: "CẢNH BÁO TỐI CAO: Đây là một dạng huấn luyện mới chưa từng có tiền lệ." },
+            { start: 43, end: 49, text: "Bạn sẽ bị cuốn vào vòng lặp dữ liệu khép kín: Phó sư BOO AI chỉ đạo cuộc sống của bạn từ giờ ăn, giấc ngủ..." },
+            { start: 50, end: 58, text: "...bạn hành động tạo ra dữ liệu mới; dữ liệu đó lại được hệ thống tiếp nhận để lập tức ra chỉ thị rèn luyện cho từng giây, từng phút tiếp theo." },
+            { start: 59, end: 62, text: "Thành công hay hủy diệt... chính bạn phải tự gánh chịu." },
+            { start: 63, end: 67, text: "Khi bước qua cánh cổng năng lượng này, bạn chính thức vào Trạm huấn luyện Samurai." },
+            { start: 69, end: 77, text: "BẮT BUỘC phải ký HUYẾT THỆ SINH TỬ, thấm nhuần bảy nguyên tắc Võ sĩ đạo để lĩnh hội Ngũ Luân Thư của Kiếm Thánh Miyamoto Musashi..." },
+            { start: 78, end: 81, text: "...dùng kỷ luật thép ấy để chinh phục vương quốc Poker." },
+            { start: 82, end: 86, text: "Đây là cánh cổng một chiều. Hãy cân nhắc kỹ trước khi kích hoạt hệ thống." }
+        ];
 
-        function playHover() { sndHover.currentTime = 0; sndHover.play().catch(e=>{}); }
-        function playClick() { sndClick.currentTime = 0; sndClick.play().catch(e=>{}); }
-        function playError() { sndError.currentTime = 0; sndError.play().catch(e=>{}); }
-        function playSuccess() { sndSuccess.currentTime = 0; sndSuccess.play().catch(e=>{}); }
+        let subInterval = null;
+        let isCinematicFinished = false;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const btns = document.querySelectorAll('.sound-btn');
-            btns.forEach(btn => {
-                btn.addEventListener('mouseenter', playHover);
-                btn.addEventListener('click', playClick);
-            });
-        });
-
-        // --- ICON MẮT ---
-        const EYE_CLOSED = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-        const EYE_OPEN = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
-
-        // --- LOGIC KÍCH HOẠT HỆ THỐNG ---
-        function activateSystem() {
+        function startCinematicIntro() {
             document.getElementById('plaqueHotspot').style.display = 'none';
+            document.getElementById('subContainer').style.display = 'block';
+            
+            // Hiện nút bỏ qua / truy cập thẳng sau 2 giây
+            setTimeout(() => { document.getElementById('skipBtn').style.display = 'block'; }, 2000);
+
             const audio = document.getElementById('sysAudio');
-            audio.play().catch(e => console.log("Lỗi tự động phát nhạc:", e));
-            document.getElementById('bg-lit').style.opacity = '1';
-            setTimeout(() => {
-                document.getElementById('loginPanelContainer').classList.add('active');
-            }, 2000); 
+            audio.play().catch(e => console.log("Lỗi autoplay:", e));
+
+            const subDisplay = document.getElementById('subTextDisplay');
+
+            // Quét timeline liên tục
+            subInterval = setInterval(() => {
+                let currentTime = audio.currentTime;
+                let currentSub = subTimeline.find(item => currentTime >= item.start && currentTime <= item.end);
+                
+                if (currentSub) {
+                    if (subDisplay.innerText !== currentSub.text) {
+                        subDisplay.classList.remove('active');
+                        setTimeout(() => {
+                            subDisplay.innerText = currentSub.text;
+                            subDisplay.classList.add('active');
+                        }, 200); // Độ trễ nhẹ để fade chữ mượt
+                    }
+                } else {
+                    subDisplay.classList.remove('active'); // Tắt chữ nếu không nằm trong mốc time
+                }
+
+                if (audio.ended || currentTime >= 87) {
+                    finishCinematic();
+                }
+            }, 100);
         }
-        
+
+        // HÀM CHUYỂN CẢNH BÙNG NỔ
+        function finishCinematic() {
+            if(isCinematicFinished) return;
+            isCinematicFinished = true;
+
+            clearInterval(subInterval);
+            document.getElementById('sysAudio').pause();
+            
+            // Tắt UI Sub
+            document.getElementById('subContainer').style.display = 'none';
+            document.getElementById('skipBtn').style.display = 'none';
+            
+            // Kích hoạt chớp sáng
+            const flash = document.getElementById('flashEffect');
+            flash.classList.add('active');
+
+            // Sau 0.8s (khi sáng trắng nhất), đổi ảnh nền và bật popup
+            setTimeout(() => {
+                document.getElementById('bg-lit').style.opacity = '1';
+                flash.classList.remove('active');
+                
+                setTimeout(() => {
+                    document.getElementById('loginPanelContainer').classList.add('active');
+                }, 400); // Chờ flash tan bớt rồi trượt Dashboard ra
+            }, 800);
+        }
+
+        // --- CÁC HÀM UI CƠ BẢN ---
         function switchPanel(panelName) { 
             document.getElementById('panel-login').style.display = 'none'; 
             document.getElementById('panel-register').style.display = 'none'; 
@@ -237,20 +286,23 @@
         
         function togglePass(inputId, iconEl) { 
             let inp = document.getElementById(inputId); 
-            if(inp.type === 'password') { inp.type = 'text'; iconEl.innerHTML = EYE_CLOSED; } 
-            else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } 
+            if(inp.type === 'password') { 
+                inp.type = 'text'; 
+                iconEl.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>'; 
+            } else { 
+                inp.type = 'password'; 
+                iconEl.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>'; 
+            } 
         }
 
-        // --- KẾT NỐI API VỚI FORMDATA ---
+        // --- KẾT NỐI API ĐĂNG NHẬP ---
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec';
-
         function submitLogin() {
             var acc = document.getElementById('accInput').value.trim(); 
             var code = document.getElementById('passcodeInput').value.trim(); 
             var statusEl = document.getElementById('loginStatus');
             
             if(acc === "" || code === "") { 
-                playError(); 
                 statusEl.innerHTML = "❌ Nhập danh tính và mật ấn vào!"; 
                 statusEl.style.color = "#ff3333"; 
                 document.getElementById('loginPanelContainer').classList.add('shake-active');
@@ -261,28 +313,20 @@
             statusEl.innerHTML = "🛰️ BOO ĐANG KIỂM CHỨNG ẤN KÝ NỘI MÔN..."; 
             statusEl.style.color = "#00e5ff";
             
-            // ĐÃ THÊM BIẾN 'action' ĐỂ KHỚP VỚI BACKEND ROUTER
             const dataForm = new FormData();
-            dataForm.append('action', 'checkLogin'); // <-- CHÌA KHÓA ĐỂ ĐẢ THÔNG API
+            dataForm.append('action', 'checkLogin');
             dataForm.append('username', acc);
             dataForm.append('password', code);
 
-            fetch(scriptURL, {
-                method: 'POST',
-                body: dataForm
-            })
+            fetch(scriptURL, { method: 'POST', body: dataForm })
             .then(response => response.json())
             .then(data => {
                 if(data.success === true || data.result === "success" || data.status === "success" || data.ket_qua === "thanh_cong") {
-                    playSuccess(); 
                     statusEl.innerHTML = "✅ ẤN KÝ TƯƠNG HỢP. ĐANG TIẾN NHẬP SƠN MÔN..."; 
                     statusEl.style.color = "#00e5ff";
                     document.getElementById('mainWrapper').classList.add('shake-active');
-                    
                     setTimeout(() => { window.location.href = 'index.html'; }, 1500);
                 } else {
-                    playError(); 
-                    // Hiển thị thông báo lỗi từ backend nếu có
                     var errorMsg = data.msg ? data.msg : "❌ Sai ấn ký nội môn! Kẻ xông bậy không thể bước qua Kết nối đường Sơn môn.";
                     statusEl.innerHTML = errorMsg; 
                     statusEl.style.color = "#ff3333";
@@ -291,7 +335,6 @@
                 }
             })
             .catch(error => {
-                playError(); 
                 statusEl.innerHTML = "❌ Kết nối đường Sơn môn đang bị phong tỏa! Hãy thử lại."; 
                 statusEl.style.color = "#ff3333";
                 document.getElementById('loginPanelContainer').classList.add('shake-active');
