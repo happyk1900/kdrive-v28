@@ -8,53 +8,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>K-Drive: Sơn Môn Yết Kiến</title>
     
-    <!-- TÍCH HỢP 3 FONT CHUẨN ĐIỆN ẢNH -->
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Great+Vibes&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- ÉP TẢI NGẦM VIDEO ƯU TIÊN CAO (CHỐNG GIẬT LAG) -->
+    <link rel="preload" as="video" href="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20BAY%20VAO.mp4">
+    
+    <!-- TÍCH HỢP FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Great+Vibes&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: none; }
+        /* KHÓA BẢO MẬT & CHỐNG LƯU ẢNH CHUỘT PHẢI / NHẤN GIỮ */
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; }
+        
         body { 
             background-color: #000; height: 100vh; width: 100vw; 
             display: flex; justify-content: center; align-items: center; 
             margin: 0; overflow: hidden; font-family: 'Space Grotesk', sans-serif; 
         }
+
+        img, video {
+            -webkit-user-drag: none; -khtml-user-drag: none; -moz-user-drag: none; -o-user-drag: none; user-drag: none;
+            pointer-events: none; /* Khóa tương tác vật lý chống tải ảnh */
+        }
+
         @keyframes screenStrikeShake { 0%, 100% { transform: scale(1) rotate(0deg); } 10%, 30%, 50%, 70%, 90% { transform: translate(-6px, 5px) scale(1.03) rotate(-1deg); } 20%, 40%, 60%, 80% { transform: translate(6px, -5px) scale(1.03) rotate(1deg); } }
         .shake-active { animation: screenStrikeShake 0.6s cubic-bezier(.36,.07,.19,.97) both; filter: contrast(1.5) brightness(1.2); }
         
         /* KHÓA KHUNG 430px CHO CẢ MOBILE LẪN PC */
         .kdrive-image-wrapper { 
-            position: relative; width: 100vw; height: 100vh; 
-            max-width: 430px; 
+            position: relative; width: 100vw; height: 100vh; max-width: 430px; 
             background-color: #000; overflow: hidden; 
         }
         
-        /* HỆ THỐNG ẢNH NỀN KÉP - CROSSFADE MƯỢT */
+        /* ẢNH NỀN KÉP - CROSSFADE MƯỢT */
         .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; filter: brightness(0.9) contrast(1.1); }
         #bg-unlit { z-index: 1; opacity: 1; }
         #bg-lit { z-index: 2; opacity: 0; transition: opacity 1.5s ease-in-out; }
 
-        /* LỚP SƯƠNG KHÓI CHE CHÓI MẶT TRỜI ĐỂ LÀM NỔI CHỮ (Top Vignette) */
+        /* LỚP SƯƠNG KHÓI CHE CHÓI MẶT TRỜI MỎNG */
         .top-shadow-gradient {
             position: absolute; top: 0; left: 0; width: 100%; height: 35%;
-            background: linear-gradient(to bottom, rgba(0, 15, 25, 0.7) 0%, rgba(0, 15, 25, 0.4) 40%, transparent 100%);
+            background: linear-gradient(to bottom, rgba(0, 15, 25, 0.65) 0%, rgba(0, 15, 25, 0.3) 50%, transparent 100%);
             z-index: 3; pointer-events: none; opacity: 0; transition: opacity 1s ease;
         }
         .top-shadow-gradient.active { opacity: 1; }
 
-        .global-radar { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; overflow: hidden; mix-blend-mode: overlay; }
+        .global-radar { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; mix-blend-mode: overlay; }
         .radar-line { width: 100%; height: 2px; background: rgba(0, 229, 255, 0.5); box-shadow: 0 0 30px rgba(0, 229, 255, 1); position: absolute; top: -10px; animation: globalScan 8s linear infinite; }
         @keyframes globalScan { 0% { top: -10px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
-        /* ĐIỂM CHẠM VÀO BIA ĐÁ */
-        #plaqueHotspot { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 120px; z-index: 10; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        /* ĐIỂM CHẠM VÀO BIA ĐÁ (Phải để pointer-events: auto để bấm được) */
+        #plaqueHotspot { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 120px; z-index: 10; cursor: pointer; display: flex; justify-content: center; align-items: center; pointer-events: auto; }
         .hotspot-arrow { width: 30px; height: 30px; border-right: 3px solid rgba(255, 51, 51, 0.8); border-bottom: 3px solid rgba(255, 51, 51, 0.8); transform: rotate(45deg); animation: bounceArrow 2s infinite ease-in-out, glowArrow 2s infinite alternate; }
         @keyframes bounceArrow { 0%, 100% { transform: translateY(-10px) rotate(45deg); } 50% { transform: translateY(10px) rotate(45deg); } }
         @keyframes glowArrow { 0% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0); } 100% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0.8); } }
 
-        /* HỆ THỐNG PHỤ ĐỀ */
+        /* HỆ THỐNG PHỤ ĐỀ (Nét mỏng thanh lịch, sang trọng) */
         @keyframes containerFloat {
             0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-8px); }
+            50% { transform: translateX(-50%) translateY(-6px); }
         }
         .cinematic-sub-container { 
             position: absolute; top: 10%; left: 50%; transform: translateX(-50%); 
@@ -64,9 +74,13 @@
         
         .sub-text-item { 
             font-family: 'EB Garamond', serif; 
-            color: #ffffff; /* Trả lại màu Trắng ngọc trai */
-            font-size: 17px; font-weight: 700; letter-spacing: 0.5px; line-height: 1.5; text-wrap: balance; 
-            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); /* Glow Xanh ngọc nhẹ nhàng */
+            color: #ffffff; 
+            font-size: 17px; 
+            font-weight: 300; /* Hạ độ dày để nét chữ mỏng manh thanh thoát */
+            letter-spacing: 0.8px; 
+            line-height: 1.6; 
+            text-wrap: balance; 
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.4); 
             opacity: 0; transform: scale(0.98); 
             transition: opacity 0.8s ease, transform 4s ease-out; 
         }
@@ -78,27 +92,25 @@
             letter-spacing: 2px;
         }
 
-        .hl-italic { font-style: italic; font-weight: 700; color: #000000; text-shadow: none; }
+        .hl-italic { font-style: italic; font-weight: 500; color: #000000; text-shadow: none; } /* Đen tuyền sắc lẹm */
 
-        /* NÚT TIẾN NHẬP NGAY */
         .skip-intro-btn { 
             position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); 
             background: transparent; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.3); 
             color: rgba(255, 255, 255, 0.6); padding: 8px 15px; font-size: 11px; font-weight: 300; 
-            letter-spacing: 5px; cursor: pointer; z-index: 101; display: none; 
+            letter-spacing: 5px; cursor: pointer; z-index: 101; display: none; pointer-events: auto;
             transition: 0.4s; font-family: 'Space Grotesk', sans-serif; white-space: nowrap;
         }
         .skip-intro-btn:hover { color: #fff; border-bottom-color: #00e5ff; text-shadow: 0 0 10px #00e5ff; }
 
-        /* VIDEO BAY VÀO (XUẤT HIỆN SAU KHI ĐĂNG NHẬP THÀNH CÔNG) */
+        /* VIDEO BAY VÀO (KHÔNG SCALE, CHỈ FADE-IN KHỚP 100% ẢNH TĨNH) */
         #successVideo {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
             z-index: 999999; 
             opacity: 0; pointer-events: none;
-            transform: scale(1.08); 
-            transition: opacity 1.5s ease-out, transform 1.5s ease-out;
+            transition: opacity 1.5s ease-out; /* Chỉ mờ sang sáng mượt mà */
         }
-        #successVideo.active { opacity: 1; transform: scale(1); pointer-events: auto; }
+        #successVideo.active { opacity: 1; pointer-events: none; }
 
         /* DASHBOARD ĐĂNG NHẬP */
         .gateway-popup { 
@@ -144,13 +156,13 @@
         .sub-link:hover { color: #00e5ff; text-shadow: 0 0 5px #00e5ff; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
     <!-- BỘ ÂM THANH -->
     <audio id="sysAudio" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/KHAIMO.MP3" preload="auto"></audio>
     <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
     
-    <!-- VIDEO BAY VÀO CHUẨN CỦA ANH ĐÂY (Sửa link rồi) -->
+    <!-- VIDEO BAY VÀO (Đã ép tải ngầm) -->
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20BAY%20VAO.mp4" playsinline preload="auto"></video>
 
     <!-- SFX BUTTONS -->
@@ -325,7 +337,7 @@
             
             document.getElementById('subContainer').style.display = 'none';
             document.getElementById('skipBtn').style.display = 'none';
-            document.getElementById('shadowOverlay').classList.remove('active'); // Tắt sương mù khi hết chữ
+            document.getElementById('shadowOverlay').classList.remove('active');
             
             const bgm = document.getElementById('bgMusic');
             bgm.play().catch(e => console.log("Lỗi BGM:", e));
@@ -393,7 +405,7 @@
                     loginPanel.style.opacity = '0';
                     loginPanel.style.pointerEvents = 'none';
                     
-                    // VIDEO BAY VÀO VÀ PHÁT
+                    // VIDEO BAY VÀO VÀ PHÁT (KHỚP ẢNH 2 100%)
                     setTimeout(() => {
                         let successVid = document.getElementById('successVideo');
                         successVid.classList.add('active');
