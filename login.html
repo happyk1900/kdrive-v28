@@ -20,8 +20,7 @@
         .radar-line { width: 100%; height: 2px; background: rgba(0, 229, 255, 0.5); box-shadow: 0 0 30px rgba(0, 229, 255, 1); position: absolute; top: -10px; animation: globalScan 8s linear infinite; }
         @keyframes globalScan { 0% { top: -10px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
-        /* 1. KHUNG K-DRIVE: Neo ở 30% để có không gian điện ảnh */
-        .central-hud-container { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 190px; z-index: 90; pointer-events: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.4s ease; opacity: 1; }
+        .central-hud-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 190px; z-index: 90; pointer-events: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.4s ease; opacity: 1; }
         .glass-layer { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: rgba(5, 10, 15, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 4px; z-index: 1; pointer-events: none; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
         .hud-text.main { position: relative; font-size: 34px; font-weight: 700; color: #fff; letter-spacing: 5px; text-shadow: 0 0 15px rgba(0, 229, 255, 0.8); z-index: 2; pointer-events: none; margin-top: -10px; text-align: center; width: 100%; display: inline-block; overflow: hidden;}
         .hud-text.main::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent); animation: quantumShine 3.5s infinite; transform: skewX(-20deg); }
@@ -32,9 +31,48 @@
         .hud-action-btn.top-left { top: 18px; left: 18px; } 
         .hud-action-btn.bottom-right { bottom: 18px; right: 18px; }
         
-        /* 2. BẢNG SƠN MÔN: Trả về 50% để tránh lẹm viền và né bàn phím ảo */
-        .gateway-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 12, 18, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 4px; padding: 30px 20px; z-index: 99999; display: none; flex-direction: column; align-items: center; box-shadow: 0 0 40px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 229, 255, 0.05); width: 90%; max-width: 350px; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
-        .gateway-popup h2 { color: #fff; font-size: 20px; letter-spacing: 4px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(0,229,255,0.6); text-transform: uppercase; border-bottom: 1px solid rgba(0, 229, 255, 0.3); padding-bottom: 10px; width: 100%; text-align: center; }
+        /* CẬP NHẬT CSS: HIỆU ỨNG VIỀN LED CHẠY & NỀN KÍNH ĐỔI MÀU */
+        .gateway-popup { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            width: 90%; max-width: 350px; z-index: 99999; display: none; 
+            border-radius: 8px; overflow: hidden; /* Giữ LED bên trong khung */
+            padding: 2px; /* Độ dày của viền LED */
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.2);
+        }
+        
+        /* Viền LED lượng tử */
+        .gateway-popup::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(transparent, transparent, transparent, #00e5ff);
+            animation: border-rotate 4s linear infinite;
+            z-index: 1;
+        }
+
+        /* Nền kính hô hấp */
+        .gateway-popup::after {
+            content: ''; position: absolute; inset: 2px; border-radius: 6px;
+            background: rgba(4, 13, 18, 0.75); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            animation: glass-breathe 4s ease-in-out infinite alternate;
+            z-index: 2;
+        }
+
+        @keyframes border-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes glass-breathe {
+            0% { background: rgba(4, 13, 18, 0.7); box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.05); }
+            100% { background: rgba(0, 30, 40, 0.85); box-shadow: inset 0 0 30px rgba(0, 229, 255, 0.15); }
+        }
+
+        /* Vùng chứa nội dung nổi lên trên nền kính */
+        .gateway-content {
+            position: relative; z-index: 10; width: 100%; height: 100%;
+            padding: 30px 20px; display: flex; flex-direction: column; align-items: center;
+        }
+
+        .gateway-content h2 { color: #fff; font-size: 20px; letter-spacing: 4px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(0,229,255,0.6); text-transform: uppercase; border-bottom: 1px solid rgba(0, 229, 255, 0.3); padding-bottom: 10px; width: 100%; text-align: center; }
         
         .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
         .login-input { width: 100%; padding: 14px; background: rgba(0, 229, 255, 0.03); border: 1px solid rgba(0, 229, 255, 0.2); color: #00e5ff; outline: none; text-align: center; font-weight: 600; font-family: 'Space Grotesk', sans-serif; border-radius: 2px; transition: all 0.3s ease; margin-bottom: 0; letter-spacing: 2px; }
@@ -61,108 +99,91 @@
         .change-pass-link:hover { color: #00e5ff; }
 
         body.popups-active .central-hud-container { pointer-events: none !important; opacity: 0 !important; transform: translate(-50%, -50%) scale(0.9); }
-        body.popups-active .cinematic-slogan { opacity: 0; transition: 0.5s; } /* Ẩn slogan khi mở bảng */
-
-        /* 3. CSS CHO SLOGAN ĐIỆN ẢNH (MỚI) */
-        .cinematic-slogan {
-            position: absolute;
-            bottom: 18%; /* Vị trí ngang hông/đùi của Samurai */
-            width: 100%;
-            text-align: center;
-            z-index: 5;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            opacity: 1;
-            transition: opacity 0.5s ease;
-        }
-        .slogan-line {
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 11px;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
-        }
-        .slogan-highlight {
-            color: #00e5ff;
-            font-weight: 700;
-            text-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
-        }
     </style>
 </head>
 <body>
-    <audio id="sfx-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
-    <audio id="sfx-error" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
-    <audio id="sfx-success" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
-    <audio id="sfx-type" src="https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3"></audio>
 
     <div class="kdrive-image-wrapper" id="mainWrapper">
         <div class="global-radar"><div class="radar-line"></div></div>
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/bushido%20(1).png?raw=true" class="kdrive-bg-target" id="kdriveBg">
-
-        <!-- SLOGAN ĐIỆN ẢNH -->
-        <div class="cinematic-slogan">
-            <div class="slogan-line">TĨNH LẶNG NHƯ SƠN <span class="slogan-highlight">·</span> HÓA ĐÁ TÂM CAN</div>
-            <div class="slogan-line">CHỈ XUẤT KIẾM KHI <span class="slogan-highlight">CỰC PHẨM</span> TẠI TAY</div>
-        </div>
+        
+        <!-- Cập nhật Background Sơn Môn mới nhất -->
+        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/SONMON%20NEN.png?raw=true" class="kdrive-bg-target" id="kdriveBg">
 
         <div id="protocolGuide" class="central-hud-container">
             <div class="glass-layer"></div>
             <div class="hud-action-btn top-left" onclick="showLoginPanel()">[ SƠN MÔN ]</div>
-            <div class="hud-action-btn bottom-right" onclick="showNinjaInfo()">[ BÍ LỤC ]</div>
+            
+            <!-- Đổi BÍ LỤC thành VỀ KIẾM THÁNH -->
+            <div class="hud-action-btn bottom-right" onclick="showMusashiPanel()">[ VỀ KIẾM THÁNH ]</div>
+            
             <div class="hud-text main">K-DRIVE</div>
             <div id="hudGuardWarning" class="hud-warning-text"></div>
         </div>
 
         <div class="gateway-popup" id="loginPanelContainer">
-            <div class="close-btn" onclick="closeLoginPanel()">[ ĐÓNG ]</div>
-            
-            <div id="panel-login" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-                <h2>[ SƠN MÔN YẾT KIẾN ]</h2>
-                <div class="input-wrapper">
-                    <input type="text" id="accInput" class="login-input" placeholder="[ DANH TÍNH NỘI MÔN ]">
-                </div>
-                <div class="input-wrapper">
-                    <input type="password" id="passcodeInput" class="login-input" placeholder="[ ẤN KÝ BÍ MẬT ]">
-                    <span class="eye-icon" onclick="togglePass('passcodeInput', this)">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </span>
-                </div>
-                <div class="account-options-row">
-                    <label class="remember-container"><input type="checkbox" id="rememberMeCheck" class="remember-checkbox" checked> Ghi nhớ ấn</label>
-                    <div style="display: flex; gap: 10px;">
-                        <span class="change-pass-link" onclick="openChangePassPanel()">[ Đổi ]</span>
-                        <span class="change-pass-link" onclick="switchPanel('forgot')" style="color: #ff3333;">[ Quên ]</span>
+            <!-- Content Wrapper (Để nổi trên nền LED và Kính) -->
+            <div class="gateway-content">
+                <div class="close-btn" onclick="closeLoginPanel()">[ ĐÓNG ]</div>
+                
+                <!-- Bảng 1: Sơn Môn Yết Kiến (Login) -->
+                <div id="panel-login" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                    <h2>[ SƠN MÔN YẾT KIẾN ]</h2>
+                    <div class="input-wrapper">
+                        <input type="text" id="accInput" class="login-input" placeholder="[ DANH TÍNH NỘI MÔN ]">
+                    </div>
+                    <div class="input-wrapper">
+                        <input type="password" id="passcodeInput" class="login-input" placeholder="[ ẤN KÝ BÍ MẬT ]">
+                        <span class="eye-icon" onclick="togglePass('passcodeInput', this)">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </span>
+                    </div>
+                    <div class="account-options-row">
+                        <label class="remember-container"><input type="checkbox" id="rememberMeCheck" class="remember-checkbox" checked> Ghi nhớ ấn</label>
+                        <div style="display: flex; gap: 10px;">
+                            <span class="change-pass-link" onclick="switchPanel('forgot')" style="color: #ff3333;">[ Quên ]</span>
+                        </div>
+                    </div>
+                    <button class="login-btn-submit" onclick="submitLogin()">[ TIẾN NHẬP SƠN MÔN ]</button>
+                    <div id="loginStatus" style="margin-top: 15px; font-weight: bold; text-align: center; font-size: 11px; letter-spacing: 1px; line-height: 1.5;"></div>
+                    
+                    <div style="margin-top: 25px; text-align: center; width: 100%; border-top: 1px solid rgba(0, 229, 255, 0.2); padding-top: 15px;">
+                        <span style="color: rgba(255,255,255,0.4); font-size: 10px; letter-spacing: 2px;">[ CHƯA LẬP THỆ? ]</span><br>
+                        <span onclick="switchPanel('register')" style="color: #00e5ff; font-size: 12px; font-weight: 700; cursor: pointer; letter-spacing: 2px; display: inline-block; margin-top: 8px; transition: 0.3s;">➔ LẬP THỆ TÂN ĐỒ</span>
                     </div>
                 </div>
-                <button class="login-btn-submit" onclick="submitLogin()">[ TIẾN NHẬP SƠN MÔN ]</button>
-                <div id="loginStatus" style="margin-top: 15px; font-weight: bold; text-align: center; font-size: 11px; letter-spacing: 1px; line-height: 1.5;"></div>
-                
-                <div style="margin-top: 25px; text-align: center; width: 100%; border-top: 1px solid rgba(0, 229, 255, 0.2); padding-top: 15px;">
-                    <span style="color: rgba(255,255,255,0.4); font-size: 10px; letter-spacing: 2px;">[ CHƯA LẬP THỆ? ]</span><br>
-                    <span onclick="switchPanel('register')" style="color: #00e5ff; font-size: 12px; font-weight: 700; cursor: pointer; letter-spacing: 2px; display: inline-block; margin-top: 8px; transition: 0.3s;">➔ LẬP THỆ TÂN ĐỒ</span>
-                </div>
-            </div>
 
-            <!-- Các phần đăng ký/quên pass ẩn bên dưới -->
-            <div id="panel-register" style="width: 100%; display: none; flex-direction: column; align-items: center;">
-                <h2>[ LẬP THỆ TÂN ĐỒ ]</h2>
-                <div class="input-wrapper"><input type="text" id="regId" class="login-input" placeholder="[ TÔN DANH ] *"></div>
-                <div class="input-wrapper"><input type="password" id="regPass" class="login-input" placeholder="[ MẬT ẤN MỚI ] *"></div>
-                <div class="input-wrapper"><input type="password" id="regPassConf" class="login-input" placeholder="[ XÁC NHẬN MẬT ẤN ] *"></div>
-                <div class="input-wrapper"><input type="email" id="regEmail" class="login-input" placeholder="[ THƯ TÍN LIÊN LẠC ] *"></div>
-                <button class="login-btn-submit" onclick="processRegistration()">TIẾN VÀO TRẬN ĐỒ</button>
-                <div id="regStatus" style="margin-top: 10px; font-weight: bold; text-align: center; font-size: 11px;"></div>
-                <span onclick="switchPanel('login')" style="color: rgba(255,255,255,0.4); font-size: 11px; cursor: pointer; margin-top: 15px; letter-spacing: 1px;">[ QUAY LẠI SƠN MÔN ]</span>
-            </div>
-            
-            <div id="panel-forgot" style="width: 100%; display: none; flex-direction: column; align-items: center;">
-                <h2>[ KHÔI PHỤC MẬT ẤN ]</h2>
-                <input type="email" id="fgEmail" class="login-input" placeholder="[ NHẬP THƯ TÍN CỦA BẠN ]" style="margin-bottom: 12px;">
-                <button class="login-btn-submit" onclick="submitForgotPass()">GỬI LỆNH TÌM KIẾM</button>
-                <div id="fgStatus" style="margin-top: 15px; font-weight: bold; text-align: center; font-size: 11px;"></div>
-                <span onclick="switchPanel('login')" style="color: rgba(255,255,255,0.4); font-size: 11px; cursor: pointer; margin-top: 15px; letter-spacing: 1px;">[ QUAY LẠI SƠN MÔN ]</span>
+                <!-- Bảng 2: Lập Thệ Tân Đồ (Register) -->
+                <div id="panel-register" style="width: 100%; display: none; flex-direction: column; align-items: center;">
+                    <h2>[ LẬP THỆ TÂN ĐỒ ]</h2>
+                    <div class="input-wrapper"><input type="text" id="regId" class="login-input" placeholder="[ TÔN DANH ] *"></div>
+                    <div class="input-wrapper"><input type="password" id="regPass" class="login-input" placeholder="[ MẬT ẤN MỚI ] *"></div>
+                    <div class="input-wrapper"><input type="password" id="regPassConf" class="login-input" placeholder="[ XÁC NHẬN MẬT ẤN ] *"></div>
+                    <div class="input-wrapper"><input type="email" id="regEmail" class="login-input" placeholder="[ THƯ TÍN LIÊN LẠC ] *"></div>
+                    <button class="login-btn-submit" onclick="processRegistration()">TIẾN VÀO TRẬN ĐỒ</button>
+                    <div id="regStatus" style="margin-top: 10px; font-weight: bold; text-align: center; font-size: 11px;"></div>
+                    <span onclick="switchPanel('login')" style="color: rgba(255,255,255,0.4); font-size: 11px; cursor: pointer; margin-top: 15px; letter-spacing: 1px;">[ QUAY LẠI SƠN MÔN ]</span>
+                </div>
+                
+                <!-- Bảng 3: Quên Mật Ấn (Forgot Password) -->
+                <div id="panel-forgot" style="width: 100%; display: none; flex-direction: column; align-items: center;">
+                    <h2>[ KHÔI PHỤC MẬT ẤN ]</h2>
+                    <input type="email" id="fgEmail" class="login-input" placeholder="[ NHẬP THƯ TÍN CỦA BẠN ]" style="margin-bottom: 12px;">
+                    <button class="login-btn-submit" onclick="submitForgotPass()">GỬI LỆNH TÌM KIẾM</button>
+                    <div id="fgStatus" style="margin-top: 15px; font-weight: bold; text-align: center; font-size: 11px;"></div>
+                    <span onclick="switchPanel('login')" style="color: rgba(255,255,255,0.4); font-size: 11px; cursor: pointer; margin-top: 15px; letter-spacing: 1px;">[ QUAY LẠI SƠN MÔN ]</span>
+                </div>
+
+                <!-- Bảng 4: Về Kiếm Thánh (Musashi Lore) -->
+                <div id="panel-musashi" style="width: 100%; display: none; flex-direction: column; align-items: center; text-align: center;">
+                    <h2 style="font-size: 18px;">[ KIẾM THÁNH MUSASHI ]</h2>
+                    <div style="color: #fff; font-size: 13px; line-height: 1.6; margin-bottom: 25px; text-shadow: 0 0 5px rgba(0,229,255,0.3); text-align: justify;">
+                        Sự hợp nhất tuyệt đối giữa con người và thuật toán lượng tử.<br><br>
+                        Tại Trạm huấn luyện Cyborg này, bạn sẽ bị cuốn vào vòng lặp dữ liệu khép kín, nơi <strong>BOO AI</strong> điều phối mọi nhịp sống và tư duy.<br><br>
+                        Sẵn sàng ký <strong>HUYẾT THỆ SINH TỬ</strong>, thấm nhuần 7 nguyên tắc Võ sĩ đạo để lĩnh hội <strong>Ngũ Luân Thư</strong> của Kiếm Thánh Miyamoto Musashi – Dùng kỷ luật thép chinh phục Vương quốc Poker.
+                    </div>
+                    <button class="login-btn-submit" onclick="closeLoginPanel()">[ ĐÃ RÕ ]</button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -171,49 +192,35 @@
         const EYE_CLOSED = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
         const EYE_OPEN = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
 
-        function playSound(type) {
-            let audioMap = {
-                'click': document.getElementById('sfx-click'),
-                'error': document.getElementById('sfx-error'),
-                'success': document.getElementById('sfx-success'),
-                'type': document.getElementById('sfx-type')
-            };
-            if(audioMap[type]) {
-                audioMap[type].currentTime = 0;
-                audioMap[type].play().catch(e => console.log('Âm thanh bị chặn bởi trình duyệt:', e));
-            }
-        }
-
-        document.querySelectorAll('.login-input').forEach(input => {
-            input.addEventListener('input', () => playSound('type'));
-        });
-
         function lockInteraction() { document.body.classList.add('popups-active'); }
         function unlockInteraction() { document.body.classList.remove('popups-active'); }
         
         function showLoginPanel() { 
-            playSound('click');
-            document.getElementById('loginPanelContainer').style.display = 'flex'; 
+            document.getElementById('loginPanelContainer').style.display = 'block'; 
             switchPanel('login'); 
             lockInteraction(); 
         }
         
+        function showMusashiPanel() { 
+            document.getElementById('loginPanelContainer').style.display = 'block'; 
+            switchPanel('musashi'); 
+            lockInteraction(); 
+        }
+
         function closeLoginPanel() { 
-            playSound('click');
             document.getElementById('loginPanelContainer').style.display = 'none'; 
             unlockInteraction(); 
         }
         
         function switchPanel(panelName) { 
-            playSound('click');
             document.getElementById('panel-login').style.display = 'none'; 
             document.getElementById('panel-register').style.display = 'none'; 
             document.getElementById('panel-forgot').style.display = 'none'; 
+            document.getElementById('panel-musashi').style.display = 'none'; 
             document.getElementById('panel-' + panelName).style.display = 'flex'; 
         }
         
         function togglePass(inputId, iconEl) { 
-            playSound('click');
             let inp = document.getElementById(inputId); 
             if(inp.type === 'password') { inp.type = 'text'; iconEl.innerHTML = EYE_CLOSED; } 
             else { inp.type = 'password'; iconEl.innerHTML = EYE_OPEN; } 
@@ -222,14 +229,12 @@
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec';
 
         function submitLogin() {
-            playSound('click');
             var acc = document.getElementById('accInput').value.trim(); 
             var code = document.getElementById('passcodeInput').value.trim(); 
             var statusEl = document.getElementById('loginStatus');
             
             if(acc === "" || code === "") { 
-                playSound('error');
-                statusEl.innerHTML = "❌ Nhập đủ danh tính và ấn ký!"; 
+                statusEl.innerHTML = "❌ Lười biếng! Nhập danh tính và mật ấn vào!"; 
                 statusEl.style.color = "#ff3333"; 
                 document.getElementById('loginPanelContainer').classList.add('shake-active');
                 setTimeout(() => document.getElementById('loginPanelContainer').classList.remove('shake-active'), 600);
@@ -239,48 +244,40 @@
             statusEl.innerHTML = "🛰️ BOO ĐANG KIỂM CHỨNG ẤN KÝ NỘI MÔN..."; 
             statusEl.style.color = "#00e5ff";
             
-            var callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-            
-            window[callbackName] = function(data) {
-                delete window[callbackName]; 
-                
-                if(data.success === true) {
-                    playSound('success');
-                    statusEl.innerHTML = "✅ TƯƠNG HỢP! ĐANG TIẾN NHẬP SƠN MÔN..."; 
+            const dataForm = new URLSearchParams();
+            dataForm.append('username', acc);
+            dataForm.append('password', code);
+
+            fetch(scriptURL, {
+                method: 'POST',
+                body: dataForm
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.result === "success" || data.status === "success" || data.success === true || data.ket_qua === "thanh_cong") {
+                    statusEl.innerHTML = "✅ ẤN KÝ TƯƠNG HỢP. ĐANG TIẾN NHẬP SƠN MÔN..."; 
                     statusEl.style.color = "#00e5ff";
                     document.getElementById('mainWrapper').classList.add('shake-active');
                     
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('currentUser', acc);
-                    
-                    setTimeout(() => { window.location.href = 'index.html?v=' + new Date().getTime(); }, 1500);
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1500);
                 } else {
-                    playSound('error');
-                    statusEl.innerHTML = "❌ " + (data.msg || "Sai ấn ký nội môn!"); 
+                    statusEl.innerHTML = "❌ Sai ấn ký nội môn! Kẻ xông bậy không thể bước qua Kết nối đường Sơn môn."; 
                     statusEl.style.color = "#ff3333";
                     document.getElementById('loginPanelContainer').classList.add('shake-active');
                     setTimeout(() => document.getElementById('loginPanelContainer').classList.remove('shake-active'), 600);
                 }
-            };
-
-            var url = scriptURL + "?action=checkLogin" + 
-                      "&username=" + encodeURIComponent(acc) + 
-                      "&password=" + encodeURIComponent(code) + 
-                      "&deviceId=Mushi1000_Mobile" + 
-                      "&callback=" + callbackName;
-
-            var script = document.createElement('script');
-            script.src = url;
-            script.onerror = function() {
-                playSound('error');
-                statusEl.innerHTML = "❌ Kết nối đường Sơn môn bị phong tỏa!"; 
+            })
+            .catch(error => {
+                statusEl.innerHTML = "❌ Kết nối đường Sơn môn đang bị phong tỏa! Hãy thử lại."; 
                 statusEl.style.color = "#ff3333";
-            };
-            document.body.appendChild(script);
+                document.getElementById('loginPanelContainer').classList.add('shake-active');
+                setTimeout(() => document.getElementById('loginPanelContainer').classList.remove('shake-active'), 600);
+                console.error('Lỗi Sơn Môn:', error);
+            });
         }
 
-        function processRegistration() { playSound('click'); document.getElementById('regStatus').innerHTML = "Tính năng này đang được rèn dũa!"; document.getElementById('regStatus').style.color = "#00e5ff"; }
-        function submitForgotPass() { playSound('click'); document.getElementById('fgStatus').innerHTML = "Đang gửi mật thư khôi phục!"; document.getElementById('fgStatus').style.color = "#00e5ff"; }
+        function processRegistration() { document.getElementById('regStatus').innerHTML = "Tính năng này đang được rèn dũa!"; document.getElementById('regStatus').style.color = "#00e5ff"; }
+        function submitForgotPass() { document.getElementById('fgStatus').innerHTML = "Đang gửi mật thư khôi phục!"; document.getElementById('fgStatus').style.color = "#00e5ff"; }
     </script>
 </body>
 </html>
