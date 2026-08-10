@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>K-Drive: Sơn Môn Yết Kiến</title>
     
-    <!-- TÍCH HỢP 3 FONT CHUẨN ĐIỆN ẢNH: Space Grotesk (Giao diện), EB Garamond (Phụ đề), Great Vibes (Chữ ký Tiêu đề) -->
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Great+Vibes&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- TÍCH HỢP 3 FONT CHUẨN ĐIỆN ẢNH -->
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Great+Vibes&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: none; }
@@ -19,11 +19,10 @@
         
         .kdrive-image-wrapper { position: relative; width: 100vw; height: 100vh; max-width: 430px; background-color: #000; overflow: hidden; }
         
-        /* HỆ THỐNG ẢNH NỀN VÀ VIDEO CROSSFADE */
-        .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; filter: brightness(0.9) contrast(1.1); transition: opacity 1.5s ease-in-out; }
+        /* HỆ THỐNG ẢNH NỀN KÉP - CROSSFADE MƯỢT 1.5 GIÂY */
+        .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; filter: brightness(0.9) contrast(1.1); }
         #bg-unlit { z-index: 1; opacity: 1; }
-        #bg-lit { z-index: 2; opacity: 0; }
-        #portalVideo { z-index: 3; opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; transition: opacity 1.5s ease-in-out; }
+        #bg-lit { z-index: 2; opacity: 0; transition: opacity 1.5s ease-in-out; }
 
         .global-radar { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; overflow: hidden; mix-blend-mode: overlay; }
         .radar-line { width: 100%; height: 2px; background: rgba(0, 229, 255, 0.5); box-shadow: 0 0 30px rgba(0, 229, 255, 1); position: absolute; top: -10px; animation: globalScan 8s linear infinite; }
@@ -35,19 +34,24 @@
         @keyframes bounceArrow { 0%, 100% { transform: translateY(-10px) rotate(45deg); } 50% { transform: translateY(10px) rotate(45deg); } }
         @keyframes glowArrow { 0% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0); } 100% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0.8); } }
 
-        /* HỆ THỐNG PHỤ ĐỀ ĐIỆN ẢNH */
-        .cinematic-sub-container { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; text-align: center; z-index: 100; pointer-events: none; display: none; }
+        /* HỆ THỐNG PHỤ ĐỀ (TĨNH LẶNG, KHÔNG GIẬT LAG) */
+        .cinematic-sub-container { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; text-align: center; z-index: 100; pointer-events: none; display: none; }
         
         .sub-text-item { 
             font-family: 'EB Garamond', serif; 
-            color: #eaeaea; font-size: 17px; font-weight: 400; letter-spacing: 0.5px; line-height: 1.5; 
+            color: #f8fcfb; 
+            font-size: 17px; font-weight: 500; letter-spacing: 0.5px; line-height: 1.6; 
             text-wrap: balance; 
-            text-shadow: 0px 2px 6px rgba(0,0,0,1), 0px 0px 15px rgba(0,0,0,0.8); 
-            opacity: 0; transform: scale(0.98); 
-            transition: opacity 0.8s ease, transform 4s ease-out; 
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6), 0 0 30px rgba(0, 229, 255, 0.3);
+            opacity: 0; 
+            transform: scale(0.95); 
+            transition: opacity 1s ease, transform 1s ease-out; 
+            will-change: transform, opacity;
         }
+        
         .sub-text-item.active { opacity: 1; transform: scale(1); }
 
+        /* Tiêu đề Khai mở (Chữ ký bay bổng) */
         .sub-text-item.is-title {
             font-family: 'Great Vibes', cursive;
             color: #ffffff; font-size: 44px; font-weight: 400; text-transform: none;
@@ -55,7 +59,12 @@
             letter-spacing: 2px;
         }
 
-        .hl-italic { font-style: italic; font-weight: 600; color: #050505; text-shadow: 0 0 4px rgba(255,255,255,0.9), 0 0 10px rgba(0,229,255,0.7); }
+        /* Từ khóa nổi bật: Xám Khói Trầm bọc Hào Quang tĩnh */
+        .hl-italic { 
+            font-style: italic; font-weight: 600; 
+            color: #2c3e4a; 
+            text-shadow: 0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(0, 229, 255, 0.5); 
+        }
 
         /* NÚT TIẾN NHẬP NGAY */
         .skip-intro-btn { 
@@ -67,16 +76,12 @@
         }
         .skip-intro-btn:hover { color: #fff; border-bottom-color: #00e5ff; text-shadow: 0 0 10px #00e5ff; }
 
-        /* HIỆU ỨNG CHỚP SÁNG CHUYỂN CẢNH */
-        .whiteout-flash { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: #e0f7fa; z-index: 90000; opacity: 0; pointer-events: none; transition: opacity 0.4s ease-out; }
-        .whiteout-flash.active { opacity: 0.95; transition: opacity 0.1s ease-in; }
-
-        /* DASHBOARD ĐĂNG NHẬP (Minimalist Sci-fi) */
+        /* DASHBOARD ĐĂNG NHẬP (Thanh mảnh, tối giản) */
         .gateway-popup { 
             position: absolute; top: 35%; left: 50%; width: 90%; max-width: 320px; 
             border-radius: 4px; overflow: hidden; padding: 1px; 
             z-index: 99999; opacity: 0; transform: translate(-50%, -20%) scale(0.95); pointer-events: none;
-            transition: all 1.5s cubic-bezier(0.25, 1, 0.3, 1); 
+            transition: all 1.2s cubic-bezier(0.25, 1, 0.3, 1); 
         }
         .gateway-popup.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
         
@@ -94,9 +99,16 @@
         .login-input::placeholder { color: rgba(255, 255, 255, 0.2); font-weight: 300; letter-spacing: 3px; }
         .login-input:focus { border-bottom-color: #00e5ff; background: rgba(0, 229, 255, 0.05); box-shadow: inset 0 -10px 15px -10px rgba(0, 229, 255, 0.2); }
         
-        /* Chống Autofill phá nền trắng */
-        .login-input:-webkit-autofill, .login-input:-webkit-autofill:hover, .login-input:-webkit-autofill:focus, .login-input:-webkit-autofill:active { transition: background-color 5000s ease-in-out 0s; -webkit-text-fill-color: #00e5ff !important; caret-color: #00e5ff; }
-        
+        /* FIX LỖI NỀN TRẮNG AUTOFILL CỦA TRÌNH DUYỆT */
+        .login-input:-webkit-autofill,
+        .login-input:-webkit-autofill:hover, 
+        .login-input:-webkit-autofill:focus, 
+        .login-input:-webkit-autofill:active {
+            transition: background-color 5000s ease-in-out 0s;
+            -webkit-text-fill-color: #00e5ff !important;
+            caret-color: #00e5ff;
+        }
+
         .login-btn-submit { padding: 12px 20px; background: transparent; color: rgba(255, 255, 255, 0.7); font-weight: 400; font-size: 11px; letter-spacing: 4px; border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 2px; cursor: pointer; width: 100%; font-family: 'Space Grotesk', sans-serif; transition: all 0.3s; margin-top: 10px; text-transform: uppercase; }
         .login-btn-submit:hover { color: #fff; border-color: #00e5ff; box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1), 0 0 15px rgba(0,229,255,0.3); text-shadow: 0 0 5px #fff; }
         
@@ -117,6 +129,9 @@
 </head>
 <body>
 
+    <!-- VIDEO BAY VÀO CỔNG CHUYỂN CẢNH KHI ĐĂNG NHẬP THÀNH CÔNG -->
+    <video id="gateTransitionVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20BAY%20VAO.mp4" style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: 999999; display: none; opacity: 0; transition: opacity 1.5s ease;" playsinline></video>
+
     <!-- HỆ THỐNG ÂM THANH -->
     <audio id="sysAudio" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/KHAIMO.MP3" preload="auto"></audio>
     <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
@@ -136,15 +151,9 @@
     <div class="kdrive-image-wrapper" id="mainWrapper">
         <div class="global-radar"><div class="radar-line"></div></div>
         
-        <!-- NỀN CHƯA KÍCH HOẠT, ĐÃ KÍCH HOẠT VÀ VIDEO TRẠM KHÔNG GIAN -->
+        <!-- NỀN CHƯA KÍCH HOẠT VÀ ĐÃ KÍCH HOẠT -->
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Logic%201%20nen.png?raw=true" id="bg-unlit" class="kdrive-bg-target">
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/logic%202%20nen.png?raw=true" id="bg-lit" class="kdrive-bg-target">
-        
-        <!-- TÍCH HỢP VIDEO XUYÊN KHÔNG 10S -->
-        <video id="portalVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20BAY%20VAO.mp4" playsinline></video>
-
-        <!-- LỚP FLASH CHUYỂN CẢNH -->
-        <div class="whiteout-flash" id="flashEffect"></div>
 
         <!-- MŨI TÊN HOTSPOT -->
         <div id="plaqueHotspot" onclick="startCinematicIntro(); playClick();" class="sound-btn">
@@ -184,7 +193,7 @@
                     </div>
                 </div>
 
-                <!-- Các bảng phụ trợ -->
+                <!-- Bảng Lập Thệ -->
                 <div id="panel-register" style="width: 100%; display: none; flex-direction: column; align-items: center;">
                     <h2>[ LẬP THỆ TÂN ĐỒ ]</h2>
                     <div class="input-wrapper"><input type="text" id="regId" class="login-input" placeholder="Tôn Danh *"></div>
@@ -195,6 +204,7 @@
                     <div class="bottom-links"><span class="sub-link sound-btn" onclick="switchPanel('login')">➔ VỀ SƠN MÔN</span></div>
                 </div>
                 
+                <!-- Bảng Quên Mật Ấn -->
                 <div id="panel-forgot" style="width: 100%; display: none; flex-direction: column; align-items: center;">
                     <h2>[ KHÔI PHỤC MẬT ẤN ]</h2>
                     <input type="email" id="fgEmail" class="login-input" placeholder="Nhập Thư Tín Của Bạn" style="margin-bottom: 20px;">
@@ -203,6 +213,7 @@
                     <div class="bottom-links"><span class="sub-link sound-btn" onclick="switchPanel('login')">➔ VỀ SƠN MÔN</span></div>
                 </div>
 
+                <!-- Bảng Về Kiếm Thánh -->
                 <div id="panel-musashi" style="width: 100%; display: none; flex-direction: column; align-items: center; text-align: center;">
                     <h2 style="font-size: 14px;">[ KIẾM THÁNH MUSASHI ]</h2>
                     <div style="color: rgba(255,255,255,0.7); font-size: 13px; line-height: 1.8; margin-bottom: 25px; text-align: justify; font-family: 'EB Garamond', serif;">
@@ -212,11 +223,13 @@
                     </div>
                     <div class="bottom-links"><span class="sub-link sound-btn" onclick="switchPanel('login')">➔ VỀ SƠN MÔN</span></div>
                 </div>
+
             </div>
         </div>
     </div>
 
     <script>
+        // Gắn sự kiện Hover cho các nút
         document.addEventListener('DOMContentLoaded', () => {
             const btns = document.querySelectorAll('.sound-btn');
             btns.forEach(btn => {
@@ -225,6 +238,7 @@
             });
         });
 
+        // --- TIMELINE ĐIỆN ẢNH (Từ khóa đen, phát hào quang) ---
         const subTimeline = [
             { start: 0, end: 4, text: "Thông Điệp Khai Mở", isTitle: true },
             { start: 5, end: 7, text: "Tiền Điều Kiện Và Huyết Thệ", isTitle: true },
@@ -249,6 +263,7 @@
         function startCinematicIntro() {
             document.getElementById('plaqueHotspot').style.display = 'none';
             document.getElementById('subContainer').style.display = 'block';
+            
             setTimeout(() => { document.getElementById('skipBtn').style.display = 'block'; }, 2000);
 
             const audio = document.getElementById('sysAudio');
@@ -274,12 +289,13 @@
                     subDisplay.classList.remove('active');
                 }
 
-                if (audio.ended) {
+                if (audio.ended || currentTime >= 87) {
                     finishCinematic();
                 }
             }, 100);
         }
 
+        // HÀM CHUYỂN CẢNH ĐẮT GIÁ (KHÔNG FLASH)
         function finishCinematic() {
             if(isCinematicFinished) return;
             isCinematicFinished = true;
@@ -287,25 +303,24 @@
             clearInterval(subInterval);
             document.getElementById('sysAudio').pause();
             
+            // 1. Tắt Sub và Nút
             document.getElementById('subContainer').style.display = 'none';
             document.getElementById('skipBtn').style.display = 'none';
             
-            const flash = document.getElementById('flashEffect');
-            flash.classList.add('active');
-
+            // 2. Kích hoạt Nhạc nền 
             const bgm = document.getElementById('bgMusic');
             bgm.play().catch(e => console.log("Lỗi BGM:", e));
 
-            setTimeout(() => {
-                document.getElementById('bg-lit').style.opacity = '1';
-                flash.classList.remove('active');
+            // 3. Ảnh 2 từ từ bừng sáng đè lên ảnh 1 (Crossfade 1.5s)
+            document.getElementById('bg-lit').style.opacity = '1';
                 
-                setTimeout(() => {
-                    document.getElementById('loginPanelContainer').classList.add('active');
-                }, 2500); 
-            }, 100);
+            // 4. THỜI GIAN VÀNG: CHIÊM NGƯỠNG ĐÚNG 2.5 GIÂY (2500ms)
+            setTimeout(() => {
+                document.getElementById('loginPanelContainer').classList.add('active');
+            }, 2500); 
         }
 
+        // --- UI CƠ BẢN ---
         function switchPanel(panelName) { 
             document.getElementById('panel-login').style.display = 'none'; 
             document.getElementById('panel-register').style.display = 'none'; 
@@ -325,6 +340,7 @@
             } 
         }
 
+        // --- KẾT NỐI API ĐĂNG NHẬP & PHÁT VIDEO ---
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec';
         
         function submitLogin() {
@@ -354,31 +370,31 @@
             .then(data => {
                 if(data.success === true || data.result === "success" || data.status === "success" || data.ket_qua === "thanh_cong") {
                     sndSuccess.currentTime = 0; sndSuccess.play().catch(e=>{});
-                    statusEl.innerHTML = "✅ ẤN KÝ TƯƠNG HỢP!"; 
+                    statusEl.innerHTML = "✅ ẤN KÝ TƯƠNG HỢP. ĐANG TIẾN NHẬP..."; 
                     statusEl.style.color = "#00e5ff";
                     
-                    // Nhịp 1: Bảng đăng nhập mờ nhòe (Blur) và bốc hơi
-                    let loginPanel = document.getElementById('loginPanelContainer');
-                    loginPanel.style.transition = "all 1s cubic-bezier(0.25, 1, 0.3, 1), filter 1s ease";
-                    loginPanel.style.transform = "translate(-50%, -60%) scale(1.05)";
-                    loginPanel.style.filter = "blur(12px)";
-                    loginPanel.style.opacity = "0";
-
-                    // Nhịp 2: Khởi động Video Portal và Crossfade đè ảnh tĩnh
+                    // 1. LÀM TAN BIẾN BẢNG ĐĂNG NHẬP
+                    document.getElementById('loginPanelContainer').classList.remove('active');
+                    
+                    // 2. PHÁT VIDEO CHUYỂN CẢNH SAU KHI BẢNG MỜ ĐI
                     setTimeout(() => {
-                        let portalVid = document.getElementById('portalVideo');
-                        portalVid.play().catch(e=>console.log("Lỗi phát video:", e));
-                        portalVid.style.opacity = '1';
+                        const gateVid = document.getElementById('gateTransitionVideo');
+                        gateVid.style.display = 'block';
+                        void gateVid.offsetWidth; // Trigger reflow để fade mượt
+                        gateVid.style.opacity = '1';
                         
-                        // Mờ từ từ ảnh tĩnh số 2 đi để hòa trộn vào Video
-                        document.getElementById('bg-lit').style.opacity = '0';
-                        document.getElementById('bg-unlit').style.opacity = '0';
-                        
-                        // Nhịp 3: Đợi trọn vẹn 10s cất cánh rồi mới chuyển trang
-                        setTimeout(() => {
+                        gateVid.play().then(() => {
+                            // 3. CHUYỂN TRANG KHI VIDEO KẾT THÚC (9 Giây)
+                            gateVid.onended = () => {
+                                window.location.href = 'index.html';
+                            };
+                        }).catch(e => {
+                            // Nếu trình duyệt chặn phát video, nhảy thẳng trang luôn
+                            console.log("Lỗi phát video:", e);
                             window.location.href = 'index.html';
-                        }, 10000); 
-                    }, 800); 
+                        });
+                    }, 1000); // Đợi 1s cho bảng đăng nhập biến mất hoàn toàn
+
                 } else {
                     sndError.currentTime = 0; sndError.play().catch(e=>{});
                     var errorMsg = data.msg ? data.msg : "❌ SAI ẤN KÝ NỘI MÔN!";
