@@ -10,41 +10,38 @@ function lockInteraction() { document.body.classList.add('popups-active'); }
 function unlockInteraction() { document.body.classList.remove('popups-active'); }
 
 window.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active') {
-        
-        // VÒNG BẢO VỆ CHỐNG SẬP NGUỒN: Chỉ ẩn bảng đăng nhập nếu bảng đó thực sự tồn tại
-        let loginPanel = document.getElementById('loginPanelContainer');
-        if (loginPanel) { loginPanel.style.display = 'none'; }
-        
-        isLoggedIn = true; 
-        
-        // Các tính năng khởi động
-        triggerHexagonShield();
-        let hud = document.getElementById('protocolGuide'); if(hud) hud.remove();
-        
-        let logoutHud = document.getElementById('logoutHud');
-        if (logoutHud) logoutHud.classList.add('logout-active');
-        
-        let cyberAltarBtn = document.getElementById('cyberAltarBtn');
-        if (cyberAltarBtn) cyberAltarBtn.classList.add('logged-in');
-        
-        let hIcon = document.getElementById('heartIcon'); 
-        if (hIcon) { hIcon.className = 'heart-icon active'; hIcon.innerHTML = "❤️"; }
-        
-        setInterval(() => { 
-            let bpmText = document.getElementById('bpmText');
-            if (bpmText) bpmText.innerText = (95 + Math.floor(Math.random() * 15)) + " BPM"; 
-        }, 2000);
-        
-        pulseTerminal("BOO: SESSION RESTORED.");
-        initRelic();
-        spawnNeonRain(); 
+    // 1. LÍNH GÁC BẢO MẬT: CHỐNG ĐI CỬA SAU
+    const hasAccess = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active';
+    
+    if (!hasAccess) {
+        // Đuổi thẳng về cổng Sơn Môn nếu không có giấy thông hành
+        window.location.href = 'login.html';
+        return;
     }
+    
+    // 2. NẾU HỢP LỆ THÌ KHỞI ĐỘNG HỆ THỐNG
+    isLoggedIn = true; 
+    
+    triggerHexagonShield();
+    
+    let logoutHud = document.getElementById('logoutHud');
+    if (logoutHud) logoutHud.classList.add('logout-active');
+    
+    let cyberAltarBtn = document.getElementById('cyberAltarBtn');
+    if (cyberAltarBtn) cyberAltarBtn.classList.add('logged-in');
+    
+    let hIcon = document.getElementById('heartIcon'); 
+    if (hIcon) { hIcon.className = 'heart-icon active'; hIcon.innerHTML = "❤️"; }
+    
+    setInterval(() => { 
+        let bpmText = document.getElementById('bpmText');
+        if (bpmText) bpmText.innerText = (95 + Math.floor(Math.random() * 15)) + " BPM"; 
+    }, 2000);
+    
+    pulseTerminal("BOO: SESSION RESTORED.");
+    initRelic();
+    spawnNeonRain(); 
 });
-
-function isValidUsername(str) { return /^[a-zA-Z0-9]{6,15}$/.test(str); }
-function isValidPassword(str) { return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(str); }
-function validateLive(type) { }
 
 const EYE_OPEN = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
 const EYE_CLOSED = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
@@ -369,19 +366,28 @@ function showLogoutConfirm() {
     if(p) p.style.display = 'flex'; 
     lockInteraction();
 }
+
+// ===============================================
+// ĐỔI LỆNH ĐĂNG XUẤT: QUAY VỀ CỔNG LOGIN MUSASHI
+// ===============================================
 function confirmLogout(isYes) { 
     try { playCyberSound(); } catch(e){} 
     let p = document.getElementById('logoutConfirmPanel');
     if(isYes) { 
         if(p) p.style.display = 'none'; 
         pulseTerminal("BOO: LOGGING OUT..."); 
-        sessionStorage.removeItem('kdrive_session'); sessionStorage.removeItem('kdrive_username'); localStorage.removeItem('kdrive_logged_in_user');
-        setTimeout(() => { window.location.reload(); }, 500); 
+        sessionStorage.removeItem('kdrive_session'); 
+        sessionStorage.removeItem('kdrive_username'); 
+        localStorage.removeItem('kdrive_logged_in_user');
+        
+        // Đá văng ra cổng ngoài thay vì tải lại trang
+        setTimeout(() => { window.location.href = 'login.html'; }, 500); 
     } else { 
         if(p) p.style.display = 'none'; 
         unlockInteraction();
     } 
 }
+
 function pulseTerminal(text) { 
     const terminal = document.getElementById('terminalStream');
     if(!terminal) return;
@@ -433,6 +439,7 @@ function handleVideoUpload(event) {
     let cube = document.getElementById('cubeWrapper');
     if(cube) cube.classList.remove('camera-rec-mode');
 }
+
 function triggerBubble() { 
     if (!hasUnreadVideo) return; 
     const bubble = document.getElementById('samuraiBubble'); 
@@ -440,6 +447,7 @@ function triggerBubble() {
     if(bubble) bubble.classList.add('bubble-show'); 
     if(bubbleText) bubbleText.innerHTML = "⚠️ MẬT THƯ ĐẾN";
 }
+
 function processSamuraiAction(element) { 
     if (!hasUnreadVideo || !capturedVideoUrl) { 
         triggerHexagonShield(); 
@@ -460,6 +468,7 @@ function processSamuraiAction(element) {
         if(player) player.play(); 
     }, 600);
 }
+
 function closeVideoModule() { 
     let popup = document.getElementById('videoPopup');
     let player = document.getElementById('capturedVideoPlayer');
@@ -471,6 +480,7 @@ function closeVideoModule() {
     if(cube) cube.classList.remove('video-play-mode'); 
     if(beam) beam.classList.remove('beam-on'); 
 }
+
 function triggerStaticNode(element) { 
     if (!checkLoginGuard()) return; 
     if(navigator.vibrate) navigator.vibrate([30]); 
@@ -481,16 +491,16 @@ function triggerStaticNode(element) {
         setTimeout(() => { cube.classList.remove('phantom-split'); }, 600); 
     }
 }
+
 function rotateWallpapersGuard(element) { 
     currentWallpaperIndex = (currentWallpaperIndex + 1) % base64Wallpapers.length; 
     let bg = document.getElementById('kdriveBg');
     if(bg) bg.src = base64Wallpapers[currentWallpaperIndex];
 }
 
-// BẢNG BÁO CÁO GIỮ NGUYÊN HOẠT ĐỘNG
+// BẢNG BÁO CÁO SỔ SINH TỬ GIỮ NGUYÊN
 class ReportDashboard {
     // ... [Code Dashboard anh đang dùng nguyên bản không đổi] ...
-    // Để giữ file gọn nhẹ, em không động chạm vào Sổ Sinh Tử của anh.
 }
 
 function fetchBattleReport() {
@@ -499,6 +509,4 @@ function fetchBattleReport() {
     playCyberClick();
     pulseTerminal("BOO: ĐANG TRUY XUẤT DỮ LIỆU...");
     alert("Dữ liệu đang được kết nối với Điện Thờ..."); 
-    // const dashboard = new ReportDashboard(currentUsername);
-    // dashboard.open();
 }
