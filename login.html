@@ -68,7 +68,7 @@
         .gateway-content { position: relative; z-index: 10; width: 100%; height: 100%; padding: 25px 20px; display: flex; flex-direction: column; align-items: center; }
         .gateway-content h2 { color: #fff; font-size: 13px; font-weight: 400; letter-spacing: 6px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(0,229,255,0.4); text-transform: uppercase; border-bottom: 1px solid rgba(0, 229, 255, 0.2); padding-bottom: 10px; width: 100%; text-align: center; }
         
-        /* RIÊNG TIÊU ĐỀ THE LEGEND (Chữ ký bay bổng) */
+        /* RIÊNG TIÊU ĐỀ THE LEGEND */
         .gateway-content h2.legend-title {
             font-family: 'Great Vibes', cursive;
             color: #ffffff;
@@ -143,13 +143,24 @@
         const sndSuccess = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3');
         const sndFlashImpact = new Audio('https://assets.mixkit.co/active_storage/sfx/2689/2689-preview.mp3'); 
         
-        sndHover.volume = 0.2; sndClick.volume = 0.4; sndError.volume = 0.5; sndSuccess.volume = 0.5; sndFlashImpact.volume = 0.8;
+        sndHover.volume = 0.2; 
+        sndClick.volume = 0.4; 
+        sndError.volume = 0.5; 
+        sndSuccess.volume = 0.5; 
+        sndFlashImpact.volume = 1.0; // ĐẨY MAX VOLUME LÊN 100%
 
         function playHover() { sndHover.currentTime = 0; sndHover.play().catch(e=>{}); }
         function playClick() { sndClick.currentTime = 0; sndClick.play().catch(e=>{}); }
         
         function triggerCinematicFlash() {
-            sndFlashImpact.currentTime = 0; sndFlashImpact.play().catch(e=>{});
+            sndFlashImpact.currentTime = 0; 
+            sndFlashImpact.play().catch(e=>{});
+            
+            // KÍCH HOẠT ĐỘNG CƠ RUNG (Haptic Feedback) - Rung mạnh 300ms, nghỉ 100ms, rung dư chấn 200ms
+            if (navigator.vibrate) {
+                navigator.vibrate([300, 100, 200]);
+            }
+
             setTimeout(() => { sndFlashImpact.pause(); sndFlashImpact.currentTime = 0; }, 2000);
             const flash = document.getElementById('flashOverlay'); flash.classList.add('flash-active');
             setTimeout(() => { flash.classList.remove('flash-active'); }, 150);
@@ -215,7 +226,7 @@
                     <div class="bottom-links"><span class="sub-link sound-btn" onclick="switchPanel('login')">➔ VỀ SƠN MÔN</span></div>
                 </div>
 
-                <!-- BẢNG HỒ SƠ KIẾM THÁNH VỚI CHỮ KÝ THE LEGEND VÀ DATA SẮC BÉN -->
+                <!-- BẢNG HỒ SƠ KIẾM THÁNH (THE LEGEND) -->
                 <div id="panel-musashi">
                     <h2 class="legend-title">The Legend</h2>
                     
@@ -344,9 +355,6 @@
             document.getElementById('panel-' + panelName).style.display = 'flex'; 
         }
 
-        // ==========================================
-        // QUẢN LÝ ĐIỀU HƯỚNG BẢNG KIẾM THÁNH (Kèm xử lý Audio)
-        // ==========================================
         const bgMusicLayer = document.getElementById('bgMusic');
         const musashiVoiceLayer = document.getElementById('musashiVoice');
 
