@@ -147,7 +147,7 @@
         sndClick.volume = 0.4; 
         sndError.volume = 0.5; 
         sndSuccess.volume = 0.5; 
-        sndFlashImpact.volume = 1.0; // ĐẨY MAX VOLUME LÊN 100%
+        sndFlashImpact.volume = 1.0; 
 
         function playHover() { sndHover.currentTime = 0; sndHover.play().catch(e=>{}); }
         function playClick() { sndClick.currentTime = 0; sndClick.play().catch(e=>{}); }
@@ -156,7 +156,6 @@
             sndFlashImpact.currentTime = 0; 
             sndFlashImpact.play().catch(e=>{});
             
-            // KÍCH HOẠT ĐỘNG CƠ RUNG (Haptic Feedback) - Rung mạnh 300ms, nghỉ 100ms, rung dư chấn 200ms
             if (navigator.vibrate) {
                 navigator.vibrate([300, 100, 200]);
             }
@@ -427,12 +426,22 @@
                     loginPanel.style.opacity = '0';
                     loginPanel.style.pointerEvents = 'none';
                     
+                    // KÍCH HOẠT HIỆU ỨNG RUNG DỒN DẬP NHƯ LỰC HÚT LƯỢNG TỬ
                     setTimeout(() => {
                         let successVid = document.getElementById('successVideo');
                         successVid.classList.add('active');
+                        
+                        // Kích hoạt nhịp rung mạnh liên tục kéo dài 4 giây
+                        if (navigator.vibrate) {
+                            navigator.vibrate([500, 50, 500, 50, 500, 50, 500, 50, 500, 50, 500, 50, 1000]); 
+                        }
+                        
                         successVid.play().catch(e => console.log("Lỗi phát video:", e));
                         
-                        successVid.onended = () => { window.location.href = 'index.html'; };
+                        successVid.onended = () => { 
+                            if(navigator.vibrate) navigator.vibrate(0); // Tắt rung khi load xong
+                            window.location.href = 'index.html'; 
+                        };
                     }, 500); 
                     
                 } else {
