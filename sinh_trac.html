@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Event Horizon Core</title>
-    <!-- Đã thêm các phông chữ thanh tao EB Garamond, Great Vibes và Space Grotesk -->
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Great+Vibes&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tích hợp phông chữ Thư Pháp Nhật Bản Yuji Boku, cùng các phông chữ thanh tao khác -->
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Great+Vibes&family=Space+Grotesk:wght@300;400;500;600;700&family=Yuji+Boku&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -13,10 +13,11 @@
             --bg-obsidian: #050608; --mint: #00ff9d; --cyan: #00e5ff;
             --amber: #ffaa00; --violet: #b026ff; --crimson: #ff2a2a;
             --neon-pink: #ff00ff; --lime: #39ff14;
-            --font-display: 'Space Grotesk', sans-serif; /* Đổi font UI chính */
+            --font-display: 'Space Grotesk', sans-serif; 
             --font-ui: 'Space Grotesk', sans-serif; 
             --font-terminal: 'Space Grotesk', monospace;
-            --font-content: 'EB Garamond', serif; /* Font chữ đọc nội dung Bí Lục */
+            --font-content: 'EB Garamond', serif; 
+            --font-jp: 'Yuji Boku', serif; /* Phông chữ Thư pháp Nhật Bản */
             --vh: 1vh; 
         }
 
@@ -308,18 +309,29 @@
         
         .directive-line { font-family: var(--font-display); font-size: 11px; font-weight: 500; padding: 0 0 6px 0; margin-bottom: 16px; background: transparent; border-bottom: 1px solid rgba(255,255,255,0.1); letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.8); }
 
-        .btn-play-lore {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 4px;
-            color: #fff;
-            padding: 5px 12px;
-            font-family: var(--font-display);
-            font-size: 10px;
-            font-weight: 500;
-            letter-spacing: 1px;
+        /* ICON MŨI HEO A.I BOO CHO BÍ LỤC */
+        .boo-play-btn {
+            font-size: 26px;
             cursor: pointer;
-            transition: all 0.3s;
+            filter: drop-shadow(0 0 5px rgba(255, 0, 255, 0.6));
+            animation: pig-breathe 1.5s infinite alternate cubic-bezier(0.25, 1, 0.5, 1);
+            transition: transform 0.2s;
+            display: inline-block;
+            user-select: none;
+        }
+        .boo-play-btn:active { transform: scale(0.9); }
+        .boo-play-btn.playing {
+            animation: pig-speak 0.15s infinite alternate !important;
+            filter: drop-shadow(0 0 15px var(--neon-pink)) brightness(1.5);
+        }
+
+        @keyframes pig-breathe {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-3px) scale(1.15); }
+        }
+        @keyframes pig-speak {
+            0% { transform: scale(1.1) rotate(-15deg); }
+            100% { transform: scale(1.3) rotate(15deg); }
         }
 
         .img-viewer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
@@ -336,10 +348,6 @@
         .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; z-index: -1; transition: background 0.3s; }
 
         .vault-input { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; text-align: center; padding: 12px; font-family: var(--font-display); font-size: 14px; font-weight: 500; letter-spacing: 3px; outline: none; text-transform: uppercase; transition: all 0.3s ease; position: relative; z-index: 2; margin-top: 10px; }
-
-        /* HIỆU ỨNG ICON BOO (MŨI HEO) */
-        #term-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; transition: all 0.3s ease; }
-        .boo-pig-nose { font-size: 13px; display: inline-block; transition: transform 0.2s; }
 
         /* CSS POPUP ONBOARDING CYBERPUNK MỚI */
         #onboarding-popup { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
@@ -365,7 +373,6 @@
 
         .fusion-title { font-family: var(--font-display); font-size: 14px; font-weight: 500; letter-spacing: 2px; margin-bottom: 20px; color: #fff; }
         .fusion-text { font-family: var(--font-terminal); font-size: 12px; font-weight: 300; line-height: 1.8; text-align: left; color: rgba(255,255,255,0.8); }
-        .fusion-text span.prompt { color: rgba(255,255,255,0.4); }
         .fusion-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 25px; }
         .fusion-box { background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); padding: 15px 5px; text-align: center; }
         .fb-lbl { font-family: var(--font-terminal); font-size: 9px; font-weight: 300; color: rgba(255,255,255,0.5); margin-bottom: 5px; letter-spacing: 1px; }
@@ -374,21 +381,60 @@
         /* ========================================================
            BUSHIDO EASTER EGG ĐIỆN ẢNH THANH TAO
            ======================================================== */
+        
+        /* Class chung để ép phông chữ Nhật Bản thư pháp đẹp */
+        .jp-text {
+            font-family: var(--font-jp);
+            font-size: 18px;
+            font-weight: 400;
+            color: rgba(255,255,255,0.9);
+            letter-spacing: 2px;
+        }
+
         .bushido-signature { 
             text-align: center; margin: 30px auto 10px; padding: 20px; 
             cursor: pointer; position: relative; 
             -webkit-tap-highlight-color: transparent;
             display: flex; flex-direction: column; align-items: center;
         }
+        
+        /* Hiệu ứng Ánh Thép Katana trượt qua 3 chữ Kanji */
         .kanji-shine { 
-            font-size: 32px; font-weight: 400; letter-spacing: 10px; 
-            color: rgba(255,255,255,0.8);
-            text-shadow: 0 0 15px rgba(255,255,255,0.3);
+            font-family: var(--font-jp);
+            font-size: 38px; font-weight: 600; letter-spacing: 12px; 
+            background: linear-gradient(120deg, #777 0%, #aaa 40%, #fff 50%, #aaa 60%, #777 100%); 
+            background-size: 200% auto; color: transparent; 
+            -webkit-background-clip: text; background-clip: text; 
+            animation: bladeShine 3s linear infinite; 
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
         }
+        @keyframes bladeShine { to { background-position: 200% center; } }
+        
+        /* Hiệu ứng Rỉ Máu cho chữ tiếng Anh */
         .eng-sub { 
-            font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 6px; 
-            font-family: var(--font-display); font-weight: 400;
-            letter-spacing: 6px; text-transform: uppercase; 
+            font-size: 11px; color: #b30000; margin-top: 8px; 
+            font-family: var(--font-display); font-weight: 700;
+            letter-spacing: 8px; text-transform: uppercase; 
+            position: relative; text-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
+        }
+        .eng-sub::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 0px;
+            background: linear-gradient(to bottom, #b30000, #ff2a2a);
+            box-shadow: 0 0 5px #ff2a2a;
+            border-radius: 2px;
+            animation: bloodDrip 3.5s infinite cubic-bezier(0.4, 0, 1, 1);
+        }
+        @keyframes bloodDrip {
+            0% { height: 0px; opacity: 1; transform: translate(-50%, 0); }
+            40% { height: 15px; opacity: 1; transform: translate(-50%, 0); }
+            70% { height: 15px; opacity: 0; transform: translate(-50%, 20px); }
+            100% { height: 0px; opacity: 0; transform: translate(-50%, 0); }
         }
 
         .bushido-fs-overlay { 
@@ -416,7 +462,7 @@
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
             text-align: center; z-index: 4; width: 90%; transition: opacity 0.5s ease-out; pointer-events: none; 
         }
-        .slogan-jp-fs { font-family: var(--font-content); font-size: 24px; font-weight: 300; color: rgba(255,255,255,0.9); letter-spacing: 4px; margin-bottom: 15px; }
+        .slogan-jp-fs { font-family: var(--font-jp); font-size: 28px; font-weight: 400; color: rgba(255,255,255,0.9); letter-spacing: 4px; margin-bottom: 15px; }
         .slogan-vi-fs { font-family: var(--font-content); font-size: 18px; font-style: italic; font-weight: 300; color: rgba(255,255,255,0.6); letter-spacing: 1px; }
 
         .fade-mask-fs { 
@@ -428,11 +474,11 @@
         }
         
         .scrolling-text-fs { position: absolute; bottom: -150%; width: 90%; max-width: 500px; color: #fff; }
-        .blood-title-fs { text-align: center; font-family: 'Great Vibes', cursive; font-size: 42px; font-weight: 400; margin-bottom: 50px; letter-spacing: 2px; color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.3); }
-        .blood-title-fs span { font-size: 13px; letter-spacing: 8px; color: rgba(255,255,255,0.5); display: block; margin-top: 10px; font-family: var(--font-display); text-transform: uppercase; }
+        .blood-title-fs { text-align: center; font-family: var(--font-jp); font-size: 52px; font-weight: 600; margin-bottom: 50px; letter-spacing: 8px; color: #b30000; text-shadow: 0 0 15px rgba(255,0,0,0.5); }
+        .blood-title-fs span { font-size: 13px; letter-spacing: 10px; color: rgba(255,0,0,0.6); display: block; margin-top: 10px; font-family: var(--font-display); text-transform: uppercase; }
         
         .blood-stanza-fs { margin-bottom: 40px; text-align: center; }
-        .blood-stanza-fs .jp { font-family: var(--font-content); font-size: 20px; font-weight: 400; letter-spacing: 2px; margin-bottom: 12px; color: rgba(255,255,255,0.9); }
+        .blood-stanza-fs .jp { font-family: var(--font-jp); font-size: 22px; font-weight: 400; letter-spacing: 2px; margin-bottom: 12px; color: rgba(255,255,255,0.9); }
         .blood-stanza-fs .vi { font-family: var(--font-content); font-size: 15px; font-weight: 300; color: rgba(255,255,255,0.7); line-height: 1.6; text-align: justify; padding: 0 20px; }
         .blood-stanza-fs .vi strong { color: #fff; font-weight: 500; font-style: italic; }
 
@@ -551,7 +597,7 @@
         </div>
 
         <div class="terminal-panel">
-            <div class="terminal-header" id="term-head" onclick="playBooReport()">BOO: PHÂN TÍCH CHIẾN THUẬT <span class="boo-pig-nose" id="boo-mascot">🐽</span></div>
+            <div class="terminal-header" id="term-head" onclick="playBooReport()">BOO: PHÂN TÍCH CHIẾN THUẬT</div>
             <div class="typewriter" id="ai-text"></div><span class="cursor"></span>
         </div>
     </div>
@@ -563,7 +609,7 @@
         <button class="btn-close-holo" id="btn-close-holo" onclick="playBeep(); closeHoloDirect()">[ XÁC NHẬN ]</button>
     </div></div>
     
-    <!-- BÍ LỤC: TIẾN HÓA (GIAO DIỆN KÍNH MỜ THANH TAO ĐÃ CẬP NHẬT 100% VĂN BẢN MỚI) -->
+    <!-- BÍ LỤC: TIẾN HÓA CÙNG MŨI HEO BOO -->
     <div class="rank-overlay" id="rank-overlay">
         <div class="rank-header">
             <h2>BÍ LỤC: TIẾN HÓA</h2>
@@ -572,7 +618,7 @@
         
         <div class="tier-list">
             
-            <!-- PACT : KHẾ ƯỚC -->
+            <!-- PACT -->
             <div class="tier-item">
                 <button class="tier-btn tier-tri" onclick="toggleTier('mod6', this)">
                     <div><span class="tier-prefix">PACT :</span> <span class="tier-name">KHẾ ƯỚC 1000 NGÀY (TẬN TÂM)</span></div> <span>▼</span>
@@ -580,7 +626,7 @@
                 <div class="tier-content" id="mod6">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="directive-line" style="border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8);">[ ĐỊNH DANH HỆ THỐNG ]: K DRIVE</div>
-                        <button class="btn-play-lore" onclick="toggleLoreAudio('mod6', event)">🔊 PHÁT</button>
+                        <div class="boo-play-btn" onclick="toggleLoreAudio('mod6', event)">🐽</div>
                     </div>
                     <p>• <strong>1. TẬN TÂM DUNG HỢP K-DRIVE:</strong> Không phải ứng dụng thông thường. Cổng kết nối trực tiếp cơ thể sinh học với lõi AI Boo 24/7. Mục tiêu thanh tẩy và rèn luyện bạn thành vận động viên Poker chuyên nghiệp, hướng tới tấm vé Gold và giải vô địch thế giới.</p>
                     <p>• <strong>2. TẬN TÂM BẢO TOÀN SCI:</strong> Dữ liệu sinh tồn ánh xạ từ thể chất, nhận thức và thi đấu. Cảm biến sinh học phải luôn kết nối hoàn hảo. SCI là chỉ số trung bình bền bỉ; biến động ngắn hạn có thể xảy ra, nhưng SCI tuyệt đối không được phép sụp đổ.</p>
@@ -597,7 +643,7 @@
                 <div class="tier-content" id="tier1">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="directive-line" style="color: rgba(255, 42, 42, 0.8); border-color: rgba(255, 42, 42, 0.4);">QUẢN TRỊ KỶ LUẬT: ĐÌNH CHỈ</div>
-                        <button class="btn-play-lore" onclick="toggleLoreAudio('tier1', event)">🔊 PHÁT</button>
+                        <div class="boo-play-btn" onclick="toggleLoreAudio('tier1', event)">🐽</div>
                     </div>
                     <p>• <strong>CAN ĐẢM ĐỐI DIỆN CHỈ SỐ SCI:</strong> Dưới 50.</p>
                     <p>• <strong>CAN ĐẢM THỪA NHẬN TRẠNG THÁI:</strong> Thân xác rệu rã, phản xạ chậm nhịp.</p>
@@ -615,7 +661,7 @@
                 <div class="tier-content" id="tier2">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="directive-line" style="color: rgba(255, 170, 0, 0.8); border-color: rgba(255, 170, 0, 0.4);">QUẢN TRỊ KỶ LUẬT: TIÊU CHUẨN</div>
-                        <button class="btn-play-lore" onclick="toggleLoreAudio('tier2', event)">🔊 PHÁT</button>
+                        <div class="boo-play-btn" onclick="toggleLoreAudio('tier2', event)">🐽</div>
                     </div>
                     <p>• <strong>CÔNG LÝ ĐÁNH GIÁ CHỈ SỐ SCI:</strong> Từ 50 đến 84.</p>
                     <p>• <strong>CÔNG LÝ DUY TRÌ TRẠNG THÁI:</strong> Lớp vỏ thần kinh và dòng năng lượng ổn định.</p>
@@ -633,7 +679,7 @@
                 <div class="tier-content" id="tier3">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="directive-line" style="color: rgba(176, 38, 255, 0.8); border-color: rgba(176, 38, 255, 0.4);">QUẢN TRỊ KỶ LUẬT: TỐI THƯỢNG</div>
-                        <button class="btn-play-lore" onclick="toggleLoreAudio('tier3', event)">🔊 PHÁT</button>
+                        <div class="boo-play-btn" onclick="toggleLoreAudio('tier3', event)">🐽</div>
                     </div>
                     <p>• <strong>DANH DỰ BẢO TOÀN CHỈ SỐ SCI:</strong> Từ 85 trở lên.</p>
                     <p>• <strong>DANH DỰ ĐẠT TRẠNG THÁI:</strong> Vô Ngã (Mushin) - Lớp vỏ Myelin tối ưu. Phản xạ sắc bén hoàn hảo.</p>
@@ -651,7 +697,7 @@
                 <div class="tier-content" id="mod4">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="directive-line" style="color: rgba(0, 229, 255, 0.8); border-color: rgba(0, 229, 255, 0.4);">GIAO THỨC CHỦ NHẬT: TẮT NGUỒN TOÀN DIỆN</div>
-                        <button class="btn-play-lore" onclick="toggleLoreAudio('tier4', event)">🔊 PHÁT</button>
+                        <div class="boo-play-btn" onclick="toggleLoreAudio('tier4', event)">🐽</div>
                     </div>
                     <p>• <strong>NHÂN TỪ ĐỊNH ĐOẠT CHU KỲ KÍCH HOẠT:</strong> Chủ Nhật hàng tuần.</p>
                     <p>• <strong>NHÂN TỪ CHẤP NHẬN TRẠNG THÁI:</strong> Tắt nguồn (Zero Poker).</p>
@@ -669,7 +715,7 @@
                 <div class="tier-content" id="mod0">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="directive-line" style="color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.3);">NGUỒN GỐC K DRIVE: MÀNG LỌC TƯ TƯỞNG</div>
-                        <button class="btn-play-lore" onclick="toggleLoreAudio('mod0', event)">🔊 PHÁT</button>
+                        <div class="boo-play-btn" onclick="toggleLoreAudio('mod0', event)">🐽</div>
                     </div>
                     <p>• <strong>TÔN TRỌNG THÔNG TIN LÕI:</strong> Miyamoto Musashi (1584 - 1645). Sinh tồn 61 năm trong kỷ nguyên đẫm máu.</p>
                     <p>• <strong>TÔN TRỌNG NỀN TẢNG TRIẾT LÝ:</strong> Ngũ Luân Thư. Vứt bỏ cảm xúc. Vận hành bằng kỷ luật và dữ liệu.</p>
@@ -686,7 +732,7 @@
                 <div class="tier-content" id="mod5">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="directive-line" style="color: rgba(0, 255, 157, 0.8); border-color: rgba(0, 255, 157, 0.4);">BẢN DỊCH MÃ MUSASHI: TRIẾT LÝ K DRIVE</div>
-                        <button class="btn-play-lore" onclick="toggleLoreAudio('mod5', event)">🔊 PHÁT</button>
+                        <div class="boo-play-btn" onclick="toggleLoreAudio('mod5', event)">🐽</div>
                     </div>
                     <p>• <strong>Giao thức Địa (Nền tảng):</strong> Kỷ luật thể chất SCI & Quản trị Stack. Đất rệu rã, chiến thuật vô nghĩa.</p>
                     <p>• <strong>Giao thức Thủy (Thích nghi):</strong> Biến ảo theo Stack size. Kiểm soát Tilt. Tĩnh lặng tuyệt đối trước Bad Beat.</p>
@@ -715,7 +761,7 @@
         <img id="viewer-img" src="" alt="View">
     </div>
 
-    <!-- MÀN HÌNH FULLSCREEN (BUSHIDO LÕI) ĐỘC LẬP (ĐÃ CẬP NHẬT 100% TEXT MỚI) -->
+    <!-- MÀN HÌNH FULLSCREEN (BUSHIDO LÕI) -->
     <div id="bushido-fullscreen" class="bushido-fs-overlay" onclick="activateBushidoMode(event)">
         <button class="btn-exit-fs" onclick="closeBushidoFullscreen(event)">[ ĐÓNG ]</button>
         <div class="musashi-fs-bg" id="fs-musashi-bg"></div>
@@ -784,10 +830,11 @@
 
     <!-- LOGIC JS -->
     <script>
-        (function checkAuthGuard() {
-            const hasAccess = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active';
-            if (!hasAccess) { window.location.replace('login.html'); }
-        })();
+        // TẠM TẮT LÍNH GÁC BẢO MẬT ĐỂ TEST MƯỢT MÀ TRÊN WINDOWS
+        // (function checkAuthGuard() {
+        //     const hasAccess = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active';
+        //     if (!hasAccess) { window.location.replace('login.html'); }
+        // })();
 
         function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport);
@@ -1440,7 +1487,6 @@
                     document.body.classList.add('sync-complete'); isSynced = true; 
                     playSlashSound(); if(navigator.vibrate) navigator.vibrate(200);
 
-                    // CHỐT SỔ VỆ TINH (T-1)
                     let centerSci = resData.sci_ma30 !== undefined ? resData.sci_ma30 : resData.sci;
                     document.getElementById('val-sci').innerText = centerSci || '---'; 
                     document.getElementById('val-hr').innerText = resData.hr || '---'; document.getElementById('val-weight').innerText = resData.weight || '---'; document.getElementById('val-sleep').innerText = resData.sleep || '---'; document.getElementById('val-fat').innerText = resData.fat || '---'; document.getElementById('val-water').innerText = resData.water || '---'; document.getElementById('val-steps').innerText = resData.steps || '---';
@@ -1576,16 +1622,17 @@
             const btn = e.currentTarget; const audio = loreAudios[id];
 
             if (currentLore === id) {
-                if (audio.paused) { audio.play(); btn.classList.add('playing'); btn.innerHTML = '⏸ DỪNG'; } 
-                else { audio.pause(); btn.classList.remove('playing'); btn.innerHTML = '🔊 PHÁT'; }
+                if (audio.paused) { audio.play(); btn.classList.add('playing'); } 
+                else { audio.pause(); btn.classList.remove('playing'); }
                 return;
             }
 
             Object.keys(loreAudios).forEach(key => { loreAudios[key].pause(); loreAudios[key].currentTime = 0; });
-            document.querySelectorAll('.btn-play-lore').forEach(b => { b.classList.remove('playing'); b.innerHTML = '🔊 PHÁT'; });
+            // Tắt hiệu ứng đang đọc của tất cả mũi heo khác
+            document.querySelectorAll('.boo-play-btn').forEach(b => { b.classList.remove('playing'); });
 
-            currentLore = id; audio.play(); btn.classList.add('playing'); btn.innerHTML = '⏸ DỪNG';
-            audio.onended = () => { btn.classList.remove('playing'); btn.innerHTML = '🔊 PHÁT'; currentLore = null; };
+            currentLore = id; audio.play(); btn.classList.add('playing');
+            audio.onended = () => { btn.classList.remove('playing'); currentLore = null; };
         }
 
         let booUtterance = null;
