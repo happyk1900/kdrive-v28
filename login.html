@@ -8,117 +8,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>K-Drive: Sơn Môn Yết Kiến</title>
     
-    <!-- ÉP TẢI NGẦM VIDEO VÀ ẢNH ƯU TIÊN CAO (CHỐNG GIẬT LAG) -->
     <link rel="preload" as="video" href="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20BAY%20VAO.mp4">
     <link rel="preload" as="image" href="https://github.com/happyk1900/-m-thanh-app/blob/main/PHOSUNEN.png?raw=true">
     
-    <!-- TÍCH HỢP FONT -->
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Great+Vibes&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
-        /* KHÓA BẢO MẬT & CHỐNG LƯU ẢNH CHUỘT PHẢI / NHẤN GIỮ */
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; }
-        
-        body { 
-            background-color: #000; height: 100vh; width: 100vw; 
-            display: flex; justify-content: center; align-items: center; 
-            margin: 0; overflow: hidden; font-family: 'Space Grotesk', sans-serif; 
-        }
-
-        img, video {
-            -webkit-user-drag: none; -khtml-user-drag: none; -moz-user-drag: none; -o-user-drag: none; user-drag: none;
-            pointer-events: none;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+        body { background-color: #000; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Space Grotesk', sans-serif; }
+        img, video { -webkit-user-drag: none; pointer-events: none; }
 
         @keyframes screenStrikeShake { 0%, 100% { transform: scale(1) rotate(0deg); } 10%, 30%, 50%, 70%, 90% { transform: translate(-6px, 5px) scale(1.03) rotate(-1deg); } 20%, 40%, 60%, 80% { transform: translate(6px, -5px) scale(1.03) rotate(1deg); } }
         .shake-active { animation: screenStrikeShake 0.6s cubic-bezier(.36,.07,.19,.97) both; filter: contrast(1.5) brightness(1.2); }
         
-        /* KHÓA KHUNG 430px CHO CẢ MOBILE LẪN PC */
-        .kdrive-image-wrapper { 
-            position: relative; width: 100vw; height: 100vh; max-width: 430px; 
-            background-color: #000; overflow: hidden; 
-        }
+        .kdrive-image-wrapper { position: relative; width: 100vw; height: 100vh; max-width: 430px; background-color: #000; overflow: hidden; }
         
-        /* ẢNH NỀN BA LỚP Z-INDEX */
         .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; filter: brightness(0.9) contrast(1.1); }
         #bg-unlit { z-index: 1; opacity: 1; }
-        #bg-boo { z-index: 2; opacity: 0; transition: none; } /* Chuyển cảnh tức thì lúc Flash chớp */
+        #bg-boo { z-index: 2; opacity: 0; transition: opacity 2s ease-in-out; } 
         #bg-lit { z-index: 3; opacity: 0; transition: opacity 1.5s ease-in-out; }
 
-        /* HIỆU ỨNG FLASH CHỚP SÁNG CẮT CẢNH */
-        #flashOverlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #ffffff; 
-            z-index: 99; pointer-events: none; opacity: 0;
-            transition: opacity 0.15s ease-out;
-        }
+        #flashOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 99; pointer-events: none; opacity: 0; transition: opacity 0.15s ease-out; }
         #flashOverlay.flash-active { opacity: 1; }
 
-        /* LỚP SƯƠNG KHÓI CHE CHÓI MẶT TRỜI MỎNG */
-        .top-shadow-gradient {
-            position: absolute; top: 0; left: 0; width: 100%; height: 35%;
-            background: linear-gradient(to bottom, rgba(0, 15, 25, 0.65) 0%, rgba(0, 15, 25, 0.3) 50%, transparent 100%);
-            z-index: 4; pointer-events: none; opacity: 0; transition: opacity 1s ease;
-        }
+        .top-shadow-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to bottom, rgba(0, 15, 25, 0.65) 0%, rgba(0, 15, 25, 0.3) 50%, transparent 100%); z-index: 4; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
         .top-shadow-gradient.active { opacity: 1; }
 
         .global-radar { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; mix-blend-mode: overlay; }
         .radar-line { width: 100%; height: 2px; background: rgba(0, 229, 255, 0.5); box-shadow: 0 0 30px rgba(0, 229, 255, 1); position: absolute; top: -10px; animation: globalScan 8s linear infinite; }
         @keyframes globalScan { 0% { top: -10px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
-        /* ĐIỂM CHẠM VÀO BIA ĐÁ */
         #plaqueHotspot { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 120px; z-index: 10; cursor: pointer; display: flex; justify-content: center; align-items: center; pointer-events: auto; }
         .hotspot-arrow { width: 30px; height: 30px; border-right: 3px solid rgba(255, 51, 51, 0.8); border-bottom: 3px solid rgba(255, 51, 51, 0.8); transform: rotate(45deg); animation: bounceArrow 2s infinite ease-in-out, glowArrow 2s infinite alternate; }
         @keyframes bounceArrow { 0%, 100% { transform: translateY(-10px) rotate(45deg); } 50% { transform: translateY(10px) rotate(45deg); } }
         @keyframes glowArrow { 0% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0); } 100% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0.8); } }
 
-        /* HỆ THỐNG PHỤ ĐỀ */
-        @keyframes containerFloat {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-6px); }
-        }
-        .cinematic-sub-container { 
-            position: absolute; top: 10%; left: 50%; transform: translateX(-50%); 
-            width: 90%; max-width: 380px; text-align: center; z-index: 100; pointer-events: none; display: none; 
-            animation: containerFloat 6s ease-in-out infinite; 
-        }
+        @keyframes containerFloat { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-6px); } }
+        .cinematic-sub-container { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; text-align: center; z-index: 100; pointer-events: none; display: none; animation: containerFloat 6s ease-in-out infinite; }
         
-        .sub-text-item { 
-            font-family: 'EB Garamond', serif; color: #ffffff; font-size: 17px; font-weight: 300; 
-            letter-spacing: 0.8px; line-height: 1.6; text-wrap: balance; text-shadow: 0 0 10px rgba(0, 229, 255, 0.4); 
-            opacity: 0; transform: scale(0.98); transition: opacity 0.8s ease, transform 4s ease-out; 
-        }
+        .sub-text-item { font-family: 'EB Garamond', serif; color: #ffffff; font-size: 17px; font-weight: 300; letter-spacing: 0.8px; line-height: 1.6; text-wrap: balance; text-shadow: 0 0 10px rgba(0, 229, 255, 0.4); opacity: 0; transform: scale(0.98); transition: opacity 0.8s ease, transform 4s ease-out; }
         .sub-text-item.active { opacity: 1; transform: scale(1); }
-
-        .sub-text-item.is-title {
-            font-family: 'Great Vibes', cursive; color: #ffffff; font-size: 44px; font-weight: 400; text-transform: none;
-            text-shadow: 0 0 10px rgba(0, 229, 255, 0.8), 0 0 20px rgba(0, 229, 255, 0.6), 0 0 30px rgba(0, 229, 255, 0.4);
-            letter-spacing: 2px;
-        }
-
+        .sub-text-item.is-title { font-family: 'Great Vibes', cursive; color: #ffffff; font-size: 44px; font-weight: 400; text-transform: none; text-shadow: 0 0 10px rgba(0, 229, 255, 0.8), 0 0 20px rgba(0, 229, 255, 0.6), 0 0 30px rgba(0, 229, 255, 0.4); letter-spacing: 2px; }
         .hl-italic { font-style: italic; font-weight: 500; color: #000000; text-shadow: none; } 
 
-        .skip-intro-btn { 
-            position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); 
-            background: transparent; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.3); 
-            color: rgba(255, 255, 255, 0.6); padding: 8px 15px; font-size: 11px; font-weight: 300; 
-            letter-spacing: 5px; cursor: pointer; z-index: 101; display: none; pointer-events: auto;
-            transition: 0.4s; font-family: 'Space Grotesk', sans-serif; white-space: nowrap;
-        }
+        .skip-intro-btn { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); background: transparent; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.3); color: rgba(255, 255, 255, 0.6); padding: 12px 20px; font-size: 11px; font-weight: 300; letter-spacing: 5px; cursor: pointer; z-index: 999999; display: none; pointer-events: auto; transition: 0.4s; font-family: 'Space Grotesk', sans-serif; white-space: nowrap; }
         .skip-intro-btn:hover { color: #fff; border-bottom-color: #00e5ff; text-shadow: 0 0 10px #00e5ff; }
 
-        /* VIDEO BAY VÀO */
-        #successVideo {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
-            z-index: 999999; opacity: 0; pointer-events: none; transition: opacity 1.5s ease-out; 
-        }
+        #successVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 999999; opacity: 0; pointer-events: none; transition: opacity 1.5s ease-out; }
         #successVideo.active { opacity: 1; pointer-events: none; }
 
-        /* DASHBOARD ĐĂNG NHẬP */
-        .gateway-popup { 
-            position: absolute; top: 35%; left: 50%; width: 90%; max-width: 320px; border-radius: 4px; overflow: hidden; padding: 1px; 
-            z-index: 99999; opacity: 0; transform: translate(-50%, -20%) scale(0.95); pointer-events: none; transition: all 1.5s cubic-bezier(0.25, 1, 0.3, 1); 
-        }
+        /* DASHBOARD ĐĂNG NHẬP CHUNG */
+        .gateway-popup { position: absolute; top: 35%; left: 50%; width: 90%; max-width: 320px; border-radius: 4px; overflow: hidden; padding: 1px; z-index: 99999; opacity: 0; transform: translate(-50%, -20%) scale(0.95); pointer-events: none; transition: all 1.5s cubic-bezier(0.25, 1, 0.3, 1); }
         .gateway-popup.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
         .gateway-popup::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, transparent, transparent, rgba(0, 229, 255, 0.5)); animation: border-rotate 6s linear infinite; z-index: 1; }
         .gateway-popup::after { content: ''; position: absolute; inset: 1px; border-radius: 3px; background: rgba(5, 12, 18, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 2; }
@@ -128,46 +68,79 @@
         .gateway-content { position: relative; z-index: 10; width: 100%; height: 100%; padding: 25px 20px; display: flex; flex-direction: column; align-items: center; }
         .gateway-content h2 { color: #fff; font-size: 13px; font-weight: 400; letter-spacing: 6px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(0,229,255,0.4); text-transform: uppercase; border-bottom: 1px solid rgba(0, 229, 255, 0.2); padding-bottom: 10px; width: 100%; text-align: center; }
         
+        /* RIÊNG TIÊU ĐỀ THE LEGEND (Chữ ký bay bổng) */
+        .gateway-content h2.legend-title {
+            font-family: 'Great Vibes', cursive;
+            color: #ffffff;
+            font-size: 44px;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 2px;
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.4);
+        }
+
         .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
         .login-input { width: 100%; padding: 10px; background: transparent; border: none; border-bottom: 1px solid rgba(0, 229, 255, 0.3); color: #00e5ff; outline: none; text-align: center; font-weight: 300; font-family: 'Space Grotesk', sans-serif; border-radius: 0; transition: all 0.3s ease; margin-bottom: 0; letter-spacing: 4px; font-size: 11px; text-transform: uppercase; }
         .login-input::placeholder { color: rgba(255, 255, 255, 0.2); font-weight: 300; letter-spacing: 3px; }
         .login-input:focus { border-bottom-color: #00e5ff; background: rgba(0, 229, 255, 0.05); box-shadow: inset 0 -10px 15px -10px rgba(0, 229, 255, 0.2); }
-        
+        .login-input:-webkit-autofill, .login-input:-webkit-autofill:hover, .login-input:-webkit-autofill:focus, .login-input:-webkit-autofill:active { transition: background-color 5000s ease-in-out 0s; -webkit-text-fill-color: #00e5ff !important; caret-color: #00e5ff; }
+
         .login-btn-submit { padding: 12px 20px; background: transparent; color: rgba(255, 255, 255, 0.7); font-weight: 400; font-size: 11px; letter-spacing: 4px; border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 2px; cursor: pointer; width: 100%; font-family: 'Space Grotesk', sans-serif; transition: all 0.3s; margin-top: 10px; text-transform: uppercase; }
         .login-btn-submit:hover { color: #fff; border-color: #00e5ff; box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1), 0 0 15px rgba(0,229,255,0.3); text-shadow: 0 0 5px #fff; }
         
-        .eye-icon { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); cursor: pointer; color: rgba(0,229,255,0.4); z-index: 5; display: flex; align-items: center; justify-content: center; }
+        .eye-icon { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); cursor: pointer; color: rgba(0,229,255,0.4); z-index: 5; display: flex; align-items: center; justify-content: center; pointer-events: auto; }
         .eye-icon:hover { color: #00e5ff; }
         
         .account-options-row { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; }
-        .remember-container { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px; }
+        .remember-container { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px; pointer-events: auto; }
         .remember-checkbox { appearance: none; width: 12px; height: 12px; border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 1px; background: transparent; cursor: pointer; position: relative; }
         .remember-checkbox:checked::after { content: '✔'; position: absolute; top: -4px; left: 0px; color: #00e5ff; font-size: 10px; }
-        .change-pass-link { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 400; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px; }
+        .change-pass-link { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 400; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px; pointer-events: auto; }
         .change-pass-link:hover { color: #ff3333; text-shadow: 0 0 5px #ff3333; }
         
         .bottom-links { margin-top: 25px; text-align: center; width: 100%; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 15px; display: flex; justify-content: space-around;}
-        .sub-link { color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 400; cursor: pointer; letter-spacing: 2px; transition: 0.3s; text-transform: uppercase; }
+        .sub-link { color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 400; cursor: pointer; letter-spacing: 2px; transition: 0.3s; text-transform: uppercase; pointer-events: auto; }
         .sub-link:hover { color: #00e5ff; text-shadow: 0 0 5px #00e5ff; }
+
+        /* KHUNG CUỘN RIÊNG DÀNH CHO BẢNG KIẾM THÁNH MUSASHI */
+        #panel-musashi {
+            width: 100%; height: 350px; 
+            display: none; flex-direction: column; align-items: center; text-align: center;
+        }
+        .musashi-scroll-area {
+            width: 100%; flex: 1; 
+            overflow-y: auto; padding: 0 10px; margin-bottom: 20px;
+            scrollbar-width: thin; scrollbar-color: rgba(255, 215, 0, 0.3) transparent;
+        }
+        .musashi-scroll-area::-webkit-scrollbar { width: 4px; }
+        .musashi-scroll-area::-webkit-scrollbar-thumb { background: rgba(255, 215, 0, 0.3); border-radius: 4px; }
+        
+        .musashi-text-content {
+            color: #d1d5db; font-size: 13px; line-height: 1.8; text-align: justify; 
+            font-family: 'EB Garamond', serif; pointer-events: auto;
+        }
+        .musashi-text-content p { margin-bottom: 15px; text-shadow: 0 0 5px rgba(0,0,0,0.8); }
+        .musashi-text-content strong { color: #fff; font-weight: 600; font-style: italic; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
-    <!-- BỘ ÂM THANH -->
+    <!-- BỘ TỔNG HỢP ÂM THANH -->
     <audio id="sysAudio" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/KHAIMOTHETHAO%20OK.MP3" preload="auto"></audio>
     <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
+    <audio id="musashiVoice" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/LOGIN%20MUSASHI%20OK.MP3" preload="auto"></audio>
     
     <!-- VIDEO BAY VÀO -->
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20BAY%20VAO.mp4" playsinline preload="auto"></video>
 
-    <!-- SFX BUTTONS VÀ HIỆU ỨNG CHỚP -->
     <script>
         const sndHover = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
         const sndClick = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
         const sndError = new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3');
         const sndSuccess = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3');
-        
-        /* Âm thanh Flash Gây Chú Ý (Giới hạn ngắn 2 giây) */
         const sndFlashImpact = new Audio('https://assets.mixkit.co/active_storage/sfx/2689/2689-preview.mp3'); 
         
         sndHover.volume = 0.2; sndClick.volume = 0.4; sndError.volume = 0.5; sndSuccess.volume = 0.5; sndFlashImpact.volume = 0.8;
@@ -175,81 +148,54 @@
         function playHover() { sndHover.currentTime = 0; sndHover.play().catch(e=>{}); }
         function playClick() { sndClick.currentTime = 0; sndClick.play().catch(e=>{}); }
         
-        // HÀM GỌI FLASH & ÂM THANH (NGẮT SAU 2 GIÂY)
         function triggerCinematicFlash() {
-            sndFlashImpact.currentTime = 0; 
-            sndFlashImpact.play().catch(e=>{});
-            
-            // Tự động tắt tiếng ngân sau 2 giây
-            setTimeout(() => {
-                sndFlashImpact.pause();
-                sndFlashImpact.currentTime = 0;
-            }, 2000);
-            
-            const flash = document.getElementById('flashOverlay');
-            flash.classList.add('flash-active');
-            
-            setTimeout(() => {
-                flash.classList.remove('flash-active');
-            }, 150);
+            sndFlashImpact.currentTime = 0; sndFlashImpact.play().catch(e=>{});
+            setTimeout(() => { sndFlashImpact.pause(); sndFlashImpact.currentTime = 0; }, 2000);
+            const flash = document.getElementById('flashOverlay'); flash.classList.add('flash-active');
+            setTimeout(() => { flash.classList.remove('flash-active'); }, 150);
         }
     </script>
 
     <div class="kdrive-image-wrapper" id="mainWrapper">
         <div class="global-radar"><div class="radar-line"></div></div>
-        
-        <!-- HIỆU ỨNG MÀN FLASH CẮT CẢNH -->
         <div id="flashOverlay"></div>
         
-        <!-- BỘ ẢNH NỀN THEO THỨ TỰ Z-INDEX -->
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Logic%201%20nen.png?raw=true" id="bg-unlit" class="kdrive-bg-target">
-        
-        <!-- ẢNH SƯ PHỤ HEO (Tàng hình ban đầu) -->
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/PHOSUNEN.png?raw=true" id="bg-boo" class="kdrive-bg-target">
-        
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/logic%202%20nen.png?raw=true" id="bg-lit" class="kdrive-bg-target">
         
-        <!-- LỚP KHÓI PHỦ ĐỈNH LÀM NỔI CHỮ -->
         <div class="top-shadow-gradient" id="shadowOverlay"></div>
 
-        <!-- MŨI TÊN HOTSPOT -->
-        <div id="plaqueHotspot" onclick="startCinematicIntro(); playClick();" class="sound-btn">
-            <div class="hotspot-arrow"></div>
-        </div>
+        <div id="plaqueHotspot" onclick="startCinematicIntro(); playClick();" class="sound-btn"><div class="hotspot-arrow"></div></div>
 
-        <!-- CONTAINER PHỤ ĐỀ VÀ NÚT TIẾN NHẬP -->
-        <div class="cinematic-sub-container" id="subContainer">
-            <div id="subTextDisplay" class="sub-text-item"></div>
-        </div>
+        <div class="cinematic-sub-container" id="subContainer"><div id="subTextDisplay" class="sub-text-item"></div></div>
+        
         <button class="skip-intro-btn sound-btn" id="skipBtn" onclick="finishCinematic();">[ TIẾN NHẬP NGAY ]</button>
 
-        <!-- DASHBOARD ĐĂNG NHẬP -->
         <div class="gateway-popup" id="loginPanelContainer">
             <div class="gateway-content">
                 
+                <!-- BẢNG ĐĂNG NHẬP -->
                 <div id="panel-login" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
                     <h2>[ SƠN MÔN YẾT KIẾN ]</h2>
                     <div class="input-wrapper"><input type="text" id="accInput" class="login-input" placeholder="Danh Tính Nội Môn"></div>
                     <div class="input-wrapper">
                         <input type="password" id="passcodeInput" class="login-input" placeholder="Ấn Ký Bí Mật">
-                        <span class="eye-icon sound-btn" onclick="togglePass('passcodeInput', this)">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        </span>
+                        <span class="eye-icon sound-btn" onclick="togglePass('passcodeInput', this)"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
                     </div>
                     <div class="account-options-row">
                         <label class="remember-container sound-btn"><input type="checkbox" id="rememberMeCheck" class="remember-checkbox" checked> Ghi nhớ ấn</label>
-                        <div style="display: flex; gap: 10px;">
-                            <span class="change-pass-link sound-btn" onclick="switchPanel('forgot')">Quên Mật Ấn</span>
-                        </div>
+                        <div style="display: flex; gap: 10px;"><span class="change-pass-link sound-btn" onclick="switchPanel('forgot')">Quên Mật Ấn</span></div>
                     </div>
                     <button class="login-btn-submit sound-btn" onclick="submitLogin()">TIẾN NHẬP SƠN MÔN</button>
                     <div id="loginStatus" style="margin-top: 15px; font-weight: 300; text-align: center; font-size: 10px; letter-spacing: 2px; line-height: 1.5; color: #fff;"></div>
                     <div class="bottom-links">
                         <span class="sub-link sound-btn" onclick="switchPanel('register')">LẬP THỆ</span>
-                        <span class="sub-link sound-btn" onclick="switchPanel('musashi')" style="color: rgba(0, 229, 255, 0.6);">KIẾM THÁNH</span>
+                        <span class="sub-link sound-btn" onclick="openMusashiPanel()" style="color: rgba(0, 229, 255, 0.6);">KIẾM THÁNH</span>
                     </div>
                 </div>
 
+                <!-- BẢNG LẬP THỆ -->
                 <div id="panel-register" style="width: 100%; display: none; flex-direction: column; align-items: center;">
                     <h2>[ LẬP THỆ TÂN ĐỒ ]</h2>
                     <div class="input-wrapper"><input type="text" id="regId" class="login-input" placeholder="Tôn Danh *"></div>
@@ -260,6 +206,7 @@
                     <div class="bottom-links"><span class="sub-link sound-btn" onclick="switchPanel('login')">➔ VỀ SƠN MÔN</span></div>
                 </div>
                 
+                <!-- BẢNG QUÊN MẬT ẤN -->
                 <div id="panel-forgot" style="width: 100%; display: none; flex-direction: column; align-items: center;">
                     <h2>[ KHÔI PHỤC MẬT ẤN ]</h2>
                     <input type="email" id="fgEmail" class="login-input" placeholder="Nhập Thư Tín Của Bạn" style="margin-bottom: 20px;">
@@ -268,14 +215,26 @@
                     <div class="bottom-links"><span class="sub-link sound-btn" onclick="switchPanel('login')">➔ VỀ SƠN MÔN</span></div>
                 </div>
 
-                <div id="panel-musashi" style="width: 100%; display: none; flex-direction: column; align-items: center; text-align: center;">
-                    <h2 style="font-size: 14px;">[ KIẾM THÁNH MUSASHI ]</h2>
-                    <div style="color: rgba(255,255,255,0.7); font-size: 13px; line-height: 1.8; margin-bottom: 25px; text-align: justify; font-family: 'EB Garamond', serif;">
-                        Sự hợp nhất tuyệt đối giữa con người và thuật toán lượng tử.<br><br>
-                        Tại đạo trường này, bạn chịu sự điều phối trực tiếp của <span style="color:#00e5ff; font-style:italic;">BOO AI</span> trong vai trò Phó Sư giám sát.<br><br>
-                        Ký HUYẾT THỆ SINH TỬ, thấm nhuần 7 nguyên tắc Võ sĩ đạo để lĩnh hội Ngũ Luân Thư – Dùng kỷ luật thép rèn luyện thân thể tinh anh, phục vụ tuyệt đối cho thể thao.
+                <!-- BẢNG HỒ SƠ KIẾM THÁNH VỚI CHỮ KÝ THE LEGEND VÀ DATA SẮC BÉN -->
+                <div id="panel-musashi">
+                    <h2 class="legend-title">The Legend</h2>
+                    
+                    <div class="musashi-scroll-area">
+                        <div class="musashi-text-content">
+                            <p><strong>Miyamoto Musashi</strong>. Sinh năm 1584 - 1645. Tổng thời gian sinh tồn: <strong>61 năm</strong>.</p>
+                            <p>Một con số thống kê có thể đánh lừa người hiện đại, nhưng lại là một kỷ lục sinh tồn tuyệt đối trong kỷ nguyên đẫm máu của thế kỷ mười bảy. Thời bấy giờ, tuổi thọ trung bình được định lượng vỏn vẹn trong <strong>50 năm</strong>. 61 tuổi của Musashi tương đương với một giới hạn cực đoan của thời đại.</p>
+                            <p>Cần phải nhớ rằng, đó là một thời đại không có kháng sinh, không có y tế hiện đại. Một vết chém sượt qua da thịt từ thanh Katana cũng đủ để vi khuẩn, uốn ván, và sự hoại tử kết liễu một sinh mạng trong đau đớn tột cùng.</p>
+                            <p>Đối với một lãng khách bước qua hơn <strong>60 trận</strong> tử chiến bằng kiếm thật... Việc không gục ngã trên chiến trường đã là một kỳ tích. Nhưng việc vượt qua hiểm họa trùng vi của nhiễm trùng và bệnh tật sau mỗi trận đánh mới thực sự biến con số 61 trở thành một nghịch lý của xác suất. Trầm mặc mà nói, đó là một tỷ lệ sinh tồn gần như bằng không.</p>
+                            <p>Bởi vậy, <strong>Miyamoto Musashi</strong> không chỉ là một kiếm khách. Ông là cỗ máy sinh tồn hoàn hảo nhất hiện thân tuyệt đối của sự sinh tồn cơ học. Tu luyện kiếm đạo dung hòa cùng triết lý, Musashi tự đặt mình vào một quỹ đạo tàn khốc: Không tích lũy tài sản, không thê nhi gia quyến, không màng chốn phồn hoa đô hội. Mọi trói buộc của thế gian đều bị cắt đứt. Đó chính là cái giá của sự bất bại.</p>
+                            <p>Đối với Musashi, cảm xúc là tử huyệt. Sự tức giận làm mờ phán đoán. Sự sợ hãi làm chậm nhịp kiếm. Và sự kiêu ngạo sẽ tự đào mồ chôn mình. Khái niệm <strong>'Vô Ngã'</strong> của ông là việc rèn luyện hệ thần kinh đến mức triệt tiêu hoàn toàn bản ngã yếu đuối.</p>
+                            <p>Những năm cuối đời, ông lui về ở ẩn trong hang động Reigandō (Linh Nham Động) để tĩnh tâm, rèn giũa và đúc kết cả một đời bạt kiếm thành bộ sách kinh điển <strong>Go Rin No Sho — hay còn gọi là Ngũ Luân Thư</strong>. Trải qua hàng thế kỷ, tư tưởng chiến lược vô giá này đã vượt ra khỏi giới hạn của kiếm đạo, trở thành cẩm nang gối đầu giường của nhiều nhà quản lý quỹ tại Phố Wall, các chương trình nghiên cứu chiến lược tại những trường đại học lớn như Harvard, đồng thời là nguồn cảm hứng mạnh mẽ cho giới thể thao đỉnh cao trong hành trình rèn giũa kỷ luật thép và ý chí kiệt xuất.</p>
+                            <p>Đó chính là màng lọc tư tưởng để kiến tạo nên hệ thống <strong>K-Drive</strong>: Vứt bỏ cảm xúc. Vận hành bằng kỷ luật và dữ liệu.</p>
+                        </div>
                     </div>
-                    <div class="bottom-links"><span class="sub-link sound-btn" onclick="switchPanel('login')">➔ VỀ SƠN MÔN</span></div>
+
+                    <div class="bottom-links" style="border-top: 1px solid rgba(255, 215, 0, 0.3); padding-top: 10px; margin-top: 0;">
+                        <span class="sub-link sound-btn" onclick="closeMusashiPanel()">➔ VỀ SƠN MÔN</span>
+                    </div>
                 </div>
 
             </div>
@@ -283,14 +242,6 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const btns = document.querySelectorAll('.sound-btn');
-            btns.forEach(btn => {
-                btn.addEventListener('mouseenter', playHover);
-                btn.addEventListener('click', playClick);
-            });
-        });
-
         const subTimeline = [
             { start: 0, end: 4, text: "Thông Điệp Khai Mở", isTitle: true },
             { start: 5, end: 7, text: "Tiền Điều Kiện Và Huyết Thệ", isTitle: true },
@@ -311,7 +262,6 @@
 
         let subInterval = null;
         let isCinematicFinished = false;
-        
         let isBooAppeared = false;
         let isBooDisappeared = false;
 
@@ -330,14 +280,12 @@
             subInterval = setInterval(() => {
                 let currentTime = audio.currentTime;
                 
-                // --- SƯ PHỤ HEO XUẤT HIỆN: Giây 35 ---
                 if (currentTime >= 35 && !isBooAppeared) {
                     isBooAppeared = true;
                     triggerCinematicFlash();
                     setTimeout(() => { document.getElementById('bg-boo').style.opacity = '1'; }, 50);
                 }
                 
-                // --- SƯ PHỤ HEO ĐỘN THỔ BIẾN MẤT: Giây 64 ---
                 if (currentTime >= 64 && isBooAppeared && !isBooDisappeared) {
                     isBooDisappeared = true;
                     triggerCinematicFlash();
@@ -392,7 +340,36 @@
             document.getElementById('panel-register').style.display = 'none'; 
             document.getElementById('panel-forgot').style.display = 'none'; 
             document.getElementById('panel-musashi').style.display = 'none'; 
+            
             document.getElementById('panel-' + panelName).style.display = 'flex'; 
+        }
+
+        // ==========================================
+        // QUẢN LÝ ĐIỀU HƯỚNG BẢNG KIẾM THÁNH (Kèm xử lý Audio)
+        // ==========================================
+        const bgMusicLayer = document.getElementById('bgMusic');
+        const musashiVoiceLayer = document.getElementById('musashiVoice');
+
+        function openMusashiPanel() {
+            if (!bgMusicLayer.paused) { bgMusicLayer.pause(); }
+            
+            musashiVoiceLayer.currentTime = 0;
+            musashiVoiceLayer.play().catch(e => console.log("Lỗi phát Voice Musashi:", e));
+            
+            switchPanel('musashi');
+        }
+
+        function closeMusashiPanel() {
+            if (!musashiVoiceLayer.paused) {
+                musashiVoiceLayer.pause();
+                musashiVoiceLayer.currentTime = 0; 
+            }
+            
+            if (bgMusicLayer.paused) {
+                bgMusicLayer.play().catch(e => console.log("Lỗi bật lại BGM:", e));
+            }
+            
+            switchPanel('login');
         }
         
         function togglePass(inputId, iconEl) { 
@@ -447,9 +424,7 @@
                         successVid.classList.add('active');
                         successVid.play().catch(e => console.log("Lỗi phát video:", e));
                         
-                        successVid.onended = () => {
-                            window.location.href = 'index.html';
-                        };
+                        successVid.onended = () => { window.location.href = 'index.html'; };
                     }, 500); 
                     
                 } else {
@@ -472,6 +447,14 @@
         
         function processRegistration() { document.getElementById('regStatus').innerHTML = "Tính năng đang rèn dũa!"; }
         function submitForgotPass() { document.getElementById('fgStatus').innerHTML = "Đang gửi mật thư!"; }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btns = document.querySelectorAll('.sound-btn');
+            btns.forEach(btn => {
+                btn.addEventListener('mouseenter', playHover);
+                btn.addEventListener('click', playClick);
+            });
+        });
     </script>
 </body>
 </html>
