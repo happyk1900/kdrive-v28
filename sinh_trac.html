@@ -54,12 +54,12 @@
         .btn-skip-ritual:active { color: #fff; background: rgba(255,255,255,0.1); }
 
         /* LỒNG GIAM BOO CHO PHÉP KÉO THẢ BÊN TRONG 420px */
-        #boo-cage { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 999999; pointer-events: none; overflow: hidden; }
+        #boo-cage { position: fixed; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; z-index: 999999; pointer-events: none; overflow: hidden; }
 
         /* WIDGET VỆ TINH BOO */
         .floating-boo {
             position: absolute; 
-            top: 15%; right: 15px; 
+            top: 15%; left: calc(100% - 62px); /* Tự động nép lề phải 10px */
             width: 52px; height: 52px;
             background: rgba(10, 15, 25, 0.6); backdrop-filter: blur(8px);
             border: 1px solid var(--neon-pink); border-radius: 50%;
@@ -163,8 +163,9 @@
         .shockwave.active { animation: shockwave-boom 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
         @keyframes shockwave-boom { 0% { width: 10px; height: 10px; opacity: 1; border-width: 15px; } 100% { width: 150vw; height: 150vw; opacity: 0; border-width: 1px; } }
 
-        /* VÂN TAY GỠ BỎ TỌA ĐỘ ẢO ĐỂ ĐƯỢC NAM CHÂM SCI-NEXUS HÚT VÀO TÂM */
+        /* VÂN TAY ĐÃ ĐƯỢC CHỐT CHẶT VÀO TÂM */
         .fingerprint-wrapper { 
+            position: relative; /* Dùng relative để fp-scanner-line lấy mốc bám vào */
             width: 50px; height: 50px; display: none; justify-content: center; align-items: center; z-index: 20; 
         }
         .fingerprint-wrapper svg { width: 100%; height: 100%; stroke: var(--violet); filter: drop-shadow(0 0 8px var(--violet)); }
@@ -306,7 +307,7 @@
         .hold-btn.state-abort { border: 1px solid rgba(255, 42, 42, 0.4); color: rgba(255, 42, 42, 0.9); background: rgba(255, 42, 42, 0.05); }
         .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; z-index: -1; background: rgba(255,255,255,0.2); transition: background 0.3s; }
 
-        /* BUSHIDO EASTER EGG ĐIỆN ẢNH THANH TAO */
+        /* BUSHIDO EASTER EGG */
         .bushido-signature { text-align: center; margin: 30px auto 10px; padding: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
         .kanji-shine { font-family: var(--font-jp); font-size: 38px; font-weight: 600; letter-spacing: 12px; background: linear-gradient(120deg, #777 0%, #aaa 40%, #fff 50%, #aaa 60%, #777 100%); background-size: 200% auto; color: transparent; -webkit-background-clip: text; animation: bladeShine 3s linear infinite; }
         @keyframes bladeShine { to { background-position: 200% center; } }
@@ -380,7 +381,7 @@
     <div class="pwa-container" id="main-pwa" style="display: none;">
         
         <!-- LỒNG GIAM VỆ TINH BOO KHÔI PHỤC KÉO THẢ DẠO CHƠI TRONG KHUNG 420px -->
-        <div id="boo-cage" style="position: fixed; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; z-index: 999999; pointer-events: none; overflow: hidden;">
+        <div id="boo-cage">
             <div id="floating-boo" class="floating-boo" onclick="handleBooClick()">
                 <span class="boo-icon-inner" id="boo-mascot">🐽</span>
             </div>
@@ -422,7 +423,7 @@
                     <g class="orb-group orb-cw orb-hr"><circle class="ring ring-hr" cx="170" cy="170" r="65" /><circle class="plasma-node" cx="170" cy="105" r="5" /></g>
                 </svg>
                 <div class="sci-nexus" id="trigger-combat" onclick="triggerBioSync()" title="Khởi động Kết Nối">
-                    <!-- VÂN TAY GỠ BỎ TỌA ĐỘ ẢO ĐỂ BỊ HÚT CHẶT VÀO TÂM -->
+                    <!-- VÂN TAY GỠ BỎ TỌA ĐỘ ẢO ĐỂ BỊ HÚT CHẶT VÀO TÂM THEO THUẬT TOÁN FLEX -->
                     <div class="fingerprint-wrapper" id="fp-wrapper">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
                           <path d="M18.9 7a8 8 0 0 1 1.1 5v1a6 6 0 0 0 .8 3" />
@@ -710,6 +711,7 @@
         let audioCtx; 
         function initAudio() { try { if(!audioCtx) { const AudioContext = window.AudioContext || window.webkitAudioContext; if(AudioContext) audioCtx = new AudioContext(); } } catch(e) { } }
         
+        // ÂM THANH CHUÔNG HUYỀN BÍ CHO NÚT GỖ
         function playMysticalGong() { 
             try { 
                 initAudio(); 
@@ -790,20 +792,6 @@
             window.speechSynthesis.speak(u);
         }
 
-        // BÍ LỤC XÁT MUỐI (TEXT TO SPEECH LIVE)
-        function readLore(tierId, e) {
-            if(e) { e.preventDefault(); e.stopPropagation(); }
-            let contentDiv = document.getElementById(tierId);
-            let text = Array.from(contentDiv.querySelectorAll('p')).map(p => p.innerText).join('. ');
-            let prefix = ""; let suffix = "";
-            if(tierId === 'tier1') { prefix = "Mở to tai ra mà nghe kết cục của kẻ vô kỷ luật đây. "; suffix = " Nghe rõ chưa? Đừng để ta thấy phong độ của ngươi rớt xuống cái đáy rác rưởi này."; }
-            else if(tierId === 'tier2') { prefix = "Đừng vội tự mãn. Nghe tiêu chuẩn của một vận động viên bán chuyên đây. "; suffix = " Mới ở mức tạm chấp nhận được thôi. Tập trung vào."; }
-            else if(tierId === 'tier3') { prefix = "Cảnh giới tối thượng của thể thao. Khắc cốt ghi tâm những lời này. "; suffix = " Giữ cái đầu lạnh. Sai một ly, ta đạp ngươi về lại số không."; }
-            else if(tierId === 'mod4') { prefix = "Cơ bắp cũng cần bảo trì. Nghe luật xả tải đây. "; suffix = " Đi xem phim đi. Cấm tuyệt đối thi đấu ngày hôm nay!"; }
-            else if(tierId === 'mod0' || tierId === 'mod5' || tierId === 'mod6') { prefix = "Rửa sạch não và nuốt từng chữ này vào. "; suffix = " Kỷ luật là vũ khí tối thượng của nhà vô địch."; }
-            triggerBooSpeech(prefix + text + suffix, false);
-        }
-
         // CHỌC BOO BÌNH THƯỜNG Ở MÀN HÌNH CHÍNH & MÀN HÌNH CHỜ
         function handleBooClick() {
             if (isDragging) return;
@@ -811,17 +799,20 @@
                 triggerBooSpeech(introText, false);
             } else if (appState === 2) {
                 let isCommitted = localStorage.getItem('combat_committed') === 'true';
-                if (!isCommitted) return triggerBooSpeech("Màn hình tối thui thế này nhìn cái gì? Sợ à? Mở Bí lục lên và giữ 3 giây ký cái khế ước cho ta nhờ!", false);
+                if (!isCommitted) return triggerBooSpeech("Màn hình tối thui thế này nhìn cái gì? Mở Bí lục lên và giữ 3 giây ký cái khế ước cho ta nhờ!", false);
                 if (!isSafetyUnlocked) return triggerBooSpeech("Tường lửa kích hoạt rồi kìa! Còn không mau bấm xác nhận kết nối đồng hồ đi?", false);
                 if (!isSynced && !window.isScanning) return triggerBooSpeech("Cấp quyền xong rồi thì nhấc ngón tay lên dí vào lõi trung tâm đi chứ!", false);
                 
                 let alertText = document.getElementById('live-metrics').innerText || ""; let metricsStr = "";
-                if (alertText.includes("KHÔNG CÒN NỢ") || alertText === "") { metricsStr = "Hôm nay sạch nợ sinh lý, ngoan đấy."; } 
+                if (alertText.includes("KHÔNG CÒN NỢ") || alertText === "") { 
+                    metricsStr = "Hệ thống ổn định. Dữ liệu sinh lý trong ngày đạt chuẩn."; 
+                } 
                 else {
                     let cleanAlert = alertText.replace(/HR:\s*-([0-9]+)\s*BPM/g, "nhịp tim hụt $1 nhịp, ").replace(/STP:\s*-([0-9.]+)/g, "nợ đầm đìa $1 bước chân, ").replace(/SLP:\s*-([0-9.]+)h/g, "ngủ thiếu $1 giờ, ").replace(/WGT:\s*\+([0-9.]+)kg/g, "dư mỡ cần giảm $1 kí, ").replace(/WGT:\s*-([0-9.]+)kg/g, "hụt mất $1 kí, ").replace(/FAT:\s*\+([0-9.]+)%/g, "cần giảm $1 phần trăm mỡ, ").replace(/H2O:\s*-([0-9.]+)%/g, "báo động đỏ thiếu $1 phần trăm nước, ");
-                    let parts = cleanAlert.split('|').map(p => p.trim()).filter(p => p); cleanAlert = parts.join(" ").replace(/,\s*$/, "").replace(/\s{2,}/g, " "); metricsStr = `Đã thế còn ${cleanAlert}! Thích nằm trương thây ra đấy không?`;
+                    let parts = cleanAlert.split('|').map(p => p.trim()).filter(p => p); cleanAlert = parts.join(" ").replace(/,\s*$/, "").replace(/\s{2,}/g, " "); 
+                    metricsStr = `Cảnh báo hệ thống! Cậu đang ${cleanAlert}. Lập tức khắc phục!`;
                 }
-                triggerBooSpeech(`Báo cáo tình hình: ${metricsStr}`, false);
+                triggerBooSpeech(metricsStr, false);
             }
         }
 
@@ -835,7 +826,7 @@
                     triggerBooSpeech(introText, true);
                 } else if (appState === 2) {
                     let isCommitted = localStorage.getItem('combat_committed') === 'true';
-                    if (!isCommitted) triggerBooSpeech("Màn hình tối thui thế này nhìn cái gì? Sợ à? Mở Bí lục lên và giữ 3 giây ký lẹ cái khế ước cho ta nhờ!", true);
+                    if (!isCommitted) triggerBooSpeech("Mở Bí lục lên và giữ 3 giây ký lẹ cái khế ước cho ta nhờ!", true);
                     else if (!isSafetyUnlocked) triggerBooSpeech("Tường lửa kích hoạt rồi kìa! Còn không mau bấm xác nhận kết nối đồng hồ với cân thông minh đi?", true);
                     else if (!isSynced && !window.isScanning) triggerBooSpeech("Cấp quyền xong rồi thì nhấc ngón tay lên dí vào lõi trung tâm đi chứ!", true);
                 }
@@ -962,7 +953,7 @@
                     document.body.classList.remove('tier-shiro', 'tier-chairo', 'tier-kuro');
                     
                     if (isDisconnected) {
-                        document.body.classList.add('tier-shiro'); statusBanner.innerText = "⚠️ MẤT KẾT NỐI THIẾT BỊ NGOẠI VI"; statusBanner.style.color = "var(--amber)"; statusBanner.style.borderColor = "var(--amber)"; statusBanner.style.background = "rgba(255, 170, 0, 0.15)";
+                        document.body.classList.add('tier-shiro'); statusBanner.innerText = "⚠️ MẤT KẾT NỐI THIẾT BỊ NGOẠI VI"; statusBanner.style.color = "var(--amber)"; statusBanner.style.background = "rgba(255, 170, 0, 0.15)";
                         updateMarquee('error'); playLockSound(); document.getElementById('live-radar-bar').style.display = 'none';
                         typeTextSafe([">_ CẢNH BÁO ĐỎ: MẤT KẾT NỐI VỚI VỆ TINH."]);
                     } 
@@ -1029,12 +1020,12 @@
 
         function updateMarquee(state) {
             const mqText = document.getElementById('marquee-text'); const box = document.getElementById('combat-marquee'); const icon = document.getElementById('mq-icon');
-            if (state === 'standby') { box.style.borderColor = 'rgba(255, 170, 0, 0.5)'; box.style.background = 'rgba(255, 170, 0, 0.05)'; icon.innerHTML = '📡'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `ĐANG KẾT NỐI VỚI LÕI SCI - CHỜ LỆNH HỆ THỐNG...`; } 
-            else if (state === 'scanning') { box.style.borderColor = 'rgba(0, 229, 255, 0.5)'; box.style.background = 'rgba(0, 229, 255, 0.05)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `GIAO THỨC ĐỒNG BỘ ĐANG KÍCH HOẠT...`; } 
-            else if (state === 'error') { box.style.borderColor = 'rgba(255, 170, 0, 0.5)'; box.style.background = 'rgba(255, 170, 0, 0.1)'; icon.innerHTML = '⚠️'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `MẤT TÍN HIỆU ĐẦU VÀO - CHỜ KẾT NỐI LẠI THIẾT BỊ`; } 
-            else if (state === 'shiro') { box.style.borderColor = 'rgba(255, 42, 42, 0.5)'; box.style.background = 'rgba(255, 42, 42, 0.1)'; icon.innerHTML = '🛑'; icon.style.color = 'var(--crimson)'; mqText.innerHTML = `CẢNH BÁO VI PHẠM KỶ LUẬT - ĐÌNH CHỈ THI ĐẤU - KHÓA THẺ`; } 
-            else if (state === 'chairo') { box.style.borderColor = 'rgba(0, 229, 255, 0.5)'; box.style.background = 'rgba(0, 229, 255, 0.05)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `MYELIN ỔN ĐỊNH - CẤP THẺ C HOẶC THẺ A`; } 
-            else if (state === 'kuro') { box.style.borderColor = 'rgba(255, 0, 255, 0.5)'; box.style.background = 'rgba(255, 0, 255, 0.05)'; icon.innerHTML = '🥷'; icon.style.color = 'var(--neon-pink)'; mqText.innerHTML = `TRẠNG THÁI VÔ NGÃ - CẤP ĐẶC QUYỀN THẺ S - OVERDRIVE`; }
+            if (state === 'standby') { box.style.background = 'rgba(255, 170, 0, 0.05)'; icon.innerHTML = '📡'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `ĐANG KẾT NỐI VỚI LÕI SCI - CHỜ LỆNH HỆ THỐNG...`; } 
+            else if (state === 'scanning') { box.style.background = 'rgba(0, 229, 255, 0.05)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `GIAO THỨC ĐỒNG BỘ ĐANG KÍCH HOẠT...`; } 
+            else if (state === 'error') { box.style.background = 'rgba(255, 170, 0, 0.1)'; icon.innerHTML = '⚠️'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `MẤT TÍN HIỆU ĐẦU VÀO - CHỜ KẾT NỐI LẠI THIẾT BỊ`; } 
+            else if (state === 'shiro') { box.style.background = 'rgba(255, 42, 42, 0.1)'; icon.innerHTML = '🛑'; icon.style.color = 'var(--crimson)'; mqText.innerHTML = `CẢNH BÁO VI PHẠM KỶ LUẬT - ĐÌNH CHỈ THI ĐẤU - KHÓA THẺ`; } 
+            else if (state === 'chairo') { box.style.background = 'rgba(0, 229, 255, 0.05)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `MYELIN ỔN ĐỊNH - CẤP THẺ C HOẶC THẺ A`; } 
+            else if (state === 'kuro') { box.style.background = 'rgba(255, 0, 255, 0.05)'; icon.innerHTML = '🥷'; icon.style.color = 'var(--neon-pink)'; mqText.innerHTML = `TRẠNG THÁI VÔ NGÃ - CẤP ĐẶC QUYỀN THẺ S - OVERDRIVE`; }
         }
 
         function initializeSystem() {
@@ -1103,7 +1094,7 @@
             let age = 2026 - year; let targetHR = Math.round((220 - age) * 0.75); let targetWeight = Math.round(21.0 * (height / 100) * (height / 100)); let targetFat = 15.0;
             let box = document.getElementById('ob-box-content');
             box.innerHTML = `<div class="fusion-title" style="color:var(--amber);">ĐANG TÍCH HỢP DỮ LIỆU...</div>`;
-            setTimeout(() => { box.innerHTML = `<div class="fusion-title" style="color:var(--cyan);">TỌA ĐỘ SINH TỬ ĐÃ THIẾT LẬP</div><div class="fusion-grid"><div class="fusion-box"><div class="fb-lbl">HR PEAK</div><div class="fb-val" id="rl-hr">0</div></div><div class="fusion-box"><div class="fb-lbl">WEIGHT</div><div class="fb-val" style="color:var(--neon-pink);" id="rl-wgt">0</div></div><div class="fusion-box"><div class="fb-lbl">FAT LIMIT</div><div class="fb-val" style="color:var(--mint);" id="rl-fat">0</div></div></div>`; animateValue('rl-hr', 0, targetHR, 1000); animateValue('rl-wgt', 0, targetWeight, 1000); animateValue('rl-fat', 0, targetFat, 1000); playSlashSound(); }, 2000);
+            setTimeout(() => { box.innerHTML = `<div class="fusion-title" style="color:var(--cyan);">TỌA ĐỘ SINH TỬ ĐÃ THIẾT LẬP</div><div class="fusion-grid"><div class="fusion-box"><div class="fb-lbl">HR PEAK</div><div class="fb-val" id="rl-hr">0</div></div><div class="fusion-box"><div class="fb-lbl">WEIGHT</div><div class="fb-val pink" id="rl-wgt">0</div></div><div class="fusion-box"><div class="fb-lbl">FAT LIMIT</div><div class="fb-val mint" id="rl-fat">0</div></div></div>`; animateValue('rl-hr', 0, targetHR, 1000); animateValue('rl-wgt', 0, targetWeight, 1000); animateValue('rl-fat', 0, targetFat, 1000); playSlashSound(); }, 2000);
             setTimeout(() => { localStorage.setItem('kdrive_target_hr', targetHR); localStorage.setItem('kdrive_target_weight', targetWeight); localStorage.setItem('kdrive_target_fat', targetFat); localStorage.setItem('combat_committed', 'true'); document.getElementById('onboarding-popup').classList.remove('active'); isSafetyUnlocked = false; document.getElementById('safety-lock-hud').classList.remove('unlocked'); document.body.classList.remove('uncommitted', 'sync-complete'); document.body.classList.add('standby-mode', 'pre-scan-locked'); updateButtonState(); updateStreakBoxUI(); updateMarquee('standby'); }, 4000);
         }
 
