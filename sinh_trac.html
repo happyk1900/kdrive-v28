@@ -53,9 +53,12 @@
         .btn-skip-ritual { position: absolute; bottom: 30px; right: 30px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); font-family: var(--font-display); font-size: 11px; letter-spacing: 2px; padding: 10px 15px; cursor: pointer; transition: all 0.3s; z-index: 90001; clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
         .btn-skip-ritual:active { color: #fff; background: rgba(255,255,255,0.1); }
 
-        /* WIDGET VỆ TINH BOO 🐽 LƠ LỬNG (DRAGGABLE) */
+        /* WIDGET VỆ TINH BOO 🐽 LƠ LỬNG (DRAGGABLE - ĐÃ KHÓA BIÊN ĐỘ) */
         .floating-boo {
-            position: fixed; top: 15%; right: 15px; width: 52px; height: 52px;
+            position: fixed; top: 15%; 
+            /* Căn lề tự động sát mép phải khung 420px */
+            left: calc(50% + min(210px, 50vw) - 67px);
+            width: 52px; height: 52px;
             background: rgba(10, 15, 25, 0.6); backdrop-filter: blur(8px);
             border: 1px solid var(--neon-pink); border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
@@ -797,12 +800,54 @@
             if(appState !== 1) startIdleTimer();
         }, {passive: true}));
 
-        /* KÉO THẢ VỆ TINH BOO */
+        /* KÉO THẢ VỆ TINH BOO (ĐÃ KHÓA BIÊN ĐỘ GIỚI HẠN) */
         const booWidget = document.getElementById('floating-boo'); let isDragging = false; let dragStartX, dragStartY; let widgetStartX, widgetStartY;
         booWidget.addEventListener('touchstart', dragStart, {passive: false}); booWidget.addEventListener('mousedown', dragStart);
-        function dragStart(e) { if (e.type === 'touchstart') { dragStartX = e.touches[0].clientX; dragStartY = e.touches[0].clientY; } else { dragStartX = e.clientX; dragStartY = e.clientY; } widgetStartX = booWidget.offsetLeft; widgetStartY = booWidget.offsetTop; isDragging = false; document.addEventListener('touchmove', dragMove, {passive: false}); document.addEventListener('touchend', dragEnd); document.addEventListener('mousemove', dragMove); document.addEventListener('mouseup', dragEnd); }
-        function dragMove(e) { let clientX, clientY; if (e.type === 'touchmove') { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; } else { clientX = e.clientX; clientY = e.clientY; } let dx = clientX - dragStartX; let dy = clientY - dragStartY; if (Math.abs(dx) > 5 || Math.abs(dy) > 5) { isDragging = true; e.preventDefault(); } if (isDragging) { let newX = Math.max(0, Math.min(window.innerWidth - booWidget.offsetWidth, widgetStartX + dx)); let newY = Math.max(0, Math.min(window.innerHeight - booWidget.offsetHeight, widgetStartY + dy)); booWidget.style.left = newX + 'px'; booWidget.style.top = newY + 'px'; booWidget.style.right = 'auto'; } }
-        function dragEnd(e) { document.removeEventListener('touchmove', dragMove); document.removeEventListener('touchend', dragEnd); document.removeEventListener('mousemove', dragMove); document.removeEventListener('mouseup', dragEnd); if (isDragging) { let currentX = booWidget.offsetLeft; booWidget.style.transition = 'left 0.3s ease-out'; if (currentX > window.innerWidth / 2) { booWidget.style.left = (window.innerWidth - booWidget.offsetWidth - 10) + 'px'; } else { booWidget.style.left = '10px'; } setTimeout(() => { booWidget.style.transition = ''; }, 300); } }
+        
+        function dragStart(e) { 
+            if (e.type === 'touchstart') { dragStartX = e.touches[0].clientX; dragStartY = e.touches[0].clientY; } else { dragStartX = e.clientX; dragStartY = e.clientY; } 
+            widgetStartX = booWidget.offsetLeft; widgetStartY = booWidget.offsetTop; isDragging = false; 
+            document.addEventListener('touchmove', dragMove, {passive: false}); document.addEventListener('touchend', dragEnd); document.addEventListener('mousemove', dragMove); document.addEventListener('mouseup', dragEnd); 
+        }
+        
+        function dragMove(e) { 
+            let clientX, clientY; 
+            if (e.type === 'touchmove') { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; } else { clientX = e.clientX; clientY = e.clientY; } 
+            let dx = clientX - dragStartX; let dy = clientY - dragStartY; 
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) { isDragging = true; e.preventDefault(); } 
+            
+            if (isDragging) { 
+                let maxW = Math.min(window.innerWidth, 420);
+                let offsetX = (window.innerWidth - maxW) / 2;
+                let minX = offsetX + 10;
+                let maxX = offsetX + maxW - booWidget.offsetWidth - 10;
+                let minY = 10;
+                let maxY = window.innerHeight - booWidget.offsetHeight - 10;
+                
+                let newX = Math.max(minX, Math.min(maxX, widgetStartX + dx)); 
+                let newY = Math.max(minY, Math.min(maxY, widgetStartY + dy)); 
+                
+                booWidget.style.left = newX + 'px'; booWidget.style.top = newY + 'px'; booWidget.style.right = 'auto'; 
+            } 
+        }
+        
+        function dragEnd(e) { 
+            document.removeEventListener('touchmove', dragMove); document.removeEventListener('touchend', dragEnd); document.removeEventListener('mousemove', dragMove); document.removeEventListener('mouseup', dragEnd); 
+            if (isDragging) { 
+                let maxW = Math.min(window.innerWidth, 420);
+                let offsetX = (window.innerWidth - maxW) / 2;
+                let currentX = booWidget.offsetLeft; 
+                let midPoint = offsetX + (maxW / 2);
+                
+                booWidget.style.transition = 'left 0.3s ease-out'; 
+                if (currentX > midPoint) { 
+                    booWidget.style.left = (offsetX + maxW - booWidget.offsetWidth - 10) + 'px'; 
+                } else { 
+                    booWidget.style.left = (offsetX + 10) + 'px'; 
+                } 
+                setTimeout(() => { booWidget.style.transition = ''; }, 300); 
+            } 
+        }
 
         /* KIỂM TRA ĐỒNG BỘ */
         function unlockPreScan() { if(isSafetyUnlocked || localStorage.getItem('combat_committed') !== 'true') return; playLockSound(); isSafetyUnlocked = true; document.getElementById('safety-lock-hud').classList.add('unlocked'); document.body.classList.remove('pre-scan-locked'); document.getElementById('live-radar-bar').classList.add('active'); typeTextSafe([">_ [ HỆ THỐNG ]: CẤP QUYỀN KẾT NỐI.", ">_ [ CHỈ THỊ ]: MỜI CHẠM LÕI SCI BÊN TRÊN ĐỂ ĐỒNG BỘ."]); }
@@ -866,7 +911,6 @@
                         else if (sciScore >= 50 && sciScore < 85) { document.body.classList.add('tier-chairo'); statusBanner.innerText = "[ TIER 2: CHAIRO ]"; statusBanner.style.color = "var(--cyan)"; updateMarquee('chairo'); typeTextSafe([">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.", ">_ [ PHÂN TÍCH ]: SCI ỔN ĐỊNH."]); } 
                         else if (sciScore >= 85) { 
                             document.body.classList.add('tier-kuro'); statusBanner.innerText = "[ TIER 3: KURO - THẺ S ]"; statusBanner.style.color = "var(--neon-pink)"; updateMarquee('kuro'); triggerMushinProtocol(); typeTextSafe([">_ [ HỆ THỐNG ]: ĐỒNG BỘ HOÀN TẤT.", ">_ [ PHÂN TÍCH ]: SCI >= 85. OVERDRIVE."]);
-                            // Phần thưởng kích hoạt nhạc Ronin khi đạt Vô Ngã
                             if (roninAudio.paused && isMuted) {
                                 roninAudio.play(); isMuted = false;
                                 document.getElementById('icon-sound-on').style.display='block'; document.getElementById('icon-sound-off').style.display='none';
