@@ -86,8 +86,10 @@
         .btn-audio, .btn-chip { padding: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; }
         .btn-audio svg, .btn-chip svg { width: 18px; height: 18px; fill: currentColor; }
         .btn-chip { display: none; color: var(--amber); border-color: var(--amber); background: rgba(255, 170, 0, 0.15); }
+        
         .sys-info { text-align: right; font-size: 11px; font-weight: 400; letter-spacing: 1px; color: rgba(255,255,255,0.5); line-height: 1.4; }
         .sys-info span { color: var(--cyan); font-weight: 600; }
+        
         .ctrl-group { display: flex; flex-direction: column; align-items: flex-end; margin-top: 10px; gap: 6px; }
         .streak-box { position: relative; overflow: hidden; border: 1px solid var(--amber); background: linear-gradient(135deg, rgba(255, 170, 0, 0.15) 0%, rgba(255, 170, 0, 0.35) 100%); color: #fff; padding: 8px 18px; font-family: var(--font-display); font-size: 13px; font-weight: 600; letter-spacing: 1.5px; cursor: pointer; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); transition: all 0.3s ease; box-shadow: 0 0 15px rgba(255, 170, 0, 0.3); }
         .streak-cleansing { border-color: var(--cyan) !important; color: var(--cyan) !important; box-shadow: 0 0 15px rgba(0, 229, 255, 0.2) !important; background: linear-gradient(135deg, rgba(0, 229, 255, 0.05) 0%, rgba(0, 229, 255, 0.15) 100%) !important; }
@@ -241,7 +243,7 @@
 
         .btn-play-lore { background: transparent; border: none; font-size: 18px; cursor: pointer; filter: drop-shadow(0 0 5px rgba(255, 0, 255, 0.6)); }
 
-        .rank-footer { position: absolute; bottom: 0; left: 0; width: 100vw; padding: 15px 20px calc(20px + env(safe-area-inset-bottom)); background: rgba(5,6,8,0.95); display: flex; justify-content: center; z-index: 55;}
+        .rank-footer { position: absolute; bottom: 0; left: 0; width: 100vw; padding: 15px 20px calc(20px + env(safe-area-bottom)); background: rgba(5,6,8,0.95); display: flex; justify-content: center; z-index: 55;}
         .hold-btn { width: 100%; max-width: 420px; padding: 16px; font-family: var(--font-display); font-size: 12px; font-weight: 500; letter-spacing: 2px; position: relative; cursor: pointer; touch-action: none; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
         .hold-btn.state-sign { border: 1px solid rgba(255,255,255,0.3); color: #fff; background: rgba(255,255,255,0.05); }
         .hold-btn.state-abort { border: 1px solid rgba(255, 42, 42, 0.4); color: rgba(255, 42, 42, 0.9); background: rgba(255, 42, 42, 0.05); }
@@ -336,7 +338,7 @@
                 </button>
             </div>
             <div class="sys-info">
-                OPR: <span>KAI</span><br> LOC: <span>HANOI</span><br> DATE: <span id="current-date">--.--.----</span>
+                OPR: <span id="opr-name">KAI</span><br> LOC: <span id="loc-name">HANOI</span><br> DATE: <span id="current-date">--.--.----</span>
                 <div class="ctrl-group">
                     <div class="streak-box" id="streak-box" onclick="playBeep(); toggleRankMenu()">ĐANG TẢI DỮ LIỆU...</div>
                 </div>
@@ -616,11 +618,6 @@
 
     <!-- LOGIC JS TỐI ƯU -->
     <script>
-        // CÁC BIẾN TOÀN CỤC & TỪ ĐIỂN
-        let appState = 0; // 0: Cổng Địa Luân, 1: Nghi thức Video, 2: Main App
-        let idleInterval = null;
-        let isSafetyUnlocked = false; 
-        
         // --- CHUẨN HÓA DATA PIPELINE ---
         window.kDriveData = {
             sciToday: 0, sciYesterday: 0,
@@ -628,6 +625,11 @@
             missingWatch: false, missingScale: false,
             synced: false, terminalText: ""
         };
+
+        // CÁC BIẾN TOÀN CỤC & TỪ ĐIỂN
+        let appState = 0; // 0: Cổng Địa Luân, 1: Nghi thức Video, 2: Main App
+        let idleInterval = null;
+        let isSafetyUnlocked = false; 
         
         let roninAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20R%C5%8Dnin.mp3'); roninAudio.loop = true; roninAudio.volume = 0.5;
         let isMuted = true;
@@ -644,6 +646,11 @@
                 const h = document.getElementById('ob-height'); let hHtml = '<option value="0" disabled selected>000</option>'; for(let i=150; i<=210; i++) hHtml += `<option value="${i}">${i}</option>`; h.innerHTML = hHtml;
                 const w = document.getElementById('ob-weight'); let wHtml = '<option value="0" disabled selected>00</option>'; for(let i=40; i<=120; i++) wHtml += `<option value="${i}">${i}</option>`; w.innerHTML = wHtml;
             }
+            
+            // ĐỒNG BỘ TÊN ĐĂNG NHẬP OPR
+            let savedOpr = localStorage.getItem('kdrive_opr_name');
+            document.getElementById('opr-name').innerText = savedOpr ? savedOpr.toUpperCase() : 'GUEST';
+            
             startIdleTimer(); 
         });
 
@@ -680,6 +687,7 @@
             document.getElementById('intro-layer').style.display = 'none';
             document.getElementById('ritual-layer').style.display = 'block';
             clearInterval(idleInterval); window.speechSynthesis.cancel();
+            
             playMysticalGong(); 
             let ritualVid = document.getElementById('ritual-video');
             ritualVid.play().catch(e => console.log("Video auto-play prevented:", e));
@@ -690,9 +698,11 @@
             if (appState !== 1) return;
             let ritualVid = document.getElementById('ritual-video');
             ritualVid.pause(); ritualVid.currentTime = 0;
+            
             document.getElementById('ritual-layer').style.display = 'none';
             document.getElementById('main-pwa').style.display = 'flex';
             setTimeout(() => { document.getElementById('main-pwa').style.opacity = '1'; }, 50);
+            
             appState = 2; 
             initializeSystem();
             startIdleTimer(); 
@@ -729,6 +739,7 @@
             clearInterval(idleInterval);
             idleInterval = setInterval(() => {
                 if (window.speechSynthesis.speaking) return; 
+                
                 if (appState === 0) {
                     triggerBooSpeech(introText, true);
                 } else if (appState === 2) {
@@ -799,11 +810,38 @@
         /* KIỂM TRA ĐỒNG BỘ */
         function unlockPreScan() { if(isSafetyUnlocked || localStorage.getItem('combat_committed') !== 'true') return; playLockSound(); isSafetyUnlocked = true; document.getElementById('safety-lock-hud').classList.add('unlocked'); document.body.classList.remove('pre-scan-locked'); document.getElementById('live-radar-bar').classList.add('active'); typeTextSafe([">_ HỆ THỐNG: CẤP QUYỀN KẾT NỐI.", ">_ CHỈ THỊ: MỜI CHẠM LÕI SCI BÊN TRÊN ĐỂ ĐỒNG BỘ."]); }
         
+        // HÀM QUÉT VỆ TINH
+        function fetchLocation() {
+            const locSpan = document.getElementById('loc-name');
+            locSpan.innerText = 'SCANNING...';
+            
+            if (!navigator.geolocation) { locSpan.innerText = 'OFFLINE'; return; }
+            
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                try {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`);
+                    const data = await response.json();
+                    let city = data.city || data.locality || data.principalSubdivision || 'UNKNOWN';
+                    city = city.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace("THANH PHO ", "").replace("TINH ", "").trim();
+                    locSpan.innerText = city;
+                } catch (err) {
+                    locSpan.innerText = 'OFFLINE';
+                }
+            }, (err) => {
+                locSpan.innerText = 'OFFLINE';
+            }, { timeout: 5000 });
+        }
+
         async function triggerBioSync() {
             if(localStorage.getItem('combat_committed') !== 'true') { playBeep(); return; }
             if(window.isScanning) return; window.isScanning = true;
             document.body.classList.remove('standby-mode'); document.body.classList.add('scanning-mode');
             updateMarquee('scanning'); playChargeSound(); if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
+            
+            fetchLocation(); // Kích hoạt quét vệ tinh
+
             await fetchBioDataReal();
         }
 
@@ -1014,7 +1052,7 @@
                 triggerBooSpeech(introText, false);
             } else if (appState === 2) {
                 let isCommitted = localStorage.getItem('combat_committed') === 'true';
-                if (!isCommitted) return triggerBooSpeech("Màn hình tối thui thế này nhìn cái gì? Mở Bí lục lên và giữ 3 giây ký cái khế ước cho ta nhờ!", false);
+                if (!isCommitted) return triggerBooSpeech("Mở Bí lục lên và giữ 3 giây ký cái khế ước cho ta nhờ!", false);
                 if (!isSafetyUnlocked) return triggerBooSpeech("Tường lửa kích hoạt rồi kìa! Còn không mau bấm xác nhận kết nối đồng hồ đi?", false);
                 if (!window.kDriveData.synced && !window.isScanning) return triggerBooSpeech("Cấp quyền xong rồi thì nhấc ngón tay lên dí vào lõi trung tâm đi chứ!", false);
                 
