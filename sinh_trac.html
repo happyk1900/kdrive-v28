@@ -81,8 +81,25 @@
 
         .boo-icon-inner { font-size: 22px; filter: drop-shadow(0 0 5px rgba(255, 0, 255, 0.8)); display: inline-block; }
         .floating-boo.reading .boo-icon-inner { animation: pig-speak 0.15s infinite alternate; filter: drop-shadow(0 0 15px var(--boo-ring-color)) brightness(1.5); }
+        
+        /* Hiệu ứng bay Zzz trên đầu mũi heo */
+        .boo-zzz { 
+            position: absolute; top: -16px; right: 2px; 
+            font-family: var(--font-display); font-size: 14px; 
+            color: #3b82f6; font-weight: bold; text-shadow: 0 0 5px rgba(59, 130, 246, 0.8);
+            opacity: 0; pointer-events: none; transition: opacity 0.3s; 
+        }
+        .floating-boo.sleeping .boo-zzz { 
+            opacity: 1; animation: zzz-float 2s infinite ease-in-out; 
+        }
+
         @keyframes levitate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes pig-speak { 0% { transform: scale(1.1) rotate(-15deg); } 100% { transform: scale(1.3) rotate(15deg); } }
+        @keyframes zzz-float {
+            0% { transform: translateY(0) scale(0.8); opacity: 0.3; }
+            50% { transform: translateY(-8px) scale(1.1); opacity: 1; }
+            100% { transform: translateY(-16px) scale(1.2); opacity: 0; }
+        }
 
         /* LỚP INTRO TRẠM 0 (ĐỊA LUÂN) */
         #intro-layer { position: fixed; inset: 0; z-index: 100000; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/BOO%20DIA%20LUAN%20OK.png?raw=true') center/cover no-repeat; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 15%; transition: opacity 0.5s ease; overflow: hidden; background-position: center bottom; }
@@ -573,6 +590,7 @@
     <div id="boo-cage">
         <div id="floating-boo" class="floating-boo" onclick="handleBooClick()">
             <span class="boo-icon-inner" id="boo-mascot">🐽</span>
+            <span class="boo-zzz" id="boo-zzz">Zzz</span>
         </div>
     </div>
 
@@ -1118,6 +1136,10 @@
         function readLore(modId, e) {
             e.stopPropagation();
             playBeep();
+            if (window.isBooSleeping) {
+                triggerBooSpeech("Đang ngủ, đọc cái gì, cút!", false);
+                return;
+            }
             let txt = "";
             if(modId === 'mod6') txt = "Khế ước 1000 ngày duy trì trạng thái Vô ngã không phải là trò đùa! Chỉ cần 1 lần lơi lỏng để phong độ rớt xuống mức Tinh anh, ta sẽ đá ngươi về vạch xuất phát. Nhưng đó là chuyện tương lai. Còn bây giờ, cắm đầu rèn luyện 6 chỉ số để chạm tới Vô ngã đi đã. Đến lúc đó, đồng hồ đếm ngược mới chính thức bắt đầu!";
             else if(modId === 'tier1') txt = "Nhìn cái điểm số thảm hại kìa! Thể lực rệu rã thế này thì xách xác ra đấu trường chỉ làm bao cát cho thiên hạ vùi dập. Lệnh hệ thống: Đình chỉ thi đấu! Ở nhà, đóng cửa, đẩy tạ và đổ mồ hôi ngay cho ta!";
@@ -1203,7 +1225,6 @@
                 if(!isDragging) {
                     window.isBooSleeping = true;
                     document.getElementById('floating-boo').classList.add('sleeping');
-                    document.getElementById('boo-mascot').innerHTML = '🐽💤';
                     document.getElementById('floating-boo').style.setProperty('--idle-progress', `0%`);
                     idleTime = 0;
                     window.speechSynthesis.cancel();
@@ -1537,17 +1558,30 @@
             }
         }
 
-        /* GỌI A.I BOO PHÂN TÍCH (THEO ĐÚNG TRÌNH TỰ 3 BƯỚC) */
+        /* GỌI A.I BOO PHÂN TÍCH VÀ CƠ CHẾ ĐÁNH THỨC 3 CHẠM */
+        let sleepTapCount = 0;
+        let sleepTapTimer = null;
+
         function handleBooClick() {
             if (isDragging) return;
 
-            // NẾU ĐANG NGỦ MÀ BỊ BẤM TRÚNG -> THỨC DẬY
             if (window.isBooSleeping) {
-                window.isBooSleeping = false;
-                document.getElementById('floating-boo').classList.remove('sleeping');
-                document.getElementById('boo-mascot').innerHTML = '🐽';
-                idleTime = 0; 
-                triggerBooSpeech("Ngủ một tí cũng không yên! Đã sẵn sàng xuất chiến chưa?", false);
+                sleepTapCount++;
+                clearTimeout(sleepTapTimer);
+
+                if (sleepTapCount === 1) {
+                    triggerBooSpeech("Đang ngủ, cút!", false);
+                    sleepTapTimer = setTimeout(() => { sleepTapCount = 0; }, 500); 
+                } else if (sleepTapCount === 2) {
+                    triggerBooSpeech("Muốn chết à, biến!", false);
+                    sleepTapTimer = setTimeout(() => { sleepTapCount = 0; }, 500);
+                } else if (sleepTapCount >= 3) {
+                    window.isBooSleeping = false;
+                    document.getElementById('floating-boo').classList.remove('sleeping');
+                    sleepTapCount = 0;
+                    idleTime = 0; 
+                    triggerBooSpeech("Bực mình thật đấy, dậy rồi đây!", false);
+                }
                 return;
             }
 
