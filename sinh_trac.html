@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spades Node - Event Horizon Core</title>
-    <!-- Phông chữ chuẩn The Legend -->
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Space+Grotesk:wght@300;400;500;600;700&family=Yuji+Boku&display=swap" rel="stylesheet">
+    <!-- Phông chữ chuẩn The Legend & Phông chữ Kanji Sắc Lẹm mới -->
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Noto+Serif+JP:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Yuji+Boku&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -33,10 +33,54 @@
 
         /* LỒNG GIAM BOO & WIDGET (ĐƯA RA NGOÀI ĐỂ HIỂN THỊ TỪ TRẠM 0) */
         #boo-cage { position: fixed; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; z-index: 999999; pointer-events: none; overflow: hidden; }
-        .floating-boo { position: absolute; top: 15%; right: 15px; width: 52px; height: 52px; background: rgba(10, 15, 25, 0.6); backdrop-filter: blur(8px); border: 1px solid var(--neon-pink); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(255, 0, 255, 0.2); cursor: pointer; animation: levitate 3s ease-in-out infinite; touch-action: none; transition: box-shadow 0.3s, border-color 0.3s; pointer-events: auto; }
-        .floating-boo.reading { animation: none; box-shadow: 0 0 30px var(--neon-pink); border-width: 2px; background: rgba(255, 0, 255, 0.15); }
+        
+        /* HIỆU ỨNG HEO THAM LAM ALL-IN-ONE */
+        .floating-boo { 
+            position: absolute; top: 15%; right: 15px; width: 52px; height: 52px; 
+            background: rgba(10, 15, 25, 0.6); backdrop-filter: blur(8px); 
+            border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+            cursor: pointer; animation: levitate 3s ease-in-out infinite; 
+            touch-action: none; pointer-events: auto;
+            /* Biến CSS động cho màu sắc và tiến trình */
+            --boo-ring-color: var(--neon-pink);
+            --idle-progress: 0%;
+            box-shadow: 0 0 15px var(--boo-ring-color); 
+            border: 1px solid var(--boo-ring-color);
+            transition: all 0.3s;
+        }
+        
+        /* Vòng đếm ngược (Conic Gradient) */
+        .floating-boo::before {
+            content: ''; position: absolute; inset: -4px; border-radius: 50%;
+            background: conic-gradient(var(--boo-ring-color) var(--idle-progress), transparent 0);
+            -webkit-mask: radial-gradient(closest-side, transparent 86%, black 88%);
+            transition: background 1s linear;
+            pointer-events: none;
+        }
+
+        /* Vòng Sóng Âm J.A.R.V.I.S đập thình thịch khi chửi */
+        .floating-boo.reading { 
+            animation: boo-pulse-wave 0.25s infinite alternate !important; 
+        }
+        @keyframes boo-pulse-wave {
+            0% { transform: scale(1); box-shadow: 0 0 10px var(--boo-ring-color); border-width: 1px; }
+            100% { transform: scale(1.15); box-shadow: 0 0 35px var(--boo-ring-color); border-width: 3px; }
+        }
+
+        /* Chế độ Ngủ đông: Viền xanh xám, nét đứt, nhịp thở, ẩn đếm ngược */
+        .floating-boo.sleeping {
+            --boo-ring-color: #3b82f6 !important; 
+            border-style: dashed;
+            animation: boo-breathe 2.5s ease-in-out infinite alternate !important;
+        }
+        .floating-boo.sleeping::before { display: none; }
+        @keyframes boo-breathe {
+            0% { transform: scale(0.95); opacity: 0.7; box-shadow: 0 0 5px var(--boo-ring-color); }
+            100% { transform: scale(1.02); opacity: 1; box-shadow: 0 0 20px var(--boo-ring-color); }
+        }
+
         .boo-icon-inner { font-size: 22px; filter: drop-shadow(0 0 5px rgba(255, 0, 255, 0.8)); display: inline-block; }
-        .floating-boo.reading .boo-icon-inner { animation: pig-speak 0.15s infinite alternate; filter: drop-shadow(0 0 15px var(--neon-pink)) brightness(1.5); }
+        .floating-boo.reading .boo-icon-inner { animation: pig-speak 0.15s infinite alternate; filter: drop-shadow(0 0 15px var(--boo-ring-color)) brightness(1.5); }
         @keyframes levitate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes pig-speak { 0% { transform: scale(1.1) rotate(-15deg); } 100% { transform: scale(1.3) rotate(15deg); } }
 
@@ -328,14 +372,16 @@
         
         /* Chữ Kanji đen bóng mờ, xẹt ánh sáng trắng cực sắc */
         .kanji-shine { 
-            font-family: var(--font-jp); font-size: 46px; font-weight: 600; 
-            letter-spacing: 18px; margin-right: -18px; 
+            font-family: 'Noto Serif JP', serif; 
+            font-size: 44px; 
+            font-weight: 900; 
+            letter-spacing: 16px; margin-right: -16px; 
             color: transparent; 
-            background: linear-gradient(110deg, #181818 35%, #ffffff 50%, #181818 65%); 
+            background: linear-gradient(110deg, #111 35%, #ffffff 50%, #111 65%); 
             background-size: 200% auto; 
             -webkit-background-clip: text; 
-            animation: katana-slash 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; 
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.9)); 
+            animation: katana-slash 3.5s cubic-bezier(0.8, 0, 0.2, 1) infinite; 
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.8)); 
         }
         @keyframes katana-slash { 
             0% { background-position: 200% center; } 
@@ -343,7 +389,7 @@
             100% { background-position: -50% center; } 
         }
 
-        /* Chữ BUSHIDO cách đều, 1 giọt máu chảy xuống từ chữ H */
+        /* Chữ BUSHIDO cách đều, 1 giọt máu chảy xuống từ chữ H (Giữ nguyên theo yêu cầu) */
         .eng-sub { 
             display: flex; justify-content: center; gap: 12px;
             font-size: 13px; color: #b30000; margin-top: 12px; 
@@ -396,22 +442,21 @@
             z-index: 5; opacity: 0; pointer-events: none; overflow: hidden; display: block; 
         }
         
-        /* Trục trôi của chữ */
+        /* Trục trôi của chữ: Xuất phát từ tàng hình tận đáy 100vh và trôi biến mất hoàn toàn */
         .scrolling-wrapper { 
-            position: absolute; inset: 0; width: 90%; max-width: 500px; 
-            margin: 0 auto; overflow: hidden;
+            position: absolute; width: 90%; max-width: 500px; left: 50%; 
+            top: 100vh; /* Bắt đầu từ tận đáy */
+            transform: translateX(-50%);
         }
         .scroll-track { display: flex; flex-direction: column; }
-        .scroll-block { 
-            display: flex; flex-direction: column; gap: 50px; 
-            padding-top: 100vh; /* Bắt buộc để chữ xuất phát từ tận đáy dưới màn hình */
-        }
+        .scroll-block { display: flex; flex-direction: column; gap: 50px; }
         
-        .bushido-fs-overlay.awakened .fade-mask-fs { opacity: 1; }
-        .bushido-fs-overlay.awakened .scroll-track { animation: scrollLoopPerfect 50s linear infinite; }
-        @keyframes scrollLoopPerfect { 
-            0% { transform: translateY(0); } 
-            100% { transform: translateY(-50%); } 
+        .bushido-fs-overlay.awakened .scrolling-wrapper { 
+            animation: scrollUpBloodFs 50s linear infinite; 
+        }
+        @keyframes scrollUpBloodFs { 
+            0% { transform: translateX(-50%) translateY(0); } 
+            100% { transform: translateX(-50%) translateY(calc(-100vh - 100%)); } 
         }
 
         /* Chữ Bushido Ánh Kim Sang Trọng (Font Great Vibes) */
@@ -1085,18 +1130,27 @@
             triggerBooSpeech(txt, false);
         }
 
-        // BỘ ĐẾM THỜI GIAN NHẮC NHỞ LỀ MỀ (IDLE TIMER)
+        // BỘ ĐẾM THỜI GIAN NHẮC NHỞ LỀ MỀ (IDLE TIMER) CẬP NHẬT GIAO THỨC NGỦ
+        let booHoldTimer = null;
+        window.isBooSleeping = false;
+
         function startIdleTimer() {
             clearInterval(idleInterval);
             idleTime = 0;
             nextIdleTrigger = 7;
+            document.getElementById('floating-boo').style.setProperty('--idle-progress', `0%`);
+            
             idleInterval = setInterval(() => {
+                if (window.isBooSleeping) return; // Bỏ qua nếu BOO đang ngủ đông
+
                 idleTime++;
+                let progress = Math.min((idleTime / nextIdleTrigger) * 100, 100);
+                document.getElementById('floating-boo').style.setProperty('--idle-progress', `${progress}%`);
+
                 if (idleTime >= nextIdleTrigger) {
-                    if (!window.speechSynthesis.speaking) {
-                        triggerIdleBoo();
-                    }
-                    nextIdleTrigger = idleTime + 45; // Lặp lại sau 45s
+                    if (!window.speechSynthesis.speaking) triggerIdleBoo();
+                    idleTime = 0; 
+                    nextIdleTrigger = 45; 
                 }
             }, 1000);
         }
@@ -1123,10 +1177,10 @@
         }
 
         ['touchstart', 'mousemove', 'keydown', 'scroll', 'click'].forEach(evt => document.addEventListener(evt, () => {
-            if(appState !== 1) { idleTime = 0; nextIdleTrigger = 7; } // Reset lại Idle timer khi người dùng chạm
+            if(appState !== 1 && !window.isBooSleeping) { idleTime = 0; nextIdleTrigger = 7; } 
         }, {passive: true}));
 
-        /* KHÔI PHỤC KÉO THẢ BOO TRONG LỒNG 420px */
+        /* KHÔI PHỤC KÉO THẢ BOO TRONG LỒNG 420px VÀ KẾT HỢP LONG PRESS ĐỂ NGỦ */
         const booWidget = document.getElementById('floating-boo'); 
         const booCage = document.getElementById('boo-cage');
         let isDragging = false; let dragStartX, dragStartY; let widgetStartX, widgetStartY;
@@ -1143,6 +1197,20 @@
             widgetStartX = booWidget.offsetLeft; widgetStartY = booWidget.offsetTop; 
             booWidget.style.right = 'auto'; booWidget.style.left = widgetStartX + 'px';
             isDragging = false; 
+
+            // Cài đặt Long Press 3s cho BOO ngủ đông
+            booHoldTimer = setTimeout(() => {
+                if(!isDragging) {
+                    window.isBooSleeping = true;
+                    document.getElementById('floating-boo').classList.add('sleeping');
+                    document.getElementById('boo-mascot').innerHTML = '🐽💤';
+                    document.getElementById('floating-boo').style.setProperty('--idle-progress', `0%`);
+                    idleTime = 0;
+                    window.speechSynthesis.cancel();
+                    triggerBooSpeech("Biết rồi, tắt đài đây! Cứ lề mề đi rồi hệ thống nó đào thải, đừng có kêu!", false);
+                }
+            }, 3000);
+
             document.addEventListener('touchmove', dragMove, {passive: false}); 
             document.addEventListener('touchend', dragEnd); 
             document.addEventListener('mousemove', dragMove); 
@@ -1155,7 +1223,11 @@
             else { clientX = e.clientX; clientY = e.clientY; } 
             
             let dx = clientX - dragStartX; let dy = clientY - dragStartY; 
-            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) { isDragging = true; e.preventDefault(); } 
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) { 
+                isDragging = true; 
+                clearTimeout(booHoldTimer); // Nếu di chuyển thì hủy lệnh đi ngủ
+                e.preventDefault(); 
+            } 
             
             if (isDragging) { 
                 let maxW = booCage.offsetWidth; let maxH = window.innerHeight;
@@ -1168,6 +1240,7 @@
         }
         
         function dragEnd(e) { 
+            clearTimeout(booHoldTimer); // Nhả tay ra thì hủy đếm giờ ngủ
             document.removeEventListener('touchmove', dragMove); document.removeEventListener('touchend', dragEnd); document.removeEventListener('mousemove', dragMove); document.removeEventListener('mouseup', dragEnd); 
             if (isDragging) { 
                 let maxW = booCage.offsetWidth; let currentX = booWidget.offsetLeft; let midPoint = maxW / 2;
@@ -1216,6 +1289,13 @@
             await fetchBioDataReal();
         }
 
+        // TỪ ĐIỂN CÁ MẬP CẮN CÁP
+        const sharkExcuses = [
+            "Á đù, cá mập lại cắn cáp quang biển rồi! Tín hiệu bốc hơi, dí tay vào lõi quét lại ngay cho ta!",
+            "Đường truyền nghẽn mất rồi! Lỗi mạng chứ không phải tại ta đâu nhé, chạm vân tay quét lại mau lên!",
+            "Tín hiệu vệ tinh đi lạc đâu rồi ấy! Chắc rớt mạng, mau quét lại đi chứ đứng nhìn gì!"
+        ];
+
         // --- HẠCH TOÁN DỮ LIỆU ĐỘC LẬP TỪ GOOGLE SHEET ---
         async function fetchBioDataReal() {
             try {
@@ -1232,6 +1312,13 @@
                     // 1. CHUẨN BỊ MỐC MỤC TIÊU VÀ DỮ LIỆU THỰC TẾ
                     let centerSci = resData.sci_ma30 !== undefined ? resData.sci_ma30 : resData.sci;
                     let sciScore = parseFloat(centerSci) || 0;
+
+                    // Đổi màu viền con BOO theo SCI
+                    let ringColor = 'var(--neon-pink)';
+                    if (sciScore < 50) ringColor = 'var(--crimson)';
+                    else if (sciScore < 85) ringColor = 'var(--cyan)';
+                    else ringColor = 'var(--violet)';
+                    document.getElementById('floating-boo').style.setProperty('--boo-ring-color', ringColor);
                     
                     let savedDate = localStorage.getItem('sci_date');
                     let todayDate = new Date().toDateString();
@@ -1406,14 +1493,20 @@
                     window.kDriveData.terminalText = terminalLines.join(" ");
                     typeTextSafe(terminalLines);
 
+                    // GỌI A.I TỰ ĐỘNG BÁO CÁO KHI QUÉT XONG
+                    setTimeout(() => { if (!window.isBooSleeping) handleBooClick(); }, 1500);
+
                 } else if (resData.status === 'empty') { 
                     typeTextSafe([">_ LỖI: TỪ CHỐI TRUY CẬP.", ">_ CẢNH BÁO: CHƯA CÓ DỮ LIỆU SINH TRẮC.", ">_ HƯỚNG DẪN: YÊU CẦU ĐỒNG BỘ HEALTH CONNECT."]); updateMarquee('standby'); document.body.classList.add('standby-mode');
+                    if (!window.isBooSleeping) triggerBooSpeech(sharkExcuses[Math.floor(Math.random() * sharkExcuses.length)], false);
                 } else {
                     typeTextSafe([">_ LỖI HỆ THỐNG: " + (resData.message || "TRUY XUẤT THẤT BẠI.")]); updateMarquee('standby'); document.body.classList.add('standby-mode');
+                    if (!window.isBooSleeping) triggerBooSpeech(sharkExcuses[Math.floor(Math.random() * sharkExcuses.length)], false);
                 }
             } catch (error) {
                 stopChargeSound(); updateMarquee('standby'); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
                 typeTextSafe([">_ CẢNH BÁO ĐỎ: MẤT KẾT NỐI VỚI VỆ TINH."]);
+                if (!window.isBooSleeping) triggerBooSpeech(sharkExcuses[Math.floor(Math.random() * sharkExcuses.length)], false);
             }
             window.isScanning = false;
         }
@@ -1447,6 +1540,17 @@
         /* GỌI A.I BOO PHÂN TÍCH (THEO ĐÚNG TRÌNH TỰ 3 BƯỚC) */
         function handleBooClick() {
             if (isDragging) return;
+
+            // NẾU ĐANG NGỦ MÀ BỊ BẤM TRÚNG -> THỨC DẬY
+            if (window.isBooSleeping) {
+                window.isBooSleeping = false;
+                document.getElementById('floating-boo').classList.remove('sleeping');
+                document.getElementById('boo-mascot').innerHTML = '🐽';
+                idleTime = 0; 
+                triggerBooSpeech("Ngủ một tí cũng không yên! Đã sẵn sàng xuất chiến chưa?", false);
+                return;
+            }
+
             idleTime = 0; nextIdleTrigger = 7; // Reset Idle Timer khi tương tác thủ công
             
             if (appState === 0) {
@@ -1591,485 +1695,232 @@
         function triggerAbort() { localStorage.removeItem('combat_committed'); window.location.replace('login.html'); }
         dynamicBtn.addEventListener('mousedown', startHold); dynamicBtn.addEventListener('mouseup', cancelHold); dynamicBtn.addEventListener('mouseleave', cancelHold); dynamicBtn.addEventListener('touchstart', startHold, {passive: false}); dynamicBtn.addEventListener('touchend', cancelHold);
 
-        /* =======================================================
-           BÍ LỤC: CỤM TITLE VÀ HIỆU ỨNG RỈ MÁU CHUẨN XÁC
-           ======================================================= */
-        .bushido-signature { text-align: center; margin: 30px auto 10px; padding: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+        /* BUSHIDO JAVASCRIPT */
+        let isBushidoActive = false; 
         
-        /* Chữ Kanji đen bóng mờ, xẹt ánh sáng trắng cực sắc */
-        .kanji-shine { 
-            font-family: var(--font-jp); font-size: 46px; font-weight: 600; 
-            letter-spacing: 18px; margin-right: -18px; 
-            color: transparent; 
-            background: linear-gradient(110deg, #181818 35%, #ffffff 50%, #181818 65%); 
-            background-size: 200% auto; 
-            -webkit-background-clip: text; 
-            animation: katana-slash 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; 
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.9)); 
-        }
-        @keyframes katana-slash { 
-            0% { background-position: 200% center; } 
-            20% { background-position: -50% center; } 
-            100% { background-position: -50% center; } 
-        }
-
-        /* Chữ BUSHIDO cách đều, 1 giọt máu chảy xuống từ chữ H */
-        .eng-sub { 
-            display: flex; justify-content: center; gap: 12px;
-            font-size: 13px; color: #b30000; margin-top: 12px; 
-            font-family: var(--font-display); font-weight: 700; 
-            text-shadow: 0 0 8px rgba(255, 0, 0, 0.5); 
-        }
-        .drip-target { position: relative; color: #ff2a2a; text-shadow: 0 0 12px rgba(255,42,42,0.8); }
-        .drip-target::after {
-            content: ''; position: absolute;
-            width: 1.5px; background: linear-gradient(to bottom, #800000, #ff1a1a);
-            left: 50%; top: 85%; transform: translateX(-50%);
-            border-radius: 1px;
-            animation: true-blood-drop 3s ease-in infinite;
-        }
-        @keyframes true-blood-drop {
-            0% { height: 0px; transform: translate(-50%, 0); opacity: 1; }
-            15% { height: 14px; transform: translate(-50%, 0); opacity: 1; }
-            40% { height: 4px; transform: translate(-50%, 18px); opacity: 0; }
-            100% { height: 0px; transform: translate(-50%, 18px); opacity: 0; }
-        }
-
-        /* =======================================================
-           BUSHIDO FULLSCREEN OVERLAY
-           ======================================================= */
-        .bushido-fs-overlay { position: fixed; inset: 0; background: #000; z-index: 999999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 1s ease; overflow: hidden; }
-        .bushido-fs-overlay.active { opacity: 1; pointer-events: auto; }
-        
-        /* Hiệu ứng 3 nền slide chớp chéo */
-        .bushido-bg-slider { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-        .bg-slide { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; filter: brightness(0.3) grayscale(0.5); transition: opacity 2s ease; }
-        .bg-slide-1 { background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/Bushido%201.png?raw=true'); opacity: 1; }
-        .bg-slide-2 { background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/Bushido%202.png?raw=true'); }
-        .bg-slide-3 { background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/Bushido%203.png?raw=true'); }
-
-        .bushido-fs-overlay.awakened .bg-slide-1 { animation: slideFade1 36s infinite; }
-        .bushido-fs-overlay.awakened .bg-slide-2 { animation: slideFade2 36s infinite; }
-        .bushido-fs-overlay.awakened .bg-slide-3 { animation: slideFade3 36s infinite; }
-
-        @keyframes slideFade1 { 0%, 26% { opacity: 1; } 33%, 93% { opacity: 0; } 100% { opacity: 1; } }
-        @keyframes slideFade2 { 0%, 26%, 100% { opacity: 0; } 33%, 60% { opacity: 1; } 66% { opacity: 0; } }
-        @keyframes slideFade3 { 0%, 60% { opacity: 0; } 66%, 93% { opacity: 1; } 100% { opacity: 0; } }
-
-        .slogan-container-fs { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 4; transition: opacity 0.5s; }
-        .slogan-vi-fs { font-family: var(--font-content); font-size: 22px; font-style: italic; color: rgba(255,255,255,0.8); letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,255,255,0.3); white-space: nowrap; }
-
-        /* Lớp sương mù mờ dần ở 2/3 trên */
-        .fade-mask-fs { 
-            position: absolute; inset: 0; 
-            -webkit-mask-image: linear-gradient(to bottom, transparent 10%, black 25%, black 75%, transparent 95%); 
-            z-index: 5; opacity: 0; pointer-events: none; overflow: hidden; display: block; 
+        function openBushidoFullscreen() { 
+            playBeep(); 
+            document.getElementById('rank-overlay').classList.remove('active'); 
+            document.getElementById('bushido-fullscreen').classList.add('active'); 
         }
         
-        /* Trục trôi của chữ */
-        .scrolling-wrapper { 
-            position: absolute; inset: 0; width: 90%; max-width: 500px; 
-            margin: 0 auto; overflow: hidden;
-        }
-        .scroll-track { display: flex; flex-direction: column; }
-        .scroll-block { 
-            display: flex; flex-direction: column; gap: 50px; 
-            padding-top: 100vh; /* Bắt buộc để chữ xuất phát từ tận đáy dưới màn hình */
-        }
-        
-        .bushido-fs-overlay.awakened .fade-mask-fs { opacity: 1; }
-        .bushido-fs-overlay.awakened .scroll-track { animation: scrollLoopPerfect 50s linear infinite; }
-        @keyframes scrollLoopPerfect { 
-            0% { transform: translateY(0); } 
-            100% { transform: translateY(-50%); } 
-        }
-
-        /* Chữ Bushido Ánh Kim Sang Trọng (Font Great Vibes) */
-        .blood-title-fs { 
-            text-align: center; font-family: var(--font-sign); font-size: 64px; 
-            color: transparent; 
-            background: linear-gradient(120deg, #b0bec5 0%, #ffffff 40%, #e0e0e0 50%, #ffffff 60%, #b0bec5 100%);
-            background-size: 200% auto; -webkit-background-clip: text;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.1); 
-            text-transform: capitalize; animation: katana-shine 3s linear infinite;
-        }
-        @keyframes katana-shine { to { background-position: 200% center; } }
-
-        /* Tiêu đề phần giãn cách không rớt dòng */
-        .blood-stanza-fs { text-align: center; }
-        .zen-title { 
-            font-family: var(--font-content); font-size: 16px; font-style: italic; 
-            letter-spacing: 3px; color: rgba(255,42,42,0.9); margin-bottom: 12px; 
-            text-shadow: 0 0 5px rgba(255,42,42,0.4); 
-            white-space: nowrap; text-align: center; text-transform: uppercase; 
-        }
-        .blood-stanza-fs .vi { font-family: var(--font-content); font-size: 16px; color: rgba(255,255,255,0.8); line-height: 1.7; text-align: justify; padding: 0 20px; }
-        .btn-exit-fs { position: absolute; top: 25px; right: 25px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); padding: 10px 18px; font-family: var(--font-display); font-size: 11px; z-index: 10; cursor: pointer; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); text-transform: uppercase;}
-
-        /* KHUNG XEM ẢNH FULLSCREEN */
-        .img-viewer { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); z-index: 9999999; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .img-viewer.active { display: flex; }
-        .img-viewer img { max-width: 90vw; max-height: 70vh; border: 2px solid var(--cyan); box-shadow: 0 0 30px rgba(0, 229, 255, 0.3); border-radius: 8px; object-fit: contain; }
-        .btn-close-img { margin-bottom: 20px; padding: 12px 24px; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--cyan); color: var(--cyan); font-family: var(--font-display); font-size: 14px; font-weight: bold; letter-spacing: 2px; cursor: pointer; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); transition: all 0.3s ease; text-transform: uppercase;}
-        .btn-close-img:active { transform: scale(0.95); background: var(--cyan); color: #000; }
-
-        /* FORM NHẬP DỮ LIỆU SINH TRẮC LÕI */
-        #onboarding-popup { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; backdrop-filter: blur(12px); }
-        #onboarding-popup.active { opacity: 1; pointer-events: auto; }
-        .cyber-led-wrapper { position: relative; padding: 1px; overflow: hidden; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
-        .cyber-led-wrapper::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, transparent, transparent, rgba(255,255,255,0.3)); animation: spin-led 4s linear infinite; }
-        @keyframes spin-led { 100% { transform: rotate(360deg); } }
-        .ob-box { width: 90vw; max-width: 360px; background: rgba(10, 15, 25, 0.95); padding: 30px 25px; text-align: center; position: relative; z-index: 1; min-height: 380px; display: flex; flex-direction: column; justify-content: center; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
-        .ob-title { font-family: var(--font-display); color: #fff; font-size: 16px; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase;}
-        .ob-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255,255,255,0.03); padding: 8px 15px; border: 1px solid rgba(255,255,255,0.05); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
-        .ob-label { font-family: var(--font-terminal); color: rgba(255,255,255,0.6); font-size: 11px; text-transform: uppercase;}
-        .cyber-select { background: transparent; border: none; color: #fff; font-family: var(--font-display); font-size: 18px; text-align: right; width: 100px; outline: none; appearance: none; }
-        .cyber-select option { background: var(--bg-obsidian); color: #fff; }
-        .ob-btn { margin-top: auto; padding: 14px; font-family: var(--font-display); font-size: 12px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); text-transform: uppercase;}
-        .fusion-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 25px; }
-        .fusion-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px 5px; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
-        .fb-lbl { font-family: var(--font-terminal); font-size: 9px; color: rgba(255,255,255,0.5); text-transform: uppercase;}
-        .fb-val { font-family: var(--font-display); font-size: 20px; color: #fff; }
-        
-        /* =======================================================
-           HỘP THẺ CHIẾN ĐẤU (CARD VAULT) & MÃ ẤN QUYẾT (J.A.R.V.I.S x Miyamoto)
-           ======================================================= */
-        
-        /* POPUP MÃ ẤN QUYẾT THE LEGEND */
-        .passcode-container { width: 85%; max-width: 320px; background: rgba(5, 8, 15, 0.6); padding: 40px 25px; border: 1px solid rgba(255,170,0,0.2); border-radius: 12px; text-align: center; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.8); backdrop-filter: blur(15px); }
-        .passcode-title { font-family: var(--font-content); font-size: 28px; font-style: italic; color: var(--amber); text-shadow: 0 0 15px rgba(255,170,0,0.6); margin-bottom: 25px; font-weight: 500; letter-spacing: 2px; }
-        .cyber-input { background: transparent; border: none; border-bottom: 2px solid rgba(255,170,0,0.5); color: var(--amber); font-family: var(--font-terminal); font-size: 32px; text-align: center; width: 160px; padding: 5px; margin: 0 auto 20px; display: block; letter-spacing: 15px; outline: none; transition: border-color 0.3s, text-shadow 0.3s; }
-        .cyber-input:focus { border-bottom-color: var(--amber); text-shadow: 0 0 10px var(--amber); }
-        .cyber-input::placeholder { color: rgba(255,170,0,0.2); letter-spacing: 15px; }
-        .passcode-warning { font-family: var(--font-terminal); font-size: 11px; color: rgba(255,255,255,0.6); letter-spacing: 1px; transition: color 0.3s; }
-
-        /* KHO THẺ CHIẾN ĐẤU */
-        .vault-container { width: 92%; max-width: 400px; background: rgba(10, 15, 25, 0.95); padding: 25px 20px; border: 1px solid rgba(255,170,0,0.3); border-radius: 8px; box-shadow: 0 15px 40px rgba(0,0,0,0.8); display: flex; flex-direction: column; gap: 15px; position: relative; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
-        .vault-header { font-family: var(--font-display); font-size: 16px; color: var(--amber); text-align: center; letter-spacing: 3px; border-bottom: 1px solid rgba(255,170,0,0.2); padding-bottom: 10px; text-transform: uppercase;}
-        
-        .vault-card { position: relative; display: flex; align-items: center; padding: 12px 15px; border-radius: 6px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; cursor: pointer; transition: transform 0.2s; user-select: none; }
-        .vault-card:active:not(.locked) { transform: scale(0.98); }
-        
-        /* Thẻ Gold (Vô Địch Thế Giới) */
-        .gold-card { flex-direction: column; text-align: center; padding: 20px; border-color: rgba(255, 215, 0, 0.6); background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.15)); margin-bottom: 10px; }
-        .gold-card:not(.locked) { animation: pulse-gold 2s infinite alternate; }
-        @keyframes pulse-gold { 0% { box-shadow: 0 0 10px rgba(255,215,0,0.2), inset 0 0 15px rgba(255,215,0,0.1); } 100% { box-shadow: 0 0 25px rgba(255,215,0,0.6), inset 0 0 20px rgba(255,215,0,0.3); } }
-        .gold-card .card-icon { font-size: 36px; filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)); margin-bottom: 5px; }
-        .gold-card .card-title { font-family: var(--font-content); font-style: italic; font-size: 22px; color: #ffd700; font-weight: 600; letter-spacing: 2px; }
-        .gold-card .card-desc { font-family: var(--font-display); font-size: 9px; color: rgba(255,255,255,0.7); letter-spacing: 2px; text-transform: uppercase; margin-top: 5px; }
-        
-        /* Kho Thực chiến */
-        .vault-arsenal { display: flex; flex-direction: column; gap: 10px; }
-        .card-icon { font-size: 20px; margin-right: 15px; z-index: 2;}
-        .card-info { flex-grow: 1; z-index: 2;}
-        .card-name { font-family: var(--font-display); font-size: 12px; color: #fff; letter-spacing: 1px; font-weight: 500;}
-        .card-count { font-family: var(--font-terminal); font-size: 9px; color: rgba(255,255,255,0.5); margin-top: 3px; }
-        
-        /* Hiệu ứng Glow cho Thẻ Đạt Yêu Cầu */
-        .s-card { border-color: var(--violet); }
-        .a-card { border-color: var(--amber); }
-        .c-card { border-color: var(--cyan); }
-        
-        .vault-card:not(.locked).s-card { animation: pulse-card-s 2s infinite alternate; }
-        .vault-card:not(.locked).a-card { animation: pulse-card-a 2s infinite alternate; }
-        .vault-card:not(.locked).c-card { animation: pulse-card-c 2s infinite alternate; }
-        
-        @keyframes pulse-card-s { 0% { box-shadow: 0 0 5px rgba(176,38,255,0.2); } 100% { box-shadow: 0 0 20px rgba(176,38,255,0.6); } }
-        @keyframes pulse-card-a { 0% { box-shadow: 0 0 5px rgba(255,170,0,0.2); } 100% { box-shadow: 0 0 20px rgba(255,170,0,0.6); } }
-        @keyframes pulse-card-c { 0% { box-shadow: 0 0 5px rgba(0,229,255,0.2); } 100% { box-shadow: 0 0 20px rgba(0,229,255,0.6); } }
-        
-        /* Thanh progress khi Hold to draw */
-        .draw-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; z-index: 1; transition: none; }
-        .s-card .draw-progress { background: rgba(176, 38, 255, 0.3); }
-        .a-card .draw-progress { background: rgba(255, 170, 0, 0.3); }
-        .c-card .draw-progress { background: rgba(0, 229, 255, 0.3); }
-        
-        /* THẺ CHƯA ĐẠT YÊU CẦU (LOCKED) */
-        .vault-card.locked { border-color: rgba(255,255,255,0.1) !important; cursor: pointer; box-shadow: none !important; animation: none !important; }
-        .vault-card.locked .card-icon, .vault-card.locked .card-info, .vault-card.locked .card-title, .vault-card.locked .card-desc { opacity: 0.3; filter: grayscale(1); }
-        
-        /* Lớp màng chớp đỏ khi ấn vào thẻ bị khóa */
-        .card-lock-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 10; display: none; justify-content: center; align-items: center; font-family: var(--font-terminal); font-size: 12px; font-weight: bold; color: var(--crimson); text-shadow: 0 0 10px var(--crimson); text-align: center; padding: 10px; border: 2px solid var(--crimson); box-shadow: inset 0 0 15px rgba(255,42,42,0.3); flex-direction: column; line-height: 1.5; letter-spacing: 1.5px; border-radius: 6px; }
-    </style>
-</head>
-<body>
-
-    <!-- LỒNG GIAM VỆ TINH BOO (ĐƯA RA NGOÀI ĐỂ HIỂN THỊ TỪ TRẠM 0) -->
-    <div id="boo-cage">
-        <div id="floating-boo" class="floating-boo" onclick="handleBooClick()">
-            <span class="boo-icon-inner" id="boo-mascot">🐽</span>
-        </div>
-    </div>
-
-    <!-- MÀN HÌNH CHỜ TRẠM 0 (ĐỊA LUÂN) -->
-    <div id="intro-layer">
-        <div class="gatekeeper-wrapper">
-            <button class="gatekeeper-btn" onclick="enterCore()" id="gatekeeper-btn">KÍCH HOẠT: ĐỊA LUÂN</button>
-        </div>
-    </div>
-
-    <!-- MÀN HÌNH NGHI THỨC KHỞI ĐỘNG BẰNG VIDEO NĂNG LƯỢNG -->
-    <div id="ritual-layer">
-        <video id="ritual-video" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/BOO%20DIA%20LUAN%20OKLA.mp4" preload="auto" playsinline></video>
-        <button class="btn-skip-ritual" onclick="endRitual()">>> BỎ QUA</button>
-    </div>
-
-    <!-- MAIN APP LÕI -->
-    <div class="tactical-grid-bg"><div class="grid-plane"></div></div>
-    <div class="particle-matrix" id="particle-matrix"></div>
-    <div class="vignette"></div>
-    <div class="edge-lighting" id="edge-lighting"></div>
-
-    <div class="pwa-container" id="main-pwa" style="display: none;">
-        
-        <div class="top-row">
-            <div class="left-controls">
-                <a href="index.html" class="btn-exit" onclick="playBeep()">ESC</a>
-                <button class="btn-audio" id="btn-audio" onclick="toggleBGM(event)">
-                    <svg id="icon-sound-on" viewBox="0 0 24 24" style="display:none;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                    <svg id="icon-sound-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.11-.31 2.15-.81 3.09-1.45l2.64 2.64 1.27-1.27L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
-                </button>
-                
-                <!-- NÚT CỔNG TORII KHO THẺ -->
-                <button class="btn-chip" id="btn-vault" style="display: none;" onclick="openPasscode()" title="Kho Thẻ">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" style="width: 16px; height: 16px; filter: drop-shadow(0 0 3px currentColor);">
-                        <path d="M3 6h18 M5 6v16 M19 6v16 M4 10h16 M12 6v4" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="sys-info">
-                OPR: <span id="opr-name">KAI</span><br> LOC: <span id="loc-name">HANOI</span><br> DATE: <span id="current-date">--.--.----</span>
-                <div class="ctrl-group">
-                    <div class="streak-box" id="streak-box" onclick="playBeep(); toggleRankMenu()">ĐANG TẢI DỮ LIỆU...</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="banner-wrapper">
-            <div class="status-banner" id="status-banner">Standby Mode</div>
-            <a href="#" class="combat-marquee-box" id="combat-marquee">
-                <div class="mq-icon-fixed" id="mq-icon">📡</div>
-                <div class="mq-text-container">
-                    <span class="marquee-text" id="marquee-text">ĐANG KẾT NỐI VỚI LÕI SCI - CHỜ LỆNH HỆ THỐNG...</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="core-wrapper">
-            <div class="shockwave" id="shockwave"></div>
-            <div class="arc-reactor">
-                <svg class="ring-svg" viewBox="0 0 340 340">
-                    <g class="orb-group orb-ccw orb-move"><circle class="ring ring-move" cx="170" cy="170" r="125" /><circle class="plasma-node" cx="170" cy="45" r="3.5" /></g>
-                    <g class="orb-group orb-cw orb-rec"><circle class="ring ring-rec" cx="170" cy="170" r="105" /><circle class="plasma-node" cx="170" cy="65" r="4" /></g>
-                    <g class="orb-group orb-ccw orb-phys"><circle class="ring ring-phys" cx="170" cy="170" r="85" /><circle class="plasma-node" cx="170" cy="85" r="4.5" /></g>
-                    <g class="orb-group orb-cw orb-hr"><circle class="ring ring-hr" cx="170" cy="170" r="65" /><circle class="plasma-node" cx="170" cy="105" r="5" /></g>
-                </svg>
-                <div class="sci-nexus" id="trigger-combat" onclick="triggerBioSync()" title="Khởi động Kết Nối">
-                    <div class="fingerprint-wrapper" id="fp-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                          <path d="M18.9 7a8 8 0 0 1 1.1 5v1a6 6 0 0 0 .8 3" />
-                          <path d="M8 11a4 4 0 0 1 8 0v1a10 10 0 0 0 2 6" />
-                          <path d="M12 11v2a14 14 0 0 0 2.5 8" />
-                          <path d="M8 15a18 18 0 0 0 1.8 6" />
-                          <path d="M4.9 19a22 22 0 0 1 -.9 -7v-1a8 8 0 0 1 12 -6.95" />
-                        </svg>
-                        <div class="fp-scanner-line"></div>
-                    </div>
-                    <div class="sci-val" id="val-sci">---</div>
-                    <div class="sci-lbl">SCI AVG</div>
-                </div>
-            </div>
-
-            <div id="safety-lock-hud" class="safety-hud-box">
-                <div class="hud-cond"><span class="prefix">_ YÊU CẦU ĐỒNG BỘ:</span> <span class="device">SMARTWATCH.</span></div>
-                <div class="hud-cond"><span class="prefix">_ YÊU CẦU ĐỒNG BỘ:</span> <span class="device">SMART SCALE.</span></div>
-                <div class="safety-lock-btn" onclick="unlockPreScan()">THIẾT LẬP KẾT NỐI</div>
-            </div>
-
-            <div class="data-panel pos-hr" onclick="openHolo('hr')"><div class="dp-val blinking" id="val-hr">---</div><div class="dp-lbl">HR (BPM)</div></div>
-            <div class="data-panel pos-phys1" onclick="openHolo('weight')"><div class="dp-val blinking" id="val-weight">---</div><div class="dp-lbl">WEIGHT (KG)</div></div>
-            <div class="data-panel pos-rec1" onclick="openHolo('sleep')"><div class="dp-val blinking" id="val-sleep">---</div><div class="dp-lbl">SLEEP (HRS)</div></div>
-            <div class="data-panel dp-right pos-phys2" onclick="openHolo('fat')"><div class="dp-val blinking" id="val-fat">---</div><div class="dp-lbl">FAT (%)</div></div>
-            <div class="data-panel dp-right pos-rec2" onclick="openHolo('water')"><div class="dp-val blinking" id="val-water">---</div><div class="dp-lbl">H2O (%)</div></div>
-            <div class="data-panel dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val blinking" id="val-steps">---</div><div class="dp-lbl">STEPS</div></div>
-        </div>
-
-        <div class="live-radar-bar" id="live-radar-bar">
-            <span class="live-pulse" id="live-pulse">🟢 ALERT</span>
-            <span class="live-metrics" id="live-metrics"></span>
-        </div>
-
-        <div class="terminal-panel">
-            <div class="terminal-header" id="term-head" onclick="playBooReport()">BOO: PHÂN TÍCH CHIẾN THUẬT</div>
-            <div class="typewriter" id="ai-text"></div><span class="cursor"></span>
-        </div>
-    </div>
-
-    <!-- HOLOGRAM POPUPS -->
-    <div class="holo-popup" id="holo-popup" onclick="closeHolo(event)"><div class="holo-box" id="holo-box">
-        <div class="holo-title" id="holo-title">NAME</div>
-        <div class="holo-desc" id="holo-desc">Nội dung...</div>
-        <button class="btn-close-holo" id="btn-close-holo" onclick="playBeep(); closeHoloDirect()">XÁC NHẬN</button>
-    </div></div>
-    
-    <!-- POPUP MÃ ẤN QUYẾT KHO THẺ -->
-    <div id="passcode-popup" class="holo-popup" onclick="closePasscode(event)">
-        <div class="passcode-container" id="passcode-box" onclick="event.stopPropagation()">
-            <div class="passcode-title">Mã Ấn Quyết</div>
-            <input type="password" id="vault-pin" class="cyber-input" maxlength="4" placeholder="••••" oninput="checkPin()">
-            <div class="passcode-warning" id="pin-warning">>_ Yêu cầu mã bảo mật cấp cao.</div>
-        </div>
-    </div>
-
-    <!-- HỘP LƯU TRỮ THẺ (CARD VAULT) -->
-    <div id="vault-popup" class="holo-popup" onclick="closeVault(event)">
-        <div class="vault-container" id="vault-box" onclick="event.stopPropagation()">
-            <div class="vault-header">KHO THẺ CHIẾN ĐẤU</div>
+        function closeBushidoFullscreen(e) { 
+            e.stopPropagation(); 
+            playBeep(); 
+            isBushidoActive = false; 
             
-            <!-- GOLD CARD -->
-            <div class="vault-card gold-card" id="card-gold" onclick="clickGold()">
-                <div class="card-icon">🏆</div>
-                <div class="card-title">Thẻ Gold</div>
-                <div class="card-desc">GIẢI VÔ ĐỊCH THẾ GIỚI</div>
-                <div class="card-lock-overlay" id="lock-gold" style="border-color: #ffd700; color: #ffd700; text-shadow: 0 0 10px #ffd700; box-shadow: inset 0 0 20px rgba(255,215,0,0.3);"></div>
-            </div>
-
-            <div class="vault-arsenal">
-                <!-- THẺ S -->
-                <div class="vault-card s-card hold-to-draw" data-card="S" id="card-s" onmousedown="startDraw(event, 'S')" onmouseup="cancelDraw()" onmouseleave="cancelDraw()" ontouchstart="startDraw(event, 'S')" ontouchend="cancelDraw()">
-                    <div class="card-icon">🎴</div>
-                    <div class="card-info">
-                        <div class="card-name">THẺ ĐẶC QUYỀN S</div>
-                        <div class="card-count" id="count-s">Đã xuất: 0</div>
-                    </div>
-                    <div class="draw-progress" id="prog-s"></div>
-                    <div class="card-lock-overlay" id="lock-s"></div>
-                </div>
-
-                <!-- THẺ A -->
-                <div class="vault-card a-card hold-to-draw" data-card="A" id="card-a" onmousedown="startDraw(event, 'A')" onmouseup="cancelDraw()" onmouseleave="cancelDraw()" ontouchstart="startDraw(event, 'A')" ontouchend="cancelDraw()">
-                    <div class="card-icon">💳</div>
-                    <div class="card-info">
-                        <div class="card-name">THẺ CHIẾN THUẬT A</div>
-                        <div class="card-count" id="count-a">Đã xuất: 0</div>
-                    </div>
-                    <div class="draw-progress" id="prog-a"></div>
-                    <div class="card-lock-overlay" id="lock-a"></div>
-                </div>
-
-                <!-- THẺ C -->
-                <div class="vault-card c-card hold-to-draw" data-card="C" id="card-c" onmousedown="startDraw(event, 'C')" onmouseup="cancelDraw()" onmouseleave="cancelDraw()" ontouchstart="startDraw(event, 'C')" ontouchend="cancelDraw()">
-                    <div class="card-icon">🏷️</div>
-                    <div class="card-info">
-                        <div class="card-name">THẺ DUY TRÌ C</div>
-                        <div class="card-count" id="count-c">Đã xuất: 0</div>
-                    </div>
-                    <div class="draw-progress" id="prog-c"></div>
-                    <div class="card-lock-overlay" id="lock-c"></div>
-                </div>
-            </div>
-            <button class="btn-close-holo" style="margin-top: 15px;" onclick="closeVault(event, true)">ĐÓNG KHO</button>
-        </div>
-    </div>
-
-    <!-- BÍ LỤC: TIẾN HÓA -->
-    <div class="rank-overlay" id="rank-overlay">
-        <div class="rank-header">
-            <h2>BÍ LỤC: TIẾN HÓA</h2>
-            <button class="btn-exit" style="background:transparent; border:none; color: rgba(255,255,255,0.5); padding: 0;" onclick="playBeep(); toggleRankMenu()">ĐÓNG</button>
-        </div>
-        
-        <div class="tier-list">
-            <!-- PACT -->
-            <div class="tier-item">
-                <button class="tier-btn tier-tri" onclick="toggleTier('mod6', this)">
-                    <div><span class="tier-prefix">Pact :</span> <span class="tier-name">Khế ước 1000 ngày (Tận tâm)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="mod6">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8);">ĐỊNH DANH HỆ THỐNG: K DRIVE</div>
-                        <button class="btn-play-lore" onclick="readLore('mod6', event)">🐽</button>
-                    </div>
-                    <p>• <strong>1. Tận tâm dung hợp K-Drive:</strong> Không phải ứng dụng thông thường. Cổng kết nối trực tiếp cơ thể sinh học với lõi AI Boo 24/7. Mục tiêu thanh tẩy và rèn luyện bạn thành vận động viên thể thao chuyên nghiệp, hướng tới tấm vé Gold và giải vô địch thế giới.</p>
-                    <p>• <strong>2. Tận tâm bảo toàn SCI:</strong> Dữ liệu sinh tồn ánh xạ từ thể chất, nhận thức và thi đấu. Cảm biến sinh học phải luôn kết nối hoàn hảo. SCI là chỉ số trung bình bền bỉ; biến động ngắn hạn có thể xảy ra, nhưng SCI tuyệt đối không được phép sụp đổ.</p>
-                    <p>• <strong>3. Tận tâm phục tùng A.I BOO:</strong> Thực thể giám sát lộ trình độc quyền dựa trên triết lý Ngũ Luân Thư. Ngừng tự suy diễn. Kỷ luật là phục tùng dữ liệu tuyệt đối.</p>
-                    <p>• <strong>4. Tận tâm thực thi luật sinh tử:</strong> Đếm ngược 1000 ngày chỉ kích hoạt khi SCI đạt ngưỡng Vô Ngã. Một lần đánh mất kỷ luật = <strong>Reset về số không.</strong> Mọi nỗ lực bị nghiền nát.</p>
-                </div>
-            </div>
-
-            <!-- TIER 1 -->
-            <div class="tier-item">
-                <button class="tier-btn tier-shiro" onclick="toggleTier('tier1', this)">
-                    <div><span class="tier-prefix">Tier 1 :</span> <span class="tier-name">Chiến binh (Can đảm)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="tier1">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="color: rgba(255, 42, 42, 0.8); border-color: rgba(255, 42, 42, 0.4);">QUẢN TRỊ KỶ LUẬT: ĐÌNH CHỈ</div>
-                        <button class="btn-play-lore" onclick="readLore('tier1', event)">🐽</button>
-                    </div>
-                    <p>• <strong>Can đảm đối diện chỉ số SCI:</strong> Dưới 50.</p>
-                    <p>• <strong>Can đảm thừa nhận trạng thái:</strong> Thân xác rệu rã, phản xạ chậm nhịp.</p>
-                    <p>• <strong>Can đảm chấp nhận lệnh hệ thống:</strong> Tước quyền thi đấu. Cấm tuyệt đối việc tham gia các giải đấu lớn. Khóa kho thẻ chiến đấu.</p>
-                    <p>• <strong>Can đảm thực thi giao thức phục hồi (6/6):</strong> Nhịp tim chạm ngưỡng vận động mạnh. Vận động đủ bước. Ngủ đủ giấc. Kiểm soát cân nặng. Tỷ lệ mỡ tiêu chuẩn. Đảm bảo lượng nước.</p>
-                    <p>• <strong>Can đảm khắc ghi:</strong> Động lực là rác rưởi, kỷ luật cơ học là vũ khí.</p>
-                </div>
-            </div>
-
-            <!-- TIER 2 -->
-            <div class="tier-item">
-                <button class="tier-btn tier-chairo" onclick="toggleTier('tier2', this)">
-                    <div><span class="tier-prefix">Tier 2 :</span> <span class="tier-name">Tinh anh (Công lý)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="tier2">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="color: rgba(255, 170, 0, 0.8); border-color: rgba(255, 170, 0, 0.4);">QUẢN TRỊ KỶ LUẬT: TIÊU CHUẨN</div>
-                        <button class="btn-play-lore" onclick="readLore('tier2', event)">🐽</button>
-                    </div>
-                    <p>• <strong>Công lý đánh giá chỉ số SCI:</strong> Từ 50 đến 84.</p>
-                    <p>• <strong>Công lý duy trì trạng thái:</strong> Lớp vỏ thần kinh và dòng năng lượng ổn định.</p>
-                    <p>• <strong>Công lý thực thi lệnh hệ thống:</strong> Cấp Thẻ C hoặc Thẻ A.</p>
-                    <p>• <strong>Công lý kiểm soát giao thức duy trì:</strong> Đánh giải vừa tầm, bảo toàn chiến thắng và duy trì nhịp độ cơ thể ở mức tiêu chuẩn.</p>
-                    <p>• <strong>Công lý ghi chú:</strong> Kiên nhẫn tích lũy đạn dược, tuyệt đối không nóng vội đốt cháy giai đoạn.</p>
-                </div>
-            </div>
-
-            <!-- TIER 3 -->
-            <div class="tier-item">
-                <button class="tier-btn tier-kuro" onclick="toggleTier('tier3', this)">
-                    <div><span class="tier-prefix">Tier 3 :</span> <span class="tier-name">Vô ngã (Danh dự)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="tier3">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="color: rgba(176, 38, 255, 0.8); border-color: rgba(176, 38, 255, 0.4);">QUẢN TRỊ KỶ LUẬT: TỐI THƯỢNG</div>
-                        <button class="btn-play-lore" onclick="readLore('tier3', event)">🐽</button>
-                    </div>
-                    <p>• <strong>Danh dự bảo toàn chỉ số SCI:</strong> Từ 85 trở lên.</p>
-                    <p>• <strong>Danh dự đạt trạng thái:</strong> Vô Ngã (Mushin) - Lớp vỏ Myelin tối ưu. Phản xạ sắc bén hoàn hảo.</p>
-                    <p>• <strong>Danh dự kích hoạt lệnh hệ thống:</strong> Cấp đặc quyền Thẻ S để tham gia các giải đấu cấp cao.</p>
-                    <p>• <strong>Danh dự chinh phục đỉnh cao tối thượng:</strong> Duy trì sự bất bại và kỷ luật sắt đá suốt 1000 ngày Mushin liên tục. Phá vỡ giới hạn hệ thống để nhận <strong>Thẻ Gold Huyền Thoại</strong> — Giấy thông hành bước ra giải vô địch thế giới.</p>
-                    <p>• <strong>Danh dự ghi chú:</strong> Kỷ luật tạo nên tự do. Một lần buông thả = Reset về số không. Giữ vững cái đầu lạnh để chạm tay vào vinh quang tối cao.</p>
-                </div>
-            </div>
-
-            <!-- REGEN -->
-            <div class="tier-item">
-                <button class="tier-btn tier-void" onclick="toggleTier('mod4', this)">
-                    <div><span class="tier-prefix">Regen :</span> <span class="tier-name">Giao thức xả tải (Nhân từ)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="mod4">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="color: rgba(0, 229, 255, 0.8); border-color: rgba(0, 229, 255, 0.4);">GIAO THỨC CHỦ NHẬT: TẮT NGUỒN TOÀN DIỆN</div>
-                        <button class="btn-play-lore" onclick="readLore('mod4', event)">🐽</button>
-                    </div>
-                    <p>• <strong>Nhân từ định đoạt chu kỳ kích hoạt:</strong> Chủ Nhật hàng tuần.</p>
-                    <p>• <strong>Nhân từ chấp nhận trạng thái:</strong> Tắt nguồn hoàn toàn (Zero Poker).</p>
-                    <p>• <strong>Nhân từ ban hành lệnh hệ thống (Xả tải):</strong> Gỡ bỏ giới hạn nhịp tim và bước chân. Cơ thể hạ nhiệt, chữa lành sợi cơ.</p>
-                    <p>• <strong>Nhân từ thiết lập giao thức tâm trí:</strong> Khóa toàn bộ Thẻ chiến đấu. Bắt buộc xem một bộ phim để xả rỗng nơ-ron thần kinh.</p>
-                    <p>• <strong>Nhân từ bảo vệ luật cứng:</strong> Giấc ngủ vẫn là Thánh địa bất khả xâm phạm.</p>
-                </div>
-            </div>
+            try { bushidoAudio.pause(); bushidoAudio.currentTime = 0; } catch(e){}
             
-            <!-- CORE -->
-            <div class="tier-item">
-                <button class="tier-btn tier-core" onclick="toggleTier('mod0', this)">
-                    <div><span class="tier-prefix">Core :</span> <span class="tier-name">Hồ sơTôi không được lập trình để làm điều đó.
+            document.getElementById('bushido-fullscreen').classList.remove('active', 'awakened'); 
+            document.getElementById('fs-slogan-container').style.opacity = '1'; 
+            document.getElementById('rank-overlay').classList.add('active'); 
+        }
+        
+        function activateBushidoMode(e) { 
+            if(e.target.className === 'btn-exit-fs') return; 
+            if (isBushidoActive) return; 
+            isBushidoActive = true; 
+            playSlashSound(); 
+            
+            try { bushidoAudio.play(); } catch(e){}
+            
+            document.getElementById('fs-slogan-container').style.opacity = '0'; 
+            document.getElementById('bushido-fullscreen').classList.add('awakened'); 
+        }
+
+        function openFullscreen(imgElement) { playBeep(); document.getElementById('viewer-img').src = imgElement.src; document.getElementById('img-viewer').classList.add('active'); }
+        function closeFullscreen() { playBeep(); document.getElementById('img-viewer').classList.remove('active'); }
+
+        /* =======================================================
+           LOGIC KHO THẺ & MÃ ẤN QUYẾT (CARD VAULT)
+           ======================================================= */
+        function openPasscode() {
+            playBeep();
+            document.getElementById('vault-pin').value = '';
+            let warning = document.getElementById('pin-warning');
+            warning.innerText = '>_ Yêu cầu mã bảo mật cấp cao.';
+            warning.style.color = 'rgba(255,255,255,0.6)';
+            document.getElementById('passcode-popup').classList.add('active');
+            setTimeout(() => document.getElementById('vault-pin').focus(), 100);
+        }
+        
+        function closePasscode(e) {
+            if(e && e.target !== document.getElementById('passcode-popup')) return;
+            document.getElementById('passcode-popup').classList.remove('active');
+            playBeep();
+        }
+
+        function checkPin() {
+            let pin = document.getElementById('vault-pin').value;
+            let warning = document.getElementById('pin-warning');
+            if(pin.length === 4) {
+                if(pin === window.kDriveData.currentOTP) {
+                    playFusionSound();
+                    warning.innerText = '>_ XÁC THỰC THÀNH CÔNG.';
+                    warning.style.color = 'var(--mint)';
+                    setTimeout(() => {
+                        document.getElementById('passcode-popup').classList.remove('active');
+                        openVaultReal();
+                    }, 500);
+                } else {
+                    playLockSound();
+                    warning.innerText = '>_ SAI MÃ. TỪ CHỐI TRUY CẬP.';
+                    warning.style.color = 'var(--crimson)';
+                    document.getElementById('vault-pin').value = '';
+                }
+            }
+        }
+
+        function openVaultReal() {
+            // Load số lần xuất thẻ
+            document.getElementById('count-s').innerText = `Đã xuất: ${localStorage.getItem('kdrive_card_s') || 0}`;
+            document.getElementById('count-a').innerText = `Đã xuất: ${localStorage.getItem('kdrive_card_a') || 0}`;
+            document.getElementById('count-c').innerText = `Đã xuất: ${localStorage.getItem('kdrive_card_c') || 0}`;
+            
+            // Xử lý Thẻ Gold đếm ngược
+            let startDateStr = localStorage.getItem('mushin_start_date'); 
+            let daysLeft = 999;
+            if(startDateStr) {
+                const today = new Date(); today.setHours(0,0,0,0);
+                const diffDays = Math.floor(Math.abs(today - new Date(startDateStr)) / (1000 * 60 * 60 * 24));
+                daysLeft = Math.max(1000 - diffDays, 0);
+            }
+            
+            let goldCard = document.getElementById('card-gold');
+            if(daysLeft <= 0) {
+                goldCard.classList.remove('locked');
+                goldCard.setAttribute('data-days', 0);
+            } else {
+                goldCard.classList.add('locked');
+                goldCard.setAttribute('data-days', daysLeft);
+            }
+
+            // Logic khóa thẻ thực chiến dựa trên điểm SCI
+            let sci = window.kDriveData.sciToday || 0;
+            
+            document.getElementById('card-c').classList.remove('locked');
+            document.getElementById('card-a').classList.remove('locked');
+            document.getElementById('card-s').classList.remove('locked');
+
+            if(sci < 50) {
+                document.getElementById('card-c').classList.add('locked');
+                document.getElementById('card-a').classList.add('locked');
+                document.getElementById('card-s').classList.add('locked');
+            } else if(sci < 70) {
+                document.getElementById('card-a').classList.add('locked');
+                document.getElementById('card-s').classList.add('locked');
+            } else if(sci < 85) {
+                document.getElementById('card-s').classList.add('locked');
+            }
+
+            document.getElementById('vault-popup').classList.add('active');
+        }
+
+        function closeVault(e, force=false) {
+            if(force || (e && e.target === document.getElementById('vault-popup'))) {
+                document.getElementById('vault-popup').classList.remove('active');
+                playBeep();
+            }
+        }
+
+        let drawTimer, drawStartTime=0, drawingCard=null;
+        
+        function clickGold() {
+            let card = document.getElementById('card-gold');
+            let days = card.getAttribute('data-days') || '999';
+            let overlay = document.getElementById('lock-gold');
+            
+            if(card.classList.contains('locked')) {
+                playLockSound();
+                overlay.innerHTML = `>_ TỪ CHỐI TRUY CẬP.<br>PHONG ẤN CÒN: ${days} NGÀY.`;
+                overlay.style.display = 'flex';
+                setTimeout(() => { overlay.style.display = 'none'; }, 2500);
+            } else {
+                playFusionSound();
+                overlay.innerHTML = `>_ ĐÃ XUẤT THẺ GOLD.<br>CHÚC BẠN VÔ ĐỊCH THẾ GIỚI!`;
+                overlay.style.color = '#fff';
+                overlay.style.display = 'flex';
+                setTimeout(() => { overlay.style.display = 'none'; closeVault(null, true); }, 3000);
+            }
+        }
+
+        function startDraw(e, cardType) {
+            e.preventDefault();
+            let cardEl = document.getElementById(`card-${cardType.toLowerCase()}`);
+            
+            if(cardEl.classList.contains('locked')) {
+                playLockSound();
+                let overlay = document.getElementById(`lock-${cardType.toLowerCase()}`);
+                if(overlay) {
+                    let req = "";
+                    if(cardType === 'C') req = "YÊU CẦU TIER 2 (SCI >= 50)";
+                    if(cardType === 'A') req = "YÊU CẦU TIER 2 BẬC CAO (SCI >= 70)";
+                    if(cardType === 'S') req = "YÊU CẦU TIER 3 (SCI >= 85)";
+                    overlay.innerHTML = `>_ TỪ CHỐI TRUY CẬP.<br>${req}`;
+                    overlay.style.display = 'flex';
+                    setTimeout(() => { overlay.style.display = 'none'; }, 2000);
+                }
+                return;
+            }
+            
+            drawingCard = cardType;
+            drawStartTime = Date.now();
+            playChargeSound();
+            if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
+            
+            let prog = document.getElementById(`prog-${cardType.toLowerCase()}`);
+            drawTimer = setInterval(() => {
+                let p = ((Date.now() - drawStartTime) / 2000) * 100;
+                if(p >= 100) {
+                    p = 100;
+                    completeDraw(cardType);
+                }
+                prog.style.width = p + '%';
+            }, 50);
+        }
+
+        function cancelDraw() {
+            if(!drawingCard) return;
+            clearInterval(drawTimer);
+            stopChargeSound();
+            if(navigator.vibrate) navigator.vibrate(0);
+            let prog = document.getElementById(`prog-${drawingCard.toLowerCase()}`);
+            if(prog) prog.style.width = '0%';
+            drawingCard = null;
+        }
+
+        function completeDraw(cardType) {
+            clearInterval(drawTimer);
+            stopChargeSound();
+            playSlashSound();
+            setTimeout(playBeep, 200);
+            if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+            
+            let prog = document.getElementById(`prog-${cardType.toLowerCase()}`);
+            if(prog) prog.style.width = '0%';
+            
+            // Lưu dữ liệu tích đếm xuất chiến
+            let key = `kdrive_card_${cardType.toLowerCase()}`;
+            let count = parseInt(localStorage.getItem(key)) || 0;
+            count++;
+            localStorage.setItem(key, count);
+            document.getElementById(`count-${cardType.toLowerCase()}`).innerText = `Đã xuất: ${count}`;
+            
+            // Cập nhật Marquee và đóng cửa Kho
+            document.getElementById('vault-popup').classList.remove('active');
+            const mqText = document.getElementById('marquee-text'); 
+            const box = document.getElementById('combat-marquee'); 
+            const icon = document.getElementById('mq-icon');
+            
+            box.style.borderColor = 'var(--neon-pink)'; 
+            box.style.background = 'rgba(255, 0, 255, 0.1)'; 
+            icon.innerHTML = '🔥'; 
+            icon.style.color = 'var(--neon-pink)'; 
+            mqText.innerHTML = `ĐÃ XUẤT THẺ ${cardType} - CHÚC VẬN ĐỘNG VIÊN BẢO TOÀN LÝ TRÍ`;
+            
+            drawingCard = null;
+        }
+
+    </script>
+</body>
+</html>
