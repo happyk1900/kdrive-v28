@@ -31,6 +31,15 @@
             display: flex; justify-content: center; align-items: center;
         }
 
+        /* LỒNG GIAM BOO & WIDGET (ĐƯA RA NGOÀI ĐỂ HIỂN THỊ TỪ TRẠM 0) */
+        #boo-cage { position: fixed; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; z-index: 999999; pointer-events: none; overflow: hidden; }
+        .floating-boo { position: absolute; top: 15%; right: 15px; width: 52px; height: 52px; background: rgba(10, 15, 25, 0.6); backdrop-filter: blur(8px); border: 1px solid var(--neon-pink); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(255, 0, 255, 0.2); cursor: pointer; animation: levitate 3s ease-in-out infinite; touch-action: none; transition: box-shadow 0.3s, border-color 0.3s; pointer-events: auto; }
+        .floating-boo.reading { animation: none; box-shadow: 0 0 30px var(--neon-pink); border-width: 2px; background: rgba(255, 0, 255, 0.15); }
+        .boo-icon-inner { font-size: 22px; filter: drop-shadow(0 0 5px rgba(255, 0, 255, 0.8)); display: inline-block; }
+        .floating-boo.reading .boo-icon-inner { animation: pig-speak 0.15s infinite alternate; filter: drop-shadow(0 0 15px var(--neon-pink)) brightness(1.5); }
+        @keyframes levitate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes pig-speak { 0% { transform: scale(1.1) rotate(-15deg); } 100% { transform: scale(1.3) rotate(15deg); } }
+
         /* LỚP INTRO TRẠM 0 (ĐỊA LUÂN) */
         #intro-layer { position: fixed; inset: 0; z-index: 100000; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/BOO%20DIA%20LUAN%20OK.png?raw=true') center/cover no-repeat; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 15%; transition: opacity 0.5s ease; overflow: hidden; background-position: center bottom; }
         #intro-layer::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 10%, rgba(0,0,0,0.85) 100%); pointer-events: none; }
@@ -52,15 +61,6 @@
         #ritual-video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         .btn-skip-ritual { position: absolute; bottom: 30px; right: 30px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); font-family: var(--font-display); font-size: 11px; letter-spacing: 2px; padding: 10px 15px; cursor: pointer; transition: all 0.3s; z-index: 90001; clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
         .btn-skip-ritual:active { color: #fff; background: rgba(255,255,255,0.1); }
-
-        /* LỒNG GIAM BOO & WIDGET */
-        #boo-cage { position: fixed; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; z-index: 999999; pointer-events: none; overflow: hidden; }
-        .floating-boo { position: absolute; top: 15%; right: 15px; width: 52px; height: 52px; background: rgba(10, 15, 25, 0.6); backdrop-filter: blur(8px); border: 1px solid var(--neon-pink); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(255, 0, 255, 0.2); cursor: pointer; animation: levitate 3s ease-in-out infinite; touch-action: none; transition: box-shadow 0.3s, border-color 0.3s; pointer-events: auto; }
-        .floating-boo.reading { animation: none; box-shadow: 0 0 30px var(--neon-pink); border-width: 2px; background: rgba(255, 0, 255, 0.15); }
-        .boo-icon-inner { font-size: 22px; filter: drop-shadow(0 0 5px rgba(255, 0, 255, 0.8)); display: inline-block; }
-        .floating-boo.reading .boo-icon-inner { animation: pig-speak 0.15s infinite alternate; filter: drop-shadow(0 0 15px var(--neon-pink)) brightness(1.5); }
-        @keyframes levitate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        @keyframes pig-speak { 0% { transform: scale(1.1) rotate(-15deg); } 100% { transform: scale(1.3) rotate(15deg); } }
 
         /* FULLSCREEN BACKGROUNDS (MAIN APP) */
         .tactical-grid-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-obsidian); z-index: 1; perspective: 600px; overflow: hidden; }
@@ -433,6 +433,13 @@
 </head>
 <body>
 
+    <!-- LỒNG GIAM VỆ TINH BOO (ĐƯA RA NGOÀI ĐỂ HIỂN THỊ TỪ TRẠM 0) -->
+    <div id="boo-cage">
+        <div id="floating-boo" class="floating-boo" onclick="handleBooClick()">
+            <span class="boo-icon-inner" id="boo-mascot">🐽</span>
+        </div>
+    </div>
+
     <!-- MÀN HÌNH CHỜ TRẠM 0 (ĐỊA LUÂN) -->
     <div id="intro-layer">
         <div class="gatekeeper-wrapper">
@@ -442,7 +449,7 @@
 
     <!-- MÀN HÌNH NGHI THỨC KHỞI ĐỘNG BẰNG VIDEO NĂNG LƯỢNG -->
     <div id="ritual-layer">
-        <video id="ritual-video" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/BOO%20DIA%20LUAN%20OK%20VIDEO.mp4" preload="auto" playsinline></video>
+        <video id="ritual-video" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/BOO%20DIA%20LUAN%20OKLA.mp4" preload="auto" playsinline></video>
         <button class="btn-skip-ritual" onclick="endRitual()">>> BỎ QUA</button>
     </div>
 
@@ -453,13 +460,6 @@
     <div class="edge-lighting" id="edge-lighting"></div>
 
     <div class="pwa-container" id="main-pwa" style="display: none;">
-        
-        <!-- LỒNG GIAM VỆ TINH BOO KHÔI PHỤC KÉO THẢ DẠO CHƠI TRONG KHUNG 420px -->
-        <div id="boo-cage">
-            <div id="floating-boo" class="floating-boo" onclick="handleBooClick()">
-                <span class="boo-icon-inner" id="boo-mascot">🐽</span>
-            </div>
-        </div>
         
         <div class="top-row">
             <div class="left-controls">
@@ -829,13 +829,15 @@
         // CÁC BIẾN TOÀN CỤC & TỪ ĐIỂN
         let appState = 0; // 0: Cổng Địa Luân, 1: Nghi thức Video, 2: Main App
         let idleInterval = null;
+        let idleTime = 0; 
+        let nextIdleTrigger = 7;
         let isSafetyUnlocked = false; 
         
         let roninAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20R%C5%8Dnin.mp3'); roninAudio.loop = true; roninAudio.volume = 0.5;
         let isMuted = true;
 
         const phoneticDict = { "SCI": "Éc-xi-ai", "K-Drive": "Cây-đờ-rai", "High Roller": "Hai Râu-lờ", "WSOP": "Đắp-liu ét âu pi", "Tilt": "Tiu", "Bankroll": "Banh-râu", "Zero Poker": "Di-rô Pâu-cơ", "A-Game": "Ây gêm", "ICM": "Ai xi em", "Meta-game": "Mê-ta gêm", "Range Reading": "Rên-giơ Rít-đinh", "Profiling": "Pờ-rô-fai-linh", "Stack": "Xì-tách", "Bad Beat": "Bát bít", "Aggression": "A-gờ-rét-sần" };
-        const introText = "Giao thức Địa Luân. Lớp học đầu tiên và cũng là nền tảng sinh tử. Trong hệ thống Ngũ Luân, đây là đạo trường đo lường giới hạn thể chất và sinh tồn Éc-xi-ai của ngươi. Đất rệu rã thì vạn vật sụp đổ. Đây cũng là nơi duy nhất để ngươi đóng ấn Khế ước một ngàn ngày. Sao thế? Bàn tay đang run à? Dữ liệu không biết nói dối, và lưỡi gươm này thì vô tình. Cân nhắc cho kỹ trước khi đặt tay vào Ấn ký. Nếu sợ hãi, hãy cất gươm và quay về làm một kẻ tầm thường. Còn nếu muốn bước lên đỉnh cao, thì ấn mạnh vào nút Kích hoạt kia cho ta!";
+        const introText = "Địa Luân là tinh hoa đầu tiên trong bộ Ngũ Luân Thư của sư phụ Miyamoto Musashi. Muốn chiến thắng đối thủ, ngươi phải chiến thắng chính bản thân mình và học cách đứng vững trên mặt đất. Hệ thống này sẽ lột trần mọi sự lười biếng của cái xác phàm kia. Dữ liệu nhịp tim và giấc ngủ của ngươi không biết nói dối đâu! Muốn vươn tới cảnh giới Vô ngã, thì hãy bắt đầu từ việc đổ mồ hôi đi. Bàn tay đang run à? Bấm kích hoạt ngay cho ta!";
 
         function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport); fixViewport();
@@ -934,25 +936,45 @@
             window.speechSynthesis.speak(u);
         }
 
-        // LẢI NHẢI VÔ HẠN 5 GIÂY (IDLE TIMER)
+        // BỘ ĐẾM THỜI GIAN NHẮC NHỞ LỀ MỀ (IDLE TIMER)
         function startIdleTimer() {
             clearInterval(idleInterval);
+            idleTime = 0;
+            nextIdleTrigger = 7;
             idleInterval = setInterval(() => {
-                if (window.speechSynthesis.speaking) return; 
-                
-                if (appState === 0) {
-                    triggerBooSpeech(introText, true);
-                } else if (appState === 2) {
-                    let isCommitted = localStorage.getItem('combat_committed') === 'true';
-                    if (!isCommitted) triggerBooSpeech("Mở Bí lục lên và giữ 3 giây ký lẹ cái khế ước cho ta nhờ!", true);
-                    else if (!isSafetyUnlocked) triggerBooSpeech("Tường lửa kích hoạt rồi kìa! Bấm xác nhận kết nối đồng hồ đi!", true);
-                    else if (!window.kDriveData.synced && !window.isScanning) triggerBooSpeech("Cấp quyền xong rồi thì nhấc ngón tay lên dí vào lõi trung tâm đi chứ!", true);
+                idleTime++;
+                if (idleTime >= nextIdleTrigger) {
+                    if (!window.speechSynthesis.speaking) {
+                        triggerIdleBoo();
+                    }
+                    nextIdleTrigger = idleTime + 45; // Lặp lại sau 45s
                 }
-            }, 5000);
+            }, 1000);
+        }
+
+        function triggerIdleBoo() {
+            if (appState === 0) {
+                triggerBooSpeech(introText, true);
+            } else if (appState === 2) {
+                let isCommitted = localStorage.getItem('combat_committed') === 'true';
+                if (!isCommitted) {
+                    let msgs = [
+                        "Đứng ngây ra nhìn màn hình tối thui làm gì? Mở Bí lục lên đọc khế ước và huyết thệ nhập môn đi!",
+                        "Mở Bí lục lên, huyết thệ vào khế ước, ngươi mới chính thức nhập môn học đạo!"
+                    ];
+                    triggerBooSpeech(msgs[Math.floor(Math.random() * msgs.length)], true);
+                }
+                else if (!isSafetyUnlocked) {
+                    triggerBooSpeech("Tường lửa đang khóa chặt kìa! Thiết bị kết nối của ngươi ổn định chưa? Nếu rồi thì bấm xác nhận!", true);
+                }
+                else if (!window.kDriveData.synced && !window.isScanning) {
+                    triggerBooSpeech("Mọi thứ đã sẵn sàng rồi, còn chần chừ gì nữa? Dí thẳng ngón tay vào lõi trung tâm để quét sinh trắc ngay!", true);
+                }
+            }
         }
 
         ['touchstart', 'mousemove', 'keydown', 'scroll', 'click'].forEach(evt => document.addEventListener(evt, () => {
-            if(appState !== 1) startIdleTimer();
+            if(appState !== 1) { idleTime = 0; nextIdleTrigger = 7; } // Reset lại Idle timer khi người dùng chạm
         }, {passive: true}));
 
         /* KHÔI PHỤC KÉO THẢ BOO TRONG LỒNG 420px */
@@ -1276,13 +1298,21 @@
         /* GỌI A.I BOO PHÂN TÍCH (THEO ĐÚNG TRÌNH TỰ 3 BƯỚC) */
         function handleBooClick() {
             if (isDragging) return;
+            idleTime = 0; nextIdleTrigger = 7; // Reset Idle Timer khi tương tác thủ công
+            
             if (appState === 0) {
                 triggerBooSpeech(introText, false);
             } else if (appState === 2) {
                 let isCommitted = localStorage.getItem('combat_committed') === 'true';
-                if (!isCommitted) return triggerBooSpeech("Mở Bí lục lên và giữ 3 giây ký cái khế ước cho ta nhờ!", false);
-                if (!isSafetyUnlocked) return triggerBooSpeech("Tường lửa kích hoạt rồi kìa! Còn không mau bấm xác nhận kết nối đồng hồ đi?", false);
-                if (!window.kDriveData.synced && !window.isScanning) return triggerBooSpeech("Cấp quyền xong rồi thì nhấc ngón tay lên dí vào lõi trung tâm đi chứ!", false);
+                if (!isCommitted) {
+                    let msgs = [
+                        "Đứng ngây ra nhìn màn hình tối thui làm gì? Mở Bí lục lên đọc khế ước và huyết thệ nhập môn đi!",
+                        "Mở Bí lục lên, huyết thệ vào khế ước, ngươi mới chính thức nhập môn học đạo!"
+                    ];
+                    return triggerBooSpeech(msgs[Math.floor(Math.random() * msgs.length)], false);
+                }
+                if (!isSafetyUnlocked) return triggerBooSpeech("Tường lửa đang khóa chặt kìa! Thiết bị kết nối của ngươi ổn định chưa? Nếu rồi thì bấm xác nhận!", false);
+                if (!window.kDriveData.synced && !window.isScanning) return triggerBooSpeech("Mọi thứ đã sẵn sàng rồi, còn chần chừ gì nữa? Dí thẳng ngón tay vào lõi trung tâm để quét sinh trắc ngay!", false);
                 
                 let data = window.kDriveData;
                 if (!data || !data.synced) return;
@@ -1362,7 +1392,7 @@
         function updateStreakBoxUI(sciScore = null) {
             const streakBox = document.getElementById('streak-box');
             if (!streakBox) return;
-            if (localStorage.getItem('combat_committed') !== 'true') { streakBox.innerText = 'CHƯA KÝ KẾT'; streakBox.className = 'streak-box alert-unsigned'; return; }
+            if (localStorage.getItem('combat_committed') !== 'true') { streakBox.innerText = 'CHƯA NHẬP MÔN'; streakBox.className = 'streak-box alert-unsigned'; return; }
             if (sciScore !== null && sciScore < 85) { localStorage.removeItem('mushin_start_date'); streakBox.innerText = 'ĐANG THANH TẨY'; streakBox.className = 'streak-box streak-cleansing'; } 
             else {
                 let startDateStr = localStorage.getItem('mushin_start_date'); const today = new Date(); today.setHours(0,0,0,0);
