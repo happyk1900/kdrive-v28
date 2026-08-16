@@ -9,137 +9,147 @@
     
     <style>
         :root {
-            --bg-obsidian: #050608; 
-            --mint: #00ff9d; 
-            --cyan: #00e5ff;
-            --amber: #ffaa00; 
-            --crimson: #ff2a2a;
-            --neon-pink: #ff00ff;
-            --font-display: 'Space Grotesk', sans-serif; 
-            --font-content: 'EB Garamond', serif; 
+            --bg-obsidian: #050608; --mint: #00ff9d; --cyan: #00e5ff;
+            --amber: #ffaa00; --crimson: #ff2a2a; --neon-pink: #ff00ff;
+            --font-display: 'Space Grotesk', sans-serif; --font-content: 'EB Garamond', serif; 
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
         
         body {
             background-color: var(--bg-obsidian); color: #ffffff;
-            font-family: var(--font-display);
-            display: flex; justify-content: center; align-items: center;
+            font-family: var(--font-display); display: flex; justify-content: center; align-items: center;
             height: 100vh; overflow: hidden; position: relative;
         }
 
-        /* ẢNH NỀN VÀ VIGNETTE */
+        /* 1. HIỆU ỨNG ĐIỆN ẢNH CHO ẢNH NỀN (NINJA SAMURAI) */
         .locked-bg {
             position: fixed !important; top: 50% !important; left: 50% !important;
-            transform: translate(-50%, -50%) !important;
             width: 100vw !important; height: 100vh !important; height: 100dvh !important;
-            object-fit: cover !important; z-index: -3; pointer-events: none; opacity: 0.9;
+            object-fit: cover !important; z-index: -4; pointer-events: none; opacity: 0.9;
+            animation: slowZoom 70s linear infinite alternate, cyberGlitch 8s infinite;
         }
-        .vignette { position: fixed; inset: 0; z-index: -2; pointer-events: none; background: radial-gradient(circle at center, transparent 30%, rgba(5,6,8, 0.8) 100%); }
+        @keyframes slowZoom {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            100% { transform: translate(-50%, -50%) scale(1.15); }
+        }
+        @keyframes cyberGlitch {
+            0%, 96%, 98%, 100% { filter: none; opacity: 0.9; }
+            97% { filter: contrast(1.5) hue-rotate(90deg); opacity: 1; }
+        }
 
-        /* BỤI SÁNG LƠ LỬNG */
-        .particles-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+        .vignette { position: fixed; inset: 0; z-index: -3; pointer-events: none; background: radial-gradient(circle at center, transparent 30%, rgba(5,6,8, 0.8) 100%); }
+        .fog-layer { position: fixed; bottom: -10%; left: 0; width: 200%; height: 60vh; z-index: -3; pointer-events: none; background: linear-gradient(to top, rgba(0, 229, 255, 0.15), transparent); animation: fogMove 25s linear infinite alternate; }
+        @keyframes fogMove { 0% { transform: translateX(0); } 100% { transform: translateX(-10%); } }
+        .light-sweep-layer { position: fixed; top: 0; left: -100%; width: 50%; height: 100vh; z-index: -3; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); transform: skewX(-30deg); animation: lightSweep 12s infinite; }
+        @keyframes lightSweep { 0%, 70% { left: -100%; } 100% { left: 200%; } }
+        .particles-container { position: fixed; inset: 0; z-index: -2; pointer-events: none; overflow: hidden; }
         .particle { position: absolute; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan); opacity: 0; animation: floatUp linear infinite; }
         @keyframes floatUp { 0% { transform: translateY(100px) scale(0.5); opacity: 0; } 50% { opacity: 0.6; } 100% { transform: translateY(-100px) scale(1.2); opacity: 0; } }
 
-        /* KHUNG ĐẠO TRƯỜNG */
+        /* ==================================================
+           2. MÀN HÌNH INTRO (THIẾT KẾ NÚT LẠI CỰC ĐẸP)
+           ================================================== */
+        #intro-ui {
+            position: fixed; inset: 0; z-index: 50000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; gap: 25px; transition: opacity 0.5s;
+        }
+        .btn-intro {
+            position: relative; overflow: hidden; width: 280px; text-align: center;
+            background: rgba(0, 229, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 229, 255, 0.4); border-left: 4px solid var(--cyan);
+            color: #fff; font-family: var(--font-display); font-size: 15px; font-weight: 600;
+            padding: 22px 20px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,229,255,0.1);
+            text-shadow: 0 0 8px rgba(0,229,255,0.8); transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+        }
+        .btn-intro::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50px; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: skewX(-20deg); animation: scanLight 4s infinite; pointer-events: none;
+        }
+        .btn-intro:hover { background: rgba(0, 229, 255, 0.15); box-shadow: 0 0 25px rgba(0,229,255,0.3); transform: scale(1.02); }
+        .btn-intro:active { transform: scale(0.96); border-color: #fff; }
+
+        /* Lớp phủ Text trôi (Triết lý) - Nền chỉ hơi mờ để thấy Ninja */
+        #intro-text-overlay {
+            position: fixed; inset: 0; z-index: 100000;
+            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            display: none; justify-content: center; overflow: hidden;
+        }
+        .star-wars-scroll {
+            position: absolute; bottom: -100%; width: 90%; max-width: 450px;
+            color: var(--cyan); font-family: var(--font-content); font-size: 19px; line-height: 1.8;
+            text-align: center; font-style: italic; text-shadow: 0 0 12px rgba(0,229,255,0.8);
+            font-weight: 500;
+        }
+        @keyframes scrollUp { 
+            0% { bottom: -100%; opacity: 0; } 
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { bottom: 100%; opacity: 0; } 
+        }
+
+        /* Lớp phủ Video (Xung trận) */
+        #intro-video-overlay { position: fixed; inset: 0; background: #000; z-index: 100000; display: none; }
+        #intro-video-overlay video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+
+        /* Nút Bỏ Qua */
+        .btn-skip {
+            position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            border: 1px dashed var(--amber); color: var(--amber); padding: 10px 18px; border-radius: 6px;
+            font-family: var(--font-display); font-size: 12px; font-weight: bold; cursor: pointer; z-index: 100001; transition: 0.2s; letter-spacing: 1px;
+        }
+        .btn-skip:active { background: var(--amber); color: #000; box-shadow: 0 0 15px var(--amber); }
+
+        /* ==================================================
+           3. KHUNG ĐẠO TRƯỜNG CHÍNH (GIỮ NGUYÊN 100%)
+           ================================================== */
         .dojo-container {
             width: 100%; max-width: 420px; height: 100vh; max-height: 900px;
             background: rgba(5, 8, 12, 0.1); border: 1px solid rgba(0, 229, 255, 0.2);
-            display: flex; flex-direction: column; padding: 20px; position: relative;
+            flex-direction: column; padding: 20px; position: relative;
             clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            display: none; opacity: 0; transition: opacity 1s ease;
         }
 
-        /* NÚT AUDIO */
-        .btn-audio {
-            position: absolute; top: 15px; left: 15px; z-index: 10000;
-            background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0,229,255,0.4);
-            color: var(--cyan); padding: 8px; border-radius: 8px; cursor: pointer;
-            display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); transition: 0.3s;
-            box-shadow: 0 0 10px rgba(0,229,255,0.2);
-        }
+        .btn-audio { position: absolute; top: 15px; left: 15px; z-index: 10000; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0,229,255,0.4); color: var(--cyan); padding: 8px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); transition: 0.3s; box-shadow: 0 0 10px rgba(0,229,255,0.2); }
         .btn-audio svg { width: 18px; height: 18px; fill: currentColor; }
         .btn-audio:active { transform: scale(0.9); background: var(--cyan); color: #000; }
-
-        /* HEADER */
         .header { text-align: center; border-bottom: 1px solid rgba(0, 229, 255, 0.2); padding-bottom: 12px; margin-bottom: 15px; flex-shrink: 0; background: rgba(0,0,0,0.3); padding-top: 5px; border-radius: 4px;}
         .header h1 { font-size: 12px; letter-spacing: 4px; color: var(--cyan); text-shadow: 0 0 10px rgba(0, 229, 255, 0.8); font-weight: 600; }
         .header h2 { font-size: 20px; color: var(--amber); letter-spacing: 2px; margin-top: 5px; font-family: var(--font-content); font-style: italic; text-shadow: 0 0 10px rgba(255, 170, 0, 0.8); }
 
-        /* A.I BOO COMPONENT */
-        .floating-boo {
-            width: 48px; height: 48px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            cursor: pointer; animation: levitate 3s ease-in-out infinite;
-            position: absolute; top: 15px; right: 15px; z-index: 9999; touch-action: none;
-            --boo-ring-color: var(--cyan);
-            border: 2px solid var(--boo-ring-color); box-shadow: 0 0 15px var(--boo-ring-color), inset 0 0 10px var(--boo-ring-color);
-            transition: all 0.3s;
-        }
-        .floating-boo::before {
-            content: ''; position: absolute; inset: -5px; border-radius: 50%;
-            background: conic-gradient(var(--boo-ring-color) 100%, transparent 0);
-            -webkit-mask: radial-gradient(closest-side, transparent 86%, black 88%); pointer-events: none; transition: background 0.3s;
-        }
+        .floating-boo { width: 48px; height: 48px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; animation: levitate 3s ease-in-out infinite; position: absolute; top: 15px; right: 15px; z-index: 9999; touch-action: none; --boo-ring-color: var(--cyan); border: 2px solid var(--boo-ring-color); box-shadow: 0 0 15px var(--boo-ring-color), inset 0 0 10px var(--boo-ring-color); transition: all 0.3s; }
+        .floating-boo::before { content: ''; position: absolute; inset: -5px; border-radius: 50%; background: conic-gradient(var(--boo-ring-color) 100%, transparent 0); -webkit-mask: radial-gradient(closest-side, transparent 86%, black 88%); pointer-events: none; transition: background 0.3s; }
         .floating-boo.speaking { animation: boo-pulse-wave 0.2s infinite alternate; --boo-ring-color: var(--cyan); }
-        @keyframes boo-pulse-wave { 0% { transform: scale(1); box-shadow: 0 0 15px var(--cyan); } 100% { transform: scale(1.15); box-shadow: 0 0 35px var(--cyan); } }
-        
         .floating-boo.sleeping { --boo-ring-color: #3b82f6; border: 1px dashed #3b82f6; box-shadow: 0 0 10px #3b82f6; animation: boo-breathe 2.5s infinite alternate; }
         .floating-boo.sleeping::before { display: none; }
-        @keyframes boo-breathe { 0% { transform: scale(0.95); opacity: 0.6; } 100% { transform: scale(1.05); opacity: 1; } }
-
         .boo-icon-inner { font-size: 22px; filter: drop-shadow(0 0 8px var(--boo-ring-color)); transition: all 0.3s; }
         .floating-boo.speaking .boo-icon-inner { animation: pig-speak 0.15s infinite alternate; filter: brightness(1.5) drop-shadow(0 0 10px var(--cyan));}
         @keyframes levitate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes pig-speak { 0% { transform: scale(1.1) rotate(-12deg); } 100% { transform: scale(1.2) rotate(12deg); } }
-
-        /* HIỆU ỨNG ZZZ TRÊN ĐẦU BOO */
-        .zzz-text {
-            position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
-            font-size: 16px; color: #3b82f6; opacity: 0; pointer-events: none;
-            font-weight: bold; text-shadow: 0 0 8px #3b82f6;
-        }
+        .zzz-text { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 16px; color: #3b82f6; opacity: 0; pointer-events: none; font-weight: bold; text-shadow: 0 0 8px #3b82f6; }
         .floating-boo.sleeping .zzz-text { animation: zzz-float 2s infinite; }
-        @keyframes zzz-float {
-            0% { opacity: 0; transform: translate(-50%, 0) scale(0.8); }
-            50% { opacity: 1; transform: translate(-50%, -15px) scale(1.1); }
-            100% { opacity: 0; transform: translate(-50%, -30px) scale(1); }
-        }
 
-        /* KHÔNG GIAN CÁC MÀN HÌNH */
         .screen-container { flex: 1; position: relative; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding-bottom: 20px;}
         .screen-container::-webkit-scrollbar { display: none; }
         .screen { display: none; flex-direction: column; min-height: 100%; }
         .screen.active { display: flex; animation: slideUpFade 0.4s ease; }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* DANH SÁCH NHIỆM VỤ (CÓ LƯỚT SÁNG SCANLINE) */
-        .mission-card { 
-            position: relative; overflow: hidden;
-            background: rgba(0, 0, 0, 0.75); border: 1px solid rgba(0, 229, 255, 0.4); border-left: 3px solid var(--cyan);
-            backdrop-filter: blur(8px); padding: 18px 15px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s; 
-            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        /* Hiệu ứng quét tia chớp trắng */
-        .mission-card::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 40px; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-            transform: skewX(-20deg); animation: scanLight 3.5s infinite; pointer-events: none;
-        }
-        @keyframes scanLight { 0% { left: -100%; } 15% { left: 200%; } 100% { left: 200%; } }
-
+        .mission-card { position: relative; overflow: hidden; background: rgba(0, 0, 0, 0.75); border: 1px solid rgba(0, 229, 255, 0.4); border-left: 3px solid var(--cyan); backdrop-filter: blur(8px); padding: 18px 15px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .mission-card::after { content: ''; position: absolute; top: 0; left: -100%; width: 40px; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); transform: skewX(-20deg); animation: scanLight 3.5s infinite; pointer-events: none; }
         .mission-card:active { transform: scale(0.96); background: rgba(0, 229, 255, 0.25); border-color: var(--cyan); }
         .mission-card h3 { color: #fff; font-size: 15px; margin-bottom: 6px; letter-spacing: 1px; text-shadow: 0 0 6px rgba(0,229,255,0.8); display: flex; align-items: center; gap: 8px;}
         .mission-card h3::before { content: '⚡'; font-size: 12px; }
         .mission-card p { font-size: 11.5px; color: rgba(255,255,255,0.85); font-weight: 300; text-shadow: 0 0 4px #000; }
         .mission-status { float: right; font-family: var(--font-display); font-size: 13px; color: var(--mint); font-weight: 600; text-shadow: 0 0 8px rgba(0,255,157,0.5);}
 
-        /* TEXT ĐÃ XÓA NGOẶC VUÔNG */
         .core-note { background: rgba(0, 0, 0, 0.8); border: 1px dashed rgba(255, 170, 0, 0.6); border-radius: 6px; padding: 12px; backdrop-filter: blur(8px); font-family: var(--font-display); font-size: 11px; color: rgba(255, 255, 255, 0.85); text-align: justify; line-height: 1.6; margin: 10px 0 15px; font-style: italic; text-shadow: 0 0 4px #000; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .core-note strong { color: var(--amber); font-weight: bold; text-shadow: 0 0 5px rgba(255,170,0,0.8);}
 
-        /* BÍ LỤC */
         .lore-accordion { margin-bottom: 20px; }
         .lore-btn { width: 100%; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.9); padding: 12px; font-family: var(--font-display); font-size: 11px; letter-spacing: 2px; cursor: pointer; transition: 0.3s; text-transform: uppercase; border-radius: 4px; backdrop-filter: blur(5px); box-shadow: 0 4px 15px rgba(0,0,0,0.4); text-shadow: 0 0 4px #000;}
         .lore-btn:active { background: rgba(255, 255, 255, 0.2); color: #fff; }
@@ -148,24 +158,19 @@
         .lore-content h4 { color: var(--cyan); font-family: var(--font-display); font-size: 12px; margin-bottom: 5px; margin-top: 10px; text-transform: uppercase; text-shadow: 0 0 5px rgba(0,229,255,0.5);}
         .lore-content p { text-align: justify; }
 
-        /* HUD NHANG (ĐÃ SỬA LỖI KHÓA CLICK) */
         .incense-hud { display: flex; justify-content: center; gap: 30px; margin: 30px 0; }
-        /* Xóa bỏ pointer-events: none ở nén nhang đỏ, thêm cursor: pointer */
         .incense-stick { width: 8px; height: 100px; background: linear-gradient(to right, #4a2e23, #6b4433, #4a2e23); border-radius: 4px; position: relative; cursor: pointer; transition: 0.4s; box-shadow: 5px 5px 10px rgba(0,0,0,0.5), inset -2px 0 3px rgba(0,0,0,0.6); }
         .incense-stick::after { content: ''; position: absolute; bottom: -18px; left: 2px; width: 4px; height: 18px; background: #cc0000; border-radius: 0 0 2px 2px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5);}
         .incense-stick.available::before { content: ''; position: absolute; top: -4px; left: -1px; width: 10px; height: 10px; background: #ff3300; border-radius: 50%; box-shadow: 0 0 10px #ff3300, 0 0 20px #ffaa00, inset 0 0 5px #fff; animation: fire-flicker 0.4s infinite alternate; }
-        /* Khóa click ở nén nhang đã cháy */
         .incense-stick.used { background: #333; height: 20px; transform: translateY(80px); pointer-events: none; opacity: 0.5; box-shadow: none;}
         .incense-stick.used::before { display: none; }
         .incense-stick.used::after { bottom: -18px; background: #555; box-shadow: none;}
         @keyframes fire-flicker { 0% { opacity: 0.8; box-shadow: 0 0 5px #ff3300, 0 0 10px #ffaa00; } 100% { opacity: 1; box-shadow: 0 0 15px #ff3300, 0 0 30px #ffaa00, inset 0 0 5px #fff; } }
 
-        /* THANH ĐẾM GIỜ */
         .timer-bar-container { width: 100%; height: 6px; background: rgba(0,0,0,0.6); border-radius: 3px; margin: 20px 0; position: relative; display: none; box-shadow: inset 0 0 8px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.1);}
         .timer-bar-fill { height: 100%; width: 100%; background: linear-gradient(to bottom, #8a5a44, #5c4033); transition: width 1s linear; position: relative; border-radius: 3px;}
         .timer-bar-fill::after { content: ''; position: absolute; right: -5px; top: -3px; width: 12px; height: 12px; background: #ff3300; border-radius: 50%; box-shadow: 0 0 12px #ff3300, 0 0 20px #ffaa00, inset 0 0 4px #fff; animation: fire-flicker 0.4s infinite alternate; }
 
-        /* BÁT QUÁI ĐỒ */
         .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 280px; height: 280px; margin: 20px auto; perspective: 1000px; }
         .grid-cell { background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 32px; transition: all 0.15s ease; box-shadow: inset 0 0 15px rgba(0,229,255,0.15), 0 5px 10px rgba(0,0,0,0.4); backdrop-filter: blur(6px); user-select: none;}
         .grid-cell:active { transform: scale(0.9) translateZ(-10px); }
@@ -173,7 +178,6 @@
         .grid-cell.correct { background: rgba(0, 255, 157, 0.6); border-color: #fff; box-shadow: 0 0 30px var(--mint), inset 0 0 20px #fff; text-shadow: 0 0 10px #fff;}
         .grid-cell.wrong { background: rgba(255, 42, 42, 0.6); border-color: #fff; box-shadow: 0 0 30px var(--crimson), inset 0 0 20px #fff; text-shadow: 0 0 10px #fff;}
 
-        /* ẤN QUYẾT SVG */
         .sequence-display { height: 90px; display: flex; justify-content: center; align-items: center; gap: 15px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(0,229,255,0.4); margin: 15px 0; border-radius: 8px; padding: 10px; box-shadow: inset 0 0 30px rgba(0,229,255,0.15); }
         .cyber-tile { width: 60px; height: 60px; border: 2px solid rgba(0, 229, 255, 0.8); background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; border-radius: 10px; box-shadow: 0 0 15px rgba(0,229,255,0.4), inset 0 0 15px rgba(0,229,255,0.3); }
         .cyber-tile.hidden-tile { font-size: 32px; font-weight: bold; color: rgba(0, 229, 255, 0.6); text-shadow: 0 0 10px var(--cyan); border-style: dashed; background: rgba(0,0,0,0.5); box-shadow: none;}
@@ -184,7 +188,6 @@
         .btn-symbol:active { transform: scale(0.9); background: rgba(0, 229, 255, 0.9); border-color: #fff; box-shadow: 0 0 30px var(--cyan); }
         .btn-symbol:active svg { stroke: #000; filter: none; }
 
-        /* LỜI KHUYÊN & NÚT TRONG TRẬN */
         .neuro-hint { font-family: var(--font-display); font-size: 11.5px; color: rgba(255, 255, 255, 0.9); text-align: center; line-height: 1.6; margin: auto 10px 15px; font-style: italic; padding: 12px; background: rgba(0,0,0,0.75); border-radius: 6px; border: 1px dashed rgba(0,229,255,0.4); text-shadow: 0 0 4px #000; backdrop-filter: blur(6px); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .neuro-hint strong { color: var(--cyan); font-weight: bold; font-style: normal; text-shadow: 0 0 8px rgba(0,229,255,0.8);}
 
@@ -199,7 +202,7 @@
         .stats span strong { color: var(--mint); font-size: 16px; text-shadow: 0 0 8px rgba(0,255,157,0.6);}
         .streak-info { color: var(--amber) !important; text-shadow: 0 0 8px var(--amber); font-weight: bold; font-size: 14px;}
 
-        /* BẢNG XÁC NHẬN RÚT LUI (CUSTOM MODAL) */
+        /* BẢNG XÁC NHẬN RÚT LUI */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-box { background: rgba(5,8,12,0.95); border: 1px solid var(--crimson); border-top: 3px solid var(--crimson); padding: 25px; width: 300px; border-radius: 6px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.9), 0 0 20px rgba(255,42,42,0.2); transform: translateY(20px); transition: transform 0.3s; }
@@ -216,9 +219,49 @@
 </head>
 <body>
 
-<img src="https://github.com/happyk1900/-m-thanh-app/blob/main/THUYLUAN%20NEN.png?raw=true" class="locked-bg" alt="Cyber Water">
+<!-- MEDIA ASSETS DÀNH CHO INTRO -->
+<audio id="audio-triet-ly" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/THUYLUAN%20GT.MP3"></audio>
+<audio id="bgm-audio" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai-Ripe%20Little%20Ninja%20(1).mp3" loop></audio>
+
+<!-- ẢNH NỀN NINJA SAMURAI VÀ HIỆU ỨNG ĐIỆN ẢNH -->
+<!-- LƯU Ý: TRẢ LẠI ĐÚNG LINK ẢNH NINJA GỐC (THUYLUAN NEN.png) -->
+<img src="https://github.com/happyk1900/-m-thanh-app/blob/main/THUYLUAN%20NEN.png?raw=true" class="locked-bg cinematic-bg" alt="Cyber Water Ninja">
+<div class="vignette"></div>
+<div class="fog-layer"></div>
+<div class="light-sweep-layer"></div>
 <div class="particles-container" id="particles-box"></div>
 
+<!-- ==============================================
+     LỚP PHỦ INTRO (2 NÚT THIẾT KẾ MỚI ĐẸP MẮT) 
+     ============================================== -->
+<div id="intro-ui">
+    <button class="btn-intro" id="btn-triet-ly" onclick="startPhilosophy()">THẤU THỊ BÍ LỤC</button>
+    <button class="btn-intro" id="btn-xung-tran" onclick="startCombat()">TIẾN VÀO DÒNG CHẢY</button>
+</div>
+
+<!-- LỚP PHỦ TEXT TRÔI (TRIẾT LÝ) - NỀN SÁNG ĐỂ THẤY NINJA -->
+<div id="intro-text-overlay">
+    <button class="btn-skip" onclick="finishPhilosophy()">BỎ QUA ➔</button>
+    <div class="star-wars-scroll" id="scroll-text">
+        Trong Ngũ Luân Thư, Musashi từng viết: Tâm phải như nước. Biến hóa vô hình... nhưng khi tĩnh lặng, sẽ như mặt hồ phản chiếu rõ vạn vật.<br><br>
+        Trí nhớ của con người cũng vậy. Chỉ một tia hoảng loạn nổi lên... mặt nước gợn sóng... ký quy sẽ lập tức bị bóp méo và vỡ nát.<br><br>
+        Chào mừng đến với Đạo trường Thủy Luân. Một hệ thống rèn luyện nhận thức... với độ khó vô hạn.<br><br>
+        Thuật toán K-Drive không có kịch bản. Nó sẽ trực tiếp 'nhập thể' vào hệ thần kinh của ngươi thông qua từng nhịp chạm. Nó đọc sự ngập ngừng... đo lường tốc độ phản xạ... và liên tục tái cấu trúc không gian để dồn ép giới hạn.<br><br>
+        Ngươi càng tĩnh tại, hệ thống càng biến ảo. Thuật toán sẽ giam giữ ngươi trên đường ranh giới mỏng manh giữa sự nhàm chán... và sự quá tải. Ép nơ-ron thần kinh phải tự tái liên kết để thích nghi.<br><br>
+        Hãy giữ cho mặt hồ trong tâm trí phẳng lặng. Nếu không... thuật toán sẽ tự động đào thải ngươi.<br><br>
+        Giao thức... bắt đầu!
+    </div>
+</div>
+
+<!-- LỚP PHỦ VIDEO (XUNG TRẬN) -->
+<div id="intro-video-overlay">
+    <video id="video-xung-tran" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/THUYLUAN%20VIDEO.mp4" playsinline></video>
+    <button class="btn-skip" onclick="skipVideo()">BỎ QUA ➔</button>
+</div>
+
+<!-- ==============================================
+     KHUNG GAME CHÍNH (GIỮ NGUYÊN 100% NHƯ CŨ)
+     ============================================== -->
 <div class="dojo-container" id="dojo-container">
     
     <button id="bgm-toggle" class="btn-audio" onclick="toggleBGM()">
@@ -313,7 +356,7 @@
     </div>
 </div>
 
-<!-- POPUP XÁC NHẬN RÚT LUI ĐẸP MẮT -->
+<!-- POPUP XÁC NHẬN RÚT LUI -->
 <div class="modal-overlay" id="custom-modal">
     <div class="modal-box">
         <div class="modal-title">XÁC NHẬN RÚT LUI</div>
@@ -326,6 +369,85 @@
 </div>
 
 <script>
+    // --- KHỞI TẠO BỤI NƯỚC (PARTICLES) ---
+    function initParticles() {
+        const container = document.getElementById('particles-box');
+        for(let i=0; i<25; i++) {
+            let p = document.createElement('div'); p.className = 'particle';
+            let size = Math.random() * 4 + 2; p.style.width = size + 'px'; p.style.height = size + 'px';
+            p.style.left = Math.random() * 100 + 'vw'; p.style.top = (Math.random() * 100 + 20) + 'vh'; 
+            p.style.animationDuration = (Math.random() * 4 + 3) + 's'; p.style.animationDelay = Math.random() * 3 + 's';
+            container.appendChild(p);
+        }
+    }
+    initParticles();
+
+    // --- LOGIC MÀN HÌNH INTRO ĐIỆN ẢNH ---
+    let bgmAudio = document.getElementById('bgm-audio');
+    bgmAudio.volume = 0.4;
+    let isMuted = false;
+
+    // LUỒNG 1: XEM TRIẾT LÝ
+    function startPhilosophy() {
+        document.getElementById('intro-ui').style.display = 'none';
+        document.getElementById('intro-text-overlay').style.display = 'flex';
+        
+        let audio = document.getElementById('audio-triet-ly');
+        let scrollText = document.getElementById('scroll-text');
+        
+        audio.play().catch(e => console.log("Cần click để play audio"));
+        scrollText.style.animation = "scrollUp 70s linear forwards";
+        
+        audio.onended = () => { finishPhilosophy(); };
+    }
+
+    // KẾT THÚC LUỒNG 1 (XÓA NÚT 1, CHỈ CÒN NÚT 2)
+    function finishPhilosophy() {
+        document.getElementById('audio-triet-ly').pause();
+        document.getElementById('intro-text-overlay').style.display = 'none';
+        
+        // Hiện lại UI Intro nhưng xóa nút Triết lý đi
+        document.getElementById('intro-ui').style.display = 'flex';
+        document.getElementById('btn-triet-ly').style.display = 'none';
+    }
+
+    // LUỒNG 2: XUNG TRẬN (CHỈ VÀO GAME QUA LUỒNG NÀY)
+    function startCombat() {
+        document.getElementById('intro-ui').style.display = 'none';
+        document.getElementById('intro-video-overlay').style.display = 'block';
+        
+        let video = document.getElementById('video-xung-tran');
+        video.play().catch(e => console.log("Cần click để play video"));
+        
+        video.onended = () => { skipVideo(); };
+    }
+
+    // VÀO THẲNG GAME SAU KHI HẾT VIDEO
+    function skipVideo() {
+        document.getElementById('video-xung-tran').pause();
+        document.getElementById('intro-video-overlay').style.display = 'none';
+
+        // Bật Giao diện Đạo trường chính
+        let dojo = document.getElementById('dojo-container');
+        dojo.style.display = 'flex';
+        setTimeout(() => { dojo.style.opacity = '1'; }, 50);
+
+        // Phát BGM và khởi động BOO
+        bgmAudio.play().catch(e => console.log(e));
+        document.getElementById('icon-sound-on').style.display = 'block';
+        document.getElementById('icon-sound-off').style.display = 'none';
+        
+        setTimeout(() => { booSpeakAudio("Chào mừng đến với Thủy Luân! Chạm vào thẻ nhiệm vụ để bắt đầu luyện tập."); }, 1000);
+    }
+
+    function toggleBGM() {
+        playBeep();
+        let onIcon = document.getElementById('icon-sound-on');
+        let offIcon = document.getElementById('icon-sound-off');
+        if(bgmAudio.paused) { bgmAudio.play(); isMuted = false; onIcon.style.display = 'block'; offIcon.style.display = 'none'; } 
+        else { bgmAudio.pause(); isMuted = true; onIcon.style.display = 'none'; offIcon.style.display = 'block'; }
+    }
+
     // --- ÂM THANH & RUNG HAPTIC TRONG TRẬN ---
     let audioCtx;
     function initAudio() { try { if(!audioCtx) { const AudioContext = window.AudioContext || window.webkitAudioContext; if(AudioContext) audioCtx = new AudioContext(); } } catch(e) {} }
@@ -340,46 +462,6 @@
     function playWrongSound() { playTone(150, 'sawtooth', 0.3, 0.2); if(navigator.vibrate) navigator.vibrate(50); }
     function playSleepBeep() { playTone(150, 'square', 0.3, 0.3); }
 
-    // --- BGM TỰ ĐỘNG ---
-    let bgmAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai-Ripe%20Little%20Ninja%20(1).mp3');
-    bgmAudio.loop = true; bgmAudio.volume = 0.4;
-    let isMuted = true;
-    let hasInteracted = false;
-
-    // Tự động bật nhạc khi chạm vào màn hình (trừ khi chạm thẳng vào nút Tắt)
-    document.addEventListener('pointerdown', (e) => {
-        if (!hasInteracted) {
-            hasInteracted = true;
-            if (!e.target.closest('#bgm-toggle')) {
-                if(bgmAudio.paused) {
-                    bgmAudio.play(); isMuted = false;
-                    document.getElementById('icon-sound-on').style.display = 'block';
-                    document.getElementById('icon-sound-off').style.display = 'none';
-                }
-            }
-        }
-    }, { once: true });
-
-    function toggleBGM() {
-        playBeep();
-        let onIcon = document.getElementById('icon-sound-on');
-        let offIcon = document.getElementById('icon-sound-off');
-        if(bgmAudio.paused) { bgmAudio.play(); isMuted = false; onIcon.style.display = 'block'; offIcon.style.display = 'none'; } 
-        else { bgmAudio.pause(); isMuted = true; onIcon.style.display = 'none'; offIcon.style.display = 'block'; }
-    }
-
-    function initParticles() {
-        const container = document.getElementById('particles-box');
-        for(let i=0; i<25; i++) {
-            let p = document.createElement('div'); p.className = 'particle';
-            let size = Math.random() * 4 + 2; p.style.width = size + 'px'; p.style.height = size + 'px';
-            p.style.left = Math.random() * 100 + 'vw'; p.style.top = (Math.random() * 100 + 20) + 'vh'; 
-            p.style.animationDuration = (Math.random() * 4 + 3) + 's'; p.style.animationDelay = Math.random() * 3 + 's';
-            container.appendChild(p);
-        }
-    }
-    initParticles();
-
     const svgs = [
         `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5Z"/><circle cx="12" cy="12" r="2"/></svg>`,
         `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15 9L13 14H11L9 9Z"/><line x1="12" y1="14" x2="12" y2="20"/><circle cx="12" cy="22" r="2"/></svg>`,
@@ -393,7 +475,6 @@
 
     // --- LÕI AI BOO ---
     const booWidget = document.getElementById('boo-widget');
-    const dojoContainer = document.getElementById('dojo-container');
     
     let isDragging = false; let dragStartX, dragStartY; let widgetStartX, widgetStartY;
     let booHoldTimer = null; window.isBooSleeping = false;
@@ -412,8 +493,8 @@
             if(!isDragging) {
                 window.isBooSleeping = true;
                 booWidget.classList.add('sleeping');
-                document.getElementById('boo-mascot').innerHTML = '🐽'; // Giữ mặt heo
-                document.getElementById('boo-zzz').style.opacity = '1'; // Hiện ZZZ bay lên
+                document.getElementById('boo-mascot').innerHTML = '🐽';
+                document.getElementById('boo-zzz').style.opacity = '1';
                 if(window.speechSynthesis.speaking) window.speechSynthesis.cancel();
                 playSleepBeep(); if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
             }
@@ -432,6 +513,7 @@
         if (Math.abs(dx) > 5 || Math.abs(dy) > 5) { isDragging = true; clearTimeout(booHoldTimer); e.preventDefault(); } 
         
         if (isDragging) { 
+            let dojoContainer = document.getElementById('dojo-container');
             let maxW = dojoContainer.offsetWidth; let maxH = dojoContainer.offsetHeight;
             let minX = 10; let maxX = maxW - booWidget.offsetWidth - 10;
             let minY = 10; let maxY = maxH - booWidget.offsetHeight - 10;
@@ -444,6 +526,7 @@
         clearTimeout(booHoldTimer); 
         document.removeEventListener('touchmove', dragMove); document.removeEventListener('touchend', dragEnd); document.removeEventListener('mousemove', dragMove); document.removeEventListener('mouseup', dragEnd); 
         if (isDragging) { 
+            let dojoContainer = document.getElementById('dojo-container');
             let maxW = dojoContainer.offsetWidth; let currentX = booWidget.offsetLeft; let midPoint = maxW / 2;
             booWidget.style.transition = 'left 0.3s ease-out, top 0.3s ease-out'; 
             if (currentX > midPoint) { booWidget.style.left = (maxW - booWidget.offsetWidth - 10) + 'px'; } else { booWidget.style.left = '10px'; } 
@@ -692,7 +775,6 @@
     }
 
     document.body.addEventListener('click', () => { initAudio(); }, {once:true});
-    setTimeout(() => { booSpeakAudio("Chào mừng đến với Thủy Luân! Chạm vào thẻ nhiệm vụ để bắt đầu luyện tập."); }, 1000);
 </script>
 
 </body>
