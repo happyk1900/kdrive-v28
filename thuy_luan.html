@@ -66,6 +66,16 @@
         .btn-intro:hover { background: rgba(0, 229, 255, 0.15); box-shadow: 0 0 25px rgba(0,229,255,0.3); transform: scale(1.02); }
         .btn-intro:active { transform: scale(0.96); border-color: #fff; }
 
+        /* HIỆU ỨNG TẢI DỮ LIỆU (LOADING SPINNER CHỐNG TREO) */
+        .loading-indicator {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: var(--cyan); font-family: var(--font-display); font-size: 14px; font-weight: bold; letter-spacing: 3px;
+            text-shadow: 0 0 15px var(--cyan), 0 0 5px #000; animation: pulse-load 0.8s infinite alternate; z-index: 100001;
+            background: rgba(0,0,0,0.6); padding: 12px 25px; border-radius: 8px; border: 1px solid var(--cyan);
+            backdrop-filter: blur(5px); display: none; text-align: center;
+        }
+        @keyframes pulse-load { 0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.95); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); } }
+
         /* LỚP PHỦ CHUỖI VIDEO THẤU THỊ BÍ LỤC */
         #intro-sequence-overlay {
             position: fixed; inset: 0; z-index: 100000; background: #000; display: none;
@@ -77,7 +87,7 @@
 
         /* LỚP PHỦ VIDEO XUNG TRẬN */
         #intro-video-overlay { position: fixed; inset: 0; background: #000; z-index: 100000; display: none; }
-        #intro-video-overlay video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        #intro-video-overlay video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; opacity: 1;}
 
         /* NÚT BỎ QUA DÙNG CHUNG */
         .btn-skip {
@@ -137,7 +147,25 @@
         .lore-content p { text-align: justify; margin-bottom: 10px;}
         .lore-content p strong { color: var(--amber); }
 
-        /* SẢNH 2 - LÒ NHANG */
+        /* SẢNH 2 - BOX KÍNH MỜ CHO TEXT & LÒ NHANG */
+        .glass-box-incense {
+            font-family: var(--font-display);
+            font-size: 13px;
+            color: var(--amber);
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0 auto 25px auto;
+            padding: 10px 22px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 170, 0, 0.5);
+            border-radius: 6px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6), inset 0 0 10px rgba(255,170,0,0.1);
+            text-shadow: 0 0 8px rgba(255,170,0,0.8);
+            display: inline-block;
+        }
         .incense-hud { display: flex; justify-content: center; gap: 30px; margin-top: 25px;}
         .incense-stick { width: 8px; height: 100px; background: linear-gradient(to right, #4a2e23, #6b4433, #4a2e23); border-radius: 4px; position: relative; cursor: pointer; transition: 0.4s; box-shadow: 5px 5px 10px rgba(0,0,0,0.5), inset -2px 0 3px rgba(0,0,0,0.6); }
         .incense-stick::after { content: ''; position: absolute; bottom: -18px; left: 2px; width: 4px; height: 18px; background: #cc0000; border-radius: 0 0 2px 2px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5);}
@@ -175,6 +203,17 @@
         .action-btn:active { transform: scale(0.98); background: var(--amber); color: #000; box-shadow: 0 0 30px var(--amber); text-shadow: none; }
         .action-btn-green { border-color: var(--mint); color: var(--mint); text-shadow: 0 0 5px rgba(0,255,157,0.8); }
         .action-btn-green:active { background: var(--mint); color: #000; box-shadow: 0 0 30px var(--mint); }
+
+        /* HIỆU ỨNG NHẤP NHÁY CHO NÚT TÁI KHAI TRẬN */
+        @keyframes pulse-action {
+            0% { box-shadow: 0 0 10px var(--amber), inset 0 0 5px var(--amber); transform: scale(1); border-color: rgba(255, 170, 0, 0.5); }
+            50% { box-shadow: 0 0 30px var(--amber), inset 0 0 15px var(--amber); transform: scale(1.02); border-color: #fff; color: #fff;}
+            100% { box-shadow: 0 0 10px var(--amber), inset 0 0 5px var(--amber); transform: scale(1); border-color: rgba(255, 170, 0, 0.5); }
+        }
+        .pulse-active {
+            animation: pulse-action 1.5s infinite alternate !important;
+            text-shadow: 0 0 10px var(--amber) !important;
+        }
 
         .back-link { font-size: 11.5px; color: rgba(255,255,255,0.9); cursor: pointer; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; display: inline-block; text-shadow: 0 0 4px #000; font-weight: 500;}
         .back-link:hover { color: var(--cyan); text-shadow: 0 0 8px var(--cyan);}
@@ -220,9 +259,11 @@
     <button class="btn-intro" id="btn-xung-tran" onclick="startCombat()">TIẾN VÀO DÒNG CHẢY</button>
 </div>
 
-<!-- LỚP PHỦ CHUỖI 5 VIDEO THẤU THỊ (1m11s) PRELOAD ĐỂ CHUYỂN KHÔNG LAG -->
+<!-- LỚP PHỦ CHUỖI 5 VIDEO THẤU THỊ (1m11s) TẢI SẴN & CÓ POSTER ĐỂ TRÁNH MÀN HÌNH ĐEN -->
 <div id="intro-sequence-overlay">
-    <video id="seq-vid-1" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/TL%20INTRO%201.mp4" preload="auto" playsinline class="seq-video"></video>
+    <!-- Cài sẵn Poster là ảnh Lão Trư Boo để trong lúc chờ tải video không bị đen màn hình -->
+    <div id="seq-loader" class="loading-indicator">ĐANG KẾT NỐI KHÔNG GIAN...</div>
+    <video id="seq-vid-1" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/TL%20INTRO%201.mp4" poster="https://github.com/happyk1900/-m-thanh-app/blob/main/THUYLIAN%20ANH%20NEN.png?raw=true" preload="auto" playsinline class="seq-video"></video>
     <video id="seq-vid-2" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/TL%20INTRO%202.mp4" preload="auto" playsinline class="seq-video"></video>
     <video id="seq-vid-3" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/TL%20INTRO%203.mp4" preload="auto" playsinline class="seq-video"></video>
     <video id="seq-vid-4" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/TL%20INTRO%204.mp4" preload="auto" playsinline class="seq-video"></video>
@@ -230,9 +271,10 @@
     <button class="btn-skip" onclick="skipPhilosophySequence()">BỎ QUA ➔</button>
 </div>
 
-<!-- LỚP PHỦ VIDEO (XUNG TRẬN 10s) -->
+<!-- LỚP PHỦ VIDEO XUNG TRẬN -->
 <div id="intro-video-overlay">
-    <video id="video-xung-tran" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/THUYLUAN%20VIDEO.mp4" playsinline></video>
+    <div id="combat-loader" class="loading-indicator">ĐANG XUNG TRẬN...</div>
+    <video id="video-xung-tran" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/THUYLUAN%20VIDEO.mp4" poster="https://github.com/happyk1900/-m-thanh-app/blob/main/TL%20TRASUA%20(1).png?raw=true" playsinline></video>
     <button class="btn-skip" onclick="skipVideo()">BỎ QUA ➔</button>
 </div>
 
@@ -293,7 +335,7 @@
             <button class="action-btn" style="border-color: rgba(255,255,255,0.4); color: #fff; margin-top: auto; box-shadow: none;" onclick="window.location.href='index.html'">➔ QUAY LẠI TRẠM LÕI</button>
         </div>
 
-        <!-- SẢNH 2 (ĐÃ HẠ LÒ NHANG & NÂNG CHỮ KHÔNG CHẠM NHANG) -->
+        <!-- SẢNH 2 -->
         <div id="screen-prep" class="screen">
             <span class="back-link" onclick="backToHub()">➔ Trở về sảnh</span>
             <div class="stats">
@@ -305,8 +347,8 @@
             <div style="flex: 1;"></div>
 
             <div style="text-align: center; margin-bottom: 15vh;">
-                <!-- CHỮ LƯỢT THỬ NẰM CAO HƠN NHANG BẰNG MARGIN-BOTTOM -->
-                <p style="font-size: 12px; color: var(--amber); letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,170,0,0.8); font-weight: bold; margin-bottom: 25px;">LƯỢT THỬ (3 NÉN NHANG)</p>
+                <!-- HỘP KÍNH MỜ CHO TEXT THẮP NHANG -->
+                <div class="glass-box-incense">ẤN VÀO NHANG ĐỂ THẮP</div>
                 <div class="incense-hud" id="incense-container"></div>
             </div>
 
@@ -356,11 +398,29 @@
     }
     initParticles();
 
-    // CHUYỂN NỀN KHÔNG LAG THEO TỪNG GIAI ĐOẠN ĐÚNG CẤU TRÚC
+    // HÀM ÂM THANH CLICK BÙNG NỔ (RUNG MẠNH + TIẾNG LỚN DÀNH CHO 2 NÚT INTRO)
+    function playExplosiveClick() {
+        try { 
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime); // Volume lớn
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            
+            if(navigator.vibrate) navigator.vibrate([100, 50, 100]); // Rung giật liên tiếp
+        } catch(e){}
+    }
+
+    // CHUYỂN NỀN KHÔNG LAG
     function switchBackground(state) {
         document.querySelectorAll('.locked-bg').forEach(bg => bg.classList.remove('active'));
-        if (state === 'intro') document.getElementById('bg-intro').classList.add('active'); // Nền Boo
-        else if (state === 'hub') document.getElementById('bg-hub').classList.add('active'); // Nền Trà sữa
+        if (state === 'intro') document.getElementById('bg-intro').classList.add('active');
+        else if (state === 'hub') document.getElementById('bg-hub').classList.add('active');
         else if (state === 1) document.getElementById('bg-1').classList.add('active');
         else if (state === 2) document.getElementById('bg-2').classList.add('active');
         else if (state === 3) document.getElementById('bg-3').classList.add('active');
@@ -370,18 +430,26 @@
     bgmAudio.volume = 0.4;
     let isMuted = false;
 
-    // LUỒNG 1: CHUỖI 5 VIDEO THẤU THỊ NỐI TIẾP NHAU
+    // LUỒNG 1: CHUỖI 5 VIDEO THẤU THỊ NỐI TIẾP
     const totalSeqVids = 5;
     function startPhilosophySequence() {
+        playExplosiveClick(); // Rung & âm thanh lớn
         document.getElementById('intro-ui').style.display = 'none';
         document.getElementById('intro-sequence-overlay').style.display = 'block';
+        document.getElementById('seq-loader').style.display = 'block'; 
         
         for(let i=1; i<=totalSeqVids; i++) {
             let v = document.getElementById('seq-vid-'+i);
-            v.style.opacity = (i === 1) ? 1 : 0;
+            v.style.opacity = (i === 1) ? 1 : 0; 
             v.currentTime = 0;
         }
-        document.getElementById('seq-vid-1').play().catch(e=>console.log(e));
+        
+        let firstVid = document.getElementById('seq-vid-1');
+        firstVid.addEventListener('playing', function() {
+            document.getElementById('seq-loader').style.display = 'none';
+        }, {once: true});
+        
+        firstVid.play().catch(e=>console.log(e));
     }
 
     for(let i=1; i<=totalSeqVids; i++) {
@@ -397,14 +465,14 @@
         };
     }
 
-    function skipPhilosophySequence() {
-        finishPhilosophySequence();
-    }
+    function skipPhilosophySequence() { finishPhilosophySequence(); }
 
     function finishPhilosophySequence() {
         for(let i=1; i<=totalSeqVids; i++) {
-            document.getElementById('seq-vid-'+i).pause();
+            let v = document.getElementById('seq-vid-'+i);
+            v.pause(); v.style.opacity = 0; 
         }
+        document.getElementById('seq-loader').style.display = 'none'; 
         document.getElementById('intro-sequence-overlay').style.display = 'none';
         document.getElementById('intro-ui').style.display = 'flex';
         document.getElementById('btn-triet-ly').style.display = 'none';
@@ -412,18 +480,28 @@
 
     // LUỒNG 2: VIDEO XUNG TRẬN
     function startCombat() {
+        playExplosiveClick(); // Rung & âm thanh lớn
         document.getElementById('intro-ui').style.display = 'none';
         document.getElementById('intro-video-overlay').style.display = 'block';
+        document.getElementById('combat-loader').style.display = 'block';
+        
         let video = document.getElementById('video-xung-tran');
+        video.style.opacity = 1; 
+        
+        video.addEventListener('playing', function() {
+            document.getElementById('combat-loader').style.display = 'none';
+        }, {once: true});
+        
         video.play().catch(e => console.log("Cần click để play video"));
         video.onended = () => { skipVideo(); };
     }
 
     function skipVideo() {
-        document.getElementById('video-xung-tran').pause();
+        let video = document.getElementById('video-xung-tran');
+        video.pause();
         document.getElementById('intro-video-overlay').style.display = 'none';
+        document.getElementById('combat-loader').style.display = 'none';
         
-        // ĐỔI NỀN SANG TRÀ SỮA LÚC VÀO HUB
         switchBackground('hub'); 
 
         let dojo = document.getElementById('dojo-container');
@@ -582,6 +660,9 @@
         document.getElementById('prep-best-score').innerText = data[id].best;
         document.getElementById('btn-no-incense').style.display = 'none';
 
+        // Xóa nhấp nháy nếu có
+        document.getElementById('game-action-btn').classList.remove('pulse-active');
+
         if(data[id].tries > 0) { booSpeakAudio(`Ngươi còn ${data[id].tries} nén nhang cho ải này. Thắp đi rồi vào sinh tử!`); } 
         else { booSpeakAudio(`Đã cạn sạch nhang! Trí lực hôm nay đến giới hạn rồi. Cút về nghỉ ngơi, ngày mai quay lại!`); document.getElementById('btn-no-incense').style.display = 'block'; }
         renderIncense();
@@ -630,12 +711,20 @@
             `;
         }
         
-        let btn = document.getElementById('game-action-btn'); btn.style.display = 'block'; btn.innerText = 'KHAI TRẬN'; btn.onclick = executeTask;
+        let btn = document.getElementById('game-action-btn'); 
+        btn.style.display = 'block'; 
+        btn.innerText = 'KHAI TRẬN'; 
+        btn.classList.remove('pulse-active'); // Xóa nhấp nháy lúc chưa chơi
+        btn.onclick = executeTask;
+        
         booSpeakAudio("Đã thắp nhang! Hít sâu và bấm Khai Trận đi.");
     }
 
     function executeTask() {
-        document.getElementById('game-action-btn').style.display = 'none'; playBeep();
+        let btn = document.getElementById('game-action-btn');
+        btn.style.display = 'none'; 
+        btn.classList.remove('pulse-active'); // Vừa bấm là tắt nhấp nháy ngay
+        playBeep();
         if(currentMission === 1) task1_StartRound(); if(currentMission === 2) task2_StartRound(); if(currentMission === 3) task3_StartCountdown();
     }
 
@@ -650,8 +739,17 @@
         else speech = "Xuất sắc! Mặt hồ phẳng lặng không gợn sóng. Hãy giữ vững cái đầu lạnh này.";
         
         booSpeakAudio(speech);
-        let btn = document.getElementById('game-action-btn'); btn.style.display = 'block'; 
-        btn.innerText = data[currentMission].tries > 0 ? 'TÁI KHAI TRẬN (CÒN NHANG)' : 'ĐÃ HẾT NHANG - RÚT LUI'; btn.onclick = backToHub;
+        let btn = document.getElementById('game-action-btn'); 
+        btn.style.display = 'block'; 
+        
+        // BẬT NHẤP NHÁY GỌI MỜI CHƠI LẠI
+        if(data[currentMission].tries > 0) {
+            btn.innerText = 'TÁI KHAI TRẬN (CÒN NHANG)';
+            btn.classList.add('pulse-active');
+        } else {
+            btn.innerText = 'ĐÃ HẾT NHANG - RÚT LUI';
+        }
+        btn.onclick = backToHub;
     }
 
     function nextRoundCheck(taskNum) {
