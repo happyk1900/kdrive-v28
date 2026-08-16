@@ -41,28 +41,71 @@
 
         .itm-label { color: #ff33cc !important; font-weight: bold; text-shadow: 0 0 10px rgba(255, 51, 204, 0.5); }
 
-        /* KHÓA CHẾT ẢNH NỀN VÀO TÂM MÀN HÌNH - CHỐNG CO GIÃN/NHẢY HÌNH KHI CHUYỂN TRANG */
+        /* KHÓA CHẾT ẢNH NỀN VÀO KHUNG GIAO DIỆN (CHỐNG LỆCH TỌA ĐỘ) */
         .locked-bg {
-            position: fixed !important; 
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            object-fit: cover !important;
-            object-position: center center !important; /* Neo cứng tâm ảnh vào tâm tọa độ */
+            position: absolute !important; 
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
             z-index: 0;
-            pointer-events: none; /* Không cản trở các thao tác bấm trên màn hình */
+            pointer-events: none; 
+            /* Tuyệt đối KHÔNG dùng object-fit: cover để các ô vẽ trên ảnh khớp 100% với nút HTML */
+        }
+
+        /* --- CSS CỔNG SƠN MÔN KHỞI ĐỘNG --- */
+        #boot-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: #000000;
+            z-index: 999999; /* Đè lên tất cả mọi thứ */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease-in-out;
+            touch-action: none; /* Khóa cuộn trang lúc đang màn hình đen */
+        }
+
+        #boot-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #00e5ff; /* Màu Cyan Cyberpunk */
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px #00e5ff, 0 0 5px #000;
+            opacity: 0; 
+            pointer-events: none; /* Chưa hiện xong thì không cho bấm */
+            transition: opacity 0.5s ease;
+        }
+
+        /* Hiệu ứng nhấp nháy khi đã tải xong và sẵn sàng cho chạm */
+        #boot-text.ready-to-tap {
+            opacity: 1;
+            pointer-events: auto;
+            cursor: pointer;
+            animation: boot-pulse 1.2s infinite alternate;
+        }
+
+        @keyframes boot-pulse {
+            0% { opacity: 0.3; text-shadow: 0 0 5px #00e5ff; transform: scale(0.98); }
+            100% { opacity: 1; text-shadow: 0 0 25px #00e5ff; transform: scale(1.02); }
         }
     </style>
 </head>
 <body>
+
+    <!-- CỔNG SƠN MÔN (LỚP PHỦ ĐEN KHỞI ĐỘNG HỆ THỐNG ĐỂ ỔN ĐỊNH KHUNG HÌNH) -->
+    <div id="boot-overlay">
+        <div id="boot-text" class="hidden-text">[ CHẠM ĐỂ VỀ SƠN MÔN ]</div>
+    </div>
+
     <div id="whiteFlash" class="white-flash-overlay"></div>
 
     <div class="kdrive-image-wrapper" id="mainWrapper">
         <div class="global-radar"><div class="radar-line"></div></div>
 
-        <!-- ẢNH NỀN GIAO DIỆN CHÍNH (Đã thay link và gắn class khóa cứng tâm màn hình) -->
+        <!-- ẢNH NỀN GIAO DIỆN CHÍNH -->
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/SONMON.png?raw=true" class="kdrive-bg-target locked-bg" id="kdriveBg">
         
         <!-- SÉT HÒM LƠ LỬNG -->
@@ -147,7 +190,54 @@
 
     <!-- SCRIPT CHÍNH -->
     <script src="core-logic-v2.js?v=99999"></script>
+
+    <!-- HỆ THỐNG CỔNG SƠN MÔN (CHỐNG LỆCH KHUNG & GIẬT MÀN HÌNH) -->
     <script>
+        window.addEventListener('load', function() {
+            let bootOverlay = document.getElementById('boot-overlay');
+            let bootText = document.getElementById('boot-text');
+
+            // BẮT BUỘC ĐỢI 1.5 GIÂY ĐỂ TRÌNH DUYỆT ỔN ĐỊNH HOÀN TOÀN THANH ĐỊA CHỈ
+            setTimeout(() => {
+                bootText.classList.add('ready-to-tap');
+                bootOverlay.addEventListener('click', unlockSystem);
+            }, 1500); 
+        });
+
+        function unlockSystem() {
+            // 1. KHÓA CỨNG CHIỀU CAO BẰNG PIXEL THẬT (CHỐNG CO GIÃN KHI LƯỚT)
+            let wrapper = document.getElementById('mainWrapper');
+            if(wrapper) {
+                // Chốt cứng Pixel, dập tắt vĩnh viễn sự co giãn của 100vh
+                wrapper.style.height = window.innerHeight + 'px';
+                wrapper.style.minHeight = window.innerHeight + 'px';
+            }
+
+            // 2. PHÁT ÂM THANH KHỞI ĐỘNG (Dùng hàm click của K-Drive)
+            if(typeof playCyberClick === 'function') {
+                playCyberClick();
+            }
+
+            // 3. MỞ CỔNG: XÓA MÀN HÌNH ĐEN
+            let bootOverlay = document.getElementById('boot-overlay');
+            bootOverlay.style.opacity = '0';
+            
+            setTimeout(() => {
+                bootOverlay.style.display = 'none';
+            }, 800); // Mờ dần trong 0.8s cho nghệ thuật
+        }
+
+        // Khóa lại pixel nếu người dùng xoay ngang máy
+        window.addEventListener('resize', function() {
+            let wrapper = document.getElementById('mainWrapper');
+            let bootOverlay = document.getElementById('boot-overlay');
+            // Chỉ cập nhật nếu màn hình đen đã được mở
+            if(wrapper && bootOverlay && bootOverlay.style.display === 'none') {
+                wrapper.style.height = window.innerHeight + 'px';
+                wrapper.style.minHeight = window.innerHeight + 'px';
+            }
+        });
+
         // Xóa bỏ bộ nhớ đệm cũ để đảm bảo logic mới mượt mà
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
