@@ -54,60 +54,15 @@
             z-index: 0;
             pointer-events: none; /* Không cản trở các thao tác bấm trên màn hình */
         }
-
-        /* --- CSS CỔNG SƠN MÔN KHỞI ĐỘNG --- */
-        #boot-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: #000000;
-            z-index: 999999; /* Đè lên tất cả mọi thứ */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.8s ease-in-out;
-            touch-action: none; /* Khóa cuộn trang lúc đang màn hình đen */
-        }
-
-        #boot-text {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            color: #00e5ff; /* Màu Cyan Cyberpunk */
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            text-shadow: 0 0 15px #00e5ff, 0 0 5px #000;
-            opacity: 0; 
-            pointer-events: none; /* Chưa hiện xong thì không cho bấm */
-            transition: opacity 0.5s ease;
-        }
-
-        /* Hiệu ứng nhấp nháy khi đã tải xong và sẵn sàng cho chạm */
-        #boot-text.ready-to-tap {
-            opacity: 1;
-            pointer-events: auto;
-            cursor: pointer;
-            animation: boot-pulse 1.2s infinite alternate;
-        }
-
-        @keyframes boot-pulse {
-            0% { opacity: 0.3; text-shadow: 0 0 5px #00e5ff; transform: scale(0.98); }
-            100% { opacity: 1; text-shadow: 0 0 25px #00e5ff; transform: scale(1.02); }
-        }
     </style>
 </head>
 <body>
-
-    <!-- CỔNG SƠN MÔN (LỚP PHỦ ĐEN KHỞI ĐỘNG HỆ THỐNG) -->
-    <div id="boot-overlay">
-        <div id="boot-text" class="hidden-text">[ CHẠM ĐỂ VỀ SƠN MÔN ]</div>
-    </div>
-
     <div id="whiteFlash" class="white-flash-overlay"></div>
 
     <div class="kdrive-image-wrapper" id="mainWrapper">
         <div class="global-radar"><div class="radar-line"></div></div>
 
-        <!-- ẢNH NỀN GIAO DIỆN CHÍNH -->
+        <!-- ẢNH NỀN GIAO DIỆN CHÍNH (Đã thay link và gắn class khóa cứng tâm màn hình) -->
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/SONMON.png?raw=true" class="kdrive-bg-target locked-bg" id="kdriveBg">
         
         <!-- SÉT HÒM LƠ LỬNG -->
@@ -192,52 +147,7 @@
 
     <!-- SCRIPT CHÍNH -->
     <script src="core-logic-v2.js?v=99999"></script>
-
-    <!-- SCRIPT XỬ LÝ CỔNG SƠN MÔN VÀ KHÓA KÍCH THƯỚC TRÌNH DUYỆT -->
     <script>
-        window.addEventListener('load', function() {
-            let bootOverlay = document.getElementById('boot-overlay');
-            let bootText = document.getElementById('boot-text');
-
-            // BẮT BUỘC ĐỢI 1.5 GIÂY ĐỂ TRÌNH DUYỆT ỔN ĐỊNH HOÀN TOÀN
-            setTimeout(() => {
-                bootText.classList.add('ready-to-tap');
-                
-                // Kích hoạt sự kiện bấm sau khi chữ đã hiện
-                bootOverlay.addEventListener('click', unlockSystem);
-            }, 1500); 
-        });
-
-        function unlockSystem() {
-            // 1. CHỐT CHẶT CHIỀU CAO ẢNH BẰNG PIXEL THẬT
-            // Ghi đè thuộc tính CSS để không bao giờ bị dãn ảnh
-            let coreBg = document.getElementById('kdriveBg'); 
-            if(coreBg) {
-                coreBg.style.setProperty('height', window.innerHeight + 'px', 'important');
-            }
-
-            // 2. PHÁT ÂM THANH KHỞI ĐỘNG (Dùng hàm có sẵn trong logic của anh nếu có)
-            if(typeof playCyberClick === 'function') {
-                playCyberClick();
-            }
-
-            // 3. MỞ CỔNG (LÀM MỜ MÀN HÌNH ĐEN RỒI XÓA ĐI)
-            let bootOverlay = document.getElementById('boot-overlay');
-            bootOverlay.style.opacity = '0';
-            
-            setTimeout(() => {
-                bootOverlay.style.display = 'none';
-            }, 800); // Đợi 0.8s cho hiệu ứng mờ kết thúc mới xóa hẳn
-        }
-
-        // Đo lại pixel nếu người dùng lỡ xoay điện thoại
-        window.addEventListener('resize', function() {
-            let coreBg = document.getElementById('kdriveBg');
-            if(coreBg) {
-                coreBg.style.setProperty('height', window.innerHeight + 'px', 'important');
-            }
-        });
-
         // Xóa bỏ bộ nhớ đệm cũ để đảm bảo logic mới mượt mà
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
