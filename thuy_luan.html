@@ -22,16 +22,17 @@
             height: 100vh; overflow: hidden; position: relative;
         }
 
-        /* 1. HIỆU ỨNG ĐIỆN ẢNH VÀ ẢNH NỀN ĐỘNG (DYNAMIC BACKGROUND) */
+        /* ẢNH NỀN ĐỘNG (ZERO-LAG TRANSITION) */
         .locked-bg {
             position: fixed !important; top: 50% !important; left: 50% !important;
             width: 100vw !important; height: 100vh !important; height: 100dvh !important;
-            object-fit: cover !important; z-index: -4; pointer-events: none; opacity: 0.95;
-            animation: slowZoom 70s linear infinite alternate, cyberGlitch 8s infinite;
-            transition: opacity 0.4s ease-in-out !important; /* Chuyển cảnh mượt mà */
+            object-fit: cover !important; z-index: -4; pointer-events: none; 
+            opacity: 0; 
+            transition: opacity 0.6s ease-in-out;
+            animation: slowZoom 70s linear infinite alternate;
         }
+        .locked-bg.active { opacity: 0.95; }
         @keyframes slowZoom { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-50%, -50%) scale(1.15); } }
-        @keyframes cyberGlitch { 0%, 96%, 98%, 100% { filter: none; opacity: 0.95; } 97% { filter: contrast(1.5) hue-rotate(90deg); opacity: 1; } }
 
         .vignette { position: fixed; inset: 0; z-index: -3; pointer-events: none; background: radial-gradient(circle at center, transparent 30%, rgba(5,6,8, 0.7) 100%); }
         .fog-layer { position: fixed; bottom: -10%; left: 0; width: 200%; height: 60vh; z-index: -3; pointer-events: none; background: linear-gradient(to top, rgba(0, 229, 255, 0.1), transparent); animation: fogMove 25s linear infinite alternate; }
@@ -42,9 +43,7 @@
         .particle { position: absolute; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan); opacity: 0; animation: floatUp linear infinite; }
         @keyframes floatUp { 0% { transform: translateY(100px) scale(0.5); opacity: 0; } 50% { opacity: 0.6; } 100% { transform: translateY(-100px) scale(1.2); opacity: 0; } }
 
-        /* ==================================================
-           2. MÀN HÌNH INTRO & 2 NÚT BẤM
-           ================================================== */
+        /* MÀN HÌNH INTRO & 2 NÚT BẤM */
         #intro-ui {
             position: fixed; inset: 0; z-index: 50000; display: flex; flex-direction: column;
             justify-content: center; align-items: center; gap: 25px; transition: opacity 0.5s;
@@ -67,18 +66,18 @@
         .btn-intro:hover { background: rgba(0, 229, 255, 0.15); box-shadow: 0 0 25px rgba(0,229,255,0.3); transform: scale(1.02); }
         .btn-intro:active { transform: scale(0.96); border-color: #fff; }
 
-        /* LỚP PHỦ TEXT TRÔI - HIỆU ỨNG TỪNG CÂU LÊN GIỮA MÀN HÌNH RỒI BIẾN MẤT */
+        /* LỚP PHỦ TEXT TRÔI - ĐÃ GỌN GÀNG, KHÔNG XUỐNG DÒNG THÔ */
         #intro-text-overlay {
             position: fixed; inset: 0; z-index: 100000;
-            background: rgba(0, 0, 0, 0.2); 
+            background: rgba(0, 0, 0, 0.4); 
             display: none; justify-content: center; align-items: center; overflow: hidden;
         }
         .subtitle-container { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; }
         .sub-text {
-            position: absolute; width: 90%; max-width: 420px;
-            color: var(--cyan); font-family: var(--font-content); font-size: 21px; line-height: 1.6;
+            position: absolute; width: 90%; max-width: 440px;
+            color: var(--cyan); font-family: var(--font-content); font-size: 20px; line-height: 1.5;
             text-align: center; font-style: italic; text-shadow: 0 0 15px rgba(0,229,255,0.9), 0 5px 15px #000;
-            opacity: 0; transform: translateY(80px);
+            opacity: 0; transform: translateY(60px);
         }
         #intro-text-overlay.active .sub-text {
             animation-name: subRise;
@@ -87,10 +86,10 @@
             animation-fill-mode: forwards;
         }
         @keyframes subRise {
-            0% { opacity: 0; transform: translateY(80px); }
+            0% { opacity: 0; transform: translateY(60px); }
             15% { opacity: 1; transform: translateY(0); }   
-            85% { opacity: 1; transform: translateY(-20px); } 
-            100% { opacity: 0; transform: translateY(-100px); } 
+            85% { opacity: 1; transform: translateY(-10px); } 
+            100% { opacity: 0; transform: translateY(-80px); } 
         }
 
         /* Lớp phủ Video */
@@ -104,9 +103,7 @@
         }
         .btn-skip:active { background: var(--amber); color: #000; box-shadow: 0 0 15px var(--amber); }
 
-        /* ==================================================
-           3. KHUNG ĐẠO TRƯỜNG CHÍNH 
-           ================================================== */
+        /* KHUNG ĐẠO TRƯỜNG CHÍNH */
         .dojo-container { width: 100%; max-width: 420px; height: 100vh; max-height: 900px; background: rgba(5, 8, 12, 0.1); border: 1px solid rgba(0, 229, 255, 0.2); flex-direction: column; padding: 20px; position: relative; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); display: none; opacity: 0; transition: opacity 1s ease; }
         .btn-audio { position: absolute; top: 15px; left: 15px; z-index: 10000; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0,229,255,0.4); color: var(--cyan); padding: 8px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); transition: 0.3s; box-shadow: 0 0 10px rgba(0,229,255,0.2); }
         .btn-audio svg { width: 18px; height: 18px; fill: currentColor; }
@@ -153,7 +150,7 @@
         .lore-content h4 { color: var(--cyan); font-family: var(--font-display); font-size: 12px; margin-bottom: 5px; margin-top: 10px; text-transform: uppercase; text-shadow: 0 0 5px rgba(0,229,255,0.5);}
         .lore-content p { text-align: justify; }
 
-        .incense-hud { display: flex; justify-content: center; gap: 30px; margin: 30px 0; }
+        .incense-hud { display: flex; justify-content: center; gap: 30px; }
         .incense-stick { width: 8px; height: 100px; background: linear-gradient(to right, #4a2e23, #6b4433, #4a2e23); border-radius: 4px; position: relative; cursor: pointer; transition: 0.4s; box-shadow: 5px 5px 10px rgba(0,0,0,0.5), inset -2px 0 3px rgba(0,0,0,0.6); }
         .incense-stick::after { content: ''; position: absolute; bottom: -18px; left: 2px; width: 4px; height: 18px; background: #cc0000; border-radius: 0 0 2px 2px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5);}
         .incense-stick.available::before { content: ''; position: absolute; top: -4px; left: -1px; width: 10px; height: 10px; background: #ff3300; border-radius: 50%; box-shadow: 0 0 10px #ff3300, 0 0 20px #ffaa00, inset 0 0 5px #fff; animation: fire-flicker 0.4s infinite alternate; }
@@ -218,15 +215,11 @@
 <audio id="audio-triet-ly" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/THUYLUAN%20GT.MP3"></audio>
 <audio id="bgm-audio" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai-Ripe%20Little%20Ninja%20(1).mp3" loop></audio>
 
-<!-- TẢI TRƯỚC (PRELOAD) ẢNH ĐỂ CHUYỂN CẢNH MƯỢT MÀ -->
-<div style="display:none;">
-    <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Tinhkhi.png?raw=true" alt="p1">
-    <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Luuthuy.png?raw=true" alt="p2">
-    <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Tamtran.png?raw=true" alt="p3">
-</div>
-
-<!-- ẢNH NỀN CHÍNH SẼ ĐƯỢC THAY ĐỔI ĐỘNG (DYNAMIC BACKGROUND) -->
-<img id="main-bg" src="https://github.com/happyk1900/-m-thanh-app/blob/main/THUYLUAN%20NEN.png?raw=true" class="locked-bg cinematic-bg" alt="Cyber Samurai">
+<!-- TẢI TRƯỚC 4 ẢNH ĐỂ CHUYỂN CẢNH ZERO-LAG -->
+<img id="bg-hub" src="https://github.com/happyk1900/-m-thanh-app/blob/main/THUYLIAN%20ANH%20NEN.png?raw=true" class="locked-bg active" alt="Hub Samurai">
+<img id="bg-1" src="https://github.com/happyk1900/-m-thanh-app/blob/main/Tinhkhi.png?raw=true" class="locked-bg" alt="Tinh Khi">
+<img id="bg-2" src="https://github.com/happyk1900/-m-thanh-app/blob/main/Luuthuy.png?raw=true" class="locked-bg" alt="Lưu Thủy">
+<img id="bg-3" src="https://github.com/happyk1900/-m-thanh-app/blob/main/Tamtran.png?raw=true" class="locked-bg" alt="Tâm Trận">
 
 <div class="vignette"></div>
 <div class="fog-layer"></div>
@@ -239,17 +232,17 @@
     <button class="btn-intro" id="btn-xung-tran" onclick="startCombat()">TIẾN VÀO DÒNG CHẢY</button>
 </div>
 
-<!-- LỚP PHỦ TEXT (CHỮ NỔI LÊN RỒI BIẾN MẤT TẠI TRUNG TÂM) -->
+<!-- LỚP PHỦ TEXT TRÔI - ĐÃ GỌN GÀNG, KHÔNG DÙNG ... HOẶC XUỐNG DÒNG THÔ -->
 <div id="intro-text-overlay">
     <button class="btn-skip" onclick="finishPhilosophy()">BỎ QUA ➔</button>
     <div class="subtitle-container">
-        <p class="sub-text" style="animation-delay: 0s;">Trong Ngũ Luân Thư, Musashi từng viết:<br><br>Tâm phải như nước. Biến hóa vô hình... nhưng khi tĩnh lặng, sẽ như mặt hồ phản chiếu rõ vạn vật.</p>
-        <p class="sub-text" style="animation-delay: 10s;">Trí nhớ của con người cũng vậy.<br><br>Chỉ một tia hoảng loạn nổi lên... mặt nước gợn sóng... ký ức sẽ lập tức bị bóp méo và vỡ nát.</p>
-        <p class="sub-text" style="animation-delay: 20s;">Chào mừng đến với Đạo trường Thủy Luân.<br><br>Một hệ thống rèn luyện nhận thức... với độ khó vô hạn.</p>
-        <p class="sub-text" style="animation-delay: 30s;">Thuật toán K-Drive không có kịch bản.<br><br>Nó sẽ trực tiếp 'nhập thể' vào hệ thần kinh của ngươi thông qua từng nhịp chạm.</p>
-        <p class="sub-text" style="animation-delay: 40s;">Nó đọc sự ngập ngừng... đo lường tốc độ phản xạ...<br><br>và liên tục tái cấu trúc không gian để dồn ép giới hạn.</p>
-        <p class="sub-text" style="animation-delay: 50s;">Ngươi càng tĩnh tại, hệ thống càng biến ảo.<br><br>Thuật toán sẽ giam giữ ngươi trên đường ranh giới mỏng manh giữa sự nhàm chán... và sự quá tải.</p>
-        <p class="sub-text" style="animation-delay: 60s;">Hãy giữ cho mặt hồ trong tâm trí phẳng lặng.<br><br>Nếu không... thuật toán sẽ tự động đào thải ngươi.<br><br>Giao thức... bắt đầu!</p>
+        <p class="sub-text" style="animation-delay: 0s;">Trong Ngũ Luân Thư Musashi từng viết Tâm phải như nước biến hóa vô hình nhưng khi tĩnh lặng sẽ như mặt hồ phản chiếu rõ vạn vật</p>
+        <p class="sub-text" style="animation-delay: 10s;">Trí nhớ của con người cũng vậy chỉ một tia hoảng loạn nổi lên mặt nước gợn sóng ký ức sẽ lập tức bị bóp méo và vỡ nát</p>
+        <p class="sub-text" style="animation-delay: 20s;">Chào mừng đến với Đạo trường Thủy Luân một hệ thống rèn luyện nhận thức với độ khó vô hạn</p>
+        <p class="sub-text" style="animation-delay: 30s;">Thuật toán K-Drive không có kịch bản nó sẽ trực tiếp nhập thể vào hệ thần kinh của ngươi thông qua từng nhịp chạm</p>
+        <p class="sub-text" style="animation-delay: 40s;">Nó đọc sự ngập ngừng đo lường tốc độ phản xạ và liên tục tái cấu trúc không gian để dồn ép giới hạn</p>
+        <p class="sub-text" style="animation-delay: 50s;">Ngươi càng tĩnh tại hệ thống càng biến ảo thuật toán sẽ giam giữ ngươi trên đường ranh giới mỏng manh giữa sự nhàm chán và sự quá tải</p>
+        <p class="sub-text" style="animation-delay: 60s;">Hãy giữ cho mặt hồ trong tâm trí phẳng lặng nếu không thuật toán sẽ tự động đào thải ngươi giao thức bắt đầu</p>
     </div>
 </div>
 
@@ -319,7 +312,7 @@
             <button class="action-btn" style="border-color: rgba(255,255,255,0.4); color: #fff; margin-top: auto; box-shadow: none;" onclick="window.location.href='index.html'">➔ QUAY LẠI TRẠM LÕI</button>
         </div>
 
-        <!-- SẢNH 2 -->
+        <!-- SẢNH 2 (ĐÃ HẠ LÒ NHANG XUỐNG 1/3 ĐÁY MÀN HÌNH) -->
         <div id="screen-prep" class="screen">
             <span class="back-link" onclick="backToHub()">➔ Trở về sảnh</span>
             <div class="stats">
@@ -327,12 +320,14 @@
                 <span>Kỷ lục: <strong id="prep-best-score">0</strong></span>
             </div>
 
-            <div style="text-align: center; margin-top: 50px;">
+            <div style="flex: 1;"></div>
+
+            <div style="text-align: center; margin-bottom: 12vh;">
                 <p style="font-size: 12px; color: var(--amber); letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,170,0,0.8); font-weight: bold;">LƯỢT THỬ (3 NÉN NHANG)</p>
                 <div class="incense-hud" id="incense-container"></div>
             </div>
 
-            <button class="action-btn" id="btn-no-incense" style="display:none; border-color: rgba(255,42,42,0.8); color: #fff; background: rgba(255,42,42,0.3); margin-top: auto;" onclick="backToHub()">ĐÃ HẾT NHANG - RÚT LUI</button>
+            <button class="action-btn" id="btn-no-incense" style="display:none; border-color: rgba(255,42,42,0.8); color: #fff; background: rgba(255,42,42,0.3); margin-top: 10px;" onclick="backToHub()">ĐÃ HẾT NHANG - RÚT LUI</button>
         </div>
 
         <!-- SẢNH 3 -->
@@ -378,40 +373,26 @@
     }
     initParticles();
 
-    // --- CẤU HÌNH LIÊN KẾT ẢNH NỀN ---
-    const bgLinks = {
-        'hub': 'https://github.com/happyk1900/-m-thanh-app/blob/main/THUYLUAN%20NEN.png?raw=true',
-        1: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Tinhkhi.png?raw=true',
-        2: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Luuthuy.png?raw=true',
-        3: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Tamtran.png?raw=true'
-    };
-
-    // --- HÀM CHUYỂN CẢNH NỀN MƯỢT MÀ ---
+    // CHUYỂN NỀN KHÔNG LAG
     function switchBackground(state) {
-        let bgImg = document.getElementById('main-bg');
-        bgImg.style.opacity = 0; // Fade out
-        setTimeout(() => {
-            bgImg.src = bgLinks[state];
-            bgImg.style.opacity = 0.95; // Fade in
-        }, 400); // Đợi 0.4s để hiệu ứng mờ hoàn tất rồi mới đổi src
+        document.querySelectorAll('.locked-bg').forEach(bg => bg.classList.remove('active'));
+        if (state === 'hub') document.getElementById('bg-hub').classList.add('active');
+        else if (state === 1) document.getElementById('bg-1').classList.add('active');
+        else if (state === 2) document.getElementById('bg-2').classList.add('active');
+        else if (state === 3) document.getElementById('bg-3').classList.add('active');
     }
 
-    // --- LOGIC MÀN HÌNH INTRO ĐIỆN ẢNH ---
     let bgmAudio = document.getElementById('bgm-audio');
     bgmAudio.volume = 0.4;
     let isMuted = false;
 
     function startPhilosophy() {
         document.getElementById('intro-ui').style.display = 'none';
-        
         let overlay = document.getElementById('intro-text-overlay');
         overlay.style.display = 'flex';
-        
         setTimeout(() => { overlay.classList.add('active'); }, 50);
-        
         let audio = document.getElementById('audio-triet-ly');
         audio.play().catch(e => console.log("Cần click để play audio"));
-        
         audio.onended = () => { finishPhilosophy(); };
     }
 
@@ -420,7 +401,6 @@
         let overlay = document.getElementById('intro-text-overlay');
         overlay.style.display = 'none';
         overlay.classList.remove('active');
-        
         document.getElementById('intro-ui').style.display = 'flex';
         document.getElementById('btn-triet-ly').style.display = 'none';
     }
@@ -428,25 +408,20 @@
     function startCombat() {
         document.getElementById('intro-ui').style.display = 'none';
         document.getElementById('intro-video-overlay').style.display = 'block';
-        
         let video = document.getElementById('video-xung-tran');
         video.play().catch(e => console.log("Cần click để play video"));
-        
         video.onended = () => { skipVideo(); };
     }
 
     function skipVideo() {
         document.getElementById('video-xung-tran').pause();
         document.getElementById('intro-video-overlay').style.display = 'none';
-
         let dojo = document.getElementById('dojo-container');
         dojo.style.display = 'flex';
         setTimeout(() => { dojo.style.opacity = '1'; }, 50);
-
         bgmAudio.play().catch(e => console.log(e));
         document.getElementById('icon-sound-on').style.display = 'block';
         document.getElementById('icon-sound-off').style.display = 'none';
-        
         setTimeout(() => { booSpeakAudio("Chào mừng đến với Thủy Luân! Chạm vào thẻ nhiệm vụ để bắt đầu luyện tập."); }, 1000);
     }
 
@@ -458,7 +433,6 @@
         else { bgmAudio.pause(); isMuted = true; onIcon.style.display = 'none'; offIcon.style.display = 'block'; }
     }
 
-    // --- ÂM THANH & RUNG HAPTIC TRONG TRẬN ---
     let audioCtx;
     function initAudio() { try { if(!audioCtx) { const AudioContext = window.AudioContext || window.webkitAudioContext; if(AudioContext) audioCtx = new AudioContext(); } } catch(e) {} }
     
@@ -483,9 +457,7 @@
     const HINT_2 = "Nước chảy mây trôi. Đừng đếm từng bước một cách máy móc, hãy để mắt và tay của bạn trôi tự nhiên theo quỹ đạo của ánh sáng.";
     const HINT_3 = "Thấy khó chịu khi đứt chuỗi? Đó là lúc não bộ đang 'tập thể dục'. Gạt bỏ sự bực tức, hít một hơi sâu và giữ nhịp điệu thong dong.";
 
-    // --- LÕI AI BOO ---
     const booWidget = document.getElementById('boo-widget');
-    
     let isDragging = false; let dragStartX, dragStartY; let widgetStartX, widgetStartY;
     let booHoldTimer = null; window.isBooSleeping = false;
     let currentContextText = "Đạo trường từ chối kẻ lười biếng. Nhấn vào thẻ nhiệm vụ để bắt đầu!";
@@ -580,7 +552,6 @@
     let scoreNow = 0; let roundNow = 1; let maxRound = 5;
     let canClick = false; let t3_timer = null; let timeLeft = 60; let currentStreak = 1;
 
-    // --- LOGIC CUSTOM MODAL ---
     function promptQuitGame() { playBeep(); document.getElementById('custom-modal').classList.add('active'); }
     function closeModal() { playBeep(); document.getElementById('custom-modal').classList.remove('active'); }
     function confirmQuit() {
@@ -593,7 +564,7 @@
     function openMission(id) {
         playBeep(); 
         currentMission = id;
-        switchBackground(id); // Gọi hàm đổi nền sang Ải tương ứng
+        switchBackground(id); 
 
         document.getElementById('screen-hub').classList.remove('active');
         document.getElementById('screen-prep').classList.add('active');
@@ -609,7 +580,7 @@
     function backToHub() {
         playBeep();
         if(t3_timer) clearInterval(t3_timer);
-        switchBackground('hub'); // Trả lại nền Samurai Sảnh chính
+        switchBackground('hub'); 
 
         document.getElementById('screen-prep').classList.remove('active'); document.getElementById('screen-game').classList.remove('active'); document.getElementById('screen-hub').classList.add('active');
         
@@ -689,7 +660,7 @@
     
     function gridClick(idx) {
         if(!canClick) return;
-        playTapSound(); // Âm thanh & rung khi chạm
+        playTapSound(); 
         if(currentMission === 1) {
             if(t1_usr.includes(idx)) return; t1_usr.push(idx);
             let c = document.getElementById(`c${idx}`); c.classList.add('active'); c.innerText = '💧';
@@ -749,7 +720,7 @@
     
     function symbolClick(symIdx) {
         if(!canClick || currentMission !== 3) return;
-        playTapSound(); // Âm thanh & rung khi chạm
+        playTapSound(); 
         t3_usr.push(symIdx);
         let area = document.getElementById('seq-area'); area.innerHTML = '';
         t3_usr.forEach(idx => { area.innerHTML += `<div class="cyber-tile">${svgs[idx]}</div>`; });
@@ -779,8 +750,6 @@
         else speech = `SCI ${avg} điểm. Trạng thái tinh anh! Ngươi đang dần chứng minh bản lĩnh của một kẻ sinh tồn bằng lý trí.`;
         
         booSpeakAudio(speech);
-        
-        // LƯU ĐIỂM SCI VÀO BỘ NHỚ TRÌNH DUYỆT
         localStorage.setItem('SCI_ThuyLuan', avg);
         
         document.getElementById('btn-finish-all').innerText = `SCI HÔM NAY: ${avg} ĐIỂM`;
