@@ -1,76 +1,196 @@
-/* ==========================================
-           2. LÕI LẬP PHƯƠNG THẦN THÁNH (ĐÃ THU NHỎ TỶ LỆ)
-        ========================================== */
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>K-Drive V28 Core</title>
+
+    <script>
+        (function checkAuthGuard() {
+            const hasAccess = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active';
+            if (!hasAccess) { window.location.replace('login.html'); }
+        })();
+    </script>
+
+    <!-- Font điện tử cho chỉ số SCI -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body, html {
+            width: 100%; height: 100%; overflow: hidden; background-color: #000;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* ẢNH NỀN & VIGNETTE */
+        #sanctum-bg {
+            position: fixed; inset: 0; width: 100vw; height: 100dvh;
+            background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/index%20nen.png?raw=true');
+            background-size: cover; background-position: center center; background-repeat: no-repeat;
+            z-index: 1; pointer-events: none; 
+        }
+        .vignette-overlay {
+            position: fixed; inset: 0; background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.8) 100%);
+            z-index: 2; pointer-events: none;
+        }
+
+        /* KHỐI LÕI LẬP PHƯƠNG */
         .holy-core-container {
-            position: relative;
-            z-index: 10;
-            width: 100px; /* Đã thu nhỏ gọn gàng hơn */
-            height: 100px;
-            perspective: 800px; /* Giảm độ hút sâu để khối vuông vức hơn */
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
+            position: relative; z-index: 10;
+            width: 120px; height: 120px; /* Kích thước tối ưu cho cả hình và chữ */
+            perspective: 800px; cursor: pointer; -webkit-tap-highlight-color: transparent;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
-        /* Hiệu ứng lún sâu khi ấn tay vào Lõi */
-        .holy-core-container:active {
-            transform: scale(0.8);
-        }
+        .holy-core-container:active { transform: scale(0.85); }
 
         .holy-cube {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            transform-style: preserve-3d;
+            width: 100%; height: 100%; position: absolute; transform-style: preserve-3d;
             animation: holySpin 15s infinite linear;
         }
 
-        /* 6 Mặt của Lõi Lập Phương */
+        /* 6 MẶT CƠ BẢN */
         .cube-face {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            /* Viền Neon chói lóa */
-            border: 2px solid #00e5ff;
-            /* Mặt kính mờ ảo */
-            background: rgba(0, 229, 255, 0.05);
-            backdrop-filter: blur(2px);
-            -webkit-backdrop-filter: blur(2px);
-            /* Hào quang điều chỉnh vừa vặn với kích thước mới */
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.4);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: absolute; width: 120px; height: 120px;
+            border: 2px solid transparent; /* Viền mặc định */
+            backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
 
-        /* Ánh sáng lõi tâm chớp nháy */
+        /* TRẠNG THÁI MÀU SẮC DỰA TRÊN SCI (Đỏ, Xanh, Tím) */
+        .state-stable { /* Từ 50 - 85: Xanh Neon */
+            border-color: #00e5ff; background: rgba(0, 229, 255, 0.05);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2);
+        }
+        .state-stable .sci-label { color: #00e5ff; text-shadow: 0 0 8px #00e5ff; }
+
+        .state-danger { /* Dưới 50: Đỏ Báo Động */
+            border-color: #ff2a2a; background: rgba(255, 42, 42, 0.05);
+            box-shadow: 0 0 20px rgba(255, 42, 42, 0.4), inset 0 0 20px rgba(255, 42, 42, 0.2);
+        }
+        .state-danger .sci-label { color: #ff2a2a; text-shadow: 0 0 8px #ff2a2a; }
+
+        .state-perfect { /* Trên 85: Tím Vô Ngã */
+            border-color: #b026ff; background: rgba(176, 38, 255, 0.05);
+            box-shadow: 0 0 20px rgba(176, 38, 255, 0.4), inset 0 0 20px rgba(176, 38, 255, 0.2);
+        }
+        .state-perfect .sci-label { color: #b026ff; text-shadow: 0 0 8px #b026ff; }
+
+        /* THIẾT KẾ CHỮ KANJI TRẮNG TRONG SUỐT (XUYÊN THẤU) */
+        .kanji-ghost {
+            font-family: "Yu Mincho", "MS Mincho", serif;
+            font-size: 55px; font-weight: normal;
+            color: rgba(255, 255, 255, 0.9); /* Sáng trắng nhưng hơi trong suốt */
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px); /* Đẩy chữ Kanji lên xíu nhường chỗ cho dòng SCI dưới đáy */
+        }
+
+        /* THIẾT KẾ DÒNG SCI NHỎ DƯỚI ĐÁY */
+        .sci-label {
+            position: absolute; bottom: 8px; width: 100%; text-align: center;
+            font-family: 'Space Grotesk', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1px;
+        }
+
+        /* ÁNH SÁNG LÕI VÔ NGÃ (TÂM ĐIỂM) */
         .inner-glow {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50px; height: 50px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #fff 0%, #00e5ff 40%, transparent 70%);
-            box-shadow: 0 0 30px #00e5ff, 0 0 60px #00e5ff;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 50px; height: 50px; border-radius: 50%;
+            background: radial-gradient(circle, #fff 0%, #b026ff 40%, transparent 70%); /* Lõi đang tím nhẹ */
+            box-shadow: 0 0 30px #b026ff, 0 0 60px #b026ff;
             animation: pulseGlow 2s infinite alternate;
         }
 
-        /* Tọa độ 3D thu hẹp lại (Dịch chuyển ra xa tâm 50px = 1 nửa của 100px) */
-        .face-front  { transform: rotateY(0deg) translateZ(50px); }
-        .face-back   { transform: rotateY(180deg) translateZ(50px); }
-        .face-right  { transform: rotateY(90deg) translateZ(50px); }
-        .face-left   { transform: rotateY(-90deg) translateZ(50px); }
-        .face-top    { transform: rotateX(90deg) translateZ(50px); }
-        .face-bottom { transform: rotateX(-90deg) translateZ(50px); }
+        /* TỌA ĐỘ 3D (Cách tâm 60px) */
+        .face-front  { transform: rotateY(0deg) translateZ(60px); }    /* 1. Thổ */
+        .face-right  { transform: rotateY(90deg) translateZ(60px); }   /* 2. Thủy */
+        .face-back   { transform: rotateY(180deg) translateZ(60px); }  /* 3. Hỏa */
+        .face-left   { transform: rotateY(-90deg) translateZ(60px); }  /* 4. Phong */
+        .face-top    { transform: rotateX(90deg) translateZ(60px); }   /* 5. Khế Ước */
+        .face-bottom { transform: rotateX(-90deg) translateZ(60px); }  /* 6. Bushido */
 
-        /* Chuyển động xoay vô cực */
         @keyframes holySpin {
             0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
             100% { transform: rotateX(360deg) rotateY(720deg) rotateZ(360deg); }
         }
-
-        /* Nhịp đập của ánh sáng lõi */
         @keyframes pulseGlow {
             0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.8); }
             100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
         }
+    </style>
+</head>
+<body>
+
+    <!-- 1. ẢNH NỀN SIÊU SẠCH -->
+    <div id="sanctum-bg"></div>
+    <div class="vignette-overlay"></div>
+
+    <!-- 2. LÕI VẠN NĂNG -->
+    <div class="holy-core-container" onclick="touchTheCore()">
+        
+        <!-- Tâm: Vô Ngã -->
+        <div class="inner-glow"></div>
+
+        <div class="holy-cube">
+            <!-- Mặt 1: Thổ (Đất) - Thể Chất - Đang ổn định (Màu Xanh) -->
+            <div class="cube-face face-front state-stable">
+                <div class="kanji-ghost">地</div>
+                <div class="sci-label">[ SCI THỂ CHẤT: 75 ]</div>
+            </div>
+            
+            <!-- Mặt 2: Thủy (Nước) - Trí Nhớ - Đạt cảnh giới (Màu Tím) -->
+            <div class="cube-face face-right state-perfect">
+                <div class="kanji-ghost">水</div>
+                <div class="sci-label">[ SCI TRÍ NHỚ: 92 ]</div>
+            </div>
+            
+            <!-- Mặt 3: Hỏa (Lửa) - Phản Xạ - Báo động (Màu Đỏ) -->
+            <div class="cube-face face-back state-danger">
+                <div class="kanji-ghost">火</div>
+                <div class="sci-label">[ SCI PHẢN XẠ: 45 ]</div>
+            </div>
+            
+            <!-- Mặt 4: Phong (Gió) - Tư Duy - Đang ổn định (Màu Xanh) -->
+            <div class="cube-face face-left state-stable">
+                <div class="kanji-ghost">風</div>
+                <div class="sci-label">[ SCI TƯ DUY: 80 ]</div>
+            </div>
+            
+            <!-- Mặt 5: Khế Ước (Nắp Trên) -->
+            <div class="cube-face face-top state-perfect">
+                <div class="kanji-ghost" style="font-size: 45px;">契</div>
+                <div class="sci-label" style="bottom: 12px;">[ DAY: 1000 ]</div>
+            </div>
+            
+            <!-- Mặt 6: Bushido (Đáy Dưới) -->
+            <div class="cube-face face-bottom state-stable">
+                <div class="kanji-ghost" style="font-size: 45px;">武</div>
+                <div class="sci-label" style="bottom: 12px;">[ BUSHIDO ]</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT TƯƠNG TÁC TEST -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playCyberClick() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function touchTheCore() {
+            playCyberClick();
+            if (navigator.vibrate) navigator.vibrate(50);
+            alert("LÕI ĐÃ ĐƯỢC CHẠM!");
+        }
+    </script>
+</body>
+</html>
