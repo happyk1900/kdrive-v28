@@ -2,12 +2,10 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <!-- ĐỒNG BỘ VIEWPORT TRÀN VIỀN TỪ SINH TRẮC -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="google" content="notranslate">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
     <title>K-Drive V28 Core</title>
 
@@ -19,9 +17,7 @@
     <script>
         (function checkAuthGuard() {
             const hasAccess = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active';
-            if (!hasAccess) {
-                window.location.replace('login.html');
-            }
+            if (!hasAccess) { window.location.replace('login.html'); }
         })();
     </script>
 
@@ -29,95 +25,85 @@
     <link rel="stylesheet" href="kdrive-style.css?v=999">
     
     <style>
-        /* KHÓA CHẾT ẢNH NỀN VÀO KHUNG (CHỐNG LẸM ĐÁY 100%) */
+        /* KHÓA ẢNH NỀN BAO NÉT, KHÔNG LỆCH, KHÔNG CO GIÃN */
         .locked-bg {
-            position: absolute !important; 
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: fill !important; /* Tối thượng: Ép ảnh khít rịt 4 góc màn hình, dập tắt lẹm đáy */
+            position: fixed !important; 
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100dvh !important;
+            object-fit: cover !important; 
+            object-position: center center !important; 
             z-index: 0;
             pointer-events: none; 
         }
 
-        /* --- CSS CỔNG SƠN MÔN: BUSHIDO --- */
-        #boot-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: #030508;
-            z-index: 999999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.8s ease-in-out;
-            touch-action: none; 
+        /* --- CỔNG SƠN MÔN: BUSHIDO --- */
+        #boot-overlay { position: fixed; inset: 0; background-color: #030508; z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-in-out; touch-action: none; }
+        #boot-text { display: flex; flex-direction: column; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        #boot-text.ready-to-tap { opacity: 1; pointer-events: auto; cursor: pointer; }
+        .kanji-glow { font-family: serif; font-size: 70px; color: #ffffff; text-shadow: 0 0 20px #fff, 0 0 40px #00e5ff, 0 0 80px #00e5ff; margin-bottom: 5px; letter-spacing: 8px; animation: boot-pulse-kanji 1.2s infinite alternate; }
+        .bushido-blood { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 800; color: #cc0000; letter-spacing: 12px; text-transform: uppercase; position: relative; text-shadow: 2px 2px 0px #330000, 0 0 15px #ff0000; margin-top: 10px; }
+        .bushido-blood::after { content: ''; position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); width: 3px; background-color: #cc0000; border-radius: 0 0 5px 5px; box-shadow: 0 0 8px #ff0000; animation: bloodDrip 2s infinite; }
+        @keyframes boot-pulse-kanji { 0% { opacity: 0.8; text-shadow: 0 0 15px #fff, 0 0 30px #00e5ff; transform: scale(0.98); } 100% { opacity: 1; text-shadow: 0 0 30px #fff, 0 0 60px #00e5ff; transform: scale(1.02); } }
+        @keyframes bloodDrip { 0% { height: 0px; opacity: 1; transform: translate(-50%, 0); } 60% { height: 25px; opacity: 1; transform: translate(-50%, 0); } 100% { height: 25px; opacity: 0; transform: translate(-50%, 15px); } }
+
+        /* --- HỆ THỐNG GIAO DIỆN MỚI (FLEXBOX/GRID) TỰ ĐỘNG CĂN CHỈNH TRÊN MỌI MÀN HÌNH --- */
+        #ui-layer {
+            position: absolute; inset: 0; z-index: 10;
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 40px 20px 30px 20px; pointer-events: none; /* Lớp vô hình, chỉ cho bấm vào các nút có pointer-events: auto */
         }
 
-        #boot-text {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            opacity: 0; 
-            pointer-events: none; 
-            transition: opacity 0.5s ease;
+        /* 1. Header (Sync / BPM) */
+        .top-status-bar { display: flex; justify-content: flex-start; align-items: flex-start; pointer-events: auto; }
+        .sync-box {
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--cyan); border-radius: 4px; padding: 8px 15px;
+            font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: #fff;
+            letter-spacing: 2px; text-shadow: 0 0 8px var(--cyan); box-shadow: 0 0 15px rgba(0,229,255,0.2);
+            display: flex; align-items: center; gap: 10px;
         }
+        .sync-box .heart { color: #ff2a2a; font-size: 16px; animation: heartBeat 1s infinite alternate; text-shadow: 0 0 10px #ff2a2a; }
+        @keyframes heartBeat { 0% { transform: scale(1); } 100% { transform: scale(1.2); } }
 
-        #boot-text.ready-to-tap {
-            opacity: 1;
-            pointer-events: auto;
-            cursor: pointer;
+        /* 2. Khu vực giữa (Cột Trái, Lõi, Cột Phải) */
+        .middle-arena { display: flex; justify-content: space-between; align-items: center; flex: 1; margin: 20px 0; }
+
+        /* Nút vật lý Glassmorphism chuẩn Cyberpunk */
+        .cyber-btn {
+            width: 55px; height: 55px; background: rgba(5, 8, 12, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--cyan); border-radius: 8px; display: flex; justify-content: center; align-items: center;
+            font-size: 24px; color: #fff; cursor: pointer; pointer-events: auto; transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,229,255,0.2);
+            margin-bottom: 15px; /* Khoảng cách giữa các nút */
         }
+        .cyber-btn:active { transform: scale(0.9); background: rgba(0, 229, 255, 0.3); box-shadow: 0 0 20px var(--cyan); }
+        .cyber-btn.red-theme { border-color: var(--crimson); box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,42,42,0.2); }
+        .cyber-btn.red-theme:active { background: rgba(255, 42, 42, 0.3); box-shadow: 0 0 20px var(--crimson); }
+        
+        .left-column { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+        .right-column { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
+        
+        /* Cờ Samurai Cột Phải */
+        .flag-samurai { width: 65px; height: auto; margin-bottom: 20px; pointer-events: auto; cursor: pointer; filter: drop-shadow(0 0 10px rgba(0,229,255,0.5)); transition: 0.2s; }
+        .flag-samurai:active { transform: scale(0.95); filter: drop-shadow(0 0 20px var(--cyan)); }
 
-        /* Chữ Kanji sáng lóa */
-        .kanji-glow {
-            font-family: serif;
-            font-size: 70px;
-            color: #ffffff;
-            text-shadow: 0 0 20px #fff, 0 0 40px #00e5ff, 0 0 80px #00e5ff, 0 0 120px #fff;
-            margin-bottom: 5px;
-            font-weight: normal;
-            letter-spacing: 8px;
-            animation: boot-pulse-kanji 1.2s infinite alternate;
+        /* Bubble Lời nói (Giữ lại ID cho JS) */
+        .speech-bubble { pointer-events: none; position: absolute; z-index: 50; }
+
+        /* 3. Khu vực dưới cùng (SYS OFF, Track Nhạc, Thần Tài) */
+        .bottom-dock { display: flex; justify-content: space-between; align-items: flex-end; pointer-events: auto; }
+        
+        .sys-off-btn {
+            background: rgba(0,0,0,0.7); border: 1px solid var(--crimson); color: var(--crimson);
+            font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: bold; letter-spacing: 2px;
+            padding: 12px 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 0 15px rgba(255,42,42,0.2); text-shadow: 0 0 5px rgba(255,42,42,0.8);
         }
+        .sys-off-btn:active { background: var(--crimson); color: #fff; box-shadow: 0 0 20px var(--crimson); text-shadow: none; }
 
-        /* Chữ Bushido nhỏ máu */
-        .bushido-blood {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 22px;
-            font-weight: 800;
-            color: #cc0000;
-            letter-spacing: 12px;
-            text-transform: uppercase;
-            position: relative;
-            text-shadow: 2px 2px 0px #330000, 0 0 15px #ff0000;
-            margin-top: 10px;
-        }
-
-        /* Hiệu ứng giọt máu rơi */
-        .bushido-blood::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 3px;
-            background-color: #cc0000;
-            border-radius: 0 0 5px 5px;
-            box-shadow: 0 0 8px #ff0000;
-            animation: bloodDrip 2s infinite;
-        }
-
-        @keyframes boot-pulse-kanji {
-            0% { opacity: 0.8; text-shadow: 0 0 15px #fff, 0 0 30px #00e5ff; transform: scale(0.98); }
-            100% { opacity: 1; text-shadow: 0 0 30px #fff, 0 0 60px #00e5ff, 0 0 100px #fff; transform: scale(1.02); }
-        }
-
-        @keyframes bloodDrip {
-            0% { height: 0px; opacity: 1; transform: translate(-50%, 0); }
-            60% { height: 25px; opacity: 1; transform: translate(-50%, 0); }
-            100% { height: 25px; opacity: 0; transform: translate(-50%, 15px); }
+        .music-track-text {
+            font-family: 'Space Grotesk', sans-serif; font-size: 11px; color: var(--cyan); text-shadow: 0 0 8px var(--cyan); margin-left: 10px; cursor: pointer;
         }
     </style>
 </head>
@@ -133,51 +119,41 @@
 
     <div id="whiteFlash" class="white-flash-overlay"></div>
 
-    <div class="kdrive-image-wrapper" id="mainWrapper">
-        <div class="global-radar"><div class="radar-line"></div></div>
+    <!-- ẢNH NỀN MỚI SIÊU SẠCH -->
+    <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/index%20nen.png?raw=true" class="locked-bg" id="kdriveBg">
 
-        <!-- ẢNH NỀN GIAO DIỆN CHÍNH -->
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/SONMON.png?raw=true" class="kdrive-bg-target locked-bg" id="kdriveBg">
-        
-        <!-- SÉT HÒM LƠ LỬNG -->
-        <div id="lightningRelic" class="lightning-relic" onclick="captureRelic()"></div>
-        
-        <div class="terminal-stream" id="terminalStream"><div class="terminal-line">> BOO AI: STANDBY...</div></div>
-        <div id="bioSyncDisplay" class="bio-sync-hud">[ <span id="heartIcon" class="heart-icon">🤍</span> SYNC: <span id="bpmText">OFFLINE</span> ]</div>
-        
-        <div class="audio-hud" id="audioHud">
-            <div class="shuriken-btn" onclick="cycleMusicTracks()">
-                <svg class="shuriken-svg" viewBox="0 0 100 100" width="24" height="24" style="stroke: #ff3333;">
-                    <path d="M50 5 L58 42 L95 50 L58 58 L50 95 L42 58 L5 50 L42 42 Z" fill="none" stroke-width="5" />
-                    <circle cx="50" cy="50" r="10" fill="none" stroke-width="3" />
-                </svg>
-            </div>
-            <div class="track-display" id="trackText" onclick="toggleMuteSystem()">[ 🔇 SYS: OFF ]</div>
-        </div>
+    <div class="global-radar"><div class="radar-line"></div></div>
 
-        <div class="logout-hud" id="logoutHud" onclick="showLogoutConfirm()">
-            <div class="shuriken-btn" style="border-color: #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);">
-                <svg viewBox="0 0 24 24" width="18" height="18" stroke="#00e5ff" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
+    <!-- THẺ CAMERA ẨN ĐỂ CHỤP ẢNH (Bảo toàn từ code cũ) -->
+    <input type="file" accept="video/*" capture="camcorder" id="hiddenCamera" style="display: none;" onchange="handleVideoUpload(event)">
+    <div id="samuraiBubble" class="speech-bubble" style="display:none; left: 50%; top: 20%; transform: translateX(-50%); background: rgba(0,0,0,0.8); border: 1px solid var(--cyan); padding: 10px; border-radius: 6px; color: #fff; font-family: 'Space Grotesk'; font-size: 12px; text-shadow: 0 0 5px var(--cyan);"><span id="bubbleText"></span></div>
+
+    <!-- LỚP GIAO DIỆN UI VẬT LÝ NỔI (Thay thế hoàn toàn tọa độ %) -->
+    <div id="ui-layer">
+        
+        <!-- HEADER (Nhịp tim) -->
+        <div class="top-status-bar">
+            <div class="sync-box">
+                <span id="heartIcon" class="heart">♥</span> [ SYNC: <span id="bpmText">OFFLINE</span> ]
             </div>
         </div>
 
-        <!-- ĐIỆN THỜ THẦN TÀI LƠ LỬNG -->
-        <div class="fab-center pulse" id="cyberAltarBtn" onclick="window.location.href='dien_tho.html'">
-            <img src="https://github.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/blob/main/ban%20tho%20ong%20dia.png?raw=true" class="avatar-chibi" alt="Thần Tài">
-        </div>
+        <!-- KHU VỰC GIỮA (Lõi + Menu 2 bên) -->
+        <div class="middle-arena">
+            
+            <!-- Cột trái: Tứ Đại Nguyên Tố -->
+            <div class="left-column">
+                <button class="cyber-btn" onclick="playCyberClick()">⛰️</button>
+                <button class="cyber-btn" onclick="playCyberClick(); window.location.href='thuy_luan.html'">🌊</button>
+                <button class="cyber-btn red-theme" onclick="playCyberClick()">🔥</button>
+                <button class="cyber-btn" onclick="playCyberClick()">💨</button>
+            </div>
 
-        <input type="file" accept="video/*" capture="camcorder" id="hiddenCamera" style="display: none;" onchange="handleVideoUpload(event)">
-        <div id="samuraiBubble" class="speech-bubble"><span id="bubbleText"></span></div>
-
-        <!-- KHỐI LẬP PHƯƠNG K-DRIVE CORE (TRUNG TÂM) -->
-        <div class="core-system-container" id="coreSystem">
-            <div class="projector-beam"></div>
-            <div class="scanning-ring"></div>
-            <div class="cube-wrapper" id="cubeWrapper">
+            <!-- Tâm: Lõi Lập Phương 3D (Tái sử dụng nguyên bản để bảo toàn hiệu ứng) -->
+            <div class="core-system-container" id="coreSystem" style="pointer-events: auto; position: relative;">
+                <div class="projector-beam"></div>
+                <div class="scanning-ring"></div>
+                <div class="cube-wrapper" id="cubeWrapper">
                     <div class="cube-scene">
                         <div class="cube" id="wireframeCube">
                             <div class="cube-face front"></div><div class="cube-face back"></div>
@@ -185,54 +161,68 @@
                             <div class="cube-face top"></div><div class="cube-face bottom"></div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Samurai, Rương, Cam, Nhạc -->
+            <div class="right-column">
+                <!-- Cờ Samurai (có thể click) -->
+                <img src="https://happyk1900.github.io/kdrive-v28/K-Icon.png" class="flag-samurai" onclick="if(typeof processSamuraiAction === 'function') processSamuraiAction(this); else playCyberClick();">
+                
+                <button class="cyber-btn" onclick="if(typeof fetchBattleReport === 'function') fetchBattleReport(); else playCyberClick();">📦</button>
+                <button class="cyber-btn red-theme" onclick="document.getElementById('hiddenCamera').click(); playCyberClick();">📷</button>
+                <button class="cyber-btn" onclick="if(typeof cycleMusicTracks === 'function') cycleMusicTracks(); else playCyberClick();">🎵</button>
             </div>
         </div>
 
-        <!-- CÁC NÚT TƯƠNG TÁC GỐC -->
-        <button type="button" class="touch-zone" id="node-samurai" onclick="processSamuraiAction(this)"></button>
-        <button type="button" class="touch-zone border-red" id="node-hearts" onclick="openSecretCameraGuard(this)"></button>
-        <button type="button" class="touch-zone" id="node-mini-clu" onclick="playCyberClick()"></button>
-        <button type="button" class="touch-zone" id="node-chip" onclick="fetchBattleReport()"></button>
-        <button type="button" class="touch-zone" id="node-new-9" onclick="playCyberClick()"></button>
-        <button type="button" class="touch-zone" id="node-spades" onclick="playCyberClick(); window.location.replace('sinh_trac.html');"></button>
-        <button type="button" class="touch-zone" id="node-clubs" onclick="playCyberClick()"></button>
-        <button type="button" class="touch-zone border-red" id="node-diamonds" onclick="playCyberClick()"></button>
-        <button type="button" class="touch-zone border-red" id="node-mini-dia" onclick="playCyberClick()"></button>
+        <!-- KHU VỰC DƯỚI CÙNG -->
+        <div class="bottom-dock">
+            
+            <button class="sys-off-btn" onclick="showLogoutConfirm()">
+                [ 🔴 SYS: OFF ]
+            </button>
 
-        <!-- NÚT VÀO THỦY LUÂN (CON SÓNG) - FIX TỌA ĐỘ CHUẨN 44.8% LEFT, 19.8% TOP -->
-        <button type="button" class="touch-zone" id="node-thuyluan-wave" 
-            onclick="if(typeof playCyberClick === 'function') playCyberClick(); window.location.href='thuy_luan.html';" 
-            style="position: absolute; left: 44.8%; top: 19.8%; width: 14%; height: 7%; z-index: 100; background: transparent; border: none; cursor: pointer;">
-        </button>
+            <!-- Tên Track nhạc đang phát -->
+            <div class="music-track-text" id="trackText" onclick="if(typeof toggleMuteSystem === 'function') toggleMuteSystem();">[ 🔇 SYS: OFF ]</div>
+
+            <!-- Điện Thờ Thần Tài -->
+            <div style="flex:1; display:flex; justify-content:flex-end;">
+                <button class="cyber-btn" style="border-color: #00ff88; box-shadow: 0 0 15px rgba(0,255,136,0.3); margin-bottom: 0; width: 65px; height: 65px;" onclick="window.location.href='dien_tho.html'">
+                    <img src="https://github.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/blob/main/ban%20tho%20ong%20dia.png?raw=true" style="width:100%; height:100%; object-fit:contain; border-radius:8px;" alt="Thần Tài">
+                </button>
+            </div>
+        </div>
 
     </div>
 
     <!-- POPUP XÁC NHẬN THOÁT -->
-    <div class="gateway-popup" id="logoutConfirmPanel" style="border-color: #ff3333; box-shadow: 0 0 50px rgba(255, 51, 51, 0.4), inset 0 0 20px rgba(255, 51, 51, 0.1);">
-        <h2 style="color: #ff3333; text-shadow: 0 0 15px rgba(255, 51, 51, 0.6);">CẢNH BÁO</h2>
-        <div style="text-align: center; font-size: 14px; color: #fff; margin-bottom: 20px; font-weight: bold;">BẠN CÓ ĐỒNG Ý THOÁT CHƯƠNG TRÌNH?</div>
-        <div style="display: flex; gap: 15px; width: 100%;">
-            <button type="button" class="login-btn-submit" style="background: linear-gradient(90deg, #cc0000, #ff3333); color: #fff; box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);" onclick="confirmLogout(true)">CÓ</button>
-            <button type="button" class="login-btn-submit" style="background: transparent; border: 1px solid #00ff88; color: #00ff88; box-shadow: none;" onclick="confirmLogout(false)">KHÔNG</button>
+    <div class="gateway-popup" id="logoutConfirmPanel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:99999; background:rgba(0,0,0,0.95); border:1px solid #ff3333; border-radius:8px; padding:25px; text-align:center; box-shadow: 0 0 50px rgba(255, 51, 51, 0.4), inset 0 0 20px rgba(255, 51, 51, 0.1);">
+        <h2 style="color: #ff3333; text-shadow: 0 0 15px rgba(255, 51, 51, 0.6); margin-bottom: 20px; font-family: 'Space Grotesk', sans-serif;">CẢNH BÁO</h2>
+        <div style="text-align: center; font-size: 14px; color: #fff; margin-bottom: 20px; font-weight: bold; font-family: 'Space Grotesk', sans-serif;">BẠN CÓ ĐỒNG Ý THOÁT CHƯƠNG TRÌNH?</div>
+        <div style="display: flex; gap: 15px; justify-content: center; width: 100%;">
+            <button style="flex:1; padding: 12px; background: linear-gradient(90deg, #cc0000, #ff3333); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: 'Space Grotesk', sans-serif;" onclick="confirmLogout(true)">CÓ</button>
+            <button style="flex:1; padding: 12px; background: transparent; border: 1px solid #00ff88; color: #00ff88; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: 'Space Grotesk', sans-serif;" onclick="confirmLogout(false)">KHÔNG</button>
         </div>
     </div>
     
     <!-- POPUP TRÌNH PHÁT MẬT THƯ -->
-    <div class="video-popup-container" id="videoPopup">
-        <button type="button" class="close-popup-btn" onclick="closeVideoModule()">X</button>
-        <div class="video-box"><video id="capturedVideoPlayer" playsinline controls></video></div>
+    <div class="video-popup-container" id="videoPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:99999; justify-content:center; align-items:center;">
+        <button type="button" style="position:absolute; top:20px; right:20px; background:var(--crimson); color:#fff; border:none; padding:10px 15px; font-weight:bold; border-radius:4px; cursor:pointer;" onclick="closeVideoModule()">X</button>
+        <div class="video-box" style="width:90%; max-width:400px; border:2px solid var(--cyan); border-radius:8px; overflow:hidden; box-shadow: 0 0 20px var(--cyan);">
+            <video id="capturedVideoPlayer" playsinline controls style="width:100%; display:block;"></video>
+        </div>
     </div>
 
     <!-- SCRIPT CHÍNH -->
     <script src="core-logic-v2.js?v=99999"></script>
 
-    <!-- HỆ THỐNG CỔNG SƠN MÔN (BUSHIDO BOOT SCREEN) -->
+    <!-- SCRIPT XỬ LÝ CỔNG SƠN MÔN (BUSHIDO BOOT SCREEN) -->
     <script>
         window.addEventListener('load', function() {
             let bootOverlay = document.getElementById('boot-overlay');
             let bootText = document.getElementById('boot-text');
 
-            // BẮT BUỘC ĐỢI 1.5 GIÂY ĐỂ TRÌNH DUYỆT ỔN ĐỊNH HOÀN TOÀN THANH ĐỊA CHỈ
+            // Đợi 1.5 giây để ổn định thanh địa chỉ (URL bar)
             setTimeout(() => {
                 bootText.classList.add('ready-to-tap');
                 bootOverlay.addEventListener('click', unlockSystem);
@@ -240,47 +230,34 @@
         });
 
         function unlockSystem() {
-            // 1. KHÓA CỨNG CHIỀU CAO BẰNG PIXEL THẬT (CHỐNG CO GIÃN KHI LƯỚT)
-            let wrapper = document.getElementById('mainWrapper');
-            if(wrapper) {
-                // Chốt cứng Pixel, dập tắt vĩnh viễn sự co giãn
-                wrapper.style.height = window.innerHeight + 'px';
-                wrapper.style.minHeight = window.innerHeight + 'px';
-            }
-
-            // 2. PHÁT ÂM THANH KHỞI ĐỘNG
             if(typeof playCyberClick === 'function') {
                 playCyberClick();
             } else if (navigator.vibrate) {
                 navigator.vibrate([100, 50, 100]);
             }
 
-            // 3. MỞ CỔNG: XÓA MÀN HÌNH ĐEN
             let bootOverlay = document.getElementById('boot-overlay');
             bootOverlay.style.opacity = '0';
-            
-            setTimeout(() => {
-                bootOverlay.style.display = 'none';
-            }, 800); // Mờ dần trong 0.8s
+            setTimeout(() => { bootOverlay.style.display = 'none'; }, 800); 
         }
 
-        // Khóa lại pixel nếu người dùng xoay ngang máy
-        window.addEventListener('resize', function() {
-            let wrapper = document.getElementById('mainWrapper');
-            let bootOverlay = document.getElementById('boot-overlay');
-            if(wrapper && bootOverlay && bootOverlay.style.display === 'none') {
-                wrapper.style.height = window.innerHeight + 'px';
-                wrapper.style.minHeight = window.innerHeight + 'px';
-            }
-        });
+        function showLogoutConfirm() {
+            if(typeof playCyberClick === 'function') playCyberClick();
+            document.getElementById('logoutConfirmPanel').style.display = 'block';
+        }
 
-        // Xóa bỏ bộ nhớ đệm cũ
+        function closeVideoModule() {
+            document.getElementById('videoPopup').style.display = 'none';
+            let v = document.getElementById('capturedVideoPlayer');
+            if(v) v.pause();
+        }
+
+        // Xóa bộ nhớ cache worker cũ
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 for(let registration of registrations) { registration.unregister(); }
             });
         }
-        setTimeout(() => { document.body.classList.remove('popups-active'); }, 100);
     </script>
 </body>
 </html>
