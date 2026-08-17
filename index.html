@@ -1,76 +1,20 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
-    <title>K-Drive V28 Core</title>
-
-    <!-- LÍNH GÁC BẢO MẬT TỪ VÒNG GỬI XE -->
-    <script>
-        (function checkAuthGuard() {
-            const hasAccess = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active';
-            if (!hasAccess) { window.location.replace('login.html'); }
-        })();
-    </script>
-
-    <style>
-        /* ==========================================
-           1. RESET TOÀN BỘ VÀ THIẾT LẬP NỀN MÓNG MỚI
-        ========================================== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* Cấm cuộn trang */
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* KHÓA ẢNH NỀN NỘI VIỆN SẠCH (Ép sát mọi góc độ) */
-        #sanctum-bg {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/index%20nen.png?raw=true');
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-            z-index: 1;
-            pointer-events: none; /* Tránh cản thao tác bấm */
-        }
-
-        /* LỚP VIGNETTE (Làm tối 4 góc để tôn vinh Lõi ở giữa) */
-        .vignette-overlay {
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.8) 100%);
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        /* ==========================================
-           2. LÕI LẬP PHƯƠNG THẦN THÁNH
+/* ==========================================
+           2. LÕI LẬP PHƯƠNG THẦN THÁNH (ĐÃ THU NHỎ TỶ LỆ)
         ========================================== */
         .holy-core-container {
             position: relative;
             z-index: 10;
-            width: 160px;
-            height: 160px;
-            perspective: 1000px; /* Độ sâu 3D */
+            width: 100px; /* Đã thu nhỏ gọn gàng hơn */
+            height: 100px;
+            perspective: 800px; /* Giảm độ hút sâu để khối vuông vức hơn */
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Hiệu ứng khi ấn tay vào Lõi */
+        /* Hiệu ứng lún sâu khi ấn tay vào Lõi */
         .holy-core-container:active {
-            transform: scale(0.85);
+            transform: scale(0.8);
         }
 
         .holy-cube {
@@ -84,40 +28,40 @@
         /* 6 Mặt của Lõi Lập Phương */
         .cube-face {
             position: absolute;
-            width: 160px;
-            height: 160px;
+            width: 100px;
+            height: 100px;
             /* Viền Neon chói lóa */
             border: 2px solid #00e5ff;
             /* Mặt kính mờ ảo */
             background: rgba(0, 229, 255, 0.05);
             backdrop-filter: blur(2px);
             -webkit-backdrop-filter: blur(2px);
-            /* Hào quang tỏa ra xung quanh và chiếu vào trong */
-            box-shadow: 0 0 30px rgba(0, 229, 255, 0.6), inset 0 0 30px rgba(0, 229, 255, 0.4);
+            /* Hào quang điều chỉnh vừa vặn với kích thước mới */
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.4);
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* Ánh sáng lõi tâm chớp nháy (Quả cầu phát sáng bên trong) */
+        /* Ánh sáng lõi tâm chớp nháy */
         .inner-glow {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 80px; height: 80px;
+            width: 50px; height: 50px;
             border-radius: 50%;
             background: radial-gradient(circle, #fff 0%, #00e5ff 40%, transparent 70%);
-            box-shadow: 0 0 50px #00e5ff, 0 0 100px #00e5ff;
+            box-shadow: 0 0 30px #00e5ff, 0 0 60px #00e5ff;
             animation: pulseGlow 2s infinite alternate;
         }
 
-        /* Gắn tọa độ 3D cho 6 mặt (Dịch chuyển ra xa tâm 80px = 1 nửa của 160px) */
-        .face-front  { transform: rotateY(0deg) translateZ(80px); }
-        .face-back   { transform: rotateY(180deg) translateZ(80px); }
-        .face-right  { transform: rotateY(90deg) translateZ(80px); }
-        .face-left   { transform: rotateY(-90deg) translateZ(80px); }
-        .face-top    { transform: rotateX(90deg) translateZ(80px); }
-        .face-bottom { transform: rotateX(-90deg) translateZ(80px); }
+        /* Tọa độ 3D thu hẹp lại (Dịch chuyển ra xa tâm 50px = 1 nửa của 100px) */
+        .face-front  { transform: rotateY(0deg) translateZ(50px); }
+        .face-back   { transform: rotateY(180deg) translateZ(50px); }
+        .face-right  { transform: rotateY(90deg) translateZ(50px); }
+        .face-left   { transform: rotateY(-90deg) translateZ(50px); }
+        .face-top    { transform: rotateX(90deg) translateZ(50px); }
+        .face-bottom { transform: rotateX(-90deg) translateZ(50px); }
 
         /* Chuyển động xoay vô cực */
         @keyframes holySpin {
@@ -130,62 +74,3 @@
             0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.8); }
             100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
         }
-    </style>
-</head>
-<body>
-
-    <!-- 1. ẢNH NỀN SẠCH TUYỆT ĐỐI -->
-    <div id="sanctum-bg"></div>
-    <div class="vignette-overlay"></div>
-
-    <!-- 2. LÕI THẦN THÁNH Ở CHÍNH GIỮA (NÚT VẠN NĂNG) -->
-    <div class="holy-core-container" onclick="touchTheCore()">
-        
-        <!-- Quả cầu năng lượng ở tâm khối -->
-        <div class="inner-glow"></div>
-
-        <div class="holy-cube">
-            <div class="cube-face face-front"></div>
-            <div class="cube-face face-back"></div>
-            <div class="cube-face face-right"></div>
-            <div class="cube-face face-left"></div>
-            <div class="cube-face face-top"></div>
-            <div class="cube-face face-bottom"></div>
-        </div>
-    </div>
-
-    <!-- 3. SCRIPT TƯƠNG TÁC (Tạm thời không gọi file logic cũ để test sự mượt mà) -->
-    <script>
-        // Hàm âm thanh Beep cơ bản để test (Không phụ thuộc code ngoài)
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playCyberClick() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
-        }
-
-        // Khi người dùng bấm vào Lõi
-        function touchTheCore() {
-            playCyberClick();
-            
-            // Nếu điện thoại có hỗ trợ rung, rung 1 nhịp ngắn
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-
-            // Test hiển thị
-            console.log("K-DRIVE CORE ACTIVATED");
-            // alert("Tâm lõi đã được đánh thức. (Menu sẽ thiết kế tỏa ra từ đây)");
-        }
-    </script>
-</body>
-</html>
