@@ -13,6 +13,7 @@
     <link rel="icon" type="image/png" href="https://happyk1900.github.io/kdrive-v28/K-Icon.png?v=4">
     <link rel="apple-touch-icon" href="https://happyk1900.github.io/kdrive-v28/K-Icon.png?v=4">
 
+    <!-- LÍNH GÁC BẢO MẬT -->
     <script>
         (function checkAuthGuard() {
             const hasAccess = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active';
@@ -24,7 +25,7 @@
     <link rel="stylesheet" href="kdrive-style.css?v=999">
     
     <style>
-        /* 1. KHÓA ẢNH NỀN BẰNG DIV (Dập tắt mọi lớp nền đen đè lên) */
+        /* 1. KHÓA ẢNH NỀN BAO NÉT */
         #kdrive-bg-container {
             position: fixed !important; 
             inset: 0 !important;
@@ -34,11 +35,11 @@
             background-size: cover !important; 
             background-position: center center !important; 
             background-repeat: no-repeat !important;
-            z-index: 1 !important; /* Ép nó nổi lên trên nền đen */
+            z-index: 1 !important; 
             pointer-events: none; 
         }
 
-        /* --- CỔNG SƠN MÔN: BUSHIDO --- */
+        /* 2. CỔNG SƠN MÔN: BUSHIDO */
         #boot-overlay { position: fixed; inset: 0; background-color: #030508; z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-in-out; touch-action: none; }
         #boot-text { display: flex; flex-direction: column; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
         #boot-text.ready-to-tap { opacity: 1; pointer-events: auto; cursor: pointer; }
@@ -48,69 +49,31 @@
         @keyframes boot-pulse-kanji { 0% { opacity: 0.8; text-shadow: 0 0 15px #fff, 0 0 30px #00e5ff; transform: scale(0.98); } 100% { opacity: 1; text-shadow: 0 0 30px #fff, 0 0 60px #00e5ff; transform: scale(1.02); } }
         @keyframes bloodDrip { 0% { height: 0px; opacity: 1; transform: translate(-50%, 0); } 60% { height: 25px; opacity: 1; transform: translate(-50%, 0); } 100% { height: 25px; opacity: 0; transform: translate(-50%, 15px); } }
 
-        /* --- HỆ THỐNG GIAO DIỆN MỚI (LỚP PHỦ HTML/CSS ĐỘC LẬP) --- */
+        /* 3. LỚP UI TỐI GIẢN CHỈ CÓ LÕI */
         #ui-layer {
             position: absolute; inset: 0; 
-            z-index: 10 !important; /* Phải cao hơn ảnh nền */
-            display: flex; flex-direction: column; justify-content: space-between;
-            padding: 40px 20px 30px 20px; pointer-events: none; 
+            z-index: 10 !important; 
+            display: flex; justify-content: center; align-items: center; 
+            pointer-events: none; /* Chỉ cho phép bấm vào Lõi */
         }
 
-        .top-status-bar { display: flex; justify-content: flex-start; align-items: flex-start; pointer-events: auto; }
-        .sync-box {
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--cyan); border-radius: 4px; padding: 8px 15px;
-            font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: #fff;
-            letter-spacing: 2px; text-shadow: 0 0 8px var(--cyan); box-shadow: 0 0 15px rgba(0,229,255,0.2);
-            display: flex; align-items: center; gap: 10px;
-        }
-        .sync-box .heart { color: #ff2a2a; font-size: 16px; animation: heartBeat 1s infinite alternate; text-shadow: 0 0 10px #ff2a2a; }
-        @keyframes heartBeat { 0% { transform: scale(1); } 100% { transform: scale(1.2); } }
-
-        .middle-arena { display: flex; justify-content: space-between; align-items: center; flex: 1; margin: 20px 0; }
-
-        .cyber-btn {
-            width: 55px; height: 55px; background: rgba(5, 8, 12, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--cyan); border-radius: 8px; display: flex; justify-content: center; align-items: center;
-            font-size: 24px; color: #fff; cursor: pointer; pointer-events: auto; transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,229,255,0.2);
-            margin-bottom: 15px; 
-        }
-        .cyber-btn:active { transform: scale(0.9); background: rgba(0, 229, 255, 0.3); box-shadow: 0 0 20px var(--cyan); }
-        .cyber-btn.red-theme { border-color: var(--crimson); box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,42,42,0.2); }
-        .cyber-btn.red-theme:active { background: rgba(255, 42, 42, 0.3); box-shadow: 0 0 20px var(--crimson); }
-        
-        .left-column { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
-        .right-column { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
-        
-        /* 2. CHỮA BỆNH KHỐI LẬP PHƯƠNG BỊ VĂNG KHỎI TÂM (Ép nó lại vị trí cũ) */
+        /* 4. LÕI LẬP PHƯƠNG TƯƠNG TÁC */
         #coreSystem {
             position: relative !important;
-            top: auto !important; bottom: auto !important; left: auto !important; right: auto !important;
-            transform: scale(0.9) !important; /* Thu nhỏ một chút để vừa vặn */
-            margin: 0 auto !important;
-            pointer-events: auto;
+            transform: scale(1.3) !important; /* Phóng to Lõi lên một chút cho uy nghi */
+            pointer-events: auto; /* Biến thành nút bấm */
+            cursor: pointer;
             display: flex; justify-content: center; align-items: center;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-
-        .flag-samurai { width: 65px; height: auto; margin-bottom: 20px; pointer-events: auto; cursor: pointer; filter: drop-shadow(0 0 10px rgba(0,229,255,0.5)); transition: 0.2s; }
-        .flag-samurai:active { transform: scale(0.95); filter: drop-shadow(0 0 20px var(--cyan)); }
-
-        .speech-bubble { pointer-events: none; position: absolute; z-index: 50; }
-
-        .bottom-dock { display: flex; justify-content: space-between; align-items: flex-end; pointer-events: auto; }
         
-        .sys-off-btn {
-            background: rgba(0,0,0,0.7); border: 1px solid var(--crimson); color: var(--crimson);
-            font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: bold; letter-spacing: 2px;
-            padding: 12px 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
-            box-shadow: 0 0 15px rgba(255,42,42,0.2); text-shadow: 0 0 5px rgba(255,42,42,0.8);
+        #coreSystem:active {
+            transform: scale(1.1) !important; /* Lõm xuống khi chạm */
+            filter: brightness(1.5) drop-shadow(0 0 30px var(--cyan));
         }
-        .sys-off-btn:active { background: var(--crimson); color: #fff; box-shadow: 0 0 20px var(--crimson); text-shadow: none; }
 
-        .music-track-text {
-            font-family: 'Space Grotesk', sans-serif; font-size: 11px; color: var(--cyan); text-shadow: 0 0 8px var(--cyan); margin-left: 10px; cursor: pointer;
-        }
+        /* Ẩn bong bóng thoại nếu không dùng tới */
+        .speech-bubble { display: none !important; }
     </style>
 </head>
 <body>
@@ -123,105 +86,32 @@
         </div>
     </div>
 
-    <!-- ẢNH NỀN MỚI SIÊU SẠCH (Đã được chuyển thành Div để ép nổi lên trên) -->
+    <!-- ẢNH NỀN SIÊU SẠCH -->
     <div id="kdrive-bg-container"></div>
 
-    <div class="global-radar"><div class="radar-line"></div></div>
-
-    <!-- THẺ CAMERA ẨN ĐỂ CHỤP ẢNH -->
-    <input type="file" accept="video/*" capture="camcorder" id="hiddenCamera" style="display: none;" onchange="handleVideoUpload(event)">
-    
-    <div id="samuraiBubble" class="speech-bubble" style="display:none; left: 50%; top: 20%; transform: translateX(-50%); background: rgba(0,0,0,0.8); border: 1px solid var(--cyan); padding: 10px; border-radius: 6px; color: #fff; font-family: 'Space Grotesk'; font-size: 12px; text-shadow: 0 0 5px var(--cyan);"><span id="bubbleText"></span></div>
-
-    <!-- LỚP GIAO DIỆN UI VẬT LÝ NỔI -->
+    <!-- LỚP GIAO DIỆN CHỈ CÒN DUY NHẤT LÕI K-DRIVE -->
     <div id="ui-layer">
-        
-        <!-- HEADER (Nhịp tim) -->
-        <div class="top-status-bar">
-            <div class="sync-box">
-                <span id="heartIcon" class="heart">♥</span> [ SYNC: <span id="bpmText">OFFLINE</span> ]
-            </div>
-        </div>
-
-        <!-- KHU VỰC GIỮA (Lõi + Menu 2 bên) -->
-        <div class="middle-arena">
-            
-            <!-- Cột trái: Tứ Đại Nguyên Tố -->
-            <div class="left-column">
-                <button class="cyber-btn" onclick="playCyberClick()">⛰️</button>
-                <button class="cyber-btn" onclick="playCyberClick(); window.location.href='thuy_luan.html'">🌊</button>
-                <button class="cyber-btn red-theme" onclick="playCyberClick()">🔥</button>
-                <button class="cyber-btn" onclick="playCyberClick()">💨</button>
-            </div>
-
-            <!-- Tâm: Lõi Lập Phương 3D (Đã ép CSS nằm chính giữa) -->
-            <div class="core-system-container" id="coreSystem">
-                <div class="projector-beam"></div>
-                <div class="scanning-ring"></div>
-                <div class="cube-wrapper" id="cubeWrapper">
-                    <div class="cube-scene">
-                        <div class="cube" id="wireframeCube">
-                            <div class="cube-face front"></div><div class="cube-face back"></div>
-                            <div class="cube-face right"></div><div class="cube-face left"></div>
-                            <div class="cube-face top"></div><div class="cube-face bottom"></div>
-                        </div>
+        <!-- TÂM: LÕI LẬP PHƯƠNG 3D -->
+        <div class="core-system-container" id="coreSystem" onclick="activateCore()">
+            <div class="projector-beam"></div>
+            <div class="scanning-ring"></div>
+            <div class="cube-wrapper" id="cubeWrapper">
+                <div class="cube-scene">
+                    <div class="cube" id="wireframeCube">
+                        <div class="cube-face front"></div><div class="cube-face back"></div>
+                        <div class="cube-face right"></div><div class="cube-face left"></div>
+                        <div class="cube-face top"></div><div class="cube-face bottom"></div>
                     </div>
                 </div>
             </div>
-
-            <!-- Cột phải: Samurai, Rương, Cam, Nhạc -->
-            <div class="right-column">
-                <img src="https://happyk1900.github.io/kdrive-v28/K-Icon.png" class="flag-samurai" onclick="if(typeof processSamuraiAction === 'function') processSamuraiAction(this); else playCyberClick();">
-                
-                <button class="cyber-btn" onclick="if(typeof fetchBattleReport === 'function') fetchBattleReport(); else playCyberClick();">📦</button>
-                <button class="cyber-btn red-theme" onclick="document.getElementById('hiddenCamera').click(); playCyberClick();">📷</button>
-                <button class="cyber-btn" onclick="if(typeof cycleMusicTracks === 'function') cycleMusicTracks(); else playCyberClick();">🎵</button>
-            </div>
-        </div>
-
-        <!-- KHU VỰC DƯỚI CÙNG -->
-        <div class="bottom-dock">
-            
-            <button class="sys-off-btn" onclick="showLogoutConfirm()">
-                [ 🔴 SYS: OFF ]
-            </button>
-
-            <!-- Tên Track nhạc đang phát -->
-            <div class="music-track-text" id="trackText" onclick="if(typeof toggleMuteSystem === 'function') toggleMuteSystem();">[ 🔇 SYS: OFF ]</div>
-
-            <!-- Điện Thờ Thần Tài -->
-            <div style="flex:1; display:flex; justify-content:flex-end;">
-                <button class="cyber-btn" style="border-color: #00ff88; box-shadow: 0 0 15px rgba(0,255,136,0.3); margin-bottom: 0; width: 65px; height: 65px;" onclick="window.location.href='dien_tho.html'">
-                    <img src="https://github.com/happyk1900/anh-va-nhac-tram-huan-luyen-chien-binh-/blob/main/ban%20tho%20ong%20dia.png?raw=true" style="width:100%; height:100%; object-fit:contain; border-radius:8px;" alt="Thần Tài">
-                </button>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- POPUP XÁC NHẬN THOÁT -->
-    <div class="gateway-popup" id="logoutConfirmPanel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:99999; background:rgba(0,0,0,0.95); border:1px solid #ff3333; border-radius:8px; padding:25px; text-align:center; box-shadow: 0 0 50px rgba(255, 51, 51, 0.4), inset 0 0 20px rgba(255, 51, 51, 0.1);">
-        <h2 style="color: #ff3333; text-shadow: 0 0 15px rgba(255, 51, 51, 0.6); margin-bottom: 20px; font-family: 'Space Grotesk', sans-serif;">CẢNH BÁO</h2>
-        <div style="text-align: center; font-size: 14px; color: #fff; margin-bottom: 20px; font-weight: bold; font-family: 'Space Grotesk', sans-serif;">BẠN CÓ ĐỒNG Ý THOÁT CHƯƠNG TRÌNH?</div>
-        <div style="display: flex; gap: 15px; justify-content: center; width: 100%;">
-            <button style="flex:1; padding: 12px; background: linear-gradient(90deg, #cc0000, #ff3333); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: 'Space Grotesk', sans-serif;" onclick="confirmLogout(true)">CÓ</button>
-            <button style="flex:1; padding: 12px; background: transparent; border: 1px solid #00ff88; color: #00ff88; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: 'Space Grotesk', sans-serif;" onclick="confirmLogout(false)">KHÔNG</button>
-        </div>
-    </div>
-    
-    <!-- POPUP TRÌNH PHÁT MẬT THƯ -->
-    <div class="video-popup-container" id="videoPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:99999; justify-content:center; align-items:center;">
-        <button type="button" style="position:absolute; top:20px; right:20px; background:var(--crimson); color:#fff; border:none; padding:10px 15px; font-weight:bold; border-radius:4px; cursor:pointer;" onclick="closeVideoModule()">X</button>
-        <div class="video-box" style="width:90%; max-width:400px; border:2px solid var(--cyan); border-radius:8px; overflow:hidden; box-shadow: 0 0 20px var(--cyan);">
-            <video id="capturedVideoPlayer" playsinline controls style="width:100%; display:block;"></video>
         </div>
     </div>
 
     <!-- SCRIPT CHÍNH -->
     <script src="core-logic-v2.js?v=99999"></script>
 
-    <!-- SCRIPT XỬ LÝ CỔNG SƠN MÔN (BUSHIDO BOOT SCREEN) -->
     <script>
+        // --- XỬ LÝ KHỞI ĐỘNG HỆ THỐNG ---
         window.addEventListener('load', function() {
             let bootOverlay = document.getElementById('boot-overlay');
             let bootText = document.getElementById('boot-text');
@@ -244,15 +134,15 @@
             setTimeout(() => { bootOverlay.style.display = 'none'; }, 800); 
         }
 
-        function showLogoutConfirm() {
-            if(typeof playCyberClick === 'function') playCyberClick();
-            document.getElementById('logoutConfirmPanel').style.display = 'block';
-        }
-
-        function closeVideoModule() {
-            document.getElementById('videoPopup').style.display = 'none';
-            let v = document.getElementById('capturedVideoPlayer');
-            if(v) v.pause();
+        // --- HÀM TƯƠNG TÁC KHI CHẠM VÀO LÕI ---
+        function activateCore() {
+            if(typeof playCyberClick === 'function') {
+                playCyberClick();
+            }
+            if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
+            
+            // Tạm thời bật thông báo để test, sau này anh em mình làm Menu bung ra ở đây
+            alert("LÕI K-DRIVE ĐÃ KÍCH HOẠT! \n\n(Menu tùy chọn sẽ được thiết kế bung ra từ đây)");
         }
 
         if ('serviceWorker' in navigator) {
