@@ -3,194 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
-    <title>K-Drive V28 Core</title>
+    <meta name="theme-color" content="#030508">
+    <title>K-Drive V28 - Inner Sanctum</title>
 
-    <script>
-        (function checkAuthGuard() {
-            const hasAccess = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active';
-            if (!hasAccess) { window.location.replace('login.html'); }
-        })();
-    </script>
-
-    <!-- Font điện tử cho chỉ số SCI -->
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Tương Lai cho SCI -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;800&display=swap" rel="stylesheet">
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ==========================================
+           1. RESET & MÔI TRƯỜNG SANCTUM
+        ========================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
         
         body, html {
-            width: 100%; height: 100%; overflow: hidden; background-color: #000;
-            display: flex; justify-content: center; align-items: center;
+            width: 100%; height: 100%; overflow: hidden; background-color: #030508;
+            font-family: 'Space Grotesk', sans-serif;
+            touch-action: none; /* Khóa cuộn trang để lấy không gian cho Vuốt 3D */
         }
 
-        /* ẢNH NỀN & VIGNETTE */
+        /* ẢNH NỀN TỦ GIÁP SAMURAI */
         #sanctum-bg {
             position: fixed; inset: 0; width: 100vw; height: 100dvh;
-            background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/INDEX%20SAMURAI.png?raw=true');
-            background-size: cover; background-position: center center; background-repeat: no-repeat;
-            z-index: 1; pointer-events: none; 
+            /* ANH THAY LINK ẢNH TỦ GIÁP MỚI VÀO ĐÂY NHÉ */
+            background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/index%20nen.png?raw=true');
+            background-size: cover; background-position: center center;
+            z-index: 1;
         }
+
+        /* LỚP VIGNETTE ĐỔ BÓNG 4 GÓC */
         .vignette-overlay {
-            position: fixed; inset: 0; background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.8) 100%);
+            position: fixed; inset: 0; 
+            background: radial-gradient(circle at center, transparent 20%, rgba(0, 0, 0, 0.85) 100%);
             z-index: 2; pointer-events: none;
         }
 
-        /* KHỐI LÕI LẬP PHƯƠNG */
-        .holy-core-container {
-            position: relative; z-index: 10;
-            width: 120px; height: 120px; /* Kích thước tối ưu cho cả hình và chữ */
-            perspective: 800px; cursor: pointer; -webkit-tap-highlight-color: transparent;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* HIỆU ỨNG DÒNG ĐIỆN CHẠY DƯỚI SÀN NHÀ */
+        .cyber-floor-energy {
+            position: fixed; bottom: -10%; left: -50%; right: -50%; height: 60vh;
+            transform: perspective(600px) rotateX(75deg);
+            background: linear-gradient(to top, rgba(0, 229, 255, 0.1) 0%, transparent 100%);
+            z-index: 3; pointer-events: none;
+            overflow: hidden;
         }
-        .holy-core-container:active { transform: scale(0.85); }
+        .energy-pulse {
+            position: absolute; inset: 0;
+            background: repeating-linear-gradient(to top, transparent, transparent 40px, rgba(0, 229, 255, 0.3) 42px, transparent 45px);
+            animation: flowUp 1.5s linear infinite;
+        }
+        @keyframes flowUp { 0% { transform: translateY(0); } 100% { transform: translateY(-45px); } }
 
-        .holy-cube {
-            width: 100%; height: 100%; position: absolute; transform-style: preserve-3d;
-            animation: holySpin 15s infinite linear;
+        /* ==========================================
+           2. HỆ THỐNG VẬT LÝ LÕI LẬP PHƯƠNG
+        ========================================== */
+        #scene-3d {
+            position: absolute; inset: 0; z-index: 10;
+            display: flex; justify-content: center; align-items: center;
+            perspective: 1000px; /* Góc nhìn hút sâu */
         }
 
-        /* 6 MẶT CƠ BẢN */
+        #holy-core {
+            position: relative; width: 120px; height: 120px;
+            transform-style: preserve-3d;
+            /* Không dùng animation CSS nữa, sẽ điều khiển hoàn toàn bằng Javascript để có trọng lực */
+        }
+
+        /* ÁNH SÁNG VÔ NGÃ (TÂM ĐIỂM) */
+        .inner-glow {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 45px; height: 45px; border-radius: 50%;
+            background: radial-gradient(circle, #fff 0%, #b026ff 40%, transparent 70%);
+            box-shadow: 0 0 30px #b026ff, 0 0 60px #b026ff;
+            animation: pulseCore 2s infinite alternate;
+        }
+        @keyframes pulseCore {
+            0% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.9); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        /* 6 MẶT KÍNH CYBERPUNK */
         .cube-face {
             position: absolute; width: 120px; height: 120px;
-            border: 2px solid transparent; /* Viền mặc định */
-            backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+            border: 2px solid transparent; 
+            backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer;
+            transition: background 0.3s, box-shadow 0.3s;
         }
 
-        /* TRẠNG THÁI MÀU SẮC DỰA TRÊN SCI (Đỏ, Xanh, Tím) */
-        .state-stable { /* Từ 50 - 85: Xanh Neon */
-            border-color: #00e5ff; background: rgba(0, 229, 255, 0.05);
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2);
-        }
-        .state-stable .sci-label { color: #00e5ff; text-shadow: 0 0 8px #00e5ff; }
+        /* TỌA ĐỘ 3D (CÁCH TÂM 60PX) */
+        .face-front  { transform: rotateY(0deg) translateZ(60px); }
+        .face-right  { transform: rotateY(90deg) translateZ(60px); }
+        .face-back   { transform: rotateY(180deg) translateZ(60px); }
+        .face-left   { transform: rotateY(-90deg) translateZ(60px); }
+        .face-top    { transform: rotateX(90deg) translateZ(60px); }
+        .face-bottom { transform: rotateX(-90deg) translateZ(60px); }
 
-        .state-danger { /* Dưới 50: Đỏ Báo Động */
-            border-color: #ff2a2a; background: rgba(255, 42, 42, 0.05);
-            box-shadow: 0 0 20px rgba(255, 42, 42, 0.4), inset 0 0 20px rgba(255, 42, 42, 0.2);
-        }
-        .state-danger .sci-label { color: #ff2a2a; text-shadow: 0 0 8px #ff2a2a; }
+        /* BẢNG MÀU SCI STATE */
+        .state-stable { border-color: rgba(0, 229, 255, 0.8); background: rgba(0, 229, 255, 0.05); box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2); }
+        .state-danger { border-color: rgba(255, 42, 42, 0.8); background: rgba(255, 42, 42, 0.05); box-shadow: 0 0 20px rgba(255, 42, 42, 0.4), inset 0 0 20px rgba(255, 42, 42, 0.2); }
+        .state-perfect{ border-color: rgba(176, 38, 255, 0.8);background: rgba(176, 38, 255, 0.05);box-shadow: 0 0 20px rgba(176, 38, 255, 0.4), inset 0 0 20px rgba(176, 38, 255, 0.2); }
 
-        .state-perfect { /* Trên 85: Tím Vô Ngã */
-            border-color: #b026ff; background: rgba(176, 38, 255, 0.05);
-            box-shadow: 0 0 20px rgba(176, 38, 255, 0.4), inset 0 0 20px rgba(176, 38, 255, 0.2);
-        }
-        .state-perfect .sci-label { color: #b026ff; text-shadow: 0 0 8px #b026ff; }
-
-        /* THIẾT KẾ CHỮ KANJI TRẮNG TRONG SUỐT (XUYÊN THẤU) */
+        /* ==========================================
+           3. TYPOGRAPHY: CHỮ KANJI & SCI XÁM BĂNG
+        ========================================== */
+        /* Chữ Kanji Trắng trong suốt */
         .kanji-ghost {
             font-family: "Yu Mincho", "MS Mincho", serif;
             font-size: 55px; font-weight: normal;
-            color: rgba(255, 255, 255, 0.9); /* Sáng trắng nhưng hơi trong suốt */
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px); /* Đẩy chữ Kanji lên xíu nhường chỗ cho dòng SCI dưới đáy */
+            color: rgba(255, 255, 255, 0.85); 
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            transform: translateY(-8px);
         }
 
-        /* THIẾT KẾ DÒNG SCI NHỎ DƯỚI ĐÁY */
+        /* Chữ SCI Xám Băng + Nền Kính Đen */
+        .sci-text-container {
+            position: absolute; bottom: 8px;
+            background: rgba(0, 0, 0, 0.65); /* Nền đen mờ chống lóa */
+            backdrop-filter: blur(2px);
+            padding: 3px 8px; border-radius: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            animation: breatheText 3s infinite alternate;
+        }
+
         .sci-label {
-            position: absolute; bottom: 8px; width: 100%; text-align: center;
-            font-family: 'Space Grotesk', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1px;
+            font-size: 9px; font-weight: 600; letter-spacing: 1px;
+            color: #E2E8F0; /* Xám băng / Trắng Bạc */
+        }
+        
+        .sci-score {
+            font-size: 10px; font-weight: 800; color: #ffffff; /* Số điểm sáng rực */
+            text-shadow: 0 0 5px #fff;
         }
 
-        /* ÁNH SÁNG LÕI VÔ NGÃ (TÂM ĐIỂM) */
-        .inner-glow {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 50px; height: 50px; border-radius: 50%;
-            background: radial-gradient(circle, #fff 0%, #b026ff 40%, transparent 70%); /* Lõi đang tím nhẹ */
-            box-shadow: 0 0 30px #b026ff, 0 0 60px #b026ff;
-            animation: pulseGlow 2s infinite alternate;
+        @keyframes breatheText {
+            0% { opacity: 0.6; box-shadow: 0 0 0 transparent; }
+            100% { opacity: 1; box-shadow: 0 0 8px rgba(226, 232, 240, 0.3); }
         }
 
-        /* TỌA ĐỘ 3D (Cách tâm 60px) */
-        .face-front  { transform: rotateY(0deg) translateZ(60px); }    /* 1. Thổ */
-        .face-right  { transform: rotateY(90deg) translateZ(60px); }   /* 2. Thủy */
-        .face-back   { transform: rotateY(180deg) translateZ(60px); }  /* 3. Hỏa */
-        .face-left   { transform: rotateY(-90deg) translateZ(60px); }  /* 4. Phong */
-        .face-top    { transform: rotateX(90deg) translateZ(60px); }   /* 5. Khế Ước */
-        .face-bottom { transform: rotateX(-90deg) translateZ(60px); }  /* 6. Bushido */
-
-        @keyframes holySpin {
-            0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-            100% { transform: rotateX(360deg) rotateY(720deg) rotateZ(360deg); }
-        }
-        @keyframes pulseGlow {
-            0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.8); }
-            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-        }
+        /* Ánh chớp khi bấm vào mặt kính */
+        .flash-active { background: #fff !important; box-shadow: 0 0 50px #fff !important; transition: 0s; }
     </style>
 </head>
 <body>
 
-    <!-- 1. ẢNH NỀN SIÊU SẠCH -->
+    <!-- NỀN & VIGNETTE -->
     <div id="sanctum-bg"></div>
     <div class="vignette-overlay"></div>
 
-    <!-- 2. LÕI VẠN NĂNG -->
-    <div class="holy-core-container" onclick="touchTheCore()">
-        
-        <!-- Tâm: Vô Ngã -->
-        <div class="inner-glow"></div>
+    <!-- MẠCH ĐIỆN SÀN NHÀ HƯỚNG VỀ TỦ GIÁP -->
+    <div class="cyber-floor-energy"><div class="energy-pulse"></div></div>
 
-        <div class="holy-cube">
-            <!-- Mặt 1: Thổ (Đất) - Thể Chất - Đang ổn định (Màu Xanh) -->
-            <div class="cube-face face-front state-stable">
+    <!-- MÔI TRƯỜNG VẬT LÝ 3D -->
+    <div id="scene-3d">
+        <div id="holy-core">
+            <!-- Vô Ngã -->
+            <div class="inner-glow"></div>
+
+            <!-- Mặt 1: Thổ (Đất) - Thể Chất -->
+            <div class="cube-face face-front state-stable" onclick="activateFace('THỂ CHẤT')">
                 <div class="kanji-ghost">地</div>
-                <div class="sci-label">[ SCI THỂ CHẤT: 75 ]</div>
+                <div class="sci-text-container"><span class="sci-label">SCI THỂ CHẤT: </span><span class="sci-score">75</span></div>
             </div>
             
-            <!-- Mặt 2: Thủy (Nước) - Trí Nhớ - Đạt cảnh giới (Màu Tím) -->
-            <div class="cube-face face-right state-perfect">
+            <!-- Mặt 2: Thủy (Nước) - Trí Nhớ -->
+            <div class="cube-face face-right state-perfect" onclick="activateFace('TRÍ NHỚ')">
                 <div class="kanji-ghost">水</div>
-                <div class="sci-label">[ SCI TRÍ NHỚ: 92 ]</div>
+                <div class="sci-text-container"><span class="sci-label">SCI TRÍ NHỚ: </span><span class="sci-score">92</span></div>
             </div>
             
-            <!-- Mặt 3: Hỏa (Lửa) - Phản Xạ - Báo động (Màu Đỏ) -->
-            <div class="cube-face face-back state-danger">
+            <!-- Mặt 3: Hỏa (Lửa) - Phản Xạ -->
+            <div class="cube-face face-back state-danger" onclick="activateFace('PHẢN XẠ')">
                 <div class="kanji-ghost">火</div>
-                <div class="sci-label">[ SCI PHẢN XẠ: 45 ]</div>
+                <div class="sci-text-container"><span class="sci-label">SCI PHẢN XẠ: </span><span class="sci-score">45</span></div>
             </div>
             
-            <!-- Mặt 4: Phong (Gió) - Tư Duy - Đang ổn định (Màu Xanh) -->
-            <div class="cube-face face-left state-stable">
+            <!-- Mặt 4: Phong (Gió) - Tư Duy -->
+            <div class="cube-face face-left state-stable" onclick="activateFace('TƯ DUY')">
                 <div class="kanji-ghost">風</div>
-                <div class="sci-label">[ SCI TƯ DUY: 80 ]</div>
+                <div class="sci-text-container"><span class="sci-label">SCI TƯ DUY: </span><span class="sci-score">80</span></div>
             </div>
             
-            <!-- Mặt 5: Khế Ước (Nắp Trên) -->
-            <div class="cube-face face-top state-perfect">
+            <!-- Mặt 5: Khế Ước (Top) -->
+            <div class="cube-face face-top state-perfect" onclick="activateFace('KHẾ ƯỚC')">
                 <div class="kanji-ghost" style="font-size: 45px;">契</div>
-                <div class="sci-label" style="bottom: 12px;">[ DAY: 1000 ]</div>
+                <div class="sci-text-container"><span class="sci-label">MUS DAY: </span><span class="sci-score">1000</span></div>
             </div>
             
-            <!-- Mặt 6: Bushido (Đáy Dưới) -->
-            <div class="cube-face face-bottom state-stable">
+            <!-- Mặt 6: Bushido (Bottom) -->
+            <div class="cube-face face-bottom state-stable" onclick="activateFace('BUSHIDO')">
                 <div class="kanji-ghost" style="font-size: 45px;">武</div>
-                <div class="sci-label" style="bottom: 12px;">[ BUSHIDO ]</div>
+                <div class="sci-text-container"><span class="sci-label">BUSHIDO</span></div>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT TƯƠNG TÁC TEST -->
+    <!-- ENGINE VẬT LÝ ZERO-GRAVITY -->
     <script>
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playCyberClick() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        const core = document.getElementById('holy-core');
+        
+        // Trạng thái vật lý
+        let rotX = -15, rotY = -25; // Góc xoay khởi đầu ngẫu nhiên
+        let velX = 0, velY = 0;     // Vận tốc (Quán tính)
+        
+        // Trạng thái điều khiển
+        let isDragging = false;
+        let startMouseX = 0, startMouseY = 0;
+        let hasMoved = false; // Phân biệt giữa Vuốt và Bấm
+
+        // 1. NGƯỜI CHƠI CHẠM VÀO LÕI (Dừng hình & Khởi động Vuốt)
+        document.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            hasMoved = false;
+            startMouseX = e.touches[0].clientX;
+            startMouseY = e.touches[0].clientY;
+            // Dừng ngay lập tức (Xóa quán tính)
+            velX = 0; 
+            velY = 0;
+        }, {passive: false});
+
+        // 2. NGƯỜI CHƠI MIẾT NGÓN TAY (Truyền lực)
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            let currentX = e.touches[0].clientX;
+            let currentY = e.touches[0].clientY;
+            
+            let deltaX = currentX - startMouseX;
+            let deltaY = currentY - startMouseY;
+            
+            if(Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) hasMoved = true; // Xác nhận là đang vuốt, không phải bấm
+
+            // Áp dụng lực vào vận tốc (Vuốt ngang thay đổi Y, vuốt dọc thay đổi X)
+            velY = deltaX * 0.4;
+            velX = -deltaY * 0.4;
+            
+            startMouseX = currentX;
+            startMouseY = currentY;
+        }, {passive: false});
+
+        // 3. NGƯỜI CHƠI BUÔNG TAY (Bắt đầu trôi tự do)
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        // HÀM CLICK MẶT KÍNH
+        function activateFace(faceName) {
+            // Nếu người dùng đang vuốt mạnh thì bỏ qua click
+            if(hasMoved) return; 
+
+            // Cảm giác cơ học khi bấm
+            if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
+
+            // Hiệu ứng chớp sáng 
+            let el = event.currentTarget;
+            let oldBg = el.style.background;
+            el.classList.add('flash-active');
+            setTimeout(() => { el.classList.remove('flash-active'); }, 150);
+
+            console.log("KÍCH HOẠT: " + faceName);
+            // Sau này anh em mình làm Menu bung ra ở đây
         }
 
-        function touchTheCore() {
-            playCyberClick();
-            if (navigator.vibrate) navigator.vibrate(50);
-            alert("LÕI ĐÃ ĐƯỢC CHẠM!");
+        // 4. VÒNG LẶP VẬT LÝ KHÔNG GIAN (Chạy liên tục 60 FPS)
+        function renderPhysics() {
+            if (!isDragging) {
+                // Áp dụng ma sát (Càng trôi càng chậm dần)
+                velX *= 0.96;
+                velY *= 0.96;
+                
+                // Trôi Vô Cực: Nếu Lõi gần như đứng im, tự động nhích nhẹ để tạo cảm giác không trọng lực
+                if (Math.abs(velX) < 0.05 && Math.abs(velY) < 0.05) {
+                    velX = 0.08; 
+                    velY = 0.12;
+                }
+            }
+            
+            // Cập nhật góc xoay hiện tại
+            rotX += velX;
+            rotY += velY;
+            
+            // Render lên giao diện
+            core.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+            
+            requestAnimationFrame(renderPhysics);
         }
+
+        // Kích hoạt Engine
+        renderPhysics();
     </script>
 </body>
 </html>
