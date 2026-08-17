@@ -13,7 +13,6 @@
     <link rel="icon" type="image/png" href="https://happyk1900.github.io/kdrive-v28/K-Icon.png?v=4">
     <link rel="apple-touch-icon" href="https://happyk1900.github.io/kdrive-v28/K-Icon.png?v=4">
 
-    <!-- LÍNH GÁC BẢO MẬT LÕI -->
     <script>
         (function checkAuthGuard() {
             const hasAccess = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active';
@@ -25,15 +24,17 @@
     <link rel="stylesheet" href="kdrive-style.css?v=999">
     
     <style>
-        /* KHÓA ẢNH NỀN BAO NÉT, KHÔNG LỆCH, KHÔNG CO GIÃN */
-        .locked-bg {
+        /* 1. KHÓA ẢNH NỀN BẰNG DIV (Dập tắt mọi lớp nền đen đè lên) */
+        #kdrive-bg-container {
             position: fixed !important; 
             inset: 0 !important;
             width: 100vw !important;
             height: 100dvh !important;
-            object-fit: cover !important; 
-            object-position: center center !important; 
-            z-index: 0;
+            background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/index%20nen.png?raw=true') !important;
+            background-size: cover !important; 
+            background-position: center center !important; 
+            background-repeat: no-repeat !important;
+            z-index: 1 !important; /* Ép nó nổi lên trên nền đen */
             pointer-events: none; 
         }
 
@@ -47,14 +48,14 @@
         @keyframes boot-pulse-kanji { 0% { opacity: 0.8; text-shadow: 0 0 15px #fff, 0 0 30px #00e5ff; transform: scale(0.98); } 100% { opacity: 1; text-shadow: 0 0 30px #fff, 0 0 60px #00e5ff; transform: scale(1.02); } }
         @keyframes bloodDrip { 0% { height: 0px; opacity: 1; transform: translate(-50%, 0); } 60% { height: 25px; opacity: 1; transform: translate(-50%, 0); } 100% { height: 25px; opacity: 0; transform: translate(-50%, 15px); } }
 
-        /* --- HỆ THỐNG GIAO DIỆN MỚI (FLEXBOX/GRID) TỰ ĐỘNG CĂN CHỈNH TRÊN MỌI MÀN HÌNH --- */
+        /* --- HỆ THỐNG GIAO DIỆN MỚI (LỚP PHỦ HTML/CSS ĐỘC LẬP) --- */
         #ui-layer {
-            position: absolute; inset: 0; z-index: 10;
+            position: absolute; inset: 0; 
+            z-index: 10 !important; /* Phải cao hơn ảnh nền */
             display: flex; flex-direction: column; justify-content: space-between;
-            padding: 40px 20px 30px 20px; pointer-events: none; /* Lớp vô hình, chỉ cho bấm vào các nút có pointer-events: auto */
+            padding: 40px 20px 30px 20px; pointer-events: none; 
         }
 
-        /* 1. Header (Sync / BPM) */
         .top-status-bar { display: flex; justify-content: flex-start; align-items: flex-start; pointer-events: auto; }
         .sync-box {
             background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -66,16 +67,14 @@
         .sync-box .heart { color: #ff2a2a; font-size: 16px; animation: heartBeat 1s infinite alternate; text-shadow: 0 0 10px #ff2a2a; }
         @keyframes heartBeat { 0% { transform: scale(1); } 100% { transform: scale(1.2); } }
 
-        /* 2. Khu vực giữa (Cột Trái, Lõi, Cột Phải) */
         .middle-arena { display: flex; justify-content: space-between; align-items: center; flex: 1; margin: 20px 0; }
 
-        /* Nút vật lý Glassmorphism chuẩn Cyberpunk */
         .cyber-btn {
             width: 55px; height: 55px; background: rgba(5, 8, 12, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--cyan); border-radius: 8px; display: flex; justify-content: center; align-items: center;
             font-size: 24px; color: #fff; cursor: pointer; pointer-events: auto; transition: all 0.2s;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,229,255,0.2);
-            margin-bottom: 15px; /* Khoảng cách giữa các nút */
+            margin-bottom: 15px; 
         }
         .cyber-btn:active { transform: scale(0.9); background: rgba(0, 229, 255, 0.3); box-shadow: 0 0 20px var(--cyan); }
         .cyber-btn.red-theme { border-color: var(--crimson); box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,42,42,0.2); }
@@ -84,14 +83,21 @@
         .left-column { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
         .right-column { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
         
-        /* Cờ Samurai Cột Phải */
+        /* 2. CHỮA BỆNH KHỐI LẬP PHƯƠNG BỊ VĂNG KHỎI TÂM (Ép nó lại vị trí cũ) */
+        #coreSystem {
+            position: relative !important;
+            top: auto !important; bottom: auto !important; left: auto !important; right: auto !important;
+            transform: scale(0.9) !important; /* Thu nhỏ một chút để vừa vặn */
+            margin: 0 auto !important;
+            pointer-events: auto;
+            display: flex; justify-content: center; align-items: center;
+        }
+
         .flag-samurai { width: 65px; height: auto; margin-bottom: 20px; pointer-events: auto; cursor: pointer; filter: drop-shadow(0 0 10px rgba(0,229,255,0.5)); transition: 0.2s; }
         .flag-samurai:active { transform: scale(0.95); filter: drop-shadow(0 0 20px var(--cyan)); }
 
-        /* Bubble Lời nói (Giữ lại ID cho JS) */
         .speech-bubble { pointer-events: none; position: absolute; z-index: 50; }
 
-        /* 3. Khu vực dưới cùng (SYS OFF, Track Nhạc, Thần Tài) */
         .bottom-dock { display: flex; justify-content: space-between; align-items: flex-end; pointer-events: auto; }
         
         .sys-off-btn {
@@ -117,18 +123,17 @@
         </div>
     </div>
 
-    <div id="whiteFlash" class="white-flash-overlay"></div>
-
-    <!-- ẢNH NỀN MỚI SIÊU SẠCH -->
-    <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/index%20nen.png?raw=true" class="locked-bg" id="kdriveBg">
+    <!-- ẢNH NỀN MỚI SIÊU SẠCH (Đã được chuyển thành Div để ép nổi lên trên) -->
+    <div id="kdrive-bg-container"></div>
 
     <div class="global-radar"><div class="radar-line"></div></div>
 
-    <!-- THẺ CAMERA ẨN ĐỂ CHỤP ẢNH (Bảo toàn từ code cũ) -->
+    <!-- THẺ CAMERA ẨN ĐỂ CHỤP ẢNH -->
     <input type="file" accept="video/*" capture="camcorder" id="hiddenCamera" style="display: none;" onchange="handleVideoUpload(event)">
+    
     <div id="samuraiBubble" class="speech-bubble" style="display:none; left: 50%; top: 20%; transform: translateX(-50%); background: rgba(0,0,0,0.8); border: 1px solid var(--cyan); padding: 10px; border-radius: 6px; color: #fff; font-family: 'Space Grotesk'; font-size: 12px; text-shadow: 0 0 5px var(--cyan);"><span id="bubbleText"></span></div>
 
-    <!-- LỚP GIAO DIỆN UI VẬT LÝ NỔI (Thay thế hoàn toàn tọa độ %) -->
+    <!-- LỚP GIAO DIỆN UI VẬT LÝ NỔI -->
     <div id="ui-layer">
         
         <!-- HEADER (Nhịp tim) -->
@@ -149,8 +154,8 @@
                 <button class="cyber-btn" onclick="playCyberClick()">💨</button>
             </div>
 
-            <!-- Tâm: Lõi Lập Phương 3D (Tái sử dụng nguyên bản để bảo toàn hiệu ứng) -->
-            <div class="core-system-container" id="coreSystem" style="pointer-events: auto; position: relative;">
+            <!-- Tâm: Lõi Lập Phương 3D (Đã ép CSS nằm chính giữa) -->
+            <div class="core-system-container" id="coreSystem">
                 <div class="projector-beam"></div>
                 <div class="scanning-ring"></div>
                 <div class="cube-wrapper" id="cubeWrapper">
@@ -166,7 +171,6 @@
 
             <!-- Cột phải: Samurai, Rương, Cam, Nhạc -->
             <div class="right-column">
-                <!-- Cờ Samurai (có thể click) -->
                 <img src="https://happyk1900.github.io/kdrive-v28/K-Icon.png" class="flag-samurai" onclick="if(typeof processSamuraiAction === 'function') processSamuraiAction(this); else playCyberClick();">
                 
                 <button class="cyber-btn" onclick="if(typeof fetchBattleReport === 'function') fetchBattleReport(); else playCyberClick();">📦</button>
@@ -222,7 +226,6 @@
             let bootOverlay = document.getElementById('boot-overlay');
             let bootText = document.getElementById('boot-text');
 
-            // Đợi 1.5 giây để ổn định thanh địa chỉ (URL bar)
             setTimeout(() => {
                 bootText.classList.add('ready-to-tap');
                 bootOverlay.addEventListener('click', unlockSystem);
@@ -252,7 +255,6 @@
             if(v) v.pause();
         }
 
-        // Xóa bộ nhớ cache worker cũ
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 for(let registration of registrations) { registration.unregister(); }
