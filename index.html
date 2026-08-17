@@ -15,10 +15,7 @@
     <link rel="icon" type="image/png" href="https://happyk1900.github.io/kdrive-v28/K-Icon.png?v=4">
     <link rel="apple-touch-icon" href="https://happyk1900.github.io/kdrive-v28/K-Icon.png?v=4">
 
-    <!-- ==========================================
-         LÍNH GÁC BẢO MẬT LÕI (ĐỒNG BỘ TỪ SINH TRẮC)
-         Bảo vệ từ vòng gửi xe, chặn đứng xâm nhập trong 0.001s
-    ========================================== -->
+    <!-- LÍNH GÁC BẢO MẬT LÕI -->
     <script>
         (function checkAuthGuard() {
             const hasAccess = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active';
@@ -28,79 +25,110 @@
         })();
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="kdrive-style.css?v=999">
     
     <style>
-        /* HIỆU ỨNG VIỀN NHỊP THỞ (BREATHE GLOW) */
-        @keyframes breatheGlow {
-            0% { opacity: 0.5; box-shadow: 0 0 15px currentColor; filter: brightness(0.9); }
-            50% { opacity: 1; box-shadow: 0 0 30px currentColor, inset 0 0 10px currentColor; filter: brightness(1.2); }
-            100% { opacity: 0.5; box-shadow: 0 0 15px currentColor; filter: brightness(0.9); }
-        }
-
-        .itm-label { color: #ff33cc !important; font-weight: bold; text-shadow: 0 0 10px rgba(255, 51, 204, 0.5); }
-
-        /* KHÓA CHẾT ẢNH NỀN VÀO TÂM MÀN HÌNH - TRẢ VỀ NGUYÊN BẢN ĐỂ KHỚP NÚT BẤM */
+        /* KHÓA CHẾT ẢNH NỀN VÀO KHUNG (CHỐNG LẸM ĐÁY 100%) */
         .locked-bg {
-            position: fixed !important; 
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            width: 100vw !important;
-            height: 100vh !important; /* Chiều cao mặc định */
-            height: 100dvh !important; /* Chiều cao động (chống giật trên mobile) */
-            object-fit: cover !important; /* Lệnh quan trọng nhất để giữ tỷ lệ, không bị kéo dãn */
-            object-position: center center !important; /* Neo cứng tâm ảnh vào tâm tọa độ */
+            position: absolute !important; 
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: fill !important; /* Tối thượng: Ép ảnh khít rịt 4 góc màn hình, dập tắt lẹm đáy */
             z-index: 0;
-            pointer-events: none; /* Không cản trở các thao tác bấm trên màn hình */
+            pointer-events: none; 
         }
 
-        /* --- CSS CỔNG SƠN MÔN KHỞI ĐỘNG --- */
+        /* --- CSS CỔNG SƠN MÔN: BUSHIDO --- */
         #boot-overlay {
             position: fixed;
             inset: 0;
-            background-color: #000000;
-            z-index: 999999; /* Đè lên tất cả mọi thứ */
+            background-color: #030508;
+            z-index: 999999;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             transition: opacity 0.8s ease-in-out;
-            touch-action: none; /* Khóa cuộn trang lúc đang màn hình đen */
+            touch-action: none; 
         }
 
         #boot-text {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            color: #00e5ff; /* Màu Cyan Cyberpunk */
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            text-shadow: 0 0 15px #00e5ff, 0 0 5px #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             opacity: 0; 
-            pointer-events: none; /* Chưa hiện xong thì không cho bấm */
+            pointer-events: none; 
             transition: opacity 0.5s ease;
         }
 
-        /* Hiệu ứng nhấp nháy khi đã tải xong và sẵn sàng cho chạm */
         #boot-text.ready-to-tap {
             opacity: 1;
             pointer-events: auto;
             cursor: pointer;
-            animation: boot-pulse 1.2s infinite alternate;
         }
 
-        @keyframes boot-pulse {
-            0% { opacity: 0.3; text-shadow: 0 0 5px #00e5ff; transform: scale(0.98); }
-            100% { opacity: 1; text-shadow: 0 0 25px #00e5ff; transform: scale(1.02); }
+        /* Chữ Kanji sáng lóa */
+        .kanji-glow {
+            font-family: serif;
+            font-size: 70px;
+            color: #ffffff;
+            text-shadow: 0 0 20px #fff, 0 0 40px #00e5ff, 0 0 80px #00e5ff, 0 0 120px #fff;
+            margin-bottom: 5px;
+            font-weight: normal;
+            letter-spacing: 8px;
+            animation: boot-pulse-kanji 1.2s infinite alternate;
+        }
+
+        /* Chữ Bushido nhỏ máu */
+        .bushido-blood {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: #cc0000;
+            letter-spacing: 12px;
+            text-transform: uppercase;
+            position: relative;
+            text-shadow: 2px 2px 0px #330000, 0 0 15px #ff0000;
+            margin-top: 10px;
+        }
+
+        /* Hiệu ứng giọt máu rơi */
+        .bushido-blood::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            background-color: #cc0000;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 0 8px #ff0000;
+            animation: bloodDrip 2s infinite;
+        }
+
+        @keyframes boot-pulse-kanji {
+            0% { opacity: 0.8; text-shadow: 0 0 15px #fff, 0 0 30px #00e5ff; transform: scale(0.98); }
+            100% { opacity: 1; text-shadow: 0 0 30px #fff, 0 0 60px #00e5ff, 0 0 100px #fff; transform: scale(1.02); }
+        }
+
+        @keyframes bloodDrip {
+            0% { height: 0px; opacity: 1; transform: translate(-50%, 0); }
+            60% { height: 25px; opacity: 1; transform: translate(-50%, 0); }
+            100% { height: 25px; opacity: 0; transform: translate(-50%, 15px); }
         }
     </style>
 </head>
 <body>
 
-    <!-- CỔNG SƠN MÔN (LỚP PHỦ ĐEN KHỞI ĐỘNG HỆ THỐNG) -->
+    <!-- CỔNG SƠN MÔN (BUSHIDO BOOT SCREEN) -->
     <div id="boot-overlay">
-        <div id="boot-text" class="hidden-text">[ CHẠM ĐỂ VỀ SƠN MÔN ]</div>
+        <div id="boot-text">
+            <div class="kanji-glow">武士道</div>
+            <div class="bushido-blood">B U S H I D O</div>
+        </div>
     </div>
 
     <div id="whiteFlash" class="white-flash-overlay"></div>
@@ -160,18 +188,22 @@
             </div>
         </div>
 
-        <!-- 9 NÚT CHẠM TƯƠNG TÁC -->
+        <!-- CÁC NÚT TƯƠNG TÁC GỐC -->
         <button type="button" class="touch-zone" id="node-samurai" onclick="processSamuraiAction(this)"></button>
         <button type="button" class="touch-zone border-red" id="node-hearts" onclick="openSecretCameraGuard(this)"></button>
         <button type="button" class="touch-zone" id="node-mini-clu" onclick="playCyberClick()"></button>
-        
         <button type="button" class="touch-zone" id="node-chip" onclick="fetchBattleReport()"></button>
-        
         <button type="button" class="touch-zone" id="node-new-9" onclick="playCyberClick()"></button>
         <button type="button" class="touch-zone" id="node-spades" onclick="playCyberClick(); window.location.replace('sinh_trac.html');"></button>
         <button type="button" class="touch-zone" id="node-clubs" onclick="playCyberClick()"></button>
         <button type="button" class="touch-zone border-red" id="node-diamonds" onclick="playCyberClick()"></button>
         <button type="button" class="touch-zone border-red" id="node-mini-dia" onclick="playCyberClick()"></button>
+
+        <!-- NÚT VÀO THỦY LUÂN (CON SÓNG) - FIX TỌA ĐỘ CHUẨN 44.8% LEFT, 19.8% TOP -->
+        <button type="button" class="touch-zone" id="node-thuyluan-wave" 
+            onclick="if(typeof playCyberClick === 'function') playCyberClick(); window.location.href='thuy_luan.html';" 
+            style="position: absolute; left: 44.8%; top: 19.8%; width: 14%; height: 7%; z-index: 100; background: transparent; border: none; cursor: pointer;">
+        </button>
 
     </div>
 
@@ -194,7 +226,7 @@
     <!-- SCRIPT CHÍNH -->
     <script src="core-logic-v2.js?v=99999"></script>
 
-    <!-- SCRIPT XỬ LÝ CỔNG SƠN MÔN (CHỈ LÀM MỜ VÀ ẨN, KHÔNG CAN THIỆP KÍCH THƯỚC) -->
+    <!-- HỆ THỐNG CỔNG SƠN MÔN (BUSHIDO BOOT SCREEN) -->
     <script>
         window.addEventListener('load', function() {
             let bootOverlay = document.getElementById('boot-overlay');
@@ -208,21 +240,41 @@
         });
 
         function unlockSystem() {
-            // Phát âm thanh khởi động nếu có sẵn trong hàm playCyberClick()
-            if(typeof playCyberClick === 'function') {
-                playCyberClick();
+            // 1. KHÓA CỨNG CHIỀU CAO BẰNG PIXEL THẬT (CHỐNG CO GIÃN KHI LƯỚT)
+            let wrapper = document.getElementById('mainWrapper');
+            if(wrapper) {
+                // Chốt cứng Pixel, dập tắt vĩnh viễn sự co giãn
+                wrapper.style.height = window.innerHeight + 'px';
+                wrapper.style.minHeight = window.innerHeight + 'px';
             }
 
-            // Mở cổng (Hiệu ứng mờ dần trong 0.8s)
+            // 2. PHÁT ÂM THANH KHỞI ĐỘNG
+            if(typeof playCyberClick === 'function') {
+                playCyberClick();
+            } else if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+
+            // 3. MỞ CỔNG: XÓA MÀN HÌNH ĐEN
             let bootOverlay = document.getElementById('boot-overlay');
             bootOverlay.style.opacity = '0';
             
             setTimeout(() => {
                 bootOverlay.style.display = 'none';
-            }, 800); 
+            }, 800); // Mờ dần trong 0.8s
         }
 
-        // Xóa bỏ bộ nhớ đệm cũ để đảm bảo logic mới mượt mà
+        // Khóa lại pixel nếu người dùng xoay ngang máy
+        window.addEventListener('resize', function() {
+            let wrapper = document.getElementById('mainWrapper');
+            let bootOverlay = document.getElementById('boot-overlay');
+            if(wrapper && bootOverlay && bootOverlay.style.display === 'none') {
+                wrapper.style.height = window.innerHeight + 'px';
+                wrapper.style.minHeight = window.innerHeight + 'px';
+            }
+        });
+
+        // Xóa bỏ bộ nhớ đệm cũ
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 for(let registration of registrations) { registration.unregister(); }
