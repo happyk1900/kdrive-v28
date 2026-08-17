@@ -17,333 +17,389 @@
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Space Grotesk', sans-serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Space Grotesk', sans-serif; touch-action: none; }
 
         /* =========================================
-           1. MÔI TRƯỜNG & KHÔNG GIAN
+           1. MÀN HÌNH KHAI MÔN (5 KANJI VORTEX)
+        ========================================= */
+        #boot-sequence {
+            position: fixed; inset: 0; z-index: 100; background-color: #000;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 1s ease;
+        }
+        .kanji-ring {
+            position: relative; width: 200px; height: 200px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .k-char {
+            position: absolute; font-family: "Yu Mincho", "MS Mincho", serif;
+            font-size: 35px; color: #fff; text-shadow: 0 0 15px #00e5ff;
+            /* Đẩy các chữ ra vòng ngoài */
+            transform: rotate(calc(var(--i) * 72deg)) translateY(-80px) rotate(calc(var(--i) * -72deg));
+            transition: all 2s cubic-bezier(0.5, 0, 0.5, 1);
+        }
+        
+        .tap-hint {
+            position: absolute; bottom: 15%; color: #ff2a2a; font-size: 12px; letter-spacing: 5px;
+            animation: pulseGlow 1.5s infinite alternate; text-shadow: 0 0 10px #ff2a2a;
+        }
+
+        /* Khi kích hoạt xoay và tụ lại */
+        .vortex-active .kanji-ring { animation: spinVortex 2s cubic-bezier(0.5, 0, 0.5, 1) forwards; }
+        .vortex-active .k-char { 
+            /* Hút vào tâm */
+            transform: rotate(calc(var(--i) * 72deg)) translateY(0px) rotate(calc(var(--i) * -72deg)) scale(0);
+            opacity: 0; filter: brightness(3);
+        }
+        .vortex-active .tap-hint { opacity: 0; transition: opacity 0.3s; }
+
+        @keyframes spinVortex { 
+            0% { transform: rotate(0deg) scale(1); }
+            80% { transform: rotate(1080deg) scale(0.2); }
+            100% { transform: rotate(1440deg) scale(0); }
+        }
+
+        /* =========================================
+           2. MÔI TRƯỜNG & KHÔNG GIAN
         ========================================= */
         #sanctum-bg {
             position: fixed; inset: 0; width: 100vw; height: 100dvh;
             background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/INDEX%20SAMURAI.png?raw=true');
             background-size: cover; background-position: center center; background-repeat: no-repeat;
-            z-index: 1; opacity: 0; transition: opacity 2s ease;
+            z-index: 1; opacity: 0; transition: opacity 3s ease; /* Hiện mượt chậm */
         }
         .vignette-overlay {
             position: fixed; inset: 0; background: radial-gradient(circle at center, transparent 20%, rgba(0, 0, 0, 0.9) 100%);
             z-index: 2; pointer-events: none;
         }
-
-        /* Lưới điện từ chạy trên mặt sàn */
         .cyber-floor {
             position: fixed; bottom: -20%; left: -50%; width: 200%; height: 60vh;
             background: 
                 repeating-linear-gradient(to top, transparent, transparent 30px, rgba(0, 229, 255, 0.3) 31px, transparent 32px),
                 repeating-linear-gradient(to right, transparent, transparent 30px, rgba(0, 229, 255, 0.3) 31px, transparent 32px);
-            transform: perspective(600px) rotateX(75deg);
-            transform-origin: center bottom;
-            animation: gridFlow 1.5s linear infinite;
-            z-index: 3; opacity: 0; pointer-events: none;
+            transform: perspective(600px) rotateX(75deg); transform-origin: center bottom;
+            animation: gridFlow 1.5s linear infinite; z-index: 3; opacity: 0; pointer-events: none;
             mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
             -webkit-mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
+            transition: opacity 2s ease;
         }
-
-        @keyframes gridFlow {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 31px; }
-        }
+        @keyframes gridFlow { 0% { background-position: 0 0; } 100% { background-position: 0 31px; } }
 
         /* =========================================
-           2. MÀN HÌNH KHỞI ĐỘNG (BOOT SCREEN)
-        ========================================= */
-        #boot-screen {
-            position: fixed; inset: 0; z-index: 100; background-color: #000;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .boot-btn {
-            padding: 15px 40px; background: transparent; border: 1px solid #ff2a2a; color: #ff2a2a;
-            font-size: 14px; letter-spacing: 4px; text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(255, 42, 42, 0.4), inset 0 0 10px rgba(255, 42, 42, 0.2);
-            cursor: pointer; transition: all 0.3s;
-        }
-        .boot-btn:active { transform: scale(0.95); background: rgba(255, 42, 42, 0.2); }
-
-        /* =========================================
-           3. HIỆP SĨ BOO (HOLOGRAM)
+           3. HIỆP SĨ BOO (Kéo thả mượt)
         ========================================= */
         .boo-hologram {
-            position: absolute; z-index: 20; width: 50px; height: 50px;
+            position: absolute; z-index: 30; width: 50px; height: 50px;
             top: 25%; right: 15%;
-            /* Tạo hình hoạt hình tối giản của mũi heo Hologram */
             background: rgba(255, 105, 180, 0.6); border: 2px solid #00e5ff;
             border-radius: 40% 40% 50% 50%;
             box-shadow: 0 0 20px #00e5ff, inset 0 0 15px #ff69b4;
             backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
-            animation: floatBoo 4s ease-in-out infinite, glitchHolo 5s infinite;
-            cursor: pointer; opacity: 0; display: flex; justify-content: center; align-items: center;
-            transition: opacity 0.5s ease;
+            opacity: 0; display: flex; justify-content: center; align-items: center;
+            transition: opacity 1s ease, transform 0.2s; cursor: grab;
         }
-        /* Lỗ mũi heo */
+        .boo-hologram:active { cursor: grabbing; transform: scale(1.1); }
         .boo-hologram::before, .boo-hologram::after {
             content: ''; position: absolute; width: 8px; height: 12px;
             background: #00e5ff; border-radius: 50%; box-shadow: 0 0 5px #00e5ff;
         }
-        .boo-hologram::before { left: 12px; }
-        .boo-hologram::after { right: 12px; }
+        .boo-hologram::before { left: 12px; } .boo-hologram::after { right: 12px; }
         
-        .boo-sleeping { opacity: 0.3 !important; animation: breatheSleep 3s ease-in-out infinite !important; }
-
-        @keyframes floatBoo {
-            0%, 100% { transform: translateY(0) rotate(2deg); }
-            50% { transform: translateY(-15px) rotate(-2deg); }
-        }
-        @keyframes breatheSleep {
-            0%, 100% { transform: scale(1); filter: brightness(0.5); }
-            50% { transform: scale(1.05); filter: brightness(1); }
-        }
-        @keyframes glitchHolo {
-            0%, 95%, 100% { opacity: 1; transform: translateX(0); }
-            96% { opacity: 0.5; transform: translateX(-2px); }
-            98% { opacity: 0.8; transform: translateX(2px); }
-        }
-
-        /* Lời thoại của Boo */
-        .boo-dialogue {
-            position: absolute; top: -60px; right: 60px; width: 220px;
-            background: rgba(0, 0, 0, 0.8); border: 1px solid #00e5ff; padding: 10px;
-            color: #00e5ff; font-size: 11px; text-shadow: 0 0 5px #00e5ff;
-            border-radius: 5px; opacity: 0; pointer-events: none; transition: opacity 0.3s;
-        }
+        .boo-float { animation: floatBoo 4s ease-in-out infinite, glitchHolo 5s infinite; }
+        
+        @keyframes floatBoo { 0%, 100% { transform: translateY(0) rotate(2deg); } 50% { transform: translateY(-15px) rotate(-2deg); } }
+        @keyframes glitchHolo { 0%, 95%, 100% { opacity: 1; } 96% { opacity: 0.5; transform: translateX(-2px); } 98% { opacity: 0.8; transform: translateX(2px); } }
 
         /* =========================================
-           4. LÕI LẬP PHƯƠNG (GIỮ NGUYÊN KIẾN TRÚC)
+           4. LÕI LẬP PHƯƠNG (Xoay tương tác)
         ========================================= */
         #core-wrapper {
             position: absolute; inset: 0; display: flex; justify-content: center; align-items: center;
-            opacity: 0; z-index: 10;
+            opacity: 0; z-index: 10; perspective: 1000px; transition: opacity 1.5s ease;
         }
         .holy-core-container {
-            position: relative; width: 120px; height: 120px; perspective: 800px;
-        }
-        .holy-cube {
-            width: 100%; height: 100%; position: absolute; transform-style: preserve-3d;
-            animation: driftFree 20s infinite linear;
+            position: relative; width: 120px; height: 120px; transform-style: preserve-3d;
+            transform: rotateX(15deg) rotateY(15deg); /* Góc ban đầu */
         }
         .cube-face {
             position: absolute; width: 120px; height: 120px;
             border: 2px solid transparent; backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer;
         }
 
-        /* Màu Xám Bạc (Nhịp thở) cho chữ SCI */
         .sci-label {
             position: absolute; bottom: 8px; width: 100%; text-align: center;
             color: #E2E8F0; font-size: 9px; font-weight: 700; letter-spacing: 1px;
-            text-shadow: 0 0 5px rgba(226, 232, 240, 0.8);
-            background: rgba(0,0,0,0.4); padding: 2px 0;
-            animation: textBreathe 3s infinite alternate;
+            text-shadow: 0 0 5px rgba(226, 232, 240, 0.8); background: rgba(0,0,0,0.4); padding: 2px 0;
         }
 
-        @keyframes textBreathe { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+        .state-stable { border-color: #00e5ff; background: rgba(0, 229, 255, 0.1); box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2); }
+        .state-perfect { border-color: #b026ff; background: rgba(176, 38, 255, 0.1); box-shadow: 0 0 20px rgba(176, 38, 255, 0.4), inset 0 0 20px rgba(176, 38, 255, 0.2); }
 
-        .state-stable { border-color: #00e5ff; background: rgba(0, 229, 255, 0.05); box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2); }
-        .state-perfect { border-color: #b026ff; background: rgba(176, 38, 255, 0.05); box-shadow: 0 0 20px rgba(176, 38, 255, 0.4), inset 0 0 20px rgba(176, 38, 255, 0.2); }
-
-        .kanji-ghost {
-            font-family: "Yu Mincho", "MS Mincho", serif; font-size: 50px; color: rgba(255, 255, 255, 0.9);
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6); transform: translateY(-5px);
-        }
+        .kanji-ghost { font-family: "Yu Mincho", "MS Mincho", serif; font-size: 50px; color: rgba(255, 255, 255, 0.9); text-shadow: 0 0 15px rgba(255, 255, 255, 0.6); transform: translateY(-5px); pointer-events: none; }
 
         .inner-glow {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 50px; height: 50px; border-radius: 50%;
-            background: radial-gradient(circle, #fff 0%, #b026ff 40%, transparent 70%);
+            width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #b026ff 40%, transparent 70%);
             box-shadow: 0 0 30px #b026ff; animation: pulseGlow 2s infinite alternate;
         }
 
-        .face-front  { transform: rotateY(0deg) translateZ(60px); }
-        .face-right  { transform: rotateY(90deg) translateZ(60px); }
-        .face-back   { transform: rotateY(180deg) translateZ(60px); }
-        .face-left   { transform: rotateY(-90deg) translateZ(60px); }
-        .face-top    { transform: rotateX(90deg) translateZ(60px); }
-        .face-bottom { transform: rotateX(-90deg) translateZ(60px); }
+        .face-front  { transform: rotateY(0deg) translateZ(60px); }    /* ĐỊA */
+        .face-right  { transform: rotateY(90deg) translateZ(60px); }   /* THỦY */
+        .face-back   { transform: rotateY(180deg) translateZ(60px); }  /* HỎA */
+        .face-left   { transform: rotateY(-90deg) translateZ(60px); }  /* PHONG */
+        .face-top    { transform: rotateX(90deg) translateZ(60px); }   /* KHẾ ƯỚC */
+        .face-bottom { transform: rotateX(-90deg) translateZ(60px); }  /* BUSHIDO */
 
-        @keyframes driftFree {
-            0% { transform: rotateX(15deg) rotateY(0deg) rotateZ(10deg); }
-            100% { transform: rotateX(375deg) rotateY(720deg) rotateZ(370deg); }
-        }
         @keyframes pulseGlow { 0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.8); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } }
     </style>
 </head>
 <body>
 
-    <!-- MÀN HÌNH CHỜ CLICK ĐỂ MỞ KHÓA ÂM THANH -->
-    <div id="boot-screen">
-        <button class="boot-btn" onclick="startCinematicBoot()">KÍCH HOẠT NỘI VIỆN</button>
+    <!-- 1. MÀN HÌNH KHAI MÔN -->
+    <div id="boot-sequence" onclick="igniteCore()">
+        <div class="kanji-ring" id="vortex-ring">
+            <span class="k-char" style="--i:0">地</span>
+            <span class="k-char" style="--i:1">水</span>
+            <span class="k-char" style="--i:2">火</span>
+            <span class="k-char" style="--i:3">風</span>
+            <span class="k-char" style="--i:4">空</span>
+        </div>
+        <div class="tap-hint">[ CHẠM ĐỂ KHAI MỞ ]</div>
     </div>
 
-    <!-- KHÔNG GIAN BÊN TRONG -->
+    <!-- 2. KHÔNG GIAN BÊN TRONG -->
     <div id="sanctum-bg"></div>
     <div class="vignette-overlay"></div>
     <div class="cyber-floor" id="floor-grid"></div>
 
-    <!-- MÕM BOO HỖN -->
-    <div class="boo-hologram" id="boo-knight">
-        <div class="boo-dialogue" id="boo-speech"></div>
-    </div>
+    <!-- 3. MÕM BOO HỖN -->
+    <div class="boo-hologram boo-float" id="boo-knight"></div>
 
-    <!-- LÕI TRUNG TÂM -->
+    <!-- 4. LÕI TRUNG TÂM -->
     <div id="core-wrapper">
-        <div class="holy-core-container">
+        <div class="holy-core-container" id="cube">
             <div class="inner-glow"></div>
-            <div class="holy-cube">
-                <!-- Địa -->
-                <div class="cube-face face-front state-stable">
-                    <div class="kanji-ghost">地</div>
-                    <div class="sci-label">[ BẢN THỂ: 75 ]</div>
-                </div>
-                <!-- Thủy -->
-                <div class="cube-face face-right state-perfect">
-                    <div class="kanji-ghost">水</div>
-                    <div class="sci-label">[ TÂM LƯU: 92 ]</div>
-                </div>
-                <!-- Hỏa -->
-                <div class="cube-face face-back state-stable">
-                    <div class="kanji-ghost">火</div>
-                    <div class="sci-label">[ BẢN NĂNG: 80 ]</div>
-                </div>
-                <!-- Phong -->
-                <div class="cube-face face-left state-stable">
-                    <div class="kanji-ghost">風</div>
-                    <div class="sci-label">[ VẠN BIẾN: 88 ]</div>
-                </div>
-                <!-- Khế Ước -->
-                <div class="cube-face face-top state-perfect">
-                    <div class="kanji-ghost" style="font-size: 40px;">契</div>
-                    <div class="sci-label" style="bottom: 12px; color: #ff2a2a;">[ MUSHI DAYS: 1000 ]</div>
-                </div>
-                <!-- Bushido -->
-                <div class="cube-face face-bottom state-stable">
-                    <div class="kanji-ghost" style="font-size: 40px;">武</div>
-                    <div class="sci-label" style="bottom: 12px;">[ BUSHIDO ]</div>
-                </div>
+            <!-- ĐỊA -> Sinh Trắc -->
+            <div class="cube-face face-front state-stable" onclick="navigateFace('sinh_trac.html', 'Địa')">
+                <div class="kanji-ghost">地</div><div class="sci-label">[ BẢN THỂ: 75 ]</div>
+            </div>
+            <!-- THỦY -> Thủy Luân -->
+            <div class="cube-face face-right state-perfect" onclick="navigateFace('thuy_luan.html', 'Thủy')">
+                <div class="kanji-ghost">水</div><div class="sci-label">[ TÂM LƯU: 92 ]</div>
+            </div>
+            <!-- HỎA -->
+            <div class="cube-face face-back state-stable" onclick="navigateFace('#', 'Hỏa')">
+                <div class="kanji-ghost">火</div><div class="sci-label">[ BẢN NĂNG: 80 ]</div>
+            </div>
+            <!-- PHONG -->
+            <div class="cube-face face-left state-stable" onclick="navigateFace('#', 'Phong')">
+                <div class="kanji-ghost">風</div><div class="sci-label">[ VẠN BIẾN: 88 ]</div>
+            </div>
+            <!-- KHẾ ƯỚC -->
+            <div class="cube-face face-top state-perfect">
+                <div class="kanji-ghost" style="font-size: 40px;">契</div><div class="sci-label" style="color: #ff2a2a;">[ MUSHI DAYS: 1000 ]</div>
+            </div>
+            <!-- BUSHIDO -->
+            <div class="cube-face face-bottom state-stable">
+                <div class="kanji-ghost" style="font-size: 40px;">武</div><div class="sci-label">[ BUSHIDO ]</div>
             </div>
         </div>
     </div>
 
     <script>
-        // =========================================
-        // A. HỆ THỐNG ÂM THANH (Dùng Web Audio API tạo tiếng Beep Cyber)
-        // Lưu ý: Thay thế các URL dưới đây bằng link file mp3 thật của anh sau này
-        // =========================================
-        function playSoundGen(type) {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
+        // Hàm rung thiết bị
+        function vHaptic(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
+
+        // Máy phát âm thanh ảo Cyber
+        let audioCtx;
+        function playBeep(type) {
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
 
             if(type === 'taiko') {
-                // Giả lập tiếng trống trầm
-                osc.type = 'sine'; osc.frequency.setValueAtTime(150, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.5);
-                gain.gain.setValueAtTime(1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
-                osc.start(); osc.stop(ctx.currentTime + 1);
+                osc.type = 'sine'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 1);
+                gain.gain.setValueAtTime(1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+                osc.start(); osc.stop(audioCtx.currentTime + 1);
             } else if(type === 'katana') {
-                // Giả lập tiếng rút kiếm sắc
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(2000, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-                osc.start(); osc.stop(ctx.currentTime + 0.5);
-            } else if(type === 'glitch') {
-                // Tiếng quét dữ liệu
-                osc.type = 'square'; osc.frequency.setValueAtTime(800, ctx.currentTime);
-                osc.frequency.setValueAtTime(1200, ctx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-                osc.start(); osc.stop(ctx.currentTime + 0.2);
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(2000, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+            } else if(type === 'click') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
             }
         }
 
-        // =========================================
-        // B. KỊCH BẢN KHỞI ĐỘNG CINEMATIC
-        // =========================================
-        function startCinematicBoot() {
-            document.getElementById('boot-screen').style.display = 'none';
+        // =====================================
+        // KỊCH BẢN KHỞI ĐỘNG CỰC MẠNH
+        // =====================================
+        let isIgnited = false;
+        function igniteCore() {
+            if(isIgnited) return; isIgnited = true;
             
-            // Nhịp 1: Trống Taiko
-            playSoundGen('taiko');
+            // Khởi tạo context Audio để lách luật trình duyệt
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             
-            setTimeout(() => {
-                // Nhịp 2: Bật điện sàn & Quét Glitch
-                document.getElementById('sanctum-bg').style.opacity = '1';
-                document.getElementById('floor-grid').style.opacity = '1';
-                playSoundGen('glitch');
-            }, 800);
+            // Bắt đầu lốc xoáy
+            document.getElementById('boot-sequence').classList.add('vortex-active');
+            playBeep('taiko');
+            vHaptic([50, 50, 300]); // Rung dập
 
             setTimeout(() => {
-                // Nhịp 3: Lõi xuất hiện & Rút kiếm
-                document.getElementById('core-wrapper').style.opacity = '1';
-                playSoundGen('katana');
-            }, 1800);
-
-            setTimeout(() => {
-                // Nhịp 4: Boo xuất hiện
-                document.getElementById('boo-knight').style.opacity = '1';
-            }, 2500);
+                document.getElementById('boot-sequence').style.opacity = '0';
+                
+                // Trễ xíu rồi Fade In Nội Viện
+                setTimeout(() => {
+                    document.getElementById('boot-sequence').style.display = 'none';
+                    document.getElementById('sanctum-bg').style.opacity = '1';
+                    document.getElementById('floor-grid').style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        document.getElementById('core-wrapper').style.opacity = '1';
+                        document.getElementById('boo-knight').style.opacity = '1';
+                        playBeep('katana');
+                        vHaptic(100);
+                    }, 1000);
+                }, 500);
+            }, 2000); // 2s cho xoáy kết thúc
         }
 
-        // =========================================
-        // C. TƯƠNG TÁC BOO MỎ HỖN (Chạm / Giữ)
-        // =========================================
-        const boo = document.getElementById('boo-knight');
-        const speech = document.getElementById('boo-speech');
-        let pressTimer;
-        let isSleeping = false;
+        // =====================================
+        // VẬT LÝ KHỐI LẬP PHƯƠNG (Xoay 3D)
+        // =====================================
+        const cube = document.getElementById('cube');
+        let isDraggingCube = false;
+        let startX, startY, currentX = 15, currentY = 15;
+        let dragDistance = 0;
 
-        const thoạiMỏHỗn = [
-            "Khịt... Ngươi tưởng qua cổng Torii là ngon hả? Mở to mắt ra mà nhìn khối Lõi đi!",
-            "Nhìn nắp trên đi! 1000 ngày Vô Ngã! Rớt 1 điểm thì quay lại vạch xuất phát. Dám chơi không?",
-            "Nội Viện không chứa chấp kẻ yếu bóng vía. Tập trung vào, tên ngốc!",
-            "Rèn luyện Bản Thể, Tâm Lưu, Bản Năng, Vạn Biến! Khịt!"
+        document.getElementById('core-wrapper').addEventListener('pointerdown', (e) => {
+            if(e.target.closest('#boo-knight')) return; // Bỏ qua nếu đang bấm Boo
+            isDraggingCube = true; dragDistance = 0;
+            startX = e.clientX; startY = e.clientY;
+            cube.style.transition = 'none';
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (!isDraggingCube) return;
+            let deltaX = e.clientX - startX;
+            let deltaY = e.clientY - startY;
+            dragDistance += Math.abs(deltaX) + Math.abs(deltaY);
+            
+            // Tính toán góc xoay (Xoay Y theo trục X chuột, Xoay X theo trục Y chuột)
+            let newRotY = currentY + deltaX * 0.5;
+            let newRotX = currentX - deltaY * 0.5;
+            cube.style.transform = `rotateX(${newRotX}deg) rotateY(${newRotY}deg)`;
+        });
+
+        window.addEventListener('pointerup', (e) => {
+            if (!isDraggingCube) return;
+            isDraggingCube = false;
+            // Lưu lại góc mới
+            let style = cube.style.transform;
+            let matchX = style.match(/rotateX\(([-0-9.]+)deg\)/);
+            let matchY = style.match(/rotateY\(([-0-9.]+)deg\)/);
+            if(matchX) currentX = parseFloat(matchX[1]);
+            if(matchY) currentY = parseFloat(matchY[1]);
+            cube.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'; // Quán tính nhẹ
+        });
+
+        // Hàm chuyển trang khi bấm vào mặt
+        function navigateFace(url, name) {
+            // Nếu người dùng vừa Vuốt/Drag (khoảng cách lớn), thì Hủy Click để không bị chuyển nhầm
+            if(dragDistance > 20) return;
+            
+            playBeep('click');
+            vHaptic([50, 100, 50]);
+            
+            // Hiệu ứng nháy sáng báo nhận lệnh
+            cube.style.filter = 'brightness(2)';
+            setTimeout(() => {
+                cube.style.filter = 'none';
+                if(url !== '#') window.location.href = url;
+            }, 300);
+        }
+
+        // =====================================
+        // AI VOICE & KÉO THẢ BOO MỎ HỖN
+        // =====================================
+        const boo = document.getElementById('boo-knight');
+        let isDraggingBoo = false;
+        let booStartX, booStartY, initialLeft, initialTop;
+        let booDragDist = 0;
+
+        const kichBanBoo = [
+            "Khịt khịt... Ngươi tưởng qua cổng Torii là ngon hả? Mở to mắt ra mà cày ải đi!",
+            "Nhìn lên nắp hộp đi! 1000 ngày Vô Ngã! Rớt một điểm là về máng lợn ngay!",
+            "Đồ ngốc! Tập trung rèn luyện Bản Thể, Tâm Lưu, Bản Năng và Vạn Biến đi."
         ];
 
-        // Sự kiện chạm (PC & Mobile)
-        function handlePressStart(e) {
-            e.preventDefault();
-            pressTimer = setTimeout(() => {
-                // ẤN GIỮ LÂU (800ms) -> Đi ngủ
-                isSleeping = true;
-                boo.classList.add('boo-sleeping');
-                speech.style.opacity = '0';
-            }, 800);
-        }
-
-        function handlePressEnd(e) {
-            e.preventDefault();
-            clearTimeout(pressTimer);
-            
-            if (isSleeping) {
-                // Nếu đang ngủ mà chạm vào -> Tỉnh dậy
-                isSleeping = false;
-                boo.classList.remove('boo-sleeping');
-                playSoundGen('glitch');
-            } else {
-                // CHẠM NHANH -> Nói chuyện
-                playSoundGen('glitch');
-                const randomText = thoạiMỏHỗn[Math.floor(Math.random() * thoạiMỏHỗn.length)];
-                speech.innerText = randomText;
-                speech.style.opacity = '1';
-                
-                // Tự động ẩn text sau 4s
-                setTimeout(() => { speech.style.opacity = '0'; }, 4000);
+        function docGiongAI(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Ngắt câu cũ nếu đang nói
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = 'vi-VN'; 
+                utter.pitch = 1.3; // Giọng the thé mỏ hỗn
+                utter.rate = 1.1;  // Nói nhanh
+                window.speechSynthesis.speak(utter);
             }
         }
 
-        boo.addEventListener('mousedown', handlePressStart);
-        boo.addEventListener('mouseup', handlePressEnd);
-        boo.addEventListener('touchstart', handlePressStart, {passive: false});
-        boo.addEventListener('touchend', handlePressEnd);
+        boo.addEventListener('pointerdown', (e) => {
+            isDraggingBoo = true; booDragDist = 0;
+            booStartX = e.clientX; booStartY = e.clientY;
+            
+            let rect = boo.getBoundingClientRect();
+            initialLeft = rect.left; initialTop = rect.top;
+            
+            boo.classList.remove('boo-float'); // Dừng hiệu ứng bay lơ lửng khi cầm
+            boo.style.right = 'auto'; // Reset right để tính theo left
+            boo.style.left = initialLeft + 'px';
+            boo.style.top = initialTop + 'px';
+            boo.style.transform = 'scale(1.2)'; // Phình to khi nắm
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (!isDraggingBoo) return;
+            let dX = e.clientX - booStartX;
+            let dY = e.clientY - booStartY;
+            booDragDist += Math.abs(dX) + Math.abs(dY);
+            
+            boo.style.left = (initialLeft + dX) + 'px';
+            boo.style.top = (initialTop + dY) + 'px';
+        });
+
+        window.addEventListener('pointerup', (e) => {
+            if (!isDraggingBoo) return;
+            isDraggingBoo = false;
+            boo.style.transform = 'scale(1)';
+            boo.classList.add('boo-float'); // Bay lại
+            
+            // Nếu không drag mà chỉ chạm nhẹ -> Nói chuyện
+            if(booDragDist < 10) {
+                vHaptic(30);
+                playBeep('click');
+                const thoai = kichBanBoo[Math.floor(Math.random() * kichBanBoo.length)];
+                docGiongAI(thoai);
+                
+                // Mũi heo chớp chớp đỏ khi nói
+                boo.style.boxShadow = "0 0 30px #ff2a2a, inset 0 0 20px #ff2a2a";
+                setTimeout(() => {
+                    boo.style.boxShadow = "0 0 20px #00e5ff, inset 0 0 15px #ff69b4";
+                }, 3000);
+            }
+        });
 
     </script>
 </body>
