@@ -6,401 +6,406 @@
     <meta name="theme-color" content="#000000">
     <title>K-Drive Core V28</title>
 
-    <script>
-        (function checkAuthGuard() {
-            const hasAccess = localStorage.getItem('kdrive_logged_in_user') || sessionStorage.getItem('kdrive_session') === 'active';
-            if (!hasAccess) { window.location.replace('login.html'); }
-        })();
-    </script>
-
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Space Grotesk', sans-serif; touch-action: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Space Grotesk', sans-serif; }
 
         /* =========================================
-           1. MÀN HÌNH KHAI MÔN (5 KANJI VORTEX)
+           1. PHASE 1: MÀN HÌNH KHAI MỞ (NGŨ LUÂN)
         ========================================= */
-        #boot-sequence {
+        #intro-screen {
             position: fixed; inset: 0; z-index: 100; background-color: #000;
-            display: flex; justify-content: center; align-items: center;
-            transition: opacity 1s ease;
-        }
-        .kanji-ring {
-            position: relative; width: 200px; height: 200px;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .k-char {
-            position: absolute; font-family: "Yu Mincho", "MS Mincho", serif;
-            font-size: 35px; color: #fff; text-shadow: 0 0 15px #00e5ff;
-            /* Đẩy các chữ ra vòng ngoài */
-            transform: rotate(calc(var(--i) * 72deg)) translateY(-80px) rotate(calc(var(--i) * -72deg));
-            transition: all 2s cubic-bezier(0.5, 0, 0.5, 1);
-        }
-        
-        .tap-hint {
-            position: absolute; bottom: 15%; color: #ff2a2a; font-size: 12px; letter-spacing: 5px;
-            animation: pulseGlow 1.5s infinite alternate; text-shadow: 0 0 10px #ff2a2a;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 1s ease, transform 1s ease;
         }
 
-        /* Khi kích hoạt xoay và tụ lại */
-        .vortex-active .kanji-ring { animation: spinVortex 2s cubic-bezier(0.5, 0, 0.5, 1) forwards; }
-        .vortex-active .k-char { 
-            /* Hút vào tâm */
-            transform: rotate(calc(var(--i) * 72deg)) translateY(0px) rotate(calc(var(--i) * -72deg)) scale(0);
-            opacity: 0; filter: brightness(3);
+        /* Vòng tròn 5 chữ Kanji */
+        .kanji-circle {
+            position: relative; width: 250px; height: 250px;
+            animation: spinCircle 15s linear infinite;
+            cursor: pointer;
         }
-        .vortex-active .tap-hint { opacity: 0; transition: opacity 0.3s; }
+        .kanji-node {
+            position: absolute; width: 40px; height: 40px;
+            left: 50%; top: 50%; margin-left: -20px; margin-top: -20px;
+            font-family: "Yu Mincho", serif; font-size: 35px; color: #00e5ff;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.8);
+            display: flex; justify-content: center; align-items: center;
+        }
+        /* Tọa độ 5 điểm */
+        .k1 { transform: rotate(0deg) translate(100px) rotate(0deg); }
+        .k2 { transform: rotate(72deg) translate(100px) rotate(-72deg); }
+        .k3 { transform: rotate(144deg) translate(100px) rotate(-144deg); }
+        .k4 { transform: rotate(216deg) translate(100px) rotate(-216deg); }
+        .k5 { transform: rotate(288deg) translate(100px) rotate(-288deg); }
 
-        @keyframes spinVortex { 
-            0% { transform: rotate(0deg) scale(1); }
-            80% { transform: rotate(1080deg) scale(0.2); }
-            100% { transform: rotate(1440deg) scale(0); }
+        @keyframes spinCircle { 100% { transform: rotate(360deg); } }
+
+        /* Tăng tốc xoay hút vào tâm */
+        .kanji-implode { animation: implodeAnim 1s forwards cubic-bezier(0.5, 0, 0.5, 1) !important; }
+        @keyframes implodeAnim {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(0.2) rotate(720deg); opacity: 1; filter: brightness(3); }
+            100% { transform: scale(5) rotate(1080deg); opacity: 0; }
         }
+
+        /* Châm ngôn & Tên tác giả */
+        .quote-container {
+            position: absolute; bottom: 15%; text-align: center; width: 80%;
+        }
+        .quote-text {
+            color: #E2E8F0; font-size: 14px; font-style: italic; letter-spacing: 1px;
+            opacity: 0; min-height: 40px; margin-bottom: 20px; text-shadow: 0 0 5px rgba(255,255,255,0.3);
+        }
+        .author-btn {
+            color: #ff2a2a; font-size: 16px; font-weight: bold; letter-spacing: 3px;
+            cursor: pointer; opacity: 0; transition: all 0.3s;
+            text-shadow: 0 0 10px rgba(255, 42, 42, 0.5);
+            animation: pulseText 2s infinite alternate;
+        }
+        @keyframes pulseText { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* Màn hình Legend (Cốt truyện) */
+        #legend-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 110;
+            display: none; justify-content: center; align-items: center; padding: 30px;
+            color: #00e5ff; text-align: justify; font-size: 14px; line-height: 1.6;
+        }
+        .close-legend { position: absolute; top: 30px; right: 30px; color: #ff2a2a; cursor: pointer; font-weight: bold; font-size: 20px;}
 
         /* =========================================
-           2. MÔI TRƯỜNG & KHÔNG GIAN
+           2. PHASE 2: NỘI VIỆN & LÕI K-DRIVE
         ========================================= */
         #sanctum-bg {
             position: fixed; inset: 0; width: 100vw; height: 100dvh;
-            background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/INDEX%20SAMURAI.png?raw=true');
+            /* Thay link ảnh nền hầm giáp của anh vào đây */
+            background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/index%20nen.png?raw=true');
             background-size: cover; background-position: center center; background-repeat: no-repeat;
-            z-index: 1; opacity: 0; transition: opacity 3s ease; /* Hiện mượt chậm */
+            z-index: 1; opacity: 0; transition: opacity 1.5s ease;
         }
-        .vignette-overlay {
-            position: fixed; inset: 0; background: radial-gradient(circle at center, transparent 20%, rgba(0, 0, 0, 0.9) 100%);
-            z-index: 2; pointer-events: none;
-        }
+        
         .cyber-floor {
             position: fixed; bottom: -20%; left: -50%; width: 200%; height: 60vh;
             background: 
                 repeating-linear-gradient(to top, transparent, transparent 30px, rgba(0, 229, 255, 0.3) 31px, transparent 32px),
                 repeating-linear-gradient(to right, transparent, transparent 30px, rgba(0, 229, 255, 0.3) 31px, transparent 32px);
             transform: perspective(600px) rotateX(75deg); transform-origin: center bottom;
-            animation: gridFlow 1.5s linear infinite; z-index: 3; opacity: 0; pointer-events: none;
+            animation: gridFlow 1.5s linear infinite; z-index: 2; opacity: 0; pointer-events: none;
             mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
             -webkit-mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
-            transition: opacity 2s ease;
         }
         @keyframes gridFlow { 0% { background-position: 0 0; } 100% { background-position: 0 31px; } }
 
-        /* =========================================
-           3. HIỆP SĨ BOO (Kéo thả mượt)
-        ========================================= */
-        .boo-hologram {
-            position: absolute; z-index: 30; width: 50px; height: 50px;
-            top: 25%; right: 15%;
-            background: rgba(255, 105, 180, 0.6); border: 2px solid #00e5ff;
-            border-radius: 40% 40% 50% 50%;
-            box-shadow: 0 0 20px #00e5ff, inset 0 0 15px #ff69b4;
-            backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
-            opacity: 0; display: flex; justify-content: center; align-items: center;
-            transition: opacity 1s ease, transform 0.2s; cursor: grab;
-        }
-        .boo-hologram:active { cursor: grabbing; transform: scale(1.1); }
-        .boo-hologram::before, .boo-hologram::after {
-            content: ''; position: absolute; width: 8px; height: 12px;
-            background: #00e5ff; border-radius: 50%; box-shadow: 0 0 5px #00e5ff;
-        }
-        .boo-hologram::before { left: 12px; } .boo-hologram::after { right: 12px; }
-        
-        .boo-float { animation: floatBoo 4s ease-in-out infinite, glitchHolo 5s infinite; }
-        
-        @keyframes floatBoo { 0%, 100% { transform: translateY(0) rotate(2deg); } 50% { transform: translateY(-15px) rotate(-2deg); } }
-        @keyframes glitchHolo { 0%, 95%, 100% { opacity: 1; } 96% { opacity: 0.5; transform: translateX(-2px); } 98% { opacity: 0.8; transform: translateX(2px); } }
-
-        /* =========================================
-           4. LÕI LẬP PHƯƠNG (Xoay tương tác)
-        ========================================= */
+        /* LÕI 3D */
         #core-wrapper {
             position: absolute; inset: 0; display: flex; justify-content: center; align-items: center;
-            opacity: 0; z-index: 10; perspective: 1000px; transition: opacity 1.5s ease;
+            opacity: 0; z-index: 10; transition: opacity 2s;
         }
-        .holy-core-container {
-            position: relative; width: 120px; height: 120px; transform-style: preserve-3d;
-            transform: rotateX(15deg) rotateY(15deg); /* Góc ban đầu */
+        .holy-core-container { position: relative; width: 140px; height: 140px; perspective: 1000px; }
+        .holy-cube {
+            width: 100%; height: 100%; position: absolute; transform-style: preserve-3d;
+            animation: driftFree 25s infinite linear; cursor: grab;
         }
+        .holy-cube:active { cursor: grabbing; }
+        
         .cube-face {
-            position: absolute; width: 120px; height: 120px;
-            border: 2px solid transparent; backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+            position: absolute; width: 140px; height: 140px;
+            border: 2px solid #00e5ff; background: rgba(0, 229, 255, 0.05);
+            backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer;
+            cursor: pointer; transition: background 0.3s, box-shadow 0.3s;
         }
+        .cube-face:active { background: rgba(0, 229, 255, 0.3); box-shadow: 0 0 40px rgba(0, 229, 255, 0.8); }
 
         .sci-label {
-            position: absolute; bottom: 8px; width: 100%; text-align: center;
-            color: #E2E8F0; font-size: 9px; font-weight: 700; letter-spacing: 1px;
-            text-shadow: 0 0 5px rgba(226, 232, 240, 0.8); background: rgba(0,0,0,0.4); padding: 2px 0;
+            position: absolute; bottom: 10px; width: 100%; text-align: center;
+            color: #E2E8F0; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+            background: rgba(0,0,0,0.6); padding: 3px 0; animation: textBreathe 3s infinite alternate;
+        }
+        @keyframes textBreathe { 0% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        .kanji-ghost { font-family: "Yu Mincho", serif; font-size: 60px; color: #fff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.8); }
+
+        .face-front  { transform: rotateY(0deg) translateZ(70px); }
+        .face-right  { transform: rotateY(90deg) translateZ(70px); }
+        .face-back   { transform: rotateY(180deg) translateZ(70px); }
+        .face-left   { transform: rotateY(-90deg) translateZ(70px); }
+        .face-top    { transform: rotateX(90deg) translateZ(70px); }
+        .face-bottom { transform: rotateX(-90deg) translateZ(70px); }
+
+        @keyframes driftFree {
+            0% { transform: rotateX(15deg) rotateY(0deg) rotateZ(10deg); }
+            100% { transform: rotateX(375deg) rotateY(720deg) rotateZ(370deg); }
         }
 
-        .state-stable { border-color: #00e5ff; background: rgba(0, 229, 255, 0.1); box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2); }
-        .state-perfect { border-color: #b026ff; background: rgba(176, 38, 255, 0.1); box-shadow: 0 0 20px rgba(176, 38, 255, 0.4), inset 0 0 20px rgba(176, 38, 255, 0.2); }
+        /* =========================================
+           3. HIỆP SĨ LỢN BOO & TRÀ SỮA
+        ========================================= */
+        .boo-hologram {
+            position: absolute; z-index: 20; width: 60px; height: 60px;
+            top: 20%; right: 10%;
+            /* Tối giản hoạt hình 2D theo yêu cầu */
+            background: #ff69b4; border: 3px solid #00e5ff; border-radius: 40% 40% 45% 45%;
+            box-shadow: 0 0 15px #00e5ff, inset 0 0 10px rgba(255,255,255,0.5);
+            animation: floatBoo 4s ease-in-out infinite, glitchHolo 6s infinite;
+            cursor: grab; opacity: 0; display: flex; justify-content: center; align-items: center;
+            transition: opacity 1s ease;
+        }
+        .boo-hologram:active { cursor: grabbing; transform: scale(1.1); }
+        
+        /* 2 Lỗ mũi lợn */
+        .boo-hologram::before, .boo-hologram::after {
+            content: ''; position: absolute; width: 10px; height: 16px;
+            background: #000; border-radius: 50%; border: 1px solid #00e5ff;
+        }
+        .boo-hologram::before { left: 14px; }
+        .boo-hologram::after { right: 14px; }
 
-        .kanji-ghost { font-family: "Yu Mincho", "MS Mincho", serif; font-size: 50px; color: rgba(255, 255, 255, 0.9); text-shadow: 0 0 15px rgba(255, 255, 255, 0.6); transform: translateY(-5px); pointer-events: none; }
-
-        .inner-glow {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #b026ff 40%, transparent 70%);
-            box-shadow: 0 0 30px #b026ff; animation: pulseGlow 2s infinite alternate;
+        @keyframes floatBoo { 0%, 100% { margin-top: 0; } 50% { margin-top: -15px; } }
+        @keyframes glitchHolo {
+            0%, 95%, 100% { filter: hue-rotate(0deg); transform: translateX(0); }
+            96% { filter: hue-rotate(90deg); transform: translateX(-3px); }
         }
 
-        .face-front  { transform: rotateY(0deg) translateZ(60px); }    /* ĐỊA */
-        .face-right  { transform: rotateY(90deg) translateZ(60px); }   /* THỦY */
-        .face-back   { transform: rotateY(180deg) translateZ(60px); }  /* HỎA */
-        .face-left   { transform: rotateY(-90deg) translateZ(60px); }  /* PHONG */
-        .face-top    { transform: rotateX(90deg) translateZ(60px); }   /* KHẾ ƯỚC */
-        .face-bottom { transform: rotateX(-90deg) translateZ(60px); }  /* BUSHIDO */
+        .boo-sleeping { opacity: 0.4 !important; filter: grayscale(0.8); animation: none !important; }
 
-        @keyframes pulseGlow { 0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.8); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } }
+        /* Ly trà sữa (Ẩn mặc định, chỉ hiện khi đạt điều kiện) */
+        .boba-cup {
+            position: absolute; bottom: 30px; left: 30px; width: 40px; height: 50px; z-index: 21;
+            background: rgba(0, 255, 128, 0.4); border: 2px solid #00ff80; border-radius: 5px 5px 15px 15px;
+            box-shadow: 0 0 15px #00ff80; cursor: grab; display: none; /* Block khi cần xuất hiện */
+        }
+        .boba-cup::before { /* Ống hút */
+            content: ''; position: absolute; width: 6px; height: 30px;
+            background: #ff2a2a; top: -20px; left: 15px; transform: rotate(15deg);
+        }
+
     </style>
 </head>
 <body>
 
-    <!-- 1. MÀN HÌNH KHAI MÔN -->
-    <div id="boot-sequence" onclick="igniteCore()">
-        <div class="kanji-ring" id="vortex-ring">
-            <span class="k-char" style="--i:0">地</span>
-            <span class="k-char" style="--i:1">水</span>
-            <span class="k-char" style="--i:2">火</span>
-            <span class="k-char" style="--i:3">風</span>
-            <span class="k-char" style="--i:4">空</span>
+    <!-- MÀN HÌNH KHAI MỞ (PHASE 1) -->
+    <div id="intro-screen">
+        <div class="kanji-circle" id="kanji-gate" onclick="triggerImplode()">
+            <div class="kanji-node k1">地</div>
+            <div class="kanji-node k2">水</div>
+            <div class="kanji-node k3">火</div>
+            <div class="kanji-node k4">風</div>
+            <div class="kanji-node k5">空</div>
         </div>
-        <div class="tap-hint">[ CHẠM ĐỂ KHAI MỞ ]</div>
+        
+        <div class="quote-container">
+            <div class="quote-text" id="typewriter-text"></div>
+            <div class="author-btn" id="musashi-btn" onclick="openLegend()">— Miyamoto Musashi</div>
+        </div>
     </div>
 
-    <!-- 2. KHÔNG GIAN BÊN TRONG -->
+    <!-- MÀN HÌNH CỐT TRUYỆN (LEGEND) -->
+    <div id="legend-overlay">
+        <div class="close-legend" onclick="closeLegend()">[X] BỎ QUA</div>
+        <div id="legend-content">
+            [ NHẬT KÝ LƯU TRỮ - M. MUSASHI ]<br><br>
+            Cỗ máy K-Drive được rèn đúc từ ý chí thép. 1000 ngày duy trì trạng thái Vô Ngã không phải là cực hình, mà là con đường duy nhất để giải phóng sức mạnh tiềm tàng của vỏ não...
+            <br><br><i>(Anh có thể dán đoạn text Legend thật của anh vào đây)</i>
+        </div>
+    </div>
+
+    <!-- KHÔNG GIAN NỘI VIỆN (PHASE 2) -->
     <div id="sanctum-bg"></div>
-    <div class="vignette-overlay"></div>
     <div class="cyber-floor" id="floor-grid"></div>
 
-    <!-- 3. MÕM BOO HỖN -->
-    <div class="boo-hologram boo-float" id="boo-knight"></div>
+    <div class="boo-hologram" id="boo-knight"></div>
+    <div class="boba-cup" id="boba-reward"></div>
 
-    <!-- 4. LÕI TRUNG TÂM -->
+    <!-- LÕI TRUNG TÂM -->
     <div id="core-wrapper">
-        <div class="holy-core-container" id="cube">
-            <div class="inner-glow"></div>
-            <!-- ĐỊA -> Sinh Trắc -->
-            <div class="cube-face face-front state-stable" onclick="navigateFace('sinh_trac.html', 'Địa')">
-                <div class="kanji-ghost">地</div><div class="sci-label">[ BẢN THỂ: 75 ]</div>
-            </div>
-            <!-- THỦY -> Thủy Luân -->
-            <div class="cube-face face-right state-perfect" onclick="navigateFace('thuy_luan.html', 'Thủy')">
-                <div class="kanji-ghost">水</div><div class="sci-label">[ TÂM LƯU: 92 ]</div>
-            </div>
-            <!-- HỎA -->
-            <div class="cube-face face-back state-stable" onclick="navigateFace('#', 'Hỏa')">
-                <div class="kanji-ghost">火</div><div class="sci-label">[ BẢN NĂNG: 80 ]</div>
-            </div>
-            <!-- PHONG -->
-            <div class="cube-face face-left state-stable" onclick="navigateFace('#', 'Phong')">
-                <div class="kanji-ghost">風</div><div class="sci-label">[ VẠN BIẾN: 88 ]</div>
-            </div>
-            <!-- KHẾ ƯỚC -->
-            <div class="cube-face face-top state-perfect">
-                <div class="kanji-ghost" style="font-size: 40px;">契</div><div class="sci-label" style="color: #ff2a2a;">[ MUSHI DAYS: 1000 ]</div>
-            </div>
-            <!-- BUSHIDO -->
-            <div class="cube-face face-bottom state-stable">
-                <div class="kanji-ghost" style="font-size: 40px;">武</div><div class="sci-label">[ BUSHIDO ]</div>
+        <div class="holy-core-container">
+            <div class="holy-cube" id="holy-cube">
+                <div class="cube-face face-front" onclick="navTo('sinh_trac.html')">
+                    <div class="kanji-ghost">地</div>
+                    <div class="sci-label">[ BẢN THỂ ]</div>
+                </div>
+                <div class="cube-face face-right" onclick="navTo('thuy_luan.html')">
+                    <div class="kanji-ghost">水</div>
+                    <div class="sci-label">[ TÂM LƯU ]</div>
+                </div>
+                <div class="cube-face face-back">
+                    <div class="kanji-ghost">火</div>
+                    <div class="sci-label">[ BẢN NĂNG ]</div>
+                </div>
+                <div class="cube-face face-left">
+                    <div class="kanji-ghost">風</div>
+                    <div class="sci-label">[ VẠN BIẾN ]</div>
+                </div>
+                <div class="cube-face face-top" style="border-color:#b026ff;">
+                    <div class="kanji-ghost" style="font-size: 35px;">契</div>
+                    <div class="sci-label" style="bottom: 5px; color: #ff2a2a;">[ MUSHI DAYS: 1000 ]</div>
+                </div>
+                <div class="cube-face face-bottom">
+                    <div class="kanji-ghost" style="font-size: 35px;">武</div>
+                    <div class="sci-label" style="bottom: 5px;">[ BUSHIDO ]</div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Hàm rung thiết bị
-        function vHaptic(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
+        // --- ÂM THANH CYBER TỰ TẠO ---
+        function playSound(type) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
 
-        // Máy phát âm thanh ảo Cyber
-        let audioCtx;
-        function playBeep(type) {
-            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-            
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-
-            if(type === 'taiko') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 1);
-                gain.gain.setValueAtTime(1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
-                osc.start(); osc.stop(audioCtx.currentTime + 1);
+            if(type === 'boom') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(100, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(20, ctx.currentTime + 1);
+                gain.gain.setValueAtTime(1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
+                osc.start(); osc.stop(ctx.currentTime + 1);
             } else if(type === 'katana') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(2000, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-            } else if(type === 'click') {
-                osc.type = 'square'; osc.frequency.setValueAtTime(900, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(1500, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+                osc.start(); osc.stop(ctx.currentTime + 0.4);
             }
         }
 
-        // =====================================
-        // KỊCH BẢN KHỞI ĐỘNG CỰC MẠNH
-        // =====================================
-        let isIgnited = false;
-        function igniteCore() {
-            if(isIgnited) return; isIgnited = true;
-            
-            // Khởi tạo context Audio để lách luật trình duyệt
-            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Bắt đầu lốc xoáy
-            document.getElementById('boot-sequence').classList.add('vortex-active');
-            playBeep('taiko');
-            vHaptic([50, 50, 300]); // Rung dập
+        // --- PHASE 1: HIỆU ỨNG GÕ CHỮ & KIỂM TRA TÂM LÝ ---
+        const quote = "Chỉ khi thấu suốt được đường kiếm, ta mới hiểu được vạn vật.";
+        let i = 0;
+        let isAwakened = false; // Biến kiểm tra: True = Tỉnh thức (ấn Musashi), False = Nóng vội (ấn Kanji)
+
+        window.onload = function() {
+            setTimeout(typeWriter, 1000);
+        };
+
+        function typeWriter() {
+            if (i < quote.length) {
+                document.getElementById("typewriter-text").innerHTML += quote.charAt(i);
+                document.getElementById("typewriter-text").style.opacity = 1;
+                i++;
+                setTimeout(typeWriter, 50);
+            } else {
+                setTimeout(() => { document.getElementById("musashi-btn").style.opacity = 1; }, 500);
+            }
+        }
+
+        function openLegend() {
+            isAwakened = true; // Đánh dấu người chơi sâu sắc
+            document.getElementById('legend-overlay').style.display = 'flex';
+        }
+        function closeLegend() {
+            document.getElementById('legend-overlay').style.display = 'none';
+        }
+
+        // --- KHAI MỞ NỘI VIỆN ---
+        function triggerImplode() {
+            // Rung thiết bị nếu hỗ trợ
+            if(navigator.vibrate) navigator.vibrate([100, 50, 500]);
+            playSound('boom');
+
+            const gate = document.getElementById('kanji-gate');
+            gate.classList.add('kanji-implode');
 
             setTimeout(() => {
-                document.getElementById('boot-sequence').style.opacity = '0';
+                document.getElementById('intro-screen').style.opacity = 0;
+                document.getElementById('intro-screen').style.pointerEvents = 'none';
                 
-                // Trễ xíu rồi Fade In Nội Viện
+                // Hiển thị Nội Viện
+                document.getElementById('sanctum-bg').style.opacity = 1;
+                document.getElementById('floor-grid').style.opacity = 1;
+                
                 setTimeout(() => {
-                    document.getElementById('boot-sequence').style.display = 'none';
-                    document.getElementById('sanctum-bg').style.opacity = '1';
-                    document.getElementById('floor-grid').style.opacity = '1';
+                    document.getElementById('core-wrapper').style.opacity = 1;
+                    playSound('katana');
+                    document.getElementById('boo-knight').style.opacity = 1;
                     
-                    setTimeout(() => {
-                        document.getElementById('core-wrapper').style.opacity = '1';
-                        document.getElementById('boo-knight').style.opacity = '1';
-                        playBeep('katana');
-                        vHaptic(100);
-                    }, 1000);
-                }, 500);
-            }, 2000); // 2s cho xoáy kết thúc
+                    // Giọng đọc AI mỏ hỗn dựa trên phân loại
+                    speakBoo();
+                }, 1000);
+            }, 1000);
         }
 
-        // =====================================
-        // VẬT LÝ KHỐI LẬP PHƯƠNG (Xoay 3D)
-        // =====================================
-        const cube = document.getElementById('cube');
-        let isDraggingCube = false;
-        let startX, startY, currentX = 15, currentY = 15;
-        let dragDistance = 0;
-
-        document.getElementById('core-wrapper').addEventListener('pointerdown', (e) => {
-            if(e.target.closest('#boo-knight')) return; // Bỏ qua nếu đang bấm Boo
-            isDraggingCube = true; dragDistance = 0;
-            startX = e.clientX; startY = e.clientY;
-            cube.style.transition = 'none';
-        });
-
-        window.addEventListener('pointermove', (e) => {
-            if (!isDraggingCube) return;
-            let deltaX = e.clientX - startX;
-            let deltaY = e.clientY - startY;
-            dragDistance += Math.abs(deltaX) + Math.abs(deltaY);
-            
-            // Tính toán góc xoay (Xoay Y theo trục X chuột, Xoay X theo trục Y chuột)
-            let newRotY = currentY + deltaX * 0.5;
-            let newRotX = currentX - deltaY * 0.5;
-            cube.style.transform = `rotateX(${newRotX}deg) rotateY(${newRotY}deg)`;
-        });
-
-        window.addEventListener('pointerup', (e) => {
-            if (!isDraggingCube) return;
-            isDraggingCube = false;
-            // Lưu lại góc mới
-            let style = cube.style.transform;
-            let matchX = style.match(/rotateX\(([-0-9.]+)deg\)/);
-            let matchY = style.match(/rotateY\(([-0-9.]+)deg\)/);
-            if(matchX) currentX = parseFloat(matchX[1]);
-            if(matchY) currentY = parseFloat(matchY[1]);
-            cube.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'; // Quán tính nhẹ
-        });
-
-        // Hàm chuyển trang khi bấm vào mặt
-        function navigateFace(url, name) {
-            // Nếu người dùng vừa Vuốt/Drag (khoảng cách lớn), thì Hủy Click để không bị chuyển nhầm
-            if(dragDistance > 20) return;
-            
-            playBeep('click');
-            vHaptic([50, 100, 50]);
-            
-            // Hiệu ứng nháy sáng báo nhận lệnh
-            cube.style.filter = 'brightness(2)';
-            setTimeout(() => {
-                cube.style.filter = 'none';
-                if(url !== '#') window.location.href = url;
-            }, 300);
+        // --- ĐIỀU HƯỚNG MẶT LÕI ---
+        function navTo(url) {
+            if(navigator.vibrate) navigator.vibrate(50);
+            playSound('katana');
+            // Thêm hiệu ứng phóng to lõi trước khi chuyển trang (Tùy chọn)
+            document.getElementById('core-wrapper').style.transform = 'scale(5)';
+            document.getElementById('core-wrapper').style.opacity = '0';
+            setTimeout(() => { window.location.href = url; }, 500);
         }
 
-        // =====================================
-        // AI VOICE & KÉO THẢ BOO MỎ HỖN
-        // =====================================
+        // --- AI VOICE: BOO MỎ HỖN ---
+        function speakBoo() {
+            if (!('speechSynthesis' in window)) return;
+            
+            let text = "";
+            if (isAwakened) {
+                text = "Khịt. Ít ra ngươi cũng biết dừng lại lắng nghe Đạo. Nhưng giữ được Vô Ngã 1000 ngày hay không lại là chuyện khác!";
+            } else {
+                // Câu chốt anh đã chọn
+                text = "Ồ, một kẻ vội vã không thích đọc chữ. Bước thẳng qua cửa thì dũng cảm đấy. Cứ để xem cái thói bộp chộp này giúp ngươi trụ được mấy ngày.";
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'vi-VN';
+            utterance.rate = 1.1; // Nói hơi nhanh xíu cho mỏ hỗn
+            utterance.pitch = 1.0; 
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- TƯƠNG TÁC BOO (Ngủ & Đánh thức) ---
         const boo = document.getElementById('boo-knight');
-        let isDraggingBoo = false;
-        let booStartX, booStartY, initialLeft, initialTop;
-        let booDragDist = 0;
+        let pressTimer;
+        let isSleeping = false;
 
-        const kichBanBoo = [
-            "Khịt khịt... Ngươi tưởng qua cổng Torii là ngon hả? Mở to mắt ra mà cày ải đi!",
-            "Nhìn lên nắp hộp đi! 1000 ngày Vô Ngã! Rớt một điểm là về máng lợn ngay!",
-            "Đồ ngốc! Tập trung rèn luyện Bản Thể, Tâm Lưu, Bản Năng và Vạn Biến đi."
-        ];
-
-        function docGiongAI(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Ngắt câu cũ nếu đang nói
-                const utter = new SpeechSynthesisUtterance(text);
-                utter.lang = 'vi-VN'; 
-                utter.pitch = 1.3; // Giọng the thé mỏ hỗn
-                utter.rate = 1.1;  // Nói nhanh
-                window.speechSynthesis.speak(utter);
+        function handlePressStart(e) {
+            pressTimer = setTimeout(() => {
+                isSleeping = true;
+                boo.classList.add('boo-sleeping');
+            }, 800); // Giữ 800ms để ngủ
+        }
+        function handlePressEnd(e) {
+            clearTimeout(pressTimer);
+            if (isSleeping) {
+                isSleeping = false;
+                boo.classList.remove('boo-sleeping');
+            } else {
+                // Chạm nhanh thì đọc lại luật
+                if ('speechSynthesis' in window && !window.speechSynthesis.speaking) {
+                    const msg = new SpeechSynthesisUtterance("Khịt, tập trung vào. Đừng có chọc ta!");
+                    msg.lang = 'vi-VN';
+                    window.speechSynthesis.speak(msg);
+                }
             }
         }
+        boo.addEventListener('mousedown', handlePressStart);
+        boo.addEventListener('mouseup', handlePressEnd);
+        boo.addEventListener('touchstart', handlePressStart, {passive: true});
+        boo.addEventListener('touchend', handlePressEnd);
 
-        boo.addEventListener('pointerdown', (e) => {
-            isDraggingBoo = true; booDragDist = 0;
-            booStartX = e.clientX; booStartY = e.clientY;
-            
-            let rect = boo.getBoundingClientRect();
-            initialLeft = rect.left; initialTop = rect.top;
-            
-            boo.classList.remove('boo-float'); // Dừng hiệu ứng bay lơ lửng khi cầm
-            boo.style.right = 'auto'; // Reset right để tính theo left
-            boo.style.left = initialLeft + 'px';
-            boo.style.top = initialTop + 'px';
-            boo.style.transform = 'scale(1.2)'; // Phình to khi nắm
+        // --- LOGIC KÉO THẢ (DRAG & DROP) CHO BOO (Bản PC cơ bản) ---
+        let isDragging = false, startX, startY, initialX, initialY;
+        boo.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX; startY = e.clientY;
+            initialX = boo.offsetLeft; initialY = boo.offsetTop;
         });
-
-        window.addEventListener('pointermove', (e) => {
-            if (!isDraggingBoo) return;
-            let dX = e.clientX - booStartX;
-            let dY = e.clientY - booStartY;
-            booDragDist += Math.abs(dX) + Math.abs(dY);
-            
-            boo.style.left = (initialLeft + dX) + 'px';
-            boo.style.top = (initialTop + dY) + 'px';
+        document.addEventListener('mousemove', (e) => {
+            if(!isDragging) return;
+            const dx = e.clientX - startX; const dy = e.clientY - startY;
+            boo.style.left = initialX + dx + 'px';
+            boo.style.top = initialY + dy + 'px';
         });
+        document.addEventListener('mouseup', () => { isDragging = false; });
 
-        window.addEventListener('pointerup', (e) => {
-            if (!isDraggingBoo) return;
-            isDraggingBoo = false;
-            boo.style.transform = 'scale(1)';
-            boo.classList.add('boo-float'); // Bay lại
-            
-            // Nếu không drag mà chỉ chạm nhẹ -> Nói chuyện
-            if(booDragDist < 10) {
-                vHaptic(30);
-                playBeep('click');
-                const thoai = kichBanBoo[Math.floor(Math.random() * kichBanBoo.length)];
-                docGiongAI(thoai);
-                
-                // Mũi heo chớp chớp đỏ khi nói
-                boo.style.boxShadow = "0 0 30px #ff2a2a, inset 0 0 20px #ff2a2a";
-                setTimeout(() => {
-                    boo.style.boxShadow = "0 0 20px #00e5ff, inset 0 0 15px #ff69b4";
-                }, 3000);
-            }
-        });
-
+        // Logic tương tự có thể áp dụng cho việc lấy Trà Sữa (boba-cup) kéo thả vào Boo sau này.
     </script>
 </body>
 </html>
