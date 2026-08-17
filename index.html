@@ -41,16 +41,19 @@
 
         .itm-label { color: #ff33cc !important; font-weight: bold; text-shadow: 0 0 10px rgba(255, 51, 204, 0.5); }
 
-        /* KHÓA CHẾT ẢNH NỀN VÀO KHUNG GIAO DIỆN (CHỐNG LỆCH TỌA ĐỘ) */
+        /* KHÓA CHẾT ẢNH NỀN VÀO TÂM MÀN HÌNH - TRẢ VỀ NGUYÊN BẢN ĐỂ KHỚP NÚT BẤM */
         .locked-bg {
-            position: absolute !important; 
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
+            position: fixed !important; 
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 100vw !important;
+            height: 100vh !important; /* Chiều cao mặc định */
+            height: 100dvh !important; /* Chiều cao động (chống giật trên mobile) */
+            object-fit: cover !important; /* Lệnh quan trọng nhất để giữ tỷ lệ, không bị kéo dãn */
+            object-position: center center !important; /* Neo cứng tâm ảnh vào tâm tọa độ */
             z-index: 0;
-            pointer-events: none; 
-            /* Tuyệt đối KHÔNG dùng object-fit: cover để các ô vẽ trên ảnh khớp 100% với nút HTML */
+            pointer-events: none; /* Không cản trở các thao tác bấm trên màn hình */
         }
 
         /* --- CSS CỔNG SƠN MÔN KHỞI ĐỘNG --- */
@@ -95,7 +98,7 @@
 </head>
 <body>
 
-    <!-- CỔNG SƠN MÔN (LỚP PHỦ ĐEN KHỞI ĐỘNG HỆ THỐNG ĐỂ ỔN ĐỊNH KHUNG HÌNH) -->
+    <!-- CỔNG SƠN MÔN (LỚP PHỦ ĐEN KHỞI ĐỘNG HỆ THỐNG) -->
     <div id="boot-overlay">
         <div id="boot-text" class="hidden-text">[ CHẠM ĐỂ VỀ SƠN MÔN ]</div>
     </div>
@@ -191,7 +194,7 @@
     <!-- SCRIPT CHÍNH -->
     <script src="core-logic-v2.js?v=99999"></script>
 
-    <!-- HỆ THỐNG CỔNG SƠN MÔN (CHỐNG LỆCH KHUNG & GIẬT MÀN HÌNH) -->
+    <!-- SCRIPT XỬ LÝ CỔNG SƠN MÔN (CHỈ LÀM MỜ VÀ ẨN, KHÔNG CAN THIỆP KÍCH THƯỚC) -->
     <script>
         window.addEventListener('load', function() {
             let bootOverlay = document.getElementById('boot-overlay');
@@ -205,38 +208,19 @@
         });
 
         function unlockSystem() {
-            // 1. KHÓA CỨNG CHIỀU CAO BẰNG PIXEL THẬT (CHỐNG CO GIÃN KHI LƯỚT)
-            let wrapper = document.getElementById('mainWrapper');
-            if(wrapper) {
-                // Chốt cứng Pixel, dập tắt vĩnh viễn sự co giãn của 100vh
-                wrapper.style.height = window.innerHeight + 'px';
-                wrapper.style.minHeight = window.innerHeight + 'px';
-            }
-
-            // 2. PHÁT ÂM THANH KHỞI ĐỘNG (Dùng hàm click của K-Drive)
+            // Phát âm thanh khởi động nếu có sẵn trong hàm playCyberClick()
             if(typeof playCyberClick === 'function') {
                 playCyberClick();
             }
 
-            // 3. MỞ CỔNG: XÓA MÀN HÌNH ĐEN
+            // Mở cổng (Hiệu ứng mờ dần trong 0.8s)
             let bootOverlay = document.getElementById('boot-overlay');
             bootOverlay.style.opacity = '0';
             
             setTimeout(() => {
                 bootOverlay.style.display = 'none';
-            }, 800); // Mờ dần trong 0.8s cho nghệ thuật
+            }, 800); 
         }
-
-        // Khóa lại pixel nếu người dùng xoay ngang máy
-        window.addEventListener('resize', function() {
-            let wrapper = document.getElementById('mainWrapper');
-            let bootOverlay = document.getElementById('boot-overlay');
-            // Chỉ cập nhật nếu màn hình đen đã được mở
-            if(wrapper && bootOverlay && bootOverlay.style.display === 'none') {
-                wrapper.style.height = window.innerHeight + 'px';
-                wrapper.style.minHeight = window.innerHeight + 'px';
-            }
-        });
 
         // Xóa bỏ bộ nhớ đệm cũ để đảm bảo logic mới mượt mà
         if ('serviceWorker' in navigator) {
