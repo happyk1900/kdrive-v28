@@ -72,7 +72,7 @@
         @keyframes pulseText { 0% { opacity: 0.3; } 100% { opacity: 1; } }
 
         /* =========================================
-           2. PHASE 2: NỘI VIỆN & LÕI K-DRIVE
+           2. NỘI VIỆN & LÕI K-DRIVE
         ========================================= */
         #sanctum-bg {
             position: fixed; inset: 0; width: 100vw; height: 100dvh;
@@ -239,7 +239,7 @@
         .p5 { right: 8px; bottom: 10px; }
 
         /* =========================================
-           4. AUDIO HUD & TERMINAL (Đồng bộ Xanh Chuối)
+           4. AUDIO HUD (Xanh Cyan) & TERMINAL (Nâng cao)
         ========================================= */
         #audio-hud {
             position: fixed; top: 20px; left: 20px; z-index: 100;
@@ -250,7 +250,7 @@
             display: flex; align-items: flex-end; gap: 3px; height: 20px; cursor: pointer; padding: 5px;
         }
         .speaker-icon .bar {
-            width: 4px; background: #39ff14; box-shadow: 0 0 8px #39ff14;
+            width: 4px; background: #00e5ff; box-shadow: 0 0 8px #00e5ff; /* Đổi về Cyan */
             animation: eqBounce 0.8s infinite alternate ease-in-out; transition: height 0.2s; border-radius: 2px;
         }
         .speaker-icon.muted .bar { animation: none !important; height: 4px !important; background: #ff2a2a; box-shadow: 0 0 8px #ff2a2a; }
@@ -262,17 +262,18 @@
 
         #volume-slider {
             -webkit-appearance: none; appearance: none;
-            width: 80px; height: 4px; background: rgba(57, 255, 20, 0.2);
+            width: 80px; height: 4px; background: rgba(0, 229, 255, 0.2);
             border-radius: 2px; outline: none; cursor: pointer;
         }
         #volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none;
             width: 14px; height: 14px; border-radius: 50%;
-            background: #39ff14; box-shadow: 0 0 10px #39ff14; cursor: pointer;
+            background: #00e5ff; box-shadow: 0 0 10px #00e5ff; cursor: pointer; /* Đổi về Cyan */
         }
 
         #terminal-hud {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 160px; /* ĐẨY LÊN CAO GIỮA LÕI VÀ BOBA */
+            left: 50%; transform: translateX(-50%);
             width: 90%; max-width: 400px;
             background: rgba(0, 15, 25, 0.8);
             border: 1px solid rgba(57, 255, 20, 0.4);
@@ -290,6 +291,39 @@
             animation: cursorBlink 0.8s infinite; display: inline-block;
         }
         @keyframes cursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* =========================================
+           5. HIỆU ỨNG TỔNG THỂ (Bụi Cyber & Glitch Màn Hình)
+        ========================================= */
+        #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+        .dust-particle {
+            position: absolute; width: 2px; height: 2px; background: #00e5ff; border-radius: 50%;
+            box-shadow: 0 0 6px #00e5ff; opacity: 0; animation: floatDust linear infinite;
+        }
+        @keyframes floatDust {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            20% { opacity: 0.6; scale: 1; }
+            80% { opacity: 0.3; }
+            100% { transform: translateY(-20vh) scale(0.5); opacity: 0; }
+        }
+
+        /* Glitch giật đỏ khi đói */
+        .critical-warning { animation: screenRedAlert 4s infinite; }
+        @keyframes screenRedAlert {
+            0%, 90%, 100% { box-shadow: inset 0 0 0 transparent; filter: none; transform: translate(0); }
+            92% { box-shadow: inset 0 0 80px rgba(255,0,0,0.3); filter: drop-shadow(4px 0 0 red); transform: translate(-3px, 2px); }
+            94% { box-shadow: inset 0 0 120px rgba(255,0,0,0.4); filter: drop-shadow(-4px 0 0 cyan); transform: translate(3px, -2px); }
+            96% { box-shadow: inset 0 0 50px rgba(255,0,0,0.1); filter: none; transform: translate(0); }
+        }
+
+        /* Glitch cắm giắc lúc mở cổng */
+        .plug-in-glitch { animation: plugInEffect 0.6s ease-out; }
+        @keyframes plugInEffect {
+            0% { filter: hue-rotate(90deg) contrast(2) brightness(1.5); transform: scale(1.05) skewX(2deg); }
+            20% { filter: invert(0.2) drop-shadow(8px 0 0 red); transform: scale(1) skewX(-2deg) translate(5px, 5px); }
+            40% { filter: drop-shadow(-8px 0 0 cyan); transform: translate(-5px, -5px); }
+            100% { filter: none; transform: translate(0); }
+        }
     </style>
 </head>
 <body>
@@ -304,6 +338,8 @@
         </div>
         <div class="author-btn" id="musashi-btn">— Miyamoto Musashi</div>
     </div>
+
+    <div id="dust-container"></div>
 
     <div id="audio-hud">
         <div class="speaker-icon" id="speaker-btn" onclick="toggleAudio()">
@@ -378,6 +414,19 @@
 
     <script>
         // ==========================================
+        // KHỞI TẠO BỤI CYBER LƠ LỬNG
+        // ==========================================
+        const dustContainer = document.getElementById('dust-container');
+        for(let i = 0; i < 40; i++) {
+            let p = document.createElement('div');
+            p.className = 'dust-particle';
+            p.style.left = (Math.random() * 100) + 'vw';
+            p.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            p.style.animationDelay = (Math.random() * 10) + 's';
+            dustContainer.appendChild(p);
+        }
+
+        // ==========================================
         // DEMO: TỰ ĐỘNG THAY ĐỔI CHỈ SỐ SCI & MÀU LÕI
         // ==========================================
         let demoStage = 0;
@@ -423,8 +472,7 @@
         function changeVolume(val) {
             bgMusic.volume = val;
             if (val > 0) { bgMusic.muted = false; speakerIcon.classList.remove('muted'); }
-            else { bgMusic.muted = true;
-            speakerIcon.classList.add('muted'); }
+            else { bgMusic.muted = true; speakerIcon.classList.add('muted'); }
         }
 
         function playSound(type) {
@@ -493,7 +541,7 @@
         }
 
         // ==========================================
-        // PHASE 1: KHAI MỞ
+        // PHASE 1: KHAI MỞ CÓ HIỆU ỨNG CẮM GIẮC
         // ==========================================
         function triggerKhaiMo() {
             if(navigator.vibrate) navigator.vibrate([200, 100, 400]);
@@ -508,6 +556,10 @@
             setTimeout(() => {
                 document.getElementById('sanctum-bg').style.opacity = 1;
                 document.getElementById('floor-grid').style.opacity = 1;
+                
+                // Màn hình giật chớp đỏ hiệu ứng Plug-in
+                document.body.classList.add('plug-in-glitch');
+                setTimeout(() => document.body.classList.remove('plug-in-glitch'), 600);
                 
                 setTimeout(() => {
                     document.getElementById('core-wrapper').style.opacity = 1;
@@ -580,7 +632,7 @@
         }
 
         // ==========================================
-        // 🌟 MODULE: HIỆP SĨ BOO (ACTION & LOGIC) 🌟
+        // 🌟 MODULE: HIỆP SĨ BOO & BÁO ĐỘNG ĐỎ
         // ==========================================
         const boo = document.getElementById('boo-knight');
         const booEnergyBorder = document.getElementById('boo-energy');
@@ -596,9 +648,14 @@
             if (booEnergy > 0) {
                 booEnergy -= 1;
                 booEnergyBorder.style.setProperty('--energy', `${booEnergy}%`);
-                if (booEnergy < 20) boo.classList.add('boo-glitch');
-                if (booEnergy === 0) 
-                    forceSleep(true);
+                
+                // Kích hoạt báo động rung màn hình khi đói
+                if (booEnergy < 20) {
+                    boo.classList.add('boo-glitch');
+                    document.body.classList.add('critical-warning');
+                }
+                
+                if (booEnergy === 0) forceSleep(true);
             }
         }, 5000);
         setTimeout(() => { bobaReward.style.display = 'block'; }, 8000);
@@ -608,6 +665,8 @@
             boo.classList.add('boo-sleeping');
             boo.dataset.fainted = isFainted;
             if(navigator.vibrate) navigator.vibrate([30, 30, 30]);
+            // Tắt báo động rung toàn màn hình khi Boo đã ngất để tránh nhức mắt
+            document.body.classList.remove('critical-warning');
         }
 
         boo.addEventListener('pointerdown', (e) => {
@@ -670,6 +729,7 @@
                     booEnergy = 100;
                     booEnergyBorder.style.setProperty('--energy', '100%');
                     boo.classList.remove('boo-glitch');
+                    document.body.classList.remove('critical-warning'); // Tắt báo động đỏ
                     
                     isBooSleeping = false;
                     boo.classList.remove('boo-sleeping');
