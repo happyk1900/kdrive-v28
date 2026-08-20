@@ -647,60 +647,80 @@
                 if(navigator.vibrate) navigator.vibrate(50); 
                 playSound('katana'); 
                 
-                // [CƠ CHẾ CHUYỂN CẢNH MỚI: LỒNG KHÔNG GIAN]
+                // [CƠ CHẾ CHUYỂN CẢNH MỚI: DÒNG CHẢY THỦY LUÂN]
                 if (taskId === 'tritue') {
-                    speakMsg("Kích hoạt Đạo Trường Thủy Luân.");
-                    playSound('warp-in');
+                    // Ngăn chặn các tương tác khác khi đang chuyển cảnh
+                    document.body.style.pointerEvents = 'none';
                     
-                    // 1. Lưu giữ trạng thái sang file kia
+                    speakMsg("Kích hoạt Đạo Trường Thủy Luân.");
+                    playSound('katana'); // Âm thanh rút kiếm điềm báo
+                    if(navigator.vibrate) navigator.vibrate([100, 100, 200]);
+                    
+                    // LƯU TRẠNG THÁI KẾT NỐI
                     localStorage.setItem('boo_energy', booEnergy);
                     localStorage.setItem('bg_music_time', bgMusic.currentTime);
                     localStorage.setItem('bg_music_muted', bgMusic.muted);
 
-                    // 2. Tắt mượt mà các thành phần phụ (Sàn lưới, Đồng hồ số)
-                    document.getElementById('floor-grid').style.transition = 'opacity 1s ease';
+                    // PHASE 1: ĐIỀM BÁO (0.0s - 0.4s)
+                    // Hãm tua khối lập phương, xoay chậm dần tạo sự ngưng đọng thời gian
+                    cubeVx = 0.05; 
+                    cubeVy = 0.05;
+
+                    // PHASE 2 & 3: THẤM LỌC VÀ CHUYỂN HÓA (0.4s - 1.5s)
+                    // Lưới điện từ và đồng hồ tan chảy chậm rãi
+                    document.getElementById('floor-grid').style.transition = 'opacity 1.5s ease-in-out';
                     document.getElementById('floor-grid').style.opacity = '0';
-                    document.getElementById('live-clock').style.transition = 'opacity 1s ease';
+                    document.getElementById('live-clock').style.transition = 'opacity 1s ease-in-out';
                     document.getElementById('live-clock').style.opacity = '0';
 
-                    // 3. Khối lập phương thu nhỏ lại và tan biến
-                    const cubeWrap = document.getElementById('core-wrapper');
-                    cubeWrap.style.transition = 'all 1.2s cubic-bezier(0.25, 1, 0.5, 1)';
-                    cubeWrap.style.transform = 'scale(0.8)';
-                    cubeWrap.style.opacity = '0';
-
-                    // 4. Xử lý Terminal (Xóa viền/nền, đổi nội dung chuẩn bị nhảy)
+                    // Terminal dọn dẹp viền kính, hòa vào không gian
                     const terminal = document.getElementById('terminal-hud');
-                    terminal.style.transition = 'all 1s ease';
+                    terminal.style.transition = 'all 1.5s ease';
                     terminal.style.background = 'transparent';
                     terminal.style.border = 'none';
                     terminal.style.boxShadow = 'none';
                     document.getElementById('terminal-text').innerHTML = ">_ [HỆ THỐNG]: ĐANG ĐỒNG BỘ KHÔNG GIAN THỦY LUÂN...";
 
-                    // 5. Lồng ảnh nền Thủy Luân đè lên (Cross-dissolve)
+                    // Khối lập phương nổi nhẹ lên rồi tan vào hư không
+                    const cubeWrap = document.getElementById('core-wrapper');
+                    cubeWrap.style.transition = 'all 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                    cubeWrap.style.transform = 'scale(1.1) translateY(-20px)';
+                    cubeWrap.style.opacity = '0';
+
+                    // Tạo lớp sương mù lạnh màu xanh ngọc (Cyan Mist) len lỏi
+                    const cyanMist = document.createElement('div');
+                    cyanMist.style.cssText = `
+                        position: fixed; inset: 0;
+                        background: radial-gradient(circle at center, rgba(0,229,255,0.1) 0%, rgba(0,15,30,0.85) 100%);
+                        z-index: 3; opacity: 0; pointer-events: none;
+                        transition: opacity 1.5s ease-in-out;
+                        backdrop-filter: blur(2px);
+                    `;
+                    document.body.appendChild(cyanMist);
+
+                    // Ảnh nền Thủy Luân từ từ trồi lên, đè lên nền căn phòng hiện tại (Cross-dissolve)
                     const nextBg = document.createElement('div');
                     nextBg.style.cssText = `
-                        position: fixed;
-                        inset: 0;
+                        position: fixed; inset: 0;
                         background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/THUY%20LUAN%20AI.png?raw=true'); 
-                        background-size: cover;
-                        background-position: center;
-                        z-index: 5; /* Đặt dưới lớp HUD và Boo */
-                        opacity: 0;
-                        transition: opacity 1.2s ease;
-                        pointer-events: none;
+                        background-size: cover; background-position: center;
+                        z-index: 4; opacity: 0; pointer-events: none;
+                        transition: opacity 1.8s ease-in-out;
                     `;
                     document.body.appendChild(nextBg);
 
-                    // Kích hoạt nhịp mờ ảnh
+                    // Kích hoạt dòng chảy thị giác và âm thanh không gian sâu
                     setTimeout(() => { 
+                        cyanMist.style.opacity = '1';
                         nextBg.style.opacity = '1'; 
-                    }, 50);
+                        playSound('warp-out'); 
+                    }, 100);
                     
-                    // 6. Chuyển trang thực sự sau khi ảnh lồng đã che kín màn hình
+                    // PHASE 4: ĐIỀU HƯỚNG MƯỢT MÀ (1.8s)
+                    // Chuyển file khi mặt nước đã lấp đầy toàn bộ khung hình
                     setTimeout(() => { 
                         window.location.href = 'thuy_luan.html'; 
-                    }, 1250);
+                    }, 1800);
                     
                     return; 
                 }
