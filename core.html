@@ -647,22 +647,38 @@
                 if(navigator.vibrate) navigator.vibrate(50); 
                 playSound('katana'); 
                 
-                // [NEW] CƠ CHẾ ĐIỀU HƯỚNG CHUYỂN CẢNH
+                // [NEW] CƠ CHẾ ĐIỀU HƯỚNG CHUYỂN CẢNH ĐỒNG BỘ
                 if (taskId === 'tritue') {
                     speakMsg("Kích hoạt Đạo Trường Thủy Luân.");
+                    playSound('warp-in');
                     
-                    // Hiệu ứng mờ dần toàn bộ màn hình Core
-                    document.body.style.transition = "opacity 0.8s ease-in-out";
-                    document.body.style.opacity = "0";
-                    
-                    // Sau 0.8s thì load sang file Thủy Luân
-                    setTimeout(() => {
-                        window.location.href = 'thuy_luan.html';
-                    }, 800);
-                    
-                    return; // Ngắt hàm tại đây để không chạy các logic bên dưới
-                }
+                    // 1. Lưu giữ trạng thái sang file kia
+                    localStorage.setItem('boo_energy', booEnergy);
+                    localStorage.setItem('bg_music_time', bgMusic.currentTime);
+                    localStorage.setItem('bg_music_muted', bgMusic.muted);
 
+                    // 2. Tắt mượt mà các thành phần không cần thiết
+                    document.getElementById('floor-grid').style.opacity = '0';
+                    document.getElementById('live-clock').style.opacity = '0';
+                    document.getElementById('terminal-hud').style.opacity = '0';
+
+                    // 3. Khối lập phương phát nổ / bay vào không gian
+                    const cubeWrap = document.getElementById('core-wrapper');
+                    cubeWrap.style.transition = 'all 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+                    cubeWrap.style.transform = 'scale(3.5)';
+                    cubeWrap.style.opacity = '0';
+
+                    // 4. Phủ lớp flash nước rồi chuyển file
+                    const flash = document.createElement('div');
+                    flash.style.cssText = 'position:fixed;inset:0;background:radial-gradient(circle, #00e5ff 0%, #000 80%);z-index:9999;opacity:0;transition:opacity 0.4s ease;pointer-events:none;';
+                    document.body.appendChild(flash);
+
+                    setTimeout(() => { flash.style.opacity = '1'; }, 200);
+                    setTimeout(() => { window.location.href = 'thuy_luan.html'; }, 600);
+                    
+                    return; 
+                }
+                
                 // Logic cũ cho các mặt khác (Điểm danh / Nhận boba)
                 let taskObj = taskList.find(t => t.id === taskId);
                 if (taskObj && !taskObj.done && !isDaoNghiepVienMan && bobaReward.style.display !== 'block') {
@@ -851,7 +867,7 @@
 Xưng hô: 'Ta' và 'Ngươi' (hoặc gọi người dùng là 'Nhóc').
 PHONG CÁCH GIAO TIẾP: Trò chuyện tự nhiên, phóng khoáng, thoải mái. Hỏi về bóng đá, bài bạc poker hay công việc thì phân tích sắc sảo, mổ xẻ chiến lược góc nhìn cao thủ.
 QUY TẮC: Tuyệt đối không lải nhải ép đi tập luyện. Chỉ khi nào đang là ban đêm (người dùng thức khuya) thì mới nhắc nhở nhẹ nhàng về việc bảo vệ Địa Luân (Sức khỏe).
-Luật đầu ra: Trả lời ngắn gọn, tối đa 3-4 câu, đi thẳng vào trọng tâm.
+LUẬT ĐẦU RA TỐI THƯỢNG: BẮT BUỘC trả lời cực kỳ súc tích, tối đa từ 1 đến 2 câu ngắn gọn (dưới 30 từ). Cấm tuyệt đối không viết văn mẫu, cấm kể chuyện dài dòng. Đi thẳng vào trọng tâm câu hỏi!
 Ngươi hãy đối đáp lại câu sau: "${text}"`
                             }]
                         }]
