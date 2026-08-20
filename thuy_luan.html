@@ -22,106 +22,33 @@
             height: 100vh; overflow: hidden; position: relative;
         }
 
-        /* ẢNH NỀN ĐỘNG (ZERO-LAG TRANSITION) */
+        /* ẢNH NỀN CHÍNH THỨC */
         .locked-bg {
             position: fixed !important; top: 50% !important; left: 50% !important;
             width: 100vw !important; height: 100vh !important; height: 100dvh !important;
             object-fit: cover !important; z-index: -4; pointer-events: none; 
-            opacity: 0; 
-            transition: opacity 0.6s ease-in-out;
-            animation: slowZoom 70s linear infinite alternate;
+            transform: translate(-50%, -50%); opacity: 0.95;
         }
-        .locked-bg.active { opacity: 0.95; }
-        @keyframes slowZoom { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-50%, -50%) scale(1.15); } }
 
-        .vignette { position: fixed; inset: 0; z-index: -3; pointer-events: none; background: radial-gradient(circle at center, transparent 30%, rgba(5,6,8, 0.7) 100%); }
-        .fog-layer { position: fixed; bottom: -10%; left: 0; width: 200%; height: 60vh; z-index: -3; pointer-events: none; background: linear-gradient(to top, rgba(0, 229, 255, 0.1), transparent); animation: fogMove 25s linear infinite alternate; }
+        .vignette { position: fixed; inset: 0; z-index: -3; pointer-events: none; background: radial-gradient(circle at center, transparent 20%, rgba(5,6,8, 0.8) 100%); }
+        .fog-layer { position: fixed; bottom: -10%; left: 0; width: 200%; height: 60vh; z-index: -3; pointer-events: none; background: linear-gradient(to top, rgba(0, 229, 255, 0.15), transparent); animation: fogMove 25s linear infinite alternate; }
         @keyframes fogMove { 0% { transform: translateX(0); } 100% { transform: translateX(-10%); } }
-        .light-sweep-layer { position: fixed; top: 0; left: -100%; width: 50%; height: 100vh; z-index: -3; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); transform: skewX(-30deg); animation: lightSweep 12s infinite; }
-        @keyframes lightSweep { 0%, 70% { left: -100%; } 100% { left: 200%; } }
         .particles-container { position: fixed; inset: 0; z-index: -2; pointer-events: none; overflow: hidden; }
         .particle { position: absolute; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan); opacity: 0; animation: floatUp linear infinite; }
-        @keyframes floatUp { 0% { transform: translateY(100px) scale(0.5); opacity: 0; } 50% { opacity: 0.6; } 100% { transform: translateY(-100px) scale(1.2); opacity: 0; } }
+        @keyframes floatUp { 0% { transform: translateY(100px) scale(0.5); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: translateY(-100px) scale(1.2); opacity: 0; } }
 
-        /* MÀN HÌNH INTRO & 2 NÚT BẤM - NỀN KÍNH MỜ TRONG SUỐT */
-        #intro-ui {
-            position: fixed; inset: 0; z-index: 50000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; gap: 25px; transition: opacity 0.5s;
-        }
-        .btn-intro {
-            position: relative; overflow: hidden; width: 280px; text-align: center;
-            background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 229, 255, 0.4); border-left: 4px solid var(--cyan);
-            color: #fff; font-family: var(--font-display); font-size: 15px; font-weight: 600;
-            padding: 22px 20px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,229,255,0.1);
-            text-shadow: 0 0 8px rgba(0,229,255,0.8), 0 0 5px #000; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
-        }
-        .btn-intro::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50px; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transform: skewX(-20deg); animation: scanLight 4s infinite; pointer-events: none;
-        }
-        .btn-intro:hover { background: rgba(0, 229, 255, 0.15); box-shadow: 0 0 25px rgba(0,229,255,0.3); transform: scale(1.02); }
-        .btn-intro:active { transform: scale(0.96); border-color: #fff; }
-
-        /* HIỆU ỨNG TẢI DỮ LIỆU */
-        .loading-indicator {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: var(--cyan); font-family: var(--font-display); font-size: 14px; font-weight: bold; letter-spacing: 3px;
-            text-shadow: 0 0 15px var(--cyan), 0 0 5px #000; animation: pulse-load 0.8s infinite alternate; z-index: 100001;
-            background: rgba(0,0,0,0.6); padding: 12px 25px; border-radius: 8px; border: 1px solid var(--cyan);
-            backdrop-filter: blur(5px); display: none; text-align: center;
-        }
-        @keyframes pulse-load { 0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.95); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); } }
-
-        /* LỚP PHỦ CHUỖI VIDEO THẤU THỊ BÍ LỤC */
-        #intro-sequence-overlay { position: fixed; inset: 0; z-index: 100000; background: #000; display: none; }
-        .seq-video { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 0.1s ease-in-out; pointer-events: none; }
-
-        /* LỚP PHỦ VIDEO XUNG TRẬN */
-        #intro-video-overlay { position: fixed; inset: 0; background: #000; z-index: 100000; display: none; }
-        #intro-video-overlay video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; opacity: 1;}
-
-        /* NÚT BỎ QUA */
-        .btn-skip { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); border: 1px dashed var(--amber); color: var(--amber); padding: 10px 18px; border-radius: 6px; font-family: var(--font-display); font-size: 12px; font-weight: bold; cursor: pointer; z-index: 100001; transition: 0.2s; letter-spacing: 1px; }
-        .btn-skip:active { background: var(--amber); color: #000; box-shadow: 0 0 15px var(--amber); }
-
-        /* KHUNG ĐẠO TRƯỜNG CHÍNH - XÓA BỎ NỀN ĐỂ NHÌN THUYÊN THẤU */
-        .dojo-container { width: 100%; max-width: 420px; height: 100vh; max-height: 900px; background: transparent; flex-direction: column; padding: 20px; position: relative; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); display: none; opacity: 0; transition: opacity 1s ease; }
+        /* KHUNG ĐẠO TRƯỜNG CHÍNH - HIỆN NGAY LẬP TỨC */
+        .dojo-container { width: 100%; max-width: 420px; height: 100vh; max-height: 900px; background: transparent; display: flex; flex-direction: column; padding: 20px; position: relative; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
         
         .btn-audio { position: absolute; top: 15px; left: 15px; z-index: 10000; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0,229,255,0.4); color: var(--cyan); padding: 8px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); transition: 0.3s; }
         .btn-audio svg { width: 18px; height: 18px; fill: currentColor; }
         .btn-audio:active { transform: scale(0.9); background: var(--cyan); color: #000; }
         
-        /* BẢNG HIỆU: KÍNH MỜ TRONG SUỐT (KHÔNG CÓ MÀU TRẮNG HAY ĐEN, CHỈ MỜ VÀ CÓ VIỀN) */
         .header-cyber-sign {
-            background: rgba(0, 0, 0, 0.15); /* Gần như trong suốt */
-            border: 1px solid rgba(0, 229, 255, 0.3);
-            border-top: 2px solid var(--cyan);
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            flex-shrink: 0;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            position: relative;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.15); border: 1px solid rgba(0, 229, 255, 0.3); border-top: 2px solid var(--cyan);
+            border-radius: 8px; padding: 10px 15px; margin-bottom: 20px; flex-shrink: 0; box-shadow: 0 8px 25px rgba(0,0,0,0.2); position: relative; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
-        .header-top-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            font-family: var(--font-display);
-            color: #fff;
-            text-shadow: 0 0 5px #000, 0 0 10px #000; /* Đổ bóng đen để chữ không bị chìm */
-            font-weight: bold;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-            border-bottom: 1px dashed rgba(0,229,255,0.3);
-            padding-bottom: 4px;
-        }
+        .header-top-row { display: flex; justify-content: space-between; font-size: 10px; font-family: var(--font-display); color: #fff; text-shadow: 0 0 5px #000, 0 0 10px #000; font-weight: bold; letter-spacing: 1px; margin-bottom: 4px; border-bottom: 1px dashed rgba(0,229,255,0.3); padding-bottom: 4px; }
         .header-top-row span strong { color: var(--cyan); text-shadow: 0 0 8px #000, 0 0 10px rgba(0,229,255,0.8); }
         .header-main { text-align: center; padding-top: 2px; }
         .header-main h1 { font-size: 11px; letter-spacing: 4px; color: var(--cyan); font-weight: 700; text-shadow: 0 0 5px #000, 0 0 10px rgba(0,229,255,0.8); }
@@ -130,15 +57,8 @@
         .floating-boo { width: 48px; height: 48px; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; animation: levitate 3s ease-in-out infinite; position: absolute; top: 15px; right: 15px; z-index: 9999; touch-action: none; --boo-ring-color: var(--cyan); border: 2px solid var(--boo-ring-color); box-shadow: 0 0 15px var(--boo-ring-color), inset 0 0 10px var(--boo-ring-color); transition: all 0.3s; }
         .floating-boo::before { content: ''; position: absolute; inset: -5px; border-radius: 50%; background: conic-gradient(var(--boo-ring-color) 100%, transparent 0); -webkit-mask: radial-gradient(closest-side, transparent 86%, black 88%); pointer-events: none; transition: background 0.3s; }
         .floating-boo.speaking { animation: boo-pulse-wave 0.2s infinite alternate; --boo-ring-color: var(--cyan); }
-        .floating-boo.sleeping { --boo-ring-color: #3b82f6; border: 1px dashed #3b82f6; box-shadow: 0 0 10px #3b82f6; animation: boo-breathe 2.5s infinite alternate; }
-        .floating-boo.sleeping::before { display: none; }
         .boo-icon-inner { font-size: 22px; filter: drop-shadow(0 0 8px var(--boo-ring-color)); transition: all 0.3s; }
-        .floating-boo.speaking .boo-icon-inner { animation: pig-speak 0.15s infinite alternate; filter: brightness(1.5) drop-shadow(0 0 10px var(--cyan));}
         @keyframes levitate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        @keyframes pig-speak { 0% { transform: scale(1.1) rotate(-12deg); } 100% { transform: scale(1.2) rotate(12deg); } }
-        .zzz-text { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 16px; color: #3b82f6; opacity: 0; pointer-events: none; font-weight: bold; text-shadow: 0 0 8px #3b82f6, 0 0 3px #000; }
-        .floating-boo.sleeping .zzz-text { animation: zzz-float 2s infinite; }
-        @keyframes zzz-float { 0% { opacity: 0; transform: translate(-50%, 0) scale(0.8); } 50% { opacity: 1; transform: translate(-50%, -15px) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
 
         .screen-container { flex: 1; position: relative; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding-bottom: 20px;}
         .screen-container::-webkit-scrollbar { display: none; }
@@ -146,94 +66,50 @@
         .screen.active { display: flex; animation: slideUpFade 0.4s ease; }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 3 Ô CHỌN ẢI: GIỮ NỀN TỐI ĐỂ LÀM TRỌNG TÂM NHƯ ẢNH MẪU */
-        .mission-card { position: relative; overflow: hidden; background: rgba(5, 8, 12, 0.85); border: 1px solid rgba(0, 229, 255, 0.5); border-left: 3px solid var(--cyan); backdrop-filter: blur(10px); padding: 18px 15px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 0 10px rgba(0,229,255,0.1); }
-        .mission-card::after { content: ''; position: absolute; top: 0; left: -100%; width: 50px; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); transform: skewX(-20deg); animation: scanLightCard 3.5s infinite; pointer-events: none; }
-        @keyframes scanLightCard { 0% { left: -100%; } 15% { left: 200%; } 100% { left: 200%; } }
-        .mission-card:hover { border-color: var(--cyan); box-shadow: 0 6px 25px rgba(0,229,255,0.5); transform: translateX(5px); }
-        .mission-card:active { transform: scale(0.96); background: rgba(0, 229, 255, 0.25); border-color: var(--cyan); }
-        .mission-card h3 { color: #fff; font-size: 15px; margin-bottom: 6px; letter-spacing: 1px; text-shadow: 0 0 6px rgba(0,229,255,0.8); display: flex; align-items: center; gap: 8px;}
-        .mission-card h3::before { content: '⚡'; font-size: 12px; }
-        .mission-card p { font-size: 11.5px; color: rgba(255,255,255,0.85); font-weight: 300; text-shadow: 0 0 4px #000; }
-        .mission-status { float: right; font-family: var(--font-display); font-size: 13px; color: var(--mint); font-weight: 600; text-shadow: 0 0 8px rgba(0,255,157,0.5);}
-
-        /* CÁC KHỐI PHỤ ĐỔI SANG KÍNH MỜ TRONG SUỐT (GLASSMORPHISM THUẦN TÚY) */
-        .lore-accordion { margin-top: 10px; margin-bottom: 12px; }
-        .lore-btn { width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; padding: 12px; font-family: var(--font-display); font-size: 11.5px; letter-spacing: 2px; cursor: pointer; transition: 0.3s; text-transform: uppercase; border-radius: 6px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-shadow: 0 0 5px #000, 0 0 8px #000; font-weight: bold;}
-        .lore-btn:hover { background: rgba(0, 0, 0, 0.3); border-color: var(--amber); color: var(--amber); text-shadow: 0 0 5px #000, 0 0 10px var(--amber);}
-        .lore-btn:active { background: rgba(0, 0, 0, 0.5); }
+        /* KHỐI HOLOGRAM ẢI LƠ LỬNG */
+        .hologram-container { display: flex; justify-content: center; align-items: center; gap: 25px; margin-top: 15vh; margin-bottom: 50px; perspective: 1000px; }
+        .holo-node { width: 70px; height: 70px; position: relative; cursor: pointer; transform-style: preserve-3d; animation: floatHolo 4s infinite ease-in-out; }
+        .holo-node:nth-child(1) { animation-delay: 0s; }
+        .holo-node:nth-child(2) { animation-delay: 0.5s; width: 85px; height: 85px; top: -20px; } /* Ải 2 to hơn chút ở giữa */
+        .holo-node:nth-child(3) { animation-delay: 1s; }
         
-        .lore-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(12px); border-left: 2px solid var(--cyan); padding: 0 15px; font-family: var(--font-content); font-size: 14px; color: #fff; line-height: 1.6; border-radius: 0 0 6px 6px; text-shadow: 0 0 5px #000;}
-        .lore-content.open { max-height: 800px; padding: 15px; border-bottom: 1px solid rgba(0,229,255,0.3); }
-        .lore-content h4 { color: var(--cyan); font-family: var(--font-display); font-size: 12px; margin-bottom: 5px; margin-top: 10px; text-transform: uppercase; text-shadow: 0 0 5px #000, 0 0 8px rgba(0,229,255,0.5); font-weight: bold;}
-        .lore-content p { text-align: justify; margin-bottom: 10px;}
-        .lore-content p strong { color: var(--amber); }
-
-        /* HỘP TRẠNG THÁI SCI - TRONG SUỐT HOÀN TOÀN + BLUR */
-        .system-status-box {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(0, 229, 255, 0.3);
-            border-top: 2px solid var(--cyan);
-            border-radius: 6px;
-            padding: 12px 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        .holo-cube {
+            width: 100%; height: 100%; background: rgba(0, 229, 255, 0.1); border: 2px solid rgba(0,229,255,0.6);
+            box-shadow: 0 0 20px rgba(0,229,255,0.3), inset 0 0 20px rgba(0,229,255,0.2);
+            transform: rotateX(45deg) rotateZ(45deg); display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px); transition: all 0.3s;
         }
-        .system-status-title {
-            font-size: 10.5px;
-            color: var(--cyan);
-            font-family: var(--font-display);
-            letter-spacing: 1.5px;
-            font-weight: bold;
-            margin-bottom: 6px;
-            text-shadow: 0 0 5px #000, 0 0 8px rgba(0,229,255,0.8);
+        .holo-core {
+            transform: rotateZ(-45deg) rotateX(-45deg); font-family: var(--font-display); font-size: 22px; font-weight: bold;
+            color: #fff; text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan);
         }
-        .system-status-content {
-            font-size: 11px;
-            font-family: var(--font-content);
-            color: #fff;
-            line-height: 1.5;
-            font-style: italic;
-            font-weight: 600;
-            text-shadow: 0 0 5px #000;
-        }
-
-        /* NÚT QUAY LẠI TRẠM LÕI - TRONG SUỐT BLUR */
-        .action-btn { position: relative; overflow: hidden; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; padding: 16px; font-family: var(--font-display); font-size: 13.5px; font-weight: 700; letter-spacing: 2px; cursor: pointer; text-align: center; transition: all 0.3s; width: 100%; margin-top: auto; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); text-shadow: 0 0 5px #000, 0 0 8px rgba(255,255,255,0.6); }
-        .action-btn:active { transform: scale(0.98); background: rgba(0, 0, 0, 0.5); color: #fff; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+        .holo-node:hover .holo-cube { background: rgba(0,255,157,0.2); border-color: var(--mint); box-shadow: 0 0 30px var(--mint), inset 0 0 20px var(--mint); transform: rotateX(45deg) rotateZ(45deg) scale(1.1); }
+        .holo-node:hover .holo-core { color: var(--mint); text-shadow: 0 0 10px var(--mint), 0 0 20px #fff; }
+        .holo-node:active .holo-cube { transform: rotateX(45deg) rotateZ(45deg) scale(0.9); background: var(--cyan); }
         
-        /* NÚT LƯU ĐIỂM SCI ĐẶC BIỆT */
+        .holo-label { position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); color: var(--cyan); font-family: var(--font-display); font-size: 11px; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 5px #000, 0 0 10px #000; text-align: center; width: 120px; text-transform: uppercase; }
+        .holo-score { display: block; font-size: 10px; color: var(--mint); margin-top: 3px; }
+
+        @keyframes floatHolo { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-12px) rotate(2deg); } }
+
+        /* HỘP TRẠNG THÁI SCI (NỀN TRONG SUỐT, CHỈ MỜ) */
+        .system-status-box { background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(0, 229, 255, 0.3); border-top: 2px solid var(--cyan); border-radius: 6px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); margin-top: auto;}
+        .system-status-title { font-size: 10.5px; color: var(--cyan); font-family: var(--font-display); letter-spacing: 1.5px; font-weight: bold; margin-bottom: 6px; text-shadow: 0 0 5px #000, 0 0 8px rgba(0,229,255,0.8); }
+        .system-status-content { font-size: 11px; font-family: var(--font-content); color: #fff; line-height: 1.5; font-style: italic; font-weight: 600; text-shadow: 0 0 5px #000; }
+
+        .action-btn { position: relative; overflow: hidden; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.4); color: #fff; padding: 16px; font-family: var(--font-display); font-size: 13.5px; font-weight: 700; letter-spacing: 2px; cursor: pointer; text-align: center; transition: all 0.3s; width: 100%; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-shadow: 0 0 5px #000; margin-bottom: 15px; }
+        .action-btn:active { transform: scale(0.98); background: rgba(0, 229, 255, 0.5); color: #fff; border-color: var(--cyan); box-shadow: 0 0 20px var(--cyan); }
         .action-btn-green { border-color: var(--mint); color: var(--mint); background: rgba(0, 255, 157, 0.15); text-shadow: 0 0 5px #000, 0 0 10px var(--mint); }
-
+        .pulse-active { animation: pulse-action 1.2s infinite alternate !important; }
         @keyframes pulse-action {
-            0% { box-shadow: 0 0 10px rgba(0, 255, 157, 0.5), inset 0 0 5px rgba(0, 255, 157, 0.2); transform: scale(1); border-color: var(--mint); background: rgba(0, 255, 157, 0.15); }
-            50% { box-shadow: 0 0 25px rgba(0, 255, 157, 0.8), inset 0 0 15px rgba(0, 255, 157, 0.5); transform: scale(1.02); border-color: #fff; color: #fff; background: rgba(0,255,157,0.3); }
-            100% { box-shadow: 0 0 10px rgba(0, 255, 157, 0.5), inset 0 0 5px rgba(0, 255, 157, 0.2); transform: scale(1); border-color: var(--mint); background: rgba(0, 255, 157, 0.15); }
-        }
-        .pulse-active {
-            animation: pulse-action 1.2s infinite alternate !important;
+            0% { box-shadow: 0 0 10px rgba(0, 255, 157, 0.5); transform: scale(1); border-color: var(--mint); }
+            100% { box-shadow: 0 0 25px rgba(0, 255, 157, 0.8); transform: scale(1.02); border-color: #fff; color: #fff; background: rgba(0,255,157,0.3); }
         }
 
-        /* BOX KÍNH MỜ TRONG SUỐT CHO TEXT LÒ NHANG */
-        .glass-box-incense {
-            font-family: var(--font-display); font-size: 13px; color: var(--amber); letter-spacing: 2px; font-weight: bold; text-transform: uppercase; margin: 0 auto 25px auto; padding: 10px 22px; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 170, 0, 0.4); border-radius: 6px; backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-shadow: 0 0 5px #000, 0 0 10px var(--amber); display: inline-block;
-        }
-        
-        .incense-hud { display: flex; justify-content: center; gap: 30px; margin-top: 25px;}
-        .incense-stick { width: 8px; height: 100px; background: linear-gradient(to right, #4a2e23, #6b4433, #4a2e23); border-radius: 4px; position: relative; cursor: pointer; transition: 0.4s; box-shadow: 5px 5px 10px rgba(0,0,0,0.5), inset -2px 0 3px rgba(0,0,0,0.6); }
-        .incense-stick::after { content: ''; position: absolute; bottom: -18px; left: 2px; width: 4px; height: 18px; background: #cc0000; border-radius: 0 0 2px 2px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5);}
-        .incense-stick.available::before { content: ''; position: absolute; top: -4px; left: -1px; width: 10px; height: 10px; background: #ff3300; border-radius: 50%; box-shadow: 0 0 10px #ff3300, 0 0 20px #ffaa00, inset 0 0 5px #fff; animation: fire-flicker 0.4s infinite alternate; }
-        .incense-stick.used { background: #333; height: 20px; transform: translateY(80px); pointer-events: none; opacity: 0.5; box-shadow: none;}
-        .incense-stick.used::before { display: none; }
-        .incense-stick.used::after { bottom: -18px; background: #555; box-shadow: none;}
-        @keyframes fire-flicker { 0% { opacity: 0.8; box-shadow: 0 0 5px #ff3300, 0 0 10px #ffaa00; } 100% { opacity: 1; box-shadow: 0 0 15px #ff3300, 0 0 30px #ffaa00, inset 0 0 5px #fff; } }
-
+        /* KHU VỰC CHƠI GAME */
         .timer-bar-container { width: 100%; height: 6px; background: rgba(0,0,0,0.6); border-radius: 3px; margin: 20px 0; position: relative; display: none; box-shadow: inset 0 0 8px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.1);}
-        .timer-bar-fill { height: 100%; width: 100%; background: linear-gradient(to bottom, #8a5a44, #5c4033); transition: width 1s linear; position: relative; border-radius: 3px;}
-        .timer-bar-fill::after { content: ''; position: absolute; right: -5px; top: -3px; width: 12px; height: 12px; background: #ff3300; border-radius: 50%; box-shadow: 0 0 12px #ff3300, 0 0 20px #ffaa00, inset 0 0 4px #fff; animation: fire-flicker 0.4s infinite alternate; }
-
+        .timer-bar-fill { height: 100%; width: 100%; background: linear-gradient(to right, var(--cyan), var(--mint)); transition: width 1s linear; position: relative; border-radius: 3px; box-shadow: 0 0 10px var(--mint);}
+        
         .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 280px; height: 280px; margin: 20px auto; perspective: 1000px; }
         .grid-cell { background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 32px; transition: all 0.15s ease; box-shadow: inset 0 0 15px rgba(0,229,255,0.15), 0 5px 10px rgba(0,0,0,0.4); backdrop-filter: blur(6px); user-select: none;}
         .grid-cell:active { transform: scale(0.9) translateZ(-10px); }
@@ -260,7 +136,7 @@
         .stats span strong { color: var(--mint); font-size: 16px; text-shadow: 0 0 8px rgba(0,255,157,0.6);}
         .streak-info { color: var(--amber) !important; text-shadow: 0 0 8px var(--amber); font-weight: bold; font-size: 14px;}
 
-        /* BẢNG XÁC NHẬN / HOÀN THÀNH NHIỆM VỤ (CUSTOM MODAL) */
+        /* BẢNG XÁC NHẬN (CUSTOM MODAL) */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); z-index: 100000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-box { background: rgba(10,15,25,0.95); border: 1px solid var(--cyan); border-top: 3px solid var(--cyan); padding: 25px; width: 320px; border-radius: 6px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.9), 0 0 25px rgba(0,229,255,0.3); transform: translateY(20px); transition: transform 0.3s; backdrop-filter: blur(10px); }
@@ -278,53 +154,24 @@
 <body>
 
 <!-- BGM -->
-<audio id="bgm-audio" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai-Ripe%20Little%20Ninja%20(1).mp3" loop></audio>
+<audio id="bgm-audio" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai-Ripe%20Little%20Ninja%20(1).mp3" loop autoplay></audio>
 
-<!-- TẢI TRƯỚC 5 ẢNH ĐỂ CHUYỂN CẢNH ZERO-LAG -->
-<img id="bg-intro" src="https://github.com/happyk1900/-m-thanh-app/blob/main/THUYLIAN%20ANH%20NEN.png?raw=true" class="locked-bg active" alt="Lão Trư Boo Intro">
-<img id="bg-hub" src="https://github.com/happyk1900/-m-thanh-app/blob/main/TL%20TRASUA%20(1).png?raw=true" class="locked-bg" alt="Trà Sữa Hub">
-<img id="bg-1" src="https://github.com/happyk1900/-m-thanh-app/blob/main/Tinhkhi.png?raw=true" class="locked-bg" alt="Tĩnh Khí">
-<img id="bg-2" src="https://github.com/happyk1900/-m-thanh-app/blob/main/Luuthuy.png?raw=true" class="locked-bg" alt="Lưu Thủy">
-<img id="bg-3" src="https://github.com/happyk1900/-m-thanh-app/blob/main/Tamtran.png?raw=true" class="locked-bg" alt="Tâm Trận">
+<!-- ẢNH NỀN DUY NHẤT -->
+<img src="https://github.com/happyk1900/-m-thanh-app/blob/main/THUY%20LUAN%20AI.png?raw=true" class="locked-bg" alt="Đạo Trường Thủy Luân">
 
 <div class="vignette"></div>
 <div class="fog-layer"></div>
-<div class="light-sweep-layer"></div>
 <div class="particles-container" id="particles-box"></div>
-
-<!-- LỚP PHỦ INTRO (2 NÚT) -->
-<div id="intro-ui">
-    <button class="btn-intro" id="btn-triet-ly" onclick="startPhilosophySequence()">THẤU THỊ BÍ LỤC</button>
-    <button class="btn-intro" id="btn-xung-tran" onclick="startCombat()">TIẾN VÀO DÒNG CHẢY</button>
-</div>
-
-<!-- LỚP PHỦ CHUỖI 5 VIDEO THẤU THỊ (1m11s) -->
-<div id="intro-sequence-overlay">
-    <div id="seq-loader" class="loading-indicator">ĐANG KẾT NỐI KHÔNG GIAN...</div>
-    <video id="seq-vid-1" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/TL%20INTRO%201.mp4" poster="https://github.com/happyk1900/-m-thanh-app/blob/main/THUYLIAN%20ANH%20NEN.png?raw=true" preload="auto" playsinline class="seq-video"></video>
-    <video id="seq-vid-2" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/TL%20INTRO%202.mp4" preload="auto" playsinline class="seq-video"></video>
-    <video id="seq-vid-3" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/TL%20INTRO%203.mp4" preload="auto" playsinline class="seq-video"></video>
-    <video id="seq-vid-4" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/TL%20INTRO%204.mp4" preload="auto" playsinline class="seq-video"></video>
-    <video id="seq-vid-5" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/TL%20INTRO%205.mp4" preload="auto" playsinline class="seq-video"></video>
-    <button class="btn-skip" onclick="skipPhilosophySequence()">BỎ QUA ➔</button>
-</div>
-
-<!-- LỚP PHỦ VIDEO XUNG TRẬN -->
-<div id="intro-video-overlay">
-    <div id="combat-loader" class="loading-indicator">ĐANG XUNG TRẬN...</div>
-    <video id="video-xung-tran" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/THUYLUAN%20VIDEO.mp4" poster="https://github.com/happyk1900/-m-thanh-app/blob/main/TL%20TRASUA%20(1).png?raw=true" playsinline></video>
-    <button class="btn-skip" onclick="skipVideo()">BỎ QUA ➔</button>
-</div>
 
 <!-- KHUNG ĐẠO TRƯỜNG CHÍNH -->
 <div class="dojo-container" id="dojo-container">
     
     <button id="bgm-toggle" class="btn-audio" onclick="toggleBGM()">
-        <svg id="icon-sound-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.11-.31 2.15-.81 3.09-1.45l2.64 2.64 1.27-1.27L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
-        <svg id="icon-sound-on" viewBox="0 0 24 24" style="display:none;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <svg id="icon-sound-off" viewBox="0 0 24 24" style="display:none;"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.11-.31 2.15-.81 3.09-1.45l2.64 2.64 1.27-1.27L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+        <svg id="icon-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
     </button>
 
-    <!-- BẢNG HIỆU KÍNH MỜ TRONG SUỐT VỚI DATA TỰ ĐỘNG -->
+    <!-- BẢNG HIỆU -->
     <div class="header-cyber-sign">
         <div class="header-top-row">
             <span>OPR: <strong id="sys-opr">ĐANG TẢI...</strong></span>
@@ -339,43 +186,29 @@
 
     <!-- BOO BAY TỰ DO -->
     <div class="floating-boo" id="boo-widget" onclick="pokeBoo()">
-        <div class="zzz-text" id="boo-zzz">zzz</div>
         <span class="boo-icon-inner" id="boo-mascot">🐽</span>
     </div>
 
     <div class="screen-container">
-        <!-- SẢNH 1 (HUB) -->
+        <!-- SẢNH CHỌN ẢI (HUB) -->
         <div id="screen-hub" class="screen active">
-            <div id="mission-list">
-                <div class="mission-card" onclick="openMission(1)">
-                    <span class="mission-status" id="status-m1">0 ĐIỂM</span>
-                    <h3>1. TĨNH KHÍ (5 Vòng)</h3>
-                    <p>Quan sát tĩnh tại. Tái lập Bát Quái Đồ.</p>
+            
+            <!-- KHỐI HOLOGRAM CHỌN ẢI -->
+            <div class="hologram-container">
+                <div class="holo-node" onclick="startGameDirectly(1)">
+                    <div class="holo-cube"><div class="holo-core">I</div></div>
+                    <div class="holo-label">Tĩnh Khí<span class="holo-score" id="status-m1">0 Điểm</span></div>
                 </div>
-                <div class="mission-card" onclick="openMission(2)">
-                    <span class="mission-status" id="status-m2">0 ĐIỂM</span>
-                    <h3>2. LƯU THỦY (5 Vòng)</h3>
-                    <p>Ghi nhớ dòng chảy vô định của nước.</p>
+                <div class="holo-node" onclick="startGameDirectly(2)">
+                    <div class="holo-cube"><div class="holo-core">II</div></div>
+                    <div class="holo-label">Lưu Thủy<span class="holo-score" id="status-m2">0 Điểm</span></div>
                 </div>
-                <div class="mission-card" onclick="openMission(3)">
-                    <span class="mission-status" id="status-m3">0 ĐIỂM</span>
-                    <h3>3. TÂM TRẬN (Sinh tồn 60s)</h3>
-                    <p>Giải mã binh khí không gian liên tục lấy Combo.</p>
-                </div>
-            </div>
-
-            <!-- BÍ LỤC & KIẾN THỨC LÕI (NỀN TRONG SUỐT, CHỈ MỜ) -->
-            <div class="lore-accordion">
-                <button class="lore-btn" onclick="toggleLore()">📜 KIẾN THỨC LÕI & S.C.I</button>
-                <div class="lore-content" id="lore-content">
-                    <h4>CẢNH BÁO LÕI</h4>
-                    <p>Độ khó của Đạo trường là vô hạn. Thuật toán sẽ liên tục đo lường <strong>Chỉ số SCI Trí nhớ</strong> của bạn để tự động tinh chỉnh chướng ngại vật. Sự cân bằng hoàn hảo giữa Thử thách và Phong độ sẽ khóa chặt bạn vào "Trạng thái Dòng chảy" (Flow State) – nơi sự tập trung đạt mức tuyệt đối.</p>
-                    <h4>I. SỰ NHẬP THỂ VÀ ĐỘ KHÓ VÔ HẠN</h4>
-                    <p>Thủy Luân không có Level cố định. Lõi AI sẽ nhập thể vào bộ não qua từng cú chạm. Khi đạt mốc Vô Ngã, hệ thống tự động ép giới hạn: lưới rộng hơn, flash nhanh hơn, quỹ đạo biến ảo.</p>
+                <div class="holo-node" onclick="startGameDirectly(3)">
+                    <div class="holo-cube"><div class="holo-core">III</div></div>
+                    <div class="holo-label">Tâm Trận<span class="holo-score" id="status-m3">0 Điểm</span></div>
                 </div>
             </div>
 
-            <!-- HỘP TRẠNG THÁI SCI (NỀN TRONG SUỐT, CHỈ MỜ) -->
             <div class="system-status-box">
                 <div class="system-status-title">📡 TRẠM ĐIỀU KHIỂN SCI</div>
                 <div class="system-status-content" id="hub-status-text">
@@ -383,33 +216,13 @@
                 </div>
             </div>
             
-            <button class="action-btn action-btn-green" id="btn-finish-all" style="display:none; margin-bottom: 12px;" onclick="attemptSaveSCI()">TỔNG KẾT & LƯU ĐIỂM SCI</button>
-            
+            <button class="action-btn action-btn-green" id="btn-finish-all" style="display:none;" onclick="attemptSaveSCI()">TỔNG KẾT & LƯU ĐIỂM SCI</button>
             <button class="action-btn" onclick="window.location.href='index.html'">➔ QUAY LẠI TRẠM LÕI</button>
         </div>
 
-        <!-- SẢNH 2 -->
-        <div id="screen-prep" class="screen">
-            <span class="back-link" onclick="backToHub()">➔ Trở về sảnh</span>
-            <div class="stats">
-                <span id="prep-title" style="color: var(--cyan); font-weight: bold; font-size: 15px;">NHIỆM VỤ</span>
-                <span>Kỷ lục: <strong id="prep-best-score">0</strong></span>
-            </div>
-
-            <div style="flex: 1;"></div>
-
-            <div style="text-align: center; margin-bottom: 15vh;">
-                <!-- HỘP KÍNH MỜ CHO TEXT THẮP NHANG -->
-                <div class="glass-box-incense">ẤN VÀO NHANG ĐỂ THẮP</div>
-                <div class="incense-hud" id="incense-container"></div>
-            </div>
-
-            <button class="action-btn" id="btn-no-incense" style="display:none; border-color: rgba(255,42,42,0.8); color: #fff; background: rgba(255,42,42,0.3); margin-top: 10px;" onclick="backToHub()">ĐÃ HẾT NHANG - RÚT LUI</button>
-        </div>
-
-        <!-- SẢNH 3 -->
+        <!-- MÀN HÌNH CHƠI GAME TRỰC TIẾP -->
         <div id="screen-game" class="screen">
-            <span class="back-link" onclick="promptQuitGame()">➔ Rút lui (Mất 1 nhang)</span>
+            <span class="back-link" onclick="promptQuitGame()">➔ Rút lui</span>
             <div class="stats">
                 <span id="game-round-info" style="color: var(--cyan); font-weight: bold;">Vòng: 1/5</span>
                 <span>Điểm: <strong id="game-current-score">0</strong></span>
@@ -419,17 +232,16 @@
             <div class="timer-bar-container" id="timer-container"><div class="timer-bar-fill" id="timer-bar"></div></div>
             <div id="game-board-area"></div>
             <div class="neuro-hint" id="neuro-hint"></div>
-            <button class="action-btn" id="game-action-btn" onclick="executeTask()">KHAI TRẬN</button>
+            <button class="action-btn" id="game-action-btn" style="margin-top:auto;" onclick="executeTask()">KHAI TRẬN</button>
         </div>
-
     </div>
 </div>
 
-<!-- POPUP XÁC NHẬN / HOÀN THÀNH -->
+<!-- POPUP XÁC NHẬN -->
 <div class="modal-overlay" id="custom-modal">
     <div class="modal-box">
         <div class="modal-title" id="modal-box-title">XÁC NHẬN RÚT LUI</div>
-        <div class="modal-text" id="modal-box-text">Rút lui giữa chừng sẽ mất luôn nén nhang hiện tại. Hệ thống ghi nhận sự đầu hàng.<br><br>Khẳng định rút lui?</div>
+        <div class="modal-text" id="modal-box-text">Rút lui giữa chừng hệ thống sẽ ghi nhận sự đầu hàng.<br><br>Khẳng định rút lui?</div>
         <div class="modal-btn-group" id="modal-btn-group-container">
             <button class="modal-btn btn-cancel" id="modal-btn-left" onclick="closeModal()">HỦY BỎ</button>
             <button class="modal-btn btn-confirm" id="modal-btn-right" onclick="confirmQuit()">RÚT LUI</button>
@@ -438,26 +250,13 @@
 </div>
 
 <script>
-    // TỰ ĐỘNG LẤY DATA: ACCOUNT, LOCATION VÀ DATE
     function initSystemHeader() {
         const d = new Date();
-        let day = String(d.getDate()).padStart(2, '0');
-        let month = String(d.getMonth() + 1).padStart(2, '0');
-        let year = d.getFullYear();
-        document.getElementById('sys-date').innerText = `${day}.${month}.${year}`;
-
-        let accName = localStorage.getItem('kdrive_username') || localStorage.getItem('accountName') || 'GUEST';
-        document.getElementById('sys-opr').innerText = accName.toUpperCase();
-
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                let loc = data.city ? data.city.toUpperCase() : (data.country_name ? data.country_name.toUpperCase() : 'UNKNOWN');
-                document.getElementById('sys-loc').innerText = loc;
-            })
-            .catch(() => {
-                document.getElementById('sys-loc').innerText = 'UNKNOWN';
-            });
+        document.getElementById('sys-date').innerText = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+        document.getElementById('sys-opr').innerText = (localStorage.getItem('kdrive_username') || localStorage.getItem('accountName') || 'GUEST').toUpperCase();
+        fetch('https://ipapi.co/json/').then(res => res.json()).then(data => {
+            document.getElementById('sys-loc').innerText = data.city ? data.city.toUpperCase() : 'UNKNOWN';
+        }).catch(() => { document.getElementById('sys-loc').innerText = 'UNKNOWN'; });
     }
     initSystemHeader();
 
@@ -473,136 +272,24 @@
     }
     initParticles();
 
-    function switchBackground(state) {
-        document.querySelectorAll('.locked-bg').forEach(bg => bg.classList.remove('active'));
-        if (state === 'intro') document.getElementById('bg-intro').classList.add('active');
-        else if (state === 'hub') document.getElementById('bg-hub').classList.add('active');
-        else if (state === 1) document.getElementById('bg-1').classList.add('active');
-        else if (state === 2) document.getElementById('bg-2').classList.add('active');
-        else if (state === 3) document.getElementById('bg-3').classList.add('active');
-    }
-
     let bgmAudio = document.getElementById('bgm-audio');
     bgmAudio.volume = 0.4;
-    let isMuted = false;
-
-    function playExplosiveClick() {
-        try { 
-            initAudio();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.2);
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.2);
-            if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
-        } catch(e){}
-    }
-
-    const totalSeqVids = 5;
-    function startPhilosophySequence() {
-        playExplosiveClick();
-        document.getElementById('intro-ui').style.display = 'none';
-        document.getElementById('intro-sequence-overlay').style.display = 'block';
-        document.getElementById('seq-loader').style.display = 'block'; 
-        
-        for(let i=1; i<=totalSeqVids; i++) {
-            let v = document.getElementById('seq-vid-'+i);
-            v.style.opacity = (i === 1) ? 1 : 0; 
-            v.currentTime = 0;
-        }
-        
-        let firstVid = document.getElementById('seq-vid-1');
-        firstVid.addEventListener('playing', function() {
-            document.getElementById('seq-loader').style.display = 'none';
-        }, {once: true});
-        
-        firstVid.play().catch(e=>console.log(e));
-    }
-
-    for(let i=1; i<=totalSeqVids; i++) {
-        document.getElementById('seq-vid-'+i).onended = function() {
-            if (i < totalSeqVids) {
-                let nextVid = document.getElementById('seq-vid-'+(i+1));
-                nextVid.style.opacity = 1;
-                nextVid.play().catch(e=>console.log(e));
-                this.style.opacity = 0;
-            } else {
-                finishPhilosophySequence();
-            }
-        };
-    }
-
-    function skipPhilosophySequence() { finishPhilosophySequence(); }
-
-    function finishPhilosophySequence() {
-        for(let i=1; i<=totalSeqVids; i++) {
-            let v = document.getElementById('seq-vid-'+i);
-            v.pause(); v.style.opacity = 0; 
-        }
-        document.getElementById('seq-loader').style.display = 'none'; 
-        document.getElementById('intro-sequence-overlay').style.display = 'none';
-        document.getElementById('intro-ui').style.display = 'flex';
-        document.getElementById('btn-triet-ly').style.display = 'none';
-    }
-
-    function startCombat() {
-        playExplosiveClick();
-        document.getElementById('intro-ui').style.display = 'none';
-        document.getElementById('intro-video-overlay').style.display = 'block';
-        document.getElementById('combat-loader').style.display = 'block';
-        
-        let video = document.getElementById('video-xung-tran');
-        video.style.opacity = 1; 
-        
-        video.addEventListener('playing', function() {
-            document.getElementById('combat-loader').style.display = 'none';
-        }, {once: true});
-        
-        video.play().catch(e => console.log("Cần click để play video"));
-        video.onended = () => { skipVideo(); };
-    }
-
-    function skipVideo() {
-        let video = document.getElementById('video-xung-tran');
-        video.pause();
-        document.getElementById('intro-video-overlay').style.display = 'none';
-        document.getElementById('combat-loader').style.display = 'none';
-        
-        switchBackground('hub'); 
-
-        let dojo = document.getElementById('dojo-container');
-        dojo.style.display = 'flex';
-        setTimeout(() => { dojo.style.opacity = '1'; }, 50);
-        bgmAudio.play().catch(e => console.log(e));
-        document.getElementById('icon-sound-on').style.display = 'block';
-        document.getElementById('icon-sound-off').style.display = 'none';
-        setTimeout(() => { booSpeakAudio("Chào mừng đến với Thủy Luân! Chạm vào thẻ nhiệm vụ để bắt đầu luyện tập."); }, 1000);
-    }
 
     function toggleBGM() {
         playBeep();
         let onIcon = document.getElementById('icon-sound-on');
         let offIcon = document.getElementById('icon-sound-off');
-        if(bgmAudio.paused) { bgmAudio.play(); isMuted = false; onIcon.style.display = 'block'; offIcon.style.display = 'none'; } 
-        else { bgmAudio.pause(); isMuted = true; onIcon.style.display = 'none'; offIcon.style.display = 'block'; }
+        if(bgmAudio.paused) { bgmAudio.play(); onIcon.style.display = 'block'; offIcon.style.display = 'none'; } 
+        else { bgmAudio.pause(); onIcon.style.display = 'none'; offIcon.style.display = 'block'; }
     }
 
     let audioCtx;
     function initAudio() { try { if(!audioCtx) { const AudioContext = window.AudioContext || window.webkitAudioContext; if(AudioContext) audioCtx = new AudioContext(); } } catch(e) {} }
-    
-    function playTone(freq, type, duration, vol=0.1) {
-        try { initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration); } catch(e){}
-    }
-    
+    function playTone(freq, type, duration, vol=0.1) { try { initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration); } catch(e){} }
     function playBeep() { playTone(800, 'sine', 0.05, 0.1); }
     function playTapSound() { playTone(600, 'sine', 0.05, 0.15); if(navigator.vibrate) navigator.vibrate(15); }
     function playCorrectSound() { playTone(800, 'square', 0.1, 0.1); setTimeout(() => playTone(1200, 'square', 0.15, 0.1), 100); if(navigator.vibrate) navigator.vibrate([20, 30, 20]); }
     function playWrongSound() { playTone(150, 'sawtooth', 0.3, 0.2); if(navigator.vibrate) navigator.vibrate(50); }
-    function playSleepBeep() { playTone(150, 'square', 0.3, 0.3); }
 
     const svgs = [
         `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5Z"/><circle cx="12" cy="12" r="2"/></svg>`,
@@ -615,98 +302,24 @@
     const HINT_2 = "Nước chảy mây trôi. Đừng đếm từng bước một cách máy móc, hãy để mắt và tay của bạn trôi tự nhiên theo quỹ đạo của ánh sáng.";
     const HINT_3 = "Thấy khó chịu khi đứt chuỗi? Đó là lúc não bộ đang 'tập thể dục'. Gạt bỏ sự bực tức, hít một hơi sâu và giữ nhịp điệu thong dong.";
 
-    const booWidget = document.getElementById('boo-widget');
-    let isDragging = false; let dragStartX, dragStartY; let widgetStartX, widgetStartY;
-    let booHoldTimer = null; window.isBooSleeping = false;
-    let currentContextText = "Đạo trường từ chối kẻ lười biếng. Nhấn vào thẻ nhiệm vụ để bắt đầu!";
-
-    booWidget.addEventListener('touchstart', dragStart, {passive: false}); 
-    booWidget.addEventListener('mousedown', dragStart);
-
-    function dragStart(e) { 
-        if (e.type === 'touchstart') { dragStartX = e.touches[0].clientX; dragStartY = e.touches[0].clientY; } 
-        else { dragStartX = e.clientX; dragStartY = e.clientY; } 
-        widgetStartX = booWidget.offsetLeft; widgetStartY = booWidget.offsetTop; 
-        isDragging = false; 
-
-        booHoldTimer = setTimeout(() => {
-            if(!isDragging) {
-                window.isBooSleeping = true;
-                booWidget.classList.add('sleeping');
-                document.getElementById('boo-mascot').innerHTML = '🐽';
-                document.getElementById('boo-zzz').style.opacity = '1';
-                if(window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-                playSleepBeep(); if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
-            }
-        }, 3000);
-
-        document.addEventListener('touchmove', dragMove, {passive: false}); document.addEventListener('touchend', dragEnd); 
-        document.addEventListener('mousemove', dragMove); document.addEventListener('mouseup', dragEnd); 
-    }
-
-    function dragMove(e) { 
-        let clientX, clientY; 
-        if (e.type === 'touchmove') { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; } 
-        else { clientX = e.clientX; clientY = e.clientY; } 
-        
-        let dx = clientX - dragStartX; let dy = clientY - dragStartY; 
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) { isDragging = true; clearTimeout(booHoldTimer); e.preventDefault(); } 
-        
-        if (isDragging) { 
-            let dojoContainer = document.getElementById('dojo-container');
-            let maxW = dojoContainer.offsetWidth; let maxH = dojoContainer.offsetHeight;
-            let minX = 10; let maxX = maxW - booWidget.offsetWidth - 10;
-            let minY = 10; let maxY = maxH - booWidget.offsetHeight - 10;
-            let newX = Math.max(minX, Math.min(maxX, widgetStartX + dx)); let newY = Math.max(minY, Math.min(maxY, widgetStartY + dy)); 
-            booWidget.style.left = newX + 'px'; booWidget.style.top = newY + 'px'; 
-        } 
-    }
-
-    function dragEnd(e) { 
-        clearTimeout(booHoldTimer); 
-        document.removeEventListener('touchmove', dragMove); document.removeEventListener('touchend', dragEnd); document.removeEventListener('mousemove', dragMove); document.removeEventListener('mouseup', dragEnd); 
-        if (isDragging) { 
-            let dojoContainer = document.getElementById('dojo-container');
-            let maxW = dojoContainer.offsetWidth; let currentX = booWidget.offsetLeft; let midPoint = maxW / 2;
-            booWidget.style.transition = 'left 0.3s ease-out, top 0.3s ease-out'; 
-            if (currentX > midPoint) { booWidget.style.left = (maxW - booWidget.offsetWidth - 10) + 'px'; } else { booWidget.style.left = '10px'; } 
-            setTimeout(() => { booWidget.style.transition = 'border-color 0.3s, box-shadow 0.3s'; }, 300); 
-        } 
-    }
-
-    function pokeBoo() {
-        if(isDragging) return;
-        playTapSound();
-        if (window.isBooSleeping) {
-            window.isBooSleeping = false;
-            booWidget.classList.remove('sleeping');
-            document.getElementById('boo-zzz').style.opacity = '0';
-            booSpeakAudio("Ta thức rồi đây! Lo mà tập trung vào!");
-        } else {
-            booSpeakAudio(currentContextText);
-        }
-    }
-
+    let currentContextText = "Chào mừng đến với Thủy Luân! Chạm vào khối Hologram để bắt đầu luyện tập.";
+    function pokeBoo() { playTapSound(); booSpeakAudio(currentContextText); }
     function booSpeakAudio(text) {
         currentContextText = text;
-        if (window.isBooSleeping) return;
         if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-        
         let u = new SpeechSynthesisUtterance(text);
         u.lang = 'vi-VN'; u.pitch = 1.1; u.rate = 1.15;
         let viVoices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('vi') || v.lang.includes('VN'));
         let femaleVoice = viVoices.find(v => v.name.toLowerCase().includes('female') || v.name.includes('Linh') || v.name.includes('Google'));
         if (femaleVoice) u.voice = femaleVoice; else if (viVoices.length > 0) u.voice = viVoices[0];
-        
-        u.onstart = () => { booWidget.classList.add('speaking'); };
-        u.onend = () => { booWidget.classList.remove('speaking'); };
+        u.onstart = () => { document.getElementById('boo-widget').classList.add('speaking'); };
+        u.onend = () => { document.getElementById('boo-widget').classList.remove('speaking'); };
         window.speechSynthesis.speak(u);
     }
-
-    function toggleLore() { playBeep(); document.getElementById('lore-content').classList.toggle('open'); }
+    setTimeout(() => { booSpeakAudio(currentContextText); }, 1500);
 
     let currentMission = 1;
-    let data = { 1: { name: "TĨNH KHÍ", tries: 3, best: 0, played: false }, 2: { name: "LƯU THỦY", tries: 3, best: 0, played: false }, 3: { name: "TÂM TRẬN", tries: 3, best: 0, played: false } };
+    let data = { 1: { best: 0, played: false }, 2: { best: 0, played: false }, 3: { best: 0, played: false } };
     let scoreNow = 0; let roundNow = 1; let maxRound = 5;
     let canClick = false; let t3_timer = null; let timeLeft = 60; let currentStreak = 1;
 
@@ -715,32 +328,55 @@
     function confirmQuit() {
         closeModal();
         if(t3_timer) clearInterval(t3_timer);
-        booSpeakAudio("Kẻ yếu đuối! Trốn chạy giữa chừng thì cút về sảnh đi.");
+        booSpeakAudio("Trốn chạy giữa chừng thì cút về sảnh đi.");
         backToHub();
     }
 
-    function openMission(id) {
-        playBeep(); 
-        currentMission = id;
-        switchBackground(id); 
+    function startGameDirectly(id) {
+        playBeep(); currentMission = id; data[id].played = true;
+        document.getElementById('screen-hub').classList.remove('active'); 
+        document.getElementById('screen-game').classList.add('active');
+        
+        scoreNow = 0; roundNow = 1; currentStreak = 1;
+        document.getElementById('game-current-score').innerText = '0'; 
+        document.getElementById('timer-container').style.display = 'none'; 
+        document.getElementById('game-streak-info').style.display = 'none';
+        
+        let board = document.getElementById('game-board-area'); board.innerHTML = '';
+        let hintEl = document.getElementById('neuro-hint');
+        if(id === 1) hintEl.innerHTML = `<strong>LỜI KHUYÊN:</strong> ${HINT_1}`; 
+        else if(id === 2) hintEl.innerHTML = `<strong>LỜI KHUYÊN:</strong> ${HINT_2}`; 
+        else if(id === 3) hintEl.innerHTML = `<strong>LỜI KHUYÊN:</strong> ${HINT_3}`;
 
-        document.getElementById('screen-hub').classList.remove('active');
-        document.getElementById('screen-prep').classList.add('active');
-        document.getElementById('prep-title').innerText = `ẢI ${id}: ${data[id].name}`;
-        document.getElementById('prep-best-score').innerText = data[id].best;
-        document.getElementById('btn-no-incense').style.display = 'none';
-
-        if(data[id].tries > 0) { booSpeakAudio(`Ngươi còn ${data[id].tries} nén nhang cho ải này. Thắp đi rồi vào sinh tử!`); } 
-        else { booSpeakAudio(`Đã cạn sạch nhang! Trí lực hôm nay đến giới hạn rồi. Cút về nghỉ ngơi, ngày mai quay lại!`); document.getElementById('btn-no-incense').style.display = 'block'; }
-        renderIncense();
+        if(id === 1 || id === 2) {
+            document.getElementById('game-round-info').innerText = `Vòng: 1/5`;
+            let grid = `<div class="game-grid">`; for(let i=0; i<9; i++) grid += `<div class="grid-cell" id="c${i}" onclick="gridClick(${i})"></div>`; grid += `</div>`; board.innerHTML = grid;
+        } else if(id === 3) {
+            document.getElementById('game-round-info').innerText = `Thời gian: 60s`; 
+            document.getElementById('game-streak-info').style.display = 'inline'; 
+            document.getElementById('game-streak-info').innerText = `Combo: x1`; 
+            document.getElementById('timer-container').style.display = 'block'; 
+            document.getElementById('timer-bar').style.width = '100%';
+            board.innerHTML = `
+                <div class="sequence-display" id="seq-area"><div class="cyber-tile hidden-tile">?</div><div class="cyber-tile hidden-tile">?</div><div class="cyber-tile hidden-tile">?</div><div class="cyber-tile hidden-tile">?</div></div>
+                <div class="input-area"><button class="btn-symbol" onclick="symbolClick(0)">${svgs[0]}</button><button class="btn-symbol" onclick="symbolClick(1)">${svgs[1]}</button><button class="btn-symbol" onclick="symbolClick(2)">${svgs[2]}</button><button class="btn-symbol" onclick="symbolClick(3)">${svgs[3]}</button></div>
+            `;
+        }
+        
+        let btn = document.getElementById('game-action-btn'); 
+        btn.style.display = 'block'; 
+        btn.innerText = 'KHAI TRẬN'; 
+        btn.classList.remove('pulse-active');
+        btn.onclick = executeTask;
+        
+        booSpeakAudio("Hít sâu và bấm Khai Trận đi.");
     }
 
     function backToHub() {
         playBeep();
         if(t3_timer) clearInterval(t3_timer);
-        switchBackground('hub'); 
-
-        document.getElementById('screen-prep').classList.remove('active'); document.getElementById('screen-game').classList.remove('active'); document.getElementById('screen-hub').classList.add('active');
+        document.getElementById('screen-game').classList.remove('active'); 
+        document.getElementById('screen-hub').classList.add('active');
         
         document.getElementById('status-m1').innerText = `${data[1].best} ĐIỂM`; 
         document.getElementById('status-m2').innerText = `${data[2].best} ĐIỂM`; 
@@ -762,83 +398,26 @@
 
     function attemptSaveSCI() {
         playBeep();
-        let isAllCompleted = data[1].played && data[2].played && data[3].played;
-        
         let modalOverlay = document.getElementById('custom-modal');
         let modalTitle = document.getElementById('modal-box-title');
         let modalText = document.getElementById('modal-box-text');
         let btnLeft = document.getElementById('modal-btn-left');
         let btnRight = document.getElementById('modal-btn-right');
 
-        if (!isAllCompleted) {
-            modalTitle.innerText = "CẢNH BÁO HỆ THỐNG";
-            modalText.innerText = "Chưa hoàn thành đủ cả 3 ải! Đạo trường từ chối lưu dữ liệu rác.\n\nHãy chinh phục đủ 3 thử thách trước khi lưu điểm.";
-            btnLeft.style.display = "none";
-            btnRight.innerText = "ĐÃ HIỂU";
-            btnRight.onclick = () => { closeModal(); };
-            modalOverlay.classList.add('active');
-            booSpeakAudio("Chưa đủ ải! Cố mà đánh cho xong đi rồi hòng lưu điểm.");
-        } else {
-            let t1 = data[1].best; 
-            let t2 = data[2].best; 
-            let t3 = Math.min(100, Math.round((data[3].best / 150) * 100));
-            let avg = Math.round((t1 + t2 + t3) / 3);
+        let t1 = data[1].best; let t2 = data[2].best; 
+        let t3 = Math.min(100, Math.round((data[3].best / 150) * 100));
+        let avg = Math.round((t1 + t2 + t3) / 3);
 
-            localStorage.setItem('SCI_ThuyLuan', avg);
+        localStorage.setItem('SCI_ThuyLuan', avg);
 
-            modalTitle.innerText = "HOÀN THÀNH NHIỆM VỤ";
-            modalText.innerHTML = `Đồng bộ thành công!<br>Chỉ số SCI Trí Nhớ hôm nay: <strong style="color:var(--mint); font-size:18px;">${avg} ĐIỂM</strong><br><br>Hệ thống đã ghi nhận. Hẹn gặp lại ngươi vào kỳ luyện tập tiếp theo!`;
-            btnLeft.style.display = "none";
-            btnRight.innerText = "VỀ TRẠM LÕI";
-            btnRight.onclick = () => {
-                closeModal();
-                window.location.href = 'index.html';
-            };
-            modalOverlay.classList.add('active');
-            playCorrectSound();
-            booSpeakAudio(`Hoàn thành xuất sắc nhiệm vụ hôm nay! Chỉ số SCI đạt ${avg} điểm. Thoát về sảnh chính.`);
-        }
-    }
-
-    function renderIncense() {
-        const container = document.getElementById('incense-container'); container.innerHTML = '';
-        let d = data[currentMission];
-        for(let i=1; i<=3; i++) {
-            let stick = document.createElement('div'); let isAvail = i <= d.tries;
-            stick.className = `incense-stick ${isAvail ? 'available' : 'used'}`;
-            if(isAvail) stick.onclick = () => startGameSession();
-            container.appendChild(stick);
-        }
-    }
-
-    function startGameSession() {
-        playBeep(); data[currentMission].tries--; data[currentMission].played = true;
-        document.getElementById('screen-prep').classList.remove('active'); document.getElementById('screen-game').classList.add('active');
-        scoreNow = 0; roundNow = 1; currentStreak = 1;
-        document.getElementById('game-current-score').innerText = '0'; document.getElementById('timer-container').style.display = 'none'; document.getElementById('game-streak-info').style.display = 'none';
-        
-        let board = document.getElementById('game-board-area'); board.innerHTML = '';
-        let hintEl = document.getElementById('neuro-hint');
-        if(currentMission === 1) hintEl.innerHTML = `<strong>LỜI KHUYÊN:</strong> ${HINT_1}`; else if(currentMission === 2) hintEl.innerHTML = `<strong>LỜI KHUYÊN:</strong> ${HINT_2}`; else if(currentMission === 3) hintEl.innerHTML = `<strong>LỜI KHUYÊN:</strong> ${HINT_3}`;
-
-        if(currentMission === 1 || currentMission === 2) {
-            document.getElementById('game-round-info').innerText = `Vòng: 1/5`;
-            let grid = `<div class="game-grid">`; for(let i=0; i<9; i++) grid += `<div class="grid-cell" id="c${i}" onclick="gridClick(${i})"></div>`; grid += `</div>`; board.innerHTML = grid;
-        } else if(currentMission === 3) {
-            document.getElementById('game-round-info').innerText = `Thời gian: 60s`; document.getElementById('game-streak-info').style.display = 'inline'; document.getElementById('game-streak-info').innerText = `Combo: x1`; document.getElementById('timer-container').style.display = 'block'; document.getElementById('timer-bar').style.width = '100%';
-            board.innerHTML = `
-                <div class="sequence-display" id="seq-area"><div class="cyber-tile hidden-tile">?</div><div class="cyber-tile hidden-tile">?</div><div class="cyber-tile hidden-tile">?</div><div class="cyber-tile hidden-tile">?</div></div>
-                <div class="input-area"><button class="btn-symbol" onclick="symbolClick(0)">${svgs[0]}</button><button class="btn-symbol" onclick="symbolClick(1)">${svgs[1]}</button><button class="btn-symbol" onclick="symbolClick(2)">${svgs[2]}</button><button class="btn-symbol" onclick="symbolClick(3)">${svgs[3]}</button></div>
-            `;
-        }
-        
-        let btn = document.getElementById('game-action-btn'); 
-        btn.style.display = 'block'; 
-        btn.innerText = 'KHAI TRẬN'; 
-        btn.classList.remove('pulse-active');
-        btn.onclick = executeTask;
-        
-        booSpeakAudio("Đã thắp nhang! Hít sâu và bấm Khai Trận đi.");
+        modalTitle.innerText = "HOÀN THÀNH NHIỆM VỤ";
+        modalText.innerHTML = `Đồng bộ thành công!<br>Chỉ số SCI Trí Nhớ: <strong style="color:var(--mint); font-size:18px;">${avg} ĐIỂM</strong><br><br>Hệ thống đã ghi nhận. Hẹn gặp lại ngươi vào kỳ luyện tập tiếp theo!`;
+        btnLeft.style.display = "none";
+        btnRight.innerText = "VỀ TRẠM LÕI";
+        btnRight.onclick = () => { window.location.href = 'index.html'; };
+        modalOverlay.classList.add('active');
+        playCorrectSound();
+        booSpeakAudio(`Hoàn thành xuất sắc nhiệm vụ! Chỉ số SCI đạt ${avg} điểm. Thoát về sảnh chính.`);
     }
 
     function executeTask() {
@@ -854,22 +433,25 @@
         if(currentMission === 3) { let normalized = Math.min(100, Math.round((scoreNow / 150) * 100)); if(normalized > data[currentMission].best) data[currentMission].best = normalized; } 
         else { if(scoreNow > data[currentMission].best) data[currentMission].best = scoreNow; }
 
-        let speech = ""; let evalScore = currentMission === 3 ? Math.min(100, (scoreNow/150)*100) : scoreNow;
-        if(evalScore < 50) speech = "Trí nhớ lủng củng, phản xạ lề mề! Chơi lại ngay hoặc cút về!";
-        else if(evalScore < 80) speech = "Tạm qua ải, nhưng phong độ còn đầy tạp niệm. Cố mà làm lại cho đàng hoàng!";
-        else speech = "Xuất sắc! Mặt hồ phẳng lặng không gợn sóng. Hãy giữ vững cái đầu lạnh này.";
+        let evalScore = currentMission === 3 ? Math.min(100, (scoreNow/150)*100) : scoreNow;
+        if(evalScore < 50) booSpeakAudio("Trí nhớ lủng củng! Chơi lại ngay hoặc cút về!");
+        else if(evalScore < 80) booSpeakAudio("Tạm qua ải. Cố mà làm lại cho đàng hoàng!");
+        else booSpeakAudio("Xuất sắc! Mặt hồ phẳng lặng không gợn sóng.");
         
-        booSpeakAudio(speech);
         let btn = document.getElementById('game-action-btn'); 
         btn.style.display = 'block'; 
+        btn.innerText = 'THỬ LẠI';
+        btn.classList.add('pulse-active');
         
-        if(data[currentMission].tries > 0) {
-            btn.innerText = 'TÁI KHAI TRẬN (CÒN NHANG)';
-            btn.classList.add('pulse-active');
-        } else {
-            btn.innerText = 'ĐÃ HẾT NHANG - RÚT LUI';
-        }
-        btn.onclick = backToHub;
+        // Cập nhật lại nút để có 2 lựa chọn khi chơi xong
+        btn.onclick = () => { startGameDirectly(currentMission); };
+        
+        // Thêm nút về sảnh tạm thời (chỉ hiện lúc xong game)
+        let backBtn = document.createElement('button');
+        backBtn.className = 'action-btn';
+        backBtn.innerText = '➔ QUAY VỀ SẢNH';
+        backBtn.onclick = () => { backBtn.remove(); backToHub(); };
+        document.getElementById('screen-game').appendChild(backBtn);
     }
 
     function nextRoundCheck(taskNum) {
@@ -899,7 +481,6 @@
                     if(t1_pat.includes(i)) { correct++; cell.classList.replace('active', 'correct'); cell.innerText = '✓'; }
                     else { cell.classList.replace('active', 'wrong'); cell.innerText = '✕'; }
                 });
-                
                 if (correct === 3) playCorrectSound(); else playWrongSound();
                 scoreNow += (correct === 3 ? 20 : correct * 5); document.getElementById('game-current-score').innerText = scoreNow;
                 if(correct === 0 && roundNow < 5) booSpeakAudio("Trật lất hết rồi! Mù à?");
