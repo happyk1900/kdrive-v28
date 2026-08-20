@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
-    <title>K-Drive Core V53 - Hoàn Thiện Tương Tác</title>
+    <title>K-Drive Core V54 - Khống Chế Dạ Hành</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -77,7 +77,8 @@
 
         /* MODULE BOO */
         #boo-module-container { position: absolute; inset: 0; pointer-events: none; z-index: 20; opacity: 0; }
-        .boo-hologram { position: absolute; width: 55px; height: 55px; top: 15%; right: 10%; cursor: pointer; display: flex; justify-content: center; align-items: center; pointer-events: auto; touch-action: none; transition: z-index 0.2s; animation: holoHover 3s ease-in-out infinite; }
+        
+        .boo-hologram { position: absolute; width: 55px; height: 55px; top: 15%; right: 10%; cursor: pointer; display: flex; justify-content: center; align-items: center; pointer-events: auto; touch-action: none; transition: z-index 0.2s; animation: holoHover 3s ease-in-out infinite; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         
         .boo-mute-icon { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 22px; opacity: 0; transition: opacity 0.3s; z-index: 10; pointer-events: none; text-shadow: 0 0 10px #ff2a2a; }
 
@@ -99,7 +100,7 @@
         @keyframes spinBoo { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.2); } 100% { transform: rotate(360deg) scale(1); } }
         @keyframes floatNotes { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.5); } }
 
-        .boo-sleeping { animation: none !important; transition: top 2s ease-in-out, left 2s ease-in-out; left: 80vw !important; top: 30vh !important; pointer-events: none; } 
+        .boo-sleeping { animation: none !important; transition: top 2s ease-in-out, left 2s ease-in-out; left: 80vw !important; top: 30vh !important; pointer-events: auto !important; } 
         .boo-sleeping .boo-face { filter: grayscale(0.8) brightness(0.6); box-shadow: none; } .boo-sleeping .boo-energy-border { box-shadow: none; } .boo-sleeping .boo-zzz { animation: zzzFloat 2s infinite; }
         
         /* Hiệu ứng Ngất Xỉu */
@@ -604,8 +605,18 @@
                     document.getElementById('core-wrapper').style.opacity = 1; playSound('katana');
                     document.getElementById('boo-module-container').style.opacity = 1; document.getElementById('top-hud').style.opacity = 1; 
                     updateSystemTerminal(); 
-                    speakMsg("Hệ thống đã đồng bộ. Ngươi hãy tiến hành rèn luyện kỷ luật.");
-                    setTimeout(() => playBooDialog(`Khịt! Hôm nay định đàm đạo chiến thuật gì với ta nào, nhóc?`), 3500);
+                    
+                    // KIỂM TRA ĐỒNG HỒ SINH HỌC
+                    const h = new Date().getHours();
+                    const isDND = (h >= 23 || h < 6);
+                    
+                    if (isDND) {
+                        forceSleep(); // Đi ngủ im lặng không phát ra tiếng
+                    } else {
+                        speakMsg("Hệ thống đã đồng bộ. Ngươi hãy tiến hành rèn luyện kỷ luật.");
+                        setTimeout(() => playBooDialog(`Khịt! Hôm nay định đàm đạo chiến thuật gì với ta nào, nhóc?`), 3500);
+                    }
+                    
                 }, 1000);
             }, 800);
             setTimeout(() => { document.getElementById('intro-screen').style.display = 'none'; }, 3000);
@@ -633,7 +644,26 @@
 
         function navToFace(faceName, taskId) { 
             if (!isCubeMoved && !isLoreOpen && !document.body.classList.contains('inspect-mode')) { 
-                if(navigator.vibrate) navigator.vibrate(50); playSound('katana'); 
+                if(navigator.vibrate) navigator.vibrate(50); 
+                playSound('katana'); 
+                
+                // [NEW] CƠ CHẾ ĐIỀU HƯỚNG CHUYỂN CẢNH
+                if (taskId === 'tritue') {
+                    speakMsg("Kích hoạt Đạo Trường Thủy Luân.");
+                    
+                    // Hiệu ứng mờ dần toàn bộ màn hình Core
+                    document.body.style.transition = "opacity 0.8s ease-in-out";
+                    document.body.style.opacity = "0";
+                    
+                    // Sau 0.8s thì load sang file Thủy Luân
+                    setTimeout(() => {
+                        window.location.href = 'thuy_luan.html';
+                    }, 800);
+                    
+                    return; // Ngắt hàm tại đây để không chạy các logic bên dưới
+                }
+
+                // Logic cũ cho các mặt khác (Điểm danh / Nhận boba)
                 let taskObj = taskList.find(t => t.id === taskId);
                 if (taskObj && !taskObj.done && !isDaoNghiepVienMan && bobaReward.style.display !== 'block') {
                     taskObj.done = true; tasksCompleted++; bobaReward.style.display = 'block';
