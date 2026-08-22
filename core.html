@@ -1,20 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <!-- [PHẪU THUẬT 1]: CẬN VỆ BẢO MẬT LÕI -->
-    <script>
-        const activeSession = sessionStorage.getItem('kdrive_session');
-        const loggedUser = localStorage.getItem('kdrive_logged_in_user');
-        if (activeSession !== 'active' || !loggedUser) {
-            localStorage.removeItem('kdrive_logged_in_user');
-            window.location.replace('login.html');
-        }
-    </script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
-    <link rel="manifest" href="manifest.json">
     <title>K-Drive Core V54 - Khống Chế Dạ Hành</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;600;700&display=swap" rel="stylesheet">
@@ -86,38 +75,67 @@
         #clock-hms { color: #39ff14; font-size: 16px; letter-spacing: 4px; text-shadow: 0 0 8px rgba(57, 255, 20, 0.6); }
         #clock-ms { color: #a0ff99; font-size: 10px; letter-spacing: 1px; text-shadow: 0 0 5px rgba(160, 255, 153, 0.5); opacity: 0.8; }
 
-        /* MODULE BOO */
-        #boo-module-container { position: absolute; inset: 0; pointer-events: none; z-index: 20; opacity: 0; }
+        /* =========================================
+           MODULE BOO & PARALLAX 3D 
+           ========================================= */
+        #boo-module-container { position: absolute; inset: 0; pointer-events: none; z-index: 20; opacity: 0; perspective: 600px; }
         
-        .boo-hologram { position: absolute; width: 55px; height: 55px; top: 15%; right: 10%; cursor: pointer; display: flex; justify-content: center; align-items: center; pointer-events: auto; touch-action: none; transition: z-index 0.2s; animation: holoHover 3s ease-in-out infinite; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        .boo-hologram { position: absolute; width: 55px; height: 55px; top: 15%; right: 10%; cursor: pointer; display: flex; justify-content: center; align-items: center; pointer-events: auto; touch-action: none; transition: z-index 0.2s, background 0.5s; animation: holoHover 3s ease-in-out infinite; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; transform-style: preserve-3d; }
         
         .boo-mute-icon { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 22px; opacity: 0; transition: opacity 0.3s; z-index: 10; pointer-events: none; text-shadow: 0 0 10px #ff2a2a; }
 
         @keyframes holoHover { 0%, 100% { margin-top: 0; } 50% { margin-top: -12px; } }
 
+        /* VÒNG LUÂN BÊN NGOÀI (LỚP 2) */
+        .boo-quadrant { position: absolute; width: 45px; height: 45px; border: 3px solid transparent; transition: all 0.4s ease; box-sizing: border-box; z-index: 1; pointer-events: none; }
+        .bq-dia { top: -10px; left: -10px; border-top-color: #ffd700; border-left-color: #ffd700; border-radius: 40px 0 0 0; filter: drop-shadow(0 0 4px #ffd700); }
+        .bq-thuy { top: -10px; right: -10px; border-top-color: #0088ff; border-right-color: #0088ff; border-radius: 0 40px 0 0; filter: drop-shadow(0 0 4px #0088ff); }
+        .bq-hoa { bottom: -10px; left: -10px; border-bottom-color: #ff3300; border-left-color: #ff3300; border-radius: 0 0 0 40px; filter: drop-shadow(0 0 4px #ff3300); }
+        .bq-phong { bottom: -10px; right: -10px; border-bottom-color: #00ffff; border-right-color: #00ffff; border-radius: 0 0 40px 0; filter: drop-shadow(0 0 4px #00ffff); }
+        
+        /* Hiệu ứng yếu/nhiễu sóng (Glitch) cho các luân */
+        .bq-weak { border-color: #444 !important; filter: none !important; animation: glitchHolo 1.5s infinite; }
+
+        /* VÒNG SINH TỒN BÊN TRONG (LỚP 1 - Kế thừa code cũ) */
+        .boo-energy-border { position: absolute; inset: -2px; border-radius: 40% 40% 45% 45%; background: conic-gradient(#00e5ff var(--energy, 20%), transparent 0); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; padding: 4px; z-index: 3; box-shadow: 0 0 25px #00e5ff, inset 0 0 15px #00e5ff; transition: background 1s linear; }
+        
+        /* LÕI BOO VÀ BIỂU CẢM */
+        .boo-face { position: absolute; inset: 2px; background: #ff1493; border-radius: 40% 40% 45% 45%; box-shadow: inset 0 0 15px rgba(255,255,255,0.8), 0 0 35px rgba(255,20,147,0.8); z-index: 2; transition: filter 0.5s, background 0.5s, box-shadow 0.5s; }
+        .boo-face::before, .boo-face::after { content: ''; position: absolute; width: 6px; height: 11px; top: 20px; background: #000; border-radius: 50%; transition: all 0.3s; }
+        .boo-face::before { left: 13px; } .boo-face::after { right: 13px; }
+        
+        /* Trạng thái BOO theo SCI (Debug Panel) */
+        .boo-face.struggling { background: #ff8c00; box-shadow: inset 0 0 15px rgba(255,255,255,0.6), 0 0 30px rgba(255,140,0,0.8); } /* Màu cam đổ mồ hôi */
+        .boo-face.struggling::before, .boo-face.struggling::after { width: 8px; height: 4px; top: 24px; border-radius: 2px; } /* Mắt nhíu lại */
+        
+        .boo-face.critical-alert { background: #ff0000; box-shadow: inset 0 0 20px #000, 0 0 40px #ff0000; animation: pulseBlood 0.8s infinite; } /* Báo động đỏ */
+        .boo-face.critical-alert::before, .boo-face.critical-alert::after { width: 10px; height: 10px; top: 22px; background: #fff; box-shadow: 0 0 8px #fff; } /* Mắt trợn trắng */
+
         .boo-jumpscare { left: calc(50% - 27px) !important; top: calc(50% - 27px) !important; z-index: 1000 !important; transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; animation: none !important; }
         .boo-jumpscare .boo-face, .boo-jumpscare .boo-energy-border { transform: scale(4.5) !important; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .boo-jumpscare #holo-bubble { bottom: 150px !important; width: 240px !important; font-size: 13px !important; opacity: 1 !important; text-shadow: 0 0 15px rgba(0,229,255,0.8); border: 1px solid rgba(0,229,255,0.6); background: rgba(5, 20, 25, 0.9); }
+        .boo-jumpscare .boo-quadrant { opacity: 0; } /* Ẩn luân trận khi Jumpscare */
+        
+        .boo-jumpscare #holo-bubble { bottom: 150px !important; width: 240px !important; font-size: 13px !important; opacity: 1 !important; text-shadow: 0 0 15px rgba(0,229,255,0.8); border: 1px solid rgba(0,229,255,0.6); background: rgba(5, 20, 25, 0.9); transform: none !important;}
 
-        .boo-face { position: absolute; inset: 2px; background: #ff1493; border-radius: 40% 40% 45% 45%; box-shadow: inset 0 0 15px rgba(255,255,255,0.8), 0 0 35px rgba(255,20,147,0.8); z-index: 2; transition: filter 0.5s; }
-        .boo-face::before, .boo-face::after { content: ''; position: absolute; width: 6px; height: 11px; top: 20px; background: #000; border-radius: 50%; }
-        .boo-face::before { left: 13px; } .boo-face::after { right: 13px; }
-        .boo-energy-border { position: absolute; inset: -2px; border-radius: 40% 40% 45% 45%; background: conic-gradient(#00e5ff var(--energy, 20%), transparent 0); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; padding: 4px; z-index: 3; box-shadow: 0 0 25px #00e5ff, inset 0 0 15px #00e5ff; transition: background 1s linear; }
         .boo-zzz { position: absolute; top: -15px; right: -5px; color: #fff; font-family: monospace; font-size: 15px; font-weight: bold; text-shadow: 0 0 8px #ff1493; opacity: 0; pointer-events: none; z-index: 4; }
         
-        #holo-bubble { position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%); width: 180px; background: rgba(5, 15, 25, 0.85); backdrop-filter: blur(4px); border-radius: 8px; padding: 10px; color: #d8ffff; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 400; text-align: left; opacity: 0; pointer-events: none; transition: opacity 0.4s ease-in-out; z-index: 10; text-shadow: 0 0 8px rgba(0,229,255,0.4); border: 1px solid rgba(0,229,255,0.3); min-height: 40px; box-shadow: 0 0 15px rgba(0,229,255,0.1); line-height: 1.4; word-break: break-word; }
+        #holo-bubble { position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%) translateZ(20px); width: 180px; background: rgba(5, 15, 25, 0.85); backdrop-filter: blur(4px); border-radius: 8px; padding: 10px; color: #d8ffff; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 400; text-align: left; opacity: 0; pointer-events: none; transition: opacity 0.4s ease-in-out; z-index: 10; text-shadow: 0 0 8px rgba(0,229,255,0.4); border: 1px solid rgba(0,229,255,0.3); min-height: 40px; box-shadow: 0 0 15px rgba(0,229,255,0.1); line-height: 1.4; word-break: break-word; }
 
         .boo-spin { animation: spinBoo 1s ease-in-out !important; }
         @keyframes spinBoo { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.2); } 100% { transform: rotate(360deg) scale(1); } }
         @keyframes floatNotes { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.5); } }
 
         .boo-sleeping { animation: none !important; transition: top 2s ease-in-out, left 2s ease-in-out; left: 80vw !important; top: 30vh !important; pointer-events: auto !important; } 
-        .boo-sleeping .boo-face { filter: grayscale(0.8) brightness(0.6); box-shadow: none; } .boo-sleeping .boo-energy-border { box-shadow: none; } .boo-sleeping .boo-zzz { animation: zzzFloat 2s infinite; }
+        .boo-sleeping .boo-face { filter: grayscale(0.8) brightness(0.6); box-shadow: none; background: #ff1493; } .boo-sleeping .boo-energy-border { box-shadow: none; } .boo-sleeping .boo-zzz { animation: zzzFloat 2s infinite; }
+        .boo-sleeping .boo-quadrant { opacity: 0.3; }
         
+        /* Hiệu ứng Ngất Xỉu */
         .boo-fainted { animation: none !important; margin-top: 15px !important; pointer-events: auto; }
         .boo-fainted .boo-face { background: #333; box-shadow: inset 0 0 10px #000; filter: grayscale(1); display: flex; justify-content: center; align-items: center; }
         .boo-fainted .boo-face::before, .boo-fainted .boo-face::after { display: none; }
         .boo-fainted .boo-energy-border { background: transparent; box-shadow: none; border: 2px dashed #ff2a2a; animation: glitchHolo 0.5s infinite; filter: none; }
+        .boo-fainted .boo-quadrant { display: none; }
+        
         .boo-dizzy { display: none; color: #ffeb3b; font-size: 14px; font-weight: bold; font-family: monospace; text-shadow: 0 0 8px #ffeb3b; animation: dizzySpin 2s linear infinite; }
         @keyframes dizzySpin { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.2); } 100% { transform: rotate(360deg) scale(1); } }
         .boo-fainted .boo-dizzy { display: block; }
@@ -132,6 +150,26 @@
         .boba-pearls { position: absolute; bottom: 5px; width: 100%; height: 20px; pointer-events: none; }
         .pearl { position: absolute; width: 7px; height: 7px; border: 2px solid #ff1493; border-radius: 50%; box-shadow: 0 0 10px #ff1493, inset 0 0 5px #ff1493; }
         .p1 { left: 4px; bottom: 2px; } .p2 { left: 14px; bottom: 0px; } .p3 { right: 4px; bottom: 3px; } .p4 { left: 10px; bottom: 10px; } .p5 { right: 6px; bottom: 8px; }
+
+        /* =========================================
+           BẢNG ĐIỀU KHIỂN DEBUG (LUÂN TRẬN)
+           ========================================= */
+        #debug-panel { position: fixed; bottom: 20px; left: 20px; background: rgba(5, 10, 14, 0.9); border: 1px solid rgba(0,229,255,0.4); padding: 12px; border-radius: 8px; z-index: 1000; backdrop-filter: blur(5px); box-shadow: 0 0 15px rgba(0,229,255,0.1); pointer-events: auto; display: none; } /* Mặc định ẩn, sẽ hiện khi khởi động xong */
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; width: 140px; }
+        .toggle-row:last-child { margin-bottom: 0; }
+        .toggle-label { font-size: 10px; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px; font-weight: bold;}
+        
+        /* Switch UI */
+        .switch { position: relative; display: inline-block; width: 30px; height: 14px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 14px; }
+        .slider:before { position: absolute; content: ""; height: 10px; width: 10px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        
+        input.dia:checked + .slider { background-color: #ffd700; }
+        input.thuy:checked + .slider { background-color: #0088ff; }
+        input.hoa:checked + .slider { background-color: #ff3300; }
+        input.phong:checked + .slider { background-color: #00ffff; }
+        input:checked + .slider:before { transform: translateX(16px); }
 
         #top-hud { position: fixed; top: 20px; left: 20px; right: 20px; z-index: 100; display: flex; justify-content: space-between; align-items: flex-start; opacity: 0; pointer-events: none; }
         .audio-wrapper { display: flex; align-items: center; gap: 12px; pointer-events: auto; }
@@ -167,6 +205,13 @@
         .lore-hint { text-align: center; color: #ff1493; font-size: 10px; font-style: italic; animation: pulseHint 2s infinite alternate; margin-top: -5px;}
         .boo-lore-mode { z-index: 1001 !important; }
 
+        #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+        .dust-particle { position: absolute; border-radius: 50%; opacity: 0; animation: floatDust linear infinite; }
+        .dust-small { width: 1.5px; height: 1.5px; background: #fff; box-shadow: 0 0 2px #fff; }
+        .dust-large { width: 3px; height: 3px; background: #00e5ff; box-shadow: 0 0 6px #00e5ff; }
+        .dust-flicker { animation: floatDust linear infinite, flicker 2s infinite alternate; }
+        @keyframes floatDust { 0% { transform: translateY(100vh); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.3; } 100% { transform: translateY(-20vh); opacity: 0; } }
+        @keyframes flicker { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.8; box-shadow: 0 0 10px #00e5ff; } }
         .critical-warning { animation: screenRedAlert 4s infinite; }
         @keyframes screenRedAlert { 0%, 90%, 100% { box-shadow: inset 0 0 0 transparent; filter: none; transform: translate(0); } 92% { box-shadow: inset 0 0 80px rgba(255,0,0,0.3); filter: drop-shadow(4px 0 0 red); transform: translate(-3px, 2px); } 94% { box-shadow: inset 0 0 120px rgba(255,0,0,0.4); filter: drop-shadow(-4px 0 0 cyan); transform: translate(3px, -2px); } 96% { box-shadow: inset 0 0 50px rgba(255,0,0,0.1); filter: none; transform: translate(0); } }
         .plug-in-glitch { animation: plugInEffect 0.6s ease-out; }
@@ -273,18 +318,51 @@
         <div class="lore-hint">👉 Chạm vào Phó sư Boo để nghe đọc to</div>
     </div>
 
+    <!-- MODULE BOO: Đã tích hợp Vòng Kép + Parallax -->
     <div id="boo-module-container" class="ui-element">
         <div class="boo-hologram" id="boo-knight">
+            <!-- Vòng 4 Luân bên ngoài -->
+            <div class="boo-quadrant bq-dia" id="arc-dia"></div>
+            <div class="boo-quadrant bq-thuy" id="arc-thuy"></div>
+            <div class="boo-quadrant bq-hoa" id="arc-hoa"></div>
+            <div class="boo-quadrant bq-phong" id="arc-phong"></div>
+
             <div class="boo-mute-icon" id="boo-mute-icon">🔇</div>
             <div id="holo-bubble"></div>
+            
+            <!-- Vòng năng lượng sinh tồn bên trong -->
             <div class="boo-energy-border" id="boo-energy"></div>
-            <div class="boo-face">
+            
+            <!-- Lõi Boo Face -->
+            <div class="boo-face" id="boo-face-core">
                 <div class="boo-dizzy" id="boo-dizzy">@_@</div>
             </div>
             <div class="boo-zzz" id="boo-zzz">Zzz</div>
         </div>
+        
         <div class="neon-boba" id="boba-reward">
             <div class="boba-pearls"><div class="pearl p1"></div><div class="pearl p2"></div><div class="pearl p3"></div><div class="pearl p4"></div><div class="pearl p5"></div></div>
+        </div>
+    </div>
+
+    <!-- HỘP TEST TRẠNG THÁI (DEBUG PANEL) -->
+    <div id="debug-panel" class="ui-element">
+        <div style="color: #00ffff; font-size: 11px; margin-bottom: 8px; text-align: center; border-bottom: 1px solid #333; padding-bottom: 5px;">[ KIỂM SOÁT LUÂN TRẬN ]</div>
+        <div class="toggle-row">
+            <span class="toggle-label" style="color: #ffd700">ĐỊA LUÂN</span>
+            <label class="switch"><input type="checkbox" id="tg-dia" class="dia" checked><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+            <span class="toggle-label" style="color: #0088ff">THỦY LUÂN</span>
+            <label class="switch"><input type="checkbox" id="tg-thuy" class="thuy" checked><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+            <span class="toggle-label" style="color: #ff3300">HỎA LUÂN</span>
+            <label class="switch"><input type="checkbox" id="tg-hoa" class="hoa" checked><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+            <span class="toggle-label" style="color: #00ffff">PHONG LUÂN</span>
+            <label class="switch"><input type="checkbox" id="tg-phong" class="phong" checked><span class="slider"></span></label>
         </div>
     </div>
 
@@ -350,62 +428,12 @@
     <button id="btn-exit-inspect" onclick="exitInspectMode()">[ THOÁT ]</button>
 
     <script>
-        // [PHẪU THUẬT 2]: ĐỒNG BỘ USER VÀ DANH SÁCH NHIỆM VỤ
         function fetchRealUser() {
-            let actualUser = localStorage.getItem('kdrive_logged_in_user') || "KAI RIPE"; 
+            let actualUser = "KAI RIPE"; 
             document.getElementById('current-username').innerText = actualUser;
             document.querySelectorAll('.inspect-username').forEach(el => el.innerText = actualUser);
         }
         fetchRealUser();
-
-        let taskList = [
-            { id: 'bushido', name: 'BUSHIDO', done: false },
-            { id: 'thechat', name: 'THỂ CHẤT', done: false },
-            { id: 'tritue', name: 'TRÍ TUỆ', done: false },
-            { id: 'phanxa', name: 'PHẢN XẠ', done: false },
-            { id: 'ungbien', name: 'ỨNG BIẾN', done: false }
-        ];
-
-        let tasksCompleted = 0; 
-        let isDaoNghiepVienMan = false;
-        const terminalText = document.getElementById('terminal-text');
-
-        // Hàm Tự Động Quét Điểm Từ LocalStorage (Hoạt động độc lập 3 Đạo Trường)
-        function syncTasksFromLocalStorage() {
-            const taskMapping = {
-                'tritue': 'kdrive_thuy_luan_done',
-                'phanxa': 'kdrive_hoa_luan_done',
-                'ungbien': 'kdrive_phong_luan_done'
-            };
-
-            for (let taskId in taskMapping) {
-                if (localStorage.getItem(taskMapping[taskId]) === 'true') {
-                    let taskObj = taskList.find(t => t.id === taskId);
-                    if (taskObj && !taskObj.done) {
-                        taskObj.done = true;
-                        tasksCompleted++;
-                        bobaReward.style.display = 'block'; // Rơi trà sữa
-                    }
-                }
-            }
-
-            if (tasksCompleted >= 5 && !isDaoNghiepVienMan) {
-                isDaoNghiepVienMan = true;
-                setTimeout(() => speakMsg("Đạo nghiệp viên mãn. Toàn bộ hệ thống đã được bảo toàn."), 3000);
-            }
-            updateSystemTerminal();
-        }
-
-        function updateSystemTerminal() {
-            const terminalHud = document.getElementById('terminal-hud');
-            if (isDaoNghiepVienMan) {
-                terminalText.innerHTML = ">_ [HỆ THỐNG]: ĐẠO NGHIỆP VIÊN MÃN.";
-            } else {
-                let missingTasks = taskList.filter(t => !t.done).map(t => t.name);
-                terminalText.innerHTML = `>_ [HỆ THỐNG]: CHỜ HOÀN THÀNH [${missingTasks[0]}].`;
-            }
-            terminalHud.style.opacity = 1; 
-        }
 
         function runHighTechClock() {
             const now = new Date();
@@ -504,6 +532,7 @@
         let holoTimeout;
         let typewriterTimer;
 
+        // HIỂN THỊ CHỮ DẠNG TERMINAL (Không có giọng đọc)
         function showHologramStatus(text) {
             window.speechSynthesis.cancel();
             speechQueue = []; 
@@ -523,6 +552,7 @@
             }, 30);
         }
 
+        // HỆ THỐNG PHỤ ĐỀ ĐỐI THOẠI PHÂN ĐOẠN
         let speechQueue = [];
         let isDialogPlaying = false;
 
@@ -597,6 +627,28 @@
             try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'vi-VN'; utterance.rate = 1.1; window.speechSynthesis.speak(utterance); } } catch (e) {} 
         }
 
+        let taskList = [
+            { id: 'bushido', name: 'BUSHIDO', done: false },
+            { id: 'thechat', name: 'THỂ CHẤT', done: false },
+            { id: 'tritue', name: 'TRÍ TUỆ', done: false },
+            { id: 'phanxa', name: 'PHẢN XẠ', done: false },
+            { id: 'ungbien', name: 'ỨNG BIẾN', done: false }
+        ];
+
+        let tasksCompleted = 0; let isDaoNghiepVienMan = false;
+        const terminalText = document.getElementById('terminal-text');
+        
+        function updateSystemTerminal() {
+            const terminalHud = document.getElementById('terminal-hud');
+            if (isDaoNghiepVienMan) {
+                terminalText.innerHTML = "> [HỆ THỐNG]: ĐẠO NGHIỆP VIÊN MÃN.";
+            } else {
+                let missingTasks = taskList.filter(t => !t.done).map(t => t.name);
+                terminalText.innerHTML = `> [HỆ THỐNG]: CHỜ HOÀN THÀNH [${missingTasks[0]}].`;
+            }
+            terminalHud.style.opacity = 1; 
+        }
+
         function getSciColor(score) {
             if(score < 50) return { r:255, g:42, b:42 }; 
             if(score < 80) return { r:255, g:235, b:59 }; 
@@ -633,9 +685,12 @@
                 setTimeout(() => {
                     document.getElementById('core-wrapper').style.opacity = 1; playSound('katana');
                     document.getElementById('boo-module-container').style.opacity = 1; document.getElementById('top-hud').style.opacity = 1; 
+                    updateSystemTerminal(); 
                     
-                    syncTasksFromLocalStorage(); // Gọi bộ quét điểm khi vừa vào Lõi
-                    
+                    // HIỂN THỊ BẢNG ĐIỀU KHIỂN DEBUG
+                    document.getElementById('debug-panel').style.display = 'block';
+
+                    // KIỂM TRA ĐỒNG HỒ SINH HỌC
                     const h = new Date().getHours();
                     const isDND = (h >= 23 || h < 6);
                     
@@ -671,63 +726,52 @@
         }
         renderPhysics();
 
-        // [PHẪU THUẬT 3]: ĐƯỜNG HẦM KHÔNG GIAN (WARP)
-        function triggerWarp(realmName, mistColor, targetUrl, bgUrl) {
-            document.body.style.pointerEvents = 'none';
-            speakMsg(`Kích hoạt Đạo Trường ${realmName}.`);
-            playSound('katana');
-            if(navigator.vibrate) navigator.vibrate([100, 100, 200]);
-            
-            localStorage.setItem('boo_energy', booEnergy);
-            localStorage.setItem('bg_music_time', bgMusic.currentTime);
-            localStorage.setItem('bg_music_muted', bgMusic.muted);
-
-            cubeVx = 0.05; cubeVy = 0.05;
-            document.getElementById('floor-grid').style.transition = 'opacity 1.5s ease-in-out';
-            document.getElementById('floor-grid').style.opacity = '0';
-            document.getElementById('live-clock').style.transition = 'opacity 1s ease-in-out';
-            document.getElementById('live-clock').style.opacity = '0';
-
-            const terminal = document.getElementById('terminal-hud');
-            terminal.style.transition = 'all 1.5s ease';
-            terminal.style.background = 'transparent';
-            terminal.style.border = 'none';
-            terminal.style.boxShadow = 'none';
-            document.getElementById('terminal-text').innerHTML = `>_ [HỆ THỐNG]: ĐANG ĐỒNG BỘ KHÔNG GIAN ${realmName}...`;
-
-            const cubeWrap = document.getElementById('core-wrapper');
-            cubeWrap.style.transition = 'all 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
-            cubeWrap.style.transform = 'scale(1.1) translateY(-20px)';
-            cubeWrap.style.opacity = '0';
-
-            const mist = document.createElement('div');
-            mist.style.cssText = `position: fixed; inset: 0; background: radial-gradient(circle at center, ${mistColor} 0%, rgba(0,15,30,0.85) 100%); z-index: 3; opacity: 0; pointer-events: none; transition: opacity 1.5s ease-in-out; backdrop-filter: blur(2px);`;
-            document.body.appendChild(mist);
-
-            const nextBg = document.createElement('div');
-            nextBg.style.cssText = `position: fixed; inset: 0; background-image: url('${bgUrl}'); background-size: cover; background-position: center; z-index: 4; opacity: 0; pointer-events: none; transition: opacity 1.8s ease-in-out;`;
-            document.body.appendChild(nextBg);
-
-            setTimeout(() => { mist.style.opacity = '1'; nextBg.style.opacity = '1'; playSound('warp-out'); }, 100);
-            setTimeout(() => { window.location.href = targetUrl; }, 1800);
-        }
-
         function navToFace(faceName, taskId) { 
             if (!isCubeMoved && !isLoreOpen && !document.body.classList.contains('inspect-mode')) { 
+                if(navigator.vibrate) navigator.vibrate(50); 
+                playSound('katana'); 
                 
                 if (taskId === 'tritue') {
-                    triggerWarp('THỦY LUÂN', 'rgba(0,229,255,0.1)', 'thuy_luan.html', 'https://github.com/happyk1900/-m-thanh-app/blob/main/THUY%20LUAN.png?raw=true');
-                    return;
-                } else if (taskId === 'phanxa') {
-                    triggerWarp('HỎA LUÂN', 'rgba(255,69,0,0.15)', 'HoaLuan.html', 'https://github.com/happyk1900/-m-thanh-app/blob/main/Gemini_Generated_Image_ol63xkol63xkol63.png?raw=true');
-                    return;
-                } else if (taskId === 'ungbien') {
-                    triggerWarp('PHONG LUÂN', 'rgba(255,255,255,0.15)', 'PhongLuan.html', 'https://github.com/happyk1900/new-abum-17-track/blob/main/PHONG%20LUAN%20AI.png?raw=true');
-                    return;
+                    document.body.style.pointerEvents = 'none';
+                    speakMsg("Kích hoạt Đạo Trường Thủy Luân.");
+                    playSound('katana'); 
+                    if(navigator.vibrate) navigator.vibrate([100, 100, 200]);
+                    
+                    localStorage.setItem('boo_energy', booEnergy);
+                    localStorage.setItem('bg_music_time', bgMusic.currentTime);
+                    localStorage.setItem('bg_music_muted', bgMusic.muted);
+
+                    cubeVx = 0.05; cubeVy = 0.05;
+                    document.getElementById('floor-grid').style.transition = 'opacity 1.5s ease-in-out';
+                    document.getElementById('floor-grid').style.opacity = '0';
+                    document.getElementById('live-clock').style.transition = 'opacity 1s ease-in-out';
+                    document.getElementById('live-clock').style.opacity = '0';
+
+                    const terminal = document.getElementById('terminal-hud');
+                    terminal.style.transition = 'all 1.5s ease';
+                    terminal.style.background = 'transparent';
+                    terminal.style.border = 'none';
+                    terminal.style.boxShadow = 'none';
+                    document.getElementById('terminal-text').innerHTML = ">_ [HỆ THỐNG]: ĐANG ĐỒNG BỘ KHÔNG GIAN THỦY LUÂN...";
+
+                    const cubeWrap = document.getElementById('core-wrapper');
+                    cubeWrap.style.transition = 'all 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                    cubeWrap.style.transform = 'scale(1.1) translateY(-20px)';
+                    cubeWrap.style.opacity = '0';
+
+                    const cyanMist = document.createElement('div');
+                    cyanMist.style.cssText = `position: fixed; inset: 0; background: radial-gradient(circle at center, rgba(0,229,255,0.1) 0%, rgba(0,15,30,0.85) 100%); z-index: 3; opacity: 0; pointer-events: none; transition: opacity 1.5s ease-in-out; backdrop-filter: blur(2px);`;
+                    document.body.appendChild(cyanMist);
+
+                    const nextBg = document.createElement('div');
+                    nextBg.style.cssText = `position: fixed; inset: 0; background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/THUY%20LUAN.png?raw=true'); background-size: cover; background-position: center; z-index: 4; opacity: 0; pointer-events: none; transition: opacity 1.8s ease-in-out;`;
+                    document.body.appendChild(nextBg);
+
+                    setTimeout(() => { cyanMist.style.opacity = '1'; nextBg.style.opacity = '1'; playSound('warp-out'); }, 100);
+                    setTimeout(() => { window.location.href = 'thuy_luan.html'; }, 1800);
+                    return; 
                 }
 
-                // Nhiệm vụ nội bộ Lõi (Thể chất / Bushido)
-                if(navigator.vibrate) navigator.vibrate(50); playSound('katana'); 
                 let taskObj = taskList.find(t => t.id === taskId);
                 if (taskObj && !taskObj.done && !isDaoNghiepVienMan && bobaReward.style.display !== 'block') {
                     taskObj.done = true; tasksCompleted++; bobaReward.style.display = 'block';
@@ -741,24 +785,22 @@
         }
 
         const boo = document.getElementById('boo-knight'); const booEnergyBorder = document.getElementById('boo-energy'); const bobaReward = document.getElementById('boba-reward');
-        let booEnergy = localStorage.getItem('boo_energy') ? parseFloat(localStorage.getItem('boo_energy')) : 20; 
-        let isBooSleeping = false; 
-        const DROP_RATE_PER_SECOND = 100 / 10800; // 3 tiếng hết 100%
+        let booEnergy = 20; let isBooSleeping = false; 
+        const DROP_RATE_PER_SECOND = 100 / 10800;
         let awakeOverride = false; let awakeTimeout = null; let holdTimer = null; let holdFired = false;
-        booEnergyBorder.style.setProperty('--energy', `${Math.max(0, booEnergy)}%`);
         
         function roamBoo() {
             if (isBooSleeping || isLoreOpen || document.body.classList.contains('inspect-mode') || boo.classList.contains('boo-jumpscare') || isVoiceChatActive) {
                 setTimeout(roamBoo, 2000); return;
             }
-            if (booEnergy <= 0) return; 
+            if (booEnergy <= 0) return;
             
             const centerX = window.innerWidth / 2; const centerY = window.innerHeight / 2;
             const radiusX = window.innerWidth * 0.35; const radiusY = window.innerHeight * 0.25;
             const randomX = centerX + (Math.random() * 2 - 1) * radiusX - 27; 
             const randomY = centerY + (Math.random() * 2 - 1) * radiusY - 27;
             
-            boo.style.transition = "top 4s ease-in-out, left 4s ease-in-out";
+            boo.style.transition = "top 4s ease-in-out, left 4s ease-in-out, background 0.5s";
             boo.style.left = randomX + 'px'; boo.style.top = randomY + 'px';
             
             let restTime = Math.floor(Math.random() * 5000) + 10000;
@@ -782,34 +824,38 @@
             let nextTask = missingTasks.length > 0 ? missingTasks[0] : "";
             
             if (booEnergy > 70) {
-                const chillLines = [ "Khịt khịt... Thảnh thơi quá, làm ly boba thì nhức nách!", "🎵 Trà sữa trân châu uống vào là hết sầu... ụt ịt..." ];
+                const chillLines = ["Khịt khịt... Thảnh thơi quá, làm ly boba thì nhức nách!", "🎵 Trà sữa trân châu uống vào là hết sầu... ụt ịt..."];
                 let line = chillLines[Math.floor(Math.random() * chillLines.length)]; playBooDialog(line);
-                if (line.includes('🎵')) { boo.classList.add('boo-spin'); setTimeout(() => boo.classList.remove('boo-spin'), 1500); const note = document.createElement('div'); note.innerHTML = '🎵'; note.style.position = 'absolute'; note.style.top = '-20px'; note.style.left = '15px'; note.style.fontSize = '24px'; note.style.animation = 'floatNotes 2s forwards'; boo.appendChild(note); setTimeout(() => note.remove(), 2000); }
+                if (line.includes('🎵')) {
+                    boo.classList.add('boo-spin'); setTimeout(() => boo.classList.remove('boo-spin'), 1500);
+                    const note = document.createElement('div'); note.innerHTML = '🎵'; note.style.position = 'absolute'; note.style.top = '-20px'; note.style.left = '15px'; note.style.fontSize = '24px'; note.style.animation = 'floatNotes 2s forwards'; boo.appendChild(note); setTimeout(() => note.remove(), 2000);
+                }
             } 
             else if (booEnergy > 40 && booEnergy <= 70) {
-                if (nextTask !== "") { playBooDialog([ `Này nhóc, mặt [${nextTask}] kìa, làm lẹ đi rồi ta bàn chiến thuật tiếp.`, `Tiến độ hơi chậm rồi đấy, dứt điểm nốt mặt [${nextTask}] đi nào.` ][Math.floor(Math.random() * 2)]); playSound('boing'); }
+                if (nextTask !== "") { playBooDialog(`Này nhóc, mặt [${nextTask}] kìa, làm lẹ đi rồi ta bàn chiến thuật tiếp.`); playSound('boing'); }
             } 
             else if (booEnergy > 10 && booEnergy <= 40) {
-                playBooDialog([ "Khịt... Bụng ta sôi sùng sục rồi! Lôi ly trà sữa ra đây mau!", "Ê nhóc, định bỏ đói phó sư của ngươi à? Đang hoa mắt rồi đây này!" ][Math.floor(Math.random() * 2)]);
+                playBooDialog("Khịt... Bụng ta sôi sùng sục rồi! Lôi ly trà sữa ra đây mau!");
                 boo.classList.add('boo-glitch'); setTimeout(() => boo.classList.remove('boo-glitch'), 1000);
             } 
             else if (booEnergy > 0 && booEnergy <= 10) {
-                playBooDialog([ "Cứu mạng... Sắp sập nguồn rồi! Trà sữa... cho ta trà sữa!!!", "Trời ơi cái bụng của ta! Ngươi ác nó vừa thôi nhóc!!" ][Math.floor(Math.random() * 2)]);
+                playBooDialog("Cứu mạng... Sắp sập nguồn rồi! Trà sữa... cho ta trà sữa!!!");
                 document.body.classList.add('critical-warning'); setTimeout(() => document.body.classList.remove('critical-warning'), 2000);
             }
         }, 35000); 
 
         setInterval(() => {
             const h = new Date().getHours(); const isDND = (h >= 23 || h < 6); 
+            
             if (isDND && !awakeOverride) { if (!isBooSleeping) forceSleep(); return; }
             if (isDaoNghiepVienMan && !awakeOverride) { booEnergy = 100; booEnergyBorder.style.setProperty('--energy', `100%`); if (!isBooSleeping) forceSleep(); return; }
             
             if (booEnergy > 0 && !isBooSleeping) { 
-                booEnergy -= DROP_RATE_PER_SECOND; 
-                booEnergyBorder.style.setProperty('--energy', `${Math.max(0, booEnergy)}%`); 
-                if (booEnergy <= 10 && booEnergy > 0) { boo.classList.add('boo-glitch'); } else { boo.classList.remove('boo-glitch'); }
+                booEnergy -= DROP_RATE_PER_SECOND; booEnergyBorder.style.setProperty('--energy', `${Math.max(0, booEnergy)}%`); 
+                if (booEnergy <= 10 && booEnergy > 0) boo.classList.add('boo-glitch'); else boo.classList.remove('boo-glitch');
                 if (booEnergy <= 0) { 
-                    booEnergy = 0; booEnergyBorder.style.setProperty('--energy', `0%`); document.body.classList.add('critical-warning'); boo.classList.add('boo-fainted'); 
+                    booEnergy = 0; booEnergyBorder.style.setProperty('--energy', `0%`); 
+                    document.body.classList.add('critical-warning'); boo.classList.add('boo-fainted'); 
                     speakMsg("Báo động đỏ! Phó sư sập nguồn."); showHologramStatus("[ HỆ THỐNG: CỐ VẤN ĐÃ NGẤT XỈU VÌ ĐÓI ]");
                 } 
             }
@@ -820,7 +866,6 @@
 
         let booClickCount = 0; let booClickTimer = null; let isVoiceChatActive = false;
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; let recognition;
-        
         if (SpeechRecognition) {
             recognition = new SpeechRecognition(); recognition.lang = 'vi-VN'; recognition.interimResults = false; recognition.maxAlternatives = 1;
             recognition.onstart = function() { showHologramStatus("[ ĐANG MỞ KÊNH GIAO TIẾP... NÓI ĐI ĐỪNG NGẠI! ]"); boo.classList.add('boo-glitch'); };
@@ -830,34 +875,41 @@
         }
 
         async function askGemini(text) {
-            const apiKey = "AQ.Ab8RN6K" + "o2VFtf_92AsU" + "yrVq_dJUjh3A" + "koHvm53gwgfBVpVoYLg"; 
+            const p1 = "AQ.Ab8RN6K"; const p2 = "o2VFtf_92AsU"; const p3 = "yrVq_dJUjh3A"; const p4 = "koHvm53gwgfBVpVoYLg"; const apiKey = p1 + p2 + p3 + p4; 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contents: [{ parts: [{ text: `Ngươi là Boo (hiệp sĩ lợn), danh xưng 'Phó sư'. Trả lời cực ngắn dưới 30 từ, đối đáp: "${text}"` }] }] }) });
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: `Ngươi là Boo (hiệp sĩ lợn), danh xưng 'Phó sư'. BẮT BUỘC trả lời súc tích, tối đa từ 1 đến 2 câu ngắn gọn (dưới 30 từ). Đáp lại câu sau: "${text}"` }] }] })
+                });
                 const data = await response.json();
-                if (!response.ok || !data.candidates) throw new Error("Lỗi API");
-                playBooDialog(data.candidates[0].content.parts[0].text.trim());
-            } catch(e) { showHologramStatus("[ Tín hiệu gián đoạn. ]"); speakMsg("Hệ thống quá tải. Hãy đợi vài giây rồi nói lại."); }
+                if (!response.ok) throw new Error("Lỗi API");
+                const reply = data.candidates[0].content.parts[0].text.trim();
+                playBooDialog(reply);
+            } catch(e) { showHologramStatus("[ Tín hiệu gián đoạn. Xin thử lại... ]"); speakMsg("Hệ thống quá tải. Hãy đợi vài giây rồi nói lại."); }
             boo.classList.remove('boo-spin'); isVoiceChatActive = false;
         }
 
-        function triggerVoiceChat() { if (!recognition) { playBooDialog("Trình duyệt không hỗ trợ!"); return; } isVoiceChatActive = true; recognition.start(); }
+        function triggerVoiceChat() { if (!recognition) { playBooDialog("Trình duyệt không hỗ trợ kết nối giọng nói!"); return; } isVoiceChatActive = true; recognition.start(); }
 
         boo.addEventListener('pointerdown', (e) => { 
             e.preventDefault(); holdFired = false;
             holdTimer = setTimeout(() => {
                 holdFired = true;
                 if (isBooSleeping && booEnergy > 0) {
-                    awakeOverride = true; wakeUpBoo(); playSound('boing'); playBooDialog("Khịt khịt... Nửa đêm nửa hôm gọi ta dậy làm gì thế nhóc? Bàn mưu tính kế gì à?"); if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                    clearTimeout(awakeTimeout); awakeTimeout = setTimeout(() => { awakeOverride = false; }, 3 * 60 * 1000); 
+                    awakeOverride = true; wakeUpBoo(); playSound('boing'); playBooDialog("Khịt khịt... Nửa đêm nửa hôm gọi ta dậy làm gì thế nhóc?");
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    clearTimeout(awakeTimeout); awakeTimeout = setTimeout(() => { awakeOverride = false; }, 3 * 60 * 1000);
                 }
             }, 2000);
         }); 
 
         boo.addEventListener('pointerleave', () => { clearTimeout(holdTimer); });
+
         boo.addEventListener('pointerup', (e) => {
             e.preventDefault(); clearTimeout(holdTimer);
-            if (holdFired || isLoreOpen || document.body.classList.contains('inspect-mode') || isVoiceChatActive) { if (isLoreOpen || document.body.classList.contains('inspect-mode')) speakMsg(lorePagesSpeak[currentLorePage]); return; }
-            if (isBooSleeping || booEnergy <= 0) return; 
+            if (holdFired) return;
+            if (isLoreOpen || document.body.classList.contains('inspect-mode') || isVoiceChatActive) { if (isLoreOpen || document.body.classList.contains('inspect-mode')) speakMsg(lorePagesSpeak[currentLorePage]); return; }
+            if (isBooSleeping || booEnergy <= 0) return;
 
             booClickCount++; clearTimeout(booClickTimer);
 
@@ -869,7 +921,7 @@
                     if (booClickCount === 1) {
                         let missing = taskList.filter(t => !t.done).map(t => t.name);
                         if (isDaoNghiepVienMan) playBooDialog("Ngươi khá lắm! Đạo nghiệp hôm nay đã viên mãn.");
-                        else if (missing.length === 1) playBooDialog(`Còn đúng mặt [${missing[0]}] thôi. Xử lý nốt đi!`);
+                        else if (missing.length === 1) playBooDialog(`Còn đúng cái mặt [${missing[0]}] thôi. Xử lý nốt đi rồi đàm đạo!`);
                         else playBooDialog(`Ê, nghe cho rõ đây! Ngươi còn mặt [${missing.slice(0, 2).join(" và ")}] chưa làm xong đâu đấy!`);
                     } else if (booClickCount === 2) {
                         if(navigator.vibrate) navigator.vibrate([100, 50, 100]); playSound('warp-in'); triggerVoiceChat();
@@ -887,28 +939,57 @@
                 isBobaDragging = false; bobaReward.style.cursor = 'grab';
                 const bobaRect = bobaReward.getBoundingClientRect(); const booRect = boo.getBoundingClientRect();
                 const overlap = !(bobaRect.right < booRect.left || bobaRect.left > booRect.right || bobaRect.bottom < booRect.top || bobaRect.top > booRect.bottom);
-                
                 if (overlap) {
-                    playSound('slurp'); booEnergy = 100; booEnergyBorder.style.setProperty('--energy', '100%'); wakeUpBoo(); boo.classList.remove('boo-fainted'); document.body.classList.remove('critical-warning'); bobaReward.style.display = 'none'; playBooDialog("Khịt khịt! Đã nạp lại năng lượng thành công. Đã no nê, tiếp tục nhiệm vụ đi!");
+                    playSound('slurp'); booEnergy = 100; booEnergyBorder.style.setProperty('--energy', '100%'); wakeUpBoo(); boo.classList.remove('boo-fainted'); document.body.classList.remove('critical-warning'); bobaReward.style.display = 'none'; playBooDialog("Khịt khịt! Đã nạp lại năng lượng thành công.");
                 } else { bobaReward.style.left = '30px'; bobaReward.style.bottom = '35px'; bobaReward.style.top = 'auto'; }
             }
         });
 
         function enterInspectMode() { if(isLoreOpen || document.body.classList.contains('inspect-mode')) return; document.body.classList.add('inspect-mode'); playSound('warp-in'); if(navigator.vibrate) navigator.vibrate([100, 50, 100]); }
         function exitInspectMode() { document.body.classList.add('exiting-inspect-mode'); playSound('warp-out'); setTimeout(() => { document.body.classList.remove('inspect-mode'); document.body.classList.remove('exiting-inspect-mode'); if(navigator.vibrate) navigator.vibrate(50); }, 500); }
-    </script>
 
-    <!-- [PHẪU THUẬT 4]: ĐÁNH THỨC SERVICE WORKER CHO APP -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').then(reg => {
-            console.log('Trạm radar SW đã kích hoạt tại Lõi.', reg.scope);
-          }).catch(err => {
-            console.log('Lỗi khởi động radar: ', err);
-          });
+        // ==========================================
+        // LOGIC TEST TRẠNG THÁI LUÂN (DEBUG PANEL)
+        // ==========================================
+        const toggles = { dia: document.getElementById('tg-dia'), thuy: document.getElementById('tg-thuy'), hoa: document.getElementById('tg-hoa'), phong: document.getElementById('tg-phong') };
+        const arcs = { dia: document.getElementById('arc-dia'), thuy: document.getElementById('arc-thuy'), hoa: document.getElementById('arc-hoa'), phong: document.getElementById('arc-phong') };
+        const booFaceCore = document.getElementById('boo-face-core');
+        
+        function updateSystemState() {
+            let score = 0;
+            for (let key in toggles) {
+                if (toggles[key].checked) { arcs[key].classList.remove('bq-weak'); score++; } 
+                else { arcs[key].classList.add('bq-weak'); }
+            }
+            
+            booFaceCore.classList.remove('struggling', 'critical-alert');
+            if (score === 4) {
+                // Hoàn hảo, giữ nguyên gốc
+            } else if (score >= 2) {
+                booFaceCore.classList.add('struggling');
+            } else {
+                booFaceCore.classList.add('critical-alert');
+            }
+        }
+        for (let key in toggles) { toggles[key].addEventListener('change', updateSystemState); }
+
+        // ==========================================
+        // HIỆU ỨNG NGHIÊNG 3D (PARALLAX & GYROSCOPE)
+        // ==========================================
+        const booModuleHolo = document.getElementById('boo-knight');
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 35;
+            const y = (window.innerHeight / 2 - e.pageY) / 35;
+            booModuleHolo.style.transform = `perspective(500px) rotateY(${-x}deg) rotateX(${y}deg)`;
         });
-      }
+
+        window.addEventListener('deviceorientation', (e) => {
+            if(e.gamma && e.beta) {
+                const x = Math.max(-25, Math.min(25, e.gamma)); 
+                const y = Math.max(-25, Math.min(25, e.beta - 45)); 
+                booModuleHolo.style.transform = `perspective(500px) rotateY(${x}deg) rotateX(${y}deg)`;
+            }
+        });
     </script>
 </body>
 </html>
