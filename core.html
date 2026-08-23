@@ -6,6 +6,9 @@
     <meta name="theme-color" content="#000000">
     <title>K-Drive Core V54 - Khống Chế Dạ Hành</title>
 
+    <!-- [PWA] BẮT BUỘC CÓ DÒNG NÀY ĐỂ CÀI ĐẶT THÀNH APP -->
+    <link rel="manifest" href="./manifest.json">
+
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
@@ -93,10 +96,9 @@
         .bq-hoa { bottom: -10px; left: -10px; border-bottom-color: #ff3300; border-left-color: #ff3300; border-radius: 0 0 0 40px; filter: drop-shadow(0 0 4px #ff3300); }
         .bq-phong { bottom: -10px; right: -10px; border-bottom-color: #00ffff; border-right-color: #00ffff; border-radius: 0 0 40px 0; filter: drop-shadow(0 0 4px #00ffff); }
         
-        /* Hiệu ứng yếu/nhiễu sóng (Glitch) cho các luân */
         .bq-weak { border-color: #444 !important; filter: none !important; animation: glitchHolo 1.5s infinite; }
 
-        /* VÒNG SINH TỒN BÊN TRONG (LỚP 1 - Kế thừa code cũ) */
+        /* VÒNG SINH TỒN BÊN TRONG (LỚP 1) */
         .boo-energy-border { position: absolute; inset: -2px; border-radius: 40% 40% 45% 45%; background: conic-gradient(#00e5ff var(--energy, 20%), transparent 0); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; padding: 4px; z-index: 3; box-shadow: 0 0 25px #00e5ff, inset 0 0 15px #00e5ff; transition: background 1s linear; }
         
         /* LÕI BOO VÀ BIỂU CẢM */
@@ -104,17 +106,27 @@
         .boo-face::before, .boo-face::after { content: ''; position: absolute; width: 6px; height: 11px; top: 20px; background: #000; border-radius: 50%; transition: all 0.3s; }
         .boo-face::before { left: 13px; } .boo-face::after { right: 13px; }
         
-        /* Trạng thái BOO theo SCI (Debug Panel) */
-        .boo-face.struggling { background: #ff8c00; box-shadow: inset 0 0 15px rgba(255,255,255,0.6), 0 0 30px rgba(255,140,0,0.8); } /* Màu cam đổ mồ hôi */
-        .boo-face.struggling::before, .boo-face.struggling::after { width: 8px; height: 4px; top: 24px; border-radius: 2px; } /* Mắt nhíu lại */
+        .boo-face.struggling { background: #ff8c00; box-shadow: inset 0 0 15px rgba(255,255,255,0.6), 0 0 30px rgba(255,140,0,0.8); } 
+        .boo-face.struggling::before, .boo-face.struggling::after { width: 8px; height: 4px; top: 24px; border-radius: 2px; } 
         
-        .boo-face.critical-alert { background: #ff0000; box-shadow: inset 0 0 20px #000, 0 0 40px #ff0000; animation: pulseBlood 0.8s infinite; } /* Báo động đỏ */
-        .boo-face.critical-alert::before, .boo-face.critical-alert::after { width: 10px; height: 10px; top: 22px; background: #fff; box-shadow: 0 0 8px #fff; } /* Mắt trợn trắng */
+        .boo-face.critical-alert { background: #ff0000; box-shadow: inset 0 0 20px #000, 0 0 40px #ff0000; animation: pulseBlood 0.8s infinite; } 
+        .boo-face.critical-alert::before, .boo-face.critical-alert::after { width: 10px; height: 10px; top: 22px; background: #fff; box-shadow: 0 0 8px #fff; } 
+
+        /* TÍNH NĂNG VĂNG KHỎI VÒNG KHI CÒN <= 2 NĂNG LƯỢNG */
+        .boo-face.glitch-out {
+            animation: glitchOutFace 0.3s infinite, pulseBlood 0.8s infinite !important;
+            border: 2px dashed #ff0000;
+        }
+        @keyframes glitchOutFace {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(-25px, 15px) scale(1.1); filter: hue-rotate(90deg) brightness(1.5); }
+            50% { transform: translate(30px, -20px) scale(0.9); }
+            75% { transform: translate(-15px, -25px) scale(1.2); filter: drop-shadow(0 0 10px red); }
+        }
 
         .boo-jumpscare { left: calc(50% - 27px) !important; top: calc(50% - 27px) !important; z-index: 1000 !important; transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; animation: none !important; }
         .boo-jumpscare .boo-face, .boo-jumpscare .boo-energy-border { transform: scale(4.5) !important; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .boo-jumpscare .boo-quadrant { opacity: 0; } /* Ẩn luân trận khi Jumpscare */
-        
+        .boo-jumpscare .boo-quadrant { opacity: 0; }
         .boo-jumpscare #holo-bubble { bottom: 150px !important; width: 240px !important; font-size: 13px !important; opacity: 1 !important; text-shadow: 0 0 15px rgba(0,229,255,0.8); border: 1px solid rgba(0,229,255,0.6); background: rgba(5, 20, 25, 0.9); transform: none !important;}
 
         .boo-zzz { position: absolute; top: -15px; right: -5px; color: #fff; font-family: monospace; font-size: 15px; font-weight: bold; text-shadow: 0 0 8px #ff1493; opacity: 0; pointer-events: none; z-index: 4; }
@@ -129,7 +141,6 @@
         .boo-sleeping .boo-face { filter: grayscale(0.8) brightness(0.6); box-shadow: none; background: #ff1493; } .boo-sleeping .boo-energy-border { box-shadow: none; } .boo-sleeping .boo-zzz { animation: zzzFloat 2s infinite; }
         .boo-sleeping .boo-quadrant { opacity: 0.3; }
         
-        /* Hiệu ứng Ngất Xỉu */
         .boo-fainted { animation: none !important; margin-top: 15px !important; pointer-events: auto; }
         .boo-fainted .boo-face { background: #333; box-shadow: inset 0 0 10px #000; filter: grayscale(1); display: flex; justify-content: center; align-items: center; }
         .boo-fainted .boo-face::before, .boo-fainted .boo-face::after { display: none; }
@@ -151,20 +162,15 @@
         .pearl { position: absolute; width: 7px; height: 7px; border: 2px solid #ff1493; border-radius: 50%; box-shadow: 0 0 10px #ff1493, inset 0 0 5px #ff1493; }
         .p1 { left: 4px; bottom: 2px; } .p2 { left: 14px; bottom: 0px; } .p3 { right: 4px; bottom: 3px; } .p4 { left: 10px; bottom: 10px; } .p5 { right: 6px; bottom: 8px; }
 
-        /* =========================================
-           BẢNG ĐIỀU KHIỂN DEBUG (LUÂN TRẬN)
-           ========================================= */
-        #debug-panel { position: fixed; bottom: 20px; left: 20px; background: rgba(5, 10, 14, 0.9); border: 1px solid rgba(0,229,255,0.4); padding: 12px; border-radius: 8px; z-index: 1000; backdrop-filter: blur(5px); box-shadow: 0 0 15px rgba(0,229,255,0.1); pointer-events: auto; display: none; } /* Mặc định ẩn, sẽ hiện khi khởi động xong */
+        /* BẢNG ĐIỀU KHIỂN DEBUG */
+        #debug-panel { position: fixed; bottom: 20px; left: 20px; background: rgba(5, 10, 14, 0.9); border: 1px solid rgba(0,229,255,0.4); padding: 12px; border-radius: 8px; z-index: 1000; backdrop-filter: blur(5px); box-shadow: 0 0 15px rgba(0,229,255,0.1); pointer-events: auto; display: none; }
         .toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; width: 140px; }
         .toggle-row:last-child { margin-bottom: 0; }
         .toggle-label { font-size: 10px; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px; font-weight: bold;}
-        
-        /* Switch UI */
         .switch { position: relative; display: inline-block; width: 30px; height: 14px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 14px; }
         .slider:before { position: absolute; content: ""; height: 10px; width: 10px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
-        
         input.dia:checked + .slider { background-color: #ffd700; }
         input.thuy:checked + .slider { background-color: #0088ff; }
         input.hoa:checked + .slider { background-color: #ff3300; }
@@ -183,7 +189,6 @@
         
         .hud-left-group { display: flex; flex-direction: column; gap: 4px; pointer-events: auto; }
         #user-display { color: rgba(0, 229, 255, 0.5); font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; letter-spacing: 1.5px; opacity: 0.8; }
-
         .hud-right-group { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; pointer-events: auto; }
         #lore-btn { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: bold; letter-spacing: 3px; border: none; background: transparent; cursor: pointer; text-shadow: 0 0 8px rgba(255, 255, 255, 0.8); }
         #date-display { color: rgba(255, 255, 255, 0.4); font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; letter-spacing: 1.5px; }
@@ -532,7 +537,6 @@
         let holoTimeout;
         let typewriterTimer;
 
-        // HIỂN THỊ CHỮ DẠNG TERMINAL (Không có giọng đọc)
         function showHologramStatus(text) {
             window.speechSynthesis.cancel();
             speechQueue = []; 
@@ -552,7 +556,6 @@
             }, 30);
         }
 
-        // HỆ THỐNG PHỤ ĐỀ ĐỐI THOẠI PHÂN ĐOẠN
         let speechQueue = [];
         let isDialogPlaying = false;
 
@@ -687,10 +690,8 @@
                     document.getElementById('boo-module-container').style.opacity = 1; document.getElementById('top-hud').style.opacity = 1; 
                     updateSystemTerminal(); 
                     
-                    // HIỂN THỊ BẢNG ĐIỀU KHIỂN DEBUG
                     document.getElementById('debug-panel').style.display = 'block';
 
-                    // KIỂM TRA ĐỒNG HỒ SINH HỌC
                     const h = new Date().getHours();
                     const isDND = (h >= 23 || h < 6);
                     
@@ -789,18 +790,25 @@
         const DROP_RATE_PER_SECOND = 100 / 10800;
         let awakeOverride = false; let awakeTimeout = null; let holdTimer = null; let holdFired = false;
         
+        let lastInteractionTime = Date.now(); // Theo dõi trạng thái rảnh rỗi (Idle)
+
         function roamBoo() {
             if (isBooSleeping || isLoreOpen || document.body.classList.contains('inspect-mode') || boo.classList.contains('boo-jumpscare') || isVoiceChatActive) {
                 setTimeout(roamBoo, 2000); return;
             }
             if (booEnergy <= 0) return;
             
+            // [CƠ CHẾ NGỦ ĐÔNG] Nếu tay người dùng đang di chuyển/lắc, ngưng tự động bay
+            if (Date.now() - lastInteractionTime < 30000) {
+                setTimeout(roamBoo, 1500); return; 
+            }
+            
             const centerX = window.innerWidth / 2; const centerY = window.innerHeight / 2;
             const radiusX = window.innerWidth * 0.35; const radiusY = window.innerHeight * 0.25;
             const randomX = centerX + (Math.random() * 2 - 1) * radiusX - 27; 
             const randomY = centerY + (Math.random() * 2 - 1) * radiusY - 27;
             
-            boo.style.transition = "top 4s ease-in-out, left 4s ease-in-out, background 0.5s";
+            boo.style.transition = "top 4s ease-in-out, left 4s ease-in-out, background 0.5s, transform 0.5s";
             boo.style.left = randomX + 'px'; boo.style.top = randomY + 'px';
             
             let restTime = Math.floor(Math.random() * 5000) + 10000;
@@ -852,10 +860,24 @@
             
             if (booEnergy > 0 && !isBooSleeping) { 
                 booEnergy -= DROP_RATE_PER_SECOND; booEnergyBorder.style.setProperty('--energy', `${Math.max(0, booEnergy)}%`); 
-                if (booEnergy <= 10 && booEnergy > 0) boo.classList.add('boo-glitch'); else boo.classList.remove('boo-glitch');
+                
+                // [CƠ CHẾ LỆCH KHỎI VÒNG] Năng lượng khẩn cấp
+                if (booEnergy <= 2 && booEnergy > 0) {
+                    booFaceCore.classList.add('glitch-out');
+                    booFaceCore.classList.add('critical-alert');
+                    boo.classList.remove('boo-glitch');
+                } else if (booEnergy <= 10 && booEnergy > 2) {
+                    boo.classList.add('boo-glitch');
+                    booFaceCore.classList.remove('glitch-out');
+                } else {
+                    boo.classList.remove('boo-glitch');
+                    booFaceCore.classList.remove('glitch-out');
+                }
+
                 if (booEnergy <= 0) { 
                     booEnergy = 0; booEnergyBorder.style.setProperty('--energy', `0%`); 
                     document.body.classList.add('critical-warning'); boo.classList.add('boo-fainted'); 
+                    booFaceCore.classList.remove('glitch-out'); // Tắt văng khi đã ngất xỉu
                     speakMsg("Báo động đỏ! Phó sư sập nguồn."); showHologramStatus("[ HỆ THỐNG: CỐ VẤN ĐÃ NGẤT XỈU VÌ ĐÓI ]");
                 } 
             }
@@ -948,9 +970,7 @@
         function enterInspectMode() { if(isLoreOpen || document.body.classList.contains('inspect-mode')) return; document.body.classList.add('inspect-mode'); playSound('warp-in'); if(navigator.vibrate) navigator.vibrate([100, 50, 100]); }
         function exitInspectMode() { document.body.classList.add('exiting-inspect-mode'); playSound('warp-out'); setTimeout(() => { document.body.classList.remove('inspect-mode'); document.body.classList.remove('exiting-inspect-mode'); if(navigator.vibrate) navigator.vibrate(50); }, 500); }
 
-        // ==========================================
         // LOGIC TEST TRẠNG THÁI LUÂN (DEBUG PANEL)
-        // ==========================================
         const toggles = { dia: document.getElementById('tg-dia'), thuy: document.getElementById('tg-thuy'), hoa: document.getElementById('tg-hoa'), phong: document.getElementById('tg-phong') };
         const arcs = { dia: document.getElementById('arc-dia'), thuy: document.getElementById('arc-thuy'), hoa: document.getElementById('arc-hoa'), phong: document.getElementById('arc-phong') };
         const booFaceCore = document.getElementById('boo-face-core');
@@ -964,7 +984,6 @@
             
             booFaceCore.classList.remove('struggling', 'critical-alert');
             if (score === 4) {
-                // Hoàn hảo, giữ nguyên gốc
             } else if (score >= 2) {
                 booFaceCore.classList.add('struggling');
             } else {
@@ -974,22 +993,71 @@
         for (let key in toggles) { toggles[key].addEventListener('change', updateSystemState); }
 
         // ==========================================
-        // HIỆU ỨNG NGHIÊNG 3D (PARALLAX & GYROSCOPE)
+        // [ĐỘC QUYỀN] DI CHUYỂN BOO BẰNG CẢM BIẾN / CHUỘT
         // ==========================================
-        const booModuleHolo = document.getElementById('boo-knight');
+        let lastGamma = 0, lastBeta = 0;
+        let lastMouseX = 0, lastMouseY = 0;
+        
         document.addEventListener('mousemove', (e) => {
+            // Xác nhận người dùng đang điều khiển
+            if (Math.abs(e.clientX - lastMouseX) > 5 || Math.abs(e.clientY - lastMouseY) > 5) {
+                lastInteractionTime = Date.now();
+                lastMouseX = e.clientX; lastMouseY = e.clientY;
+            }
+            
+            // Xoay 3D
             const x = (window.innerWidth / 2 - e.pageX) / 35;
             const y = (window.innerHeight / 2 - e.pageY) / 35;
-            booModuleHolo.style.transform = `perspective(500px) rotateY(${-x}deg) rotateX(${y}deg)`;
+            
+            // Bay lướt theo chuột (nếu đang hoạt động)
+            if (Date.now() - lastInteractionTime < 30000 && !isBooSleeping && booEnergy > 0) {
+                const targetX = (e.clientX / window.innerWidth) * 100;
+                const targetY = (e.clientY / window.innerHeight) * 100;
+                boo.style.transition = 'top 0.4s ease-out, left 0.4s ease-out, transform 0.1s';
+                boo.style.left = `calc(${targetX}vw - 27px)`;
+                boo.style.top = `calc(${targetY}vh - 27px)`;
+            }
+            boo.style.transform = `perspective(500px) rotateY(${-x}deg) rotateX(${y}deg)`;
         });
 
         window.addEventListener('deviceorientation', (e) => {
             if(e.gamma && e.beta) {
+                // Xác nhận người dùng đang cầm điện thoại lắc
+                if (Math.abs(e.gamma - lastGamma) > 1.5 || Math.abs(e.beta - lastBeta) > 1.5) {
+                    lastInteractionTime = Date.now();
+                    lastGamma = e.gamma;
+                    lastBeta = e.beta;
+                }
+                
+                // Xoay 3D
                 const x = Math.max(-25, Math.min(25, e.gamma)); 
                 const y = Math.max(-25, Math.min(25, e.beta - 45)); 
-                booModuleHolo.style.transform = `perspective(500px) rotateY(${x}deg) rotateX(${y}deg)`;
+                
+                // Bay lướt theo cảm biến nghiêng
+                if (Date.now() - lastInteractionTime < 30000 && !isBooSleeping && booEnergy > 0) {
+                    let targetX = 50 + (e.gamma / 45) * 40; 
+                    let targetY = 50 + ((e.beta - 45) / 45) * 40;
+                    targetX = Math.max(5, Math.min(95, targetX));
+                    targetY = Math.max(5, Math.min(95, targetY));
+                    
+                    boo.style.transition = 'top 0.5s ease-out, left 0.5s ease-out, transform 0.1s';
+                    boo.style.left = `calc(${targetX}vw - 27px)`;
+                    boo.style.top = `calc(${targetY}vh - 27px)`;
+                }
+                boo.style.transform = `perspective(500px) rotateY(${x}deg) rotateX(${y}deg)`;
             }
         });
+
+        // ==========================================
+        // KHỞI ĐỘNG SERVICE WORKER (ĐỂ CÀI ĐẶT THÀNH APP)
+        // ==========================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                .then(registration => console.log('ServiceWorker đăng ký thành công!'))
+                .catch(err => console.log('ServiceWorker đăng ký thất bại: ', err));
+            });
+        }
     </script>
 </body>
 </html>
