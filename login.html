@@ -45,25 +45,38 @@
         @keyframes glowArrow { 0% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0); } 100% { box-shadow: 10px 10px 15px -10px rgba(255, 0, 0, 0.8); } }
 
         /* =======================================
-           GIAO DIỆN HOLO-BUBBLE (ĐỒNG BỘ CORE)
+           GIAO DIỆN HOLO-BUBBLE THU GỌN CHUẨN MỰC
            ======================================= */
-        @keyframes bubbleFloat { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-8px); } }
+        @keyframes bubbleFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
         
         .cinematic-sub-container { 
             position: absolute; 
-            top: 38%; 
+            top: 41%; /* Vị trí chuẩn ngay trên đỉnh đầu Samurai ở giữa */
             left: 50%; 
             transform: translateX(-50%); 
-            width: 85%; max-width: 320px; 
-            background: rgba(5, 15, 25, 0.85); 
+            width: 85%; max-width: 250px; /* Thu gọn chiều ngang để chữ rớt đều đẹp mắt */
+            background: rgba(5, 15, 25, 0.88); 
             backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
             border: 1px solid rgba(0, 229, 255, 0.3);
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); 
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.15); 
             border-radius: 8px; 
-            padding: 12px 15px; 
+            padding: 12px 14px; 
             z-index: 100; pointer-events: none; display: none; 
             animation: bubbleFloat 3s ease-in-out infinite; 
             transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Đuôi nhọn chỉa xuống đầu nhân vật */
+        .cinematic-sub-container::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 10px; height: 10px;
+            background: rgba(5, 15, 25, 0.88);
+            border-right: 1px solid rgba(0, 229, 255, 0.3);
+            border-bottom: 1px solid rgba(0, 229, 255, 0.3);
         }
 
         .sub-text-item { 
@@ -72,7 +85,7 @@
             font-weight: 400; 
             line-height: 1.4;      
             color: #d8ffff;        
-            text-align: left; 
+            text-align: center; /* Căn giữa cho khối chữ gọn gàng */
             text-shadow: 0 0 8px rgba(0, 229, 255, 0.4); 
             word-break: break-word;
             opacity: 0; 
@@ -80,15 +93,20 @@
         }
         .sub-text-item.active { opacity: 1; }
 
-        /* TRẠNG THÁI KHI KẺ THÁCH THỨC TỰ SỰ */
-        .cinematic-sub-container.speaker-user {
-            top: 65%; 
-            border-color: rgba(255, 215, 0, 0.3);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+        /* TRẠNG THÁI KHI PHÓ SƯ BOO NÓI (Hạ thấp và dời sang phải sát đầu lợn Boo) */
+        .cinematic-sub-container.speaker-boo {
+            top: 56%;
+            left: 72%; /* Dời lệch sang phải nơi Boo đứng */
+            border-color: rgba(255, 51, 51, 0.4);
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);
         }
-        .cinematic-sub-container.speaker-user .sub-text-item {
-            color: #fff8cc; 
-            text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+        .cinematic-sub-container.speaker-boo::after {
+            border-color: rgba(255, 51, 51, 0.4);
+            background: rgba(5, 15, 25, 0.88);
+        }
+        .cinematic-sub-container.speaker-boo .sub-text-item {
+            color: #ffcccc; 
+            text-shadow: 0 0 8px rgba(255, 51, 51, 0.4);
         }
 
         .skip-intro-btn { 
@@ -179,12 +197,10 @@
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
-    <!-- BỘ TỔNG HỢP ÂM THANH ĐÃ THAY FILE MỚI -->
     <audio id="sysAudio" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/DAOTRUONG%20OK%20LA.mp4" preload="auto"></audio>
     <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
     <audio id="musashiVoice" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/LOGIN%20MUSASHI%20OK.MP3" preload="auto"></audio>
     
-    <!-- VIDEO BAY VÀO -->
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20BAY%20VAO.mp4" playsinline preload="auto"></video>
 
     <script>
@@ -335,11 +351,10 @@
                 let currentSub = subTimeline.find(item => currentTime >= item.start && currentTime <= item.end);
                 
                 if (currentSub) {
-                    // Chuyển đổi vị trí và màu sắc dựa trên người nói (user/boo)
-                    if (currentSub.type === "user") {
-                        subContainer.classList.add('speaker-user');
+                    if (currentSub.type === "boo") {
+                        subContainer.classList.add('speaker-boo');
                     } else {
-                        subContainer.classList.remove('speaker-user');
+                        subContainer.classList.remove('speaker-boo');
                     }
 
                     if (subDisplay.innerHTML !== currentSub.text) {
