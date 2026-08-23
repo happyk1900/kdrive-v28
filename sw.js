@@ -1,8 +1,7 @@
 self.addEventListener('install', (e) => {
-  console.log('[K-Drive] Trạm kiểm soát đã cài đặt Service Worker');
-  self.skipWaiting();
+  console.log('[Service Worker] Đã cài đặt');
 });
 
 self.addEventListener('fetch', (e) => {
-  // Để trống lệnh fetch này là đủ để lừa trình duyệt Cốc Cốc/Chrome công nhận đây là App
+  // Dòng này là bùa chú bắt buộc phải có để Chrome cấp quyền cài PWA
 });
