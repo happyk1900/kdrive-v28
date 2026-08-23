@@ -105,8 +105,8 @@
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
-    <!-- CHÈN LINK NHẠC 16S CỦA ANH VÀO ĐÂY -->
-    <audio id="sysAudio" src="LINK_NHAC_16S_CUA_ANH_DAN_VAO_DAY.mp3" preload="auto"></audio>
+    <!-- LINK NHẠC ĐÃ ĐƯỢC CHÈN CHUẨN XÁC -->
+    <audio id="sysAudio" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/KAIROIN(1).MP3" preload="auto"></audio>
     <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
     <audio id="musashiVoice" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/LOGIN%20MUSASHI%20OK.MP3" preload="auto"></audio>
     
@@ -217,55 +217,54 @@
 
         let matrixInterval;
         let isCinematicFinished = false;
-        let flags = { glitched: false, rained: false, booLoaded: false, textScrolled: false, telepathyLoaded: false, welcomeLoaded: false };
 
         function startMatrixIntro() {
+            // Ẩn nút ngay khi bấm
             document.getElementById('startBtn').style.display = 'none';
+            
+            // Bật nhạc của anh
             const audio = document.getElementById('sysAudio');
-            
-            // Backup time in case onended fails
-            setTimeout(() => { if(!isCinematicFinished) finishCinematic(); }, 16500);
+            audio.play().catch(e => console.log("Lỗi Audio:", e));
 
-            audio.play().catch(e => console.log("Cần cấp quyền Audio:", e));
+            // CHẠY TIMELINE ĐỘC LẬP (Đã ngắt hoàn toàn sự phụ thuộc vào nhạc)
             
-            audio.addEventListener('timeupdate', () => {
-                let t = audio.currentTime;
-                
-                // Giây 1: Glitch
-                if(t >= 1 && !flags.glitched) {
-                    flags.glitched = true;
-                    document.getElementById('mainWrapper').classList.add('glitch-active');
-                    setTimeout(() => { document.getElementById('mainWrapper').classList.remove('glitch-active'); }, 400);
-                }
-                // Giây 2: Mưa Matrix
-                if(t >= 2 && !flags.rained) {
-                    flags.rained = true;
-                    document.getElementById('matrixCanvas').classList.add('active');
-                    matrixInterval = setInterval(drawMatrix, 40);
-                }
-                // Giây 3: Phó sư Boo xuất hiện
-                if(t >= 3 && !flags.booLoaded) {
-                    flags.booLoaded = true;
-                    document.getElementById('bg-boo').style.opacity = '1';
-                }
-                // Giây 4: Chữ K-Drive trôi qua
-                if(t >= 4 && !flags.textScrolled) {
-                    flags.textScrolled = true;
-                    document.getElementById('scrollText').style.animation = 'scrollLeftAnim 8s linear forwards';
-                }
-                // Giây 7: Logo Telepathy
-                if(t >= 7 && !flags.telepathyLoaded) {
-                    flags.telepathyLoaded = true;
-                    document.getElementById('telepathyLogo').style.opacity = '1';
-                }
-                // Giây 13: Welcome to Son Mon
-                if(t >= 13 && !flags.welcomeLoaded) {
-                    flags.welcomeLoaded = true;
-                    document.getElementById('welcomeText').classList.add('active');
-                }
-            });
+            // Giây 1: Glitch màn hình
+            setTimeout(() => {
+                document.getElementById('mainWrapper').classList.add('glitch-active');
+                setTimeout(() => { document.getElementById('mainWrapper').classList.remove('glitch-active'); }, 400);
+            }, 1000);
 
-            audio.onended = () => { if(!isCinematicFinished) finishCinematic(); };
+            // Giây 2: Mưa Matrix rơi
+            setTimeout(() => {
+                document.getElementById('matrixCanvas').classList.add('active');
+                matrixInterval = setInterval(drawMatrix, 40);
+            }, 2000);
+
+            // Giây 3: Phó sư Boo hiện ra
+            setTimeout(() => {
+                document.getElementById('bg-boo').style.opacity = '1';
+            }, 3000);
+
+            // Giây 4: Chữ K-Drive trôi qua
+            setTimeout(() => {
+                document.getElementById('scrollText').style.display = 'block';
+                document.getElementById('scrollText').style.animation = 'scrollLeftAnim 8s linear forwards';
+            }, 4000);
+
+            // Giây 7: Logo Telepathy nhấp nháy
+            setTimeout(() => {
+                document.getElementById('telepathyLogo').style.opacity = '1';
+            }, 7000);
+
+            // Giây 13: Welcome to Son Mon bừng sáng
+            setTimeout(() => {
+                document.getElementById('welcomeText').classList.add('active');
+            }, 13000);
+
+            // Giây 16: Hoàn tất Intro, bật đèn và trượt bảng Đăng Nhập
+            setTimeout(() => {
+                if(!isCinematicFinished) finishCinematic();
+            }, 16000);
         }
 
         function finishCinematic() {
@@ -325,7 +324,6 @@
             var statusEl = document.getElementById('loginStatus');
             
             if(acc === "" || code === "") { 
-                sndError.currentTime = 0; sndError.play().catch(e=>{});
                 statusEl.innerHTML = "❌ NHẬP DANH TÍNH VÀ MẬT ẤN!"; 
                 statusEl.style.color = "#ff3333"; 
                 return; 
@@ -343,7 +341,6 @@
             .then(response => response.json())
             .then(data => {
                 if(data.success === true || data.result === "success" || data.status === "success" || data.ket_qua === "thanh_cong") {
-                    sndSuccess.currentTime = 0; sndSuccess.play().catch(e=>{});
                     statusEl.innerHTML = "✅ ẤN KÝ TƯƠNG HỢP. ĐANG TIẾN NHẬP..."; 
                     statusEl.style.color = "#00e5ff";
                     
@@ -353,13 +350,11 @@
                     document.getElementById('bgMusic').pause();
                     setTimeout(() => { window.location.href = 'core.html'; }, 1000); 
                 } else {
-                    sndError.currentTime = 0; sndError.play().catch(e=>{});
                     statusEl.innerHTML = data.msg ? data.msg : "❌ SAI ẤN KÝ NỘI MÔN!"; 
                     statusEl.style.color = "#ff3333";
                 }
             })
             .catch(error => {
-                sndError.currentTime = 0; sndError.play().catch(e=>{});
                 statusEl.innerHTML = "❌ KẾT NỐI BỊ PHONG TỎA!"; 
                 statusEl.style.color = "#ff3333";
             });
