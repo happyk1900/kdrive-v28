@@ -28,7 +28,6 @@
             pointer-events: none;
         }
 
-        /* LỚP CANVAS HIỆU ỨNG HẠT NỔI & MƯA BAY */
         #particle-canvas {
             position: absolute; inset: 0; width: 100%; height: 100%;
             z-index: 4; pointer-events: none;
@@ -121,7 +120,6 @@
             <source src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/A%20ROYAL.mp4" type="video/mp4">
         </video>
 
-        <!-- LỚP CANVAS HIỆU ỨNG HẠT VÀ MƯA -->
         <canvas id="particle-canvas"></canvas>
 
         <div class="ob-container" id="ob-container-wrapper">
@@ -155,10 +153,9 @@
         <button class="start-btn light-sweep" id="bootBtn" onclick="launchCore()">TRUY CẬP ĐẠO TRƯỜNG</button>
     </div>
 
+    <audio id="bg-music" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai-Ripe.mp3" loop preload="auto"></audio>
+
     <script>
-        // ==========================================
-        // HỆ THỐNG HIỆU ỨNG HẠT NỔI & MƯA BAY (CANVAS)
-        // ==========================================
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -177,13 +174,12 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                // Kết hợp hạt nổi lững lờ và hạt mưa bay xéo góc
                 this.isRain = Math.random() > 0.4;
                 this.size = this.isRain ? Math.random() * 1.5 + 0.8 : Math.random() * 2.5 + 1;
                 this.speedX = this.isRain ? -0.8 : (Math.random() - 0.5) * 0.5;
                 this.speedY = this.isRain ? Math.random() * 6 + 4 : (Math.random() - 0.5) * 0.6;
                 this.opacity = Math.random() * 0.6 + 0.2;
-                this.color = Math.random() > 0.5 ? '#00e5ff' : '#ff1493'; // Xanh cyan neon hoặc hồng neon
+                this.color = Math.random() > 0.5 ? '#00e5ff' : '#ff1493'; 
             }
             update() {
                 this.x += this.speedX;
@@ -198,7 +194,6 @@
                 ctx.globalAlpha = this.opacity;
                 ctx.fillStyle = this.color;
                 if (this.isRain) {
-                    // Vẽ hạt mưa dạng vạch sọc nhẹ
                     ctx.strokeStyle = this.color;
                     ctx.lineWidth = this.size;
                     ctx.beginPath();
@@ -206,7 +201,6 @@
                     ctx.lineTo(this.x - 2, this.y + 12);
                     ctx.stroke();
                 } else {
-                    // Vẽ hạt sáng lững lờ tròn
                     ctx.shadowBlur = 8;
                     ctx.shadowColor = this.color;
                     ctx.beginPath();
@@ -217,7 +211,6 @@
             }
         }
 
-        // Khởi tạo 50 hạt chuyển động
         for (let i = 0; i < 50; i++) {
             particles.push(new Particle());
         }
@@ -232,9 +225,6 @@
         }
         animateParticles();
 
-        // ==========================================
-        // DỮ LIỆU CẢNH VÀ ĐIỀU HƯỚNG
-        // ==========================================
         const obScenes = [
             { 
                 title: "PHÓ SƯ BOO AI", 
@@ -278,11 +268,11 @@
                 visualClass: "ob-scene-4" 
             },
             { 
-                title: "A ROYAL TEA - KẾT NỐI", 
+                title: "HIỆU LỆNH XUNG TRẬN", 
                 isVideo: true,
                 textNodes: [
-                    { text: "// Nơi khởi nguồn của giấc mơ.", color: "#00e5ff" },
-                    { text: "Hành trình trở thành Cyber-Ronin chính thức khai ấn!!", color: "#ffaa00", bold: true }
+                    { text: "// Gác lại khói sương trần thế.", color: "#00e5ff" },
+                    { text: "Đạo trường tối thượng đã mở. Sẵn sàng cắm cờ lập chiến công!", color: "#ffaa00", bold: true }
                 ],
                 visualClass: "ob-scene-5" 
             }
@@ -325,6 +315,7 @@
             } catch(e) {}
         }
 
+        // KHÔI PHỤC HOÀN TOÀN ÂM THANH ĐẶC TRƯNG 4 CẢNH
         function playHardcoreAudio(sceneIndex) {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -376,28 +367,10 @@
                     currentOscillators.push(osc);
                 }
             }
-            else if (sceneIndex === 4) {
-                const chordFrequencies = [220, 261.63, 329.63, 392.00]; 
-                for(let loop = 0; loop < 4; loop++) { 
-                    let baseTime = t + (loop * 4.0);
-                    chordFrequencies.forEach((freq, fIndex) => {
-                        let osc = audioCtx.createOscillator(); 
-                        let gain = audioCtx.createGain();
-                        osc.type = (fIndex % 2 === 0) ? 'sine' : 'triangle';
-                        osc.frequency.setValueAtTime(freq, baseTime);
-                        
-                        gain.gain.setValueAtTime(0, baseTime);
-                        gain.gain.linearRampToValueAtTime(0.06, baseTime + 0.5);
-                        gain.gain.linearRampToValueAtTime(0.03, baseTime + 3.5);
-                        gain.gain.linearRampToValueAtTime(0, baseTime + 3.9);
-                        
-                        osc.connect(gain); gain.connect(audioCtx.destination);
-                        osc.start(baseTime); osc.stop(baseTime + 4.0);
-                        currentOscillators.push(osc);
-                    });
-                }
-            }
         }
+
+        const bgMusic = document.getElementById('bg-music');
+        bgMusic.volume = 0.8;
 
         window.addEventListener('load', () => {
             document.body.addEventListener('click', bootSequence, { once: true });
@@ -413,6 +386,8 @@
         function bootSequence() {
             hasBooted = true;
             triggerVibration(50);
+            bgMusic.play().catch(e => console.log("Audio play blocked:", e));
+
             document.getElementById('ob-boo-wrapper').classList.add('ob-boo-grand-entry');
             document.getElementById('ob-laser-line').style.opacity = 1;
             document.getElementById('ob-dots').style.opacity = 1;
