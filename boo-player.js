@@ -1,22 +1,22 @@
 (function() {
-    // 1. Tiêm CSS: Trái tim đỏ chuẩn chỉ + Phi tiêu ninja xoay tròn khi hát
+    // 1. Tiêm CSS: Ghim vĩnh cửu, z-index tối đa, căn chỉnh trái tim & phi tiêu chuẩn đẹp
     const style = document.createElement('style');
     style.innerHTML = `
         .boo-car-widget {
             position: fixed;
-            bottom: 20px;
+            bottom: 24px; /* Đẩy lên cao hơn một chút để che khít mọi góc thừa */
             right: 20px;
-            z-index: 9999;
+            z-index: 9999999; /* Luôn nổi lên trên cùng, kể cả video bay vào */
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: rgba(8, 12, 20, 0.9);
+            background: rgba(8, 12, 20, 0.92);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 20, 147, 0.5);
+            border: 1px solid rgba(255, 20, 147, 0.6);
             padding: 6px 12px;
             border-radius: 30px;
-            box-shadow: 0 0 20px rgba(255, 20, 147, 0.25);
+            box-shadow: 0 0 25px rgba(255, 20, 147, 0.35);
             font-family: 'Space Grotesk', sans-serif;
             pointer-events: auto;
             cursor: pointer;
@@ -26,7 +26,7 @@
         }
         .boo-car-widget:hover {
             border-color: #00e5ff;
-            box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+            box-shadow: 0 0 35px rgba(0, 229, 255, 0.5);
         }
 
         /* Khung chứa icon */
@@ -40,38 +40,36 @@
             flex-shrink: 0;
         }
 
-        /* TRÁI TIM ĐỎ CHUẨN CHỈ (Trạng thái Nghỉ) */
+        /* TRÁI TIM ĐỎ CHUẨN CHỈ (Trạng thái Nghỉ) - Căn giữa hoàn hảo */
         .cyber-heart-k {
             position: relative;
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             background-color: #ff1493;
             transform: rotate(-45deg);
-            box-shadow: 0 0 12px rgba(255, 20, 147, 0.8);
+            box-shadow: 0 0 12px rgba(255, 20, 147, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 2px;
+            margin: 2px 0 0 2px;
         }
-        /* Tạo hai nửa hình tròn bên trên của trái tim */
         .cyber-heart-k::before,
         .cyber-heart-k::after {
             content: "";
             position: absolute;
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             background-color: #ff1493;
             border-radius: 50%;
         }
         .cyber-heart-k::before {
-            top: -14px;
+            top: -13px;
             left: 0;
         }
         .cyber-heart-k::after {
-            left: 14px;
+            left: 13px;
             top: 0;
         }
-        /* Chữ K nằm giữa trái tim (xoay ngược lại 45 độ để đứng thẳng) */
         .cyber-heart-k span {
             position: relative;
             z-index: 10;
