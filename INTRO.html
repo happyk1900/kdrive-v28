@@ -94,7 +94,7 @@
         .bq-dia { top: -10px; left: -10px; border-top-color: #ffd700; border-left-color: #ffd700; border-radius: 40px 0 0 0; filter: drop-shadow(0 0 4px #ffd700); }
         .bq-thuy { top: -10px; right: -10px; border-top-color: #0088ff; border-right-color: #0088ff; border-radius: 0 40px 0 0; filter: drop-shadow(0 0 4px #0088ff); }
         .bq-hoa { bottom: -10px; left: -10px; border-bottom-color: #ff3300; border-left-color: #ff3300; border-radius: 0 0 0 40px; filter: drop-shadow(0 0 4px #ff3300); }
-        .bq-phong { bottom: -10px; right: -10px; border-bottom-color: #00ffff; border-right-color: #00ffff; border-radius: 0 0 40px 0; filter: drop-shadow(0 0 4px #00ffff); }
+        .bq-phong { bottom: -10px; right: -10px; border-bottom-color: #00ffff; border-right-color: #00ffff; border-radius: 0 0 40px 0; filter: drop-shadow(0 0 40px #00ffff); }
         
         .boo-energy-border { position: absolute; inset: -2px; border-radius: 40% 40% 45% 45%; background: conic-gradient(#00e5ff 100%, transparent 0); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; padding: 4px; z-index: 3; box-shadow: 0 0 25px #00e5ff, inset 0 0 15px #00e5ff; transform: scale(0.8); }
         .boo-face { position: absolute; inset: 2px; background: #ff1493; border-radius: 40% 40% 45% 45%; box-shadow: inset 0 0 15px rgba(255,255,255,0.8), 0 0 35px rgba(255,20,147,0.8); z-index: 2; }
@@ -135,7 +135,6 @@
             margin-bottom: 15px; text-align: center; text-transform: uppercase;
         }
         
-        /* 🌟 ĐIỀU CHỈNH KHUNG CHỮ CẢNH 5 THOÁNG ĐÃNG, TÁCH BẠCH RÕ RÀNG */
         .ob-desc { 
             color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; font-weight: 500; line-height: 1.7; text-align: center; width: 100%; 
             min-height: 90px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8); 
@@ -358,8 +357,9 @@
                 title: "Hiệu lệnh xung trận", 
                 isVideo: true,
                 textNodes: [
-                    { text: "K-Drive huấn luyện chiến đấu để giành chiến thắng. Phá vỡ mọi giới hạn, làm chủ bản thân và định đoạt vận mệnh của chính mình.", color: "#ffffff" },
-                    { text: "— Cảm tác từ Ngũ Luân Thư Miyamoto Musashi —", color: "#ffd700", bold: true }
+                    { text: "K-Drive huấn luyện chiến đấu để giành chiến thắng. Phá vỡ mọi giới hạn, làm chủ bản thân và định đoạt vận mệnh của chính mình.", color: "#ffffff", highlightKDrive: true },
+                    { text: "— Cảm tác từ Ngũ Luân Thư —", color: "#ffffff", highlightBook: true },
+                    { text: "Miyamoto Musashi", color: "#ffd700", bold: true }
                 ],
                 visualClass: "ob-scene-5" 
             }
@@ -528,41 +528,60 @@
                 return;
             }
 
-            let currentNodeIdx = 0;
+            let nodes = scene.textNodes;
+            let currentLineIdx = 0;
             let currentCharIdx = 0;
-            
-            let lines = scene.textNodes.map(node => {
-                let div = document.createElement('div');
-                div.style.color = node.color || '#ffffff';
-                div.style.textAlign = 'center';
-                div.style.width = '100%';
-                if(node.bold) {
-                    div.style.fontWeight = 'bold';
-                    div.style.marginTop = '10px'; // Tạo khoảng cách thoáng với dòng trên
-                    div.style.fontSize = '12.5px'; // Thu nhỏ nhẹ để vừa vặn một dòng
-                }
-                element.appendChild(div);
-                return { div: div, text: node.text };
-            });
+            let activeDiv = null;
 
             typingInterval = setInterval(() => {
-                if (currentNodeIdx < lines.length) {
-                    let currentLine = lines[currentNodeIdx];
-                    if (currentCharIdx <= currentLine.text.length) {
-                        currentLine.div.textContent = currentLine.text.substring(0, currentCharIdx);
+                if (currentLineIdx < nodes.length) {
+                    let node = nodes[currentLineIdx];
+                    let text = node.text;
+
+                    // Nếu chưa tạo khung dòng mới thì tạo và đẩy vào DOM khi bắt đầu gõ dòng đó
+                    if (!activeDiv) {
+                        activeDiv = document.createElement('div');
+                        activeDiv.style.color = node.color || '#ffffff';
+                        activeDiv.style.textAlign = 'center';
+                        activeDiv.style.width = '100%';
+                        if (node.bold) {
+                            activeDiv.style.fontWeight = 'bold';
+                            activeDiv.style.marginTop = '8px';
+                            activeDiv.style.fontSize = '13px';
+                        } else if (scene.visualClass === 'ob-scene-5') {
+                            activeDiv.style.marginTop = '8px';
+                            activeDiv.style.fontSize = '12.5px';
+                        }
+                        element.appendChild(activeDiv);
+                    }
+
+                    if (currentCharIdx <= text.length) {
+                        let partial = text.substring(0, currentCharIdx);
+
+                        if (node.highlightKDrive) {
+                            let displayed = partial.startsWith('K-Drive') ? `<span style="color: #ff3333; font-weight: bold;">K-Drive</span>${partial.substring(7)}` : partial;
+                            activeDiv.innerHTML = displayed;
+                        } else if (node.highlightBook) {
+                            let displayed = partial.replace('Ngũ Luân Thư', '<span style="color: #ff3333; font-weight: bold;">Ngũ Luân Thư</span>');
+                            activeDiv.innerHTML = displayed;
+                        } else {
+                            activeDiv.textContent = partial;
+                        }
+
                         let oldCursor = element.querySelector('.cursor');
                         if(oldCursor) oldCursor.remove();
                         let cursor = document.createElement('span');
                         cursor.className = 'cursor';
-                        currentLine.div.appendChild(cursor);
+                        activeDiv.appendChild(cursor);
 
                         playKeyClickSound();
                         currentCharIdx++;
                     } else {
-                        let oldCursor = currentLine.div.querySelector('.cursor');
+                        let oldCursor = activeDiv.querySelector('.cursor');
                         if(oldCursor) oldCursor.remove();
-                        currentNodeIdx++;
+                        currentLineIdx++;
                         currentCharIdx = 0;
+                        activeDiv = null; // Reset để sang dòng tiếp theo
                     }
                 } else {
                     clearInterval(typingInterval);
@@ -608,7 +627,7 @@
                 document.getElementById('ob-title').innerHTML = scene.title;
                 
                 const descElem = document.getElementById('ob-desc');
-                typeWriterSafe(scene, descElem, 45);
+                typeWriterSafe(scene, descElem, 40);
                 
                 if (bg0) {
                     bg0.classList.add('fade-out');
