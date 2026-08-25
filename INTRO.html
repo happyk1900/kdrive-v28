@@ -28,6 +28,21 @@
             pointer-events: none;
         }
 
+        /* LỚP SƯƠNG MÙ LẠNH LẼO TRUNG CHUYỂN TỪ ĐẠO TRƯỜNG */
+        #cold-mist-overlay {
+            position: absolute; inset: 0;
+            background: radial-gradient(circle at 50% 100%, rgba(128, 222, 234, 0.15) 0%, rgba(0, 15, 25, 0.8) 70%);
+            box-shadow: inset 0 -50px 100px rgba(0, 50, 80, 0.6);
+            z-index: 3;
+            pointer-events: none;
+            transition: opacity 2s ease-in-out;
+            animation: breatheMist 4s infinite alternate;
+        }
+        @keyframes breatheMist {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
         #particle-canvas {
             position: absolute; inset: 0; width: 100%; height: 100%;
             z-index: 4; pointer-events: none;
@@ -44,7 +59,6 @@
 
         .ob-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 25px; width: 100%; z-index: 10;}
         
-        /* KHU VỰC ĐIỀU HƯỚNG CÓ CHÚ THÍCH [QUAY LẠI] / [QUA NHANH] */
         .nav-btn-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 100; cursor: pointer; pointer-events: auto; }
         .nav-arrow { color: #00e5ff; font-size: 32px; padding: 5px 15px; text-shadow: 0 0 10px #00e5ff; transition: transform 0.2s, text-shadow 0.2s; user-select: none; font-family: monospace; font-weight: bold; }
         .nav-btn-wrapper:active .nav-arrow { transform: scale(0.8); text-shadow: 0 0 20px #fff; }
@@ -128,10 +142,12 @@
             <source src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/A%20ROYAL.mp4" type="video/mp4">
         </video>
 
+        <!-- LỚP SƯƠNG LẠNH - CHỈ HIỆN LÚC CHỜ KHỞI ĐỘNG -->
+        <div id="cold-mist-overlay"></div>
+
         <canvas id="particle-canvas"></canvas>
 
         <div class="ob-container" id="ob-container-wrapper">
-            <!-- NÚT QUAY LẠI CÓ CHÚ THÍCH -->
             <div class="nav-btn-wrapper" id="ob-nav-left" onclick="prevSceneManual(event)">
                 <div class="nav-arrow">&#10094;</div>
                 <div class="nav-label">Quay lại</div>
@@ -150,7 +166,6 @@
                 </div>
             </div>
 
-            <!-- NÚT QUA NHANH CÓ CHÚ THÍCH -->
             <div class="nav-btn-wrapper" id="ob-nav-right" onclick="nextSceneManual(event)">
                 <div class="nav-arrow">&#10095;</div>
                 <div class="nav-label">Qua nhanh</div>
@@ -178,6 +193,7 @@
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
+        let hasBooted = false;
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -198,7 +214,13 @@
                 this.speedX = this.isRain ? -0.8 : (Math.random() - 0.5) * 0.5;
                 this.speedY = this.isRain ? Math.random() * 6 + 4 : (Math.random() - 0.5) * 0.6;
                 this.opacity = Math.random() * 0.6 + 0.2;
-                this.color = Math.random() > 0.5 ? '#00e5ff' : '#ff1493'; 
+                
+                // ĐỔI MÀU THEO TRẠNG THÁI: LẠNH TRƯỚC (CHỜ), RỰC RỠ SAU (BOOT)
+                if (!hasBooted) {
+                    this.color = Math.random() > 0.5 ? '#e0f7fa' : '#80deea'; // Xanh băng/Trắng mờ
+                } else {
+                    this.color = Math.random() > 0.5 ? '#00e5ff' : '#ff1493'; // Neon rực rỡ
+                }
             }
             update() {
                 this.x += this.speedX;
@@ -300,7 +322,6 @@
         let obSceneIndex = 0;
         let sceneTimeout = null;
         let typingInterval = null;
-        let hasBooted = false;
 
         let audioCtx = null;
         let currentOscillators = [];
@@ -395,8 +416,8 @@
             
             setTimeout(() => {
                 if(!hasBooted) {
-                    // CHỮ TO RÕ RÀNG: CHẠM ĐỂ KHỞI ĐỘNG
-                    document.getElementById('ob-title').innerHTML = "<span style='color:#00ffff; font-size:20px; font-weight:bold; letter-spacing: 3px; text-shadow: 0 0 15px #00ffff, 2px 2px 4px #000;'>CHẠM ĐỂ KHỞI ĐỘNG</span>";
+                    // CHỮ HIỂN THỊ ÁNH SÁNG LẠNH TRƯỚC KHI BOOT
+                    document.getElementById('ob-title').innerHTML = "<span style='color:#e0f7fa; font-size:20px; font-weight:bold; letter-spacing: 3px; text-shadow: 0 0 20px #80deea, 2px 2px 4px #000;'>CHẠM ĐỂ KHỞI ĐỘNG</span>";
                     document.getElementById('ob-text-wrapper').style.opacity = 1;
                 }
             }, 500);
@@ -406,6 +427,12 @@
             hasBooted = true;
             triggerVibration(50);
             bgMusic.play().catch(e => console.log("Audio play blocked:", e));
+
+            // ĐỔI TOÀN BỘ HẠT SANG MÀU NEON RỰC RỠ SAU KHI CHẠM
+            particles.forEach(p => { p.color = Math.random() > 0.5 ? '#00e5ff' : '#ff1493'; });
+
+            // TẮT LỚP SƯƠNG MÙ LẠNH LẼO
+            document.getElementById('cold-mist-overlay').style.opacity = '0';
 
             document.getElementById('ob-boo-wrapper').classList.add('ob-boo-grand-entry');
             document.getElementById('ob-laser-line').style.opacity = 1;
@@ -565,6 +592,8 @@
             flash.style.opacity = 1;
             
             setTimeout(() => { document.body.style.backgroundColor = '#000'; flash.style.opacity = 0; }, 150);
+            
+            // SAU KHI INTRO XONG THÌ BAY THẲNG VÀO LÕI HỆ THỐNG
             setTimeout(() => { window.location.href = 'core.html'; }, 500); 
         }
     </script>
