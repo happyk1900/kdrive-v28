@@ -1,5 +1,5 @@
 (function() {
-    // 1. Tiêm CSS: Giao diện Ninja Cyber Boo + Hiệu ứng nốt nhạc bay lơ lửng
+    // 1. Tiêm CSS: Trái tim đỏ chuẩn chỉ + Phi tiêu ninja xoay tròn khi hát
     const style = document.createElement('style');
     style.innerHTML = `
         .boo-car-widget {
@@ -40,81 +40,71 @@
             flex-shrink: 0;
         }
 
-        /* Quân bài Ca Cơ chữ K (Trạng thái Nghỉ) */
+        /* TRÁI TIM ĐỎ CHUẨN CHỈ (Trạng thái Nghỉ) */
         .cyber-heart-k {
-            width: 32px;
-            height: 32px;
-            background: radial-gradient(circle, #ff1493 0%, #8b008b 100%);
-            clip-path: polygon(50% 0%, 100% 35%, 82% 100%, 50% 75%, 18% 100%, 0% 35%);
+            position: relative;
+            width: 28px;
+            height: 28px;
+            background-color: #ff1493;
+            transform: rotate(-45deg);
+            box-shadow: 0 0 12px rgba(255, 20, 147, 0.8);
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 10px rgba(255, 20, 147, 0.7);
+            margin-top: 2px;
         }
+        /* Tạo hai nửa hình tròn bên trên của trái tim */
+        .cyber-heart-k::before,
+        .cyber-heart-k::after {
+            content: "";
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            background-color: #ff1493;
+            border-radius: 50%;
+        }
+        .cyber-heart-k::before {
+            top: -14px;
+            left: 0;
+        }
+        .cyber-heart-k::after {
+            left: 14px;
+            top: 0;
+        }
+        /* Chữ K nằm giữa trái tim (xoay ngược lại 45 độ để đứng thẳng) */
         .cyber-heart-k span {
+            position: relative;
+            z-index: 10;
             color: #ffd700;
             font-weight: 900;
-            font-size: 14px;
+            font-size: 13px;
             text-shadow: 0 0 6px rgba(255, 215, 0, 0.9);
-            margin-top: -2px;
+            transform: rotate(45deg);
         }
 
-        /* Ninja Cyber Boo đội nón (Trạng thái Hát) */
-        .cyber-ninja-boo {
-            width: 34px;
-            height: 34px;
-            background: radial-gradient(circle, #ff69b4 0%, #4a0025 100%);
-            border-radius: 50%;
-            position: relative;
+        /* Phi tiêu Ninja 3 cánh Cyberpunk (Trạng thái Hát - Xoay tròn liên tục) */
+        .cyber-ninja-star {
+            width: 32px;
+            height: 32px;
+            background: radial-gradient(circle, #00e5ff 0%, #ff1493 100%);
+            clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 12px rgba(255, 20, 147, 0.9);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.9);
+            animation: starRotate 1.5s linear infinite;
         }
-        /* Nón Ninja Cyber che phần trên */
-        .cyber-ninja-boo::after {
+        .cyber-ninja-star::after {
             content: '';
-            position: absolute;
-            top: -2px;
-            left: -3px;
-            right: -3px;
-            height: 18px;
-            background: linear-gradient(135deg, #111, #333);
-            border-bottom: 2px solid #00e5ff;
-            clip-path: polygon(0 100%, 50% 0%, 100% 100%);
-        }
-        .boo-snout-ninja {
-            position: absolute;
-            top: 18px;
-            width: 12px;
-            height: 7px;
-            background: #ff1493;
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.5);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 2;
+            box-shadow: 0 0 6px #fff;
         }
-        .boo-snout-ninja span { width: 1.5px; height: 3px; background: #000; border-radius: 50%; }
-
-        /* Hiệu ứng nốt nhạc bay lên đầu khi đang hát */
-        .music-note-float {
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-            color: #00e5ff;
-            text-shadow: 0 0 8px #00e5ff;
-            animation: noteFly 1.5s infinite ease-in-out;
-            pointer-events: none;
-            z-index: 10;
-        }
-        @keyframes noteFly {
-            0% { transform: translate(-50%, 0) scale(0.8); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translate(-50%, -18px) scale(1.2); opacity: 0; }
+        @keyframes starRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* Chữ hiển thị */
@@ -192,7 +182,6 @@
     widget.innerHTML = `
         <div class="boo-car-avatar-container" id="booAvatarContainer">
             <div class="cyber-heart-k" id="iconBox"><span>K</span></div>
-            <div id="noteContainer"></div>
         </div>
         <div class="boo-car-info">
             <span class="boo-car-title" id="carMainText">${WEBSITE_NAME}</span>
@@ -220,9 +209,7 @@
             if (!audioTag && allAudios.length > 0) audioTag = allAudios[0];
         }
 
-        const avatarContainer = document.getElementById('booAvatarContainer');
         const iconBox = document.getElementById('iconBox');
-        const noteContainer = document.getElementById('noteContainer');
         const mainText = document.getElementById('carMainText');
         const subText = document.getElementById('carSubText');
         const miniControls = document.getElementById('booMiniControls');
@@ -251,12 +238,8 @@
         }
 
         function setPlayingState() {
-            iconBox.className = "cyber-ninja-boo";
-            iconBox.innerHTML = `
-                <div class="boo-snout-ninja"><span></span><span></span></div>
-            `;
-            // Thêm nốt nhạc bay lơ lửng trên đầu
-            noteContainer.innerHTML = `<div class="music-note-float">♫</div>`;
+            iconBox.className = "cyber-ninja-star";
+            iconBox.innerHTML = ``;
             mainText.textContent = songName;
             subText.textContent = STORY_SUB;
             playBtn.textContent = "⏸ PAUSE";
@@ -265,7 +248,6 @@
         function setIdleState() {
             iconBox.className = "cyber-heart-k";
             iconBox.innerHTML = `<span>K</span>`;
-            noteContainer.innerHTML = ``; // Xóa nốt nhạc khi dừng
             mainText.textContent = WEBSITE_NAME;
             subText.textContent = STORY_SUB;
             playBtn.textContent = "▶ PLAY";
