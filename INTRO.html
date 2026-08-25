@@ -15,16 +15,39 @@
 
         #onboarding-ui { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: transparent; z-index: 10; padding: 20px; transition: opacity 0.5s ease-out; }
         
-        #ob-bg-layer {
+        /* 🌟 KỸ THUẬT ĐỔI ẢNH CHÉO (CROSS-FADE) SIÊU MƯỢT VỚI GPU ACCELERATION */
+        .ob-bg-layer {
             position: absolute; inset: 0;
             background-size: cover; background-position: center center;
-            opacity: 0; transition: opacity 0.8s ease-in-out, background-image 0.5s ease;
+            opacity: 0; 
+            filter: blur(10px) scale(1.05);
+            transform: translateZ(0); /* Ép tăng tốc phần cứng GPU */
+            transition: opacity 1.6s cubic-bezier(0.25, 1, 0.5, 1), filter 1.6s cubic-bezier(0.25, 1, 0.5, 1), transform 1.6s cubic-bezier(0.25, 1, 0.5, 1);
             z-index: 1; 
+        }
+        .ob-bg-layer.active {
+            opacity: 1;
+            filter: blur(0px) scale(1);
+        }
+
+        /* LỚP ẢNH MỞ ĐẦU (CẢNH 0) ĐƯỢC GẮN SẴN NÉT CĂNG TỪ ĐẦU */
+        #ob-bg-0 {
+            position: absolute; inset: 0;
+            background-size: cover; background-position: center center;
+            background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/INTRO%20canh%200.png?raw=true');
+            opacity: 1;
+            filter: blur(0px) scale(1);
+            transition: opacity 1.6s cubic-bezier(0.25, 1, 0.5, 1), filter 1.6s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 1;
+        }
+        #ob-bg-0.fade-out {
+            opacity: 0;
+            filter: blur(10px) scale(1.05);
         }
 
         #ob-bg-video {
             position: absolute; inset: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: 2; opacity: 0; transition: opacity 1s ease-in-out;
+            object-fit: cover; z-index: 2; opacity: 0; transition: opacity 1.6s ease-in-out;
             pointer-events: none;
         }
 
@@ -59,7 +82,7 @@
         .bq-dia { top: -10px; left: -10px; border-top-color: #ffd700; border-left-color: #ffd700; border-radius: 40px 0 0 0; filter: drop-shadow(0 0 4px #ffd700); }
         .bq-thuy { top: -10px; right: -10px; border-top-color: #0088ff; border-right-color: #0088ff; border-radius: 0 40px 0 0; filter: drop-shadow(0 0 4px #0088ff); }
         .bq-hoa { bottom: -10px; left: -10px; border-bottom-color: #ff3300; border-left-color: #ff3300; border-radius: 0 0 0 40px; filter: drop-shadow(0 0 4px #ff3300); }
-        .bq-phong { bottom: -10px; right: -10px; border-bottom-color: #00ffff; border-right-color: #00ffff; border-radius: 0 0 40px 0; filter: drop-shadow(0 0 4px #00ffff); }
+        .bq-phong { bottom: -10px; right: -10px; border-bottom-color: #00ffff; border-right-color: #00ffff; border-radius: 0 0 40px 0; filter: drop-shadow(0 0 40px #00ffff); }
         
         .boo-energy-border { position: absolute; inset: -2px; border-radius: 40% 40% 45% 45%; background: conic-gradient(#00e5ff 100%, transparent 0); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; padding: 4px; z-index: 3; box-shadow: 0 0 25px #00e5ff, inset 0 0 15px #00e5ff; transform: scale(0.8); }
         .boo-face { position: absolute; inset: 2px; background: #ff1493; border-radius: 40% 40% 45% 45%; box-shadow: inset 0 0 15px rgba(255,255,255,0.8), 0 0 35px rgba(255,20,147,0.8); z-index: 2; }
@@ -140,7 +163,11 @@
     <div id="flash-overlay"></div>
 
     <div id="onboarding-ui">
-        <div id="ob-bg-layer"></div>
+        <!-- ẢNH NỀN MỞ ĐẦU (CẢNH 0) VÀ 2 LỚP NỀN CHUYỂN ĐỔI CHÉO -->
+        <div id="ob-bg-0"></div>
+        <div class="ob-bg-layer" id="ob-bg-1"></div>
+        <div class="ob-bg-layer" id="ob-bg-2"></div>
+
         <video id="ob-bg-video" autoplay muted loop playsinline>
             <source src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/A%20ROYAL.mp4" type="video/mp4">
         </video>
@@ -321,9 +348,22 @@
             }
         ];
 
+        // TỰ ĐỘNG PRELOAD TRƯỚC TẤT CẢ ẢNH NỀN BAO GỒM CẢ CẢNH 0
+        window.addEventListener('load', () => {
+            const allImages = [
+                "https://github.com/happyk1900/-m-thanh-app/blob/main/INTRO%20canh%200.png?raw=true",
+                ...obScenes.map(s => s.bgUrl).filter(Boolean)
+            ];
+            allImages.forEach(url => {
+                const img = new Image();
+                img.src = url;
+            });
+        });
+
         let obSceneIndex = 0;
         let sceneTimeout = null;
         let typingInterval = null;
+        let activeBgLayer = 1;
 
         let audioCtx = null;
         let currentOscillators = [];
@@ -537,12 +577,12 @@
             }
             
             const textWrap = document.getElementById('ob-text-wrapper');
-            const bgLayer = document.getElementById('ob-bg-layer');
+            const bg0 = document.getElementById('ob-bg-0');
+            const bg1 = document.getElementById('ob-bg-1');
+            const bg2 = document.getElementById('ob-bg-2');
             const bgVideo = document.getElementById('ob-bg-video');
             
             textWrap.style.opacity = 0;
-            bgLayer.style.opacity = 0;
-            bgVideo.style.opacity = 0;
 
             setTimeout(() => {
                 document.getElementById('ob-title').innerHTML = scene.title;
@@ -550,13 +590,32 @@
                 const descElem = document.getElementById('ob-desc');
                 typeWriterSafe(scene, descElem, 45);
                 
+                // 🌟 MỜ DẦN ẢNH CẢNH 0 KHI BẮT ĐẦU CHUYỂN SANG CẢNH 1
+                if (bg0) {
+                    bg0.classList.add('fade-out');
+                }
+
                 if (scene.isVideo) {
+                    bg1.classList.remove('active');
+                    bg2.classList.remove('active');
                     bgVideo.style.opacity = 1;
                     bgVideo.play().catch(e => {});
                 } else {
                     bgVideo.pause();
-                    bgLayer.style.backgroundImage = `url('${scene.bgUrl}')`;
-                    bgLayer.style.opacity = 1; 
+                    bgVideo.style.opacity = 0;
+
+                    // 🌟 CROSS-FADE CHÉO ẢNH SIÊU MƯỢT VỚI GPU ACCELERATION
+                    if (activeBgLayer === 1) {
+                        bg2.style.backgroundImage = `url('${scene.bgUrl}')`;
+                        bg2.classList.add('active');
+                        bg1.classList.remove('active');
+                        activeBgLayer = 2;
+                    } else {
+                        bg1.style.backgroundImage = `url('${scene.bgUrl}')`;
+                        bg1.classList.add('active');
+                        bg2.classList.remove('active');
+                        activeBgLayer = 1;
+                    }
                 }
                 
                 textWrap.style.opacity = 1;
