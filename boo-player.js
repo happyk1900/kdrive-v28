@@ -1,77 +1,78 @@
 (function() {
-    // 1. Tiêm CSS cho giao diện 2 trạng thái độc đáo
+    // 1. Tiêm CSS tối ưu hóa: Sạch sẽ, không che khuất màn hình, không lỗi nút bấm
     const style = document.createElement('style');
     style.innerHTML = `
         .boo-car-widget {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 999999;
-            display: flex;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: inline-flex;
             align-items: center;
-            gap: 12px;
-            background: rgba(8, 12, 20, 0.88);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            gap: 10px;
+            background: rgba(8, 12, 20, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 20, 147, 0.5);
-            padding: 8px 14px;
+            padding: 6px 12px;
             border-radius: 30px;
-            box-shadow: 0 0 25px rgba(255, 20, 147, 0.3);
+            box-shadow: 0 0 20px rgba(255, 20, 147, 0.25);
             font-family: 'Space Grotesk', sans-serif;
             pointer-events: auto;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
+            transition: all 0.3s ease;
+            width: auto;
+            max-width: 220px;
         }
         .boo-car-widget:hover {
-            box-shadow: 0 0 35px rgba(0, 229, 255, 0.6);
             border-color: #00e5ff;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
         }
 
-        /* Khung chứa biểu tượng (Ca cơ chữ K hoặc Mặt lợn Boo) */
+        /* Khung chứa icon */
         .boo-car-avatar-container {
-            width: 38px;
-            height: 38px;
+            width: 34px;
+            height: 34px;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-shrink: 0;
         }
 
-        /* Biểu tượng Ca Cơ chữ K độc quyền (Trạng thái Nghỉ) */
+        /* Quân bài Ca Cơ chữ K (Trạng thái Nghỉ) */
         .cyber-heart-k {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             background: radial-gradient(circle, #ff1493 0%, #8b008b 100%);
-            /* Tạo hình trái tim / ca cơ bằng clip-path hoặc border-radius cách điệu */
             clip-path: polygon(50% 0%, 100% 35%, 82% 100%, 50% 75%, 18% 100%, 0% 35%);
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 15px rgba(255, 20, 147, 0.8);
-            transition: transform 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 20, 147, 0.7);
         }
         .cyber-heart-k span {
             color: #ffd700;
             font-weight: 900;
-            font-size: 16px;
-            text-shadow: 0 0 8px rgba(255, 215, 0, 0.9);
+            font-size: 14px;
+            text-shadow: 0 0 6px rgba(255, 215, 0, 0.9);
             margin-top: -2px;
         }
 
-        /* Vòng năng lượng sinh mệnh (Chỉ hiện khi hát) */
+        /* Vòng năng lượng sinh mệnh (Trạng thái Hát) */
         .boo-car-avatar-container.active-pulse::before,
         .boo-car-avatar-container.active-pulse::after {
             content: '';
             position: absolute;
-            top: -5px; left: -5px; right: -5px; bottom: -5px;
+            top: -4px; left: -4px; right: -4px; bottom: -4px;
             border-radius: 50%;
-            border: 1px dashed rgba(255, 20, 147, 0.9);
+            border: 1px dashed rgba(255, 20, 147, 0.8);
             animation: ringRotate 4s linear infinite;
             pointer-events: none;
         }
         .boo-car-avatar-container.active-pulse::after {
-            top: -9px; left: -9px; right: -9px; bottom: -9px;
-            border: 1px solid rgba(0, 229, 255, 0.7);
+            top: -7px; left: -7px; right: -7px; bottom: -7px;
+            border: 1px solid rgba(0, 229, 255, 0.6);
             animation: ringRotateReverse 6s linear infinite;
         }
         @keyframes ringRotate { 100% { transform: rotate(360deg); } }
@@ -79,43 +80,43 @@
 
         /* Mặt lợn Boo chuẩn chỉnh (Trạng thái Hát) */
         .boo-real-face {
-            width: 38px;
-            height: 38px;
+            width: 34px;
+            height: 34px;
             background: radial-gradient(circle, #ff69b4 0%, #c71585 100%);
             border-radius: 50%;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 15px rgba(255, 20, 147, 0.9);
+            box-shadow: 0 0 12px rgba(255, 20, 147, 0.9);
         }
         .boo-real-face::before, .boo-real-face::after {
-            content: ''; position: absolute; top: 3px; width: 10px; height: 7px;
+            content: ''; position: absolute; top: 2px; width: 9px; height: 6px;
             background: #ff69b4; border-radius: 50%; border: 1px solid rgba(0,229,255,0.6);
         }
         .boo-real-face::before { left: -2px; transform: rotate(-20deg); }
         .boo-real-face::after { right: -2px; transform: rotate(20deg); }
         .boo-snout {
-            position: absolute; top: 18px; width: 14px; height: 8px;
+            position: absolute; top: 15px; width: 12px; height: 7px;
             background: #ff1493; border-radius: 50%; border: 1px solid rgba(255,255,255,0.5);
             display: flex; justify-content: space-around; align-items: center;
         }
-        .boo-snout span { width: 2px; height: 3px; background: #4a0025; border-radius: 50%; }
+        .boo-snout span { width: 1.5px; height: 3px; background: #4a0025; border-radius: 50%; }
         .boo-eyes-mini {
-            position: absolute; width: 18px; display: flex; justify-content: space-between; top: 10px;
+            position: absolute; width: 15px; display: flex; justify-content: space-between; top: 8px;
         }
-        .boo-eyes-mini span { width: 3px; height: 4px; background: #000; border-radius: 50%; }
+        .boo-eyes-mini span { width: 2.5px; height: 3.5px; background: #000; border-radius: 50%; }
 
-        /* Phần chữ hiển thị */
+        /* Chữ hiển thị */
         .boo-car-info {
             display: flex;
             flex-direction: column;
-            max-width: 170px;
             overflow: hidden;
+            pointer-events: none;
         }
         .boo-car-title {
             color: #ffd700;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             white-space: nowrap;
             overflow: hidden;
@@ -124,8 +125,8 @@
         }
         .boo-car-sub {
             color: #00e5ff;
-            font-size: 9px;
-            letter-spacing: 1px;
+            font-size: 8.5px;
+            letter-spacing: 0.8px;
             text-transform: uppercase;
             opacity: 0.9;
             white-space: nowrap;
@@ -136,19 +137,19 @@
         /* Menu điều khiển mini */
         .boo-mini-controls {
             position: absolute;
-            bottom: 60px;
+            bottom: 50px;
             right: 0;
             background: rgba(10, 15, 25, 0.95);
             border: 1px solid #00e5ff;
-            padding: 6px 10px;
-            border-radius: 16px;
+            padding: 5px 8px;
+            border-radius: 12px;
             display: flex;
-            gap: 8px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
             opacity: 0;
             pointer-events: none;
-            transform: translateY(8px);
-            transition: 0.3s ease;
+            transform: translateY(6px);
+            transition: 0.25s ease;
         }
         .boo-mini-controls.active {
             opacity: 1;
@@ -159,15 +160,15 @@
             background: transparent;
             border: 1px solid #ff1493;
             color: #fff;
-            font-size: 9px;
-            padding: 3px 8px;
-            border-radius: 8px;
+            font-size: 8.5px;
+            padding: 3px 6px;
+            border-radius: 6px;
             cursor: pointer;
             transition: 0.2s;
         }
         .boo-ctrl-btn:hover {
             background: #ff1493;
-            box-shadow: 0 0 8px #ff1493;
+            box-shadow: 0 0 6px #ff1493;
         }
     `;
     document.head.appendChild(style);
@@ -175,7 +176,7 @@
     const COMPANY_NAME = "TELEPATHY CORP // KAI-RIPE";
     const WEBSITE_NAME = "TELEPATHY.COM.VN";
 
-    // 2. Bơm Widget vào trang
+    // 2. Tạo Widget
     const widget = document.createElement('div');
     widget.className = 'boo-car-widget';
     widget.innerHTML = `
@@ -193,15 +194,13 @@
     `;
     document.body.appendChild(widget);
 
-    // 3. Xử lý logic chọn đúng nhạc nền chính & chuyển đổi trạng thái mượt mà
+    // 3. Xử lý logic
     window.addEventListener('DOMContentLoaded', () => {
-        // Lọc chuẩn xác: Chỉ bắt thẻ audio có id là bgMusic hoặc file nhạc nền dài, bỏ qua voice ngắn
         let audioTag = document.querySelector('audio#bgMusic') || document.querySelector('audio[id*="music"]');
         if (!audioTag) {
             const allAudios = document.querySelectorAll('audio');
             for (let audio of allAudios) {
                 let src = (audio.src || "").toLowerCase();
-                // Bỏ qua các file ngắn/voice/login
                 if (!src.includes('login') && !src.includes('error') && !src.includes('success')) {
                     audioTag = audio;
                     break;
@@ -227,7 +226,6 @@
             miniControls.classList.remove('active');
         });
 
-        // Tự động bắt tên bài hát chuẩn từ file nhạc
         let songName = "K-DRIVE: CYBER ANTHEM";
         if (audioTag) {
             try {
@@ -240,28 +238,24 @@
             } catch(e) {}
         }
 
-        // Trạng thái HÁT (Playing Mode)
         function setPlayingState() {
-            // Biến thành mặt lợn Boo chuẩn kèm vòng năng lượng
             iconBox.className = "boo-real-face";
             iconBox.innerHTML = `
                 <div class="boo-eyes-mini"><span></span><span></span></div>
                 <div class="boo-snout"><span></span><span></span></div>
             `;
             avatarContainer.classList.add('active-pulse');
-            mainText.textContent = songName;      // Tên bài hát tự động bắt chuẩn
-            subText.textContent = COMPANY_NAME;   // Tên công ty ở dưới
+            mainText.textContent = songName;
+            subText.textContent = COMPANY_NAME;
             playBtn.textContent = "⏸ PAUSE";
         }
 
-        // Trạng thái NGHỈ (Idle Mode)
         function setIdleState() {
-            // Biến thành quân bài Ca Cơ chữ K độc quyền
             iconBox.className = "cyber-heart-k";
             iconBox.innerHTML = `<span>K</span>`;
             avatarContainer.classList.remove('active-pulse');
-            mainText.textContent = WEBSITE_NAME;  // Website công ty
-            subText.textContent = COMPANY_NAME;   // Tên công ty
+            mainText.textContent = WEBSITE_NAME;
+            subText.textContent = COMPANY_NAME;
             playBtn.textContent = "▶ PLAY";
         }
 
