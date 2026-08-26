@@ -111,7 +111,7 @@
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: songName,
                     artist: 'K-Drive // Kai-Ripe',
-                    album: 'Cyber-Ninja: I',
+                    album: 'Cyber-Ninja:Album I',
                     artwork: [
                         { src: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Music%20anh%20nen.png?raw=true', sizes: '512x512', type: 'image/png' }
                     ]
