@@ -15,15 +15,111 @@
     
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-        body { background-color: #050505; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Space Grotesk', sans-serif; }
+        body { background-color: #050505; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Space Grotesk', sans-serif; perspective: 1000px; }
         img, video { -webkit-user-drag: none; pointer-events: none; }
 
-        .kdrive-image-wrapper { position: relative; width: 100vw; height: 100vh; max-width: 480px; background-color: #000; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        .kdrive-image-wrapper { position: relative; width: 100vw; height: 100vh; max-width: 480px; background-color: #000; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.8); transform-style: preserve-3d; }
         
-        /* 🔥 LỚP VIDEO FLYCAM 10 GIÂY ĐẦU TIÊN 🔥 */
+        /* 🔥 MÀN HÌNH CHỜ VỚI NÚT CỔNG XOÁY HỐ ĐEN NGHIÊNG THEO ĐỘ NGHIÊNG ĐIỆN THOẠI 🔥 */
+        #launchGateOverlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 20px; text-align: center;
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            transition: opacity 1s ease-in-out;
+            transform-style: preserve-3d;
+        }
+
+        .vortex-btn-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: transform 0.1s ease-out;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+        .vortex-btn-container:active {
+            transform: scale(0.9) !important;
+        }
+
+        /* Hiệu ứng hào quang hố đen xoay vòng */
+        .vortex-ring {
+            position: absolute;
+            inset: -12px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #00ffff, #ff007f, #ffd700, #7f00ff, #00ffff);
+            animation: spinVortex 2s linear infinite;
+            filter: blur(10px);
+            opacity: 0.9;
+        }
+        .vortex-ring-2 {
+            position: absolute;
+            inset: -22px;
+            border-radius: 50%;
+            background: conic-gradient(from 180deg, #ff1493, #00ffff, #00ff66, #ff1493);
+            animation: spinVortexReverse 3.5s linear infinite;
+            filter: blur(18px);
+            opacity: 0.6;
+        }
+
+        @keyframes spinVortex {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.03); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        @keyframes spinVortexReverse {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(-180deg) scale(0.97); }
+            100% { transform: rotate(-360deg) scale(1); }
+        }
+
+        /* Tâm hố đen 3D nổi khối */
+        .vortex-core {
+            position: relative;
+            width: 135px;
+            height: 135px;
+            background: radial-gradient(circle, #080c14 0%, #010204 80%, #000000 100%);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            border: 2px solid rgba(0, 229, 255, 0.8);
+            box-shadow: inset 0 0 30px rgba(0, 229, 255, 0.6), 0 0 30px rgba(0, 229, 255, 0.4);
+            transform: translateZ(20px);
+        }
+
+        .vortex-text {
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.9);
+            text-align: center;
+            padding: 0 5px;
+        }
+        .vortex-subtext {
+            color: #00ffff;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-top: 4px;
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+        }
+
+        /* 🔥 LỚP VIDEO FLYCAM 10 GIÂY CHẠY SAU KHI BẤM NÚT XOÁY 🔥 */
         #splashVideoOverlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: 9999999; background: #000;
+            object-fit: cover; z-index: 9999999; background: #000; display: none;
             transition: opacity 1s ease-in-out;
         }
 
@@ -69,7 +165,6 @@
         
         .tele-text { grid-area: 1 / 1; white-space: nowrap; text-align: center; }
         
-        /* 🔥 BỘ 4 HIỆU ỨNG LUÂN PHIÊN - TỔNG THỜI GIAN 16 GIÂY 🔥 */
         .t1 { animation: swapT1 16s infinite; opacity: 0; }
         .t2 { animation: swapT2 16s infinite; opacity: 0; }
         .t3 { animation: swapT3 16s infinite; opacity: 0; }
@@ -249,62 +344,39 @@
         .glow-kdrive { color: #ff1493; font-weight: 600; text-shadow: 0 0 8px rgba(255, 20, 147, 0.9), 0 0 15px rgba(255, 20, 147, 0.5); }
     </style>
 </head>
-<body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
-
-    <!-- 🔥 VIDEO FLYCAM CHẠY ĐẦU TIÊN (10 GIÂY RỒI TỰ TẮT ĐỂ VỀ LOGIN NGUYÊN BẢN) 🔥 -->
-    <video id="splashVideoOverlay" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/City%20Ronin.mp4" autoplay muted playsinline></video>
-
-    <audio id="sysAudio" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/KAIRON.MP3" preload="auto"></audio>
-    <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
-    <audio id="musashiVoice" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/LOGIN%20MUSASHI%20OK.MP3" preload="auto"></audio>
-    
-    <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20BAY%20VAO.mp4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 999999; display: none;" playsinline></video>
-
-    <script>
-        const sndClick = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
-        const sndError = new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3');
-        sndClick.volume = 0.4; sndError.volume = 0.5; 
-        function playClick() { sndClick.currentTime = 0; sndClick.play().catch(e=>{}); }
-
-        // --- ĐOẠN SCRIPT ĐIỀU KHIỂN: SAU 10 GIÂY HOẶC KHI VIDEO CHẠY XONG SẼ ẨN ĐI VỀ LOGIN GỐC ---
-        window.addEventListener('DOMContentLoaded', () => {
-            const splashVid = document.getElementById('splashVideoOverlay');
-            if(splashVid) {
-                // Tự động ẩn sau đúng 10 giây
-                const hideTimer = setTimeout(() => {
-                    removeSplash();
-                }, 10000);
-
-                // Hoặc khi video chạy hết
-                splashVid.onended = () => {
-                    clearTimeout(hideTimer);
-                    removeSplash();
-                };
-            }
-        });
-
-        function removeSplash() {
-            const splashVid = document.getElementById('splashVideoOverlay');
-            if(splashVid && splashVid.style.display !== 'none') {
-                splashVid.style.opacity = '0';
-                setTimeout(() => {
-                    splashVid.style.display = 'none';
-                }, 1000);
-            }
-        }
-    </script>
+<body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;" style="background: #000;">
 
     <div class="kdrive-image-wrapper" id="mainWrapper">
         <div class="top-shadow-gradient" id="shadowOverlay"></div>
         
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Logic%201%20nen.png?raw=true" id="bg-unlit" class="kdrive-bg-target">
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/SON%20MON%20CYBER.png?raw=true" id="bg-cyber" class="kdrive-bg-target">
+        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/SON%20MON%20CYBER.png?raw=true" id="bg-cyber" class="kdrive-bg-target" style="opacity: 1;">
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/BOO%20LOGIC%20OK.png?raw=true" id="bg-boo" class="kdrive-bg-target">
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/logic%202%20nen.png?raw=true" id="bg-lit" class="kdrive-bg-target">
         
         <div id="bottom-mist"></div>
 
-        <!-- 🔥 KHỐI 4 CÂU LUÂN PHIÊN GIỮ NGUYÊN BẢN GỐC CỦA SƯ PHỤ 🔥 -->
+        <!-- 🔥 NÚT VÒNG XOÁY HỐ ĐEN NGHIÊNG THEO ĐỘ NGHIÊNG ĐIỆN THOẠI 🔥 -->
+        <div id="launchGateOverlay">
+            <div class="vortex-btn-container" id="vortexBtn" onclick="triggerAppLaunch(); playClick();">
+                <div class="vortex-ring-2"></div>
+                <div class="vortex-ring"></div>
+                <div class="vortex-core">
+                    <div class="vortex-text">MỞ CỔNG</div>
+                    <div class="vortex-subtext">VORTEX</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔥 VIDEO FLYCAM 10 GIÂY CHẠY SAU KHI BẤM NÚT XOÁY 🔥 -->
+        <video id="splashVideoOverlay" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/City%20Ronin.mp4" playsinline></video>
+
+        <audio id="sysAudio" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/KAIRON.MP3" preload="auto"></audio>
+        <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
+        <audio id="musashiVoice" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/LOGIN%20MUSASHI%20OK.MP3" preload="auto"></audio>
+        
+        <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20BAY%20VAO.mp4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 999999; display: none;" playsinline></video>
+
         <div id="telepathyLogoWrapper">
             <span class="tele-text t1 light-sweep">© TELEPATHY COMPANY</span>
             <span class="tele-text t2 light-sweep">WWW.TELEPATHY.COM.VN</span>
@@ -312,8 +384,7 @@
             <span class="tele-text t4 light-sweep">MIYAMOTO MUSASHI</span>
         </div>
         
-        <!-- Nút bên ngoài trả về tiếng click bình thường -->
-        <button class="start-btn light-sweep" id="startBtn" onclick="startMinimalistIntro(); playClick();">MỞ CỔNG XUYÊN KHÔNG</button>
+        <button class="start-btn light-sweep" id="startBtn" onclick="startMinimalistIntro(); playClick();" style="display: none;">MỞ CỔNG XUYÊN KHÔNG</button>
 
         <div class="gateway-popup" id="loginPanelContainer">
             <div class="gateway-content">
@@ -328,7 +399,6 @@
                         <label class="remember-container sound-btn"><input type="checkbox" id="rememberMeCheck" class="remember-checkbox" checked> Ghi nhớ ấn</label>
                         <div style="display: flex; gap: 10px;"><span class="change-pass-link sound-btn" onclick="switchPanel('forgot')">Quên Mật Ấn</span></div>
                     </div>
-                    <!-- NÚT TIẾN NHẬP KÍCH HOẠT LỆNH SUBMIT -->
                     <button class="login-btn-submit sound-btn" onclick="submitLogin(); playClick();">TIẾN NHẬP</button>
                     <div id="loginStatus" style="margin-top: 15px; font-weight: 700; text-align: center; font-size: 10px; letter-spacing: 2px; line-height: 1.5; color: #fff; text-shadow: 0 1px 3px #000;"></div>
                     <div class="bottom-links">
@@ -357,10 +427,71 @@
     </div>
 
     <script>
+        const sndClick = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+        const sndError = new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3');
+        sndClick.volume = 0.4; sndError.volume = 0.5; 
+        function playClick() { sndClick.currentTime = 0; sndClick.play().catch(e=>{}); }
+
+        // --- CẢM BIẾN CON QUAY HỒI CHUYỂN NGHIÊNG THEO ĐỘ NGHIÊNG ĐIỆN THOẠI ---
+        window.addEventListener('deviceorientation', (event) => {
+            const vortex = document.getElementById('vortexBtn');
+            if (!vortex) return;
+            
+            // event.gamma: độ nghiêng trái/phải (-90 đến 90)
+            // event.beta: độ nghiêng trước/sau (-180 đến 180)
+            let tiltX = event.gamma ? event.gamma : 0;
+            let tiltY = event.beta ? event.beta - 45 : 0; // trừ góc cầm máy tự nhiên khoảng 45 độ
+
+            // Giới hạn góc nghiêng để không bị lật ngược nút
+            tiltX = Math.max(-30, Math.min(30, tiltX));
+            tiltY = Math.max(-30, Math.min(30, tiltY));
+
+            // Áp dụng hiệu ứng xoay 3D (rotateX và rotateY)
+            vortex.style.transform = `rotateY(${tiltX * 1.2}deg) rotateX(${-tiltY * 1.2}deg)`;
+        }, true);
+
+        // Hỗ trợ thêm cho máy tính (PC) di chuột theo con trỏ chuột nếu không có cảm biến điện thoại
+        window.addEventListener('mousemove', (e) => {
+            const vortex = document.getElementById('vortexBtn');
+            if (!vortex) return;
+            let xAxis = (window.innerWidth / 2 - e.pageX) / 15;
+            let yAxis = (window.innerHeight / 2 - e.pageY) / 15;
+            vortex.style.transform = `rotateY(${-xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+
+        function triggerAppLaunch() {
+            const gate = document.getElementById('launchGateOverlay');
+            gate.style.opacity = '0';
+            setTimeout(() => { gate.style.display = 'none'; }, 800);
+
+            const splashVid = document.getElementById('splashVideoOverlay');
+            splashVid.style.display = 'block';
+            splashVid.play().catch(e => {});
+
+            const hideTimer = setTimeout(() => {
+                finishSplashAndStartLogin();
+            }, 10000);
+
+            splashVid.onended = () => {
+                clearTimeout(hideTimer);
+                finishSplashAndStartLogin();
+            };
+        }
+
+        function finishSplashAndStartLogin() {
+            const splashVid = document.getElementById('splashVideoOverlay');
+            if(splashVid && splashVid.style.display !== 'none') {
+                splashVid.style.opacity = '0';
+                setTimeout(() => {
+                    splashVid.style.display = 'none';
+                    startMinimalistIntro();
+                }, 1000);
+            }
+        }
+
         let isCinematicFinished = false;
 
         function startMinimalistIntro() {
-            document.getElementById('startBtn').style.display = 'none';
             document.getElementById('bg-cyber').style.opacity = '1'; 
             
             const audio = document.getElementById('sysAudio');
@@ -451,14 +582,10 @@
             .then(data => {
                 if(data.success === true || data.result === "success" || data.status === "success" || data.ket_qua === "thanh_cong") {
                     
-                    // --- 🔥 KÍCH HOẠT HIỆU ỨNG ĐỘC BẢN CỦA NÚT TIẾN NHẬP TẠI ĐÂY 🔥 ---
-                    
-                    // 1. Âm thanh xé gió gầm rú (Đổi link MP3 nếu sư phụ có file riêng)
                     const sndVortex = new Audio('https://assets.mixkit.co/active_storage/sfx/2771/2771-preview.mp3');
                     sndVortex.volume = 1.0;
                     sndVortex.play().catch(e=>{});
 
-                    // 2. Rung mạnh mẽ dài liên hồi (CHỈ HOẠT ĐỘNG TRÊN ĐIỆN THOẠI)
                     if (navigator.vibrate) {
                         navigator.vibrate([300, 100, 400, 100, 500, 150, 600, 200, 1000]);
                     }
@@ -471,7 +598,6 @@
                     
                     document.getElementById('bgMusic').pause();
 
-                    // Mở video bay vào
                     setTimeout(() => { 
                         document.getElementById('loginPanelContainer').classList.remove('active'); 
                         setTimeout(() => {
