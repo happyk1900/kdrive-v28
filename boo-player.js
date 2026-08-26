@@ -1,5 +1,5 @@
 (function() {
-    // 1. Tự động bơm CSS cho widget, mặt Boo chớp mắt, nốt nhạc bay và cụm nút điều khiển vật lý
+    // 1. Tự động bơm CSS cho widget, hiệu ứng Hologram ẩn hiện và nốt nhạc đơn thanh lịch
     const style = document.createElement('style');
     style.innerHTML = `
         .boo-car-widget {
@@ -9,12 +9,12 @@
             z-index: 999999;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             background: rgba(10, 15, 25, 0.9);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(0, 229, 255, 0.6);
-            padding: 8px 14px;
+            padding: 8px 16px;
             border-radius: 35px;
             box-shadow: 0 0 25px rgba(0, 229, 255, 0.4), inset 0 0 10px rgba(0, 229, 255, 0.2);
             font-family: 'Space Grotesk', sans-serif;
@@ -51,33 +51,28 @@
             100% { transform: scale(1.12); box-shadow: 0 0 25px #ff1493, 0 0 40px #00e5ff; }
         }
 
-        /* Hiệu ứng nốt nhạc bay mờ ảo trên đầu khi phát nhạc */
+        /* Hiệu ứng 1 nốt nhạc kép bay mờ ảo trên đầu khi phát nhạc */
         .floating-note {
             position: absolute;
-            top: -22px;
-            right: 2px;
-            font-size: 13px;
+            top: -24px;
+            right: 8px;
+            font-size: 14px;
             pointer-events: none;
             opacity: 0;
-            animation: noteFloatUp 1.8s infinite linear;
-        }
-        .floating-note:nth-child(2) {
-            right: 18px;
-            animation-delay: 0.9s;
-            font-size: 10px;
+            animation: noteFloatUp 2s infinite linear;
         }
         .boo-car-avatar:not(.singing) .floating-note {
             display: none;
         }
         @keyframes noteFloatUp {
-            0% { transform: translateY(0) scale(0.7); opacity: 1; filter: drop-shadow(0 0 4px #ff1493); }
-            100% { transform: translateY(-30px) scale(1.3) rotate(15deg); opacity: 0; }
+            0% { transform: translateY(0) scale(0.6); opacity: 1; filter: drop-shadow(0 0 6px #ff1493); }
+            100% { transform: translateY(-32px) scale(1.2) rotate(15deg); opacity: 0; }
         }
 
         .boo-car-info {
             display: flex;
             flex-direction: column;
-            max-width: 160px;
+            max-width: 170px;
             overflow: hidden;
             cursor: pointer;
         }
@@ -99,25 +94,41 @@
             opacity: 0.9;
         }
 
-        /* Nút bấm vật lý điều khiển nhạc */
-        .boo-car-ctrl {
-            background: transparent;
-            border: 1px solid rgba(0, 229, 255, 0.5);
+        /* Nút bấm điều khiển kiểu Hologram ẩn hiện (Mặc định ẩn, trượt ra khi active) */
+        .boo-hologram-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            max-width: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-width 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+            margin-left: 0;
+        }
+        .boo-car-widget.active-hologram .boo-hologram-ctrl {
+            max-width: 60px;
+            opacity: 1;
+            margin-left: 4px;
+        }
+        .hologram-btn {
+            background: rgba(0, 229, 255, 0.15);
+            border: 1px solid rgba(0, 229, 255, 0.7);
             color: #00e5ff;
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            font-size: 10px;
+            font-size: 9px;
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
             transition: 0.2s;
             flex-shrink: 0;
         }
-        .boo-car-ctrl:hover {
-            background: rgba(0, 229, 255, 0.2);
-            box-shadow: 0 0 10px #00e5ff;
+        .hologram-btn:hover {
+            background: rgba(0, 229, 255, 0.4);
+            box-shadow: 0 0 12px #00e5ff;
         }
     `;
     document.head.appendChild(style);
@@ -126,19 +137,20 @@
     const widget = document.createElement('div');
     widget.className = 'boo-car-widget';
     widget.innerHTML = `
-        <div class="boo-car-avatar" id="booAvatarIcon" title="Bấm để bật/tắt nhạc">
+        <div class="boo-car-avatar" id="booAvatarIcon" title="Bấm để mở bảng điều khiển">
             <span class="floating-note">🎵</span>
-            <span class="floating-note">🎶</span>
         </div>
-        <div class="boo-car-info" id="booInfoArea" title="Bấm để bật/tắt nhạc">
+        <div class="boo-car-info" id="booInfoArea" title="Bấm để mở bảng điều khiển">
             <span class="boo-car-title" id="carSongTitle">TELEPATHY COMPANY</span>
             <span class="boo-car-sub" id="carAlbumSub">Cyber Ninja : Chương I</span>
         </div>
-        <button class="boo-car-ctrl" id="carPlayBtn" title="Play/Pause">▶</button>
+        <div class="boo-hologram-ctrl" id="hologramCtrl">
+            <button class="hologram-btn" id="carPlayBtn" title="Play/Pause">▶</button>
+        </div>
     `;
     document.body.appendChild(widget);
 
-    // 3. Logic điều khiển âm thanh, đồng bộ MediaSession và trạng thái giao diện
+    // 3. Logic điều khiển âm thanh, đồng bộ MediaSession và hiệu ứng Hologram ẩn hiện
     window.addEventListener('DOMContentLoaded', () => {
         const audioTag = document.querySelector('audio#bgMusic') || document.querySelector('audio');
         const avatarIcon = document.getElementById('booAvatarIcon');
@@ -146,6 +158,7 @@
         const playBtn = document.getElementById('carPlayBtn');
         const songTitleEl = document.getElementById('carSongTitle');
         const albumSubEl = document.getElementById('carAlbumSub');
+        const widgetContainer = document.querySelector('.boo-car-widget');
 
         if (audioTag) {
             let baseSongName = "K-DRIVE ANTHEM";
@@ -184,8 +197,30 @@
                 });
             }
 
-            // Hàm xử lý Play/Pause chung khi bấm vào avatar, vùng chữ hoặc nút vật lý
-            function togglePlayState() {
+            // Bấm vào mặt Boo hoặc vùng chữ để bật/tắt bảng điều khiển Hologram (và tự động Play/Pause luôn cho tiện)
+            function handleWidgetClick(e) {
+                e.stopPropagation();
+                // Nếu chưa mở hologram thì mở ra, nếu mở rồi thì thực hiện play/pause
+                if (!widgetContainer.classList.contains('active-hologram')) {
+                    widgetContainer.classList.add('active-hologram');
+                } else {
+                    togglePlayState();
+                }
+            }
+
+            avatarIcon.addEventListener('click', handleWidgetClick);
+            infoArea.addEventListener('click', handleWidgetClick);
+
+            // Click ra ngoài màn hình thì ẩn bảng Hologram đi
+            document.addEventListener('click', (e) => {
+                if (!widgetContainer.contains(e.target)) {
+                    widgetContainer.classList.remove('active-hologram');
+                }
+            });
+
+            // Hàm xử lý Play/Pause chính
+            function togglePlayState(e) {
+                if (e) e.stopPropagation();
                 if (audioTag.paused) {
                     audioTag.play().then(() => {
                         updatePlayerUI(true);
@@ -196,8 +231,6 @@
                 }
             }
 
-            avatarIcon.addEventListener('click', togglePlayState);
-            infoArea.addEventListener('click', togglePlayState);
             playBtn.addEventListener('click', togglePlayState);
 
             // Lắng nghe sự kiện phát nhạc từ thẻ Audio gốc[cite: 4]
