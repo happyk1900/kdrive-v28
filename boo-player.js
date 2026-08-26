@@ -1,5 +1,5 @@
 (function() {
-    // 1. Tự động bơm CSS cho mặt Boo hát và thanh hiển thị bài hát
+    // 1. Tự động bơm CSS cho widget với hiệu ứng Phi tiêu Ninja xoay và nốt nhạc bay
     const style = document.createElement('style');
     style.innerHTML = `
         .boo-car-widget {
@@ -10,49 +10,98 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            background: rgba(10, 15, 25, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 229, 255, 0.5);
-            padding: 8px 14px;
-            border-radius: 30px;
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3), inset 0 0 10px rgba(0, 229, 255, 0.2);
+            background: rgba(10, 15, 25, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 229, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 35px;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.4), inset 0 0 10px rgba(0, 229, 255, 0.2);
             font-family: 'Space Grotesk', sans-serif;
             pointer-events: auto;
+            cursor: pointer;
             transition: 0.3s ease;
         }
+        .boo-car-widget:active {
+            transform: scale(0.95);
+        }
         .boo-car-avatar {
-            width: 36px;
-            height: 36px;
-            background: #ff1493;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #00e5ff, #b026ff);
             border-radius: 50%;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 15px rgba(255, 20, 147, 0.8);
-            transition: transform 0.1s ease;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.8);
+            transition: transform 0.3s ease;
         }
-        /* Hiệu ứng chớp mắt của Boo */
-        .boo-car-avatar::before, .boo-car-avatar::after {
-            content: ''; position: absolute; width: 4px; height: 7px; top: 12px; background: #000; border-radius: 50%;
+        
+        /* Trạng thái CHƯA PHÁT: Hiển thị chữ K to đẹp */
+        .boo-car-avatar .avatar-k {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            text-shadow: 0 0 10px #00e5ff, 0 0 20px #ff1493;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        .boo-car-avatar::before { left: 10px; }
-        .boo-car-avatar::after { right: 10px; }
 
-        /* Class kích hoạt trạng thái "Đang hát" - Phát sáng nhấp nháy theo nhạc */
-        .boo-car-avatar.singing {
-            animation: booSingPulse 0.6s infinite alternate ease-in-out;
+        /* Trạng thái ĐANG PHÁT: Biến thành Phi tiêu Ninja 3 cánh xoay tít */
+        .boo-car-avatar.spinning {
+            background: radial-gradient(circle, #1a0033 0%, #000 100%);
+            border: 1px solid #00e5ff;
+            animation: ninjaSpin 1.2s linear infinite;
+            box-shadow: 0 0 25px #00e5ff, 0 0 40px #ff1493;
         }
-        @keyframes booSingPulse {
-            0% { transform: scale(1); box-shadow: 0 0 10px #ff1493, 0 0 20px #00e5ff; }
-            100% { transform: scale(1.15); box-shadow: 0 0 25px #ff1493, 0 0 40px #00e5ff; }
+        .boo-car-avatar.spinning .avatar-k {
+            display: none; /* Ẩn chữ K */
+        }
+        /* Vẽ phi tiêu ninja 3 cánh bằng CSS Vector */
+        .boo-car-avatar.spinning::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: conic-gradient(#00e5ff 0deg 120deg, #ff1493 120deg 240deg, #ffd700 240deg 360deg);
+            clip-path: polygon(50% 50%, 100% 0%, 65% 35%, 100% 100%, 35% 65%, 0% 100%, 0% 35%);
+            box-shadow: 0 0 10px #fff;
+        }
+        @keyframes ninjaSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hiệu ứng nốt nhạc bay lơ lửng trên đầu khi phát nhạc */
+        .floating-note {
+            position: absolute;
+            top: -20px;
+            right: 5px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            animation: noteFloatUp 1.8s infinite linear;
+        }
+        .floating-note:nth-child(2) {
+            right: 20px;
+            animation-delay: 0.9s;
+            font-size: 11px;
+        }
+        .boo-car-avatar:not(.spinning) .floating-note {
+            display: none; /* Tắt nốt nhạc khi chưa phát */
+        }
+        @keyframes noteFloatUp {
+            0% { transform: translateY(0) scale(0.8); opacity: 1; filter: drop-shadow(0 0 5px #ff1493); }
+            100% { transform: translateY(-35px) scale(1.3) rotate(15deg); opacity: 0; }
         }
 
         .boo-car-info {
             display: flex;
             flex-direction: column;
-            max-width: 180px;
+            max-width: 190px;
             overflow: hidden;
         }
         .boo-car-title {
@@ -79,62 +128,79 @@
     const widget = document.createElement('div');
     widget.className = 'boo-car-widget';
     widget.innerHTML = `
-        <div class="boo-car-avatar" id="booAvatarIcon"></div>
+        <div class="boo-car-avatar" id="booAvatarIcon">
+            <span class="avatar-k">K</span>
+            <span class="floating-note">🎵</span>
+            <span class="floating-note">🎶</span>
+        </div>
         <div class="boo-car-info">
-            <span class="boo-car-title" id="carSongTitle">K-DRIVE: HỆ THỐNG ONLINE</span>
-            <span class="boo-car-sub">PHÓ SƯ BOO // VIP</span>
+            <span class="boo-car-title" id="carSongTitle">Cyber Ninja : Chương I</span>
+            <span class="boo-car-sub" id="carAlbumSub">www.telepathy.com.vn</span>
         </div>
     `;
     document.body.appendChild(widget);
 
-    // 3. Logic kết nối âm thanh, đồng bộ MediaSession lên ô tô & điều khiển hiệu ứng mặt Boo hát
+    // 3. Logic điều khiển âm thanh, đồng bộ MediaSession và trạng thái giao diện
     window.addEventListener('DOMContentLoaded', () => {
-        const audioTag = document.querySelector('audio#bgMusic') || document.querySelector('audio');
+        const audioTag = document.querySelector('audio#bg-music') || document.querySelector('audio');
         const avatarIcon = document.getElementById('booAvatarIcon');
         const songTitleEl = document.getElementById('carSongTitle');
+        const albumSubEl = document.getElementById('carAlbumSub');
 
         if (audioTag) {
-            // Lấy tên file nhạc làm tên bài hát hiển thị (hoặc tuỳ chỉnh theo ý anh)
-            let songName = "K-DRIVE: CYBERPUNK ANTHEM";
+            let baseSongName = "K-DRIVE ANTHEM";
             try {
                 let srcPath = audioTag.src || audioTag.currentSrc;
                 if (srcPath) {
                     let fileName = decodeURIComponent(srcPath.split('/').pop().split('?')[0]);
-                    songName = fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+                    baseSongName = fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
                 }
             } catch(e) {}
 
-            songTitleEl.textContent = songName;
+            // Hàm cập nhật giao diện theo trạng thái Play/Pause
+            function updatePlayerUI(isPlaying) {
+                if (isPlaying) {
+                    avatarIcon.classList.add('spinning');
+                    songTitleEl.textContent = baseSongName; // Tên bài hát tự update
+                    albumSubEl.textContent = "Cyber Ninja : Album I";
+                } else {
+                    avatarIcon.classList.remove('spinning');
+                    songTitleEl.textContent = "Cyber Ninja : Chương I";
+                    albumSubEl.textContent = "www.telepathy.com.vn";
+                }
+            }
 
-            // Đồng bộ chuẩn phát nhạc lên màn hình ô tô (MediaSession API)
+            // Đồng bộ chuẩn phát nhạc lên màn hình ô tô & màn hình khóa điện thoại (MediaSession API)
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
-                    title: songName,
+                    title: baseSongName,
                     artist: 'K-Drive // Kai-Ripe',
-                    album: 'Đạo Trường K-Drive VIP',
+                    album: 'Cyber Ninja : Album I',
                     artwork: [
-                        { src: 'https://github.com/happyk1900/-m-thanh-app/blob/main/BOO%20LOGIC%20OK.png?raw=true', sizes: '512x512', type: 'image/png' }
+                        { src: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Music%20anh%20nen.png?raw=true', sizes: '512x512', type: 'image/png' }
                     ]
                 });
             }
 
-            // Theo dõi trạng thái phát nhạc để bật/tắt hiệu ứng mặt Boo hát
-            audioTag.addEventListener('play', () => {
-                avatarIcon.classList.add('singing');
+            // Sự kiện tương tác bấm vào widget để Play / Pause nhạc
+            widget.addEventListener('click', () => {
+                if (audioTag.paused) {
+                    audioTag.play().then(() => {
+                        updatePlayerUI(true);
+                    }).catch(err => console.log(err));
+                } else {
+                    audioTag.pause();
+                    updatePlayerUI(false);
+                }
             });
 
-            audioTag.addEventListener('pause', () => {
-                avatarIcon.classList.remove('singing');
-            });
+            // Lắng nghe sự kiện từ thẻ Audio
+            audioTag.addEventListener('play', () => updatePlayerUI(true));
+            audioTag.addEventListener('pause', () => updatePlayerUI(false));
+            audioTag.addEventListener('ended', () => updatePlayerUI(false));
 
-            audioTag.addEventListener('ended', () => {
-                avatarIcon.classList.remove('singing');
-            });
-
-            // Nếu nhạc đang chạy sẵn thì bật hiệu ứng luôn
-            if (!audioTag.paused) {
-                avatarIcon.classList.add('singing');
-            }
+            // Trạng thái khởi tạo ban đầu
+            updatePlayerUI(!audioTag.paused);
         }
     });
 })();
