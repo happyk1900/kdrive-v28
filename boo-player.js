@@ -114,7 +114,7 @@
         </div>
         <div class="boo-car-info">
             <span class="boo-car-title" id="carSongTitle">TELEPATHY COMPANY</span>
-            <span class="boo-car-sub" id="carAlbumSub">Cyber Ninja : Chương I</span>
+            <span class="boo-car-sub" id="carAlbumSub">CHƯƠNG I: Tinh Thần Samurai</span>
         </div>
     `;
     document.body.appendChild(widget);
