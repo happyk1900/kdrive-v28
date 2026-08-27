@@ -1,5 +1,5 @@
 (function() {
-    // 1. Tự động bơm CSS: Thay thế mặt hồng tròn bằng Phi tiêu Sasuke, giữ nguyên hiệu ứng nốt nhạc bay
+    // 1. Tự động bơm CSS & Đồ họa SVG Phi tiêu Sasuke chuẩn xác
     const style = document.createElement('style');
     style.innerHTML = `
         .boo-car-widget {
@@ -26,43 +26,36 @@
             transform: scale(0.96);
         }
         
-        /* 🌟 AVATAR BIẾN THÀNH PHI TIÊU SASUKE SẮC LẸM 🌟 */
+        /* 🌟 AVATAR PHI TIÊU SASUKE SẮC LẸM ĐỎ RỰC 🌟 */
         .boo-car-avatar {
             width: 38px;
             height: 38px;
-            background: transparent !important;
+            background: rgba(15, 20, 30, 0.95);
+            border: 2px solid #ff2a2a;
             border-radius: 50%;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 15px rgba(255, 42, 42, 0.6);
+            box-shadow: 0 0 15px rgba(255, 42, 42, 0.7), inset 0 0 8px rgba(255, 42, 42, 0.4);
             flex-shrink: 0;
-            
-            /* Đồ họa SVG Phi tiêu Sasuke chuẩn xác */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='%23ff2a2a' stroke='%23ff2a2a' stroke-width='2'%3E%3Ccircle cx='50' cy='50' r='12' fill='%23111' stroke='%23ff2a2a' stroke-width='3'/%3E%3Cpath d='M50 10 L58 42 L90 50 L58 58 L50 90 L42 58 L10 50 L42 42 Z' fill='%23ff2a2a' opacity='0.95'/%3E%3Ccircle cx='50' cy='50' r='5' fill='%23ffeedd'/%3E%3C/g%3E%3C/svg%3E");
-            background-size: 90% 90%;
-            background-position: center;
-            background-repeat: no-repeat;
             transition: box-shadow 0.3s ease;
         }
-        /* Xóa bỏ mắt chớp gốc của avatar cũ */
-        .boo-car-avatar::before, .boo-car-avatar::after { display: none !important; }
 
         /* Class kích hoạt: Nhạc bật -> Phi tiêu XOAY TÍT MÙ + Phát sáng nhấp nháy */
         .boo-car-avatar.singing {
-            animation: shurikenSpin 1.8s linear infinite, booSingPulse 0.6s infinite alternate ease-in-out;
+            animation: shurikenSpin 1.5s linear infinite, booSingPulse 0.6s infinite alternate ease-in-out;
         }
         @keyframes shurikenSpin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
         @keyframes booSingPulse {
-            0% { box-shadow: 0 0 10px #ff2a2a, 0 0 20px #00e5ff; }
+            0% { box-shadow: 0 0 12px #ff2a2a, 0 0 20px #00e5ff; }
             100% { box-shadow: 0 0 25px #ff2a2a, 0 0 40px #00e5ff; }
         }
 
-        /* Giữ nguyên hiệu ứng nốt nhạc kép bay mờ ảo trên đầu khi phát nhạc */
+        /* Hiệu ứng nốt nhạc kép bay mờ ảo trên đầu khi phát nhạc */
         .floating-note {
             position: absolute;
             top: -24px;
@@ -106,11 +99,17 @@
     `;
     document.head.appendChild(style);
 
-    // 2. Tự động bơm Widget vào trang[cite: 2]
+    // 2. Tự động bơm Widget kèm hình vẽ SVG Phi tiêu Sasuke vào trang
     const widget = document.createElement('div');
     widget.className = 'boo-car-widget';
     widget.innerHTML = `
         <div class="boo-car-avatar" id="booAvatarIcon">
+            <!-- Đồ họa SVG Phi tiêu Sasuke chuẩn y hệt ảnh mẫu -->
+            <svg width="26" height="26" viewBox="0 0 100 100" style="filter: drop-shadow(0 0 4px #ff2a2a);">
+                <path d="M50 5 L58 42 L95 50 L58 58 L50 95 L42 58 L5 50 L42 42 Z" fill="#ff2a2a" stroke="#ffffff" stroke-width="3"/>
+                <circle cx="50" cy="50" r="14" fill="#0b0f19" stroke="#ff2a2a" stroke-width="4"/>
+                <circle cx="50" cy="50" r="5" fill="#ffffff"/>
+            </svg>
             <span class="floating-note">🎵</span>
         </div>
         <div class="boo-car-info">
@@ -120,7 +119,7 @@
     `;
     document.body.appendChild(widget);
 
-    // 3. Logic điều khiển âm thanh, đồng bộ MediaSession và trạng thái xoay của phi tiêu[cite: 2]
+    // 3. Logic điều khiển âm thanh và trạng thái xoay
     window.addEventListener('DOMContentLoaded', () => {
         const audioTag = document.querySelector('audio#bgMusic') || document.querySelector('audio');
         const avatarIcon = document.getElementById('booAvatarIcon');
@@ -139,11 +138,11 @@
 
             function updatePlayerUI(isPlaying) {
                 if (isPlaying) {
-                    avatarIcon.classList.add('singing'); // Phát nhạc -> Phi tiêu xoay tít + nốt nhạc bay[cite: 2]
+                    avatarIcon.classList.add('singing'); // Phát nhạc -> Phi tiêu xoay tít + nốt nhạc bay
                     songTitleEl.textContent = baseSongName;
                     albumSubEl.textContent = "Cyber Ninja : Album I";
                 } else {
-                    avatarIcon.classList.remove('singing'); // Dừng nhạc -> Phi tiêu đứng im[cite: 2]
+                    avatarIcon.classList.remove('singing'); // Dừng nhạc -> Phi tiêu đứng im
                     songTitleEl.textContent = "TELEPATHY COMPANY";
                     albumSubEl.textContent = "Cyber Ninja : Chương I";
                 }
