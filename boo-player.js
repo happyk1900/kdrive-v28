@@ -1,5 +1,5 @@
 (function() {
-    // 1. Tự động bơm CSS cho widget tối giản, mặt Boo chớp mắt và nốt nhạc kép bay mờ ảo
+    // 1. Tự động bơm CSS: Thay thế mặt hồng tròn bằng Phi tiêu Sasuke, giữ nguyên hiệu ứng nốt nhạc bay
     const style = document.createElement('style');
     style.innerHTML = `
         .boo-car-widget {
@@ -25,36 +25,44 @@
         .boo-car-widget:active {
             transform: scale(0.96);
         }
+        
+        /* 🌟 AVATAR BIẾN THÀNH PHI TIÊU SASUKE SẮC LẸM 🌟 */
         .boo-car-avatar {
-            width: 36px;
-            height: 36px;
-            background: #ff1493;
+            width: 38px;
+            height: 38px;
+            background: transparent !important;
             border-radius: 50%;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 15px rgba(255, 20, 147, 0.8);
-            transition: transform 0.2s ease;
+            box-shadow: 0 0 15px rgba(255, 42, 42, 0.6);
             flex-shrink: 0;
+            
+            /* Đồ họa SVG Phi tiêu Sasuke chuẩn xác */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='%23ff2a2a' stroke='%23ff2a2a' stroke-width='2'%3E%3Ccircle cx='50' cy='50' r='12' fill='%23111' stroke='%23ff2a2a' stroke-width='3'/%3E%3Cpath d='M50 10 L58 42 L90 50 L58 58 L50 90 L42 58 L10 50 L42 42 Z' fill='%23ff2a2a' opacity='0.95'/%3E%3Ccircle cx='50' cy='50' r='5' fill='%23ffeedd'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 90% 90%;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: box-shadow 0.3s ease;
         }
-        /* Hiệu ứng chớp mắt gốc của Boo */
-        .boo-car-avatar::before, .boo-car-avatar::after {
-            content: ''; position: absolute; width: 4px; height: 7px; top: 12px; background: #000; border-radius: 50%;
-        }
-        .boo-car-avatar::before { left: 10px; }
-        .boo-car-avatar::after { right: 10px; }
+        /* Xóa bỏ mắt chớp gốc của avatar cũ */
+        .boo-car-avatar::before, .boo-car-avatar::after { display: none !important; }
 
-        /* Class kích hoạt trạng thái "Đang hát" - Phát sáng nhấp nháy theo nhạc */
+        /* Class kích hoạt: Nhạc bật -> Phi tiêu XOAY TÍT MÙ + Phát sáng nhấp nháy */
         .boo-car-avatar.singing {
-            animation: booSingPulse 0.6s infinite alternate ease-in-out;
+            animation: shurikenSpin 1.8s linear infinite, booSingPulse 0.6s infinite alternate ease-in-out;
+        }
+        @keyframes shurikenSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         @keyframes booSingPulse {
-            0% { transform: scale(1); box-shadow: 0 0 10px #ff1493, 0 0 20px #00e5ff; }
-            100% { transform: scale(1.12); box-shadow: 0 0 25px #ff1493, 0 0 40px #00e5ff; }
+            0% { box-shadow: 0 0 10px #ff2a2a, 0 0 20px #00e5ff; }
+            100% { box-shadow: 0 0 25px #ff2a2a, 0 0 40px #00e5ff; }
         }
 
-        /* Hiệu ứng 1 nốt nhạc kép bay mờ ảo trên đầu khi phát nhạc */
+        /* Giữ nguyên hiệu ứng nốt nhạc kép bay mờ ảo trên đầu khi phát nhạc */
         .floating-note {
             position: absolute;
             top: -24px;
@@ -68,7 +76,7 @@
             display: none;
         }
         @keyframes noteFloatUp {
-            0% { transform: translateY(0) scale(0.6); opacity: 1; filter: drop-shadow(0 0 6px #ff1493); }
+            0% { transform: translateY(0) scale(0.6); opacity: 1; filter: drop-shadow(0 0 6px #ff2a2a); }
             100% { transform: translateY(-32px) scale(1.2) rotate(15deg); opacity: 0; }
         }
 
@@ -98,7 +106,7 @@
     `;
     document.head.appendChild(style);
 
-    // 2. Tự động bơm HTML Widget vào trang (Cực kỳ gọn gàng, không vướng nút bấm)
+    // 2. Tự động bơm Widget vào trang[cite: 2]
     const widget = document.createElement('div');
     widget.className = 'boo-car-widget';
     widget.innerHTML = `
@@ -112,7 +120,7 @@
     `;
     document.body.appendChild(widget);
 
-    // 3. Logic điều khiển âm thanh, đồng bộ MediaSession và tương tác chạm trực tiếp
+    // 3. Logic điều khiển âm thanh, đồng bộ MediaSession và trạng thái xoay của phi tiêu[cite: 2]
     window.addEventListener('DOMContentLoaded', () => {
         const audioTag = document.querySelector('audio#bgMusic') || document.querySelector('audio');
         const avatarIcon = document.getElementById('booAvatarIcon');
@@ -129,20 +137,18 @@
                 }
             } catch(e) {}
 
-            // Cập nhật giao diện đồng bộ khi Play / Pause
             function updatePlayerUI(isPlaying) {
                 if (isPlaying) {
-                    avatarIcon.classList.add('singing');
-                    songTitleEl.textContent = baseSongName; // Tên bài hát tự update
+                    avatarIcon.classList.add('singing'); // Phát nhạc -> Phi tiêu xoay tít + nốt nhạc bay[cite: 2]
+                    songTitleEl.textContent = baseSongName;
                     albumSubEl.textContent = "Cyber Ninja : Album I";
                 } else {
-                    avatarIcon.classList.remove('singing');
+                    avatarIcon.classList.remove('singing'); // Dừng nhạc -> Phi tiêu đứng im[cite: 2]
                     songTitleEl.textContent = "TELEPATHY COMPANY";
                     albumSubEl.textContent = "Cyber Ninja : Chương I";
                 }
             }
 
-            // Đồng bộ chuẩn phát nhạc lên màn hình ô tô & màn hình khóa điện thoại (MediaSession API)[cite: 4]
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: baseSongName,
@@ -154,7 +160,6 @@
                 });
             }
 
-            // Chạm trực tiếp vào widget để Play/Pause cực kỳ mượt mà
             widget.addEventListener('click', () => {
                 if (audioTag.paused) {
                     audioTag.play().then(() => {
@@ -166,12 +171,10 @@
                 }
             });
 
-            // Lắng nghe sự kiện phát nhạc từ thẻ Audio gốc[cite: 4]
             audioTag.addEventListener('play', () => updatePlayerUI(true));
             audioTag.addEventListener('pause', () => updatePlayerUI(false));
             audioTag.addEventListener('ended', () => updatePlayerUI(false));
 
-            // Trạng thái khởi tạo ban đầu[cite: 4]
             updatePlayerUI(!audioTag.paused);
         }
     });
