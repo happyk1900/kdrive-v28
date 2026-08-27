@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#000000">
     <title>K-Drive Core V57 - Tuyệt Tác Typography & Đa Vũ Trụ</title>
 
-    <!-- 🌟 ĐÃ IMPORT THÊM FONT CINZEL (HOÀNG GIA) VÀ TEKO (HẦM HỐ) 🌟 -->
+    <!-- 🌟 IMPORT FONT CINZEL (HOÀNG GIA) VÀ TEKO (HẦM HỐ) 🌟 -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Share+Tech+Mono&family=Montserrat:wght@800;900&family=Cinzel:wght@700&family=Teko:wght@500;600&display=swap" rel="stylesheet">
     
     <style>
@@ -213,13 +213,11 @@
         .boo-sleeping .boo-quadrant { opacity: 0.3; }
         @keyframes zzzFloat { 0% { transform: translate(0, 0) scale(0.8); opacity: 0; } 50% { opacity: 1; } 100% { transform: translate(0, -40px) scale(1.2); opacity: 0; } }
         
-        /* 🌟 TRẠNG THÁI BOO SẬP NGUỒN 🌟 */
+        /* 🌟 BOO SẬP NGUỒN TẠI CHỖ (RƠI THẲNG XUỐNG NGAY TẠI TỌA ĐỘ HIỆN TẠI) 🌟 */
         .boo-fainted { 
             animation: none !important; 
-            top: 65% !important; 
-            left: 50% !important; 
-            transform: translateX(-50%) scale(0.9) !important;
-            transition: top 1s cubic-bezier(0.5, 0, 1, 1), left 1s ease-out !important;
+            transform: translateY(35px) scale(0.95) !important; /* Rơi xuống một đoạn ngắn ngay tại chỗ */
+            transition: transform 0.6s cubic-bezier(0.5, 0, 1, 1) !important;
             pointer-events: auto; 
         }
         .boo-fainted .boo-face { background: #1a332d; box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 0 10px rgba(0, 229, 255, 0.2); filter: none; display: block; animation: none; }
@@ -469,7 +467,7 @@
         function fetchRealUser() { let storedUser = localStorage.getItem('kdrive_logged_in_user'); let actualUser = storedUser ? storedUser.toUpperCase() : "KAI RIPE"; document.getElementById('current-username').innerText = actualUser; document.querySelectorAll('.inspect-username').forEach(el => el.innerText = actualUser); }
         function runHighTechClock() { const now = new Date(); const hours = String(now.getHours()).padStart(2, '0'); const minutes = String(now.getMinutes()).padStart(2, '0'); const seconds = String(now.getSeconds()).padStart(2, '0'); const ms = String(now.getMilliseconds()).padStart(3, '0').substring(0,2); document.getElementById('clock-hms').innerText = `${hours}:${minutes}:${seconds}`; document.getElementById('clock-ms').innerText = `:${ms}`; const year = now.getFullYear(); const month = String(now.getMonth() + 1).padStart(2, '0'); const day = String(now.getDate()).padStart(2, '0'); document.getElementById('date-display').innerText = `${year}.${month}.${day}`; requestAnimationFrame(runHighTechClock); }
         
-        async function fetchCityName(lat, lon) { try { let response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=vi`); let data = await response.json(); if(data && data.address) { let ad = data.address; let street = ad.road || ad.pedestrian || ad.neighbourhood || ""; let ward = ad.quarter || ad.suburb || ad.village || ""; let district = ad.city_district || ad.borough || ad.county || ""; let city = ad.city || ad.state || ad.town || ""; const clean = (str) => str.replace(/(Phường|Quận|Thành phố|Tỉnh|Thị xã|Huyện|Xã|Đường|Phố)\s+/gi, '').trim(); let parts = []; if (street) parts.push(clean(street)); if (ward) { let w = clean(ward); if (!parts.includes(w)) parts.push(w); } if (district) { let d = clean(district); if (!parts.includes(d)) parts.push(d); } if (parts.length > 0) return parts.slice(0, 2).join(", "); if (city) return clean(city); return "UNKNOWN SECTOR"; } } catch(e) { return null; } return null; }
+        async function fetchCityName(lat, lon) { try { let response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=vi`); let data = await response.json(); if(data && data.address) { let ad = data.address; let street = ad.road || ad.pedestrian || ad.neighbourhood || ""; let ward = ad.quarter || ad.suburb || ad.village || ""; let district = ad.city_district || ad.borough || ad.county || ""; let city = ad.city || ad.state || ad.town || ""; const clean = (str) => str.replace(/(Phường|Quận|Thành phố|Tỉnh|Th thị xã|Huyện|Xã|Đường|Phố)\s+/gi, '').trim(); let parts = []; if (street) parts.push(clean(street)); if (ward) { let w = clean(ward); if (!parts.includes(w)) parts.push(w); } if (district) { let d = clean(district); if (!parts.includes(d)) parts.push(d); } if (parts.length > 0) return parts.slice(0, 2).join(", "); if (city) return clean(city); return "UNKNOWN SECTOR"; } } catch(e) { return null; } return null; }
         
         function requestRealGeolocation() { const gpsEl = document.getElementById('gps-display'); if ("geolocation" in navigator) { navigator.geolocation.getCurrentPosition( async (position) => { const lat = position.coords.latitude; const lon = position.coords.longitude; let exactLocation = await fetchCityName(lat, lon); if(exactLocation) { gpsEl.innerText = `GPS: ${exactLocation.toUpperCase()}`; } else { gpsEl.innerText = `GPS: ${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`; } }, (error) => { gpsEl.innerText = "GPS: UNKNOWN SECTOR // DENIED"; }, { timeout: 10000 } ); } else { gpsEl.innerText = "GPS: SYSTEM OFFLINE"; } }
 
@@ -715,7 +713,7 @@
             }
         }
 
-        /* 🌟 CÚP CẦU DAO PHE ĐỐI LẬP + NÂNG CẤP FONT CHỮ 🌟 */
+        /* 🌟 XỬ LÝ KHÓA PHE ĐỐI LẬP & ẢNH NỀN PHÂN KHU (GITHUB) 🌟 */
         function showFactionPreview(side) {
             const bg = document.getElementById('sanctum-bg');
             const modal = document.getElementById('faction-preview-modal');
@@ -726,9 +724,9 @@
             document.getElementById('floor-grid').style.opacity = '0';
             
             if (side === 'light') {
-                document.getElementById('arrow-left').classList.remove('show-arrow'); // Tắt neon THE DARK
+                document.getElementById('arrow-left').classList.remove('show-arrow'); // Tắt điện THE DARK
                 
-                bg.style.backgroundImage = "url('HINH_THE_LIGHT.jpg')";
+                bg.style.backgroundImage = "url('https://github.com/happyk1900/-m-thanh-app/blob/main/LIGH%20NEN.png?raw=true')";
                 modal.style.borderColor = "#00e5ff";
                 modal.style.boxShadow = "0 0 20px rgba(0,229,255,0.4), inset 0 0 15px rgba(0,229,255,0.2)";
                 content.innerHTML = `
@@ -738,9 +736,9 @@
                     <div class="holo-req">Yêu cầu: Đạo nghiệp viên mãn (SCI > 85).</div>
                 `;
             } else {
-                document.getElementById('arrow-right').classList.remove('show-arrow'); // Tắt neon THE LIGHT
+                document.getElementById('arrow-right').classList.remove('show-arrow'); // Tắt điện THE LIGHT
 
-                bg.style.backgroundImage = "url('HINH_THE_DARK.jpg')";
+                bg.style.backgroundImage = "url('https://github.com/happyk1900/-m-thanh-app/blob/main/DARK%20NEN.png?raw=true')";
                 modal.style.borderColor = "#ff2a2a";
                 modal.style.boxShadow = "0 0 20px rgba(255,42,42,0.4), inset 0 0 15px rgba(255,42,42,0.2)";
                 content.innerHTML = `
@@ -761,7 +759,7 @@
             document.getElementById('core-wrapper').style.pointerEvents = 'auto';
             document.getElementById('floor-grid').style.opacity = '1';
             
-            /* Bật lại cầu dao 2 bên */
+            /* Cấp điện lại cho 2 biển Neon */
             document.getElementById('arrow-left').classList.add('show-arrow');
             document.getElementById('arrow-right').classList.add('show-arrow');
             
@@ -772,7 +770,7 @@
         const boo = document.getElementById('boo-knight'); const booEnergyBorder = document.getElementById('boo-energy'); const bobaReward = document.getElementById('boba-reward');
         let booEnergy = 20; let isBooSleeping = false; const DROP_RATE_PER_SECOND = 100 / 10800; let awakeOverride = false; let awakeTimeout = null; let holdTimer = null; let holdFired = false;
         
-        /* 🌟 SỬA LỖI VÒNG LẶP BAY CỦA BOO (HẾT PIN VẪN PHẢI CHECK LẠI) 🌟 */
+        /* 🌟 SỬA LỖI VÒNG LẶP BAY CỦA BOO 🌟 */
         function roamBoo() { 
             if (isBooSleeping || isLoreOpen || document.body.classList.contains('inspect-mode') || boo.classList.contains('boo-jumpscare') || isVoiceChatActive || booEnergy <= 0) { 
                 setTimeout(roamBoo, 2000); 
@@ -834,7 +832,7 @@
         boo.addEventListener('pointerdown', (e) => { e.preventDefault(); holdFired = false; holdTimer = setTimeout(() => { holdFired = true; if (isBooSleeping && booEnergy > 0) { awakeOverride = true; wakeUpBoo(); playSound('boing'); if (!isBooMuted) playBooDialog("Khịt khịt... Nửa đêm nửa hôm gọi lão chư dậy làm gì thế hả ngươi?"); if (navigator.vibrate) navigator.vibrate([100, 50, 100]); clearTimeout(awakeTimeout); awakeTimeout = setTimeout(() => { awakeOverride = false; }, 3 * 60 * 1000); } }, 1000); }); 
         boo.addEventListener('pointerleave', () => { clearTimeout(holdTimer); });
         
-        /* 🌟 SỬA LỖI TƯƠNG TÁC LÚC BOO SẬP NGUỒN 🌟 */
+        /* 🌟 XỬ LÝ TƯƠNG TÁC LÚC BOO SẬP NGUỒN 🌟 */
         boo.addEventListener('pointerup', (e) => {
             e.preventDefault(); clearTimeout(holdTimer); if (holdFired) return;
             
@@ -845,7 +843,6 @@
             
             if (isBooSleeping) return;
             
-            // Xử lý báo động khi cố chạm vào Boo lúc hết pin
             if (booEnergy <= 0) { 
                 playSound('brake');
                 showHologramStatus("BÁO ĐỘNG: Lõi sinh cơ sập nguồn! Kéo ly Boba vào để kích hoạt lại.");
@@ -913,6 +910,5 @@
         document.addEventListener('mousemove', (e) => { const x = (window.innerWidth / 2 - e.pageX) / 35; const y = (window.innerHeight / 2 - e.pageY) / 35; booModuleHolo.style.transform = `perspective(500px) rotateY(${-x}deg) rotateX(${y}deg)`; });
         window.addEventListener('deviceorientation', (e) => { if(e.gamma && e.beta) { const x = Math.max(-25, Math.min(25, e.gamma)); const y = Math.max(-25, Math.min(25, e.beta - 45)); booModuleHolo.style.transform = `perspective(500px) rotateY(${x}deg) rotateX(${y}deg)`; } });
     </script>
-      <script src="boo-player.js"></script>
 </body>
 </html>
