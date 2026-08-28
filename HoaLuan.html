@@ -308,14 +308,34 @@
     </div>
 
     <script>
+        let fxCtx = null;
+        
+        function initAudio() {
+            if (!fxCtx) {
+                fxCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (fxCtx.state === 'suspended') {
+                fxCtx.resume();
+            }
+        }
+        
+        // Khởi tạo AudioContext toàn cục ngay khi người dùng chạm vào màn hình
+        window.addEventListener('touchstart', initAudio, { passive: true });
+        window.addEventListener('click', initAudio, { passive: true });
+
         const bgMusic = document.getElementById('bg-music');
         const speakerIcon = document.getElementById('speaker-btn');
         
         function playSound(type) {
             try { 
-                const ctx = new (window.AudioContext || window.webkitAudioContext)(); 
-                const osc = ctx.createOscillator(); const gain = ctx.createGain(); 
-                osc.connect(gain); gain.connect(ctx.destination);
+                // Sử dụng fxCtx toàn cục thay vì tạo mới liên tục
+                if (!fxCtx) initAudio();
+                const ctx = fxCtx; 
+                
+                const osc = ctx.createOscillator(); 
+                const gain = ctx.createGain(); 
+                osc.connect(gain); 
+                gain.connect(ctx.destination);
                 
                 if(type === 'katana') { 
                     osc.type = 'sawtooth'; osc.frequency.setValueAtTime(1200, ctx.currentTime); 
@@ -336,7 +356,9 @@
                     gain.gain.setValueAtTime(1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
                     osc.start(); osc.stop(ctx.currentTime + 0.5);
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.warn("Lỗi phát âm thanh:", e);
+            }
         }
 
         const lorePagesHTML = [
@@ -616,7 +638,6 @@
                 scoresData[cGame][tryIdx] = aScore;
                 hLuanTries[cGame]++;
             } else {
-                // Nếu quá 3 lượt, ghi đè vào lượt thứ 3 hoặc cộng dồn test tùy ý
                 scoresData[cGame][2] = aScore;
             }
 
@@ -643,5 +664,6 @@
             setTimeout(() => { window.location.href = 'index.html'; }, 800); 
         }
     </script>
+    <script src="boo-player.js"></script>
 </body>
 </html>
