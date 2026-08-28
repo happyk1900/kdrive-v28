@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
-    <title>K-Drive Core V66 - Album Ảo Ảnh</title>
+    <title>K-Drive Core V67 - Trình Phát Ảo Ảnh</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Montserrat:wght@800;900&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
     
@@ -206,6 +206,8 @@
             0% { transform: translate(-50%, -50%) scale(2.2) translateY(0px) rotate(-3deg); filter: drop-shadow(0 0 35px rgba(0,229,255,0.6)); } 
             100% { transform: translate(-50%, -50%) scale(2.2) translateY(-25px) rotate(3deg); filter: drop-shadow(0 0 50px rgba(255,20,147,0.7)); } 
         }
+        /* Lớp class pause animation cho Boo khi Pause nhạc */
+        .boo-hologram.paused-anim { animation-play-state: paused !important; filter: drop-shadow(0 0 15px rgba(0,229,255,0.3)) !important; }
 
         /* Nốt nhạc ánh sáng nhả ra từ Boo */
         .singing-note {
@@ -219,9 +221,24 @@
             100% { transform: translate(calc(25px * var(--dir, 1)), -90px) scale(1.5) rotate(calc(25deg * var(--dir, 1))); opacity: 0; }
         }
         
+        /* CỤM ĐIỀU KHIỂN BÀI HÁT NEON DƯỚI CHÂN BOO */
+        #dream-player-controls {
+            position: fixed; top: 64%; left: 50%; transform: translateX(-50%);
+            display: none; align-items: center; justify-content: center; gap: 28px; z-index: 1000005;
+        }
+        body.dream-mode #dream-player-controls { display: flex; }
+        .dream-ctrl-btn {
+            background: transparent; border: none; color: #00e5ff;
+            font-size: 24px; cursor: pointer; text-shadow: 0 0 10px rgba(0,229,255,0.8);
+            transition: all 0.3s ease; outline: none; padding: 5px; line-height: 1;
+        }
+        .dream-ctrl-btn:hover { color: #fff; text-shadow: 0 0 15px #fff, 0 0 20px #00e5ff; transform: scale(1.15); }
+        .dream-ctrl-btn:active { transform: scale(0.9); }
+        .dream-ctrl-btn.loop-active { color: #ff1493; text-shadow: 0 0 12px rgba(255,20,147,0.8); }
+        
         /* Nút thoát Ảo Ảnh - Tinh Tế, Thanh Lịch */
         #dream-exit-btn {
-            position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%);
             padding: 10px 35px; background: rgba(0, 229, 255, 0.05); 
             border: 1px solid rgba(0, 229, 255, 0.4);
             color: #00e5ff; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 4px;
@@ -233,23 +250,6 @@
         #dream-exit-btn:hover { background: rgba(0, 229, 255, 0.15); box-shadow: 0 4px 20px rgba(0,229,255,0.3), inset 0 0 12px rgba(0,229,255,0.2); }
         #dream-exit-btn:active { transform: translateX(-50%) scale(0.96); }
         body.dream-mode #dream-exit-btn { display: block; }
-
-        /* Mini Player cho Không Gian Ảo Ảnh */
-        #dream-player-controls {
-            position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%);
-            display: none; align-items: center; gap: 15px; z-index: 1000005;
-            color: #00e5ff; font-family: 'Share Tech Mono', monospace; font-size: 12px;
-            text-shadow: 0 0 5px rgba(0,229,255,0.8);
-        }
-        body.dream-mode #dream-player-controls { display: flex; }
-        .dream-ctrl-btn {
-            background: transparent; border: 1px solid rgba(0,229,255,0.4); color: #00e5ff;
-            padding: 6px 12px; border-radius: 6px; cursor: pointer; text-shadow: 0 0 5px rgba(0,229,255,0.8);
-            font-family: 'Share Tech Mono', monospace; font-weight: bold; letter-spacing: 1px;
-            transition: all 0.3s ease;
-        }
-        .dream-ctrl-btn:active { background: rgba(0,229,255,0.2); transform: scale(0.95); }
-        #dream-song-title { width: 180px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; letter-spacing: 1px; }
         
         .boo-charging { animation: chargeSwell 3s ease-in forwards !important; }
         @keyframes chargeSwell {
@@ -493,15 +493,16 @@
         </div>
     </div>
 
+    <!-- CỤM ĐIỀU KHIỂN NHẠC TÀNG HÌNH LƠ LỬNG DƯỚI CHÂN BOO -->
+    <div id="dream-player-controls">
+        <button class="dream-ctrl-btn" id="dream-loop-btn" onclick="toggleDreamLoop()">🔁</button>
+        <button class="dream-ctrl-btn" onclick="prevDreamSong()">⏮</button>
+        <button class="dream-ctrl-btn" id="dream-play-btn" onclick="toggleDreamPlay()">⏸</button>
+        <button class="dream-ctrl-btn" onclick="nextDreamSong()">⏭</button>
+    </div>
+
     <!-- NÚT NGẮT MỘNG SIÊU TINH TẾ (NẰM 1 DÒNG) -->
     <button id="dream-exit-btn" onclick="exitDreamMode()">NGẮT MỘNG</button>
-    
-    <!-- CỤM ĐIỀU KHIỂN BÀI HÁT TRONG KHÔNG GIAN ẢO ẢNH -->
-    <div id="dream-player-controls">
-        <button class="dream-ctrl-btn" onclick="prevDreamSong()">[ |< ]</button>
-        <div id="dream-song-title">ĐANG PHÁT...</div>
-        <button class="dream-ctrl-btn" onclick="nextDreamSong()">[ >| ]</button>
-    </div>
 
     <div id="debug-panel" class="ui-element" onclick="this.classList.toggle('debug-panel-open')">
         <div class="panel-title">KIỂM SOÁT LUÂN TRẬN</div>
@@ -940,7 +941,7 @@
                 let p = document.createElement('div');
                 p.className = 'dream-particle';
                 p.style.left = Math.random() * 100 + 'vw';
-                p.style.top = (Math.random() * 100 + 50) + 'vh'; // start from lower half
+                p.style.top = (Math.random() * 100 + 50) + 'vh'; 
                 p.style.animationDuration = (Math.random() * 8 + 6) + 's';
                 p.style.animationDelay = (Math.random() * 5) + 's';
                 let color = Math.random() > 0.5 ? '#00e5ff' : '#ff1493';
@@ -954,8 +955,10 @@
         let isChargingMagic = false;
         let currentChargeOsc = null;
         let singingInterval = null;
+        let isLoopOne = false; // Biến cờ lặp nhạc
 
         // -- MẢNG CHỨA LINK BÀI HÁT (PLAYLIST) CHO KHÔNG GIAN ẢO ẢNH --
+        // Không cần hiển thị tên bài hát nữa, chỉ phát nhạc
         const dreamPlaylist = [
             "https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Rain%20Table%20Circuit.mp3", 
             "https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Shamisen%20Chips.mp3", 
@@ -964,33 +967,61 @@
             "https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20(4).mp3"  
         ];
         
-        const dreamSongNames = [
-            "BÀI HÁT 01", 
-            "BÀI HÁT 02", 
-            "BÀI HÁT 03", 
-            "BÀI HÁT 04", 
-            "BÀI HÁT 05"
-        ];
-        
         let currentDreamSong = 0;
         const dreamAudio = document.getElementById('dream-music');
 
-        // Tự động nhảy bài khi hết bài hiện tại
-        dreamAudio.addEventListener('ended', nextDreamSong);
+        // Logic khi kết thúc bài hát
+        dreamAudio.addEventListener('ended', () => {
+            if (!isLoopOne) {
+                nextDreamSong();
+            }
+        });
 
         function playDreamSong(index) {
-            // Đảm bảo không bị lố danh sách
             if (index >= dreamPlaylist.length) index = 0;
             if (index < 0) index = dreamPlaylist.length - 1;
             
             currentDreamSong = index;
-            
-            // Cập nhật thẻ audio và phát
             dreamAudio.src = dreamPlaylist[currentDreamSong];
+            dreamAudio.loop = isLoopOne; // Giữ trạng thái lặp
+            
             dreamAudio.play().catch(e => console.log("Lỗi phát nhạc:", e));
             
-            // Hiển thị tên bài hát trên UI
-            document.getElementById('dream-song-title').innerText = "ĐANG PHÁT: " + dreamSongNames[currentDreamSong];
+            // Cập nhật giao diện play/pause
+            document.getElementById('dream-play-btn').innerHTML = '⏸';
+            document.getElementById('boo-knight').classList.remove('paused-anim');
+            startSinging(); // Đảm bảo Boo đang hát
+        }
+
+        function toggleDreamPlay() {
+            const btn = document.getElementById('dream-play-btn');
+            const boo = document.getElementById('boo-knight');
+            
+            if (dreamAudio.paused) {
+                dreamAudio.play();
+                btn.innerHTML = '⏸';
+                startSinging();
+                boo.classList.remove('paused-anim'); // Boo bay bổng lại
+            } else {
+                dreamAudio.pause();
+                btn.innerHTML = '▶';
+                clearInterval(singingInterval); // Nín hát
+                boo.classList.add('paused-anim'); // Boo đứng im lơ lửng
+            }
+        }
+
+        function toggleDreamLoop() {
+            isLoopOne = !isLoopOne;
+            const btn = document.getElementById('dream-loop-btn');
+            if (isLoopOne) {
+                btn.classList.add('loop-active');
+                btn.innerHTML = '🔂';
+                dreamAudio.loop = true;
+            } else {
+                btn.classList.remove('loop-active');
+                btn.innerHTML = '🔁';
+                dreamAudio.loop = false;
+            }
         }
 
         function nextDreamSong() {
@@ -1090,16 +1121,13 @@
             const holoBubble = document.getElementById('holo-bubble');
             holoBubble.innerHTML = "";
             
-            // Tắt nhạc nền, Bật nhạc Playlist
             document.getElementById('bg-music').pause();
             dreamAudio.volume = 0.8;
             playDreamSong(currentDreamSong);
-
-            // Boo bắt đầu nhả nốt nhạc (Hát)
-            startSinging();
         }
 
         function startSinging() {
+            clearInterval(singingInterval);
             const boo = document.getElementById('boo-knight');
             singingInterval = setInterval(() => {
                 if(!document.body.classList.contains('dream-mode')) return;
@@ -1117,12 +1145,10 @@
         function exitDreamMode() {
             document.body.classList.remove('dream-mode');
             clearInterval(singingInterval);
+            document.getElementById('boo-knight').classList.remove('paused-anim');
             
-            // Tắt nhạc Ảo ảnh
             dreamAudio.pause();
-            // (Giữ nguyên thời gian để lần sau vào phát tiếp bài đó, hoặc thay đổi nếu cần)
             
-            // Quay lại nhạc nền
             if(!document.getElementById('speaker-btn').classList.contains('muted')) {
                 document.getElementById('bg-music').play().catch(e=>console.log(e));
             }
