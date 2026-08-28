@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
-    <title>K-Drive Core V65 - Không Gian Ảo Ảnh</title>
+    <title>K-Drive Core V66 - Album Ảo Ảnh</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Montserrat:wght@800;900&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
     
@@ -158,7 +158,7 @@
         .holo-btn-legend { align-self: center; margin-top: 8px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; padding: 6px 20px; border-radius: 6px; transition: all 0.3s ease; box-shadow: 0 3px 10px rgba(0,0,0,0.4); text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
         /* =========================================================
-           🌟 EASTER EGG: KHÔNG GIAN ẢO ẢNH (DREAM MODE)
+           🌟 EASTER EGG: KHÔNG GIAN ẢO ẢNH (DREAM MODE) + PLAYER
            ========================================================= */
         body.dream-mode { 
             background: radial-gradient(circle at center, #070a1a 0%, #000000 100%) !important; 
@@ -221,7 +221,7 @@
         
         /* Nút thoát Ảo Ảnh - Tinh Tế, Thanh Lịch */
         #dream-exit-btn {
-            position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
             padding: 10px 35px; background: rgba(0, 229, 255, 0.05); 
             border: 1px solid rgba(0, 229, 255, 0.4);
             color: #00e5ff; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 4px;
@@ -233,6 +233,23 @@
         #dream-exit-btn:hover { background: rgba(0, 229, 255, 0.15); box-shadow: 0 4px 20px rgba(0,229,255,0.3), inset 0 0 12px rgba(0,229,255,0.2); }
         #dream-exit-btn:active { transform: translateX(-50%) scale(0.96); }
         body.dream-mode #dream-exit-btn { display: block; }
+
+        /* Mini Player cho Không Gian Ảo Ảnh */
+        #dream-player-controls {
+            position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%);
+            display: none; align-items: center; gap: 15px; z-index: 1000005;
+            color: #00e5ff; font-family: 'Share Tech Mono', monospace; font-size: 12px;
+            text-shadow: 0 0 5px rgba(0,229,255,0.8);
+        }
+        body.dream-mode #dream-player-controls { display: flex; }
+        .dream-ctrl-btn {
+            background: transparent; border: 1px solid rgba(0,229,255,0.4); color: #00e5ff;
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; text-shadow: 0 0 5px rgba(0,229,255,0.8);
+            font-family: 'Share Tech Mono', monospace; font-weight: bold; letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        .dream-ctrl-btn:active { background: rgba(0,229,255,0.2); transform: scale(0.95); }
+        #dream-song-title { width: 180px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; letter-spacing: 1px; }
         
         .boo-charging { animation: chargeSwell 3s ease-in forwards !important; }
         @keyframes chargeSwell {
@@ -423,8 +440,8 @@
     </div>
     
     <audio id="bg-music" loop src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20Signal.mp3"></audio>
-    <!-- THÊM LINK BÀI NHẠC ẢO ẢNH / HÁT CỦA ANH VÀO ĐÂY CHO BOO PHIÊU -->
-    <audio id="dream-music" loop src=""></audio>
+    <!-- Trình phát nhạc ẩn cho Không gian ảo ảnh -->
+    <audio id="dream-music" src=""></audio>
 
     <div id="gps-display" class="ui-element">GPS: ACQUIRES...</div>
 
@@ -478,6 +495,13 @@
 
     <!-- NÚT NGẮT MỘNG SIÊU TINH TẾ (NẰM 1 DÒNG) -->
     <button id="dream-exit-btn" onclick="exitDreamMode()">NGẮT MỘNG</button>
+    
+    <!-- CỤM ĐIỀU KHIỂN BÀI HÁT TRONG KHÔNG GIAN ẢO ẢNH -->
+    <div id="dream-player-controls">
+        <button class="dream-ctrl-btn" onclick="prevDreamSong()">[ |< ]</button>
+        <div id="dream-song-title">ĐANG PHÁT...</div>
+        <button class="dream-ctrl-btn" onclick="nextDreamSong()">[ >| ]</button>
+    </div>
 
     <div id="debug-panel" class="ui-element" onclick="this.classList.toggle('debug-panel-open')">
         <div class="panel-title">KIỂM SOÁT LUÂN TRẬN</div>
@@ -572,7 +596,7 @@
         function fetchRealUser() { let storedUser = localStorage.getItem('kdrive_logged_in_user'); let actualUser = storedUser ? storedUser.toUpperCase() : "KAI RIPE"; document.getElementById('current-username').innerText = actualUser; document.querySelectorAll('.inspect-username').forEach(el => el.innerText = actualUser); }
         function runHighTechClock() { const now = new Date(); const hours = String(now.getHours()).padStart(2, '0'); const minutes = String(now.getMinutes()).padStart(2, '0'); const seconds = String(now.getSeconds()).padStart(2, '0'); const ms = String(now.getMilliseconds()).padStart(3, '0').substring(0,2); document.getElementById('clock-hms').innerText = `${hours}:${minutes}:${seconds}`; document.getElementById('clock-ms').innerText = `:${ms}`; const year = now.getFullYear(); const month = String(now.getMonth() + 1).padStart(2, '0'); const day = String(now.getDate()).padStart(2, '0'); document.getElementById('date-display').innerText = `${year}.${month}.${day}`; requestAnimationFrame(runHighTechClock); }
         
-        async function fetchCityName(lat, lon) { try { let response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=vi`); let data = await response.json(); if(data && data.address) { let ad = data.address; let street = ad.road || ad.pedestrian || ad.neighbourhood || ""; let ward = ad.quarter || ad.suburb || ad.village || ""; let district = ad.city_district || ad.borough || ad.county || ""; let city = ad.city || ad.state || ad.town || ""; const clean = (str) => str.replace(/(Phường|Quận|Thành phố|Tỉnh|Thị xã|Huyện|Xã|Đường|Phố)\s+/gi, '').trim(); let parts = []; if (street) push(clean(street)); if (ward) { let w = clean(ward); if (!parts.includes(w)) parts.push(w); } if (district) { let d = clean(district); if (!parts.includes(d)) parts.push(d); } if (parts.length > 0) return parts.slice(0, 2).join(", "); if (city) return clean(city); return "UNKNOWN SECTOR"; } } catch(e) { return null; } return null; }
+        async function fetchCityName(lat, lon) { try { let response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=vi`); let data = await response.json(); if(data && data.address) { let ad = data.address; let street = ad.road || ad.pedestrian || ad.neighbourhood || ""; let ward = ad.quarter || ad.suburb || ad.village || ""; let district = ad.city_district || ad.borough || ad.county || ""; let city = ad.city || ad.state || ad.town || ""; const clean = (str) => str.replace(/(Phường|Quận|Thành phố|Tỉnh|Thị xã|Huyện|Xã|Đường|Phố)\s+/gi, '').trim(); let parts = []; if (street) parts.push(clean(street)); if (ward) { let w = clean(ward); if (!parts.includes(w)) parts.push(w); } if (district) { let d = clean(district); if (!parts.includes(d)) parts.push(d); } if (parts.length > 0) return parts.slice(0, 2).join(", "); if (city) return clean(city); return "UNKNOWN SECTOR"; } } catch(e) { return null; } return null; }
         
         function requestRealGeolocation() { const gpsEl = document.getElementById('gps-display'); if ("geolocation" in navigator) { navigator.geolocation.getCurrentPosition( async (position) => { const lat = position.coords.latitude; const lon = position.coords.longitude; let exactLocation = await fetchCityName(lat, lon); if(exactLocation) { gpsEl.innerText = `GPS: ${exactLocation.toUpperCase()}`; } else { gpsEl.innerText = `GPS: ${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`; } }, (error) => { gpsEl.innerText = "GPS: UNKNOWN SECTOR // DENIED"; }, { timeout: 10000 } ); } else { gpsEl.innerText = "GPS: SYSTEM OFFLINE"; } }
 
@@ -640,7 +664,7 @@
                 hud.classList.remove('expanded');
                 playSound('brake'); 
             }
-            updateSystemTerminal(); // Vẽ lại giao diện checklist
+            updateSystemTerminal(); 
         }
 
         function setMissionState(state) {
@@ -907,7 +931,7 @@
 
 
         /* =========================================================
-           🌟 EASTER EGG: KHÔNG GIAN ẢO ẢNH (DREAM MODE)
+           🌟 EASTER EGG: KHÔNG GIAN ẢO ẢNH (DREAM MODE) + PLAYER
            ========================================================= */
         function createDreamParticles() {
             const container = document.getElementById('dream-particles-container');
@@ -930,6 +954,52 @@
         let isChargingMagic = false;
         let currentChargeOsc = null;
         let singingInterval = null;
+
+        // -- MẢNG CHỨA LINK BÀI HÁT (PLAYLIST) CHO KHÔNG GIAN ẢO ẢNH --
+        const dreamPlaylist = [
+            "https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Rain%20Table%20Circuit.mp3", 
+            "https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Shamisen%20Chips.mp3", 
+            "https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20Tokyo.mp3", 
+            "https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20R%C5%8Dnin.mp3", 
+            "https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20(4).mp3"  
+        ];
+        
+        const dreamSongNames = [
+            "BÀI HÁT 01", 
+            "BÀI HÁT 02", 
+            "BÀI HÁT 03", 
+            "BÀI HÁT 04", 
+            "BÀI HÁT 05"
+        ];
+        
+        let currentDreamSong = 0;
+        const dreamAudio = document.getElementById('dream-music');
+
+        // Tự động nhảy bài khi hết bài hiện tại
+        dreamAudio.addEventListener('ended', nextDreamSong);
+
+        function playDreamSong(index) {
+            // Đảm bảo không bị lố danh sách
+            if (index >= dreamPlaylist.length) index = 0;
+            if (index < 0) index = dreamPlaylist.length - 1;
+            
+            currentDreamSong = index;
+            
+            // Cập nhật thẻ audio và phát
+            dreamAudio.src = dreamPlaylist[currentDreamSong];
+            dreamAudio.play().catch(e => console.log("Lỗi phát nhạc:", e));
+            
+            // Hiển thị tên bài hát trên UI
+            document.getElementById('dream-song-title').innerText = "ĐANG PHÁT: " + dreamSongNames[currentDreamSong];
+        }
+
+        function nextDreamSong() {
+            playDreamSong(currentDreamSong + 1);
+        }
+
+        function prevDreamSong() {
+            playDreamSong(currentDreamSong - 1);
+        }
 
         function playChargeSound() {
             try {
@@ -1020,11 +1090,10 @@
             const holoBubble = document.getElementById('holo-bubble');
             holoBubble.innerHTML = "";
             
-            // Tắt nhạc nền, bật nhạc mộng mơ
+            // Tắt nhạc nền, Bật nhạc Playlist
             document.getElementById('bg-music').pause();
-            let dreamAudio = document.getElementById('dream-music');
             dreamAudio.volume = 0.8;
-            dreamAudio.play().catch(e => console.log("Không tìm thấy nhạc Ảo ảnh!", e));
+            playDreamSong(currentDreamSong);
 
             // Boo bắt đầu nhả nốt nhạc (Hát)
             startSinging();
@@ -1049,10 +1118,11 @@
             document.body.classList.remove('dream-mode');
             clearInterval(singingInterval);
             
-            let dreamAudio = document.getElementById('dream-music');
+            // Tắt nhạc Ảo ảnh
             dreamAudio.pause();
-            dreamAudio.currentTime = 0;
+            // (Giữ nguyên thời gian để lần sau vào phát tiếp bài đó, hoặc thay đổi nếu cần)
             
+            // Quay lại nhạc nền
             if(!document.getElementById('speaker-btn').classList.contains('muted')) {
                 document.getElementById('bg-music').play().catch(e=>console.log(e));
             }
