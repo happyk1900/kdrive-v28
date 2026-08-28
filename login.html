@@ -2,10 +2,11 @@
 <html lang="vi">
 <head>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#030508">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/happyk1900/Kai-Ripe/main/t%C3%A1ch%20r%E1%BB%A3i.png">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>K-Drive: Cổng không gian cyber</title>
     
     <link rel="preload" as="image" href="https://github.com/happyk1900/-m-thanh-app/blob/main/BOO%20LOGIC%20OK.png?raw=true">
@@ -17,19 +18,33 @@
     
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-        body { background-color: #050505; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Space Grotesk', sans-serif; }
+        body { background-color: #030508; height: 100vh; height: 100dvh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Space Grotesk', sans-serif; }
         img, video { -webkit-user-drag: none; pointer-events: none; }
 
-        .kdrive-image-wrapper { position: relative; width: 100vw; height: 100vh; max-width: 480px; background-color: #000; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        /* 🔥 ĐIỀU CHỈNH 1: TRÀN VIỀN 100% & KHUNG KÍNH VISOR 🔥 */
+        .kdrive-image-wrapper { 
+            position: relative; width: 100vw; height: 100vh; height: 100dvh; max-width: none; 
+            background-color: #000; overflow: hidden; 
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Viền khung góc cạnh công nghệ (Hiệu ứng kính Visor) */
+        .kdrive-image-wrapper::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border: 2px solid rgba(200, 215, 255, 0.15);
+            pointer-events: none; z-index: 99999999;
+            box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05);
+        }
         
-        .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; object-position: bottom center; position: absolute; top: 0; left: 0; filter: brightness(0.95) contrast(1.1); }
+        .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; object-position: center; position: absolute; top: 0; left: 0; filter: brightness(0.95) contrast(1.1); }
         
         #bg-unlit { z-index: 1; opacity: 1; }
         #bg-cyber { z-index: 2; opacity: 0; transition: opacity 1s ease-in-out; }
         #bg-boo { z-index: 3; opacity: 0; transition: opacity 2s ease-in-out; } 
         #bg-lit { z-index: 4; opacity: 0; transition: opacity 1.5s ease-in-out; }
 
-        .top-shadow-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%); z-index: 11; pointer-events: none; }
+        .top-shadow-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to bottom, rgba(3, 5, 8, 0.85) 0%, rgba(3, 5, 8, 0.3) 50%, transparent 100%); z-index: 11; pointer-events: none; }
 
         #bottom-mist {
             position: absolute; bottom: 0; left: -15%; width: 130%; height: 26%;
@@ -51,7 +66,7 @@
         @keyframes sweepLight { 0% { left: -150%; } 20% { left: 150%; } 100% { left: 150%; } }
 
         .start-btn { 
-            position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); 
+            position: absolute; bottom: calc(env(safe-area-inset-bottom, 20px) + 20px); left: 50%; transform: translateX(-50%); 
             width: auto; padding: 15px 28px;
             background: rgba(10, 12, 18, 0.88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(210, 215, 230, 0.6); border-radius: 12px;
@@ -70,11 +85,24 @@
             text-shadow: 0 2px 4px #000, 0 0 15px #fff; 
         }
 
-        /* --- 🔥 STYLING MÀN HÌNH MỞ ĐẦU (INTRO START) 🔥 --- */
+        /* --- 🔥 ĐIỀU CHỈNH 2: THANH TRẠNG THÁI HUD CYBER GIẢ LẬP 🔥 */
+        .cyber-hud-bar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 32px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; z-index: 9999999; pointer-events: none;
+            font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 800;
+            color: rgba(255, 255, 255, 0.7); letter-spacing: 1.5px;
+            background: linear-gradient(to bottom, rgba(3,5,8,0.95) 0%, rgba(3,5,8,0) 100%);
+        }
+        .hud-item { display: flex; align-items: center; gap: 6px; text-shadow: 0 0 8px rgba(0,229,255,0.6); }
+        .hud-dot { width: 6px; height: 6px; background: #00e5ff; border-radius: 50%; box-shadow: 0 0 8px #00e5ff; animation: pulseDot 1.5s infinite; }
+        @keyframes pulseDot { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+
+        /* --- 🔥 MÀN HÌNH MỞ ĐẦU & 2 NÚT HOLOGRAPHIC 🔥 */
         #startIntroScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 9999999; display: flex; flex-direction: column; justify-content: flex-end;
-            align-items: center; padding: 40px 20px; overflow: hidden;
+            z-index: 999999; display: flex; flex-direction: column; justify-content: flex-end;
+            align-items: center; padding: calc(env(safe-area-inset-bottom, 20px) + 30px) 20px; overflow: hidden;
             opacity: 1; transition: opacity 0.8s ease-in-out;
         }
         #startIntroScreen.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
@@ -86,13 +114,13 @@
 
         .start-intro-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(3,5,8,0.3) 0%, rgba(3,5,8,0.75) 70%, rgba(3,5,8,0.95) 100%);
+            background: linear-gradient(to bottom, rgba(3,5,8,0.2) 0%, rgba(3,5,8,0.6) 60%, rgba(3,5,8,0.95) 100%);
             z-index: 2; pointer-events: none;
         }
 
         .start-button-group {
             position: relative; z-index: 10; width: 100%; max-width: 320px;
-            display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;
+            display: flex; flex-direction: column; gap: 15px; margin-bottom: 10px;
         }
 
         .hologram-btn {
@@ -120,7 +148,7 @@
             color: rgba(255, 255, 255, 0.85);
         }
 
-        /* --- 🔥 TRÌNH PHÁT VIDEO CỐT TRUYỆN 🔥 --- */
+        /* --- 🔥 TRÌNH PHÁT VIDEO CỐT TRUYỆN 🔥 */
         #storyVideoContainer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 9999998; display: none; justify-content: center; align-items: center;
@@ -130,17 +158,17 @@
         }
 
         .gateway-popup { 
-            position: absolute; top: 38%; left: 50%; width: 92%; max-width: 340px; 
-            background: rgba(8, 12, 20, 0.55); 
-            backdrop-filter: blur(10px); 
-            -webkit-backdrop-filter: blur(10px);
+            position: absolute; top: 50%; left: 50%; width: 92%; max-width: 340px; 
+            background: rgba(8, 12, 20, 0.75); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(200, 205, 220, 0.4); 
             border-radius: 16px; 
             overflow: hidden; 
             padding: 2px; 
             z-index: 99999; 
             opacity: 0; 
-            transform: translate(-50%, -20%) scale(0.95); 
+            transform: translate(-50%, -40%) scale(0.95); 
             pointer-events: none; 
             visibility: hidden; 
             transition: all 1.2s cubic-bezier(0.25, 1, 0.3, 1); 
@@ -232,28 +260,28 @@
         .sub-link { color: rgba(255,255,255,0.9); font-size: 10px; cursor: pointer; letter-spacing: 1px; transition: 0.3s; text-transform: uppercase; font-weight: 700; text-shadow: 0 1px 3px #000; }
         .sub-link:hover { color: #ffffff; text-shadow: 0 0 8px #fff; }
 
-        #panel-musashi { width: 100%; height: 350px; display: none; flex-direction: column; align-items: center; text-align: center; }
-        .musashi-scroll-area { width: 100%; flex: 1; overflow-y: auto; padding: 0 10px; margin-bottom: 20px; scrollbar-width: thin; scrollbar-color: rgba(200, 205, 220, 0.4) transparent; }
+        #panel-musashi { width: 100%; height: 320px; display: none; flex-direction: column; align-items: center; text-align: center; }
+        .musashi-scroll-area { width: 100%; flex: 1; overflow-y: auto; padding: 0 10px; margin-bottom: 15px; scrollbar-width: thin; scrollbar-color: rgba(200, 205, 220, 0.4) transparent; }
         
         .musashi-text-content { 
             color: #e5e7eb; 
-            font-size: 13px; 
-            line-height: 1.8; 
+            font-size: 12px; 
+            line-height: 1.7; 
             text-align: justify; 
             font-family: 'EB Garamond', serif; 
             font-weight: 400;
             text-shadow: 0 1px 2px #000; 
         }
-        .musashi-text-content p { margin-bottom: 12px; }
+        .musashi-text-content p { margin-bottom: 10px; }
 
         .legend-title {
             font-family: 'Great Vibes', cursive !important;
-            font-size: 44px !important;
+            font-size: 38px !important;
             color: #fff7cc !important;
             text-shadow: 0 2px 5px rgba(0,0,0,0.9), 0 0 12px rgba(255, 215, 0, 0.9), 0 0 25px rgba(255, 230, 100, 0.8) !important;
             font-weight: normal !important;
             letter-spacing: 1px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-transform: none !important;
         }
 
@@ -272,12 +300,18 @@
 
     <!-- TRÌNH PHÁT VIDEO CỐT TRUYỆN HUYỀN THOẠI -->
     <div id="storyVideoContainer">
-        <video id="storyVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20HUYEN%20THOAI.mp4" playsinline preload="auto"></video>
+        <video id="storyVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/HUYENTHOAI.mp4" playsinline preload="auto"></video>
     </div>
 
     <div class="kdrive-image-wrapper" id="mainWrapper">
 
-        <!-- 🔥 MÀN HÌNH MỞ ĐẦU VỚI ẢNH ANH MO DAU & 2 NÚT HOLOGRAPHIC 🔥 -->
+        <!-- THANH TRẠNG THÁI HUD CYBER GIẢ LẬP CHE PHỦ ĐỈNH MÀN HÌNH -->
+        <div class="cyber-hud-bar">
+            <div class="hud-item"><span class="hud-dot"></span>SYS.ONLINE // 2099</div>
+            <div class="hud-item">K-DRIVE v2.6</div>
+        </div>
+
+        <!-- MÀN HÌNH MỞ ĐẦU VỚI ẢNH ANH MO DAU & 2 NÚT HOLOGRAPHIC -->
         <div id="startIntroScreen">
             <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Anh%20mo%20dau.png?raw=true" class="start-intro-bg">
             <div class="start-intro-overlay"></div>
@@ -340,7 +374,6 @@
     </div>
 
     <script>
-        // --- LOGIC MÀN HÌNH MỞ ĐẦU & VIDEO CỐT TRUYỆN ---
         const storyVid = document.getElementById('storyVideo');
 
         function playStoryVideo() {
@@ -350,7 +383,7 @@
             
             storyVid.currentTime = 0;
             storyVid.play().catch(e => {
-                console.log("Auto-play blocked, playing muted or requiring interaction", e);
+                console.log("Auto-play restricted:", e);
             });
         }
 
@@ -377,7 +410,7 @@
                 if(!isCinematicFinished) triggerToriiGateway(); 
             }, 16000);
 
-            audio.play().catch(e => console.log("Cần cấp quyền Audio:", e));
+            audio.play().catch(e => console.log("Audio block:", e));
             audio.onended = () => { if(!isCinematicFinished) triggerToriiGateway(); };
         }
 
