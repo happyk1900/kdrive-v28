@@ -112,7 +112,7 @@
         .orb-content-tilt {
             position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center;
             transform-style: preserve-3d; will-change: transform; pointer-events: none;
-            transition: transform 0.05s linear;
+            transition: transform 0.08s ease-out;
         }
 
         .orb-title {
@@ -396,6 +396,7 @@
             K-Drive tự hào là tựa game đầu tiên trên thế giới đồng bộ hóa trực tiếp các chỉ số cơ thể thực tế làm chỉ số sức mạnh của nhân vật.
         </div>
 
+        <!-- Hộp chọn ngôn ngữ -->
         <div class="splash-lang-switcher" id="langSwitcherSplash">
             <button class="lang-flag-btn active" id="btnVi" onclick="setLanguage('vi')">VI</button>
             <button class="lang-flag-btn" id="btnEn" onclick="setLanguage('en')">EN</button>
@@ -422,6 +423,7 @@
     <div id="storyBackBtn" onclick="returnToHomeFromStory()" title="Quay lại">❮</div>
 
     <div id="storyVideoContainer">
+        <!-- 🌟 LINK VIDEO KHÁM PHÁ CHUẨN XÁC 🌟 -->
         <video id="storyVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20KHAM%20PHA%20HD.mp4" playsinline preload="auto"></video>
     </div>
 
@@ -491,6 +493,7 @@
 
         <div class="top-shadow-gradient" id="shadowOverlay"></div>
         
+        <!-- 🌟 LINK ẢNH NỀN ĐĂNG NHẬP CHUẨN XÁC 🌟 -->
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20DANG%20NHAP.png?raw=true" id="bg-login" class="kdrive-bg-target">
         
         <div id="bottom-mist"></div>
@@ -738,6 +741,30 @@
             });
         }
 
+        // 🌟 KÍCH HOẠT QUYỀN CON QUAY HỒI CHUYỂN BẰNG TOUCH 🌟
+        function initGyroscope() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation, true);
+                        }
+                    }).catch(console.error);
+            } else {
+                window.addEventListener('deviceorientation', handleOrientation, true);
+            }
+        }
+
+        function handleOrientation(event) {
+            const tiltContent = document.getElementById('orbContentTilt');
+            if(!tiltContent) return;
+            let tiltX = event.beta ? event.beta * 0.7 : 0;  
+            let tiltY = event.gamma ? event.gamma * 0.7 : 0; 
+            tiltX = Math.max(-35, Math.min(35, tiltX));
+            tiltY = Math.max(-35, Math.min(35, tiltY));
+            tiltContent.style.transform = `perspective(600px) rotateX(${-tiltX}deg) rotateY(${tiltY}deg)`;
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             setLanguage(currentLang);
             const introVid = document.querySelector('.intro-bg-video');
@@ -746,6 +773,8 @@
                     document.addEventListener('click', () => { introVid.play(); }, { once: true });
                 });
             }
+            window.addEventListener('click', initGyroscope, { once: true });
+            window.addEventListener('touchstart', initGyroscope, { once: true });
         });
 
         const storyVid = document.getElementById('storyVideo');
@@ -763,8 +792,9 @@
             }, 600);
         }, 3500);
 
-        // 🌟 HIỆU ỨNG NGHIÊNG MƯỢT MÀ THEO CHUỘT / NGÓN TAY TRƯỢT 🌟
+        // Giữ hiệu ứng theo chuột cho Desktop (PC)
         window.addEventListener('pointermove', e => {
+            if (window.innerWidth < 1024) return; // Không can thiệp nếu là điện thoại
             const tiltContent = document.getElementById('orbContentTilt');
             if(!tiltContent) return;
             let rect = { width: window.innerWidth, height: window.innerHeight };
@@ -815,10 +845,12 @@
             if(ring) ring.classList.remove('active');
         }
 
+        // 🌟 SỬA LỖI ĐƠ NÚT TẠI ĐÂY: KHÔNG DÙNG LỆNH REMOVE() 🌟
         function triggerOrbExplosion() {
             if(navigator.vibrate) navigator.vibrate([200, 100, 300, 100, 600]);
             
-            document.getElementById('langSwitcherSplash').classList.add('hidden');
+            const langSwitch = document.getElementById('langSwitcherSplash');
+            if(langSwitch) langSwitch.classList.add('hidden');
 
             const container = document.getElementById('orbContainer');
             if(container) {
@@ -837,7 +869,8 @@
                 const splash = document.getElementById('splashScreen');
                 if(splash) {
                     splash.classList.add('hidden');
-                    setTimeout(() => splash.remove(), 800);
+                    // CHỈ ẨN ĐI THAY VÌ XÓA SẠCH KHỎI BỘ NHỚ ĐỂ KHÔNG BỊ LỖI NULL
+                    setTimeout(() => { splash.style.display = 'none'; }, 800);
                 }
             }, 400);
         }
@@ -857,7 +890,7 @@
 
         function hideSecurityBadge() {
             const badge = document.getElementById('intro-security-badge');
-            if (badge) { badge.style.opacity = '0'; setTimeout(() => badge.remove(), 500); }
+            if (badge) { badge.style.opacity = '0'; setTimeout(() => badge.style.display = 'none', 500); }
         }
 
         function openIntroModal(modalId) { 
@@ -868,54 +901,80 @@
             document.getElementById(modalId).classList.remove('active'); 
         }
 
+        // 🌟 SỬA LỖI ĐƠ NÚT TẠI ĐÂY: KIỂM TRA TRƯỚC KHI ẨN HỘP NGÔN NGỮ 🌟
         function playStoryVideo() {
             hideSecurityBadge();
-            document.getElementById('langSwitcherSplash').classList.add('hidden');
+            
+            const langSwitch = document.getElementById('langSwitcherSplash');
+            if(langSwitch) langSwitch.classList.add('hidden');
             
             const sysAudio = document.getElementById('sysAudio');
             if(sysAudio) sysAudio.pause();
 
-            document.getElementById('startIntroScreen').classList.add('hidden');
+            const startScreen = document.getElementById('startIntroScreen');
+            if(startScreen) startScreen.classList.add('hidden');
+            
             const videoContainer = document.getElementById('storyVideoContainer');
-            videoContainer.style.display = 'flex';
-            document.getElementById('storyBackBtn').style.display = 'flex';
-            storyVid.currentTime = 0;
-            storyVid.play().catch(e => console.log(e));
+            if(videoContainer) videoContainer.style.display = 'flex';
+            
+            const backBtn = document.getElementById('storyBackBtn');
+            if(backBtn) backBtn.style.display = 'flex';
+            
+            if(storyVid) {
+                storyVid.currentTime = 0;
+                storyVid.play().catch(e => console.log(e));
+            }
         }
 
         function returnToHomeFromStory() {
-            storyVid.pause();
-            storyVid.currentTime = 0;
-            document.getElementById('storyVideoContainer').style.display = 'none';
-            document.getElementById('storyBackBtn').style.display = 'none';
-            document.getElementById('startIntroScreen').classList.remove('hidden');
+            if(storyVid) {
+                storyVid.pause();
+                storyVid.currentTime = 0;
+            }
+            const videoContainer = document.getElementById('storyVideoContainer');
+            if(videoContainer) videoContainer.style.display = 'none';
+            
+            const backBtn = document.getElementById('storyBackBtn');
+            if(backBtn) backBtn.style.display = 'none';
+            
+            const startScreen = document.getElementById('startIntroScreen');
+            if(startScreen) startScreen.classList.remove('hidden');
+            
             const badge = document.getElementById('intro-security-badge');
             if(badge) badge.style.opacity = '1';
         }
 
+        // 🌟 SỬA LỖI ĐƠ NÚT TẠI ĐÂY 🌟
         function skipIntroScreen() {
             hideSecurityBadge();
-            document.getElementById('langSwitcherSplash').classList.add('hidden');
+            
+            const langSwitch = document.getElementById('langSwitcherSplash');
+            if(langSwitch) langSwitch.classList.add('hidden');
 
             const sysAudio = document.getElementById('sysAudio');
             if(sysAudio) sysAudio.pause();
 
-            document.getElementById('startIntroScreen').classList.add('hidden');
+            const startScreen = document.getElementById('startIntroScreen');
+            if(startScreen) startScreen.classList.add('hidden');
+            
             triggerCleanBackgroundDelay();
         }
 
-        storyVid.onended = () => {
-            document.getElementById('storyVideoContainer').style.display = 'none';
-            document.getElementById('storyBackBtn').style.display = 'none';
-            triggerCleanBackgroundDelay();
-        };
+        if(storyVid) {
+            storyVid.onended = () => {
+                document.getElementById('storyVideoContainer').style.display = 'none';
+                document.getElementById('storyBackBtn').style.display = 'none';
+                triggerCleanBackgroundDelay();
+            };
+        }
 
         function triggerCleanBackgroundDelay() {
             const bgm = document.getElementById('bgMusic');
-            bgm.play().catch(e => {});
+            if(bgm) bgm.play().catch(e => {});
             
             setTimeout(() => {
-                document.getElementById('loginPanelContainer').classList.add('active');
+                const loginPanel = document.getElementById('loginPanelContainer');
+                if(loginPanel) loginPanel.classList.add('active');
             }, 4000); 
         }
 
@@ -952,13 +1011,19 @@
                     if (navigator.vibrate) navigator.vibrate([300, 100, 400, 100, 500, 150, 600, 200, 1000]);
                     statusEl.innerHTML = "✅ THÀNH CÔNG!"; statusEl.style.color = "#00e5ff";
                     sessionStorage.setItem('kdrive_session', 'active'); sessionStorage.setItem('kdrive_username', acc); 
-                    document.getElementById('bgMusic').pause();
+                    const bgMusic = document.getElementById('bgMusic');
+                    if(bgMusic) bgMusic.pause();
                     setTimeout(() => { 
                         document.getElementById('loginPanelContainer').classList.remove('active'); 
                         setTimeout(() => {
                             const successVid = document.getElementById('successVideo');
-                            successVid.style.display = 'block'; successVid.play().catch(err => { window.location.href = 'INTRO.html'; });
-                            successVid.onended = () => { window.location.href = 'INTRO.html'; };
+                            if(successVid) {
+                                successVid.style.display = 'block'; 
+                                successVid.play().catch(err => { window.location.href = 'INTRO.html'; });
+                                successVid.onended = () => { window.location.href = 'INTRO.html'; };
+                            } else {
+                                window.location.href = 'INTRO.html';
+                            }
                         }, 500);
                     }, 1000); 
                 } else {
