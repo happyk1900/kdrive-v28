@@ -116,10 +116,12 @@
             filter: brightness(1.1) contrast(1.05);
         }
 
+        /* 🌟 ẢNH NỀN ĐĂNG NHẬP MỚI (ANH DANG NHAP.png) 🌟 */
         .kdrive-bg-target { 
             width: 100%; height: 100%; object-fit: cover; object-position: center; position: absolute; top: 0; left: 0; 
             filter: brightness(1.1) contrast(1.05);
             z-index: 1; opacity: 1;
+            transition: opacity 1s ease-in-out;
         }
 
         .top-shadow-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to bottom, rgba(3, 5, 8, 0.5) 0%, rgba(3, 5, 8, 0.1) 40%, transparent 100%); z-index: 11; pointer-events: none; }
@@ -323,8 +325,8 @@
     <audio id="sysAudio" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Digital%20Dawn.mp3" preload="auto" loop></audio>
     <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
 
-    <!-- 🌟 VIDEO BAY VÀO MỚI (VIDEO BAY VAO MOI.mp4) DẪN VÀO INTRO.html 🌟 -->
-    <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20BAY%20VAO%20MOI.mp4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 999999; display: none;" playsinline></video>
+    <!-- 🌟 VIDEO ĐĂNG NHẬP (VIDEO DANG NHAP.mp4) DẪN VÀO INTRO.html 🌟 -->
+    <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20DANG%20NHAP.mp4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 999999; display: none;" playsinline></video>
 
     <!-- 🌟 MÀN HÌNH CHỜ SPLASH SCREEN 🌟 -->
     <div id="splashScreen">
@@ -443,12 +445,12 @@
 
         <div class="top-shadow-gradient" id="shadowOverlay"></div>
         
-        <!-- 🌟 ẢNH NỀN ĐĂNG NHẬP (Nen Dang nhap.png) 🌟 -->
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Nen%20Dang%20nhap.png?raw=true" id="bg-login" class="kdrive-bg-target">
+        <!-- 🌟 ẢNH NỀN ĐĂNG NHẬP MỚI (ANH DANG NHAP.png) 🌟 -->
+        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20DANG%20NHAP.png?raw=true" id="bg-login" class="kdrive-bg-target">
         
         <div id="bottom-mist"></div>
 
-        <!-- 🌟 BẢNG ĐĂNG NHẬP 🌟 -->
+        <!-- 🌟 BẢNG ĐĂNG NHẬP HIỆN SAU 3-5 GIÂY 🌟 -->
         <div class="gateway-popup" id="loginPanelContainer">
             <div class="gateway-content">
                 <div id="panel-login" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
@@ -639,26 +641,30 @@
             if(badge) badge.style.opacity = '1';
         }
 
-        /* 🌟 NÚT BỎ QUA HOẶC XEM XONG VIDEO SẼ HIỆN THẲNG BẢNG ĐĂNG NHẬP 🌟 */
+        /* 🌟 NÚT BỎ QUA HOẶC XEM XONG VIDEO: HIỆN ẢNH NỀN SẠCH 3-5 GIÂY RỒI BẬT BẢNG ĐĂNG NHẬP 🌟 */
         function skipIntroScreen() {
             hideSecurityBadge();
             const sysAudio = document.getElementById('sysAudio');
             if(sysAudio) sysAudio.pause();
 
             document.getElementById('startIntroScreen').classList.add('hidden');
-            showLoginPanelDirectly();
+            triggerCleanBackgroundDelay();
         }
 
         storyVid.onended = () => {
             document.getElementById('storyVideoContainer').style.display = 'none';
             document.getElementById('storyBackBtn').style.display = 'none';
-            showLoginPanelDirectly();
+            triggerCleanBackgroundDelay();
         };
 
-        function showLoginPanelDirectly() {
+        function triggerCleanBackgroundDelay() {
             const bgm = document.getElementById('bgMusic');
             bgm.play().catch(e => {});
-            document.getElementById('loginPanelContainer').classList.add('active');
+            
+            // Đợi đúng 4 giây hiển thị trọn vẹn ảnh nền mới (ANH DANG NHAP.png) không bị che lấp rồi mới bung bảng đăng nhập
+            setTimeout(() => {
+                document.getElementById('loginPanelContainer').classList.add('active');
+            }, 4000); 
         }
 
         function switchPanel(panelName) { 
@@ -698,7 +704,7 @@
                     setTimeout(() => { 
                         document.getElementById('loginPanelContainer').classList.remove('active'); 
                         setTimeout(() => {
-                            /* 🌟 ĐĂNG NHẬP THÀNH CÔNG PHÁT VIDEO MỚI (VIDEO BAY VAO MOI.mp4) VÀ DẪN VÀO INTRO.html 🌟 */
+                            /* 🌟 ĐĂNG NHẬP THÀNH CÔNG PHÁT VIDEO (VIDEO DANG NHAP.mp4) VÀ DẪN VÀO INTRO.html 🌟 */
                             const successVid = document.getElementById('successVideo');
                             successVid.style.display = 'block'; successVid.play().catch(err => { window.location.href = 'INTRO.html'; });
                             successVid.onended = () => { window.location.href = 'INTRO.html'; };
