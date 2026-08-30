@@ -114,7 +114,7 @@
         </div>
         <div class="boo-car-info">
             <span class="boo-car-title" id="carSongTitle">TELEPATHY COMPANY</span>
-            <span class="boo-car-sub" id="carAlbumSub">CHƯƠNG I: Tinh Thần Samurai</span>
+            <span class="boo-car-sub" id="carAlbumSub">CHAPTER I: SAMURAI SPIRIT</span>
         </div>
     `;
     document.body.appendChild(widget);
@@ -140,11 +140,11 @@
                 if (isPlaying) {
                     avatarIcon.classList.add('singing'); // Phát nhạc -> Phi tiêu xoay tít + nốt nhạc bay
                     songTitleEl.textContent = baseSongName;
-                    albumSubEl.textContent = "Cyber Ninja : Album I";
+                    albumSubEl.textContent = "CYBER NINJA : ALBUM I";
                 } else {
                     avatarIcon.classList.remove('singing'); // Dừng nhạc -> Phi tiêu đứng im
                     songTitleEl.textContent = "TELEPATHY COMPANY";
-                    albumSubEl.textContent = "Cyber Ninja : Chương I";
+                    albumSubEl.textContent = "CYBER NINJA : CHAPTER I";
                 }
             }
 
