@@ -24,6 +24,95 @@
         body { background-color: #030508; height: 100vh; height: 100dvh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Space Grotesk', sans-serif; }
         img, video { -webkit-user-drag: none; pointer-events: none; }
 
+        /* 🌟 GIAO DIỆN SPLASH SCREEN (KHỞI ĐỘNG) 🌟 */
+        #splashScreen {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+            z-index: 999999999; display: flex; justify-content: center; align-items: center;
+            background: #020305; perspective: 1000px; overflow: hidden;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .splash-grid-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255, 140, 0, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 140, 0, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(600px) rotateX(60deg) translateY(-50px) translateZ(-200px);
+            animation: gridScan 4s linear infinite; pointer-events: none;
+        }
+
+        @keyframes gridScan {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 50px; }
+        }
+
+        .splash-orb {
+            position: relative; width: 320px; height: 320px; border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(10, 15, 25, 0.9) 0%, rgba(2, 3, 5, 0.95) 70%);
+            box-shadow: 0 0 60px rgba(255, 140, 0, 0.4), inset 0 0 20px rgba(255, 140, 0, 0.3), 0 0 120px rgba(255, 140, 0, 0.1);
+            border: 1.5px solid rgba(255, 140, 0, 0.6); display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transform-style: preserve-3d; transition: all 0.2s ease;
+        }
+
+        .splash-orb.shaking {
+            animation: orbCharge 0.1s infinite;
+            border-color: #00e5ff;
+            box-shadow: 0 0 80px rgba(0, 229, 255, 0.7), inset 0 0 40px rgba(0, 229, 255, 0.5), 0 0 150px rgba(0, 229, 255, 0.3);
+        }
+
+        @keyframes orbCharge {
+            0% { transform: translate(1px, 1px); }
+            25% { transform: translate(-1px, -2px); }
+            50% { transform: translate(-2px, 0px); }
+            75% { transform: translate(1px, -1px); }
+            100% { transform: translate(-1px, 2px); }
+        }
+
+        .splash-orb.exploding {
+            animation: warpExplode 0.8s cubic-bezier(0.1, 0.8, 0.1, 1) forwards;
+        }
+
+        @keyframes warpExplode {
+            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 100px #00e5ff; }
+            30% { transform: scale(0.9); opacity: 1; box-shadow: 0 0 200px #00e5ff; }
+            100% { transform: scale(25); opacity: 0; box-shadow: 0 0 500px #00e5ff; }
+        }
+
+        .splash-text-wrapper {
+            position: absolute; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            pointer-events: none; transition: transform 0.1s ease-out; transform: translateZ(50px);
+            text-align: center; gap: 12px;
+        }
+
+        .splash-txt-cyan {
+            font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; color: #e0f7fa;
+            text-transform: uppercase; text-shadow: 0 0 15px #00e5ff, 0 0 30px #00e5ff; line-height: 1.1;
+        }
+
+        .splash-txt-gold {
+            font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 900; color: #fff8e1;
+            text-transform: uppercase; text-shadow: 0 0 15px #ff8c00, 0 0 30px #ff8c00; letter-spacing: 1px;
+        }
+
+        .splash-tap-btn {
+            margin-top: 15px; padding: 10px 24px; border: 1.5px solid #00e5ff; border-radius: 20px;
+            color: #00e5ff; font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700;
+            letter-spacing: 3px; text-transform: uppercase; background: rgba(0, 229, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3), inset 0 0 10px rgba(0, 229, 255, 0.2);
+            animation: pulseTap 1.5s infinite alternate;
+        }
+
+        @keyframes pulseTap {
+            0% { box-shadow: 0 0 10px rgba(0,229,255,0.2); opacity: 0.8; }
+            100% { box-shadow: 0 0 25px rgba(0,229,255,0.7); opacity: 1; }
+        }
+
+        /* 🌟 CÁC LỚP ẨN HIỆN CHO HIỆU ỨNG BAY VÀO SẢNH CHÍNH 🌟 */
+        .init-hide { opacity: 0; pointer-events: none; transform: scale(1.1); transition: all 1.5s cubic-bezier(0.25, 1, 0.3, 1); }
+        .fly-in { opacity: 1 !important; transform: scale(1) !important; pointer-events: auto !important; }
+
+        .btn-group-init { opacity: 0; transform: translateY(80px); transition: all 1.2s cubic-bezier(0.25, 1, 0.3, 1); }
+        .btn-group-fly { opacity: 1; transform: translateY(0); }
+
         .kdrive-image-wrapper { 
             position: relative; width: 100vw; height: 100vh; height: 100dvh; max-width: none; 
             background-color: #000; overflow: hidden; 
@@ -70,14 +159,6 @@
         }
         @keyframes lightMistDrift { 0% { transform: translateX(-3%) scaleY(0.95); opacity: 0.6; } 100% { transform: translateX(3%) scaleY(1.1); opacity: 0.9; } }
 
-        .light-sweep { position: relative; overflow: hidden; display: inline-block; }
-        .light-sweep::after {
-            content: ''; position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.9), transparent);
-            transform: skewX(-25deg); animation: sweepLight 3s infinite;
-        }
-        @keyframes sweepLight { 0% { left: -150%; } 20% { left: 150%; } 100% { left: 150%; } }
-
         .cyber-hud-bar {
             position: absolute; top: 0; left: 0; width: 100%; height: 32px;
             display: flex; justify-content: space-between; align-items: center;
@@ -103,9 +184,9 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 999999; display: flex; flex-direction: column; justify-content: flex-end;
             align-items: center; padding: 0 25px calc(env(safe-area-inset-bottom, 20px) + 90px) 25px; overflow: hidden;
-            opacity: 1; transition: opacity 0.8s ease-in-out;
+            transition: opacity 0.8s ease-in-out;
         }
-        #startIntroScreen.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
+        #startIntroScreen.hidden { opacity: 0 !important; pointer-events: none !important; visibility: hidden; }
 
         .start-button-group { 
             position: relative; z-index: 10; width: 100%; max-width: 320px; 
@@ -304,18 +385,11 @@
         }
 
         .cyber-modal-popup::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 3px;
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 3px;
             background: linear-gradient(90deg, transparent, #ffffff, #00e5ff, transparent);
-            animation: topBorderScan 3s linear infinite;
-            z-index: 5;
+            animation: topBorderScan 3s linear infinite; z-index: 5;
         }
-        @keyframes topBorderScan {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
+        @keyframes topBorderScan { 0% { left: -100%; } 100% { left: 100%; } }
 
         .cyber-modal-popup.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; visibility: visible; }
 
@@ -389,7 +463,23 @@
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
-    <!-- 🌟 THẺ AUDIO ĐOẠN 16 GIÂY PHÁT SAU KHI XÁC NHẬN GIỚI TÍNH 🌟 -->
+    <!-- 🌟 SPLASH SCREEN: KHỞI ĐỘNG HỆ THỐNG 🌟 -->
+    <div id="splashScreen">
+        <div class="splash-grid-bg"></div>
+        <div class="splash-orb" id="splashOrb" 
+             onmousedown="startBootHold(event)" ontouchstart="startBootHold(event)" 
+             onmouseup="cancelBootHold(event)" ontouchend="cancelBootHold(event)" onmouseleave="cancelBootHold(event)">
+            <div class="splash-text-wrapper" id="splashTextWrapper">
+                <div class="splash-txt-cyan">ĐỘ KHÓ<br>VÔ CỰC</div>
+                <div class="splash-txt-gold">KẾT NỐI CƠ THỂ 24/7</div>
+                <div class="splash-tap-btn">TAP TO SYNC</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO PHÁT DIGITAL DAWN KHI NỔ SPLASH -->
+    <audio id="mainThemeMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Digital%20Dawn.mp3" preload="auto" loop></audio>
+
     <audio id="sysAudio" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/KAIRON.MP3" preload="auto"></audio>
     <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20BAY%20VAO.mp4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 999999; display: none;" playsinline></video>
@@ -401,20 +491,20 @@
     </div>
 
     <div class="kdrive-image-wrapper" id="mainWrapper">
-        <div class="cyber-hud-bar">
+        <div class="cyber-hud-bar init-hide">
             <div class="hud-item"><span class="hud-dot"></span>SYS.ONLINE // 2099</div>
             <div class="hud-item">K-DRIVE v2.6</div>
         </div>
 
-        <div id="intro-security-badge">
+        <div id="intro-security-badge" class="init-hide">
             VẬN HÀNH TRÊN HỆ THỐNG BẢO MẬT TOÀN CẦU | POWERED BY GOOGLE & MICROSOFT CLOUD SECURITY
         </div>
 
-        <div id="startIntroScreen">
-            <video src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/video%20mo%20dau.mp4" class="intro-bg-video" autoplay muted loop playsinline></video>
+        <div id="startIntroScreen" class="init-hide">
+            <video src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/video%20mo%20dau.mp4" class="intro-bg-video init-hide" autoplay muted loop playsinline></video>
             <div class="start-intro-overlay"></div>
             
-            <div class="start-button-group">
+            <div class="start-button-group btn-group-init" id="mainBtnGroup">
                 <button class="cyber-btn" onclick="playStoryVideo();">
                     <div class="cyber-btn-border"></div>
                     <div class="cyber-btn-glow"></div>
@@ -566,33 +656,107 @@
     <script>
         const storyVid = document.getElementById('storyVideo');
 
+        /* 🌟 LOGIC KHỞI ĐỘNG (SPLASH SCREEN & GYROSCOPE) 🌟 */
+        let bootHoldTimer;
+        let bootStartTime = 0;
+        const bootHoldDuration = 3000;
+
+        // Cảm biến nghiêng chữ bên trong quả cầu
+        window.addEventListener('deviceorientation', (e) => {
+            const wrapper = document.getElementById('splashTextWrapper');
+            if(!wrapper) return;
+            let x = e.beta ? e.beta : 0;
+            let y = e.gamma ? e.gamma : 0;
+            x = Math.max(-45, Math.min(45, x));
+            y = Math.max(-45, Math.min(45, y));
+            wrapper.style.transform = `translateZ(50px) rotateX(${x * -0.4}deg) rotateY(${y * 0.4}deg)`;
+        });
+
+        // Hiệu ứng di chuột trên PC
+        document.addEventListener('mousemove', (e) => {
+            const wrapper = document.getElementById('splashTextWrapper');
+            if(!wrapper || document.getElementById('splashScreen').style.opacity === '0') return;
+            let x = (window.innerWidth / 2 - e.pageX) / 25;
+            let y = (window.innerHeight / 2 - e.pageY) / 25;
+            wrapper.style.transform = `translateZ(50px) rotateX(${y}deg) rotateY(${-x}deg)`;
+        });
+
+        function startBootHold(e) {
+            if(e.cancelable) e.preventDefault();
+            const orb = document.getElementById('splashOrb');
+            orb.classList.add('shaking');
+            if(navigator.vibrate) navigator.vibrate(50);
+            
+            bootStartTime = Date.now();
+            bootHoldTimer = setInterval(() => {
+                let elapsed = Date.now() - bootStartTime;
+                if(elapsed >= bootHoldDuration) {
+                    clearInterval(bootHoldTimer);
+                    triggerWarpExplosion();
+                }
+            }, 50);
+        }
+
+        function cancelBootHold(e) {
+            clearInterval(bootHoldTimer);
+            const orb = document.getElementById('splashOrb');
+            if(orb) orb.classList.remove('shaking');
+        }
+
+        function triggerWarpExplosion() {
+            if(navigator.vibrate) navigator.vibrate([200, 100, 300, 50, 500]);
+            const orb = document.getElementById('splashOrb');
+            orb.classList.remove('shaking');
+            orb.classList.add('exploding');
+            
+            // PHÁT DIGITAL DAWN NGAY KHI NỔ
+            const mainAudio = document.getElementById('mainThemeMusic');
+            mainAudio.play().catch(err => console.log("Audio play blocked", err));
+
+            // Chuyển cảnh bay vào sảnh chính
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                splash.style.opacity = '0';
+                setTimeout(() => { splash.style.display = 'none'; }, 800);
+                
+                // Hiển thị và bay các thành phần HUD vào
+                document.getElementById('startIntroScreen').classList.remove('init-hide');
+                document.getElementById('intro-security-badge').classList.remove('init-hide');
+                document.querySelector('.cyber-hud-bar').classList.remove('init-hide');
+                
+                const bgVid = document.querySelector('.intro-bg-video');
+                bgVid.classList.remove('init-hide');
+                bgVid.classList.add('fly-in');
+
+                document.getElementById('mainBtnGroup').classList.add('btn-group-fly');
+                document.querySelectorAll('.init-hide').forEach(el => el.classList.add('fly-in'));
+
+            }, 600); // Đợi bóng nổ bao trùm màn hình
+        }
+
         function hideSecurityBadge() {
             const badge = document.getElementById('intro-security-badge');
             if (badge) { badge.style.opacity = '0'; setTimeout(() => badge.remove(), 500); }
         }
 
-        /* 🌟 KÍCH HOẠT ĐÚNG LINK NHẠC DIGITAL DAWN CHO LỊCH SỬ / CÔNG NGHỆ VÀ TRỎ WIDGET PHÍA DƯỚI 🌟 */
         function openIntroModal(modalId) { 
             document.getElementById(modalId).classList.add('active'); 
-            if(window.booPlayer && typeof window.booPlayer.playTrack === 'function') {
-                window.booPlayer.playTrack('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Digital%20Dawn.mp3', 'Digital Dawn (1)');
-            }
         }
 
         function closeIntroModal(modalId) { 
             document.getElementById(modalId).classList.remove('active'); 
-            if(window.booPlayer && typeof window.booPlayer.stop === 'function') {
-                window.booPlayer.stop();
-            }
         }
 
         function playStoryVideo() {
             hideSecurityBadge();
-            if(window.booPlayer && typeof window.booPlayer.stop === 'function') { window.booPlayer.stop(); }
             document.getElementById('startIntroScreen').classList.add('hidden');
             const videoContainer = document.getElementById('storyVideoContainer');
             videoContainer.style.display = 'flex';
             document.getElementById('storyBackBtn').style.display = 'flex';
+            
+            const mainAudio = document.getElementById('mainThemeMusic');
+            if(mainAudio) mainAudio.pause();
+
             storyVid.currentTime = 0;
             storyVid.play().catch(e => console.log(e));
         }
@@ -603,13 +767,18 @@
             document.getElementById('storyVideoContainer').style.display = 'none';
             document.getElementById('storyBackBtn').style.display = 'none';
             document.getElementById('startIntroScreen').classList.remove('hidden');
+            
+            const mainAudio = document.getElementById('mainThemeMusic');
+            if(mainAudio) mainAudio.play().catch(e=>{});
+
             const badge = document.getElementById('intro-security-badge');
             if(badge) badge.style.opacity = '1';
         }
 
         function skipIntroScreen() {
             hideSecurityBadge();
-            if(window.booPlayer && typeof window.booPlayer.stop === 'function') { window.booPlayer.stop(); }
+            const mainAudio = document.getElementById('mainThemeMusic');
+            if(mainAudio) mainAudio.pause();
             document.getElementById('startIntroScreen').classList.add('hidden');
             showNeonSelection();
         }
@@ -743,7 +912,6 @@
             }
         }
 
-        /* 🌟 KHI XÁC NHẬN GIỚI TÍNH XONG, GỌI ĐOẠN NHẠC 16 GIÂY (KAIRON.MP3) 🌟 */
         function completeEnergyHold() {
             if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
             document.getElementById('previewConfirmContainer').style.display = 'none';
