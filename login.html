@@ -165,7 +165,7 @@
         .hud-dot { width: 6px; height: 6px; background: #00e5ff; border-radius: 50%; box-shadow: 0 0 8px #00e5ff; animation: pulseDot 1.5s infinite; }
         @keyframes pulseDot { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
 
-        /* Hộp chọn ngôn ngữ rút gọn RÕ RÀNG, SẠCH SẼ */
+        /* Hộp chọn ngôn ngữ rõ ràng, sạch sẽ */
         .splash-lang-switcher {
             position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 8px; z-index: 99999999; pointer-events: auto;
@@ -372,7 +372,7 @@
         #storyVideoContainer video { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
-<body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;" ondeviceorientation="handleOrientation(event)">
+<body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
     <audio id="sysAudio" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Neon%20Pulse.mp3" preload="auto" loop></audio>
     <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
@@ -730,6 +730,20 @@
             });
         }
 
+        // 🌟 KÍCH HOẠT QUYỀN CON QUAY HỒI CHUYỂN (GYROSCOPE) KHI CHẠM MÀN HÌNH 🌟
+        function initGyroscopePermission() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation, true);
+                        }
+                    }).catch(console.error);
+            } else {
+                window.addEventListener('deviceorientation', handleOrientation, true);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             setLanguage(currentLang);
             const introVid = document.querySelector('.intro-bg-video');
@@ -738,6 +752,9 @@
                     document.addEventListener('click', () => { introVid.play(); }, { once: true });
                 });
             }
+            // Lắng nghe cú chạm đầu tiên để mở khóa cảm biến điện thoại
+            window.addEventListener('click', initGyroscopePermission, { once: true });
+            window.addEventListener('touchstart', initGyroscopePermission, { once: true });
         });
 
         const storyVid = document.getElementById('storyVideo');
@@ -755,7 +772,6 @@
             }, 600);
         }, 3500);
 
-        // 🌟 KÍCH HOẠT CON QUAY HỒI CHUYỂN (GYROSCOPE) HOÀN CHỈNH CHO ĐIỆN THOẠI 🌟
         function handleOrientation(event) {
             const tiltContent = document.getElementById('orbContentTilt');
             if(!tiltContent) return;
