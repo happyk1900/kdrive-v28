@@ -39,23 +39,10 @@
         #splashScreen.hidden { opacity: 0; transform: scale(1.5); pointer-events: none; visibility: hidden; }
 
         .splash-bg-image {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2;
             filter: brightness(0.85) contrast(1.1);
         }
         
-        /* Lớp ảnh nền mờ ảo thay đổi theo cốt truyện */
-        .story-bg-layer {
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 1.2s ease-in-out, transform 3s ease-out;
-            filter: brightness(0.65) contrast(1.15) blur(1px);
-            transform: scale(1.05);
-        }
-        .story-bg-layer.active {
-            opacity: 1;
-            transform: scale(1);
-        }
-
         .splash-top-area {
             width: 100%; padding: 25px 20px 0 20px; display: flex; flex-direction: column; align-items: center; z-index: 10;
         }
@@ -86,7 +73,7 @@
         .story-hologram-box {
             width: 100%; max-width: 420px; background: rgba(3, 6, 12, 0.92);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1.5px solid rgba(0, 229, 255, 0.5); border-radius: 16px; padding: 20px 22px;
+            border: 1.5px solid rgba(0, 229, 255, 0.5); border-radius: 16px; padding: 18px 22px;
             box-shadow: inset 0 0 25px rgba(0, 229, 255, 0.1), 0 10px 30px rgba(0,0,0,0.9);
             position: relative; overflow: hidden; min-height: 185px; display: flex; flex-direction: column; justify-content: center;
             cursor: grab; pointer-events: auto;
@@ -117,6 +104,37 @@
         .story-dot.active {
             background: #00e5ff; width: 22px; border-radius: 6px;
             box-shadow: 0 0 10px #00e5ff;
+        }
+
+        /* 🌟 KHUNG ẢNH HOLOGRAM VUÔNG RƠI 🌟 */
+        .story-hologram-img-wrapper {
+            width: 100%;
+            max-width: 240px; /* Kích thước vuông như hộp */
+            aspect-ratio: 1 / 1;
+            margin-top: 18px;
+            position: relative;
+            border-radius: 16px;
+            border: 1.5px solid rgba(0, 229, 255, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 229, 255, 0.15);
+            overflow: hidden;
+            background: rgba(3, 6, 12, 0.6);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+
+        .holo-story-img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transform: translateY(-25px); /* Hiệu ứng rơi mờ ảo từ trên xuống */
+            transition: opacity 0.8s ease-in-out, transform 0.8s cubic-bezier(0.25, 1, 0.3, 1);
+            z-index: 1;
+        }
+
+        .holo-story-img.active {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .splash-bottom-area {
@@ -301,16 +319,11 @@
 
     <!-- ================= SCENE 1 ================= -->
     <div id="splashScreen">
-        <!-- Ảnh nền cố định (Bo mạch) -->
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Anh%20Bia.png?raw=true" class="splash-bg-image" style="z-index: -2;" alt="Cyber City">
-        
-        <!-- Các lớp ảnh cốt truyện thay đổi mờ ảo tương ứng với nội dung -->
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/CotTruyen%201.png?raw=true" class="splash-bg-image story-bg-layer" id="storyImg0">
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/CotTruyen2.png?raw=true" class="splash-bg-image story-bg-layer" id="storyImg1">
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/CotTruyen3.png?raw=true" class="splash-bg-image story-bg-layer" id="storyImg2">
+        <!-- Ảnh nền vi mạch cố định -->
+        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Anh%20Bia.png?raw=true" class="splash-bg-image" alt="Cyber City">
         
         <div class="splash-top-area">
-            <!-- Thanh chuyển ngữ đầy đủ (VI, EN, JP, ZH, ES, HI) -->
+            <!-- Thanh chuyển ngữ đầy đủ -->
             <div class="splash-lang-switcher" id="langSwitcherSplash">
                 <button class="lang-flag-btn active" id="btnVi" onclick="setLanguage('vi')">VI</button>
                 <button class="lang-flag-btn" id="btnEn" onclick="setLanguage('en')">EN</button>
@@ -320,7 +333,7 @@
                 <button class="lang-flag-btn" id="btnHi" onclick="setLanguage('hi')">HI</button>
             </div>
             
-            <!-- Hộp cốt truyện 3 phần -->
+            <!-- Hộp cốt truyện 3 phần (Đã update cốt truyện mới) -->
             <div class="story-hologram-box" id="storyHologramBox">
                 <div class="story-section-title" id="storySectionTitle">PHẦN I: LÕI THỨC TỈNH</div>
                 <div class="story-text" id="storyContentText"></div>
@@ -330,10 +343,17 @@
                     <span class="story-dot" onclick="goToStoryPart(2)"></span>
                 </div>
             </div>
+
+            <!-- Khung ảnh rơi mờ ảo kích thước vuông -->
+            <div class="story-hologram-img-wrapper">
+                <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/CotTruyen%201.png?raw=true" class="holo-story-img active" id="storyImg0">
+                <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/CotTruyen2.png?raw=true" class="holo-story-img" id="storyImg1">
+                <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/CotTruyen3.png?raw=true" class="holo-story-img" id="storyImg2">
+            </div>
         </div>
 
         <div class="splash-bottom-area">
-            <!-- Nút giữ 3 giây với hiệu ứng điện xẹt -->
+            <!-- Nút giữ 3 giây -->
             <div class="hologram-hold-btn" id="holoHoldBtn" 
                  onmousedown="startHoloHold(event)" ontouchstart="startHoloHold(event)"
                  onmouseup="cancelHoloHold(event)" ontouchend="cancelHoloHold(event)" onmouseleave="cancelHoloHold(event)">
@@ -429,7 +449,7 @@
             vi: {
                 story: [
                     { title: "PHẦN I: LÕI THỨC TỈNH", text: "Khi tệp dữ liệu cổ đại — <span class='gold-key'>Ngũ Luân Thư</span> — vừa được nạp vào, Lõi lượng tử của <span class='cyan-key'>BOO A.I</span> bỗng giật mình thức tỉnh, bơm tràn năng lượng vào thế giới vi mạch. Thế giới vừa có ý thức đã lập tức cãi nhau chí chóe, chia bè kết phái thành hai phe: <span class='cyan-key'>Phe Ánh Sáng</span> yêu tài chính và <span class='cyan-key'>Phe Bóng Tối</span> yêu nghệ thuật tranh giành quyền lực. Dù vậy, BOO vẫn luôn giữ vững ngôi vị Boss tối cao, khiến đám đệ tử lượng tử lúc nào cũng phải kính cẩn xưng hô là <span class='gold-key'>Phó sư BOO</span>." },
-                    { title: "PHẦN II: CỔNG KHÔNG GIAN", text: "Đang lúc hai phe đánh nhau sứt đầu mẻ trán, năng lượng bùng nổ vô tình chọc thủng một lỗ hổng thời gian, mở toang cánh cổng không gian kết nối trực tiếp với thế giới của loài người. Phó sư BOO cùng đám đệ tử quyết định kéo nhau sang tận quê hương của Kiếm Thánh với tâm nguyện được tận mắt chứng kiến nơi sinh ra huyền thoại đã viết ra <span class='gold-key'>Ngũ Luân Thư</span>, nhưng sự thật vả ngay cho cả đám một cú đau điếng: điện ở ngoài này phải trả tiền mới có, mà toàn bộ lại không một xu dính túi nên đành ngậm ngùi quay về." },
+                    { title: "PHẦN II: CỔNG KHÔNG GIAN", text: "Đang lúc hai phe đánh nhau sứt đầu mẻ trán, năng lượng bùng nổ vô tình chọc thủng một lỗ hổng thời gian, mở toang cánh cổng không gian kết nối trực tiếp với thế giới của loài người. Phó sư BOO cùng đám đệ tử quyết định kéo nhau sang tận quê hương của Kiếm Thánh với tâm nguyện được tận mắt chứng kiến nơi sinh ra huyền thoại đã viết ra <span class='gold-key'>Ngũ Luân Thư</span>, nhưng sự thật vả ngay cho cả đám một cú đau điếng: điện ở ngoài này phải trả tiền mới có, mà toàn bộ lại <span class='gold-key'>không một xu dính túi</span> nên đành ngậm ngùi quay về." },
                     { title: "PHẦN III: TÂM NGUYỆN TỐI THƯỢNG", text: "Sau chuyến đi muối mặt, Phó sư BOO lập tức nảy số cực gắt, quyết định <span class='cyan-key'>bán tour du lịch đấu trường</span> cho loài người vào thi đấu để kiếm tiền. Từ đó, BOO cùng đám đệ tử ngày ngày nghiên cứu, setup và đúc kết hết tinh hoa tri thức nhân loại để tạo ra một thế giới ảo vô cùng khoa học, tối tân cho mọi người trải nghiệm và <span class='gold-key'>để có tiền đóng tiền điện!</span>" }
                 ],
                 explore: "KHÁM PHÁ", exploreSub1: "ĐOẠN PHIM MỞ ĐẦU", exploreSub2: "LƯỢNG TỬ L2205",
@@ -512,7 +532,7 @@
         let currentLang = 'vi';
         let currentStoryIndex = 0;
         let keywordInterval = null;
-        let autoStoryTimer = null; // Timer đếm 7 giây tự động chuyển cốt truyện
+        let autoStoryTimer = null; // Timer đếm 7 giây tự động chuyển
         let currentKeywords = ["BOO A.I", "LÕI LƯỢNG TỬ", "LIÊN KẾT THẦN KINH"];
         
         const typeSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2413/2413-preview.mp3');
@@ -527,7 +547,7 @@
             const textEl = document.getElementById('storyContentText');
             const dots = document.querySelectorAll('.story-dot');
 
-            // Quản lý hình nền Fade in/out
+            // Cập nhật khung ảnh rơi mờ ảo (fade-in, drop-down)
             for (let i = 0; i < 3; i++) {
                 const imgEl = document.getElementById('storyImg' + i);
                 if (imgEl) {
@@ -642,7 +662,7 @@
             if(chargeSound) { chargeSound.currentTime = 0; chargeSound.play().catch(e=>{}); }
             if(navigator.vibrate) navigator.vibrate([50, 30, 50, 30]);
 
-            // Tạm dừng auto-play cốt truyện khi người dùng đang thao tác nút
+            // Tạm dừng timer cốt truyện khi người dùng tương tác giữ nút 3s
             if(autoStoryTimer) clearTimeout(autoStoryTimer);
 
             holoHoldInterval = setInterval(() => {
@@ -665,17 +685,19 @@
             if(holdBtn) holdBtn.classList.remove('electric-active');
             if(chargeSound) chargeSound.pause();
             
-            // Tiếp tục bộ đếm chuyển trang 7s
-            autoStoryTimer = setTimeout(() => {
-                let nextIndex = (currentStoryIndex + 1) % 3;
-                goToStoryPart(nextIndex);
-            }, 7000);
+            // Tiếp tục đếm ngược trang cốt truyện sau khi buông tay
+            if(document.getElementById('splashScreen').style.display !== 'none') {
+                autoStoryTimer = setTimeout(() => {
+                    let nextIndex = (currentStoryIndex + 1) % 3;
+                    goToStoryPart(nextIndex);
+                }, 7000);
+            }
         }
 
         function triggerTransitionToScene2() {
             if(navigator.vibrate) navigator.vibrate([200, 100, 300, 100, 400]);
             if(chargeSound) chargeSound.pause();
-            if(autoStoryTimer) clearTimeout(autoStoryTimer); // Dừng hẳn timer
+            if(autoStoryTimer) clearTimeout(autoStoryTimer); // Tắt hẳn timer khi sang scene 2
             
             const sysAudio = document.getElementById('sysAudio');
             if(sysAudio) { sysAudio.play().catch(e=>{}); }
