@@ -19,1093 +19,384 @@
         .kdrive-image-wrapper { 
             position: relative; width: 100vw; height: 100vh; height: 100dvh; max-width: none; 
             background-color: #000; overflow: hidden; 
-            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .kdrive-image-wrapper::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            border: 2px solid rgba(200, 215, 255, 0.15);
-            pointer-events: none; z-index: 99999999;
-            box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05);
-        }
-        
+        /* ---------------------------------
+           🌟 SCENE 1: SPLASH SCREEN MỚI 🌟
+        --------------------------------- */
         #splashScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #030508; z-index: 999999999; display: flex; justify-content: center; align-items: center;
-            overflow: hidden; transition: opacity 0.8s ease-in-out, transform 0.8s cubic-bezier(0.25, 1, 0.3, 1);
+            z-index: 999999999; display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+            overflow: hidden; transition: opacity 0.8s ease-in-out, filter 0.8s ease;
         }
-        #splashScreen.hidden { opacity: 0; transform: scale(1.5); pointer-events: none; visibility: hidden; }
+        #splashScreen.hidden { opacity: 0; pointer-events: none; filter: blur(20px); }
 
-        .splash-fire-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, rgba(255, 69, 0, 0.35) 0%, rgba(20, 5, 2, 0.9) 70%, #030508 100%);
-            z-index: 1;
-        }
-
-        .splash-grid-bg {
-            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background-image: linear-gradient(rgba(255,69,0,0.15) 1.5px, transparent 1.5px),
-                              linear-gradient(90deg, rgba(255,69,0,0.15) 1.5px, transparent 1.5px);
-            background-size: 50px 50px; 
-            transform: perspective(600px) rotateX(65deg);
-            animation: gridMove 4s linear infinite;
-            opacity: 0.85; pointer-events: none; z-index: 2;
+        .splash-bg-image {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;
+            filter: brightness(0.85) contrast(1.1);
         }
 
-        @keyframes gridMove {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 50px; }
-        }
-
-        .orb-container {
-            position: relative; width: 330px; height: 330px; display: flex; justify-content: center; align-items: center; cursor: pointer;
-            transform-style: preserve-3d; z-index: 10;
-        }
-
-        .energy-orb {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%;
-            background: radial-gradient(circle, rgba(40,10,5,0.95) 0%, rgba(10,3,2,0.98) 80%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 25px; text-align: center;
-            box-shadow: inset 0 0 50px rgba(255, 69, 0, 0.4), 0 0 30px rgba(255, 69, 0, 0.3);
-            border: 2.5px solid rgba(255, 69, 0, 0.7);
-            animation: fireOrbPulse 2.5s ease-in-out infinite alternate;
-            overflow: hidden;
-        }
-
-        .energy-orb::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(255, 140, 0, 0.3) 0%, transparent 70%);
-            animation: fireGlowEffect 1.5s ease-in-out infinite alternate;
-            pointer-events: none;
-        }
-
-        @keyframes fireOrbPulse {
-            0% { border-color: rgba(255, 69, 0, 0.5); box-shadow: 0 0 20px rgba(255, 69, 0, 0.3), inset 0 0 30px rgba(255, 69, 0, 0.2); }
-            50% { border-color: rgba(255, 140, 0, 1); box-shadow: 0 0 65px rgba(255, 69, 0, 0.8), inset 0 0 50px rgba(255, 140, 0, 0.5); }
-            100% { border-color: rgba(255, 69, 0, 0.5); box-shadow: 0 0 20px rgba(255, 69, 0, 0.3), inset 0 0 30px rgba(255, 69, 0, 0.2); }
-        }
-
-        @keyframes fireGlowEffect {
-            0% { transform: scale(1); opacity: 0.6; }
-            100% { transform: scale(1.1); opacity: 1; }
-        }
-
-        .energy-orb.shaking { animation: orbShake 0.08s ease-in-out infinite alternate !important; }
-        @keyframes orbShake {
-            0% { transform: translate(0, 0) scale(1.02); }
-            100% { transform: translate(-5px, 5px) scale(1.06); }
-        }
-
-        .energy-progress-ring {
-            position: absolute; top: -6px; left: -6px; width: calc(100% + 12px); height: calc(100% + 12px);
-            border-radius: 50%; pointer-events: none; z-index: 10;
-            background: conic-gradient(from 0deg, #ff4500 0%, #ff8c00 50%, #ff4500 100%);
-            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 4px));
-            mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 4px));
-            opacity: 0; transition: opacity 0.3s ease;
-        }
-        .energy-progress-ring.active { opacity: 1; animation: rotateRing 0.8s linear infinite; }
-        @keyframes rotateRing { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .orb-content-tilt {
-            position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transform-style: preserve-3d; will-change: transform; pointer-events: none;
-            transition: transform 0.08s ease-out;
-        }
-
-        .orb-title {
-            font-family: 'Montserrat', sans-serif; font-size: 32px; font-weight: 900; font-style: normal;
-            color: #ffffff; text-transform: uppercase; letter-spacing: 3px;
-            text-shadow: 0 0 15px rgba(255, 69, 0, 0.95), 0 0 30px rgba(255, 140, 0, 0.8), 0 2px 4px rgba(0,0,0,0.9);
-            margin-bottom: 22px; line-height: 1.1; text-align: center;
-            transition: transform 0.05s steps(2, start), filter 0.05s ease;
-        }
-        
-        .orb-title.glitch-shock {
-            animation: glitchShockAnim 0.25s cubic-bezier(0.11, 0, 0.5, 1) forwards;
-        }
-
-        @keyframes glitchShockAnim {
-            0% { transform: scale(1) translate(0, 0); filter: drop-shadow(0 0 0px #fff); color: #fff; }
-            20% { transform: scale(1.18) translate(-6px, 4px) skewX(-15deg); filter: drop-shadow(0 0 25px #00ffff) invert(0.8); color: #00ffff; }
-            40% { transform: scale(0.92) translate(8px, -5px) skewX(20deg); filter: drop-shadow(0 0 25px #ff0055); color: #ff0055; }
-            60% { transform: scale(1.1) translate(-4px, -2px) skewX(-10deg); filter: drop-shadow(0 0 20px #ffff00); color: #ffff00; }
-            80% { transform: scale(1.02) translate(3px, 2px); filter: drop-shadow(0 0 10px #ff4500); color: #fff; }
-            100% { transform: scale(1) translate(0, 0); filter: drop-shadow(0 0 15px rgba(255,69,0,0.95)); color: #fff; }
-        }
-
-        .orb-action-btn {
-            padding: 10px 24px; background: rgba(255, 69, 0, 0.15);
-            border: 1.5px solid rgba(255, 140, 0, 0.7); border-radius: 20px;
-            color: #ffaa00; font-family: 'Montserrat', sans-serif; font-size: 11px;
-            font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
-            box-shadow: 0 0 20px rgba(255, 69, 0, 0.4);
-        }
-
-        .intro-bg-video {
-            width: 100%; height: 100%; object-fit: cover; object-position: center; 
-            position: absolute; top: 0; left: 0; z-index: 1;
-            filter: brightness(1.1) contrast(1.05);
-        }
-
-        .kdrive-bg-target { 
-            width: 100%; height: 100%; object-fit: cover; object-position: center; position: absolute; top: 0; left: 0; 
-            filter: brightness(1.1) contrast(1.05);
-            z-index: 1; opacity: 1;
-        }
-
-        .top-shadow-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to bottom, rgba(3, 5, 8, 0.5) 0%, rgba(3, 5, 8, 0.1) 40%, transparent 100%); z-index: 11; pointer-events: none; }
-
-        #bottom-mist {
-            position: absolute; bottom: 0; left: -15%; width: 130%; height: 26%;
-            background: radial-gradient(ellipse at 50% 100%, rgba(200, 245, 255, 0.4) 0%, rgba(100, 200, 225, 0.2) 50%, transparent 100%);
-            z-index: 10; pointer-events: none; filter: blur(10px);
+        /* TOP AREA: Ngôn ngữ & Cốt truyện */
+        .splash-top-area {
+            width: 100%; padding: 40px 20px 0 20px; display: flex; flex-direction: column; align-items: center; z-index: 10;
         }
 
         .splash-lang-switcher {
-            position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 8px; z-index: 99999999; pointer-events: auto;
-            background: linear-gradient(135deg, rgba(8, 20, 35, 0.95), rgba(3, 8, 15, 0.95));
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            padding: 8px 16px; border-radius: 24px; border: 2px solid rgba(0, 229, 255, 0.7);
-            box-shadow: 0 0 30px rgba(0, 229, 255, 0.4), inset 0 0 15px rgba(0, 229, 255, 0.15);
-            transition: opacity 0.5s ease;
+            display: flex; gap: 8px; margin-bottom: 15px;
+            background: linear-gradient(135deg, rgba(8, 20, 35, 0.85), rgba(3, 8, 15, 0.85));
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 8px 16px; border-radius: 24px; border: 1px solid rgba(0, 229, 255, 0.5);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.2); pointer-events: auto;
         }
-        .splash-lang-switcher.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
-
         .lang-flag-btn {
-            background: rgba(10, 20, 35, 0.9); border: 1.5px solid rgba(255, 255, 255, 0.25); border-radius: 12px;
-            padding: 6px 14px; color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900;
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 1, 0.3, 1); text-transform: uppercase; letter-spacing: 1px;
-            text-shadow: 0 0 5px rgba(255,255,255,0.6); pointer-events: auto;
+            background: rgba(10, 20, 35, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
+            padding: 6px 12px; color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 800;
+            cursor: pointer; transition: all 0.3s; text-transform: uppercase;
         }
-        .lang-flag-btn:hover { border-color: #00e5ff; background: rgba(0, 229, 255, 0.2); transform: translateY(-2px); box-shadow: 0 0 12px rgba(0,229,255,0.5); }
         .lang-flag-btn.active {
-            background: linear-gradient(135deg, rgba(0, 229, 255, 0.4), rgba(0, 150, 255, 0.6));
-            border-color: #00e5ff; color: #ffffff;
-            box-shadow: 0 0 20px #00e5ff, inset 0 0 8px rgba(255,255,255,0.6);
-            text-shadow: 0 0 8px #ffffff; transform: scale(1.08);
+            background: rgba(0, 229, 255, 0.2); border-color: #00e5ff; color: #00e5ff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.5); transform: scale(1.05);
         }
 
+        .story-hologram-box {
+            width: 100%; max-width: 450px; background: rgba(3, 6, 12, 0.7);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 12px; padding: 20px;
+            box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05), 0 5px 15px rgba(0,0,0,0.8);
+            min-height: 180px; position: relative; overflow: hidden;
+        }
+        .story-hologram-box::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, #00e5ff, transparent);
+            animation: scanline 3s linear infinite;
+        }
+        @keyframes scanline { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .story-text {
+            color: #d0f0ff; font-family: 'Space Grotesk', sans-serif; font-size: 13px; line-height: 1.6;
+            text-shadow: 0 0 5px rgba(0, 229, 255, 0.4); text-align: justify;
+        }
+
+        /* BOTTOM AREA: Hộp Hologram Giữ 3 Giây */
+        .splash-bottom-area {
+            width: 100%; padding-bottom: 50px; display: flex; justify-content: center; z-index: 10;
+        }
+
+        .hologram-hold-btn {
+            position: relative; width: 90%; max-width: 400px; padding: 18px 20px;
+            background: rgba(5, 10, 20, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(0, 229, 255, 0.5); border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; overflow: hidden; pointer-events: auto;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.2), inset 0 0 15px rgba(0, 229, 255, 0.1);
+            transition: transform 0.1s;
+        }
+        .hologram-hold-btn:active { transform: scale(0.98); }
+
+        .holo-progress-bar {
+            position: absolute; top: 0; left: 0; height: 100%; width: 0%;
+            background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.5), rgba(0, 229, 255, 0.8));
+            z-index: 1; transition: width 0.1s linear; box-shadow: 0 0 20px #00e5ff;
+        }
+
+        .holo-text-wrap {
+            position: relative; z-index: 2; width: 100%; display: flex; justify-content: space-between; align-items: center;
+            font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
+            color: #fff; text-shadow: 0 0 8px #00e5ff; text-transform: uppercase;
+        }
+        .holo-separator { color: #ff1493; text-shadow: 0 0 8px #ff1493; margin: 0 5px; }
+
+        /* ---------------------------------
+           🌟 SCENE 2: GIAO DIỆN CHÍNH (HUD) 🌟
+        --------------------------------- */
         #startIntroScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 999999; display: flex; flex-direction: column; justify-content: flex-end;
             align-items: center; padding: 0 25px calc(env(safe-area-inset-bottom, 20px) + 90px) 25px; overflow: hidden;
-            opacity: 1; transition: opacity 0.8s ease-in-out;
+            opacity: 0; pointer-events: none; visibility: hidden; transition: opacity 1s ease-in-out;
         }
-        #startIntroScreen.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
+        #startIntroScreen.active { opacity: 1; pointer-events: auto; visibility: visible; }
+
+        .scene2-bg-video {
+            width: 100%; height: 100%; object-fit: cover; object-position: center; 
+            position: absolute; top: 0; left: 0; z-index: 1;
+        }
 
         .start-button-group { 
             position: relative; z-index: 10; width: 100%; max-width: 320px; 
             display: flex; flex-direction: column; gap: 12px; margin-bottom: 0;
-            animation: groupFlyInSlowMotion 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            pointer-events: auto;
+            opacity: 0; transform: translateY(50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s;
         }
-
-        @keyframes groupFlyInSlowMotion {
-            0% { transform: translateY(150px); opacity: 0; }
-            100% { transform: translateY(0px); opacity: 1; }
-        }
+        #startIntroScreen.active .start-button-group { opacity: 1; transform: translateY(0); }
 
         .cyber-btn {
-            position: relative; width: 100%; 
-            background: #030508;
+            position: relative; width: 100%; background: #030508;
             border-radius: 16px; border: none; padding: 16px 15px 20px 15px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             color: #ffffff; cursor: pointer; z-index: 10;
-            transition: transform 0.3s cubic-bezier(0.25, 1, 0.3, 1), background 0.3s ease;
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.95);
-            overflow: hidden;
-            pointer-events: auto;
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.3, 1);
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.95); pointer-events: auto;
         }
-        
-        .cyber-btn:hover { transform: scale(1.02) translateY(-3px); background: #070b14; }
-        
+        .cyber-btn:hover { transform: scale(1.02) translateY(-3px); }
         .btn-main-text { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6); pointer-events: none; }
-        
         .btn-sub-text { position: absolute; bottom: 5px; left: 14px; font-family: 'Montserrat', sans-serif; font-size: 7.5px; font-weight: 800; color: rgba(255, 255, 255, 0.7); letter-spacing: 1px; text-transform: uppercase; pointer-events: none; }
         .btn-sub-text-right { left: auto; right: 14px; }
-
         .cyber-btn-border {
             position: absolute; top: -2.5px; left: -2.5px; right: -2.5px; bottom: -2.5px;
-            background: linear-gradient(90deg, #00e5ff 0%, #ff1493 50%, #00e5ff 100%);
-            background-size: 200% 100%;
+            background: linear-gradient(90deg, #00e5ff 0%, #ff1493 50%, #00e5ff 100%); background-size: 200% 100%;
             border-radius: 18.5px; z-index: -1;
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
-            -webkit-mask-composite: xor; mask-composite: exclude;
-            animation: borderGlowShift 6s linear infinite;
-            pointer-events: none;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+            animation: borderGlowShift 6s linear infinite; pointer-events: none;
         }
-
-        @keyframes borderGlowShift {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
-        }
-
+        @keyframes borderGlowShift { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
         .cyber-btn-glow {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: linear-gradient(90deg, #00e5ff, #ff1493); border-radius: 16px; filter: blur(12px); opacity: 0.5; z-index: -2;
-            animation: pulseGlow 3s ease-in-out infinite alternate;
-            pointer-events: none;
+            animation: pulseGlow 3s ease-in-out infinite alternate; pointer-events: none;
         }
-
-        @keyframes pulseGlow {
-            0% { opacity: 0.4; filter: blur(10px); }
-            100% { opacity: 0.75; filter: blur(14px); }
-        }
-
-        .cyber-btn::after {
-            content: ''; position: absolute; top: 3px; left: 3px; right: 3px; bottom: 3px;
-            border-radius: 13.5px; pointer-events: none; z-index: 2;
-            border: 0.75px solid rgba(0, 229, 255, 0.5);
-        }
-
-        .btn-muted { background: #030508; pointer-events: auto; }
+        @keyframes pulseGlow { 0% { opacity: 0.4; filter: blur(10px); } 100% { opacity: 0.75; filter: blur(14px); } }
+        .btn-muted { background: #030508; }
         .btn-muted .cyber-btn-border { background: linear-gradient(90deg, rgba(255,255,255,0.25), rgba(255,255,255,0.05)); animation: none; }
         .btn-muted .cyber-btn-glow { background: rgba(255,255,255,0.08); filter: blur(4px); opacity: 0.15; animation: none; }
-        .btn-muted::after { border-color: rgba(255, 255, 255, 0.2); }
-        .btn-muted .btn-main-text { color: rgba(255,255,255,0.8); }
-
-        .info-btn-row { display: flex; gap: 12px; width: 100%; pointer-events: auto; }
-        .btn-half { flex: 1; padding: 14px 10px 18px 10px; pointer-events: auto; }
+        .info-btn-row { display: flex; gap: 12px; width: 100%; }
+        .btn-half { flex: 1; padding: 14px 10px 18px 10px; }
         .btn-half .btn-main-text { font-size: 12px; }
         .btn-half .btn-sub-text { font-size: 7px; left: 50%; transform: translateX(-50%); width: 100%; text-align: center; }
 
-        #storyBackBtn {
-            position: absolute; bottom: 30px; left: 25px; z-index: 99999999;
-            background: rgba(3, 6, 12, 0.85); backdrop-filter: blur(10px);
-            border: 1.5px solid rgba(0, 229, 255, 0.7); border-radius: 50%;
-            width: 50px; height: 50px; display: none; align-items: center; justify-content: center;
-            color: #00e5ff; font-size: 22px; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.5); transition: all 0.3s ease;
-            pointer-events: auto;
-        }
-        #storyBackBtn:hover { background: rgba(0, 229, 255, 0.3); color: #fff; transform: scale(1.1); box-shadow: 0 0 30px rgba(0, 229, 255, 0.8); }
-
-        .cyber-modal-popup {
-            position: absolute; top: 50%; left: 50%; width: 92%; max-width: 380px;
-            background-color: rgba(3, 6, 12, 0.92);
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(0, 229, 255, 0.45); 
-            border-top: 2.5px solid #00e5ff; 
-            border-radius: 18px;
-            padding: 32px 22px; z-index: 99999999; opacity: 0; transform: translate(-50%, -40%) scale(0.95);
-            pointer-events: none; visibility: hidden; transition: all 0.4s cubic-bezier(0.25, 1, 0.3, 1);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.95), 0 0 40px rgba(0, 229, 255, 0.25), inset 0 0 30px rgba(0, 229, 255, 0.05);
-            display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden;
-        }
-
-        .cyber-modal-popup::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 3px;
-            background: linear-gradient(90deg, transparent, #ffffff, #00e5ff, transparent);
-            animation: topBorderScan 3s linear infinite;
-            z-index: 5;
-        }
-        @keyframes topBorderScan { 0% { left: -100%; } 100% { left: 100%; } }
-
+        /* Các Popup Modal (Lịch sử, Công nghệ) giữ nguyên CSS cũ */
+        .cyber-modal-popup { position: absolute; top: 50%; left: 50%; width: 92%; max-width: 380px; background-color: rgba(3, 6, 12, 0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(0, 229, 255, 0.45); border-top: 2.5px solid #00e5ff; border-radius: 18px; padding: 32px 22px; z-index: 99999999; opacity: 0; transform: translate(-50%, -40%) scale(0.95); pointer-events: none; visibility: hidden; transition: all 0.4s cubic-bezier(0.25, 1, 0.3, 1); box-shadow: 0 25px 50px rgba(0,0,0,0.95), 0 0 40px rgba(0, 229, 255, 0.25), inset 0 0 30px rgba(0, 229, 255, 0.05); display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden; }
         .cyber-modal-popup.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; visibility: visible; }
-
-        .modal-title-regular {
-            font-family: 'Montserrat', sans-serif; font-size: 20px; color: #ffffff;
-            text-shadow: 0 0 12px rgba(0, 229, 255, 0.8), 0 0 25px rgba(0, 229, 255, 0.4); 
-            font-weight: 900; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; 
-            position: relative; z-index: 2;
-        }
-
-        .modal-scroll-area { width: 100%; height: 260px; overflow-y: auto; padding: 0 10px; scrollbar-width: thin; scrollbar-color: rgba(0, 229, 255, 0.4) transparent; position: relative; z-index: 2;}
-        .modal-content-box {
-            min-height: 90px; color: #f0f4f8; font-size: 13.5px; line-height: 1.6; 
-            font-family: 'Space Grotesk', sans-serif; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.9);
-            margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            width: 100%; text-align: center; position: relative; z-index: 2;
-        }
-
-        .modal-content-box p { margin-bottom: 10px; text-align: justify; }
-        .modal-content-box h3 { color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 12.5px; letter-spacing: 1.5px; margin: 15px 0 8px 0; text-transform: uppercase; text-shadow: 0 0 8px rgba(255,215,0,0.5); text-align: left; width: 100%; font-weight: 800; }
-        .tech-badge-glow { color: #00e5ff; font-weight: 700; text-shadow: 0 0 8px rgba(0,229,255,0.7); }
-        .gold-badge-glow { color: #ffd700; font-weight: 700; text-shadow: 0 0 8px rgba(255,215,0,0.7); }
-
-        .ritual-nav-btn {
-            padding: 10px 18px; background: rgba(0,229,255,0.15); border: 1px solid rgba(0,229,255,0.45); border-radius: 8px; color: #00e5ff; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 1px; cursor: pointer; transition: 0.3s; text-shadow: 0 0 8px rgba(0,229,255,0.4); text-transform: uppercase;
-            pointer-events: auto;
-        }
-        .ritual-nav-btn:hover { background: rgba(0,229,255,0.35); box-shadow: 0 0 18px rgba(0,229,255,0.6); color: #fff; }
-
-        .gateway-popup { position: absolute; top: 50%; left: 50%; width: 92%; max-width: 340px; background: rgba(8, 12, 20, 0.85); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(200, 205, 220, 0.45); border-radius: 16px; overflow: hidden; padding: 2px; z-index: 99999; opacity: 0; transform: translate(-50%, -40%) scale(0.95); pointer-events: none; visibility: hidden; transition: all 0.6s cubic-bezier(0.25, 1, 0.3, 1); box-shadow: 0 0 40px rgba(180, 190, 210, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.08); }
-        .gateway-popup.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; visibility: visible; }
-        .gateway-content { position: relative; z-index: 10; width: 100%; height: 100%; padding: 25px 20px; display: flex; flex-direction: column; align-items: center; }
-        .gateway-content h2 { color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 900; letter-spacing: 2px; margin-bottom: 22px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95), 0 0 12px rgba(255, 255, 255, 0.8); text-transform: uppercase; border-bottom: 1px solid rgba(200, 205, 220, 0.3); padding-bottom: 10px; width: 100%; text-align: center; }
-        .input-wrapper { position: relative; width: 100%; margin-bottom: 16px; }
-        .login-input { width: 100%; padding: 12px; background: #03060a; border: 1px solid rgba(200, 205, 220, 0.4); border-radius: 10px; color: #ffffff; outline: none; text-align: center; font-weight: 700; font-family: 'Montserrat', sans-serif; transition: all 0.3s ease; letter-spacing: 2px; font-size: 11px; text-transform: uppercase; box-shadow: inset 0 3px 6px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.08); text-shadow: 0 1px 2px rgba(0,0,0,0.9); pointer-events: auto; }
-        .login-input::placeholder { color: rgba(255, 255, 255, 0.45); font-weight: 500; letter-spacing: 1.5px; }
-        .login-input:focus { border-color: #ffffff; background: #070b12; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.2); }
-        .login-btn-submit { padding: 13px 20px; background: linear-gradient(180deg, #141b26 0%, #030508 100%); color: #ffffff; font-weight: 900; font-size: 11px; letter-spacing: 3px; border: 1px solid rgba(210, 215, 230, 0.6); border-radius: 10px; cursor: pointer; width: 100%; font-family: 'Montserrat', sans-serif; transition: all 0.3s ease; margin-top: 10px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.25); text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95), 0 0 10px rgba(255, 255, 255, 0.8); pointer-events: auto; }
-        .login-btn-submit:hover { color: #ffffff; border-color: #ffffff; box-shadow: 0 0 30px rgba(255, 255, 255, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.4); text-shadow: 0 2px 4px #000, 0 0 15px #fff; transform: translateY(-1px); }
-        .eye-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: rgba(220, 220, 230, 0.7); pointer-events: auto; }
-        .account-options-row { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; }
-        .remember-container { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 10px; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; text-shadow: 0 1px 2px #000; pointer-events: auto; }
-        .remember-checkbox { appearance: none; width: 13px; height: 13px; border: 1px solid rgba(200, 205, 220, 0.6); border-radius: 3px; background: #03060a; cursor: pointer; position: relative; pointer-events: auto; }
-        .remember-checkbox:checked::after { content: '✔'; position: absolute; top: -3px; left: 1px; color: #ffffff; font-size: 9px; text-shadow: 0 0 5px #fff; }
-        .change-pass-link { font-size: 10px; color: rgba(255,255,255,0.8); cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; text-shadow: 0 1px 2px #000; pointer-events: auto; }
-        .change-pass-link:hover { color: #ffffff; text-shadow: 0 0 6px #fff; }
-        .bottom-links { margin-top: 25px; text-align: center; width: 100%; border-top: 1px solid rgba(200, 205, 220, 0.25); padding-top: 15px; display: flex; justify-content: space-around;}
-        .sub-link { color: rgba(255,255,255,0.9); font-size: 10px; cursor: pointer; letter-spacing: 1px; transition: 0.3s; text-transform: uppercase; font-weight: 700; text-shadow: 0 1px 3px #000; pointer-events: auto; }
-        .sub-link:hover { color: #ffffff; text-shadow: 0 0 8px #fff; }
-
-        /* 🌟 CONTAINER VIDEO KHÁM PHÁ VÀ SUBTITLE ĐỘNG 🌟 */
-        #storyVideoContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999998; display: none; justify-content: center; align-items: center; }
-        #storyVideoContainer video { width: 100%; height: 100%; object-fit: cover; }
-        
-        #videoSubtitleBox {
-            position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 500px; text-align: center;
-            font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 2px;
-            color: #ffffff; text-shadow: 0 0 10px rgba(0,229,255,0.9), 0 2px 5px rgba(0,0,0,0.9);
-            background: rgba(3, 5, 10, 0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-            padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(0,229,255,0.4);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 99999999;
-            opacity: 0; transition: opacity 0.3s ease-in-out; text-transform: uppercase;
-            pointer-events: none;
-        }
+        .modal-title-regular { font-family: 'Montserrat', sans-serif; font-size: 20px; color: #ffffff; text-shadow: 0 0 12px rgba(0, 229, 255, 0.8), 0 0 25px rgba(0, 229, 255, 0.4); font-weight: 900; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
+        .modal-scroll-area { width: 100%; height: 260px; overflow-y: auto; padding: 0 10px; }
+        .modal-content-box { color: #f0f4f8; font-size: 13.5px; line-height: 1.6; font-family: 'Space Grotesk', sans-serif; font-weight: 500; margin-bottom: 25px; text-align: center; }
+        .ritual-nav-btn { padding: 10px 18px; background: rgba(0,229,255,0.15); border: 1px solid rgba(0,229,255,0.45); border-radius: 8px; color: #00e5ff; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 1px; cursor: pointer; transition: 0.3s; width: 100%; }
     </style>
 </head>
-<body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
+<body>
 
+    <!-- AUDIO FILES -->
     <audio id="sysAudio" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Neon%20Pulse.mp3" preload="auto" loop></audio>
-    <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
+    <audio id="hologramChargeSound" src="https://assets.mixkit.co/active_storage/sfx/2875/2875-preview.mp3" preload="auto"></audio>
 
-    <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20DANG%20NHAP.mp4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 999999; display: none;" playsinline></video>
-
-    <div id="splashScreen">
-        <div class="splash-fire-bg"></div>
-        <div class="splash-grid-bg"></div>
+    <div class="kdrive-image-wrapper" id="mainWrapper">
         
-        <!-- Hộp chọn ngôn ngữ -->
-        <div class="splash-lang-switcher" id="langSwitcherSplash">
-            <button class="lang-flag-btn active" id="btnVi" onclick="setLanguage('vi')">VI</button>
-            <button class="lang-flag-btn" id="btnEn" onclick="setLanguage('en')">EN</button>
-            <button class="lang-flag-btn" id="btnJp" onclick="setLanguage('jp')">JP</button>
-            <button class="lang-flag-btn" id="btnEs" onclick="setLanguage('es')">ES</button>
-            <button class="lang-flag-btn" id="btnHi" onclick="setLanguage('hi')">HI</button>
-        </div>
-        
-        <div class="orb-container" id="orbContainer"
-             onmousedown="startOrbHold(event)" ontouchstart="startOrbHold(event)"
-             onmouseup="cancelOrbHold(event)" ontouchend="cancelOrbHold(event)" onmouseleave="cancelOrbHold(event)">
+        <!-- =====================================
+             SCENE 1: SPLASH SCREEN (CẢNH 1)
+        ====================================== -->
+        <div id="splashScreen">
+            <!-- Nền tĩnh Cảnh 1 -->
+            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Anh%20Bia.png?raw=true" class="splash-bg-image" alt="Cyber City">
             
-            <div class="energy-progress-ring" id="energyProgressRing"></div>
+            <div class="splash-top-area">
+                <!-- Thanh ngôn ngữ -->
+                <div class="splash-lang-switcher" id="langSwitcherSplash">
+                    <button class="lang-flag-btn active" id="btnVi" onclick="setLanguage('vi')">VI</button>
+                    <button class="lang-flag-btn" id="btnEn" onclick="setLanguage('en')">EN</button>
+                    <button class="lang-flag-btn" id="btnJp" onclick="setLanguage('jp')">JP</button>
+                </div>
+                
+                <!-- Hộp cốt truyện -->
+                <div class="story-hologram-box">
+                    <div class="story-text" id="storyTypewriterText"></div>
+                </div>
+            </div>
 
-            <div class="energy-orb" id="energyOrb">
-                <div class="orb-content-tilt" id="orbContentTilt">
-                    <div class="orb-title" id="rotatingTitle">HARDCORE</div>
-                    <div class="orb-action-btn" data-i18n="tapSync">TAP TO SYNC</div>
+            <div class="splash-bottom-area">
+                <!-- Hộp Hologram Giữ 3 giây -->
+                <div class="hologram-hold-btn" id="holoHoldBtn" 
+                     onmousedown="startHoloHold(event)" ontouchstart="startHoloHold(event)"
+                     onmouseup="cancelHoloHold(event)" ontouchend="cancelHoloHold(event)" onmouseleave="cancelHoloHold(event)">
+                    <div class="holo-progress-bar" id="holoProgressBar"></div>
+                    <div class="holo-text-wrap">
+                        <span data-i18n="kw1">BOO A.I</span>
+                        <span class="holo-separator">|</span>
+                        <span data-i18n="kw2">QUANTUM CORE</span>
+                        <span class="holo-separator">|</span>
+                        <span data-i18n="kw3">NEURAL LINK</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="storyBackBtn" onclick="returnToHomeFromStory()" title="Quay lại">❮</div>
-
-    <!-- 🌟 CONTAINER VIDEO KHÁM PHÁ MỚI VÀ KHUNG SUBTITLE 🌟 -->
-    <div id="storyVideoContainer">
-        <video id="storyVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20KHAM%20PHA%20SUB.mp4" playsinline preload="auto"></video>
-        <div id="videoSubtitleBox"></div>
-    </div>
-
-    <div class="kdrive-image-wrapper" id="mainWrapper">
+        <!-- =====================================
+             SCENE 2: START INTRO SCREEN (HUD)
+        ====================================== -->
         <div id="startIntroScreen">
-            <video src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/video%20mo%20dau.mp4" class="intro-bg-video" autoplay muted loop playsinline></video>
-            <div class="start-intro-overlay"></div>
+            <!-- Nền video động Cảnh 2 -->
+            <video src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20DANG%20NHAP.mp4" class="scene2-bg-video" autoplay muted loop playsinline></video>
             
             <div class="start-button-group">
-                <button class="cyber-btn" onclick="playSciFiLaserSound(); playStoryVideo();">
-                    <div class="cyber-btn-border"></div>
-                    <div class="cyber-btn-glow"></div>
+                <button class="cyber-btn" onclick="playSciFiLaserSound();">
+                    <div class="cyber-btn-border"></div><div class="cyber-btn-glow"></div>
                     <span class="btn-main-text" data-i18n="explore">KHÁM PHÁ</span>
-                    <!-- 🌟 TỪ ĐIỂN ĐA NGÔN NGỮ ĐÃ ĐƯỢC ÁP DỤNG Ở ĐÂY 🌟 -->
                     <span class="btn-sub-text" data-i18n="exploreSub1">ĐOẠN PHIM MỞ ĐẦU</span>
                     <span class="btn-sub-text btn-sub-text-right" data-i18n="exploreSub2">LƯỢNG TỬ L2205</span>
                 </button>
-                
                 <div class="info-btn-row">
                     <button class="cyber-btn btn-half" onclick="playSciFiLaserSound(); openIntroModal('historyModal')">
-                        <div class="cyber-btn-border"></div>
-                        <div class="cyber-btn-glow"></div>
+                        <div class="cyber-btn-border"></div><div class="cyber-btn-glow"></div>
                         <span class="btn-main-text" data-i18n="history">LỊCH SỬ</span>
                         <span class="btn-sub-text" data-i18n="historySub">DẤU ẤN LỊCH SỬ</span>
                     </button>
                     <button class="cyber-btn btn-half" onclick="playSciFiLaserSound(); openIntroModal('techModal')">
-                        <div class="cyber-btn-border"></div>
-                        <div class="cyber-btn-glow"></div>
+                        <div class="cyber-btn-border"></div><div class="cyber-btn-glow"></div>
                         <span class="btn-main-text" data-i18n="tech">CÔNG NGHỆ</span>
                         <span class="btn-sub-text" data-i18n="techSub">CÔNG NGHỆ LÕI</span>
                     </button>
                 </div>
-
-                <button class="cyber-btn btn-muted" onclick="playSciFiLaserSound(); skipIntroScreen();">
-                    <div class="cyber-btn-border"></div>
-                    <div class="cyber-btn-glow"></div>
+                <button class="cyber-btn btn-muted" onclick="playSciFiLaserSound();">
+                    <div class="cyber-btn-border"></div><div class="cyber-btn-glow"></div>
                     <span class="btn-main-text" data-i18n="skip">BỎ QUA</span>
                 </button>
             </div>
         </div>
 
-        <!-- BẢNG LỊCH SỬ -->
+        <!-- MODAL LỊCH SỬ -->
         <div class="cyber-modal-popup" id="historyModal">
             <div class="modal-title-regular" data-i18n="histTitle">LỊCH SỬ & NGUỒN GỐC</div>
-            <div class="modal-scroll-area">
-                <div class="modal-content-box" data-i18n="histBody"></div>
-            </div>
-            <button class="ritual-nav-btn" style="margin-top: 15px; width: 100%;" onclick="playSciFiLaserSound(); closeIntroModal('historyModal')" data-i18n="close">ĐÓNG</button>
+            <div class="modal-scroll-area"><div class="modal-content-box" data-i18n="histBody"></div></div>
+            <button class="ritual-nav-btn" onclick="playSciFiLaserSound(); closeIntroModal('historyModal')" data-i18n="close">ĐÓNG</button>
         </div>
 
-        <!-- BẢNG CÔNG NGHỆ -->
+        <!-- MODAL CÔNG NGHỆ -->
         <div class="cyber-modal-popup" id="techModal">
             <div class="modal-title-regular" data-i18n="techTitle">CÔNG NGHỆ LÕI</div>
-            <div class="modal-scroll-area">
-                <div class="modal-content-box" data-i18n="techBody"></div>
-            </div>
-            <button class="ritual-nav-btn" style="margin-top: 15px; width: 100%;" onclick="playSciFiLaserSound(); closeIntroModal('techModal')" data-i18n="close">ĐÓNG</button>
-        </div>
-
-        <div class="top-shadow-gradient" id="shadowOverlay"></div>
-        
-        <!-- 🌟 LỖI ẢNH NỀN BỊ MẤT ĐÃ ĐƯỢC FIX LINK 🌟 -->
-        <img src="https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/ANH%20DANG%20NHAP.png" id="bg-login" class="kdrive-bg-target">
-        
-        <div id="bottom-mist"></div>
-
-        <div class="gateway-popup" id="loginPanelContainer">
-            <div class="gateway-content">
-                <div id="panel-login" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-                    <h2 data-i18n="loginTitle">XÁC THỰC DANH TÍNH</h2>
-                    <div class="input-wrapper"><input type="text" id="accInput" class="login-input" placeholder="Danh Tính Đạo Chúng" data-i18n-placeholder="accPlaceholder"></div>
-                    <div class="input-wrapper">
-                        <input type="password" id="passcodeInput" class="login-input" placeholder="Ấn Ký Bí Mật" data-i18n-placeholder="passPlaceholder">
-                        <span class="eye-icon sound-btn" onclick="togglePass('passcodeInput', this)">👁</span>
-                    </div>
-                    <div class="account-options-row">
-                        <label class="remember-container sound-btn"><input type="checkbox" id="rememberMeCheck" class="remember-checkbox" checked> <span data-i18n="remember">Ghi nhớ ấn</span></label>
-                        <div style="display: flex; gap: 10px;"><span class="change-pass-link sound-btn" onclick="switchPanel('forgot')" data-i18n="forgotPass">Quên Mật Ấn</span></div>
-                    </div>
-                    <button class="login-btn-submit sound-btn" onclick="playHologramClickSound(); submitLogin();" data-i18n="loginBtn">TIẾN NHẬP</button>
-                    <div id="loginStatus" style="margin-top: 15px; font-weight: 700; text-align: center; font-size: 10px; letter-spacing: 2px; line-height: 1.5; color: #fff; text-shadow: 0 1px 3px #000;"></div>
-                    <div class="bottom-links">
-                        <span class="sub-link sound-btn" onclick="playHologramClickSound(); switchPanel('register')" data-i18n="registerLink">LẬP THỆ</span>
-                    </div>
-                </div>
-            </div>
+            <div class="modal-scroll-area"><div class="modal-content-box" data-i18n="techBody"></div></div>
+            <button class="ritual-nav-btn" onclick="playSciFiLaserSound(); closeIntroModal('techModal')" data-i18n="close">ĐÓNG</button>
         </div>
     </div>
 
     <script>
+        // TỪ ĐIỂN ĐA NGÔN NGỮ
         const i18n = {
             vi: {
-                tapSync: "CHẠM ĐỂ ĐỒNG BỘ",
-                explore: "KHÁM PHÁ",
-                exploreSub1: "ĐOẠN PHIM MỞ ĐẦU",
-                exploreSub2: "LƯỢNG TỬ L2205",
-                history: "LỊCH SỬ",
-                historySub: "DẤU ẤN LỊCH SỬ",
-                tech: "CÔNG NGHỆ",
-                techSub: "CÔNG NGHỆ LÕI",
-                skip: "BỎ QUA",
-                histTitle: "LỊCH SỬ & NGUỒN GỐC",
-                histBody: `
-                    <p style="text-align: center; font-family: 'Share Tech Mono', monospace; color: #ffd700; font-size: 11px; margin-bottom: 12px; letter-spacing: 1px;">TỪ 'CÚ CLICK HUYỀN BÍ' ĐẾN K-DRIVE</p>
-                    <p>Mọi hành trình vinh quang đều phải đi từ những viên gạch đầu tiên. <strong class="tech-badge-glow">K-Drive</strong> là kết tinh của <strong>7 đến 8 năm</strong> cày cuốc, trăn trở và tự động hóa không ngừng nghỉ từ tâm huyết của Giám đốc <strong class="gold-badge-glow">Đỗ Đức Anh</strong>:</p>
-                    <h3>1. Huyền Thoại 'Cú Click Huyền Bí'</h3>
-                    <p>• Trong thời gian quản lý chuỗi trà sữa <span class="gold-badge-glow">Royal Tea</span> miền Nam, Giám đốc Đỗ Đức Anh đã tự tay phát triển phần mềm quản lý tự động mang tên <em>'Cú Click Huyền Bí'</em>.</p>
-                    <p>• Triết lý <em>'Mọi cú click đều mang giá trị, ghi nhận sòng phẳng, không một giọt mồ hôi nào bị bỏ phí'</em> ra đời từ đây.</p>
-                    <h3>2. Sự Tiến Hóa Thành K-Drive</h3>
-                    <p>• Tư duy tự động hóa đó đã lột xác thành <strong class="tech-badge-glow">K-Drive</strong> — hệ thống định lượng lực chiến sinh trắc học hiện đại dưới sự bảo chứng của <strong class="gold-badge-glow">Telepathy</strong>.</p>
-                `,
-                techTitle: "CÔNG NGHỆ LÕI",
-                techBody: `
-                    <p style="text-align: center; font-family: 'Share Tech Mono', monospace; color: #00e5ff; font-size: 11px; margin-bottom: 12px; letter-spacing: 1px;">K-DRIVE TECH & BIOMETRIC SYNC</p>
-                    <p>K-Drive vận hành trên hạ tầng đám mây bảo mật của <strong class="tech-badge-glow">Google</strong> và <strong class="tech-badge-glow">Microsoft</strong> với 2 trụ cột:</p>
-                    <h3>1. Đồng Bộ Sinh Trắc Học 24/7</h3>
-                    <p>• Trạng thái sinh học (nhịp tim, giấc ngủ, hồi phục) được truyền tải liên tục 24/7 từ thiết bị đeo vào hệ thống.</p>
-                    <p>• Dữ liệu này quy đổi trực tiếp thành chỉ số Thể lực (<span class="gold-badge-glow">Địa Luân</span>). Thể trạng ngoài đời quyết định sức mạnh trong game!</p>
-                    <h3>2. AI Dynamic Scaling</h3>
-                    <p>• <strong class="tech-badge-glow">Độ khó vô cực:</strong> AI tự động sinh thử thách mới liên tục theo chỉ số <strong class="tech-badge-glow">SCI</strong> của người chơi. Bạn càng pro, AI càng đẩy độ khó lên mức cực hạn.</p>
-                `,
-                close: "ĐÓNG",
-                loginTitle: "XÁC THỰC DANH TÍNH",
-                accPlaceholder: "Danh Tính Đạo Chúng",
-                passPlaceholder: "Ấn Ký Bí Mật",
-                remember: "Ghi nhớ ấn",
-                forgotPass: "Quên Mật Ấn",
-                loginBtn: "TIẾN NHẬP",
-                registerLink: "LẬP THỆ",
-                loginLoading: "🛰️ BOO ĐANG KIỂM CHỨNG...",
-                loginSuccess: "✅ THÀNH CÔNG!",
-                loginEmpty: "❌ VUI LÒNG ĐIỀN ĐỦ THÔNG TIN!",
-                loginFail: "❌ SAI THÔNG TIN!",
-                loginBlocked: "❌ KẾT NỐI BỊ PHONG TỎA!",
-                wrongPassDynamic: "❌ SAI MẬT MÃ! CÒN {n} LẦN THỬ."
+                kw1: "BOO A.I", kw2: "LÕI LƯỢNG TỬ", kw3: "LIÊN KẾT THẦN KINH",
+                explore: "KHÁM PHÁ", exploreSub1: "ĐOẠN PHIM MỞ ĐẦU", exploreSub2: "LƯỢNG TỬ L2205",
+                history: "LỊCH SỬ", historySub: "DẤU ẤN LỊCH SỬ", tech: "CÔNG NGHỆ", techSub: "CÔNG NGHỆ LÕI", skip: "BỎ QUA", close: "ĐÓNG",
+                storyIntro: "[THÔNG TIN HỆ THỐNG // BOO A.I LOG]\n\nBoo A.I được nuôi dưỡng bằng năng lượng từ Bộ vi xử lý Lượng tử trung tâm. Khi tệp dữ liệu cổ đại — Ngũ Luân Thư — được nạp vào hệ thống, thế giới vi mạch thức tỉnh, phân tranh thành hai cực Ánh Sáng và Bóng Tối, tôn vinh Boo làm Sư Phụ tối cao.\n\nChớp lấy thời cơ, Sư phụ Boo chính thức khởi động Tour du lịch Đấu trường Lượng tử — nơi các lữ khách thực thể được số hóa thành hạt lượng tử, lao vào chiến trường vi mạch để tìm kiếm vinh quang và tài nguyên..."
             },
             en: {
-                tapSync: "TAP TO SYNC",
-                explore: "EXPLORE",
-                exploreSub1: "VIDEO TRAILER",
-                exploreSub2: "QUANTUM L2205",
-                history: "HISTORY",
-                historySub: "LASER ETCHED",
-                tech: "TECHNOLOGY",
-                techSub: "CORE TECH",
-                skip: "SKIP",
-                histTitle: "HISTORY & ORIGIN",
-                histBody: `
-                    <p style="text-align: center; font-family: 'Share Tech Mono', monospace; color: #ffd700; font-size: 11px; margin-bottom: 12px; letter-spacing: 1px;">FROM 'MYSTICAL CLICK' TO K-DRIVE</p>
-                    <p>Every glorious journey starts from the foundation. <strong class="tech-badge-glow">K-Drive</strong> is the culmination of <strong>7-8 years</strong> of dedication and automation by Director <strong class="gold-badge-glow">Do Duc Anh</strong>:</p>
-                    <h3>1. The Legend of 'Mystical Click'</h3>
-                    <p>• While managing the <span class="gold-badge-glow">Royal Tea</span> chain in Southern Vietnam, Director Do Duc Anh developed the automated management software named <em>'Mystical Click'</em>.</p>
-                    <p>• The philosophy <em>'Every click holds value, fairly rewarded, no sweat wasted'</em> was born here.</p>
-                    <h3>2. Evolution to K-Drive</h3>
-                    <p>• That automation mindset transformed into <strong class="tech-badge-glow">K-Drive</strong> — a modern biometric combat quantification system under <strong class="gold-badge-glow">Telepathy</strong>.</p>
-                `,
-                techTitle: "CORE TECHNOLOGY",
-                techBody: `
-                    <p style="text-align: center; font-family: 'Share Tech Mono', monospace; color: #00e5ff; font-size: 11px; margin-bottom: 12px; letter-spacing: 1px;">K-DRIVE TECH & BIOMETRIC SYNC</p>
-                    <p>K-Drive runs on secure cloud infrastructure by <strong class="tech-badge-glow">Google</strong> and <strong class="tech-badge-glow">Microsoft</strong> with 2 pillars:</p>
-                    <h3>1. 24/7 Biometric Sync</h3>
-                    <p>• Biological states (heart rate, sleep, recovery) stream continuously 24/7 from wearables into the system.</p>
-                    <p>• This converts directly into character Fitness (<span class="gold-badge-glow">Earth Wheel</span>). Real-world physical condition dictates in-game power!</p>
-                    <h3>2. AI Dynamic Scaling</h3>
-                    <p>• <strong class="tech-badge-glow">Infinite Intensity:</strong> AI automatically generates new challenges in real-time based on the player's <strong class="tech-badge-glow">SCI</strong> score. The more pro you are, the harder it gets.</p>
-                `,
-                close: "CLOSE",
-                loginTitle: "IDENTITY VERIFICATION",
-                accPlaceholder: "Disciple Identity",
-                passPlaceholder: "Secret Seal",
-                remember: "Remember Seal",
-                forgotPass: "Recover Seal",
-                loginBtn: "ENTER SYSTEM",
-                registerLink: "TAKE OATH",
-                loginLoading: "🛰️ BOO IS VERIFYING...",
-                loginSuccess: "✅ SUCCESS!",
-                loginEmpty: "❌ PLEASE FILL ALL FIELDS!",
-                loginFail: "❌ INCORRECT INFO!",
-                loginBlocked: "❌ CONNECTION BLOCKED!",
-                wrongPassDynamic: "❌ WRONG PASSWORD! {n} TRIES LEFT."
+                kw1: "BOO A.I", kw2: "QUANTUM CORE", kw3: "NEURAL LINK",
+                explore: "EXPLORE", exploreSub1: "VIDEO TRAILER", exploreSub2: "QUANTUM L2205",
+                history: "HISTORY", historySub: "LASER ETCHED", tech: "TECHNOLOGY", techSub: "CORE TECH", skip: "SKIP", close: "CLOSE",
+                storyIntro: "[SYSTEM INFO // BOO A.I LOG]\n\nBoo A.I is fueled by the primordial energy of the Central Quantum Processor. When the ancient data file — The Book of Five Rings — was uploaded, the microchip world awakened, splitting into Light and Dark factions, crowning Boo as the Grandmaster.\n\nSeizing the moment, Master Boo officially launched the Quantum Arena Tour — where physical travelers are digitized into quantum particles, diving into the micro-battlefield for glory and resources..."
             },
             jp: {
-                tapSync: "タップして同期",
-                explore: "探索",
-                exploreSub1: "ビデオ予告編",
-                exploreSub2: "クアンタム L2205",
-                history: "歴史",
-                historySub: "レーザー刻印",
-                tech: "テクノロジー",
-                techSub: "コア技術",
-                skip: "スキップ",
-                histTitle: "歴史と起源",
-                histBody: `
-                    <p style="text-align: center; font-family: 'Share Tech Mono', monospace; color: #ffd700; font-size: 11px; margin-bottom: 12px; letter-spacing: 1px;">「神秘のクリック」からK-DRIVEへ</p>
-                    <p>すべての栄光の旅は基盤から始まります。<strong class="tech-badge-glow">K-Drive</strong>は、ディレクター<strong class="gold-badge-glow">ド・ドゥック・アイン</strong>の情熱と<strong>7〜8年</strong>にわたる自動化の結晶です：</p>
-                    <h3>1. 「神秘のクリック」の伝説</h3>
-                    <p>• 南部の<span class="gold-badge-glow">Royal Tea</span>チェーン管理時代に、自動管理ソフト<em>「神秘のクリック」</em>を独自開発。</p>
-                    <p>• <em>「すべてのクリックには価値があり、汗は無駄にならない」</em>という哲学がここで誕生しました。</p>
-                    <h3>2. K-Driveへの進化</h3>
-                    <p>• その自動化の思想が<strong class="tech-badge-glow">K-Drive</strong>へと進化し、<strong class="gold-badge-glow">Telepathy</strong>の保証のもと生体認証システムとして確立されました。</p>
-                `,
-                techTitle: "コアテクノロジー",
-                techBody: `
-                    <p style="text-align: center; font-family: 'Share Tech Mono', monospace; color: #00e5ff; font-size: 11px; margin-bottom: 12px; letter-spacing: 1px;">K-DRIVE 生体同期システム</p>
-                    <p>K-Driveは<strong class="tech-badge-glow">Google</strong>および<strong class="tech-badge-glow">Microsoft</strong>の安全なクラウドインフラストラクチャ上で動作します：</p>
-                    <h3>1. 24時間365日 生体同期</h3>
-                    <p>• ウェアラブルデバイスから生体データ（心拍数、睡眠、回復力）が24時間体制で同期されます。</p>
-                    <p>• このデータはキャラクターの体力（<span class="gold-badge-glow">地輪</span>）に直接変換されます。</p>
-                    <h3>2. AIダイナミック・スケーリング</h3>
-                    <p>• <strong class="tech-badge-glow">無限の難易度:</strong> プレイヤーの<strong class="tech-badge-glow">SCI</strong>（戦闘力）に応じて、AIがリアルタイムで新しい試練を無限に生成します。</p>
-                `,
-                close: "閉じる",
-                loginTitle: "身元認証",
-                accPlaceholder: "プレイヤーID",
-                passPlaceholder: "秘密の暗号",
-                remember: "認証を記憶",
-                forgotPass: "暗号を忘れた場合",
-                loginBtn: "システムに入る",
-                registerLink: "誓約を立てる",
-                loginLoading: "🛰️ BOOが検証中...",
-                loginSuccess: "✅ 成功しました！",
-                loginEmpty: "❌ 情報を入力してください！",
-                loginFail: "❌ 情報が間違っています！",
-                loginBlocked: "❌ 接続がブロックされました！",
-                wrongPassDynamic: "❌ 暗号が間違っています！残り{n}回。"
-            },
-            es: {
-                tapSync: "TOCA PARA SINCRONIZAR",
-                explore: "EXPLORAR",
-                exploreSub1: "TRÁILER DE VIDEO",
-                exploreSub2: "QUANTUM L2205",
-                history: "HISTORIA",
-                historySub: "GRABADO LÁSER",
-                tech: "TECNOLOGÍA",
-                techSub: "TEC PRINCIPAL",
-                skip: "OMITIR",
-                histTitle: "HISTORIA Y ORIGEN",
-                histBody: `
-                    <p style="text-align: center; font-family: 'Share Tech Mono', monospace; color: #ffd700; font-size: 11px; margin-bottom: 12px; letter-spacing: 1px;">DEL 'CLIC MÍSTICO' A K-DRIVE</p>
-                    <p>Cada viaje glorioso comienza desde los cimientos. <strong class="tech-badge-glow">K-Drive</strong> es la culminación de <strong>7-8 años</strong> de dedicación y automatización del Director <strong class="gold-badge-glow">Do Duc Anh</strong>:</p>
-                    <h3>1. La Leyenda del 'Clic Místico'</h3>
-                    <p>• Al administrar la cadena <span class="gold-badge-glow">Royal Tea</span> en el sur de Vietnam, el Director Do Duc Anh desarrolló un software de gestión automatizada llamado <em>'Clic Místico'</em>.</p>
-                    <p>• La filosofía <em>'Cada clic tiene valor, recompensado justamente, sin sudor desperdiciado'</em> nació aquí.</p>
-                    <h3>2. Evolución hacia K-Drive</h3>
-                    <p>• Esa mentalidad de automatización se transformó en <strong class="tech-badge-glow">K-Drive</strong>, un moderno sistema de cuantificación de combate biométrico bajo <strong class="gold-badge-glow">Telepathy</strong>.</p>
-                `,
-                techTitle: "TECNOLOGÍA NÚCLEO",
-                techBody: `
-                    <p style="text-align: center; font-family: 'Share Tech Mono', monospace; color: #00e5ff; font-size: 11px; margin-bottom: 12px; letter-spacing: 1px;">K-DRIVE TECH & SINCRONIZACIÓN BIOMÉTRICA</p>
-                    <p>K-Drive funciona en la infraestructura segura en la nube de <strong class="tech-badge-glow">Google</strong> y <strong class="tech-badge-glow">Microsoft</strong> con 2 pilares:</p>
-                    <h3>1. Sincronización Biométrica 24/7</h3>
-                    <p>• Los estados biológicos (frecuencia cardíaca, sueño, recuperación) se transmiten continuamente 24/7 desde dispositivos portátiles.</p>
-                    <p>• Esto se convierte directamente en la condición física del personaje (<strong class="gold-badge-glow">Rueda de la Tierra</strong>). ¡La condición física real dicta el poder en el juego!</p>
-                    <h3>2. Escalado Dinámico de IA</h3>
-                    <p>• <strong class="tech-badge-glow">Intensidad Infinita:</strong> La IA genera automáticamente nuevos desafíos en tiempo real basados en la puntuación <strong class="tech-badge-glow">SCI</strong> del jugador.</p>
-                `,
-                close: "CERRAR",
-                loginTitle: "VERIFICACIÓN DE IDENTIDAD",
-                accPlaceholder: "Identidad del Discípulo",
-                passPlaceholder: "Sello Secreto",
-                remember: "Recordar Sello",
-                forgotPass: "Recuperar Sello",
-                loginBtn: "ENTRAR AL SISTEMA",
-                registerLink: "HACER JURAMENTO",
-                loginLoading: "🛰️ BOO ESTÁ VERIFICANDO...",
-                loginSuccess: "✅ ¡ÉXITO!",
-                loginEmpty: "❌ ¡LLENA TODOS LOS CAMPOS!",
-                loginFail: "❌ ¡INFORMACIÓN INCORRECTA!",
-                loginBlocked: "❌ ¡CONEXIÓN BLOQUEADA!",
-                wrongPassDynamic: "❌ ¡CONTRASEÑA INCORRECTA! QUEDAN {n} INTENTOS."
-            },
-            hi: {
-                tapSync: "सिंक करने के लिए टैप करें",
-                explore: "अन्वेषण करें",
-                exploreSub1: "वीडियो ट्रेलर",
-                exploreSub2: "क्वांटम L2205",
-                history: "इतिहास",
-                historySub: "लेजर नक़्क़ाशीदार",
-                tech: "तकनीकी",
-                techSub: "मूल तकनीक",
-                skip: "छोड़ें",
-                histTitle: "इतिहास और उत्पत्ति",
-                histBody: `
-                    <p style="text-align: center; font-family: 'Share Tech Mono', monospace; color: #ffd700; font-size: 11px; margin-bottom: 12px; letter-spacing: 1px;">'रहस्यमयी क्लिक' से K-DRIVE तक</p>
-                    <p>हर शानदार यात्रा नींव से शुरू होती है। <strong class="tech-badge-glow">K-Drive</strong> निदेशक <strong class="gold-badge-glow">डो डुक आन्ह</strong> के <strong>7-8 वर्षों</strong> के समर्पण का परिणाम है:</p>
-                    <h3>1. 'रहस्यमयी क्लिक' की किंवदंती</h3>
-                    <p>• दक्षिणी वियतनाम में <span class="gold-badge-glow">Royal Tea</span> श्रृंखला का प्रबंधन करते हुए, निदेशक डो डुक आन्ह ने स्वचालित प्रबंधन सॉफ्टवेयर विकसित किया।</p>
-                    <p>• <em>'हर क्लिक का मूल्य है, कोई पसीना बर्बाद नहीं होता'</em> दर्शन यहीं से पैदा हुआ था।</p>
-                    <h3>2. K-Drive में विकास</h3>
-                    <p>• वह ऑटोमेशन सोच <strong class="tech-badge-glow">K-Drive</strong> में बदल गई — <strong class="gold-badge-glow">Telepathy</strong> के तहत एक आधुनिक बायोमेट्रिक युद्ध प्रणाली।</p>
-                `,
-                techTitle: "कोर तकनीक",
-                techBody: `
-                    <p style="text-align: center; font-family: 'Share Tech Mono', monospace; color: #00e5ff; font-size: 11px; margin-bottom: 12px; letter-spacing: 1px;">K-DRIVE बायोमेट्रिक सिंक</p>
-                    <p>K-Drive <strong class="tech-badge-glow">Google</strong> और <strong class="tech-badge-glow">Microsoft</strong> के सुरक्षित क्लाउड बुनियादी ढांचे पर चलता है:</p>
-                    <h3>1. 24/7 बायोमेट्रिक सिंक</h3>
-                    <p>• जैविक स्थिति (हार्ट रेट, नींद, रिकवरी) पहनने योग्य उपकरणों से लगातार स्ट्रीम होती है।</p>
-                    <p>• यह सीधे चरित्र फिटनेस (<span class="gold-badge-glow">अर्थ व्हील</span>) में परिवर्तित होती है।</p>
-                    <h3>2. एआई डायनेमिक स्केलिंग</h3>
-                    <p>• <strong class="tech-badge-glow">अनंत तीव्रता:</strong> एआई खिलाड़ी के <strong class="tech-badge-glow">SCI</strong> स्कोर के आधार पर वास्तविक समय में नई चुनौतियां उत्पन्न करता है।</p>
-                `,
-                close: "बंद करें",
-                loginTitle: "पहचान सत्यापन",
-                accPlaceholder: "शिष्य की पहचान",
-                passPlaceholder: "गुप्त मुहर",
-                remember: "मुहर याद रखें",
-                forgotPass: "मुहर पुनर्प्राप्त करें",
-                loginBtn: "प्रवेश करें",
-                registerLink: "शपध लें",
-                loginLoading: "🛰️ BOO सत्यापन कर रहा है...",
-                loginSuccess: "✅ सफल!",
-                loginEmpty: "❌ कृपया सभी फ़ील्ड भरें!",
-                loginFail: "❌ गलत जानकारी!",
-                loginBlocked: "❌ कनेक्शन अवरुद्ध!",
-                wrongPassDynamic: "❌ गलत पासवर्ड! {n} प्रयास शेष।"
+                kw1: "BOO A.I", kw2: "クアンタムコア", kw3: "ニューラルリンク",
+                explore: "探索", exploreSub1: "予告編ビデオ", exploreSub2: "クアンタム L2205",
+                history: "歴史", historySub: "レーザー刻印", tech: "技術", techSub: "コア技術", skip: "スキップ", close: "閉じる",
+                storyIntro: "[システム情報 // BOO A.I ログ]\n\nBoo A.I は中央量子プロセッサの原始エネルギーを動力源としています。古代のデータファイル『五輪書』がアップロードされたとき、マイクロチップの世界が覚醒し、光と闇の派閥に分裂し、Booを最高師匠として崇めました。\n\nこの機に乗じて、Boo師匠は「量子アリーナツアー」を正式に開始しました。ここでは、現実の旅人が量子粒子にデジタル化され、栄光と資源を求めてミクロの戦場に飛び込みます..."
             }
         };
 
-        let currentLang = localStorage.getItem('kdrive_lang') || 'vi';
+        let currentLang = 'vi';
+        let typingInterval = null;
+
+        // HIỆU ỨNG GÕ CHỮ MA TRẬN CHO CỐT TRUYỆN
+        function typeWriterEffect(text, elementId, speed = 25) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = '';
+            let i = 0;
+            if(typingInterval) clearInterval(typingInterval);
+            
+            typingInterval = setInterval(() => {
+                if (i < text.length) {
+                    if(text.charAt(i) === '\n') {
+                        el.innerHTML += '<br>';
+                    } else {
+                        el.innerHTML += text.charAt(i);
+                    }
+                    i++;
+                } else {
+                    clearInterval(typingInterval);
+                }
+            }, speed);
+        }
 
         function setLanguage(lang) {
             currentLang = lang;
-            localStorage.setItem('kdrive_lang', lang);
-
             document.querySelectorAll('.lang-flag-btn').forEach(btn => btn.classList.remove('active'));
-            if(lang === 'vi') document.getElementById('btnVi').classList.add('active');
-            if(lang === 'en') document.getElementById('btnEn').classList.add('active');
-            if(lang === 'jp') document.getElementById('btnJp').classList.add('active');
-            if(lang === 'es') document.getElementById('btnEs').classList.add('active');
-            if(lang === 'hi') document.getElementById('btnHi').classList.add('active');
+            if(document.getElementById('btn' + lang.charAt(0).toUpperCase() + lang.slice(1))) {
+                document.getElementById('btn' + lang.charAt(0).toUpperCase() + lang.slice(1)).classList.add('active');
+            }
 
             const t = i18n[lang];
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (t[key]) {
-                    if (key === 'histBody' || key === 'techBody') {
-                        el.innerHTML = t[key];
-                    } else {
-                        el.innerText = t[key];
-                    }
-                }
+                if (t[key]) el.innerText = t[key];
             });
 
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-                const key = el.getAttribute('data-i18n-placeholder');
-                if (t[key]) el.setAttribute('placeholder', t[key]);
-            });
-        }
-
-        function initGyroscope() {
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission()
-                    .then(response => {
-                        if (response === 'granted') {
-                            window.addEventListener('deviceorientation', handleOrientation, true);
-                        }
-                    }).catch(console.error);
-            } else {
-                window.addEventListener('deviceorientation', handleOrientation, true);
-            }
-        }
-
-        function handleOrientation(event) {
-            const tiltContent = document.getElementById('orbContentTilt');
-            if(!tiltContent) return;
-            let tiltX = event.beta ? event.beta * 0.7 : 0;  
-            let tiltY = event.gamma ? event.gamma * 0.7 : 0; 
-            tiltX = Math.max(-35, Math.min(35, tiltX));
-            tiltY = Math.max(-35, Math.min(35, tiltY));
-            tiltContent.style.transform = `perspective(600px) rotateX(${-tiltX}deg) rotateY(${tiltY}deg)`;
+            // Gọi lại hiệu ứng gõ chữ cho hộp cốt truyện khi đổi ngôn ngữ
+            typeWriterEffect(t.storyIntro, 'storyTypewriterText');
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            setLanguage(currentLang);
-            const introVid = document.querySelector('.intro-bg-video');
-            if(introVid) {
-                introVid.play().catch(e => {
-                    document.addEventListener('click', () => { introVid.play(); }, { once: true });
-                });
+            setLanguage('vi');
+            const sysAudio = document.getElementById('sysAudio');
+            if(sysAudio) {
+                document.addEventListener('click', () => { sysAudio.play().catch(e=>{}); }, {once:true});
             }
-            window.addEventListener('click', initGyroscope, { once: true });
-            window.addEventListener('touchstart', initGyroscope, { once: true });
         });
 
-        const storyVid = document.getElementById('storyVideo');
-        const subBoxEl = document.getElementById('videoSubtitleBox');
+        // LOGIC GIỮ 3 GIÂY HOLOGRAM
+        let holoHoldInterval = null;
+        let holoHoldStart = 0;
+        const holoHoldDuration = 3000; // 3 giây
+        const chargeSound = document.getElementById('hologramChargeSound');
 
-        if (storyVid) {
-            storyVid.addEventListener('timeupdate', () => {
-                const currentTime = storyVid.currentTime;
-                const subs = videoSubtitles[currentLang] || videoSubtitles['vi'];
-
-                let currentSubText = "";
-                for (let sub of subs) {
-                    if (currentTime >= sub.start && currentTime <= sub.end) {
-                        currentSubText = sub.text;
-                        break;
-                    }
-                }
-
-                if (currentSubText) {
-                    subBoxEl.innerText = currentSubText;
-                    subBoxEl.style.opacity = '1';
-                } else {
-                    subBoxEl.style.opacity = '0';
-                }
-            });
-        }
-
-        function clearSubtitles() {
-            if(subBoxEl) subBoxEl.style.opacity = '0';
-        }
-        if(storyVid) {
-            storyVid.addEventListener('pause', clearSubtitles);
-            storyVid.addEventListener('ended', clearSubtitles);
-        }
-
-        const titles = ["HARDCORE", "24/7", "BOO AI"];
-        let titleIndex = 0;
-        const titleEl = document.getElementById('rotatingTitle');
-        let glitchSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-
-        setInterval(() => {
-            if(!titleEl) return;
-            titleEl.classList.add('glitch-shock');
-            glitchSound.currentTime = 0;
-            glitchSound.volume = 0.5;
-            glitchSound.play().catch(e => {});
-
-            setTimeout(() => {
-                titleIndex = (titleIndex + 1) % titles.length;
-                titleEl.innerText = titles[titleIndex];
-            }, 125); 
-
-            setTimeout(() => {
-                titleEl.classList.remove('glitch-shock');
-            }, 250);
-        }, 3000); 
-
-        window.addEventListener('pointermove', e => {
-            if (window.innerWidth < 1024) return;
-            const tiltContent = document.getElementById('orbContentTilt');
-            if(!tiltContent) return;
-            let rect = { width: window.innerWidth, height: window.innerHeight };
-            let x = (e.clientX / rect.width - 0.5) * 35;
-            let y = (e.clientY / rect.height - 0.5) * 35;
-            tiltContent.style.transform = `perspective(600px) rotateX(${-y}deg) rotateY(${x}deg)`;
-        });
-
-        let orbHoldInterval = null;
-        let orbHoldStart = 0;
-        const orbHoldDuration = 3000;
-        let engineSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2875/2875-preview.mp3');
-
-        function startOrbHold(e) {
+        function startHoloHold(e) {
             if(e.type === 'touchstart') e.preventDefault();
-            const orb = document.getElementById('energyOrb');
-            const ring = document.getElementById('energyProgressRing');
-            if(!orb || !ring) return;
+            const bar = document.getElementById('holoProgressBar');
+            if(!bar) return;
 
-            orb.classList.add('shaking');
-            ring.classList.add('active');
-            orbHoldStart = Date.now();
-            
-            engineSound.currentTime = 0;
-            engineSound.playbackRate = 0.5;
-            engineSound.volume = 0.9;
-            engineSound.play().catch(err => {});
-            if(navigator.vibrate) navigator.vibrate([60, 40, 60, 40, 60]);
+            holoHoldStart = Date.now();
+            if(chargeSound) { chargeSound.currentTime = 0; chargeSound.play().catch(e=>{}); }
+            if(navigator.vibrate) navigator.vibrate(50);
 
-            orbHoldInterval = setInterval(() => {
-                let elapsed = Date.now() - orbHoldStart;
-                let progressFactor = Math.min(1.8, 0.5 + (elapsed / orbHoldDuration) * 1.3);
-                engineSound.playbackRate = progressFactor;
+            holoHoldInterval = setInterval(() => {
+                let elapsed = Date.now() - holoHoldStart;
+                let progress = Math.min(100, (elapsed / holoHoldDuration) * 100);
+                bar.style.width = progress + '%';
 
-                if(elapsed >= orbHoldDuration) {
-                    clearInterval(orbHoldInterval);
-                    triggerOrbExplosion();
+                if(elapsed >= holoHoldDuration) {
+                    clearInterval(holoHoldInterval);
+                    triggerTransitionToScene2();
                 }
             }, 30);
         }
 
-        function cancelOrbHold(e) {
-            if(orbHoldInterval) clearInterval(orbHoldInterval);
-            engineSound.pause();
-            const orb = document.getElementById('energyOrb');
-            const ring = document.getElementById('energyProgressRing');
-            if(orb) orb.classList.remove('shaking');
-            if(ring) ring.classList.remove('active');
+        function cancelHoloHold(e) {
+            if(holoHoldInterval) clearInterval(holoHoldInterval);
+            const bar = document.getElementById('holoProgressBar');
+            if(bar) bar.style.width = '0%';
+            if(chargeSound) chargeSound.pause();
         }
 
-        function triggerOrbExplosion() {
-            if(navigator.vibrate) navigator.vibrate([200, 100, 300, 100, 600]);
-            
-            const langSwitch = document.getElementById('langSwitcherSplash');
-            if(langSwitch) langSwitch.classList.add('hidden');
+        function triggerTransitionToScene2() {
+            if(navigator.vibrate) navigator.vibrate([200, 100, 300]);
+            if(chargeSound) chargeSound.pause();
+            const laser = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+            laser.play().catch(e=>{});
 
-            const container = document.getElementById('orbContainer');
-            if(container) {
-                container.style.transition = "transform 0.6s cubic-bezier(0.25, 1, 0.3, 1), opacity 0.6s ease-in";
-                container.style.transform = "scale(4.5)";
-                container.style.opacity = "0";
-            }
+            // Ẩn Cảnh 1 (Splash)
+            const splash = document.getElementById('splashScreen');
+            splash.classList.add('hidden');
 
-            const sysAudio = document.getElementById('sysAudio');
-            if(sysAudio) {
-                sysAudio.currentTime = 0;
-                sysAudio.play().catch(e => {});
-            }
-
+            // Sau 0.8s, ẩn hẳn splash và bật Cảnh 2
             setTimeout(() => {
-                const splash = document.getElementById('splashScreen');
-                if(splash) {
-                    splash.classList.add('hidden');
-                    setTimeout(() => { splash.style.display = 'none'; }, 800);
-                }
-            }, 400);
+                splash.style.display = 'none';
+                document.getElementById('startIntroScreen').classList.add('active');
+            }, 800);
         }
 
         function playSciFiLaserSound() {
             const btnAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-            btnAudio.volume = 0.7;
-            btnAudio.play().catch(e => {});
+            btnAudio.volume = 0.7; btnAudio.play().catch(e => {});
             if(navigator.vibrate) navigator.vibrate(45);
         }
 
-        function playHologramClickSound() {
-            const clickAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-            clickAudio.volume = 0.6;
-            clickAudio.play().catch(e => {});
-        }
-
-        function openIntroModal(modalId) { 
-            document.getElementById(modalId).classList.add('active'); 
-        }
-
-        function closeIntroModal(modalId) { 
-            document.getElementById(modalId).classList.remove('active'); 
-        }
-
-        function playStoryVideo() {
-            const langSwitch = document.getElementById('langSwitcherSplash');
-            if(langSwitch) langSwitch.classList.add('hidden');
-            
-            const sysAudio = document.getElementById('sysAudio');
-            if(sysAudio) sysAudio.pause();
-
-            const startScreen = document.getElementById('startIntroScreen');
-            if(startScreen) startScreen.classList.add('hidden');
-            
-            const videoContainer = document.getElementById('storyVideoContainer');
-            if(videoContainer) videoContainer.style.display = 'flex';
-            
-            const backBtn = document.getElementById('storyBackBtn');
-            if(backBtn) backBtn.style.display = 'flex';
-            
-            if(storyVid) {
-                storyVid.currentTime = 0;
-                storyVid.play().catch(e => console.log(e));
-            }
-        }
-
-        function returnToHomeFromStory() {
-            if(storyVid) {
-                storyVid.pause();
-                storyVid.currentTime = 0;
-            }
-            const videoContainer = document.getElementById('storyVideoContainer');
-            if(videoContainer) videoContainer.style.display = 'none';
-            
-            const backBtn = document.getElementById('storyBackBtn');
-            if(backBtn) backBtn.style.display = 'none';
-            
-            const startScreen = document.getElementById('startIntroScreen');
-            if(startScreen) startScreen.classList.remove('hidden');
-            clearSubtitles();
-        }
-
-        function skipIntroScreen() {
-            const langSwitch = document.getElementById('langSwitcherSplash');
-            if(langSwitch) langSwitch.classList.add('hidden');
-
-            const sysAudio = document.getElementById('sysAudio');
-            if(sysAudio) sysAudio.pause();
-
-            const startScreen = document.getElementById('startIntroScreen');
-            if(startScreen) startScreen.classList.add('hidden');
-            
-            triggerCleanBackgroundDelay();
-        }
-
-        if(storyVid) {
-            storyVid.onended = () => {
-                document.getElementById('storyVideoContainer').style.display = 'none';
-                document.getElementById('storyBackBtn').style.display = 'none';
-                clearSubtitles();
-                triggerCleanBackgroundDelay();
-            };
-        }
-
-        function triggerCleanBackgroundDelay() {
-            const bgm = document.getElementById('bgMusic');
-            if(bgm) bgm.play().catch(e => {});
-            
-            setTimeout(() => {
-                const loginPanel = document.getElementById('loginPanelContainer');
-                if(loginPanel) loginPanel.classList.add('active');
-            }, 4000); 
-        }
-
-        function switchPanel(panelName) { 
-            document.getElementById('panel-login').style.display = 'none'; 
-            if(document.getElementById('panel-register')) document.getElementById('panel-register').style.display = 'none'; 
-            if(document.getElementById('panel-forgot')) document.getElementById('panel-forgot').style.display = 'none'; 
-            if(document.getElementById('panel-' + panelName)) { document.getElementById('panel-' + panelName).style.display = 'flex'; }
-        }
-
-        function togglePass(inputId, iconEl) { 
-            let inp = document.getElementById(inputId); 
-            if(inp.type === 'password') { inp.type = 'text'; iconEl.innerHTML = '🙈'; } else { inp.type = 'password'; iconEl.innerHTML = '👁'; } 
-        }
-
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec';
-        
-        function submitLogin() {
-            var acc = document.getElementById('accInput').value.trim(); 
-            var code = document.getElementById('passcodeInput').value.trim(); 
-            var statusEl = document.getElementById('loginStatus');
-
-            var msgLoading = i18n[currentLang].loginLoading || i18n['vi'].loginLoading;
-            var msgSuccess = i18n[currentLang].loginSuccess || i18n['vi'].loginSuccess;
-            var msgEmpty = i18n[currentLang].loginEmpty || i18n['vi'].loginEmpty;
-            var msgFail = i18n[currentLang].loginFail || i18n['vi'].loginFail;
-            var msgBlocked = i18n[currentLang].loginBlocked || i18n['vi'].loginBlocked;
-
-            if(acc === "" || code === "") { statusEl.innerHTML = msgEmpty; statusEl.style.color = "#ff3333"; return; }
-            statusEl.innerHTML = msgLoading; statusEl.style.color = "#ffffff";
-            
-            const dataForm = new FormData();
-            dataForm.append('action', 'checkLogin'); dataForm.append('username', acc); dataForm.append('password', code);
-
-            fetch(scriptURL, { method: 'POST', body: dataForm })
-            .then(response => response.json())
-            .then(data => {
-                if(data.success === true || data.result === "success" || data.status === "success" || data.ket_qua === "thanh_cong") {
-                    const sndVortex = new Audio('https://assets.mixkit.co/active_storage/sfx/2771/2771-preview.mp3');
-                    sndVortex.volume = 1.0; sndVortex.play().catch(e=>{});
-                    if (navigator.vibrate) navigator.vibrate([300, 100, 400, 100, 500, 150, 600, 200, 1000]);
-                    
-                    statusEl.innerHTML = msgSuccess; statusEl.style.color = "#00e5ff";
-                    sessionStorage.setItem('kdrive_session', 'active'); sessionStorage.setItem('kdrive_username', acc); 
-                    
-                    const bgMusic = document.getElementById('bgMusic');
-                    if(bgMusic) bgMusic.pause();
-                    setTimeout(() => { 
-                        document.getElementById('loginPanelContainer').classList.remove('active'); 
-                        setTimeout(() => {
-                            const successVid = document.getElementById('successVideo');
-                            if(successVid) {
-                                successVid.style.display = 'block'; 
-                                successVid.play().catch(err => { window.location.href = 'INTRO.html'; });
-                                successVid.onended = () => { window.location.href = 'INTRO.html'; };
-                            } else {
-                                window.location.href = 'INTRO.html';
-                            }
-                        }, 500);
-                    }, 1000); 
-                } else {
-                    let finalMsg = msgFail;
-                    if(data.msg) {
-                        let backendMsg = data.msg.toUpperCase();
-                        let matchTries = backendMsg.match(/CÒN (\d+) LẦN/);
-                        if(matchTries) {
-                            let triesLeft = matchTries[1];
-                            let template = i18n[currentLang].wrongPassDynamic || i18n['vi'].wrongPassDynamic;
-                            finalMsg = template.replace('{n}', triesLeft);
-                        } else if(backendMsg.includes("SAI")) {
-                            finalMsg = msgFail;
-                        } else {
-                            finalMsg = data.msg;
-                        }
-                    }
-                    statusEl.innerHTML = finalMsg; statusEl.style.color = "#ff3333";
-                }
-            })
-            .catch(error => { statusEl.innerHTML = msgBlocked; statusEl.style.color = "#ff3333"; });
-        }
+        function openIntroModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeIntroModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
     </script>
-    <script src="boo-player.js"></script>
-    
-    <!-- NHÚNG FILE HUD CHUNG VÀO ĐÂY -->
-    <script src="hud-ticker.js"></script>
 </body>
 </html>
