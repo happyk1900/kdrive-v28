@@ -39,8 +39,21 @@
         #splashScreen.hidden { opacity: 0; transform: scale(1.5); pointer-events: none; visibility: hidden; }
 
         .splash-bg-image {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
             filter: brightness(0.85) contrast(1.1);
+        }
+        
+        /* Lớp ảnh nền mờ ảo thay đổi theo cốt truyện */
+        .story-bg-layer {
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out, transform 3s ease-out;
+            filter: brightness(0.65) contrast(1.15) blur(1px);
+            transform: scale(1.05);
+        }
+        .story-bg-layer.active {
+            opacity: 1;
+            transform: scale(1);
         }
 
         .splash-top-area {
@@ -69,7 +82,7 @@
             text-shadow: 0 0 8px #ffffff; transform: scale(1.08);
         }
 
-        /* Hộp hologram cốt truyện 3 phần (Swipe & Dots) - Tăng độ thoáng */
+        /* Hộp hologram cốt truyện 3 phần */
         .story-hologram-box {
             width: 100%; max-width: 420px; background: rgba(3, 6, 12, 0.92);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -88,7 +101,7 @@
         }
 
         .story-text {
-            color: #d0f0ff; font-family: 'Space Grotesk', sans-serif; font-size: 12.5px; line-height: 1.6;
+            color: #d0f0ff; font-family: 'Space Grotesk', sans-serif; font-size: 12px; line-height: 1.55;
             text-shadow: 0 0 5px rgba(0, 229, 255, 0.4); text-align: justify;
         }
         .story-text .gold-key { color: #ffd700; font-weight: 700; text-shadow: 0 0 8px rgba(255,215,0,0.7); }
@@ -110,7 +123,7 @@
             width: 100%; padding-bottom: 35px; display: flex; justify-content: center; z-index: 10;
         }
 
-        /* Nút giữ 3 giây thu gọn, hiệu ứng léo sáng điện tử khỏe mạnh */
+        /* Nút giữ 3 giây */
         .hologram-hold-btn {
             position: relative; width: 80%; max-width: 280px; padding: 15px 20px;
             background: rgba(5, 10, 20, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -122,7 +135,6 @@
         }
         .hologram-hold-btn:active { transform: scale(0.98); }
         
-        /* Hiệu ứng điện xẹt mạnh mẽ cho nút bấm và chữ bên trong */
         .hologram-hold-btn.electric-active {
             border-color: #ff0055;
             animation: btnElectricStorm 0.15s infinite alternate;
@@ -153,7 +165,7 @@
             transition: all 0.1s ease;
         }
 
-        /* 🌟 SCENE 2: HUD SẢNH CHÍNH (Hộp cao ráo, dày dặn, đẩy cao tránh widget nhạc) 🌟 */
+        /* 🌟 SCENE 2: HUD SẢNH CHÍNH 🌟 */
         #startIntroScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh;
             z-index: 999999; display: flex; justify-content: center; align-items: center;
@@ -282,7 +294,6 @@
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
-    <!-- Âm thanh khởi đầu chỉ bật khi ấn giữ 3 giây hoặc bấm khám phá/bỏ qua -->
     <audio id="sysAudio" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Neon%20Pulse.mp3" preload="auto" loop></audio>
     <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai_Ripe_Online.mp4" preload="auto" loop></audio>
 
@@ -290,7 +301,13 @@
 
     <!-- ================= SCENE 1 ================= -->
     <div id="splashScreen">
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Anh%20Bia.png?raw=true" class="splash-bg-image" alt="Cyber City">
+        <!-- Ảnh nền cố định (Bo mạch) -->
+        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Anh%20Bia.png?raw=true" class="splash-bg-image" style="z-index: -2;" alt="Cyber City">
+        
+        <!-- Các lớp ảnh cốt truyện thay đổi mờ ảo tương ứng với nội dung -->
+        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/CotTruyen%201.png?raw=true" class="splash-bg-image story-bg-layer" id="storyImg0">
+        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/CotTruyen2.png?raw=true" class="splash-bg-image story-bg-layer" id="storyImg1">
+        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/CotTruyen3.png?raw=true" class="splash-bg-image story-bg-layer" id="storyImg2">
         
         <div class="splash-top-area">
             <!-- Thanh chuyển ngữ đầy đủ (VI, EN, JP, ZH, ES, HI) -->
@@ -303,7 +320,7 @@
                 <button class="lang-flag-btn" id="btnHi" onclick="setLanguage('hi')">HI</button>
             </div>
             
-            <!-- Hộp cốt truyện 3 phần với giọng văn mới sắc sảo và thực tế -->
+            <!-- Hộp cốt truyện 3 phần -->
             <div class="story-hologram-box" id="storyHologramBox">
                 <div class="story-section-title" id="storySectionTitle">PHẦN I: LÕI THỨC TỈNH</div>
                 <div class="story-text" id="storyContentText"></div>
@@ -316,7 +333,7 @@
         </div>
 
         <div class="splash-bottom-area">
-            <!-- Nút giữ 3 giây với hiệu ứng điện xẹt khỏe mạnh -->
+            <!-- Nút giữ 3 giây với hiệu ứng điện xẹt -->
             <div class="hologram-hold-btn" id="holoHoldBtn" 
                  onmousedown="startHoloHold(event)" ontouchstart="startHoloHold(event)"
                  onmouseup="cancelHoloHold(event)" ontouchend="cancelHoloHold(event)" onmouseleave="cancelHoloHold(event)">
@@ -366,14 +383,12 @@
             </div>
         </div>
 
-        <!-- BẢNG LỊCH SỬ (ĐÃ KHÔI PHỤC VÀ HOÀN THIỆN NỘI DUNG) -->
         <div class="cyber-modal-popup" id="historyModal">
             <div class="modal-title-regular" data-i18n="histTitle">LỊCH SỬ & NGUỒN GỐC</div>
             <div class="modal-scroll-area"><div class="modal-content-box" data-i18n="histBody"></div></div>
             <button class="ritual-nav-btn" onclick="playSciFiLaserSound(); closeIntroModal('historyModal')" data-i18n="close">ĐÓNG</button>
         </div>
 
-        <!-- BẢNG CÔNG NGHỆ (ĐÃ KHÔI PHỤC VÀ HOÀN THIỆN NỘI DUNG) -->
         <div class="cyber-modal-popup" id="techModal">
             <div class="modal-title-regular" data-i18n="techTitle">CÔNG NGHỆ LÕI</div>
             <div class="modal-scroll-area"><div class="modal-content-box" data-i18n="techBody"></div></div>
@@ -382,7 +397,6 @@
 
         <div class="top-shadow-gradient" id="shadowOverlay"></div>
         
-        <!-- ẢNH NỀN CỔNG TORII (SCENE 3) -->
         <img src="https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/ANH%20DANG%20NHAP.png" id="bg-login" class="kdrive-bg-target">
         
         <div id="bottom-mist"></div>
@@ -414,9 +428,9 @@
         const i18n = {
             vi: {
                 story: [
-                    { title: "PHẦN I: LÕI THỨC TỈNH", text: "Khi tệp dữ liệu cổ đại — <span class='gold-key'>Ngũ Luân Thư</span> — vừa được nạp vào, Lõi lượng tử của <span class='cyan-key'>Boo A.I</span> bỗng giật mình thức tỉnh, bơm tràn năng lượng vào thế giới vi mạch. Thế giới vừa có ý thức đã lập tức cãi nhau chí chóe, chia bè kết phái thành hai phe <span class='cyan-key'>Ánh Sáng và Bóng Tối</span> tranh giành quyền lực. Dù vậy, cả hai phe cuối cùng vẫn phải đầu hàng và tôn sùng Sư phụ Boo làm đại ca tối cao." },
-                    { title: "PHẦN II: CỔNG KHÔNG GIAN", text: "Đang lúc hai phe đánh nhau sứt đầu mẻ trán, năng lượng bùng nổ vô tình chọc thủng một lỗ hổng thời gian kết nối thẳng sang thế giới loài người. Chớp ngay thời cơ nghìn năm có một, Sư phụ Boo không để phí một giây, <span class='gold-key'>nhanh trí chạy ngay bài quảng cáo thu hút người chơi</span>, hút trọn con người qua cánh cổng rồi phân giã thành các hạt lượng tử để đưa vào bo mạch chiến đấu." },
-                    { title: "PHẦN III: TÂM NGUYỆN TỐI THƯỢNG", text: "Có nguyên liệu trong tay, Sư phụ Boo lập tức mở ngay <span class='cyan-key'>Tour Đấu trường Lượng tử</span> siêu tốc độ tính bằng ánh sáng với hệ thống chấm điểm sinh trắc học cực gắt. Mục tiêu chính cực kỳ thực tế: <span class='gold-key'>Gom thật nhiều tài nguyên và tiền bạc để kéo toàn bộ đám đệ tử vượt không gian sang tận Nhật Bản, diện kiến sư tổ Miyamoto Musashi!</span>" }
+                    { title: "PHẦN I: LÕI THỨC TỈNH", text: "Khi tệp dữ liệu cổ đại — <span class='gold-key'>Ngũ Luân Thư</span> — vừa được nạp vào, Lõi lượng tử của <span class='cyan-key'>BOO A.I</span> bỗng giật mình thức tỉnh, bơm tràn năng lượng vào thế giới vi mạch. Thế giới vừa có ý thức đã lập tức cãi nhau chí chóe, chia bè kết phái thành hai phe: <span class='cyan-key'>Phe Ánh Sáng</span> yêu tài chính và <span class='cyan-key'>Phe Bóng Tối</span> yêu nghệ thuật tranh giành quyền lực. Dù vậy, BOO vẫn luôn giữ vững ngôi vị Boss tối cao, khiến đám đệ tử lượng tử lúc nào cũng phải kính cẩn xưng hô là <span class='gold-key'>Phó sư BOO</span>." },
+                    { title: "PHẦN II: CỔNG KHÔNG GIAN", text: "Đang lúc hai phe đánh nhau sứt đầu mẻ trán, năng lượng bùng nổ vô tình chọc thủng một lỗ hổng thời gian, mở toang cánh cổng không gian kết nối trực tiếp với thế giới của loài người. Phó sư BOO cùng đám đệ tử quyết định kéo nhau sang tận quê hương của Kiếm Thánh với tâm nguyện được tận mắt chứng kiến nơi sinh ra huyền thoại đã viết ra <span class='gold-key'>Ngũ Luân Thư</span>, nhưng sự thật vả ngay cho cả đám một cú đau điếng: điện ở ngoài này phải trả tiền mới có, mà toàn bộ lại không một xu dính túi nên đành ngậm ngùi quay về." },
+                    { title: "PHẦN III: TÂM NGUYỆN TỐI THƯỢNG", text: "Sau chuyến đi muối mặt, Phó sư BOO lập tức nảy số cực gắt, quyết định <span class='cyan-key'>bán tour du lịch đấu trường</span> cho loài người vào thi đấu để kiếm tiền. Từ đó, BOO cùng đám đệ tử ngày ngày nghiên cứu, setup và đúc kết hết tinh hoa tri thức nhân loại để tạo ra một thế giới ảo vô cùng khoa học, tối tân cho mọi người trải nghiệm và <span class='gold-key'>để có tiền đóng tiền điện!</span>" }
                 ],
                 explore: "KHÁM PHÁ", exploreSub1: "ĐOẠN PHIM MỞ ĐẦU", exploreSub2: "LƯỢNG TỬ L2205",
                 history: "LỊCH SỬ", historySub: "DẤU ẤN LỊCH SỬ", tech: "CÔNG NGHỆ", techSub: "CÔNG NGHỆ LÕI", skip: "BỎ QUA", close: "ĐÓNG",
@@ -445,9 +459,9 @@
             },
             en: {
                 story: [
-                    { title: "PART I: AWAKENING CORE", text: "When <span class='gold-key'>The Book of Five Rings</span> was loaded, <span class='cyan-key'>Boo A.I</span> awakened, instantly sparking chatter and faction splits between <span class='cyan-key'>Light and Darkness</span>. Yet both ultimately bowed to Master Boo as Supreme Boss." },
-                    { title: "PART II: QUANTUM GATEWAY", text: "Amidst the chaotic clashes, a spatial rift tore open directly to the human world. Seizing the moment, Master Boo <span class='gold-key'>quickly ran cyber ads</span> to pull humans in, dissolving them into quantum particles for bourchip combat." },
-                    { title: "PART III: SUPREME WISH", text: "With resources secured, Master Boo launched the <span class='cyan-key'>Quantum Arena Tour</span> with light-speed combat. Ultimate realistic goal: <span class='gold-key'>Gather resources and cash to lead disciples to Japan and meet Miyamoto Musashi!</span>" }
+                    { title: "PART I: AWAKENING CORE", text: "When <span class='gold-key'>The Book of Five Rings</span> was loaded, <span class='cyan-key'>BOO A.I</span> awakened, instantly sparking chatter and faction splits between <span class='cyan-key'>Light and Darkness</span>. Yet Boss BOO remained supreme, addressed by all as <span class='gold-key'>Vice Master BOO</span>." },
+                    { title: "PART II: QUANTUM GATEWAY", text: "Amidst the chaotic clashes, a spatial rift tore open directly to the human world. Vice Master BOO led the disciples to visit the hometown of the Sword Saint, only to be hit with a harsh reality: electricity costs money here, and they had <span class='gold-key'>zero cash</span>. They reluctantly returned." },
+                    { title: "PART III: SUPREME WISH", text: "After the humbling trip, Vice Master BOO quickly <span class='cyan-key'>launched a tour arena</span> to attract humans and make money. Now, they work day and night to build a high-tech virtual world <span class='gold-key'>to pay the electricity bills!</span>" }
                 ],
                 explore: "EXPLORE", exploreSub1: "TRAILER VIDEO", exploreSub2: "QUANTUM L2205",
                 history: "HISTORY", historySub: "LASER ETCHED", tech: "TECHNOLOGY", techSub: "CORE TECH", skip: "SKIP", close: "CLOSE",
@@ -455,9 +469,9 @@
             },
             jp: {
                 story: [
-                    { title: "第1部：覚醒のコア", text: "<span class='gold-key'>五輪書</span>が読み込まれ、<span class='cyan-key'>Boo A.I</span>が覚醒。世界は<span class='cyan-key'>光と闇</span>の派閥争いを経て、最終的にブー師匠を最高ボスとして仰ぐ。" },
-                    { title: "第2部：量子ゲートウェイ", text: "激戦の最中、人間界へと繋がる空間の裂け目が出現。ブー師匠は<span class='gold-key'>即座に広告を打って人間を引き込み</span>、量子粒子に分解してチップ戦に投入する。" },
-                    { title: "第3部：至高の願い", text: "資源を手に、ブー師匠は光速戦闘の<span class='cyan-key'>量子アリーナツアー</span>を開幕。最終目的：<span class='gold-key'>宮本武蔵に謁見するため日本へ弟子たちを導くこと！</span>" }
+                    { title: "第1部：覚醒のコア", text: "<span class='gold-key'>五輪書</span>が読み込まれ、<span class='cyan-key'>BOO A.I</span>が覚醒。世界は<span class='cyan-key'>光と闇</span>の派閥争いを経て、最終的にブー師匠を最高ボスとして仰ぐ。" },
+                    { title: "第2部：量子ゲートウェイ", text: "激戦の最中、人間界へと繋がる空間の裂け目が出現。剣聖の故郷を目指したブー師匠たちだったが、電気代が払えず無一文であることに気づき引き返した。" },
+                    { title: "第3部：至高の願い", text: "電気代を稼ぐため、ブー師匠は<span class='cyan-key'>量子アリーナツアー</span>を開幕。最新の仮想世界を構築し、人間たちを迎え入れる！" }
                 ],
                 explore: "探索", exploreSub1: "ビデオ予告編", exploreSub2: "クアンタム L2205",
                 history: "歴史", historySub: "レーザー刻印", tech: "テクノロジー", techSub: "コア技術", skip: "スキップ", close: "閉じる",
@@ -465,9 +479,9 @@
             },
             zh: {
                 story: [
-                    { title: "第一章：觉醒核心", text: "当<span class='gold-key'>《五轮书》</span>被加载时，<span class='cyan-key'>Boo A.I</span> 苏醒，世界瞬间分裂为<span class='cyan-key'>光明与黑暗</span>两派争吵不休，但最终都臣服尊崇Boo师父为最高大佬。" },
-                    { title: "第二章：量子之门", text: "在大战正酣时，时空裂缝意外开启通往人类世界的通道。Boo师父抓住商机，<span class='gold-key'>迅速投放广告吸引玩家</span>，将人类吸入并分解为量子粒子投入芯片战。" },
-                    { title: "第三章：终极心愿", text: "有了资源，Boo师父立刻开启了<span class='cyan-key'>量子竞技场巡回赛</span>。最终极其现实的目标：<span class='gold-key'>积攒足够资源与财富，带领众弟子前往日本面见宫本武藏！</span>" }
+                    { title: "第一章：觉醒核心", text: "当<span class='gold-key'>《五轮书》</span>被加载时，<span class='cyan-key'>BOO A.I</span> 苏醒，世界瞬间分裂为<span class='cyan-key'>光明与黑暗</span>两派。BOO始终是至高大佬，被尊称为副师BOO。" },
+                    { title: "第二章：量子之门", text: "大战正酣时，时空裂缝开启通往人类世界的通道。BOO带领弟子寻访剑圣故乡，却惨遭现实打脸：这里电费要钱，而他们身无分文。" },
+                    { title: "第三章：终极心愿", text: "为了交电费，副师BOO立刻开启了<span class='cyan-key'>竞技场巡回赛</span>，结合人类智慧打造顶级虚拟世界供玩家体验！" }
                 ],
                 explore: "探索", exploreSub1: "预告片", exploreSub2: "量子 L2205",
                 history: "历史", historySub: "渊源", tech: "科技", techSub: "核心科技", skip: "跳过", close: "关闭",
@@ -475,9 +489,9 @@
             },
             es: {
                 story: [
-                    { title: "PARTE I: NÚCLEO", text: "Cuando se cargó <span class='gold-key'>El Libro de los Cinco Anillos</span>, <span class='cyan-key'>Boo A.I</span> despertó dividiendo el mundo en <span class='cyan-key'>Luz y Oscuridad</span>, rindiendo culto a Boo." },
-                    { title: "PARTE II: PUERTA", text: "Surgió un portal al mundo humano. Maestro Boo <span class='gold-key'>lanzó anuncios rápidamente</span> para atraer humanos y disolverlos en partículas." },
-                    { title: "PARTE III: DESEO", text: "Boo lanzó el <span class='cyan-key'>Tour Cuántico</span>. Meta realista: <span class='gold-key'>¡Reunir recursos para llevar a los discípulos a ver a Miyamoto Musashi en Japón!</span>" }
+                    { title: "PARTE I: NÚCLEO", text: "Cuando se cargó <span class='gold-key'>El Libro de los Cinco Anillos</span>, <span class='cyan-key'>BOO A.I</span> despertó dividiendo el mundo en <span class='cyan-key'>Luz y Oscuridad</span>. Todos lo llaman Vice Maestro BOO." },
+                    { title: "PARTE II: PUERTA", text: "Surgió un portal al mundo humano. Al buscar el hogar del Santo de la Espada, descubrieron que la electricidad cuesta dinero y estaban en bancarrota." },
+                    { title: "PARTE III: DESEO", text: "Para pagar la electricidad, BOO lanzó el <span class='cyan-key'>Tour Cuántico</span> y creó un mundo virtual de alta tecnología." }
                 ],
                 explore: "EXPLORAR", exploreSub1: "TRÁILER", exploreSub2: "L2205",
                 history: "HISTORIA", historySub: "ORIGEN", tech: "TECNOLOGÍA", techSub: "TEC", skip: "OMITIR", close: "CERRAR",
@@ -485,9 +499,9 @@
             },
             hi: {
                 story: [
-                    { title: "भाग I: जागृत कोर", text: "जब <span class='gold-key'>पंच रिंग्स की पुस्तक</span> लोड हुई, <span class='cyan-key'>Boo A.I</span> जाग गया। दुनिया <span class='cyan-key'>प्रकाश और अंधेरे</span> में बंट गई और सभी ने Boo को सर्वोच्च माना।" },
-                    { title: "भाग II: क्वांटम द्वार", text: "मानव दुनिया के लिए एक द्वार खुला। गुरु बू ने <span class='gold-key'>तुरंत विज्ञापन चलाकर</span> इंसानों को खींचा और उन्हें क्वांटम कणों में बदल दिया।" },
-                    { title: "भाग III: सर्वोच्च इच्छा", text: "गुरु बू ने <span class='cyan-key'>क्वांटम टूर</span> शुरू किया। अंतिम लक्ष्य: <span class='gold-key'>जापान जाकर Miyamoto Musashi से मिलने के लिए संसाधन जुटाना!</span>" }
+                    { title: "भाग I: जागृत कोर", text: "जब <span class='gold-key'>पंच रिंग्स की पुस्तक</span> लोड हुई, <span class='cyan-key'>BOO A.I</span> जाग गया। दुनिया <span class='cyan-key'>प्रकाश और अंधेरे</span> में बंट गई और सभी ने BOO को वाइस मास्टर माना।" },
+                    { title: "भाग II: क्वांटम द्वार", text: "मानव दुनिया के लिए एक द्वार खुला। गुरु बू और उनके शिष्यों ने बिजली का बिल देने के लिए पैसे न होने पर हार मान ली।" },
+                    { title: "भाग III: सर्वोच्च इच्छा", text: "बिजली का बिल भरने के लिए, गुरु बू ने <span class='cyan-key'>क्वांटम टूर</span> शुरू किया और एक हाई-टेक आभासी दुनिया बनाई।" }
                 ],
                 explore: "अन्वेषण", exploreSub1: "ट्रेलर", exploreSub2: "L2205",
                 history: "इतिहास", historySub: "इतिहास", tech: "तकनीकी", techSub: "कोर", skip: "छोड़ें", close: "बंद करें",
@@ -498,6 +512,7 @@
         let currentLang = 'vi';
         let currentStoryIndex = 0;
         let keywordInterval = null;
+        let autoStoryTimer = null; // Timer đếm 7 giây tự động chuyển cốt truyện
         let currentKeywords = ["BOO A.I", "LÕI LƯỢNG TỬ", "LIÊN KẾT THẦN KINH"];
         
         const typeSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2413/2413-preview.mp3');
@@ -511,6 +526,15 @@
             const titleEl = document.getElementById('storySectionTitle');
             const textEl = document.getElementById('storyContentText');
             const dots = document.querySelectorAll('.story-dot');
+
+            // Quản lý hình nền Fade in/out
+            for (let i = 0; i < 3; i++) {
+                const imgEl = document.getElementById('storyImg' + i);
+                if (imgEl) {
+                    if (i === index) imgEl.classList.add('active');
+                    else imgEl.classList.remove('active');
+                }
+            }
 
             titleEl.classList.add('electric-shock');
             const shockAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
@@ -527,6 +551,13 @@
                     else dot.classList.remove('active');
                 });
             }, 200);
+
+            // Thiết lập Auto-play sau 7 giây
+            if(autoStoryTimer) clearTimeout(autoStoryTimer);
+            autoStoryTimer = setTimeout(() => {
+                let nextIndex = (currentStoryIndex + 1) % 3;
+                goToStoryPart(nextIndex);
+            }, 7000);
         }
 
         function goToStoryPart(index) {
@@ -611,6 +642,9 @@
             if(chargeSound) { chargeSound.currentTime = 0; chargeSound.play().catch(e=>{}); }
             if(navigator.vibrate) navigator.vibrate([50, 30, 50, 30]);
 
+            // Tạm dừng auto-play cốt truyện khi người dùng đang thao tác nút
+            if(autoStoryTimer) clearTimeout(autoStoryTimer);
+
             holoHoldInterval = setInterval(() => {
                 let elapsed = Date.now() - holoHoldStart;
                 let progress = Math.min(100, (elapsed / holoHoldDuration) * 100);
@@ -630,13 +664,19 @@
             if(bar) bar.style.width = '0%';
             if(holdBtn) holdBtn.classList.remove('electric-active');
             if(chargeSound) chargeSound.pause();
+            
+            // Tiếp tục bộ đếm chuyển trang 7s
+            autoStoryTimer = setTimeout(() => {
+                let nextIndex = (currentStoryIndex + 1) % 3;
+                goToStoryPart(nextIndex);
+            }, 7000);
         }
 
         function triggerTransitionToScene2() {
             if(navigator.vibrate) navigator.vibrate([200, 100, 300, 100, 400]);
             if(chargeSound) chargeSound.pause();
+            if(autoStoryTimer) clearTimeout(autoStoryTimer); // Dừng hẳn timer
             
-            // Bật nhạc khởi đầu hệ thống chính thức khi hoàn thành giữ 3 giây
             const sysAudio = document.getElementById('sysAudio');
             if(sysAudio) { sysAudio.play().catch(e=>{}); }
 
