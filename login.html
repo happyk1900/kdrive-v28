@@ -30,6 +30,7 @@
             box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05);
         }
         
+        /* 🌟 SCENE 1: SPLASH SCREEN 🌟 */
         #splashScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #030508; z-index: 999999999; display: flex; flex-direction: column; justify-content: space-between; align-items: center;
@@ -111,6 +112,7 @@
             transition: opacity 0.2s ease-in-out;
         }
 
+        /* 🌟 SCENE 2: HUD SẢNH CHÍNH 🌟 */
         #startIntroScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 999999; display: flex; flex-direction: column; justify-content: flex-end;
@@ -197,6 +199,7 @@
         }
         .ritual-nav-btn:hover { background: rgba(0,229,255,0.35); box-shadow: 0 0 18px rgba(0,229,255,0.6); color: #fff; }
 
+        /* 🌟 ẢNH NỀN CỔNG TORII (SCENE 3) 🌟 */
         .kdrive-bg-target { 
             width: 100%; height: 100%; object-fit: cover; object-position: center; position: absolute; top: 0; left: 0; 
             z-index: 1; opacity: 0; visibility: hidden; transition: opacity 0.8s ease-in-out;
@@ -273,7 +276,6 @@
 
     <div class="kdrive-image-wrapper" id="mainWrapper">
         <div id="startIntroScreen">
-            <!-- Video mới khi giữ đủ 3 giây -->
             <video src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/video%20khoi%20dau.mp4" class="intro-bg-video" autoplay muted loop playsinline></video>
             <div class="start-intro-overlay"></div>
             
@@ -321,7 +323,7 @@
 
         <div class="top-shadow-gradient" id="shadowOverlay"></div>
         
-        <!-- Ảnh nền cũ hiển thị sau khi xem xong khám phá hoặc bỏ qua -->
+        <!-- ẢNH NỀN CỔNG TORII (SCENE 3) -->
         <img src="https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/ANH%20DANG%20NHAP.png" id="bg-login" class="kdrive-bg-target">
         
         <div id="bottom-mist"></div>
@@ -464,7 +466,7 @@
         let holoHoldInterval = null;
         let holoHoldStart = 0;
         const holoHoldDuration = 3000;
-        const chargeSound = document.getElementById('hologramChargeSound');
+        const chargeSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2875/2875-preview.mp3');
 
         function startHoloHold(e) {
             if(e.type === 'touchstart') e.preventDefault();
@@ -494,6 +496,7 @@
             if(chargeSound) chargeSound.pause();
         }
 
+        // CHUYỂN TỪ CẢNH 1 SANG CẢNH 2 (HUD video động mới)
         function triggerTransitionToScene2() {
             if(navigator.vibrate) navigator.vibrate([200, 100, 300]);
             if(chargeSound) chargeSound.pause();
@@ -505,7 +508,8 @@
 
             setTimeout(() => {
                 splash.style.display = 'none';
-                document.getElementById('startIntroScreen').classList.add('active');
+                const introScreen = document.getElementById('startIntroScreen');
+                if(introScreen) introScreen.classList.add('active'); // Kích hoạt hiển thị và tương tác nút bấm Cảnh 2
             }, 800);
         }
 
@@ -529,7 +533,8 @@
         function playStoryVideo() {
             stopSysAudio();
             document.getElementById('langSwitcherSplash').classList.add('hidden');
-            document.getElementById('startIntroScreen').classList.add('hidden');
+            document.getElementById('startIntroScreen').classList.remove('active');
+            document.getElementById('startIntroScreen').style.display = 'none';
             document.getElementById('storyVideoContainer').style.display = 'flex';
             document.getElementById('storyBackBtn').style.display = 'flex';
             if(storyVid) { storyVid.currentTime = 0; storyVid.play().catch(e => {}); }
@@ -540,14 +545,16 @@
             document.getElementById('storyVideoContainer').style.display = 'none';
             document.getElementById('storyBackBtn').style.display = 'none';
             if(subBoxEl) subBoxEl.style.opacity = '0';
-            triggerCleanBackgroundDelay();
+            document.getElementById('startIntroScreen').style.display = 'flex';
+            document.getElementById('startIntroScreen').classList.add('active');
         }
 
         function skipIntroScreen() {
             stopSysAudio();
             document.getElementById('langSwitcherSplash').classList.add('hidden');
-            document.getElementById('startIntroScreen').classList.add('hidden');
-            triggerCleanBackgroundDelay();
+            document.getElementById('startIntroScreen').classList.remove('active');
+            document.getElementById('startIntroScreen').style.display = 'none';
+            triggerToriiAndLoginTransition();
         }
 
         if(storyVid) {
@@ -555,21 +562,22 @@
                 document.getElementById('storyVideoContainer').style.display = 'none';
                 document.getElementById('storyBackBtn').style.display = 'none';
                 if(subBoxEl) subBoxEl.style.opacity = '0';
-                triggerCleanBackgroundDelay();
+                triggerToriiAndLoginTransition();
             };
         }
 
-        function triggerCleanBackgroundDelay() {
+        // XỬ LÝ CHUYỂN TỪ TRANG KHÁM PHÁ / BỎ QUA -> HIỆN ẢNH CỔNG TORII VÀ HỘP ĐĂNG NHẬP
+        function triggerToriiAndLoginTransition() {
             const bgTarget = document.getElementById('bg-login');
-            if(bgTarget) bgTarget.classList.add('active');
+            if(bgTarget) bgTarget.classList.add('active'); // Hiện ảnh nền 3 nhân vật trước cổng Torii
 
             const bgm = document.getElementById('bgMusic');
             if(bgm) bgm.play().catch(e => {});
             
             setTimeout(() => {
                 const loginPanel = document.getElementById('loginPanelContainer');
-                if(loginPanel) loginPanel.classList.add('active');
-            }, 1000); 
+                if(loginPanel) loginPanel.classList.add('active'); // Hiện hộp đăng nhập xác thực
+            }, 800); 
         }
 
         function switchPanel(panelName) { 
