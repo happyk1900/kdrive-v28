@@ -30,9 +30,10 @@
             pointer-events: none;
         }
 
+        /* Nút Truy Cập Lõi Lượng Tử - Nâng cấp chạm nhạy bén */
         .core-access-btn {
             position: absolute; top: 58%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 3; pointer-events: none; 
+            z-index: 3; pointer-events: auto; cursor: pointer;
             color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 900;
             letter-spacing: 2.5px; text-transform: uppercase; white-space: nowrap;
             padding: 8px 18px; border-radius: 4px;
@@ -215,7 +216,7 @@
             filter: blur(0.5px);
         }
 
-        /* ================= MODAL HIỂN THỊ NỘI DUNG (CÓ HÌNH NỀN) ================= */
+        /* ================= MODAL HIỂN THỊ NỘI DUNG ================= */
         .info-modal-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh;
             background: rgba(0,0,0,0.88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -310,10 +311,10 @@
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
-    <!-- HỆ THỐNG ÂM THANH: Đã cấp quyền crossorigin="anonymous" để vượt qua lỗi CORS của boo-player -->
-    <audio id="preAudio" crossorigin="anonymous" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Hello!.mp3" preload="auto" loop></audio>
-    <audio id="bgMusic" crossorigin="anonymous" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Hello,%20I%20am%20Master%20Boo..mp3" preload="auto" loop></audio>
-    <audio id="toriiAudio" crossorigin="anonymous" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Path%20of%20the%20Ninja.mp3" preload="auto" loop></audio>
+    <!-- HỆ THỐNG ÂM THANH ĐÃ BỎ RÀO CẢN CORS ĐỂ BOO PLAYER ĐỌC MƯỢT MÀ -->
+    <audio id="preAudio" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Hello!.mp3" preload="auto" loop></audio>
+    <audio id="bgMusic" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Hello,%20I%20am%20Master%20Boo..mp3" preload="auto" loop></audio>
+    <audio id="toriiAudio" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Path%20of%20the%20Ninja.mp3" preload="auto" loop></audio>
     
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20DANG%20NHAP.mp4" playsinline></video>
 
@@ -323,7 +324,7 @@
             <source src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/video%20khoi%20dau.mp4" type="video/mp4">
         </video>
         <div class="pre-splash-overlay"></div>
-        <div class="core-access-btn">TRUY CẬP LÕI LƯỢNG TỬ</div>
+        <div class="core-access-btn" onclick="enterPreSplash()">TRUY CẬP LÕI LƯỢNG TỬ</div>
     </div>
 
     <!-- ================= SCENE 1: QUẦY VÉ ================= -->
@@ -405,25 +406,39 @@
         };
 
         function playHologramClick() {
-            const snd = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-            snd.volume = 0.5; snd.play().catch(e=>{});
+            try {
+                const snd = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+                snd.volume = 0.5; 
+                let p = snd.play();
+                if(p !== undefined) p.catch(e=>{});
+            } catch(err) {}
         }
 
         function enterPreSplash() {
-            const preScreen = document.getElementById('preSplashScreen');
-            preScreen.style.pointerEvents = 'none'; 
-            
-            playHologramClick();
-            
-            const bgm = document.getElementById('bgMusic');
-            if(bgm) bgm.play().catch(e => console.log("Trình duyệt chặn Audio:", e));
-            
-            preScreen.style.transform = "scale(1.5)";
-            preScreen.style.opacity = "0";
-            
-            setTimeout(() => {
-                preScreen.style.display = "none";
-            }, 800);
+            try {
+                const preScreen = document.getElementById('preSplashScreen');
+                if(preScreen) preScreen.style.pointerEvents = 'none'; 
+                
+                playHologramClick();
+                
+                const bgm = document.getElementById('bgMusic');
+                if(bgm) {
+                    let playPromise = bgm.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(e => console.log("Trình duyệt chặn Audio:", e));
+                    }
+                }
+                
+                if(preScreen) {
+                    preScreen.style.transform = "scale(1.5)";
+                    preScreen.style.opacity = "0";
+                    setTimeout(() => { preScreen.style.display = "none"; }, 800);
+                }
+            } catch (error) {
+                // Ép xóa màn hình khởi động nếu có lỗi kẹt
+                const preScreen = document.getElementById('preSplashScreen');
+                if(preScreen) preScreen.style.display = "none";
+            }
         }
 
         function toggleGlobeMenu() {
@@ -569,7 +584,7 @@
                     nhapmon: { title: "생체 인식 동기화", slides: ["선수(도중) 신원을 인증하고 생체 인식을 연결합니다."] },
                     tongquan: { title: "양자 영역", slides: ["현실의 육체가 양자 파워로 디지털화되는 전투 아레나입니다."] },
                     luatchoi: { title: "훈련 프로토콜", slides: ["6면 큐브를 통해 현실 체력과 멘탈을 단련하세요."] },
-                    santhuong: { title: "무술 대회", slides: ["9년에 개최되는 그랜드 총회. 총 수익의 30%가 상금으로 환원됩니다."] }
+                    santhuong: { title: "무술 대회", slides: ["9년에 개최되는 그랜드 총회. 총 수익의 30%가 상금 환원됩니다."] }
                 }
             },
             cn: {
@@ -631,7 +646,6 @@
             if (!isReload) playHologramClick();
             activeModalKey = key;
             
-            // TRỘN ẢNH NỀN VÀO HỘP THÔNG BÁO TƯƠNG ỨNG
             document.querySelector('.info-modal-content').style.backgroundImage = modalBackgrounds[key] || 'none';
 
             const t = langData[currentLang] || langData['vi'];
@@ -707,7 +721,7 @@
 
             holdBtn.classList.add('electric-active');
             holoHoldStart = Date.now();
-            if(chargeSound) { chargeSound.currentTime = 0; chargeSound.play().catch(e=>{}); }
+            if(chargeSound) { chargeSound.currentTime = 0; let p = chargeSound.play(); if(p!==undefined)p.catch(e=>{}); }
             if(navigator.vibrate) navigator.vibrate([50, 30, 50, 30]);
 
             holoHoldInterval = setInterval(() => {
@@ -731,30 +745,36 @@
         }
 
         function triggerTransitionToTorii() {
-            if(navigator.vibrate) navigator.vibrate([200, 100, 300, 100, 400]);
-            if(chargeSound) chargeSound.pause();
-            
-            const bgm = document.getElementById('bgMusic');
-            if(bgm) bgm.pause();
+            try {
+                if(navigator.vibrate) navigator.vibrate([200, 100, 300, 100, 400]);
+                if(chargeSound) chargeSound.pause();
+                
+                const bgm = document.getElementById('bgMusic');
+                if(bgm) bgm.pause();
 
-            const toriiAudio = document.getElementById('toriiAudio');
-            if(toriiAudio) toriiAudio.play().catch(e=>{});
+                const toriiAudio = document.getElementById('toriiAudio');
+                if(toriiAudio) { let p = toriiAudio.play(); if(p!==undefined)p.catch(e=>{}); }
 
-            const laser = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-            laser.play().catch(e=>{});
+                const laser = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+                let p2 = laser.play(); if(p2!==undefined)p2.catch(e=>{});
 
-            const splash = document.getElementById('splashScreen');
-            splash.style.transition = "opacity 0.8s ease";
-            splash.style.opacity = "0";
-            
-            const bgTarget = document.getElementById('bg-login');
-            bgTarget.classList.add('active');
+                const splash = document.getElementById('splashScreen');
+                if(splash) {
+                    splash.style.transition = "opacity 0.8s ease";
+                    splash.style.opacity = "0";
+                    setTimeout(() => { splash.style.display = 'none'; }, 800);
+                }
+                
+                const bgTarget = document.getElementById('bg-login');
+                if(bgTarget) bgTarget.classList.add('active');
 
-            setTimeout(() => { splash.style.display = 'none'; }, 800);
-
-            setTimeout(() => {
-                document.getElementById('loginPanelContainer').classList.add('active');
-            }, 3000); 
+                setTimeout(() => {
+                    const panel = document.getElementById('loginPanelContainer');
+                    if(panel) panel.classList.add('active');
+                }, 3000); 
+            } catch(err) {
+                console.error("Lỗi chuyển cảnh Torii:", err);
+            }
         }
 
         function togglePass(inputId, iconEl) { 
@@ -779,9 +799,12 @@
             .then(response => response.json())
             .then(data => {
                 if(data.success === true || data.result === "success" || data.status === "success" || data.ket_qua === "thanh_cong") {
-                    const sndVortex = new Audio('https://assets.mixkit.co/active_storage/sfx/2771/2771-preview.mp3');
-                    sndVortex.volume = 1.0; sndVortex.play().catch(e=>{});
-                    if (navigator.vibrate) navigator.vibrate([300, 100, 400, 100, 500, 150, 600, 200, 1000]);
+                    try {
+                        const sndVortex = new Audio('https://assets.mixkit.co/active_storage/sfx/2771/2771-preview.mp3');
+                        sndVortex.volume = 1.0; 
+                        let p = sndVortex.play(); if(p!==undefined)p.catch(e=>{});
+                        if (navigator.vibrate) navigator.vibrate([300, 100, 400, 100, 500, 150, 600, 200, 1000]);
+                    } catch(e) {}
                     
                     statusEl.innerHTML = "✅ THÀNH CÔNG!"; statusEl.style.color = "#00e5ff";
                     sessionStorage.setItem('kdrive_session', 'active'); sessionStorage.setItem('kdrive_username', acc); 
@@ -790,21 +813,39 @@
                     if(toriiAudio) toriiAudio.pause();
                     
                     setTimeout(() => { 
-                        document.getElementById('loginPanelContainer').classList.remove('active'); 
+                        const panel = document.getElementById('loginPanelContainer');
+                        if(panel) panel.classList.remove('active'); 
+                        
                         setTimeout(() => {
                             const successVid = document.getElementById('successVideo');
                             if(successVid) {
                                 successVid.style.display = 'block'; 
-                                successVid.play().catch(err => { window.location.href = 'INTRO.html'; });
-                                successVid.onended = () => { window.location.href = 'INTRO.html'; };
-                            } else { window.location.href = 'INTRO.html'; }
+                                let vidPromise = successVid.play();
+                                if (vidPromise !== undefined) {
+                                    vidPromise.then(() => {
+                                        successVid.onended = () => { window.location.href = 'INTRO.html'; };
+                                    }).catch(err => { 
+                                        window.location.href = 'INTRO.html'; 
+                                    });
+                                } else {
+                                    successVid.onended = () => { window.location.href = 'INTRO.html'; };
+                                    setTimeout(() => { window.location.href = 'INTRO.html'; }, 3000);
+                                }
+                            } else { 
+                                window.location.href = 'INTRO.html'; 
+                            }
                         }, 500);
                     }, 1000); 
                 } else {
                     statusEl.innerHTML = "❌ SAI THÔNG TIN!"; statusEl.style.color = "#ff3333";
                 }
             })
-            .catch(error => { statusEl.innerHTML = "❌ MẤT KẾT NỐI!"; statusEl.style.color = "#ff3333"; });
+            .catch(error => { 
+                statusEl.innerHTML = "❌ MẤT KẾT NỐI!"; statusEl.style.color = "#ff3333"; 
+                // Ép chuyển để test mạch game trong trường hợp lỗi mạng cục bộ
+                // Bỏ comment dòng dưới nếu muốn lỗi mạng vẫn cho qua (thực tế thì không nên)
+                // window.location.href = 'INTRO.html';
+            });
         }
     </script>
 
