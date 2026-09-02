@@ -1,7 +1,9 @@
 // Tạo thẻ style chứa toàn bộ CSS của HUD và Nút Chat Thế Giới
 const hudStyle = document.createElement('style');
 hudStyle.innerHTML = `
-    /* CSS CỦA HUD CŨ GIỮ NGUYÊN */
+    /* ========================================= */
+    /* CSS CỦA HUD GỐC                           */
+    /* ========================================= */
     .cyber-hud-container {
         position: fixed; top: 15px; left: 20px; right: 20px;
         display: flex; justify-content: space-between; align-items: flex-start;
@@ -25,33 +27,25 @@ hudStyle.innerHTML = `
     /* NÚT BẤM CHAT & KHUNG CHAT MỞ RỘNG         */
     /* ========================================= */
     
-    /* Nút bấm lơ lửng góc phải màn hình */
+    /* Nút bấm Kênh Chat Thế Giới - Đã thu nhỏ, đổi màu vàng, nằm dưới ngày tháng */
     .chat-toggle-btn {
-        position: fixed;
-        right: 20px;
-        top: 70px; /* Đặt dưới cụm HUD bên phải một chút */
-        background: rgba(3, 5, 8, 0.85);
-        border: 1px solid rgba(0, 229, 255, 0.5);
-        color: #00e5ff;
-        padding: 6px 12px;
-        border-radius: 6px;
+        margin-top: 6px; 
+        color: #ffd700; 
         font-family: 'Share Tech Mono', monospace;
-        font-size: 10px;
+        font-size: 10px; 
         font-weight: bold;
         letter-spacing: 1px;
         cursor: pointer;
-        z-index: 9999999; /* Luôn nổi trên cùng */
-        pointer-events: auto; /* Cho phép bấm */
-        box-shadow: 0 0 10px rgba(0,229,255,0.2);
+        pointer-events: auto; 
+        text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         transition: all 0.3s ease;
-        backdrop-filter: blur(4px);
     }
     .chat-toggle-btn:hover {
-        background: rgba(0, 229, 255, 0.2);
-        box-shadow: 0 0 15px rgba(0,229,255,0.5);
+        text-shadow: 0 0 15px rgba(255, 215, 0, 1);
+        transform: scale(1.05);
     }
     
     /* Chấm đỏ báo tin nhắn mới */
@@ -59,8 +53,9 @@ hudStyle.innerHTML = `
         background: #ff1493;
         color: #fff;
         border-radius: 50%;
-        padding: 2px 4px;
-        font-size: 9px;
+        padding: 1px 4px;
+        font-size: 8.5px;
+        text-shadow: none;
         animation: pulseBadge 1.5s infinite;
     }
     @keyframes pulseBadge { 
@@ -68,25 +63,25 @@ hudStyle.innerHTML = `
         50% { opacity: 1; transform: scale(1.1); box-shadow: 0 0 8px #ff1493; } 
     }
 
-    /* Bảng Chat Ẩn (Sẽ hiện ra khi bấm nút) */
+    /* Bảng Chat Ẩn */
     .world-chat-panel {
         position: fixed;
         right: 20px;
-        top: 110px;
+        top: 75px;
         width: 280px;
-        height: 350px;
+        height: 380px;
         background: rgba(5, 8, 15, 0.95);
         border: 1px solid rgba(0, 229, 255, 0.4);
         border-radius: 8px;
         z-index: 9999998;
-        display: none; /* Ẩn mặc định */
+        display: none; 
         flex-direction: column;
         backdrop-filter: blur(10px);
         box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         pointer-events: auto;
     }
     .world-chat-panel.active {
-        display: flex; /* Hiện khi có class active */
+        display: flex; 
         animation: slideInChat 0.3s cubic-bezier(0.25, 1, 0.3, 1);
     }
     @keyframes slideInChat {
@@ -142,10 +137,54 @@ hudStyle.innerHTML = `
         font-weight: bold;
         margin-right: 5px;
     }
+
+    /* KHUNG NHẬP LỆNH CHAT */
+    .chat-input-area {
+        display: flex; gap: 8px; padding: 10px;
+        border-top: 1px solid rgba(0, 229, 255, 0.2);
+        background: rgba(0, 229, 255, 0.05);
+        border-radius: 0 0 8px 8px;
+    }
+    .chat-input-area input {
+        flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,229,255,0.3);
+        color: #fff; padding: 6px 10px; border-radius: 4px; outline: none;
+        font-family: 'Space Grotesk', sans-serif; font-size: 11px;
+    }
+    .chat-input-area input:disabled {
+        opacity: 0.5; cursor: not-allowed; border-color: rgba(255,255,255,0.1);
+    }
+    .chat-input-area button {
+        background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff;
+        color: #00e5ff; font-weight: bold; border-radius: 4px; padding: 0 12px;
+        cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-size: 11px;
+        transition: 0.2s;
+    }
+    .chat-input-area button:disabled {
+        background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.3); cursor: not-allowed;
+    }
+    .chat-input-area button:not(:disabled):hover {
+        background: rgba(0, 229, 255, 0.4); color: #fff;
+    }
 `;
 document.head.appendChild(hudStyle);
 
-// Bơm cụm HTML (HUD + Nút Chat + Bảng Chat) vào body
+// Tự động quét ngày tháng năm thực tế trên thiết bị
+const today = new Date();
+const yyyy = today.getFullYear(); 
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const dd = String(today.getDate()).padStart(2, '0');
+const realDate = `${yyyy}.${mm}.${dd}`;
+
+// Quét Session xem người chơi đã đăng nhập thành công chưa
+const isLogged = sessionStorage.getItem('kdrive_session') === 'active';
+const userName = isLogged ? sessionStorage.getItem('kdrive_username') : 'GUEST';
+
+// Cài đặt Placeholder và Khóa/Mở ô nhập liệu dựa theo trạng thái đăng nhập
+const chatPlaceholder = isLogged ? "Hãy nói chuyện văn minh..." : "Chưa đăng nhập";
+const chatDisabled = isLogged ? "" : "disabled";
+
+// Bơm cụm HTML (HUD + Nút Chat nằm dưới Date + Bảng Chat) vào body
 const hudContainer = document.createElement('div');
 hudContainer.innerHTML = `
     <!-- KHUNG HUD GỐC -->
@@ -153,20 +192,20 @@ hudContainer.innerHTML = `
         <div class="hud-left">
             <div class="hud-line">
                 <div class="signal-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
-                SYS.ONLINE // 2126
+                SYS.ONLINE // ${yyyy}
             </div>
-            <div class="hud-line" style="color: #ffffff;">USER: GUEST</div>
+            <div class="hud-line" style="color: #ffffff;">USER: ${userName.toUpperCase()}</div>
             <div class="hud-gps">GPS: 21.06°N, 105.91°E</div>
         </div>
         <div class="hud-right">
             <div class="hud-line" style="letter-spacing: 3px;">K-DRIVE v2.6</div>
-            <div class="hud-gps" style="color: #ffffff; font-family: 'Montserrat', sans-serif;">2126.08.31</div>
+            <div class="hud-gps" style="color: #ffffff; font-family: 'Montserrat', sans-serif;">${realDate}</div>
+            
+            <!-- NÚT BẤM CHAT THẾ GIỚI MỚI CHÈN VÀO ĐÂY (NẰM DƯỚI NGÀY THÁNG) -->
+            <div class="chat-toggle-btn" id="btnToggleChat">
+                KÊNH CHAT THẾ GIỚI <span class="chat-badge">9+</span>
+            </div>
         </div>
-    </div>
-
-    <!-- NÚT BẤM CHAT THẾ GIỚI -->
-    <div class="chat-toggle-btn" id="btnToggleChat">
-        KÊNH THẾ GIỚI <span class="chat-badge">9+</span>
     </div>
 
     <!-- BẢNG CHAT (ẨN KHI CHƯA BẤM) -->
@@ -182,6 +221,12 @@ hudContainer.innerHTML = `
             <div class="chat-msg-line"><span>Viper:</span> Nút chat gọn gàng thế này ấn tượng đấy.</div>
             <div class="chat-msg-line"><span>Ares:</span> Mở bảng chat ra chém gió tiện hơn hẳn dòng chữ chạy.</div>
         </div>
+        
+        <!-- KHUNG NHẬP LỆNH CHAT (TỰ ĐỘNG KHÓA NẾU CHƯA ĐĂNG NHẬP) -->
+        <div class="chat-input-area">
+            <input type="text" id="worldChatInput" placeholder="${chatPlaceholder}" ${chatDisabled}>
+            <button id="worldChatSendBtn" ${chatDisabled}>GỬI</button>
+        </div>
     </div>
 `;
 document.body.appendChild(hudContainer);
@@ -190,7 +235,7 @@ document.body.appendChild(hudContainer);
 document.getElementById('btnToggleChat').addEventListener('click', function() {
     const panel = document.getElementById('worldChatPanel');
     panel.classList.add('active'); // Hiện bảng
-    this.style.opacity = '0'; // Tạm ẩn nút bấm đi cho đỡ rối mắt
+    this.style.opacity = '0'; // Tạm ẩn nút bấm
 });
 
 document.getElementById('btnCloseChat').addEventListener('click', function() {
