@@ -192,7 +192,7 @@ hudContainer.innerHTML = `
         <div class="hud-left">
             <div class="hud-line">
                 <div class="signal-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
-                SYS.ONLINE // ${yyyy}
+                SYS.ONLINE
             </div>
             <div class="hud-line" style="color: #ffffff;">USER: ${userName.toUpperCase()}</div>
             <div class="hud-gps">GPS: 21.06°N, 105.91°E</div>
