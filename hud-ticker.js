@@ -709,6 +709,5 @@
             .catch(error => { statusEl.innerHTML = "❌ MẤT KẾT NỐI!"; statusEl.style.color = "#ff3333"; });
         }
     </script>
-    <script src="boo-player.js"></script>
 </body>
 </html>
