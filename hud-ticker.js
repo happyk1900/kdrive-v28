@@ -10,6 +10,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body { background-color: #030508; height: 100vh; height: 100dvh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Space Grotesk', sans-serif; }
+        img, video { -webkit-user-drag: none; pointer-events: none; }
 
         /* THANH HUD HỆ THỐNG CỐ ĐỊNH TỐI CAO */
         .hud-top-bar {
@@ -24,7 +25,7 @@
         .hud-gps { color: #ff007f; font-weight: 700; text-shadow: 0 0 8px rgba(255,0,127,0.6); }
         .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.6); cursor: pointer; }
 
-        /* MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (QUẢ CẦU 3D ĐỘNG + DANH SÁCH MỞ RỘNG) */
+        /* MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (QUẢ CẦU 3D) */
         #globalLangScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: radial-gradient(circle at center, #0a1128 0%, #030508 85%);
@@ -44,8 +45,6 @@
             text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; text-align: center;
             text-shadow: 0 0 10px rgba(255,215,0,0.8);
         }
-        
-        /* KHUNG CUỘN CHỨA TẤT CẢ CÁC NGÔN NGỮ TRÊN THẾ GIỚI */
         .lang-grid-nodes {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 92%; max-width: 360px;
             max-height: 240px; overflow-y: auto; padding-right: 4px; z-index: 2;
@@ -91,6 +90,19 @@
         }
         .gps-btn-allow { background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #00e5ff; box-shadow: 0 0 12px rgba(0, 229, 255, 0.3); }
         .gps-btn-deny { background: rgba(255, 0, 60, 0.15); border: 1px solid rgba(255, 0, 60, 0.6); color: #ff3333; }
+
+        /* SCENE 0: VIDEO KHỞI ĐẦU */
+        #preSplashScreen { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            background: #000; z-index: 2147483644; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            opacity: 0; visibility: hidden; transition: opacity 0.8s ease; cursor: pointer; pointer-events: none; 
+        }
+        #preSplashScreen.active { opacity: 1; visibility: visible; pointer-events: auto; }
+        #preSplashVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.85; }
+        .core-access-btn {
+            position: absolute; top: 58%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 3; pointer-events: auto; cursor: pointer; color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: 2.5px; text-transform: uppercase; white-space: nowrap; padding: 8px 18px; border-radius: 4px; background: rgba(255, 0, 127, 0.15); border: 1px solid rgba(255, 0, 127, 0.8); box-shadow: 0 0 10px rgba(255, 0, 127, 0.4); text-shadow: 0 0 5px #ff007f;
+        }
     </style>
 </head>
 <body>
@@ -109,7 +121,7 @@
         </div>
     </div>
 
-    <!-- MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (QUẢ CẦU 3D ĐỘNG & TẤT CẢ NGÔN NGỮ) -->
+    <!-- MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (QUẢ CẦU 3D ĐỘNG) -->
     <div id="globalLangScreen">
         <div class="global-globe-container">
             <canvas id="globeCanvas" width="140" height="140"></canvas>
@@ -120,8 +132,8 @@
             <div class="lang-node-btn" onclick="selectLanguage('en')">ENGLISH</div>
             <div class="lang-node-btn" onclick="selectLanguage('jp')">日本語</div>
             <div class="lang-node-btn" onclick="selectLanguage('kr')">한국어</div>
-            <div class="lang-node-btn" onclick="selectLanguage('cn')">中文 (繁體)</div>
-            <div class="lang-node-btn" onclick="selectLanguage('zh')">中文 (简体)</div>
+            <div class="lang-node-btn" onclick="selectLanguage('cn')">中文 (繁)</div>
+            <div class="lang-node-btn" onclick="selectLanguage('zh')">中文 (简)</div>
             <div class="lang-node-btn" onclick="selectLanguage('fr')">FRANÇAIS</div>
             <div class="lang-node-btn" onclick="selectLanguage('es')">ESPAÑOL</div>
             <div class="lang-node-btn" onclick="selectLanguage('de')">DEUTSCH</div>
@@ -146,13 +158,33 @@
             <div class="gps-modal-title" id="gpsModalTitle">🛰️ XÁC THỰC TỌA ĐỘ GPS</div>
             <div class="gps-modal-desc" id="gpsModalDesc">Hệ thống yêu cầu cấp quyền truy xuất định vị thực tế để đồng bộ bản đồ Đấu trường Lượng tử toàn cầu.</div>
             <div class="gps-btn-row">
-                <button class="gps-action-btn gps-btn-deny" onclick="handleGps(false)">TỪ CHỐI</button>
-                <button class="gps-action-btn gps-btn-allow" onclick="handleGps(true)">ĐỒNG Ý</button>
+                <button class="gps-action-btn gps-btn-deny" id="gpsDenyBtn" onclick="handleGps(false)">TỪ CHỐI</button>
+                <button class="gps-action-btn gps-btn-allow" id="gpsAllowBtn" onclick="handleGps(true)">ĐỒNG Ý</button>
             </div>
         </div>
     </div>
 
+    <!-- SCENE 0: MÀN HÌNH KHỞI ĐỘNG (VIDEO) -->
+    <div id="preSplashScreen" onclick="enterPreSplash()">
+        <video id="preSplashVideo" autoplay loop muted playsinline>
+            <source src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/video%20khoi%20dau.mp4" type="video/mp4">
+        </video>
+        <div class="core-access-btn" id="preBtnText">TRUY CẬP LÕI LƯỢNG TỬ</div>
+    </div>
+
     <script>
+        // TỪ ĐIỂN ĐA NGÔN NGỮ CHO HỆ THỐNG
+        const langData = {
+            vi: { title: "CHỌN MẠNG LƯỚI NGÔN NGỮ TOÀN CẦU", gpsTitle: "🛰️ XÁC THỰC TỌA ĐỘ GPS", gpsDesc: "Hệ thống yêu cầu cấp quyền truy xuất định vị thực tế để đồng bộ bản đồ Đấu trường Lượng tử toàn cầu.", allow: "ĐỒNG Ý", deny: "TỪ CHỐI", preBtn: "TRUY CẬP LÕI LƯỢNG TỬ" },
+            en: { title: "SELECT GLOBAL LANGUAGE NETWORK", gpsTitle: "🛰️ GPS COORDINATE VERIFICATION", gpsDesc: "System requires real-time location access to synchronize global Quantum Arena mapping.", allow: "ACCEPT", deny: "DENY", preBtn: "ACCESS QUANTUM CORE" },
+            jp: { title: "グローバル言語ネットワークを選択", gpsTitle: "🛰️ GPS座標の検証", gpsDesc: "量子アリーナマッピングを同期するため、位置情報へのアクセスが必要です。", allow: "許可", deny: "拒否", preBtn: "量子コアアクセス" },
+            kr: { title: "글로벌 언어 네트워크 선택", gpsTitle: "🛰️ GPS 좌표 인증", gpsDesc: "양자 아레나 매핑 동기화를 위해 실시간 위치 접근 권한이 필요합니다.", allow: "허용", deny: "거부", preBtn: "양자 코어 접속" },
+            cn: { title: "选择全球语言网络", gpsTitle: "🛰️ GPS 坐标验证", gpsDesc: "系统需要实时位置访问权限来同步全球量子竞技场映射。", allow: "同意", deny: "拒绝", preBtn: "访问量子核心" },
+            zh: { title: "选择全球语言网络", gpsTitle: "🛰️ GPS 坐标验证", gpsDesc: "系统需要实时位置访问权限来同步全球量子竞技场映射。", allow: "同意", deny: "拒绝", preBtn: "访问量子核心" },
+            fr: { title: "SÉLECTIONNER LA LANGUE", gpsTitle: "🛰️ VÉRIFICATION GPS", gpsDesc: "Le système nécessite l'accès à la position pour synchroniser l'Arène Quantique.", allow: "AUTORISER", deny: "REFUSER", preBtn: "ACCÉDER AU CŒUR" },
+            es: { title: "SELECCIONAR IDIOMA", gpsTitle: "🛰️ VERIFICACIÓN GPS", gpsDesc: "El sistema requiere acceso a la ubicación en tiempo real.", allow: "ACEPTAR", deny: "RECHAZAR", preBtn: "ACCEDER AL NÚCLEO" }
+        };
+
         // HOẠT HÌNH QUẢ CẦU 3D XOAY TRÒN (CANVAS WIREFRAME GLOBE)
         const canvas = document.getElementById('globeCanvas');
         const ctx = canvas.getContext('2d');
@@ -161,32 +193,22 @@
         function drawGlobe() {
             ctx.clearRect(0, 0, 140, 140);
             const cx = 70, cy = 70, r = 60;
+            ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)'; ctx.lineWidth = 1.5; ctx.stroke();
 
-            // Vẽ vòng tròn nền
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            // Vẽ các đường kinh tuyến / vĩ tuyến xoay
             for (let i = -Math.PI / 2; i <= Math.PI / 2; i += 0.5) {
                 ctx.beginPath();
                 let latRadius = r * Math.cos(i);
                 let latY = cy + r * Math.sin(i) * 0.4;
                 ctx.ellipse(cx, latY, latRadius, latRadius * 0.2, 0, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(0, 229, 255, 0.2)';
-                ctx.stroke();
+                ctx.strokeStyle = 'rgba(0, 229, 255, 0.2)'; ctx.stroke();
             }
-
             for (let i = 0; i < Math.PI; i += 0.6) {
                 ctx.beginPath();
                 let currentAngle = i + angle;
                 ctx.ellipse(cx + Math.cos(currentAngle) * 15, cy, r * Math.abs(Math.sin(currentAngle)), r, 0, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(255, 0, 127, 0.25)';
-                ctx.stroke();
+                ctx.strokeStyle = 'rgba(255, 0, 127, 0.25)'; ctx.stroke();
             }
-
             angle += 0.02;
             requestAnimationFrame(drawGlobe);
         }
@@ -198,6 +220,15 @@
 
         function selectLanguage(lang) {
             playClick();
+            // Áp dụng ngôn ngữ vào hệ thống
+            const d = langData[lang] || langData['en'];
+            document.getElementById('globalTitleText').textContent = d.title;
+            document.getElementById('gpsModalTitle').textContent = d.gpsTitle;
+            document.getElementById('gpsModalDesc').textContent = d.gpsDesc;
+            document.getElementById('gpsAllowBtn').textContent = d.allow;
+            document.getElementById('gpsDenyBtn').textContent = d.deny;
+            document.getElementById('preBtnText').textContent = d.preBtn;
+
             const langScreen = document.getElementById('globalLangScreen');
             langScreen.style.transform = "scale(1.2)";
             langScreen.style.opacity = "0";
@@ -218,17 +249,37 @@
                     (pos) => {
                         gpsText.textContent = `GPS: ${pos.coords.latitude.toFixed(2)}N, ${pos.coords.longitude.toFixed(2)}E`;
                         gpsText.style.color = "#00e5ff";
+                        proceedToPreSplash();
                     },
                     () => {
                         gpsText.textContent = "GPS: OFFLINE";
                         gpsText.style.color = "#ff3333";
+                        proceedToPreSplash();
                     },
                     { timeout: 5000 }
                 );
             } else {
                 gpsText.textContent = "GPS: OFFLINE";
                 gpsText.style.color = "#ff3333";
+                proceedToPreSplash();
             }
+        }
+
+        function proceedToPreSplash() {
+            // Hiển thị màn hình Scene 0 (Video khởi đầu) thay vì bị treo màn hình đen
+            document.getElementById('preSplashScreen').classList.add('active');
+        }
+
+        function enterPreSplash() {
+            playClick();
+            const preSplash = document.getElementById('preSplashScreen');
+            preSplash.style.transform = "scale(1.5)";
+            preSplash.style.opacity = "0";
+            setTimeout(() => {
+                preSplash.style.display = 'none';
+                // Chuyển thẳng sang trang chủ hoặc sảnh tiếp theo nếu có
+                alert("Đã kết nối Lõi Lượng Tử thành công! Tiến vào sảnh chính.");
+            }, 800);
         }
     </script>
 </body>
