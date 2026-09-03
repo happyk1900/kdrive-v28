@@ -27,7 +27,6 @@ hudStyle.innerHTML = `
     /* NÚT BẤM CHAT & KHUNG CHAT MỞ RỘNG         */
     /* ========================================= */
     
-    /* Nút bấm Kênh Chat Thế Giới - Đã thu nhỏ, đổi màu vàng, nằm dưới ngày tháng */
     .chat-toggle-btn {
         margin-top: 6px; 
         color: #ffd700; 
@@ -48,7 +47,6 @@ hudStyle.innerHTML = `
         transform: scale(1.05);
     }
     
-    /* Chấm đỏ báo tin nhắn mới */
     .chat-badge {
         background: #ff1493;
         color: #fff;
@@ -63,7 +61,6 @@ hudStyle.innerHTML = `
         50% { opacity: 1; transform: scale(1.1); box-shadow: 0 0 8px #ff1493; } 
     }
 
-    /* Bảng Chat Ẩn */
     .world-chat-panel {
         position: fixed;
         right: 20px;
@@ -89,7 +86,6 @@ hudStyle.innerHTML = `
         to { opacity: 1; transform: translateX(0); }
     }
 
-    /* Header của bảng Chat */
     .chat-panel-header {
         border-bottom: 1px solid rgba(0, 229, 255, 0.2);
         padding: 10px 12px;
@@ -114,7 +110,6 @@ hudStyle.innerHTML = `
         font-size: 16px;
     }
 
-    /* Vùng chứa tin nhắn */
     .chat-messages-area {
         flex: 1;
         padding: 12px;
@@ -138,7 +133,6 @@ hudStyle.innerHTML = `
         margin-right: 5px;
     }
 
-    /* KHUNG NHẬP LỆNH CHAT */
     .chat-input-area {
         display: flex; gap: 8px; padding: 10px;
         border-top: 1px solid rgba(0, 229, 255, 0.2);
@@ -166,6 +160,66 @@ hudStyle.innerHTML = `
     .chat-input-area button:not(:disabled):hover {
         background: rgba(0, 229, 255, 0.4); color: #fff;
     }
+
+    /* ========================================= */
+    /* GPS PERMISSION MODAL (CYBERPUNK STYLE)    */
+    /* ========================================= */
+    .gps-modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+        background: rgba(2, 4, 8, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        z-index: 99999999; display: flex; justify-content: center; align-items: center;
+        opacity: 0; visibility: hidden; transition: all 0.4s ease;
+    }
+    .gps-modal-overlay.active { opacity: 1; visibility: visible; }
+    
+    .gps-modal-box {
+        width: 90%; max-width: 340px; background: rgba(8, 14, 26, 0.95);
+        border: 1.5px solid #00e5ff; border-radius: 16px; padding: 25px 20px;
+        display: flex; flex-direction: column; align-items: center; text-align: center;
+        box-shadow: 0 0 30px rgba(0, 229, 255, 0.3), inset 0 0 15px rgba(0, 229, 255, 0.1);
+        transform: scale(0.9); transition: transform 0.3s ease;
+    }
+    .gps-modal-overlay.active .gps-modal-box { transform: scale(1); }
+    
+    .gps-icon-radar {
+        font-size: 32px; margin-bottom: 12px;
+        text-shadow: 0 0 15px #00e5ff;
+        animation: radarPulse 2s infinite;
+    }
+    @keyframes radarPulse {
+        0%, 100% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.15); opacity: 1; text-shadow: 0 0 25px #ff007f; }
+    }
+    
+    .gps-modal-title {
+        color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 14px;
+        font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase;
+        margin-bottom: 12px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    }
+    .gps-modal-desc {
+        color: #d0f0ff; font-family: 'Space Grotesk', sans-serif; font-size: 12px;
+        line-height: 1.6; margin-bottom: 22px; opacity: 0.9;
+    }
+    
+    .gps-btn-group { display: flex; gap: 10px; width: 100%; }
+    .gps-btn {
+        flex: 1; padding: 12px 10px; border-radius: 10px; font-family: 'Montserrat', sans-serif;
+        font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer;
+        transition: all 0.3s ease; letter-spacing: 1px;
+    }
+    .gps-btn-allow {
+        background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #00e5ff;
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    }
+    .gps-btn-allow:hover {
+        background: rgba(0, 229, 255, 0.4); color: #fff; box-shadow: 0 0 18px rgba(0, 229, 255, 0.5);
+    }
+    .gps-btn-deny {
+        background: rgba(255, 0, 60, 0.15); border: 1px solid rgba(255, 0, 60, 0.6); color: #ff003c;
+    }
+    .gps-btn-deny:hover {
+        background: rgba(255, 0, 60, 0.3); color: #fff; box-shadow: 0 0 15px rgba(255, 0, 60, 0.4);
+    }
 `;
 document.head.appendChild(hudStyle);
 
@@ -180,52 +234,64 @@ const realDate = `${yyyy}.${mm}.${dd}`;
 const isLogged = sessionStorage.getItem('kdrive_session') === 'active';
 const userName = isLogged ? sessionStorage.getItem('kdrive_username') : 'GUEST';
 
-// Cài đặt Placeholder và Khóa/Mở ô nhập liệu dựa theo trạng thái đăng nhập
-const chatPlaceholder = isLogged ? "Hãy nói chuyện văn minh..." : "Chưa đăng nhập";
+// Cài đặt Placeholder và Khóa/Mở ô nhập liệu dựa theo trạng thái đăng nhập (Tiếng Anh toàn bộ)
+const chatPlaceholder = isLogged ? "Type a message..." : "Not logged in";
 const chatDisabled = isLogged ? "" : "disabled";
 
-// Bơm cụm HTML (HUD + Nút Chat nằm dưới Date + Bảng Chat) vào body
+// Bơm cụm HTML (HUD + Nút Chat tiếng Anh + Bảng Chat + Modal GPS) vào body
 const hudContainer = document.createElement('div');
 hudContainer.innerHTML = `
-    <!-- KHUNG HUD GỐC -->
-    <div class="cyber-hud-container">
+    <!-- KHUNG HUD GỐC (HOÀN TOÀN TIẾNG ANH) -->
+    <div class="cyber-hud-container" id="cyberHudBar">
         <div class="hud-left">
             <div class="hud-line">
                 <div class="signal-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
-                SYS.ONLINE
+                SYS.ONLINE // ${yyyy}
             </div>
             <div class="hud-line" style="color: #ffffff;">USER: ${userName.toUpperCase()}</div>
-            <div class="hud-gps">GPS: 21.06°N, 105.91°E</div>
+            <div class="hud-gps" id="hudGpsCoord">GPS: INITIALIZING...</div>
         </div>
         <div class="hud-right">
             <div class="hud-line" style="letter-spacing: 3px;">K-DRIVE v2.6</div>
             <div class="hud-gps" style="color: #ffffff; font-family: 'Montserrat', sans-serif;">${realDate}</div>
             
-            <!-- NÚT BẤM CHAT THẾ GIỚI MỚI CHÈN VÀO ĐÂY (NẰM DƯỚI NGÀY THÁNG) -->
+            <!-- NÚT BẤM CHAT THẾ GIỚI (GLOBAL CHAT - TIẾNG ANH) -->
             <div class="chat-toggle-btn" id="btnToggleChat">
-                KÊNH CHAT THẾ GIỚI <span class="chat-badge">9+</span>
+                GLOBAL CHAT <span class="chat-badge">9+</span>
             </div>
         </div>
     </div>
 
-    <!-- BẢNG CHAT (ẨN KHI CHƯA BẤM) -->
+    <!-- BẢNG CHAT TOÀN CẦU -->
     <div class="world-chat-panel" id="worldChatPanel">
         <div class="chat-panel-header">
             <div class="chat-panel-title">⚡ GLOBAL COMM LINK</div>
             <div class="chat-close-btn" id="btnCloseChat">✖</div>
         </div>
         <div class="chat-messages-area" id="chatMessageArea">
-            <div class="chat-msg-line"><span>[Hệ Thống]:</span> Chào mừng đến không gian K-Drive.</div>
-            <div class="chat-msg-line"><span>Kai:</span> Đã khóa cứng hệ thống 1 dòng, sẵn sàng chiến.</div>
-            <div class="chat-msg-line"><span>Shadow:</span> Ai lười hôm nay chuẩn bị âm điểm nhé haha.</div>
-            <div class="chat-msg-line"><span>Viper:</span> Nút chat gọn gàng thế này ấn tượng đấy.</div>
-            <div class="chat-msg-line"><span>Ares:</span> Mở bảng chat ra chém gió tiện hơn hẳn dòng chữ chạy.</div>
+            <div class="chat-msg-line"><span>[System]:</span> Welcome to the K-Drive Quantum Realm.</div>
+            <div class="chat-msg-line"><span>Kai:</span> Core locked and loaded, ready for battle.</div>
+            <div class="chat-msg-line"><span>Shadow:</span> Lazy players get ready to lose points haha.</div>
+            <div class="chat-msg-line"><span>Viper:</span> Clean chat UI design right here.</div>
+            <div class="chat-msg-line"><span>Ares:</span> Opening chat panel is way better than scrolling banners.</div>
         </div>
         
-        <!-- KHUNG NHẬP LỆNH CHAT (TỰ ĐỘNG KHÓA NẾU CHƯA ĐĂNG NHẬP) -->
         <div class="chat-input-area">
             <input type="text" id="worldChatInput" placeholder="${chatPlaceholder}" ${chatDisabled}>
-            <button id="worldChatSendBtn" ${chatDisabled}>GỬI</button>
+            <button id="worldChatSendBtn" ${chatDisabled}>SEND</button>
+        </div>
+    </div>
+
+    <!-- GPS PERMISSION MODAL (XIN QUYỀN ĐỊNH VỊ BAN ĐẦU) -->
+    <div class="gps-modal-overlay active" id="gpsModalOverlay">
+        <div class="gps-modal-box">
+            <div class="gps-icon-radar">🛰️</div>
+            <div class="gps-modal-title">QUANTUM GPS PROTOCOL</div>
+            <div class="gps-modal-desc">K-Drive system requires location access to synchronize real-world coordinates into the global arena HUD.</div>
+            <div class="gps-btn-group">
+                <button class="gps-btn gps-btn-deny" id="gpsBtnDeny">OFFLINE</button>
+                <button class="gps-btn gps-btn-allow" id="gpsBtnAllow">ALLOW</button>
+            </div>
         </div>
     </div>
 `;
@@ -234,12 +300,48 @@ document.body.appendChild(hudContainer);
 // Logic xử lý Bật / Tắt bảng Chat
 document.getElementById('btnToggleChat').addEventListener('click', function() {
     const panel = document.getElementById('worldChatPanel');
-    panel.classList.add('active'); // Hiện bảng
-    this.style.opacity = '0'; // Tạm ẩn nút bấm
+    panel.classList.add('active');
+    this.style.opacity = '0';
 });
 
 document.getElementById('btnCloseChat').addEventListener('click', function() {
     const panel = document.getElementById('worldChatPanel');
-    panel.classList.remove('active'); // Ẩn bảng
-    document.getElementById('btnToggleChat').style.opacity = '1'; // Hiện lại nút bấm
+    panel.classList.remove('active');
+    document.getElementById('btnToggleChat').style.opacity = '1';
 });
+
+// Logic xử lý Giao thức Xin quyền GPS
+document.getElementById('gpsBtnAllow').addEventListener('click', function() {
+    const gpsText = document.getElementById('hudGpsCoord');
+    gpsText.textContent = "GPS: ACQUIRING...";
+    
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude.toFixed(2);
+                const lon = position.coords.longitude.toFixed(2);
+                gpsText.textContent = `GPS: ${lat}°N, ${lon}°E`;
+                closeGpsModal();
+            },
+            function(error) {
+                gpsText.textContent = "GPS: SIGNAL ERROR";
+                closeGpsModal();
+            },
+            { timeout: 10000, enableHighAccuracy: true }
+        );
+    } else {
+        gpsText.textContent = "GPS: NOT SUPPORTED";
+        closeGpsModal();
+    }
+});
+
+document.getElementById('gpsBtnDeny').addEventListener('click', function() {
+    document.getElementById('hudGpsCoord').textContent = "GPS: OFFLINE / UNAUTHORIZED";
+    closeGpsModal();
+});
+
+function closeGpsModal() {
+    const modal = document.getElementById('gpsModalOverlay');
+    modal.classList.remove('active');
+    setTimeout(() => { modal.style.display = 'none'; }, 400);
+}
