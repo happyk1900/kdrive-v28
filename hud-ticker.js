@@ -26,7 +26,7 @@
         .hud-gps { color: #ff007f; font-weight: 700; text-shadow: 0 0 8px rgba(255,0,127,0.6); }
         .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.6); pointer-events: auto; cursor: pointer; }
 
-        /* ================= MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (BẢN ĐỒ / LƯỚI KHÔNG GIAN) ================= */
+        /* ================= MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (BẢN ĐỒ / QUẢ CẦU 3D) ================= */
         #globalLangScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #0a1128 0%, #030508 85%);
@@ -34,10 +34,10 @@
             transition: opacity 0.8s ease, transform 0.8s ease;
         }
         .global-globe-container {
-            position: relative; width: 280px; height: 280px; border-radius: 50%;
+            position: relative; width: 240px; height: 240px; border-radius: 50%;
             border: 2px dashed rgba(0, 229, 255, 0.4); box-shadow: 0 0 40px rgba(0, 229, 255, 0.2), inset 0 0 30px rgba(0, 229, 255, 0.15);
             display: flex; justify-content: center; align-items: center; animation: globeRotate 20s linear infinite;
-            margin-bottom: 30px; background: radial-gradient(circle, rgba(0,229,255,0.05) 0%, transparent 70%);
+            margin-bottom: 25px; background: radial-gradient(circle, rgba(0,229,255,0.05) 0%, transparent 70%);
         }
         @keyframes globeRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
@@ -48,17 +48,17 @@
         @keyframes globeRotateReverse { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
 
         .global-title {
-            color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 900;
-            text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px; text-align: center;
+            color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 20px; text-align: center;
             text-shadow: 0 0 12px rgba(255,215,0,0.8);
         }
         .lang-grid-nodes {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 85%; max-width: 320px;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 88%; max-width: 320px;
             z-index: 2;
         }
         .lang-node-btn {
             background: rgba(10, 20, 35, 0.85); backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 229, 255, 0.5); border-radius: 10px; padding: 12px 8px;
+            border: 1px solid rgba(0, 229, 255, 0.5); border-radius: 10px; padding: 12px 6px;
             text-align: center; cursor: pointer; color: #ffffff; font-family: 'Montserrat', sans-serif;
             font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
             box-shadow: 0 0 12px rgba(0, 229, 255, 0.2); transition: all 0.3s;
@@ -68,10 +68,10 @@
             transform: scale(1.05);
         }
 
-        /* ================= HỘP THOẠI XIN QUYỀN GPS (CYBERNETIC PERMISSION MODAL) ================= */
+        /* ================= HỘP THOẠI XIN QUYỀN GPS ================= */
         .gps-modal-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(15px);
             z-index: 9999999; display: flex; justify-content: center; align-items: center;
             opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
         }
@@ -90,7 +90,6 @@
         }
         .gps-modal-desc {
             color: #d0f0ff; font-size: 12px; line-height: 1.6; margin-bottom: 25px;
-            font-family: 'Space Grotesk', sans-serif;
         }
         .gps-btn-row { display: flex; gap: 10px; justify-content: center; }
         .gps-action-btn {
@@ -122,7 +121,6 @@
             position: absolute; top: 58%; left: 50%; transform: translate(-50%, -50%);
             z-index: 3; pointer-events: auto; cursor: pointer; color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: 2.5px; text-transform: uppercase; white-space: nowrap; padding: 8px 18px; border-radius: 4px; background: rgba(255, 0, 127, 0.15); backdrop-filter: blur(4px); border: 1px solid rgba(255, 0, 127, 0.8); box-shadow: 0 0 10px rgba(255, 0, 127, 0.4), inset 0 0 5px rgba(255, 0, 127, 0.2); text-shadow: 0 0 5px #ff007f, 0 0 10px #ff007f; animation: electricGlow 2.5s infinite;
         }
-
         @keyframes electricGlow {
             0%, 100% { box-shadow: 0 0 10px rgba(255, 0, 127, 0.4), inset 0 0 5px rgba(255, 0, 127, 0.2); text-shadow: 0 0 5px #ff007f; }
             50% { box-shadow: 0 0 15px rgba(0, 229, 255, 0.5), inset 0 0 8px rgba(0, 229, 255, 0.3); text-shadow: 0 0 8px #00e5ff; border-color: rgba(0, 229, 255, 0.8); }
@@ -147,13 +145,13 @@
 
         .splash-boxes-container { 
             position: absolute; bottom: 165px; left: 50%; transform: translateX(-50%); 
-            width: 88%; max-width: 350px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; z-index: 10; transition: opacity 0.3s; 
+            width: 88%; max-width: 350px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; z-index: 10; 
         }
         .cyber-box { 
-            position: relative; background: rgba(3, 7, 14, 0.35); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
+            position: relative; background: rgba(3, 7, 14, 0.35); backdrop-filter: blur(12px); 
             border: 1px solid rgba(0, 229, 255, 0.45); border-radius: 10px; padding: 12px 5px; text-align: center; 
             cursor: pointer; pointer-events: auto; overflow: hidden; box-shadow: 0 0 12px rgba(0, 229, 255, 0.15); 
-            transition: all 0.2s ease; animation: boxElectricFlicker 4s infinite;
+            animation: boxElectricFlicker 4s infinite;
         }
         .cyber-box:active { transform: scale(0.95); background: rgba(0, 229, 255, 0.25); border-color: #00e5ff; }
         .cyber-text { 
@@ -193,30 +191,33 @@
             100% { transform: scale(1); filter: brightness(1); color: #ffffff; }
         }
 
-        /* MODAL THÔNG TIN & LOGIN */
+        /* ================= MODAL THÔNG TIN (FONT CHỮ TO, RÕ NÉT) ================= */
         .info-modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); backdrop-filter: blur(10px); z-index: 9999999; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; pointer-events: none; }
         .info-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
-        .info-modal-content { width: 92%; max-width: 380px; background-color: rgba(5, 10, 18, 0.98); border: 1.5px solid #00e5ff; border-radius: 18px; padding: 20px 15px 15px 15px; box-shadow: 0 0 35px rgba(0, 229, 255, 0.35); transform: scale(0.9); transition: transform 0.3s ease; display: flex; flex-direction: column; align-items: center; }
+        .info-modal-content { width: 92%; max-width: 380px; background-color: rgba(5, 10, 18, 0.98); border: 1.5px solid #00e5ff; border-radius: 18px; padding: 22px 18px 18px 18px; box-shadow: 0 0 35px rgba(0, 229, 255, 0.35); transform: scale(0.9); transition: transform 0.3s ease; display: flex; flex-direction: column; align-items: center; }
         .info-modal-overlay.active .info-modal-content { transform: scale(1); }
-        .info-modal-title { color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 900; text-align: center; margin-bottom: 12px; text-transform: uppercase; text-shadow: 0 0 12px rgba(255,215,0,0.8); letter-spacing: 1.5px; border-bottom: 1px solid rgba(255, 215, 0, 0.3); width: 100%; padding-bottom: 10px; }
-        .modal-image-wrapper { width: 100%; height: 160px; margin-bottom: 12px; border-radius: 12px; border: 1px solid rgba(0, 229, 255, 0.4); overflow: hidden; display: flex; justify-content: center; align-items: center; background: #000; }
+        .info-modal-title { color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 900; text-align: center; margin-bottom: 12px; text-transform: uppercase; text-shadow: 0 0 12px rgba(255,215,0,0.8); letter-spacing: 1.5px; border-bottom: 1px solid rgba(255, 215, 0, 0.3); width: 100%; padding-bottom: 10px; }
+        .modal-image-wrapper { width: 100%; height: 150px; margin-bottom: 15px; border-radius: 12px; border: 1px solid rgba(0, 229, 255, 0.4); overflow: hidden; display: flex; justify-content: center; align-items: center; background: #000; }
         .modal-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         .carousel-track { display: flex; width: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
         .carousel-track::-webkit-scrollbar { display: none; }
-        .slide-item { flex: 0 0 100%; width: 100%; padding: 0 10px; scroll-snap-align: center; color: #d0f0ff; font-size: 13px; line-height: 1.7; text-align: left; font-family: 'Space Grotesk', sans-serif; }
+        
+        .slide-item { flex: 0 0 100%; width: 100%; padding: 0 5px; scroll-snap-align: center; color: #d0f0ff; font-size: 14.5px; line-height: 1.8; text-align: left; font-family: 'Space Grotesk', sans-serif; font-weight: 500; }
         .slide-item b { color: #00e5ff; font-weight: 700; }
-        .carousel-dots { display: flex; gap: 8px; justify-content: center; margin: 10px 0 15px 0; }
+        
+        .carousel-dots { display: flex; gap: 8px; justify-content: center; margin: 15px 0 15px 0; }
         .dot { width: 8px; height: 8px; background: rgba(0, 229, 255, 0.3); border-radius: 50%; transition: 0.3s; }
         .dot.active { background: #00e5ff; width: 22px; border-radius: 4px; box-shadow: 0 0 10px #00e5ff; }
-        .close-info-btn { width: 90%; padding: 11px; background: rgba(0, 229, 255, 0.15); border: 1px solid #00e5ff; color: #00e5ff; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-size: 11.5px; font-weight: 800; text-transform: uppercase; cursor: pointer; pointer-events: auto; }
+        .close-info-btn { width: 90%; padding: 12px; background: rgba(0, 229, 255, 0.15); border: 1px solid #00e5ff; color: #00e5ff; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; pointer-events: auto; }
 
+        /* SCENE 2: ĐĂNG NHẬP */
         .kdrive-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #010204; z-index: 1; overflow: hidden; }
         .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; opacity: 0; visibility: hidden; transition: opacity 1.5s ease-in-out; }
         .kdrive-bg-target.active { opacity: 1; visibility: visible; }
         
         .gateway-popup { 
             position: absolute; top: 50%; left: 50%; width: 92%; max-width: 340px; 
-            background: rgba(10, 15, 25, 0.5); backdrop-filter: blur(20px); 
+            background: rgba(10, 15, 25, 0.65); backdrop-filter: blur(20px); 
             border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 20px; padding: 30px 25px; z-index: 99999; 
             opacity: 0; transform: translate(-50%, -40%) scale(0.95); pointer-events: none; visibility: hidden; 
             transition: all 0.8s cubic-bezier(0.25, 1, 0.3, 1); box-shadow: 0 15px 35px rgba(0,0,0,0.8); 
@@ -259,9 +260,9 @@
         </div>
     </div>
 
-    <!-- MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (BƯỚC 1) -->
+    <!-- MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (QUẢ CẦU 3D) -->
     <div id="globalLangScreen">
-        <div class="global-globe-container">
+        <div class="global-globe-container" onclick="selectLanguage('vi')">
             <div class="globe-core-icon">🌐</div>
         </div>
         <div class="global-title" id="globalTitleText">CHỌN MẠNG LƯỚI NGÔN NGỮ</div>
@@ -275,7 +276,7 @@
         </div>
     </div>
 
-    <!-- HỘP THOẠI XIN QUYỀN GPS (BƯỚC 2) -->
+    <!-- HỘP THOẠI XIN QUYỀN GPS -->
     <div class="gps-modal-overlay" id="gpsModalOverlay">
         <div class="gps-modal-box">
             <div class="gps-modal-title" id="gpsModalTitle">🛰️ XÁC THỰC TỌA ĐỘ GPS</div>
@@ -300,11 +301,6 @@
     <div id="splashScreen">
         <div class="cyber-ticker-wrap">
             <div class="ticker-content" id="tickerText">K-DRIVE: KHÔNG CHỈ LÀ GAME - LÀ GIAO THỨC SỐ HÓA SINH MỆNH TIÊN PHONG ⬢ CHUYỂN HOÁ TRỰC TIẾP THỂ CHẤT VÀ TRÍ LỰC VÀO KHÔNG GIAN LƯỢNG TỬ</div>
-        </div>
-
-        <div class="glitch-disclaimer-overlay" id="glitchDisclaimer">
-            <div class="glitch-text-core" id="glitchTitle">⚠️ MIỄN TRỪ TRÁCH NHIỆM ⚠️</div>
-            <div class="glitch-sub-text" id="glitchSub">Đang đồng bộ ấn ký sinh học. Bằng việc truy cập, Đạo chúng chấp nhận tiến nhập Không gian Lượng tử.</div>
         </div>
 
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20NEN%20NU.png?raw=true" class="splash-bg-image" alt="Cyber City">
@@ -337,7 +333,7 @@
         </div>
     </div>
 
-    <!-- CỔNG TORII & LOGIN (SCENE 2) -->
+    <!-- SCENE 2: CỔNG & LOGIN -->
     <div class="kdrive-image-wrapper">
         <img src="https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/ANH%20DANG%20NHAP.png" id="bg-login" class="kdrive-bg-target" alt="Login Background">
         <div class="gateway-popup" id="loginPanelContainer">
@@ -389,10 +385,10 @@
                 passPlaceholder: "Ấn Ký Bí Mật", remember: "GHI NHỚ ẤN", forgot: "QUÊN MẬT ẤN?",
                 submit: "TIẾN NHẬP", register: "QUAY LẠI TRANG CHỦ", chat: "GLOBAL CHAT 9+",
                 info: {
-                    nhapmon: { title: "ĐỒNG BỘ SINH MỆNH", slides: ["Xác thực danh tính <span style='color:#00e5ff;'>Đạo chúng</span> và kết nối sinh trắc học cá nhân.", "Bảo mật lượng tử đám mây lõi (Google & Microsoft).", "Từng giọt mồ hôi chuyển hóa thành quyền năng vô song."] },
-                    tongquan: { title: "THẾ GIỚI LƯỢNG TỬ", slides: ["Đấu trường đối kháng sinh trắc học tiên phong.", "Hệ sinh thái PRO: Kết nối Đồng hồ & Cân thông minh.", "Hệ sinh thái Phổ thông: Chinh phục Trí lực."] },
-                    luatchoi: { title: "GIAO THỨC RÈN LUYỆN", slides: ["Khối lập phương 4 nguyên tố: Địa, Thủy, Hỏa, Phong.", "Thực chiến Lượng tử: Tích lũy SCI lên cấp đại hội tháng 9.", "AI Dynamic Scaling: Vượt qua giới hạn bản thân."] },
-                    santhuong: { title: "ĐẠI HỘI VÕ LÂM", slides: ["Sự kiện tháng 9 trích 30% doanh thu toàn hệ thống.", "Đại chiến phe phái tranh đoạt phần thưởng lớn.", "Đặc quyền vinh danh Bang chủ."] }
+                    nhapmon: { title: "ĐỒNG BỘ SINH MỆNH", slides: ["Xác thực danh tính <span style='color:#00e5ff;'>Đạo chúng</span> và kết nối sinh trắc học cá nhân để số hóa năng lực.", "Bảo mật lượng tử đám mây lõi <span style='color:#00e5ff;'>(Google & Microsoft)</span> tuyệt đối.", "Từng giọt mồ hôi thực tế sẽ chuyển hóa thành <span style='color:#ff007f;'>quyền năng vô song</span>."] },
+                    tongquan: { title: "THẾ GIỚI LƯỢNG TỬ", slides: ["Đấu trường đối kháng sinh trắc học tiên phong, nơi năng lực thực tế quyết định sức mạnh.", "<b>Hệ sinh thái PRO:</b> Kết nối Đồng hồ & Cân thông minh để đồng bộ Địa Luân (Thể chất).", "<b>Hệ sinh thái Phổ thông:</b> Chinh phục Trí lực qua Thủy, Hỏa, Phong Luân."] },
+                    luatchoi: { title: "GIAO THỨC RÈN LUYỆN", slides: ["<b>Khối 4 nguyên tố:</b><br>- Địa Luân (Sức mạnh ngoài đời thực).<br>- Thủy - Hỏa - Phong (Trí nhớ, Phản xạ, Phán đoán).", "Tích lũy điểm <b>SCI</b> để leo cấp bang phái và giành lợi thế độc tôn cho đại hội tháng 9.", "AI Dynamic Scaling tự động căn chỉnh độ khó bám sát giới hạn riêng của bạn."] },
+                    santhuong: { title: "ĐẠI HỘI VÕ LÂM", slides: ["Sự kiện offline hoành tráng vào tháng 9 với quỹ thưởng lớn từ <span style='color:#ff007f;'>30% tổng doanh thu</span>.", "Đại chiến phe phái: Phe thắng nhận 15%, phe thua nhận 5%. Tiệc tri ân miễn phí 100%.", "<b>Đặc quyền vinh danh:</b> PRO xưng bá Bang chủ, Phổ thông săn quà Viễn Tưởng."] }
                 }
             },
             en: {
@@ -496,12 +492,11 @@
         let holoMessages = ["GIỮ 3 GIÂY ĐỂ VÀO", "KHỞI TẠO KHÔNG GIAN LƯỢNG TỬ", "XÁC NHẬN MÃ ẤN KÝ SINH MỆNH"];
         let currentMsgIndex = 0;
 
-        // BƯỚC 1: CHỌN NGÔN NGỮ TỪ BẢN ĐỒ TOÀN CẦU
+        // BƯỚC 1: CHỌN NGÔN NGỮ TỪ BẢN ĐỒ / QUẢ CẦU
         function selectLanguage(lang) {
             currentLang = lang;
             playHologramClick();
             
-            // Ẩn màn hình chọn ngôn ngữ toàn cầu
             const langScreen = document.getElementById('globalLangScreen');
             langScreen.style.transform = "scale(1.2)";
             langScreen.style.opacity = "0";
@@ -540,7 +535,6 @@
             document.getElementById('submitBtnText').textContent = data.submit;
             document.getElementById('registerLinkText').textContent = data.register;
             document.getElementById('hudChatText').textContent = data.chat;
-            document.getElementById('glitchTitle').textContent = data.info.luatchoi.title ? "⚠️ " + data.glitchTitle : "⚠️ DISCLAIMER ⚠️";
         }
 
         // BƯỚC 3: XỬ LÝ QUYỀN GPS VÀ CHUYỂN SANG SCENE 0 (VIDEO KHỞI ĐẦU)
@@ -574,7 +568,6 @@
 
         function closeGpsModalAndStart() {
             document.getElementById('gpsModalOverlay').classList.remove('active');
-            // Mở Scene 0 (Màn hình Video khởi đầu)
             document.getElementById('preSplashScreen').classList.add('active');
         }
 
