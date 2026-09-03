@@ -26,24 +26,24 @@
         .hud-gps { color: #ff007f; font-weight: 700; text-shadow: 0 0 8px rgba(255,0,127,0.6); }
         .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.6); pointer-events: auto; cursor: pointer; }
 
-        /* ================= MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (BẢN ĐỒ / QUẢ CẦU 3D) ================= */
+        /* ================= MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (QUẢ CẦU 3D) ================= */
         #globalLangScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #0a1128 0%, #030508 85%);
             z-index: 99999999; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.8s ease, transform 0.8s ease;
+            opacity: 1; visibility: visible; transition: opacity 0.8s ease, transform 0.8s ease;
         }
         .global-globe-container {
-            position: relative; width: 240px; height: 240px; border-radius: 50%;
-            border: 2px dashed rgba(0, 229, 255, 0.4); box-shadow: 0 0 40px rgba(0, 229, 255, 0.2), inset 0 0 30px rgba(0, 229, 255, 0.15);
-            display: flex; justify-content: center; align-items: center; animation: globeRotate 20s linear infinite;
-            margin-bottom: 25px; background: radial-gradient(circle, rgba(0,229,255,0.05) 0%, transparent 70%);
+            position: relative; width: 220px; height: 220px; border-radius: 50%;
+            border: 2px dashed rgba(0, 229, 255, 0.5); box-shadow: 0 0 50px rgba(0, 229, 255, 0.3), inset 0 0 35px rgba(0, 229, 255, 0.2);
+            display: flex; justify-content: center; align-items: center; animation: globeRotate 15s linear infinite;
+            margin-bottom: 25px; background: radial-gradient(circle, rgba(0,229,255,0.1) 0%, transparent 70%);
         }
         @keyframes globeRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .globe-core-icon {
-            position: absolute; font-size: 45px; animation: globeRotateReverse 20s linear infinite;
-            text-shadow: 0 0 20px #00e5ff;
+            position: absolute; font-size: 50px; animation: globeRotateReverse 15s linear infinite;
+            text-shadow: 0 0 25px #00e5ff;
         }
         @keyframes globeRotateReverse { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
 
@@ -57,18 +57,18 @@
             z-index: 2;
         }
         .lang-node-btn {
-            background: rgba(10, 20, 35, 0.85); backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 229, 255, 0.5); border-radius: 10px; padding: 12px 6px;
+            background: rgba(10, 20, 35, 0.9); backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 229, 255, 0.6); border-radius: 10px; padding: 12px 6px;
             text-align: center; cursor: pointer; color: #ffffff; font-family: 'Montserrat', sans-serif;
             font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 0 0 12px rgba(0, 229, 255, 0.2); transition: all 0.3s;
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.25); transition: all 0.3s; pointer-events: auto;
         }
         .lang-node-btn:hover, .lang-node-btn:active {
-            background: rgba(0, 229, 255, 0.25); border-color: #00e5ff; box-shadow: 0 0 20px #00e5ff;
+            background: rgba(0, 229, 255, 0.3); border-color: #00e5ff; box-shadow: 0 0 20px #00e5ff;
             transform: scale(1.05);
         }
 
-        /* ================= HỘP THOẠI XIN QUYỀN GPS ================= */
+        /* ================= HỘP THOẠI XIN QUYỀN GPS (CỐ ĐỊNH, KHÔNG CHỚP TẮT) ================= */
         .gps-modal-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(15px);
@@ -80,9 +80,7 @@
             width: 90%; max-width: 340px; background: rgba(5, 12, 22, 0.95);
             border: 1.5px solid #ff007f; border-radius: 16px; padding: 25px 20px;
             text-align: center; box-shadow: 0 0 35px rgba(255, 0, 127, 0.4);
-            transform: scale(0.9); transition: transform 0.3s;
         }
-        .gps-modal-overlay.active .gps-modal-box { transform: scale(1); }
         .gps-modal-title {
             color: #ff007f; font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 900;
             text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;
@@ -262,7 +260,7 @@
 
     <!-- MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (QUẢ CẦU 3D) -->
     <div id="globalLangScreen">
-        <div class="global-globe-container" onclick="selectLanguage('vi')">
+        <div class="global-globe-container">
             <div class="globe-core-icon">🌐</div>
         </div>
         <div class="global-title" id="globalTitleText">CHỌN MẠNG LƯỚI NGÔN NGỮ</div>
@@ -492,7 +490,7 @@
         let holoMessages = ["GIỮ 3 GIÂY ĐỂ VÀO", "KHỞI TẠO KHÔNG GIAN LƯỢNG TỬ", "XÁC NHẬN MÃ ẤN KÝ SINH MỆNH"];
         let currentMsgIndex = 0;
 
-        // BƯỚC 1: CHỌN NGÔN NGỮ TỪ BẢN ĐỒ / QUẢ CẦU
+        // BƯỚC 1: CHỌN NGÔN NGỮ TỪ BẢN ĐỒ QUẢ CẦU
         function selectLanguage(lang) {
             currentLang = lang;
             playHologramClick();
@@ -503,7 +501,7 @@
             setTimeout(() => {
                 langScreen.style.display = 'none';
                 applyLanguageUI();
-                // BƯỚC 2: BẬT HỘP THOẠI XIN QUYỀN GPS TRÊN HUD
+                // BƯỚC 2: BẬT CỐ ĐỊNH HỘP XIN QUYỀN GPS TRÊN HUD (CHỈ HIỆN 1 LẦN)
                 document.getElementById('gpsModalOverlay').classList.add('active');
             }, 800);
         }
@@ -537,7 +535,7 @@
             document.getElementById('hudChatText').textContent = data.chat;
         }
 
-        // BƯỚC 3: XỬ LÝ QUYỀN GPS VÀ CHUYỂN SANG SCENE 0 (VIDEO KHỞI ĐẦU)
+        // BƯỚC 3: XỬ LÝ QUYỀN GPS CỐ ĐỊNH VÀ CHUYỂN SANG SCENE 0 (VIDEO)
         function handleGpsPermission(isAllowed) {
             playHologramClick();
             const gpsText = document.getElementById('hudGpsText');
