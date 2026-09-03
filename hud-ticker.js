@@ -14,11 +14,11 @@
 
         /* ================= THANH HUD HỆ THỐNG CỐ ĐỊNH TỐI CAO ================= */
         .hud-top-bar {
-            position: fixed; top: 0; left: 0; width: 100%; height: 50px;
-            display: flex; justify-content: space-between; align-items: center; padding: 0 15px;
-            background: linear-gradient(to bottom, rgba(3,5,8,0.95) 0%, rgba(3,5,8,0.4) 70%, rgba(3,5,8,0) 100%);
-            z-index: 999999999; font-family: 'Space Grotesk', sans-serif; font-size: 10.5px; color: #00e5ff; letter-spacing: 1px;
-            pointer-events: auto;
+            position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 50px !important;
+            display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 15px !important;
+            background: linear-gradient(to bottom, rgba(3,5,8,0.95) 0%, rgba(3,5,8,0.4) 70%, rgba(3,5,8,0) 100%) !important;
+            z-index: 2147483647 !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 10.5px !important; color: #00e5ff !important; letter-spacing: 1px !important;
+            visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;
         }
         .hud-left, .hud-right { display: flex; flex-direction: column; gap: 2px; }
         .hud-right { text-align: right; color: rgba(255,255,255,0.85); }
@@ -30,8 +30,8 @@
         #globalLangScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #0a1128 0%, #030508 85%);
-            z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            opacity: 1; visibility: visible; transition: opacity 0.8s ease, transform 0.8s ease;
+            z-index: 99999999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 1 !important; visibility: visible !important; transition: opacity 0.8s ease, transform 0.8s ease;
         }
         .global-globe-container {
             position: relative; width: 220px; height: 220px; border-radius: 50%;
@@ -61,7 +61,7 @@
             border: 1px solid rgba(0, 229, 255, 0.6); border-radius: 10px; padding: 12px 6px;
             text-align: center; cursor: pointer; color: #ffffff; font-family: 'Montserrat', sans-serif;
             font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 0 0 12px rgba(0, 229, 255, 0.25); transition: all 0.3s;
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.25); transition: all 0.3s; pointer-events: auto;
         }
         .lang-node-btn:hover, .lang-node-btn:active {
             background: rgba(0, 229, 255, 0.3); border-color: #00e5ff; box-shadow: 0 0 20px #00e5ff;
@@ -245,7 +245,7 @@
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20DANG%20NHAP.mp4" playsinline></video>
 
     <!-- THANH HUD TRẠNG THÁI HỆ THỐNG (CỐ ĐỊNH XUYÊN SUỐT) -->
-    <div class="hud-top-bar">
+    <div class="hud-top-bar" id="mainHudBar">
         <div class="hud-left">
             <span class="hud-sys-online" id="hudSysText">SYS.ONLINE // 2026</span>
             <span style="color: #fff;" id="hudUserText">USER: GUEST</span>
