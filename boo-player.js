@@ -119,62 +119,85 @@
     `;
     document.body.appendChild(widget);
 
-    // 3. Logic điều khiển âm thanh và trạng thái xoay
+    // 3. Logic ĐIỀU KHIỂN ÂM THANH THÔNG MINH (Quét toàn bộ thẻ Audio)
     window.addEventListener('DOMContentLoaded', () => {
-        const audioTag = document.querySelector('audio#bgMusic') || document.querySelector('audio');
+        const audioTags = document.querySelectorAll('audio'); // Quét TẤT CẢ các thẻ nhạc trong file
         const avatarIcon = document.getElementById('booAvatarIcon');
         const songTitleEl = document.getElementById('carSongTitle');
         const albumSubEl = document.getElementById('carAlbumSub');
+        
+        let activeAudio = null; // Biến ghi nhớ thẻ audio nào đang phát
 
-        if (audioTag) {
-            let baseSongName = "K-DRIVE ANTHEM";
+        // Hàm trích xuất tên bài nhạc từ đường link
+        function extractSongName(audioElement) {
+            if (!audioElement) return "TELEPATHY COMPANY";
             try {
-                let srcPath = audioTag.src || audioTag.currentSrc;
+                let srcPath = audioElement.src || audioElement.currentSrc;
                 if (srcPath) {
                     let fileName = decodeURIComponent(srcPath.split('/').pop().split('?')[0]);
-                    baseSongName = fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+                    return fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
                 }
             } catch(e) {}
+            return "K-DRIVE ANTHEM";
+        }
 
-            function updatePlayerUI(isPlaying) {
-                if (isPlaying) {
-                    avatarIcon.classList.add('singing'); // Phát nhạc -> Phi tiêu xoay tít + nốt nhạc bay
-                    songTitleEl.textContent = baseSongName;
-                    albumSubEl.textContent = "CYBER NINJA : ALBUM I";
-                } else {
-                    avatarIcon.classList.remove('singing'); // Dừng nhạc -> Phi tiêu đứng im
+        // Hàm cập nhật Giao diện (Tên, Xoay phi tiêu, Media Session)
+        function updatePlayerUI(audioElement, isPlaying) {
+            if (isPlaying) {
+                activeAudio = audioElement; // Lưu lại bài đang phát
+                const songName = extractSongName(audioElement);
+                avatarIcon.classList.add('singing');
+                songTitleEl.textContent = songName;
+                albumSubEl.textContent = "CYBER NINJA : ALBUM I";
+                
+                // Đồng bộ lên thanh thông báo của điện thoại
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: songName,
+                        artist: 'K-Drive // DJ Kai-Ripe',
+                        album: 'Cyber Ninja : Album I',
+                        artwork: [
+                            { src: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Music%20anh%20nen.png?raw=true', sizes: '512x512', type: 'image/png' }
+                        ]
+                    });
+                }
+            } else {
+                // Chỉ dừng xoay nếu bài bị dừng chính là bài đang active
+                if (activeAudio === audioElement) {
+                    avatarIcon.classList.remove('singing');
                     songTitleEl.textContent = "TELEPATHY COMPANY";
                     albumSubEl.textContent = "CYBER NINJA : CHAPTER I";
                 }
             }
+        }
 
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: baseSongName,
-                    artist: 'K-Drive // DJ Kai-Ripe',
-                    album: 'Cyber Ninja : Album I',
-                    artwork: [
-                        { src: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Music%20anh%20nen.png?raw=true', sizes: '512x512', type: 'image/png' }
-                    ]
-                });
-            }
+        // Gắn mắt thần theo dõi vào TẤT CẢ các bài nhạc
+        audioTags.forEach(audio => {
+            audio.addEventListener('play', () => updatePlayerUI(audio, true));
+            audio.addEventListener('pause', () => updatePlayerUI(audio, false));
+            audio.addEventListener('ended', () => updatePlayerUI(audio, false));
+        });
 
-            widget.addEventListener('click', () => {
-                if (audioTag.paused) {
-                    audioTag.play().then(() => {
-                        updatePlayerUI(true);
-                    }).catch(err => console.log(err));
-                } else {
-                    audioTag.pause();
-                    updatePlayerUI(false);
+        // Xử lý khi bấm tay vào cái hộp nhạc
+        widget.addEventListener('click', () => {
+            // Tìm xem có bài nhạc nào đang rên nền không
+            let playingAudio = Array.from(audioTags).find(a => !a.paused);
+            
+            if (playingAudio) {
+                playingAudio.pause(); // Nếu có thì tắt đi
+            } else {
+                // Nếu đang im lặng thì bật bài active gần nhất, hoặc bật đại bài nền (bgMusic)
+                let toPlay = activeAudio || document.getElementById('bgMusic') || audioTags[0];
+                if (toPlay) {
+                    toPlay.play().catch(err => console.log(err));
                 }
-            });
+            }
+        });
 
-            audioTag.addEventListener('play', () => updatePlayerUI(true));
-            audioTag.addEventListener('pause', () => updatePlayerUI(false));
-            audioTag.addEventListener('ended', () => updatePlayerUI(false));
-
-            updatePlayerUI(!audioTag.paused);
+        // Kiểm tra xem khi web load xong có bài nào bị ép phát luôn không
+        let initialPlaying = Array.from(audioTags).find(a => !a.paused);
+        if (initialPlaying) {
+            updatePlayerUI(initialPlaying, true);
         }
     });
 })();
