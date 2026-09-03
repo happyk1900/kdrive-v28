@@ -12,25 +12,25 @@
         body { background-color: #030508; height: 100vh; height: 100dvh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Space Grotesk', sans-serif; }
         img, video { -webkit-user-drag: none; pointer-events: none; }
 
-        /* ================= THANH HUD HỆ THỐNG TRÊN CÙNG ================= */
+        /* ================= THANH HUD HỆ THỐNG CỐ ĐỊNH TỐI CAO ================= */
         .hud-top-bar {
-            position: absolute; top: 0; left: 0; width: 100%; height: 50px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 50px;
             display: flex; justify-content: space-between; align-items: center; padding: 0 15px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%);
-            z-index: 99999; font-family: 'Space Grotesk', sans-serif; font-size: 10.5px; color: #00e5ff; letter-spacing: 1px;
-            pointer-events: none;
+            background: linear-gradient(to bottom, rgba(3,5,8,0.95) 0%, rgba(3,5,8,0.4) 70%, rgba(3,5,8,0) 100%);
+            z-index: 999999999; font-family: 'Space Grotesk', sans-serif; font-size: 10.5px; color: #00e5ff; letter-spacing: 1px;
+            pointer-events: auto;
         }
         .hud-left, .hud-right { display: flex; flex-direction: column; gap: 2px; }
         .hud-right { text-align: right; color: rgba(255,255,255,0.85); }
         .hud-sys-online { color: #00e5ff; font-weight: 700; text-shadow: 0 0 8px rgba(0,229,255,0.6); }
         .hud-gps { color: #ff007f; font-weight: 700; text-shadow: 0 0 8px rgba(255,0,127,0.6); }
-        .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.6); pointer-events: auto; cursor: pointer; }
+        .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.6); cursor: pointer; }
 
         /* ================= MÀN HÌNH CHỌN NGÔN NGỮ TOÀN CẦU (QUẢ CẦU 3D) ================= */
         #globalLangScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #0a1128 0%, #030508 85%);
-            z-index: 99999999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center;
             opacity: 1; visibility: visible; transition: opacity 0.8s ease, transform 0.8s ease;
         }
         .global-globe-container {
@@ -61,18 +61,18 @@
             border: 1px solid rgba(0, 229, 255, 0.6); border-radius: 10px; padding: 12px 6px;
             text-align: center; cursor: pointer; color: #ffffff; font-family: 'Montserrat', sans-serif;
             font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 0 0 12px rgba(0, 229, 255, 0.25); transition: all 0.3s; pointer-events: auto;
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.25); transition: all 0.3s;
         }
         .lang-node-btn:hover, .lang-node-btn:active {
             background: rgba(0, 229, 255, 0.3); border-color: #00e5ff; box-shadow: 0 0 20px #00e5ff;
             transform: scale(1.05);
         }
 
-        /* ================= HỘP THOẠI XIN QUYỀN GPS (CỐ ĐỊNH, KHÔNG CHỚP TẮT) ================= */
+        /* ================= HỘP THOẠI XIN QUYỀN GPS ================= */
         .gps-modal-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(15px);
-            z-index: 9999999; display: flex; justify-content: center; align-items: center;
+            z-index: 99999999; display: flex; justify-content: center; align-items: center;
             opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
         }
         .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
@@ -107,7 +107,7 @@
         /* ================= SCENE 0: MÀN HÌNH KHỞI ĐỘNG (VIDEO) ================= */
         #preSplashScreen { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #000; z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            background: #000; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; 
             opacity: 0; visibility: hidden; transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out; 
             cursor: pointer; pointer-events: none; 
         }
@@ -125,7 +125,7 @@
         }
 
         /* ================= SCENE 1: QUẦY LỄ TÂN ================= */
-        #splashScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #030508; z-index: 99999; display: flex; flex-direction: column; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.8s ease; }
+        #splashScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #030508; z-index: 9999; display: flex; flex-direction: column; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.8s ease; }
         #splashScreen.active { opacity: 1; visibility: visible; }
         .splash-bg-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transform: scale(1.05) translateY(15px); }
         
@@ -190,7 +190,7 @@
         }
 
         /* ================= MODAL THÔNG TIN (FONT CHỮ TO, RÕ NÉT) ================= */
-        .info-modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); backdrop-filter: blur(10px); z-index: 9999999; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; pointer-events: none; }
+        .info-modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); backdrop-filter: blur(10px); z-index: 999999; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; pointer-events: none; }
         .info-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
         .info-modal-content { width: 92%; max-width: 380px; background-color: rgba(5, 10, 18, 0.98); border: 1.5px solid #00e5ff; border-radius: 18px; padding: 22px 18px 18px 18px; box-shadow: 0 0 35px rgba(0, 229, 255, 0.35); transform: scale(0.9); transition: transform 0.3s ease; display: flex; flex-direction: column; align-items: center; }
         .info-modal-overlay.active .info-modal-content { transform: scale(1); }
@@ -216,7 +216,7 @@
         .gateway-popup { 
             position: absolute; top: 50%; left: 50%; width: 92%; max-width: 340px; 
             background: rgba(10, 15, 25, 0.65); backdrop-filter: blur(20px); 
-            border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 20px; padding: 30px 25px; z-index: 99999; 
+            border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 20px; padding: 30px 25px; z-index: 999; 
             opacity: 0; transform: translate(-50%, -40%) scale(0.95); pointer-events: none; visibility: hidden; 
             transition: all 0.8s cubic-bezier(0.25, 1, 0.3, 1); box-shadow: 0 15px 35px rgba(0,0,0,0.8); 
         }
@@ -234,7 +234,7 @@
         .change-pass-link { color: rgba(255, 255, 255, 0.6); cursor: pointer; }
         .login-btn-submit { width: 100%; padding: 15px 20px; background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(0, 150, 255, 0.35)); color: #ffffff; font-weight: 900; font-size: 12px; letter-spacing: 4px; border: 1px solid rgba(0, 229, 255, 0.5); border-radius: 12px; cursor: pointer; text-transform: uppercase; }
         .back-home-btn { width: 100%; padding: 12px; background: transparent; border: 1px solid rgba(0, 229, 255, 0.2); color: #00e5ff; border-radius: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        #successVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 9999999; display: none; background: #000; }
+        #successVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 999999; display: none; background: #000; }
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
@@ -244,7 +244,7 @@
     <audio id="toriiAudio" crossorigin="anonymous" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Path%20of%20the%20Ninja.mp3" preload="auto" loop></audio>
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20DANG%20NHAP.mp4" playsinline></video>
 
-    <!-- THANH HUD TRẠNG THÁI HỆ THỐNG -->
+    <!-- THANH HUD TRẠNG THÁI HỆ THỐNG (CỐ ĐỊNH XUYÊN SUỐT) -->
     <div class="hud-top-bar">
         <div class="hud-left">
             <span class="hud-sys-online" id="hudSysText">SYS.ONLINE // 2026</span>
@@ -501,7 +501,7 @@
             setTimeout(() => {
                 langScreen.style.display = 'none';
                 applyLanguageUI();
-                // BƯỚC 2: BẬT CỐ ĐỊNH HỘP XIN QUYỀN GPS TRÊN HUD (CHỈ HIỆN 1 LẦN)
+                // BƯỚC 2: BẬT CỐ ĐỊNH HỘP XIN QUYỀN GPS
                 document.getElementById('gpsModalOverlay').classList.add('active');
             }, 800);
         }
@@ -535,7 +535,7 @@
             document.getElementById('hudChatText').textContent = data.chat;
         }
 
-        // BƯỚC 3: XỬ LÝ QUYỀN GPS CỐ ĐỊNH VÀ CHUYỂN SANG SCENE 0 (VIDEO)
+        // BƯỚC 3: XỬ LÝ QUYỀN GPS CỐ ĐỊNH
         function handleGpsPermission(isAllowed) {
             playHologramClick();
             const gpsText = document.getElementById('hudGpsText');
@@ -551,14 +551,14 @@
                         closeGpsModalAndStart();
                     },
                     (error) => {
-                        gpsText.textContent = "GPS: OFFLINE / UNAUTHORIZED";
+                        gpsText.textContent = "GPS: OFFLINE";
                         gpsText.style.color = "#ff3333";
                         closeGpsModalAndStart();
                     },
                     { timeout: 5000 }
                 );
             } else {
-                gpsText.textContent = "GPS: OFFLINE / UNAUTHORIZED";
+                gpsText.textContent = "GPS: OFFLINE";
                 gpsText.style.color = "#ff3333";
                 closeGpsModalAndStart();
             }
