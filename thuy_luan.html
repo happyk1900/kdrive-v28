@@ -82,7 +82,7 @@
         .assembled #dual-metrics-box { opacity: 1; }
 
         .metric-card { flex: 1; background: rgba(5, 15, 25, 0.9); border: 1px solid rgba(0, 229, 255, 0.6); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.7), inset 0 0 12px rgba(0, 229, 255, 0.2); backdrop-filter: blur(5px); }
-        .metric-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #00e5ff; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; font-weight: bold; text-shadow: 0 0 6px rgba(0,229,255,0.5); }
+        .metric-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #00e5ff; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; font-weight: bold; text-shadow: 0 0 6px rgba(0,229,255,0.5); cursor: pointer; user-select: none; }
         .metric-val { font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: bold; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.8); }
 
         /* HỆ THỐNG SỔ XUỐNG (ACCORDION) TO RÕ */
@@ -280,7 +280,8 @@
     <!-- HAI HỘP CHỈ SỐ -->
     <div id="dual-metrics-box">
         <div class="metric-card">
-            <span class="metric-label">SCI AVG</span>
+            <!-- CHẠM 5 LẦN VÀO ĐÂY ĐỂ MỞ KHÓA TEST MODE -->
+            <span class="metric-label" id="secret-test-trigger">SCI AVG</span>
             <span class="metric-val" id="sci-avg-val">0.0%</span>
         </div>
         <div class="metric-card">
@@ -330,7 +331,7 @@
     <!-- BẢNG LED CHẠY CHỮ -->
     <div id="terminal-bar">
         <div class="terminal-track">
-            <span class="terminal-text">⚡ [HỆ THỐNG GIỚI HẠN 3 LƯỢT/NGÀY]: HÃY HOÀN THÀNH ẢI VÀ BẤM LƯU ĐIỂM NGAY! ⚡ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⚡ [ĐẠO TRƯỜNG THỦY LUÂN]: TẬP TRUNG - CHÍNH XÁC - NÉT CĂNG! ⚡</span>
+            <span class="terminal-text" id="sys-msg-led">⚡ [HỆ THỐNG GIỚI HẠN 3 LƯỢT/NGÀY]: HÃY HOÀN THÀNH ẢI VÀ BẤM LƯU ĐIỂM NGAY! ⚡ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⚡ [ĐẠO TRƯỜNG THỦY LUÂN]: TẬP TRUNG - CHÍNH XÁC - NÉT CĂNG! ⚡</span>
         </div>
     </div>
 
@@ -390,8 +391,22 @@
         const bgMusic = document.getElementById('bg-music');
         const speakerIcon = document.getElementById('speaker-btn');
         
-        // Link ảnh bé Boo Ninja của anh khi up lên GitHub nhớ dán vào đây nhé!
+        // CẤU HÌNH BIẾN TOÀN CỤC
         const booNinjaIconUrl = 'https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/boo_ninja.png'; 
+        let isTestMode = false; // Biến kiểm soát chế độ bẻ khóa 3 lượt
+        let secretClicks = 0;   // Đếm số lần chạm bí mật
+
+        // LẮNG NGHE CHẠM ĐỂ MỞ KHÓA TEST MODE
+        document.getElementById('secret-test-trigger').addEventListener('click', () => {
+            secretClicks++;
+            if (secretClicks === 5) {
+                isTestMode = true;
+                playSound('coin');
+                document.getElementById('sys-msg-led').innerHTML = '⚡ [HỆ THỐNG]: CHẾ ĐỘ TEST ĐÃ KÍCH HOẠT - VÔ HIỆU HÓA GIỚI HẠN LƯỢT CHƠI! ⚡ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⚡ CHẾ ĐỘ TEST ĐÃ KÍCH HOẠT ⚡';
+                updateHologramUI();
+                alert('🔓 Đã bẻ khóa Giới Hạn Kỷ Luật! Bạn có thể test ải vô hạn lần.');
+            }
+        });
 
         function playSound(type) {
             try { 
@@ -417,7 +432,6 @@
             } catch (e) {}
         }
 
-        // ================= HIỆN THỊ ALERT =================
         function showCustomAlert() {
             playSound('error');
             document.getElementById('custom-alert-overlay').classList.add('active');
@@ -552,13 +566,15 @@
                     activeLevelsCount++;
                 }
 
-                // Đếm số lượt đã chơi trong ngày (tối đa 3)
                 let playedCount = validScores.length;
                 let remainingTurns = Math.max(0, 3 - playedCount);
 
                 let statusEl = document.getElementById(`status-${id}`);
                 if(statusEl) {
-                    if (remainingTurns > 0) {
+                    if (isTestMode) {
+                        statusEl.innerText = `TEST MODE (∞)`;
+                        statusEl.style.color = '#00e5ff';
+                    } else if (remainingTurns > 0) {
                         statusEl.innerText = `LƯỢT: ${remainingTurns}/3`;
                         statusEl.style.color = '#00ff66';
                     } else {
@@ -579,7 +595,6 @@
                 if(tagEl) tagEl.innerText = `MAX: ${maxVal}`;
             });
 
-            // Lực Chiến dựa theo kỷ luật hoàn thành 3 ải
             let currentDaySCI = (activeLevelsCount / 3) * 100;
 
             let sciHistory = JSON.parse(localStorage.getItem(sciHistoryKey)) || [];
@@ -658,9 +673,9 @@
         }
 
         function openGameArena(id, name) {
-            // Khóa chốt 3 lượt - Nếu hết lượt hiện Alert Custom
+            // Kiểm tra giới hạn 3 lượt (bỏ qua nếu đang bật Test Mode)
             let runs = gameRuns[id].filter(v => v !== null);
-            if (runs.length >= 3) {
+            if (runs.length >= 3 && !isTestMode) {
                 showCustomAlert();
                 return;
             }
@@ -720,6 +735,9 @@
         }
 
         function commitCurrentRun() {
+            // Test Mode không lưu điểm rác vào lịch sử để bảo toàn dữ liệu thật
+            if (isTestMode) return; 
+
             stopPressureTimer();
             let runs = gameRuns[currentGame];
             for (let i = 0; i < 3; i++) {
@@ -728,6 +746,12 @@
                     break;
                 }
             }
+            // Nếu đã full 3 lượt thì đẩy điểm cũ nhất ra, đưa điểm mới vào
+            if(runs.filter(v => v !== null).length > 3) {
+                runs.shift();
+                runs.push(arenaScore);
+            }
+            
             localStorage.setItem(todayDateKey, JSON.stringify(gameRuns));
             updateHologramUI();
         }
@@ -969,7 +993,6 @@
             let displayTime = Math.max(400, 1500 - (currentLevel * 100));
             t3HideTimeout = setTimeout(() => {
                 if(!isPlaying || myRoundId !== currentRoundId) return;
-                // Tích hợp Icon Bé Boo Ninja
                 area.innerHTML = `<div class="hidden-box"><img src="${booNinjaIconUrl}" style="width:90%; height:90%; object-fit:contain; filter:drop-shadow(0 0 5px #00e5ff);" alt="Boo Ninja"></div>`.repeat(t3Seq.length);
                 canClick = true;
             }, displayTime);
@@ -1056,8 +1079,7 @@
             localStorage.setItem(sciHistoryKey, JSON.stringify(sciHistory));
             localStorage.setItem(prestigeHistoryKey, JSON.stringify(prestigeHistory));
             
-            // Xung nhịp UI sau khi lưu
-            document.getElementById('sys-msg').innerHTML = `✅ [HỆ THỐNG]: KỶ LUẬT & DANH VỌNG ĐÃ CẬP NHẬT THÀNH CÔNG!`;
+            document.getElementById('sys-msg-led').innerHTML = `⚡ [HỆ THỐNG]: KỶ LUẬT & DANH VỌNG ĐÃ CẬP NHẬT THÀNH CÔNG! ⚡`;
             updateHologramUI();
         }
         
@@ -1065,7 +1087,8 @@
             playSound('error');
             document.body.classList.remove('assembled');
             document.getElementById('sanctum-bg').style.opacity = '0';
-            setTimeout(() => { window.location.href = 'index.html'; }, 800); 
+            // Cập nhật đường dẫn chuẩn xác
+            setTimeout(() => { window.location.href = 'core.html'; }, 800); 
         }
     </script>
 <script src="boo-player.js"></script>
