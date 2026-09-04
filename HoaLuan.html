@@ -250,11 +250,11 @@
         </div>
     </div>
 
-    <!-- HAI HỘP MỚI: LỰC CHIẾN (SCI AVG) & DANH VỌNG (MAX POINT) -->
+    <!-- HAI HỘP MỚI: LỰC CHIẾN (KỶ LUẬT) & DANH VỌNG (MAX POINT) -->
     <div id="dual-metrics-box">
         <div class="metric-card">
-            <span class="metric-label">LỰC CHIẾN (SCI)</span>
-            <span class="metric-val" id="sci-avg-val">0.0</span>
+            <span class="metric-label">LỰC CHIẾN (KỶ LUẬT)</span>
+            <span class="metric-val" id="sci-avg-val">0.0%</span>
         </div>
         <div class="metric-card">
             <span class="metric-label">DANH VỌNG (MAX)</span>
@@ -286,7 +286,7 @@
     </div>
 
     <div id="terminal-bar">
-        <span class="terminal-text" id="sys-msg">⚠️ Nhớ lưu điểm mỗi ngày để hoàn thành nhiệm vụ!</span>
+        <span class="terminal-text" id="sys-msg">⚠️ SCI hiện được tính dựa trên Kỷ Luật Chuyên Cần (Chơi đủ 3 ải = 100%)!</span>
     </div>
 
     <div id="action-panel">
@@ -376,10 +376,11 @@
         function nextPage() { if(currentLorePage < 2) { currentLorePage++; renderLorePage(); playSound('error'); } }
         function prevPage() { if(currentLorePage > 0) { currentLorePage--; renderLorePage(); playSound('error'); } }
 
-        // Logic 3 lượt chơi mỗi ngày và lưu điểm
+        // Logic 3 lượt chơi mỗi ngày và lưu điểm (Chu kỳ 7 ngày)
         let gameRuns = { '1': [null, null, null], '2': [null, null, null], '3': [null, null, null] };
         const todayDateKey = 'hualuan_runs_' + new Date().toISOString().slice(0,10);
         const savedScoreKey = 'hualuan_saved_score_' + new Date().toISOString().slice(0,10);
+        const sciHistoryKey = 'hualuan_sci_history';
 
         window.onload = () => {
             document.getElementById('sanctum-bg').style.opacity = '1';
@@ -392,6 +393,7 @@
             setTimeout(() => { document.body.classList.add('assembled'); }, 300);
         };
 
+        // TÍNH TOÁN LỰC CHIẾN KỶ LUẬT (SCI = CHUYÊN CẦN 3 ẢI) VÀ DANH VỌNG MAX
         function updateHologramUI() {
             let totalMaxSum = 0;
             let activeLevelsCount = 0;
@@ -401,8 +403,10 @@
                 let validScores = runs.filter(v => v !== null);
                 let maxVal = validScores.length > 0 ? Math.max(...validScores) : 0;
                 
+                totalMaxSum += maxVal;
+
+                // Nếu có chơi ít nhất 1 lần trong ngày, tính là hoàn thành ải đó
                 if(validScores.length > 0) {
-                    totalMaxSum += maxVal;
                     activeLevelsCount++;
                 }
 
@@ -424,12 +428,29 @@
                 }
             });
 
-            // 1. Lực chiến (SCI AVG): Trung bình cộng các điểm MAX
-            let sciAvg = activeLevelsCount > 0 ? (totalMaxSum / 3).toFixed(1) : '0.0';
+            // Lực Chiến (Kỷ Luật) của ngày hôm nay: Hoàn thành bao nhiêu phần của 3 ải
+            let currentDaySCI = (activeLevelsCount / 3) * 100;
+
+            // XỬ LÝ CHU KỲ 7 NGÀY (7-DAY MOVING AVERAGE)
+            let sciHistory = JSON.parse(localStorage.getItem(sciHistoryKey)) || [];
+            let todaySaved = localStorage.getItem(savedScoreKey);
+            let displaySCI = currentDaySCI; // Mặc định hiển thị điểm hôm nay nếu chưa từng lưu
+
+            if(sciHistory.length > 0) {
+                let sumHistory = sciHistory.reduce((a, b) => a + b, 0);
+                if(todaySaved) {
+                    // Đã lưu -> Cộng gộp các ngày, lấy ngày cuối cùng thay bằng điểm hôm nay
+                    displaySCI = (sumHistory - sciHistory[sciHistory.length - 1] + currentDaySCI) / sciHistory.length;
+                } else {
+                    // Chưa lưu -> Tạm tính điểm hôm nay như ngày tiếp theo
+                    let days = Math.min(sciHistory.length + 1, 7);
+                    displaySCI = (sumHistory + currentDaySCI) / days;
+                }
+            }
+
             let sciAvgEl = document.getElementById('sci-avg-val');
-            if(sciAvgEl) sciAvgEl.innerText = sciAvg;
+            if(sciAvgEl) sciAvgEl.innerText = displaySCI.toFixed(1) + '%';
             
-            // 2. Danh vọng (MAX Point): Tổng điểm MAX của các ải
             let maxTotalEl = document.getElementById('max-total-val');
             if(maxTotalEl) maxTotalEl.innerText = totalMaxSum;
         }
@@ -660,10 +681,43 @@
             document.getElementById('task-container').style.pointerEvents = 'auto';
         }
 
+        // LƯU ĐIỂM KỶ LUẬT (SCI CHUYÊN CẦN) VÀO CHU KỲ 7 NGÀY
         function saveScore() {
             playSound('coin');
             localStorage.setItem(savedScoreKey, 'true');
-            document.getElementById('sys-msg').innerHTML = `✅ Đã lưu điểm thành công ngày hôm nay!`;
+            
+            // Tính số lượng ải đã hoàn thành trong hôm nay
+            let activeLevelsCount = 0;
+            ['1', '2', '3'].forEach(id => {
+                let runs = gameRuns[id];
+                if(runs.filter(v => v !== null).length > 0) {
+                    activeLevelsCount++;
+                }
+            });
+            
+            // Tính Lực chiến của hôm nay: Chơi 1 ải = 33.3%, 3 ải = 100%
+            let todaySCI = (activeLevelsCount / 3) * 100;
+
+            // Xử lý chuỗi Moving Average 7 ngày
+            let sciHistory = JSON.parse(localStorage.getItem(sciHistoryKey)) || [];
+            let alreadySavedToday = localStorage.getItem('last_saved_date_hualuan') === new Date().toISOString().slice(0,10);
+            
+            if(alreadySavedToday) {
+                // Đã lưu -> Ghi đè chỉ số vào ngày hôm nay
+                if(sciHistory.length > 0) sciHistory[sciHistory.length - 1] = todaySCI;
+                else sciHistory.push(todaySCI);
+            } else {
+                // Lưu lần đầu tiên trong ngày -> Đẩy vào chuỗi
+                sciHistory.push(todaySCI);
+                // Giới hạn chu kỳ 7 ngày, nếu quá 7 thì xóa ngày cũ nhất
+                if(sciHistory.length > 7) sciHistory.shift();
+                localStorage.setItem('last_saved_date_hualuan', new Date().toISOString().slice(0,10));
+            }
+
+            localStorage.setItem(sciHistoryKey, JSON.stringify(sciHistory));
+            
+            document.getElementById('sys-msg').innerHTML = `✅ Đã lưu Điểm Kỷ Luật vào Chu Kỳ 7 Ngày thành công!`;
+            updateHologramUI();
         }
         
         function navToCore() {
