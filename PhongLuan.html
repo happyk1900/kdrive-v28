@@ -132,11 +132,15 @@
         .highlight-score { color: #00ff66; font-weight: bold; font-size: 13px; text-shadow: 0 0 8px rgba(0,255,102,0.5); }
         .inline-boo-msg { color: #a0c0d0; font-style: italic; font-size: 10px; margin-left: 3px; }
 
-        .wind-target { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: background 0.1s, box-shadow 0.1s, opacity 0.2s, transform 0.1s; pointer-events: none; } 
-        .t-track { width: 45px; height: 45px; background: rgba(160,192,208,0.5); box-shadow: 0 0 20px #a0c0d0; border: 2px solid #fff; }
+        .wind-target { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: background 0.1s, box-shadow 0.1s, opacity 0.2s, transform 0.1s; } 
+        .t-track { width: 45px; height: 45px; background: rgba(160,192,208,0.5); box-shadow: 0 0 20px #a0c0d0; border: 2px solid #fff; pointer-events: none; }
         .t-track.hovered { background: #fff; box-shadow: 0 0 30px #fff; border-color: #00ff66; transform: translate(-50%, -50%) scale(1.1); }
+        
+        /* ẢI 2: TÀNG HÌNH THÌ VÔ HIỆU HÓA CLICK, HIỆN HỮU MỚI CHO BẤM */
         .t-ghost { width: 50px; height: 50px; background: #fff; box-shadow: 0 0 25px #fff; opacity: 1; cursor: crosshair; pointer-events: auto; }
-        .t-ghost.hidden { opacity: 0; box-shadow: none; background: transparent; border: none; }
+        .t-ghost.hidden { opacity: 0; box-shadow: none; background: transparent; border: none; pointer-events: none; }
+
+        /* ẢI 3: BIẾN ÁO */
         .t-multi { width: 50px; height: 50px; cursor: crosshair; pointer-events: auto; }
         .mode-track { background: transparent; border: 2px dashed #a0c0d0; box-shadow: 0 0 15px #a0c0d0; }
         .mode-strike { background: #fff; box-shadow: 0 0 35px #fff; border: 2px solid #00ff66; }
@@ -263,7 +267,7 @@
     <div id="task-arena">
         <div id="play-area">
             <div id="custom-cursor"></div>
-            <div id="game-target" class="wind-target"></div>
+            <div id="game-target" class="wind-target" onmousedown="handleTargetClick(event)" ontouchstart="handleTargetClick(event)"></div>
         </div>
         
         <div class="arena-ui-panel" id="arena-menu-panel">
@@ -515,9 +519,9 @@
         }
 
         const rulesDict = {
-            '1': "<b>LUẬT CHƠI - BÁM ĐUỔI (VÔ CỰC):</b><br>• Dùng chuột/ngón tay di chuyển liên tục bám sát tâm luồng gió.<br>• Giữ tâm trong vòng tròn sáng để tích lũy điểm.<br>• <b>CHÚ Ý:</b> Có <b>3 Mạng (❤️❤️❤️)</b>. Tốc độ gió tăng trưởng vô cực theo số điểm đạt được!",
-            '2': "<b>LUẬT CHƠI - HÓA HƯ (VÔ CỰC):</b><br>• Luồng gió tàng hình và hiện hình liên tục.<br>• Chỉ được click/chạm khi gió <b>HIỆN HỮU RÕ RÀNG</b> (+10 điểm).<br>• <b>CHÚ Ý:</b> Bấm nhầm lúc tàng hình hoặc bấm hụt sẽ bị <b>mất 1 mạng</b>!",
-            '3': "<b>LUẬT CHƠI - BIẾN ẢO (VÔ CỰC):</b><br>• Đọc kỹ trạng thái của mục tiêu:<br>  - <i>Viền mờ:</i> Chỉ bám theo, KHÔNG BẤM.<br>  - <i>Trắng đặc:</i> Bấm ngay lập tức.<br>  - <i>Viền dày:</i> Đợi nở to cực đại mới bấm.<br>• Sống sót và bứt phá điểm số vô cực!"
+            '1': "<b>LUẬT CHƠI - BÁM ĐUỔI (VÔ CỰC):</b><br>• Dùng ngón tay/chuột bám sát tâm luồng gió.<br>• Giữ trong vòng tròn sáng để tích lũy điểm.<br>• <b>CHÚ Ý:</b> Có <b>3 Mạng (❤️❤️❤️)</b>. Tốc độ tăng trưởng vô cực không giới hạn!",
+            '2': "<b>LUẬT CHƠI - HÓA HƯ (VÔ CỰC):</b><br>• Gió liên tục tàng hình và hiện hình rõ ràng.<br>• <b>CHÍNH XÁC:</b> Chỉ bấm khi gió <b>HIỆN HỮU RÕ RÀNG</b> (+10đ).<br>• <b>PHẠT:</b> Bấm lúc đang tàng hình (vô hình) sẽ bị <b>MẤT 1 MẠNG</b>!",
+            '3': "<b>LUẬT CHƠI - BIẾN ẢO (VÔ CỰC):</b><br>• Đọc kỹ 3 trạng thái mục tiêu rõ ràng:<br>  - <i>Viền mờ:</i> Chỉ bám theo, KHÔNG BẤM.<br>  - <i>Trắng đặc:</i> Bấm ngay lập tức.<br>  - <i>Viền dày phình to:</i> Đợi nở to cực đại mới bấm.<br>• Sinh tồn vô cực bứt phá điểm cao!"
         };
 
         function openGameArena(id, name) {
@@ -622,39 +626,42 @@
             if(stability <= 0) finishGame(reason);
         }
 
-        // BẮT SỰ KIỆN CLICK CHO ẢI 2 VÀ ẢI 3
-        playArea.onmousedown = playArea.ontouchstart = (e) => {
+        // XỬ LÝ CLICK MỤC TIÊU RẤT RẠCH RÒI CHO TỪNG ẢI
+        function handleTargetClick(e) {
             if(!isPlaying) return;
-            if(currentGame === '1') return; // Ải 1 dùng bám chuột, không dùng click
+            e.stopPropagation();
 
-            let dist = Math.hypot(mx - tx, my - ty);
-            let hitRadius = 70;
-            
             if(currentGame === '2') {
-                if(dist < hitRadius && !isGhost) {
+                // Ải 2: Nếu đang tàng hình (hidden) thì không tương tác được, bấm vào không tính. 
+                // Chỉ khi hiện hữu rõ ràng (không hidden) bấm vào mới chuẩn xác!
+                if(!isGhost) {
                     arenaScore += 10;
                     playSound('coin'); booMsg("CHÍNH XÁC (+10)!");
                     tx = 50 + Math.random() * (maxX - 100); 
                     ty = 50 + Math.random() * (maxY - 100);
-                } else {
-                    loseLife("BẤM SAI / TÀNG HÌNH!");
+                    document.getElementById('arena-score').innerText = Math.floor(arenaScore);
                 }
             } 
             else if(currentGame === '3') {
-                if(g3Mode === 'STRIKE' && dist < hitRadius) {
+                let dist = Math.hypot(mx - tx, my - ty);
+                if(g3Mode === 'STRIKE') {
                     arenaScore += 20; playSound('coin'); booMsg("SÁT PHẠT (+20)!");
                     tEl.style.background = "#000"; setTimeout(()=> tEl.style.background = "#fff", 100);
                     tx = 50 + Math.random() * (maxX - 100); ty = 50 + Math.random() * (maxY - 100);
-                } else if (g3Mode === 'WAIT' && dist < hitRadius && g3Scale > 1.4) {
+                } else if (g3Mode === 'WAIT' && g3Scale > 1.35) {
                     arenaScore += 30; playSound('coin'); booMsg("ĐIỀM TĨNH (+30)!");
                     tEl.style.background = "#fff"; setTimeout(()=> tEl.style.background = "transparent", 100);
                     tx = 50 + Math.random() * (maxX - 100); ty = 50 + Math.random() * (maxY - 100);
                 } else {
-                    if(g3Mode !== 'TRACK') loseLife("SAI NHỊP BIẾN ẢO!");
+                    if(g3Mode === 'TRACK') {
+                        loseLife("VIỀN MỜ: CHỈ BÁM THEO!");
+                    } else if(g3Mode === 'WAIT') {
+                        loseLife("CHƯA NỞ ĐỦ TO!");
+                    }
                 }
+                document.getElementById('arena-score').innerText = Math.floor(arenaScore);
             }
-            document.getElementById('arena-score').innerText = Math.floor(arenaScore);
-        };
+        }
 
         /* ------------------ CÀI ĐẶT ------------------ */
         function initG1() {
@@ -669,14 +676,21 @@
         function initG2() {
             tEl.className = 'wind-target t-ghost';
             document.getElementById('custom-cursor').style.display = 'none';
-            baseSpeed = 1.8;
+            baseSpeed = 1.6;
+            isGhost = false;
             booMsg("Chỉ bấm khi Hiện Hữu!");
+            
             let t = setInterval(() => {
                 if(!isPlaying) return;
                 isGhost = !isGhost;
-                if(isGhost) { tEl.classList.add('hidden'); booMsg("HÓA HƯ (Đừng bấm)..."); } 
-                else { tEl.classList.remove('hidden'); booMsg("HIỆN HỮU (Bấm ngay)!"); }
-            }, 2000);
+                if(isGhost) { 
+                    tEl.classList.add('hidden'); 
+                    booMsg("HÓA HƯ (Vô hình - Đừng bấm)..."); 
+                } else { 
+                    tEl.classList.remove('hidden'); 
+                    booMsg("HIỆN HỮU (Bấm ngay)!"); 
+                }
+            }, 1800);
             gTimeouts.push(t);
         }
 
@@ -693,7 +707,7 @@
                 if(g3Mode === 'TRACK') { tEl.classList.add('mode-track'); booMsg("Viền mờ: Chỉ bám theo"); }
                 else if(g3Mode === 'STRIKE') { tEl.classList.add('mode-strike'); booMsg("Trắng đặc: Bấm ngay!"); }
                 else if(g3Mode === 'WAIT') { tEl.classList.add('mode-wait'); booMsg("Viền dày: Đợi nở to!"); }
-            }, 3000);
+            }, 2800);
             gTimeouts.push(t);
         }
 
@@ -701,9 +715,8 @@
         function gameLoop() {
             if(!isPlaying) return;
 
-            // TỐC ĐỘ TĂNG TRƯỞNG VÔ CỰC THEO ĐIỂM SỐ (KHÔNG CÓ TRẦN GIỚI HẠN)
-            let endlessMultiplier = Math.floor(arenaScore / 50); // Cứ thêm 50 điểm tốc độ lại bứt phá thêm
-            let targetSpeed = baseSpeed + (arenaScore * 0.012) + (endlessMultiplier * 0.5);
+            let endlessMultiplier = Math.floor(arenaScore / 40); 
+            let targetSpeed = baseSpeed + (arenaScore * 0.015) + (endlessMultiplier * 0.4);
 
             if(Math.random() < 0.008) tAngle += (Math.random() - 0.5) * Math.PI; 
             
@@ -734,7 +747,7 @@
                     tEl.classList.remove('hovered');
                     g1MissFrames++;
                     
-                    let missMax = Math.max(40, 120 - Math.floor(arenaScore * 0.1)); // Càng cao điểm thời gian trượt cho phép càng ngắn
+                    let missMax = Math.max(40, 120 - Math.floor(arenaScore * 0.1)); 
                     let pct = (g1MissFrames / missMax) * 100;
                     document.getElementById('warning-progress').style.width = Math.min(100, pct) + '%';
 
