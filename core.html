@@ -446,7 +446,7 @@
     <button id="btn-exit-inspect" onclick="exitInspectMode()" data-i18n="btnExitInspect">[ QUAY LẠI ]</button>
 
     <script>
-        // 🌟 BỘ TỪ ĐIỂN ĐA NGÔN NGỮ ĐÃ ĐƯỢC CHUẨN HÓA CÁC THUỘC TÍNH BẢNG CHỌN PHE 🌟
+        // 🌟 BỘ TỪ ĐIỂN ĐA NGÔN NGỮ ĐÃ ĐƯỢC CHUẨN HÓA 🌟
         const i18nCore = {
             vi: {
                 theDarkText: "BÓNG TỐI", theLightText: "ÁNH SÁNG", bushidoMax: "VÕ ĐẠO: TỐI ĐA", mushiDays: "VÔ NGÃ: 1000", armorInt: ">> HỆ THỐNG K-DRIVE", armorSubj: ">> ĐỐI TƯỢNG:",
@@ -556,7 +556,7 @@
             let storedUser = sessionStorage.getItem('kdrive_username') || localStorage.getItem('kdrive_logged_in_user'); 
             let actualUser = storedUser ? storedUser.toUpperCase() : (currentLang === 'vi' ? "KHÁCH" : "GUEST"); 
             document.getElementById('hud-user').innerText = "USER: " + actualUser; 
-            document.querySelectorAll('.inspect-username').forEach(el => el.innerText = actualUser); 
+            document.querySelectorAll('.inspect-username').forEach(el => { if(el) el.innerText = actualUser; }); 
         }
 
         function runHighTechClock() { 
@@ -565,12 +565,12 @@
             const minutes = String(now.getMinutes()).padStart(2, '0'); 
             const seconds = String(now.getSeconds()).padStart(2, '0'); 
             const ms = String(now.getMilliseconds()).padStart(3, '0').substring(0,2); 
-            document.getElementById('clock-hms').innerText = `${hours}:${minutes}:${seconds}`; 
-            document.getElementById('clock-ms').innerText = `:${ms}`; 
+            let elHms = document.getElementById('clock-hms'); if(elHms) elHms.innerText = `${hours}:${minutes}:${seconds}`; 
+            let elMs = document.getElementById('clock-ms'); if(elMs) elMs.innerText = `:${ms}`; 
             
             const month = String(now.getMonth() + 1).padStart(2, '0'); 
             const day = String(now.getDate()).padStart(2, '0'); 
-            document.getElementById('hud-date-display').innerText = `2126.${month}.${day}`; 
+            let elDate = document.getElementById('hud-date-display'); if(elDate) elDate.innerText = `2126.${month}.${day}`; 
             requestAnimationFrame(runHighTechClock); 
         }
         
@@ -578,6 +578,7 @@
         
         function requestRealGeolocation() { 
             const gpsEl = document.getElementById('hud-gps-display'); 
+            if(!gpsEl) return;
             if ("geolocation" in navigator) { 
                 navigator.geolocation.getCurrentPosition( async (position) => { 
                     const lat = position.coords.latitude; const lon = position.coords.longitude; 
@@ -589,21 +590,23 @@
         }
 
         const dustContainer = document.getElementById('dust-container');
-        for(let i = 0; i < 50; i++) { let p = document.createElement('div'); let type = Math.random(); if(type < 0.5) p.className = 'dust-particle dust-small'; else if(type < 0.8) p.className = 'dust-particle dust-large'; else p.className = 'dust-particle dust-large dust-flicker'; p.style.left = (Math.random() * 100) + 'vw'; p.style.animationDuration = (Math.random() * 15 + 10) + 's'; p.style.animationDelay = (Math.random() * 10) + 's'; dustContainer.appendChild(p); }
+        if(dustContainer) {
+            for(let i = 0; i < 50; i++) { let p = document.createElement('div'); let type = Math.random(); if(type < 0.5) p.className = 'dust-particle dust-small'; else if(type < 0.8) p.className = 'dust-particle dust-large'; else p.className = 'dust-particle dust-large dust-flicker'; p.style.left = (Math.random() * 100) + 'vw'; p.style.animationDuration = (Math.random() * 15 + 10) + 's'; p.style.animationDelay = (Math.random() * 10) + 's'; dustContainer.appendChild(p); }
+        }
 
         let currentLorePage = 0; let isLoreOpen = false;
-        function openLore() { isLoreOpen = true; document.getElementById('lore-modal').classList.add('active'); document.getElementById('boo-knight').classList.add('boo-lore-mode'); renderLorePage(); playSound('katana'); }
-        function closeLore() { isLoreOpen = false; document.getElementById('lore-modal').classList.remove('active'); document.getElementById('boo-knight').classList.remove('boo-lore-mode'); window.speechSynthesis.cancel(); playSound('brake'); }
+        function openLore() { isLoreOpen = true; document.getElementById('lore-modal').classList.add('active'); let bKnight = document.getElementById('boo-knight'); if(bKnight) bKnight.classList.add('boo-lore-mode'); renderLorePage(); playSound('katana'); }
+        function closeLore() { isLoreOpen = false; document.getElementById('lore-modal').classList.remove('active'); let bKnight = document.getElementById('boo-knight'); if(bKnight) bKnight.classList.remove('boo-lore-mode'); window.speechSynthesis.cancel(); playSound('brake'); }
         function renderLorePage() { 
             let loreArr = loreData[currentLang] || loreData['en']; 
-            document.getElementById('lore-text').innerHTML = loreArr[currentLorePage]; 
-            document.getElementById('lore-page-num').innerText = `${currentLorePage + 1} / ${loreArr.length}`; 
+            let lText = document.getElementById('lore-text'); if(lText) lText.innerHTML = loreArr[currentLorePage]; 
+            let lNum = document.getElementById('lore-page-num'); if(lNum) lNum.innerText = `${currentLorePage + 1} / ${loreArr.length}`; 
             window.speechSynthesis.cancel(); 
         }
         function nextPage() { let loreArr = loreData[currentLang] || loreData['en']; if(currentLorePage < loreArr.length - 1) { currentLorePage++; renderLorePage(); playSound('brake'); } }
         function prevPage() { if(currentLorePage > 0) { currentLorePage--; renderLorePage(); playSound('brake'); } }
 
-        const bgMusic = document.getElementById('bg-music'); bgMusic.volume = 0.6; 
+        const bgMusic = document.getElementById('bg-music'); if(bgMusic) bgMusic.volume = 0.6; 
 
         // TỪ ĐIỂN THOẠI CỦA BOO AI
         const booLines = {
@@ -695,10 +698,10 @@
 
         let isBooMuted = false;
         const holoBubble = document.getElementById('holo-bubble'); let holoTimeout; let typewriterTimerCore;
-        function showHologramStatus(text) { window.speechSynthesis.cancel(); speechQueue = []; holoBubble.style.opacity = 1; holoBubble.innerHTML = ""; clearTimeout(holoTimeout); clearInterval(typewriterTimerCore); let i = 0; typewriterTimerCore = setInterval(() => { if (i < text.length) { holoBubble.innerHTML += text.charAt(i); i++; } else { clearInterval(typewriterTimerCore); holoTimeout = setTimeout(() => { holoBubble.style.opacity = 0; }, 3200); } }, 25); }
+        function showHologramStatus(text) { window.speechSynthesis.cancel(); speechQueue = []; if(!holoBubble) return; holoBubble.style.opacity = 1; holoBubble.innerHTML = ""; clearTimeout(holoTimeout); clearInterval(typewriterTimerCore); let i = 0; typewriterTimerCore = setInterval(() => { if (i < text.length) { holoBubble.innerHTML += text.charAt(i); i++; } else { clearInterval(typewriterTimerCore); holoTimeout = setTimeout(() => { holoBubble.style.opacity = 0; }, 3200); } }, 25); }
         let speechQueue = []; let isDialogPlaying = false;
         function playBooDialog(fullText, useVoice = true, callback = null) { window.speechSynthesis.cancel(); clearTimeout(holoTimeout); clearInterval(typewriterTimerCore); let sentences = fullText.replace(/([.!?])\s+/g, "$1|").split("|"); speechQueue = []; let chunk = ""; for (let s of sentences) { s = s.trim(); if (!s) continue; if (chunk.split(/[.!?]/).length - 1 >= 2 || chunk.length > 80) { speechQueue.push(chunk); chunk = s; } else { chunk += (chunk ? " " : "") + s; } } if (chunk) speechQueue.push(chunk); isDialogPlaying = false; processDialogQueue(useVoice, callback); }
-        function processDialogQueue(useVoice, callback) { if (speechQueue.length === 0) { isDialogPlaying = false; holoTimeout = setTimeout(() => { holoBubble.style.opacity = 0; }, 3500); if (callback) callback(); return; } isDialogPlaying = true; let text = speechQueue.shift(); holoBubble.style.opacity = 1; holoBubble.innerHTML = ""; clearInterval(typewriterTimerCore); let i = 0; typewriterTimerCore = setInterval(() => { if (i < text.length) { holoBubble.innerHTML += text.charAt(i); i++; } else { clearInterval(typewriterTimerCore); } }, 30); if (useVoice) { try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = currentLang === 'en' ? 'en-US' : (currentLang === 'jp' ? 'ja-JP' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'hi' ? 'hi-IN' : 'vi-VN'))); utterance.rate = 1.15; utterance.onend = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; utterance.onerror = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; window.speechSynthesis.speak(utterance); } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } } catch (e) { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 1000); } }
+        function processDialogQueue(useVoice, callback) { if (speechQueue.length === 0) { isDialogPlaying = false; holoTimeout = setTimeout(() => { if(holoBubble) holoBubble.style.opacity = 0; }, 3500); if (callback) callback(); return; } isDialogPlaying = true; let text = speechQueue.shift(); if(holoBubble) { holoBubble.style.opacity = 1; holoBubble.innerHTML = ""; } clearInterval(typewriterTimerCore); let i = 0; typewriterTimerCore = setInterval(() => { if (i < text.length) { if(holoBubble) holoBubble.innerHTML += text.charAt(i); i++; } else { clearInterval(typewriterTimerCore); } }, 30); if (useVoice) { try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = currentLang === 'en' ? 'en-US' : (currentLang === 'jp' ? 'ja-JP' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'hi' ? 'hi-IN' : 'vi-VN'))); utterance.rate = 1.15; utterance.onend = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; utterance.onerror = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; window.speechSynthesis.speak(utterance); } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } } catch (e) { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 1000); } }
         function speakMsg(text) { try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = currentLang === 'en' ? 'en-US' : (currentLang === 'jp' ? 'ja-JP' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'hi' ? 'hi-IN' : 'vi-VN'))); utterance.rate = 1.1; window.speechSynthesis.speak(utterance); } } catch (e) {} }
 
         let isMissionExpanded = false;
@@ -707,6 +710,7 @@
 
         function toggleMissionHud() {
             const hud = document.getElementById('dynamic-hud-module');
+            if(!hud) return;
             isMissionExpanded = !isMissionExpanded;
             if (isMissionExpanded) {
                 hud.classList.add('expanded');
@@ -722,6 +726,7 @@
         function setMissionState(state) {
             currentMissionState = state;
             const dot = document.getElementById('mission-status-dot');
+            if(!dot) return;
             clearInterval(missionBeepInterval);
             dot.className = 'status-dot'; 
             
@@ -732,7 +737,8 @@
                 dot.classList.add('dot-progress');
             } else if (state === 'COMPLETED') {
                 dot.classList.add('dot-completed');
-                document.getElementById('dynamic-hud-module').classList.remove('expanded');
+                let hud = document.getElementById('dynamic-hud-module');
+                if(hud) hud.classList.remove('expanded');
                 isMissionExpanded = false;
             }
         }
@@ -801,10 +807,11 @@
             const threshold = 85;
             const mapping = [ { id: 'dia', score: scores[0] }, { id: 'thuy', score: scores[1] }, { id: 'hoa', score: scores[2] }, { id: 'phong', score: scores[3] } ];
             let activeCount = 0;
-            mapping.forEach(item => { const elVal = document.getElementById(`sync-${item.id}`); if(elVal) elVal.innerText = item.score; if (item.score >= threshold) { arcs[item.id].classList.remove('bq-weak'); if(elVal) elVal.style.color = '#00ffcc'; activeCount++; } else { arcs[item.id].classList.add('bq-weak'); if(elVal) elVal.style.color = '#ff2a2a'; } });
-            booFaceCore.classList.remove('struggling', 'critical-alert');
-            if (activeCount >= 4) { } else if (activeCount >= 2) { booFaceCore.classList.add('struggling'); } else { booFaceCore.classList.add('critical-alert'); }
-            
+            mapping.forEach(item => { const elVal = document.getElementById(`sync-${item.id}`); if(elVal) elVal.innerText = item.score; if (item.score >= threshold) { if(arcs[item.id]) arcs[item.id].classList.remove('bq-weak'); if(elVal) elVal.style.color = '#00ffcc'; activeCount++; } else { if(arcs[item.id]) arcs[item.id].classList.add('bq-weak'); if(elVal) elVal.style.color = '#ff2a2a'; } });
+            if(booFaceCore) {
+                booFaceCore.classList.remove('struggling', 'critical-alert');
+                if (activeCount >= 4) { } else if (activeCount >= 2) { booFaceCore.classList.add('struggling'); } else { booFaceCore.classList.add('critical-alert'); }
+            }
             updateSystemTerminal();
         }
 
@@ -812,10 +819,11 @@
         setInterval(() => { 
             let scores; 
             if(demoStage === 0) { scores = [40, 45, 30, 40]; } else if(demoStage === 1) { scores = [60, 70, 75, 65]; } else { scores = [85, 90, 95, 99]; } 
-            document.getElementById('sci-val-1').innerText = scores[0]; updateFaceColor(0, scores[0]); 
-            document.getElementById('sci-val-2').innerText = scores[1]; updateFaceColor(1, scores[1]); 
-            document.getElementById('sci-val-3').innerText = scores[2]; updateFaceColor(2, scores[2]); 
-            document.getElementById('sci-val-4').innerText = scores[3]; updateFaceColor(3, scores[3]); 
+            let v1=document.getElementById('sci-val-1'), v2=document.getElementById('sci-val-2'), v3=document.getElementById('sci-val-3'), v4=document.getElementById('sci-val-4');
+            if(v1) { v1.innerText = scores[0]; updateFaceColor(0, scores[0]); }
+            if(v2) { v2.innerText = scores[1]; updateFaceColor(1, scores[1]); }
+            if(v3) { v3.innerText = scores[2]; updateFaceColor(2, scores[2]); }
+            if(v4) { v4.innerText = scores[3]; updateFaceColor(3, scores[3]); }
             syncLuanTran(scores);
             demoStage = (demoStage + 1) % 3; 
         }, 4000); 
@@ -825,33 +833,35 @@
             fetchRealUser(); runHighTechClock(); requestRealGeolocation();
             
             setTimeout(() => {
-                document.getElementById('sanctum-bg').style.opacity = '1';
-                document.getElementById('floor-grid').style.opacity = '1';
+                let sb = document.getElementById('sanctum-bg'); if(sb) sb.style.opacity = '1';
+                let fg = document.getElementById('floor-grid'); if(fg) fg.style.opacity = '1';
                 playSound('warp-in'); if(navigator.vibrate) navigator.vibrate([200, 50, 300]);
                 
                 const coreWrap = document.getElementById('core-wrapper');
-                coreWrap.style.opacity = '1'; coreWrap.style.transform = 'scale(0.9) translateY(0) rotateX(0deg) rotateY(0deg)';
-                coreWrap.style.pointerEvents = 'auto';
+                if(coreWrap) {
+                    coreWrap.style.opacity = '1'; coreWrap.style.transform = 'scale(0.9) translateY(0) rotateX(0deg) rotateY(0deg)';
+                    coreWrap.style.pointerEvents = 'auto';
+                }
                 
-                setTimeout(() => { document.getElementById('core-glow-floor').style.opacity = '1'; }, 1000);
+                setTimeout(() => { let cf = document.getElementById('core-glow-floor'); if(cf) cf.style.opacity = '1'; }, 1000);
 
-                document.getElementById('boo-module-container').style.opacity = '1';
-                document.getElementById('boo-module-container').style.transform = 'scale(1)';
+                let bmc = document.getElementById('boo-module-container');
+                if(bmc) { bmc.style.opacity = '1'; bmc.style.transform = 'scale(1)'; }
                 
                 updateSystemTerminal(); 
                 
-                document.getElementById('armor-inspect-zone').style.opacity = '1';
-                document.getElementById('armor-inspect-zone').style.pointerEvents = 'auto';
+                let aiz = document.getElementById('armor-inspect-zone');
+                if(aiz) { aiz.style.opacity = '1'; aiz.style.pointerEvents = 'auto'; }
 
-                const bgMusic = document.getElementById('bg-music'); bgMusic.play().catch(e => console.log(e));
+                const bgMusic = document.getElementById('bg-music'); if(bgMusic) bgMusic.play().catch(e => console.log(e));
                 const h = new Date().getHours(); if (h >= 23 || h < 6) forceSleep();
 
                 const hudElements = [ document.getElementById('main-hud'), document.getElementById('dynamic-hud-module') ];
-                hudElements.forEach(el => { el.style.opacity = '1'; });
+                hudElements.forEach(el => { if(el) el.style.opacity = '1'; });
                 
                 setTimeout(() => {
-                    document.getElementById('arrow-left').classList.add('show-arrow');
-                    document.getElementById('arrow-right').classList.add('show-arrow');
+                    let al = document.getElementById('arrow-left'); if(al) al.classList.add('show-arrow');
+                    let ar = document.getElementById('arrow-right'); if(ar) ar.classList.add('show-arrow');
                 }, 1500);
 
             }, 500);
@@ -860,45 +870,78 @@
         const cube = document.getElementById('holy-cube'); 
         let cubeRx = 15, cubeRy = 20; let cubeVx = 0.5, cubeVy = 0.8; let isCubeDragging = false, isCubeMoved = false; let startPx, startPy;
 
-        cube.addEventListener('pointerdown', (e) => { 
-            if(isLoreOpen || document.body.classList.contains('inspect-mode') || document.getElementById('faction-preview-modal').classList.contains('active')) return; 
-            isCubeDragging = true; isCubeMoved = false; startPx = e.clientX; startPy = e.clientY; cubeVx = 0; cubeVy = 0; 
-            playSound('brake'); if(navigator.vibrate) navigator.vibrate(20); cube.style.cursor = "grabbing"; 
-        });
+        if(cube) {
+            cube.addEventListener('pointerdown', (e) => { 
+                if(isLoreOpen || document.body.classList.contains('inspect-mode')) return; 
+                let fpm = document.getElementById('faction-preview-modal'); if(fpm && fpm.classList.contains('active')) return;
+                isCubeDragging = true; isCubeMoved = false; startPx = e.clientX; startPy = e.clientY; cubeVx = 0; cubeVy = 0; 
+                playSound('brake'); if(navigator.vibrate) navigator.vibrate(20); cube.style.cursor = "grabbing"; 
+            });
 
-        window.addEventListener('pointermove', (e) => { 
-            if (!isCubeDragging) return; let dx = e.clientX - startPx; let dy = e.clientY - startPy; 
-            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) isCubeMoved = true; 
-            cubeVy = dx * 0.5; cubeVx = -dy * 0.5; startPx = e.clientX; startPy = e.clientY; 
-        });
+            window.addEventListener('pointermove', (e) => { 
+                if (!isCubeDragging) return; let dx = e.clientX - startPx; let dy = e.clientY - startPy; 
+                if (Math.abs(dx) > 5 || Math.abs(dy) > 5) isCubeMoved = true; 
+                cubeVy = dx * 0.5; cubeVx = -dy * 0.5; startPx = e.clientX; startPy = e.clientY; 
+            });
 
-        window.addEventListener('pointerup', () => { isCubeDragging = false; cube.style.cursor = "grab"; });
+            window.addEventListener('pointerup', () => { isCubeDragging = false; cube.style.cursor = "grab"; });
+        }
 
         function renderPhysics() { 
-            if (!isCubeDragging && !isLoreOpen && !document.body.classList.contains('inspect-mode') && !document.getElementById('faction-preview-modal').classList.contains('active')) { cubeVx *= 0.95; cubeVy *= 0.95; if(Math.abs(cubeVx) < 0.08) cubeVx = (cubeVx >= 0 ? 0.08 : -0.08); if(Math.abs(cubeVy) < 0.08) cubeVy = (cubeVy >= 0 ? 0.08 : -0.08); } 
-            if(!isLoreOpen && !document.body.classList.contains('inspect-mode')) { cubeRx += cubeVx; cubeRy += cubeVy; if(cubeRx > 80) cubeRx = 80; if(cubeRx < -80) cubeRx = -80; } 
-            cube.style.transform = `rotateX(${cubeRx}deg) rotateY(${cubeRy}deg)`; requestAnimationFrame(renderPhysics); 
+            let fpm = document.getElementById('faction-preview-modal');
+            let isModalActive = fpm && fpm.classList.contains('active');
+            if (!isCubeDragging && !isLoreOpen && !document.body.classList.contains('inspect-mode') && !isModalActive) { 
+                cubeVx *= 0.95; cubeVy *= 0.95; 
+                if(Math.abs(cubeVx) < 0.08) cubeVx = (cubeVx >= 0 ? 0.08 : -0.08); 
+                if(Math.abs(cubeVy) < 0.08) cubeVy = (cubeVy >= 0 ? 0.08 : -0.08); 
+            } 
+            if(!isLoreOpen && !document.body.classList.contains('inspect-mode')) { 
+                cubeRx += cubeVx; cubeRy += cubeVy; 
+                if(cubeRx > 80) cubeRx = 80; if(cubeRx < -80) cubeRx = -80; 
+            } 
+            if(cube) cube.style.transform = `rotateX(${cubeRx}deg) rotateY(${cubeRy}deg)`; 
+            requestAnimationFrame(renderPhysics); 
         }
         renderPhysics();
 
+        // 🌟 CHỈNH SỬA PHẦN NÀY ĐỂ KẾT NỐI VÀ KHÔNG BỊ LỖI SCALE 🌟
         function navToFace(faceName, taskId) { 
-            if (!isCubeMoved && !isLoreOpen && !document.body.classList.contains('inspect-mode')) { 
+            let fpm = document.getElementById('faction-preview-modal');
+            let isModalActive = fpm && fpm.classList.contains('active');
+            
+            if (!isCubeMoved && !isLoreOpen && !document.body.classList.contains('inspect-mode') && !isModalActive) { 
                 if(navigator.vibrate) navigator.vibrate(50); playSound('katana'); 
                 
+                // MẶT HỎA (PHẢN XẠ)
                 if (taskId === 'phanxa') {
-                    document.getElementById('core-wrapper').style.transform = 'scale(0.1) translateY(500px)';
+                    document.getElementById('core-wrapper').style.opacity = '0'; // Tắt hiệu ứng scale, chỉ mờ đi
+                    playSound('warp-out');
+                    speakMsg(currentLang === 'en' ? "Fire Chakra Matrix Activated!" : "Kích hoạt Đạo Trường Hỏa Luân!");
+                    setTimeout(() => { window.location.href = 'HoaLuan.html'; }, 800);
+                    return; 
+                }
+                
+                // MẶT THỦY (TRÍ NHỚ)
+                if (taskId === 'trinho') {
                     document.getElementById('core-wrapper').style.opacity = '0';
                     playSound('warp-out');
-                    const msg = currentLang === 'en' ? "Fire Chakra Matrix Activated!" : "Kích hoạt Đạo Trường Hỏa Luân!";
-                    speakMsg(msg);
-                    setTimeout(() => {
-                        window.location.href = 'HoaLuan.html';
-                    }, 800);
+                    speakMsg(currentLang === 'en' ? "Water Chakra Matrix Activated!" : "Kích hoạt Đạo Trường Thủy Luân!");
+                    setTimeout(() => { window.location.href = 'thuy_luan.html'; }, 800);
+                    return; 
+                }
+
+                // MẶT PHONG (PHÁN ĐOÁN)
+                if (taskId === 'phandoan') {
+                    document.getElementById('core-wrapper').style.opacity = '0';
+                    playSound('warp-out');
+                    speakMsg(currentLang === 'en' ? "Wind Chakra Matrix Activated!" : "Kích hoạt Đạo Trường Phong Luân!");
+                    setTimeout(() => { window.location.href = 'PhongLuan.html'; }, 800);
                     return; 
                 }
 
                 let taskObj = taskList.find(t => t.id === taskId);
-                if (taskObj && !taskObj.done && !isDaoNghiepVienMan && bobaReward.style.display !== 'block') { 
+                let bobaReward = document.getElementById('boba-reward');
+                if (taskObj && !taskObj.done && !isDaoNghiepVienMan && bobaReward && bobaReward.style.display !== 'block') { 
                     taskObj.done = true; tasksCompleted++; 
                     
                     bobaReward.style.display = 'block'; 
@@ -907,7 +950,6 @@
                     bobaReward.style.top = 'auto';
                     playSound('warp-in'); 
 
-                    let faceLocal = i18nCore[currentLang] ? i18nCore[currentLang]['face1'] : faceName; 
                     const msg = currentLang === 'en' ? `Check-in completed. Good job disciple!` : `Ngươi đã điểm danh xong. Khá lắm môn đệ!`;
                     speakMsg(msg); 
                     updateSystemTerminal(); 
@@ -916,8 +958,14 @@
         }
 
         function triggerFactionWar() {
-            document.getElementById('faction-war-hud').style.opacity = '1';
-            setTimeout(() => { document.getElementById('fill-dark').style.width = '45%'; document.getElementById('fill-light').style.width = '55%'; }, 500);
+            let fwh = document.getElementById('faction-war-hud');
+            if(fwh) {
+                fwh.style.opacity = '1';
+                setTimeout(() => { 
+                    let fd = document.getElementById('fill-dark'); if(fd) fd.style.width = '45%'; 
+                    let fl = document.getElementById('fill-light'); if(fl) fl.style.width = '55%'; 
+                }, 500);
+            }
         }
 
         let originalBgUrl = "url('https://github.com/happyk1900/-m-thanh-app/blob/main/INDEX%20SAMURAI.png?raw=true')";
@@ -943,17 +991,17 @@
             const bg = document.getElementById('sanctum-bg');
             const modal = document.getElementById('faction-preview-modal');
             const content = document.getElementById('faction-preview-content');
+            if(!bg || !modal || !content) return;
             
-            document.getElementById('core-wrapper').style.opacity = '0';
-            document.getElementById('core-wrapper').style.pointerEvents = 'none';
-            document.getElementById('floor-grid').style.opacity = '0';
-            document.getElementById('boo-module-container').style.opacity = '0';
-            document.getElementById('dynamic-hud-module').style.opacity = '0';
+            let cw = document.getElementById('core-wrapper'); if(cw) { cw.style.opacity = '0'; cw.style.pointerEvents = 'none'; }
+            let fg = document.getElementById('floor-grid'); if(fg) fg.style.opacity = '0';
+            let bmc = document.getElementById('boo-module-container'); if(bmc) bmc.style.opacity = '0';
+            let dhm = document.getElementById('dynamic-hud-module'); if(dhm) dhm.style.opacity = '0';
             
             const t = i18nCore[currentLang] || i18nCore['vi'];
 
             if (side === 'light') {
-                document.getElementById('arrow-left').classList.remove('show-arrow');
+                let al = document.getElementById('arrow-left'); if(al) al.classList.remove('show-arrow');
                 bg.style.backgroundImage = "url('https://github.com/happyk1900/-m-thanh-app/blob/main/LIGH%20NEN.png?raw=true')";
                 modal.style.borderColor = "rgba(0, 229, 255, 0.5)";
                 content.innerHTML = `
@@ -966,7 +1014,7 @@
                     </div>
                 `;
             } else {
-                document.getElementById('arrow-right').classList.remove('show-arrow');
+                let ar = document.getElementById('arrow-right'); if(ar) ar.classList.remove('show-arrow');
                 bg.style.backgroundImage = "url('https://github.com/happyk1900/-m-thanh-app/blob/main/DARK%20NEN.png?raw=true')";
                 modal.style.borderColor = "rgba(255, 42, 42, 0.5)";
                 content.innerHTML = `
@@ -985,18 +1033,17 @@
         function closeFactionPreview() {
             const bg = document.getElementById('sanctum-bg');
             const modal = document.getElementById('faction-preview-modal');
-            bg.style.backgroundImage = originalBgUrl;
+            if(bg) bg.style.backgroundImage = originalBgUrl;
             
-            document.getElementById('core-wrapper').style.opacity = '1';
-            document.getElementById('core-wrapper').style.pointerEvents = 'auto';
-            document.getElementById('floor-grid').style.opacity = '1';
-            document.getElementById('boo-module-container').style.opacity = '1';
-            document.getElementById('dynamic-hud-module').style.opacity = '1';
+            let cw = document.getElementById('core-wrapper'); if(cw) { cw.style.opacity = '1'; cw.style.pointerEvents = 'auto'; }
+            let fg = document.getElementById('floor-grid'); if(fg) fg.style.opacity = '1';
+            let bmc = document.getElementById('boo-module-container'); if(bmc) bmc.style.opacity = '1';
+            let dhm = document.getElementById('dynamic-hud-module'); if(dhm) dhm.style.opacity = '1';
             
-            document.getElementById('arrow-left').classList.add('show-arrow');
-            document.getElementById('arrow-right').classList.add('show-arrow');
+            let al = document.getElementById('arrow-left'); if(al) al.classList.add('show-arrow');
+            let ar = document.getElementById('arrow-right'); if(ar) ar.classList.add('show-arrow');
             
-            modal.classList.remove('active');
+            if(modal) modal.classList.remove('active');
             playSound('brake');
         }
 
@@ -1004,6 +1051,7 @@
         let booEnergy = 20; let isBooSleeping = false; const DROP_RATE_PER_SECOND = 100 / 10800; let awakeOverride = false; let awakeTimeout = null; let holdTimer = null; let holdFired = false;
         
         function roamBoo() { 
+            if(!boo) return;
             if (isBooSleeping || isLoreOpen || document.body.classList.contains('inspect-mode') || boo.classList.contains('boo-jumpscare') || isVoiceChatActive || booEnergy <= 0) { 
                 setTimeout(roamBoo, 2000); 
                 return; 
@@ -1015,9 +1063,10 @@
         setTimeout(roamBoo, 2000); 
 
         let isBooActivePhase = true; let booCycleTime = 0; 
-        setInterval(() => { booCycleTime++; if (isBooActivePhase && booCycleTime >= 180) { isBooActivePhase = false; booCycleTime = 0; holoBubble.style.opacity = 0; } else if (!isBooActivePhase && booCycleTime >= 60) { isBooActivePhase = true; booCycleTime = 0; } }, 1000);
+        setInterval(() => { booCycleTime++; if (isBooActivePhase && booCycleTime >= 180) { isBooActivePhase = false; booCycleTime = 0; if(holoBubble) holoBubble.style.opacity = 0; } else if (!isBooActivePhase && booCycleTime >= 60) { isBooActivePhase = true; booCycleTime = 0; } }, 1000);
 
         setInterval(() => {
+            if(!boo) return;
             if (!isBooActivePhase || isLoreOpen || isBooSleeping || document.body.classList.contains('inspect-mode') || isVoiceChatActive || isDialogPlaying || isBooMuted) return;
             const h = new Date().getHours(); if (h >= 23 || h < 6) return; if (booEnergy <= 0) return;
             let missingTasks = taskList.filter(t => !t.done).map(t => t.name); let nextTask = missingTasks.length > 0 ? missingTasks[0] : "";
@@ -1043,30 +1092,29 @@
         }, 35000); 
 
         setInterval(() => {
+            if(!boo) return;
             const h = new Date().getHours(); const isDND = (h >= 23 || h < 6); 
             if (isDND && !awakeOverride) { if (!isBooSleeping) forceSleep(); return; }
-            if (isDaoNghiepVienMan && !awakeOverride) { booEnergy = 100; booEnergyBorder.style.setProperty('--energy', `100%`); if (!isBooSleeping) forceSleep(); return; }
-            if (booEnergy > 0 && !isBooSleeping) { booEnergy -= DROP_RATE_PER_SECOND; booEnergyBorder.style.setProperty('--energy', `${Math.max(0, booEnergy)}%`); if (booEnergy <= 10 && booEnergy > 0) boo.classList.add('boo-glitch'); else boo.classList.remove('boo-glitch'); if (booEnergy <= 0) { booEnergy = 0; booEnergyBorder.style.setProperty('--energy', `0%`); document.body.classList.add('critical-warning'); boo.classList.add('boo-fainted'); const msg = booLines.faintedStatus[currentLang] || booLines.faintedStatus['en']; speakMsg(msg); showHologramStatus(msg); } }
+            if (isDaoNghiepVienMan && !awakeOverride) { booEnergy = 100; if(booEnergyBorder) booEnergyBorder.style.setProperty('--energy', `100%`); if (!isBooSleeping) forceSleep(); return; }
+            if (booEnergy > 0 && !isBooSleeping) { booEnergy -= DROP_RATE_PER_SECOND; if(booEnergyBorder) booEnergyBorder.style.setProperty('--energy', `${Math.max(0, booEnergy)}%`); if (booEnergy <= 10 && booEnergy > 0) boo.classList.add('boo-glitch'); else boo.classList.remove('boo-glitch'); if (booEnergy <= 0) { booEnergy = 0; if(booEnergyBorder) booEnergyBorder.style.setProperty('--energy', `0%`); document.body.classList.add('critical-warning'); boo.classList.add('boo-fainted'); const msg = booLines.faintedStatus[currentLang] || booLines.faintedStatus['en']; speakMsg(msg); showHologramStatus(msg); } }
         }, 1000);
 
-        function forceSleep() { isBooSleeping = true; boo.classList.add('boo-sleeping'); if(navigator.vibrate) navigator.vibrate([30, 30, 30]); holoBubble.style.opacity = 0; }
-        function wakeUpBoo() { isBooSleeping = false; boo.classList.remove('boo-sleeping'); boo.classList.remove('boo-glitch'); document.body.classList.remove('critical-warning'); }
+        function forceSleep() { if(!boo) return; isBooSleeping = true; boo.classList.add('boo-sleeping'); if(navigator.vibrate) navigator.vibrate([30, 30, 30]); if(holoBubble) holoBubble.style.opacity = 0; }
+        function wakeUpBoo() { if(!boo) return; isBooSleeping = false; boo.classList.remove('boo-sleeping'); boo.classList.remove('boo-glitch'); document.body.classList.remove('critical-warning'); }
 
         let booClickCount = 0; let booClickTimer = null; let isVoiceChatActive = false; 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; let recognition;
         
         if (SpeechRecognition) {
             recognition = new SpeechRecognition(); recognition.lang = currentLang === 'en' ? 'en-US' : (currentLang === 'jp' ? 'ja-JP' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'hi' ? 'hi-IN' : 'vi-VN'))); recognition.interimResults = false; recognition.maxAlternatives = 1;
-            recognition.onstart = function() { showHologramStatus(booLines.voiceOpen[currentLang] || booLines.voiceOpen['en']); boo.classList.add('boo-glitch'); };
-            recognition.onresult = function(event) { const speechResult = event.results[0][0].transcript; showHologramStatus(`Hearing: "${speechResult}"...`); boo.classList.add('boo-spin'); askGemini(speechResult); };
-            recognition.onerror = function(event) { let errorMsg = event.error; showHologramStatus(`Voice Error: ${errorMsg}`); boo.classList.remove('boo-glitch'); boo.classList.remove('boo-spin'); isVoiceChatActive = false; };
-            recognition.onend = function() { boo.classList.remove('boo-glitch'); }
+            recognition.onstart = function() { showHologramStatus(booLines.voiceOpen[currentLang] || booLines.voiceOpen['en']); if(boo) boo.classList.add('boo-glitch'); };
+            recognition.onresult = function(event) { const speechResult = event.results[0][0].transcript; showHologramStatus(`Hearing: "${speechResult}"...`); if(boo) boo.classList.add('boo-spin'); askGemini(speechResult); };
+            recognition.onerror = function(event) { let errorMsg = event.error; showHologramStatus(`Voice Error: ${errorMsg}`); if(boo) { boo.classList.remove('boo-glitch'); boo.classList.remove('boo-spin'); } isVoiceChatActive = false; };
+            recognition.onend = function() { if(boo) boo.classList.remove('boo-glitch'); }
         }
 
-        // ÉP GEMINI TRẢ LỜI ĐÚNG NGÔN NGỮ ĐÃ CHỌN
         async function askGemini(text) {
             const p1 = "AQ.Ab8RN6LUGh"; const p2 = "hBh06H36sz3qO"; const p3 = "Yr0mVxnJ9fM1"; const p4 = "KEgz4P9Yo4VDrpA"; const apiKey = p1 + p2 + p3 + p4; 
-            
             const langMap = { vi: "tiếng Việt", en: "tiếng Anh (English)", jp: "tiếng Nhật (Japanese)", es: "tiếng Tây Ban Nha (Spanish)", hi: "tiếng Hindi" };
             const reqLang = langMap[currentLang] || "tiếng Việt";
 
@@ -1076,92 +1124,100 @@
                 const data = await response.json(); if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
                 const reply = data.candidates[0].content.parts[0].text.trim(); playBooDialog(reply); 
             } catch(e) { showHologramStatus("Connection blocked..."); speakMsg("Error AI."); }
-            boo.classList.remove('boo-spin'); isVoiceChatActive = false;
+            if(boo) boo.classList.remove('boo-spin'); isVoiceChatActive = false;
         }
 
         function triggerVoiceChat() { if (!recognition) { playBooDialog("Browser not supported!"); return; } isVoiceChatActive = true; recognition.start(); }
 
-        boo.addEventListener('pointerdown', (e) => { 
-            e.preventDefault(); holdFired = false; holdTimer = setTimeout(() => { holdFired = true; if (isBooSleeping && booEnergy > 0) { awakeOverride = true; wakeUpBoo(); playSound('boing'); if (!isBooMuted) { const msg = booLines.wakeUp[currentLang] || booLines.wakeUp['en']; playBooDialog(msg); } if (navigator.vibrate) navigator.vibrate([100, 50, 100]); clearTimeout(awakeTimeout); awakeTimeout = setTimeout(() => { awakeOverride = false; }, 3 * 60 * 1000); } }, 1000); 
-        }); 
-        boo.addEventListener('pointerleave', () => { clearTimeout(holdTimer); });
-        
-        boo.addEventListener('pointerup', (e) => {
-            e.preventDefault(); clearTimeout(holdTimer); if (holdFired) return;
-            if (isLoreOpen || document.body.classList.contains('inspect-mode') || isVoiceChatActive || isBooSleeping) return; 
+        if(boo) {
+            boo.addEventListener('pointerdown', (e) => { 
+                e.preventDefault(); holdFired = false; holdTimer = setTimeout(() => { holdFired = true; if (isBooSleeping && booEnergy > 0) { awakeOverride = true; wakeUpBoo(); playSound('boing'); if (!isBooMuted) { const msg = booLines.wakeUp[currentLang] || booLines.wakeUp['en']; playBooDialog(msg); } if (navigator.vibrate) navigator.vibrate([100, 50, 100]); clearTimeout(awakeTimeout); awakeTimeout = setTimeout(() => { awakeOverride = false; }, 3 * 60 * 1000); } }, 1000); 
+            }); 
+            boo.addEventListener('pointerleave', () => { clearTimeout(holdTimer); });
             
-            if (booEnergy <= 0) { 
-                playSound('brake');
-                showHologramStatus("BÁO ĐỘNG: Lõi sinh cơ sập nguồn! Kéo ly Boba vào để kích hoạt lại.");
-                document.body.classList.add('critical-warning');
-                setTimeout(() => document.body.classList.remove('critical-warning'), 1000);
-                return; 
-            }
-            
-            booClickCount++; clearTimeout(booClickTimer);
-            if (booClickCount >= 3) { isBooMuted = !isBooMuted; const muteIcon = document.getElementById('boo-mute-icon'); if (isBooMuted) { window.speechSynthesis.cancel(); speechQueue = []; isDialogPlaying = false; clearInterval(typewriterTimerCore); clearTimeout(holoTimeout); holoBubble.style.opacity = 0; muteIcon.style.opacity = 1; playSound('brake'); } else { muteIcon.style.opacity = 0; playSound('warp-in'); playBooDialog(booLines.unmuted[currentLang] || booLines.unmuted['en']); } booClickCount = 0; } else {
-                booClickTimer = setTimeout(() => {
-                    if(isBooMuted) { booClickCount = 0; return; } 
-                    if (booClickCount === 1) { 
-                        let missing = taskList.filter(t => !t.done).map(t => t.name); 
-                        if (isDaoNghiepVienMan) playBooDialog(booLines.doneAll[currentLang] || booLines.doneAll['en']); 
-                        else if (missing.length === 1) playBooDialog(booLines.almostDone[currentLang] || booLines.almostDone['en']); 
-                        else playBooDialog(booLines.manyTasks[currentLang] || booLines.manyTasks['en']); 
-                    } else if (booClickCount === 2) { if(navigator.vibrate) navigator.vibrate([100, 50, 100]); playSound('warp-in'); triggerVoiceChat(); } booClickCount = 0;
-                }, 350);
-            }
-        });
+            boo.addEventListener('pointerup', (e) => {
+                e.preventDefault(); clearTimeout(holdTimer); if (holdFired) return;
+                if (isLoreOpen || document.body.classList.contains('inspect-mode') || isVoiceChatActive || isBooSleeping) return; 
+                
+                if (booEnergy <= 0) { 
+                    playSound('brake');
+                    showHologramStatus("BÁO ĐỘNG: Lõi sinh cơ sập nguồn! Kéo ly Boba vào để kích hoạt lại.");
+                    document.body.classList.add('critical-warning');
+                    setTimeout(() => document.body.classList.remove('critical-warning'), 1000);
+                    return; 
+                }
+                
+                booClickCount++; clearTimeout(booClickTimer);
+                if (booClickCount >= 3) { isBooMuted = !isBooMuted; const muteIcon = document.getElementById('boo-mute-icon'); if (isBooMuted) { window.speechSynthesis.cancel(); speechQueue = []; isDialogPlaying = false; clearInterval(typewriterTimerCore); clearTimeout(holoTimeout); if(holoBubble) holoBubble.style.opacity = 0; if(muteIcon) muteIcon.style.opacity = 1; playSound('brake'); } else { if(muteIcon) muteIcon.style.opacity = 0; playSound('warp-in'); playBooDialog(booLines.unmuted[currentLang] || booLines.unmuted['en']); } booClickCount = 0; } else {
+                    booClickTimer = setTimeout(() => {
+                        if(isBooMuted) { booClickCount = 0; return; } 
+                        if (booClickCount === 1) { 
+                            let missing = taskList.filter(t => !t.done).map(t => t.name); 
+                            if (isDaoNghiepVienMan) playBooDialog(booLines.doneAll[currentLang] || booLines.doneAll['en']); 
+                            else if (missing.length === 1) playBooDialog(booLines.almostDone[currentLang] || booLines.almostDone['en']); 
+                            else playBooDialog(booLines.manyTasks[currentLang] || booLines.manyTasks['en']); 
+                        } else if (booClickCount === 2) { if(navigator.vibrate) navigator.vibrate([100, 50, 100]); playSound('warp-in'); triggerVoiceChat(); } booClickCount = 0;
+                    }, 350);
+                }
+            });
+        }
 
         let isBobaDragging = false, bobaStartX, bobaStartY, bobaInitX, bobaInitY;
         
-        bobaReward.addEventListener('pointerdown', (e) => { 
-            isBobaDragging = true; 
-            bobaStartX = e.clientX; bobaStartY = e.clientY; 
-            bobaInitX = bobaReward.offsetLeft; bobaInitY = bobaReward.offsetTop; 
-            bobaReward.style.cursor = 'grabbing'; 
-            bobaReward.style.transition = 'none'; 
-        });
-        
-        window.addEventListener('pointermove', (e) => { 
-            if(isBobaDragging) { 
-                bobaReward.style.left = (bobaInitX + (e.clientX - bobaStartX)) + 'px'; 
-                bobaReward.style.top = (bobaInitY + (e.clientY - bobaStartY)) + 'px'; 
-            } 
-        });
-        
-        window.addEventListener('pointerup', (e) => {
-            if(isBobaDragging) {
-                isBobaDragging = false; bobaReward.style.cursor = 'grab';
-                bobaReward.style.transition = 'top 0.3s ease, left 0.3s ease'; 
-                
-                const bobaRect = bobaReward.getBoundingClientRect(); 
-                const booRect = boo.getBoundingClientRect(); 
-                const overlap = !(bobaRect.right < booRect.left || bobaRect.left > booRect.right || bobaRect.bottom < booRect.top || bobaRect.top > booRect.bottom);
-                
-                if (overlap) { 
-                    playSound('slurp'); 
-                    booEnergy = 100; booEnergyBorder.style.setProperty('--energy', '100%'); 
-                    wakeUpBoo(); boo.classList.remove('boo-fainted'); document.body.classList.remove('critical-warning'); 
+        if(bobaReward) {
+            bobaReward.addEventListener('pointerdown', (e) => { 
+                isBobaDragging = true; 
+                bobaStartX = e.clientX; bobaStartY = e.clientY; 
+                bobaInitX = bobaReward.offsetLeft; bobaInitY = bobaReward.offsetTop; 
+                bobaReward.style.cursor = 'grabbing'; 
+                bobaReward.style.transition = 'none'; 
+            });
+            
+            window.addEventListener('pointermove', (e) => { 
+                if(isBobaDragging) { 
+                    bobaReward.style.left = (bobaInitX + (e.clientX - bobaStartX)) + 'px'; 
+                    bobaReward.style.top = (bobaInitY + (e.clientY - bobaStartY)) + 'px'; 
+                } 
+            });
+            
+            window.addEventListener('pointerup', (e) => {
+                if(isBobaDragging) {
+                    isBobaDragging = false; bobaReward.style.cursor = 'grab';
+                    bobaReward.style.transition = 'top 0.3s ease, left 0.3s ease'; 
                     
-                    bobaReward.style.display = 'none'; 
+                    const bobaRect = bobaReward.getBoundingClientRect(); 
+                    let booRect = {left:0, right:0, top:0, bottom:0};
+                    if(boo) booRect = boo.getBoundingClientRect(); 
+                    const overlap = !(bobaRect.right < booRect.left || bobaRect.left > booRect.right || bobaRect.bottom < booRect.top || bobaRect.top > booRect.bottom);
                     
-                    if (!isBooMuted) playBooDialog(booLines.charged[currentLang] || booLines.charged['en']); 
-                } else { 
-                    playSound('brake');
-                    bobaReward.style.left = '30px'; 
-                    bobaReward.style.bottom = '35px';
-                    bobaReward.style.top = 'auto'; 
+                    if (overlap) { 
+                        playSound('slurp'); 
+                        booEnergy = 100; if(booEnergyBorder) booEnergyBorder.style.setProperty('--energy', '100%'); 
+                        wakeUpBoo(); if(boo) boo.classList.remove('boo-fainted'); document.body.classList.remove('critical-warning'); 
+                        
+                        bobaReward.style.display = 'none'; 
+                        
+                        if (!isBooMuted) playBooDialog(booLines.charged[currentLang] || booLines.charged['en']); 
+                    } else { 
+                        playSound('brake');
+                        bobaReward.style.left = '30px'; 
+                        bobaReward.style.bottom = '35px';
+                        bobaReward.style.top = 'auto'; 
+                    }
                 }
-            }
-        });
+            });
+        }
 
         function enterInspectMode() { if(isLoreOpen || document.body.classList.contains('inspect-mode') || document.getElementById('faction-preview-modal').classList.contains('active')) return; document.body.classList.add('inspect-mode'); playSound('warp-in'); if(navigator.vibrate) navigator.vibrate([100, 50, 100]); }
         function exitInspectMode() { document.body.classList.add('exiting-inspect-mode'); playSound('warp-out'); setTimeout(() => { document.body.classList.remove('inspect-mode'); document.body.classList.remove('exiting-inspect-mode'); if(navigator.vibrate) navigator.vibrate(50); }, 500); }
 
         const booModuleHolo = document.getElementById('boo-knight');
-        document.addEventListener('mousemove', (e) => { const x = (window.innerWidth / 2 - e.pageX) / 35; const y = (window.innerHeight / 2 - e.pageY) / 35; booModuleHolo.style.transform = `perspective(500px) rotateY(${-x}deg) rotateX(${y}deg)`; });
-        window.addEventListener('deviceorientation', (e) => { if(e.gamma && e.beta) { const x = Math.max(-25, Math.min(25, e.gamma)); const y = Math.max(-25, Math.min(25, e.beta - 45)); booModuleHolo.style.transform = `perspective(500px) rotateY(${x}deg) rotateX(${y}deg)`; } });
+        if(booModuleHolo) {
+            document.addEventListener('mousemove', (e) => { const x = (window.innerWidth / 2 - e.pageX) / 35; const y = (window.innerHeight / 2 - e.pageY) / 35; booModuleHolo.style.transform = `perspective(500px) rotateY(${-x}deg) rotateX(${y}deg)`; });
+            window.addEventListener('deviceorientation', (e) => { if(e.gamma && e.beta) { const x = Math.max(-25, Math.min(25, e.gamma)); const y = Math.max(-25, Math.min(25, e.beta - 45)); booModuleHolo.style.transform = `perspective(500px) rotateY(${x}deg) rotateX(${y}deg)`; } });
+        }
     </script>
     <script src="boo-player.js"></script>
+    <script src="hud-ticker.js"></script>
 </body>
 </html>
