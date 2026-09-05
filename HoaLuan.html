@@ -109,7 +109,7 @@
         .holo-best { color: #ffb700; font-weight: bold; width: 50px; text-align: right; text-shadow: 0 0 6px rgba(255,183,0,0.6); }
 
         .chart-container { width: 100%; height: 50px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; border-top: 1px solid rgba(255,69,0,0.3); padding-top: 8px; margin-top: 4px; }
-        #reflex-canvas { width: 100%; height: 40px; display: block; }
+        #reflex-canvas { width: 100%; height: 40px; display: block; cursor: pointer; }
         .chart-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #ff4500; text-align: center; margin-top: 4px; font-weight: bold; }
 
         #terminal-bar { position: fixed; bottom: 145px; left: 0; width: 100vw; background: rgba(10, 0, 0, 0.9); border-top: 1.5px solid rgba(255, 69, 0, 0.6); border-bottom: 1.5px solid rgba(255, 69, 0, 0.6); padding: 8px 0; text-align: center; z-index: 45; overflow: hidden; display: flex; align-items: center; }
@@ -201,6 +201,7 @@
         .hit-flash { animation: flashRed 0.3s ease-out; }
         @keyframes flashRed { 0% { background-color: rgba(255,0,0,0.6); } 100% { background-color: transparent; } }
 
+        /* BẢNG CẢNH BÁO POPUP 3D VIỀN ĐỎ */
         #custom-alert-overlay { position: fixed; inset: 0; background: rgba(0, 5, 10, 0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(8px); }
         #custom-alert-overlay.active { opacity: 1; pointer-events: auto; }
         
@@ -291,8 +292,8 @@
         </div>
 
         <div class="chart-container">
-            <canvas id="reflex-canvas"></canvas>
-            <div class="chart-label">TẦN SỐ BẠO PHÁT (LỊCH SỬ)</div>
+            <canvas id="reflex-canvas" onclick="handleChartClick(event)"></canvas>
+            <div class="chart-label">CHẠM VÀO ĐIỂM ĐỂ XEM CHI TIẾT TẦN SỐ</div>
         </div>
     </div>
 
@@ -336,6 +337,7 @@
         </div>
     </div>
 
+    <!-- CUSTOM ALERT POPUP 3D -->
     <div id="custom-alert-overlay">
         <div class="custom-alert-box">
             <div class="alert-title glitch-anim" id="alert-box-title">⚠️ GIỚI HẠN KỶ LUẬT</div>
@@ -347,6 +349,7 @@
     <script>
         let isTestMode = false;
         let secretClicks = 0;
+        let chartPointsCoords = []; // Lưu tọa độ các điểm trên biểu đồ để bắt sự kiện chạm
 
         document.getElementById('secret-test-trigger').addEventListener('click', () => {
             secretClicks++;
@@ -425,27 +428,31 @@
             if(localStorage.getItem('bg_music_muted') !== 'true') { bgMusic.play().catch(e => {}); }
         };
 
+        // VẼ BIỂU ĐỒ BÁM SÁT DỮ LIỆU THẬT & LƯU TỌA ĐỘ TƯƠNG TÁC
         function drawReflexChart() {
             let canvas = document.getElementById('reflex-canvas');
             if(!canvas) return;
             let ctx = canvas.getContext('2d');
-            let history = JSON.parse(localStorage.getItem(reflexHistoryKey)) || [20, 45, 60, 80, 110];
+            let history = JSON.parse(localStorage.getItem(reflexHistoryKey)) || [];
+            
+            // Nếu chưa có lịch sử thực tế, nạp mẫu mặc định nhưng chuẩn xác
+            if(history.length === 0) history = [15, 30, 45, 60, 75];
             
             canvas.width = canvas.parentElement.clientWidth;
             canvas.height = 40;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            if(history.length === 0) return;
-
-            let maxVal = Math.max(...history, 100);
+            let maxVal = Math.max(...history, 50);
             let stepX = canvas.width / (history.length - 1 || 1);
-            let points = [];
+            chartPointsCoords = []; // Reset danh sách tọa độ điểm
 
+            let points = [];
             for(let i = 0; i < history.length; i++) {
                 let val = history[i];
                 let x = i === 0 && history.length === 1 ? canvas.width / 2 : i * stepX;
-                let y = canvas.height - (val / maxVal) * (canvas.height - 10) - 5;
+                let y = canvas.height - (val / maxVal) * (canvas.height - 12) - 6;
                 points.push({x: x, y: y});
+                chartPointsCoords.push({ x: x, y: y, score: val, index: i + 1 });
             }
 
             let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -475,9 +482,39 @@
             points.forEach(p => {
                 ctx.beginPath();
                 ctx.fillStyle = '#fff';
-                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
                 ctx.fill();
             });
+        }
+
+        // TÍNH NĂNG CHẠM VÀO BIỂU ĐỒ ĐỂ HIỆN BẢNG CHI TIẾT
+        function handleChartClick(event) {
+            let canvas = document.getElementById('reflex-canvas');
+            let rect = canvas.getBoundingClientRect();
+            let clickX = event.clientX - rect.left;
+            let clickY = event.clientY - rect.top;
+
+            // Tìm điểm gần nhất với vị trí chạm
+            let closest = null;
+            let minDist = 25; // Khoảng cách nhận diện chạm (pixel)
+
+            chartPointsCoords.forEach(pt => {
+                let dist = Math.hypot(pt.x - clickX, pt.y - clickY);
+                if(dist < minDist) {
+                    minDist = dist;
+                    closest = pt;
+                }
+            });
+
+            if(closest) {
+                playSound('coin');
+                let evaluation = closest.val >= 50 ? "🔥 BẠO PHÁT ĐỈNH CAO" : (closest.val >= 25 ? "⚡ PHẢN XẠ ỔN ĐỊNH" : "🌱 CẦN BỨT PHÁ TỐC ĐỘ");
+                showCustomAlertBox(`📊 CHI TIẾT LƯỢT #${closest.index}`, 
+                    `Điểm bạo phát: <b style="color:#ffb700; font-size:18px;">${closest.score}</b><br>` +
+                    `Trạng thái: <span style="color:#00ff66;">${evaluation}</span><br><br>` +
+                    `<span style="font-size:12px; color:#aaa;">Dữ liệu ghi nhận trực tiếp từ sóng phản xạ sinh học của bạn.</span>`
+                );
+            }
         }
 
         function updateHologramUI() {
