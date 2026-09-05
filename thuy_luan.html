@@ -42,7 +42,7 @@
         #wrapper-2 { transform: translateY(150vh); opacity: 0; }
         .assembled #wrapper-1 { transform: translateX(0); opacity: 1; transition-delay: 0.2s; }
         .assembled #wrapper-3 { transform: translateX(0); opacity: 1; transition-delay: 0.4s; }
-        .assembled #wrapper-2 { transform: translateY(0); opacity: 1; transition-delay: 0.6s; }
+        .assembled #wrapper-2 { transform: translateX(0); opacity: 1; transition-delay: 0.6s; }
         
         .holo-card { width: 105px; height: 110px; background-size: cover; background-position: center; border: 1.5px solid #00e5ff; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 6px 4px; box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.4), 0 0 12px rgba(0, 229, 255, 0.3); cursor: pointer; border-radius: 8px; transition: all 0.3s ease; position: relative; overflow: hidden; }
         .holo-card::before { content: ''; position: absolute; inset: 0; background: rgba(2, 8, 15, 0.4); z-index: 1; transition: background 0.3s; }
@@ -175,12 +175,37 @@
         .w-shuriken { width: 22px; height: 22px; background: #00e5ff; clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%); animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .combo-text { color: #00e5ff; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; position: absolute; top: 5px; right: 10px; opacity: 0; transition: opacity 0.2s; pointer-events: none; text-shadow: 0 0 10px rgba(0,229,255,0.9); z-index: 10; }
-        .combo-text.active { opacity: 1; animation: pop 0.2s ease; }
-        .combo-text.broken { color: #ff3366; text-shadow: 0 0 10px #ff3366; }
-        .combo-text.level-up { color: #00ff66; text-shadow: 0 0 15px #00ff66; font-size: 22px; animation: levelUpPop 0.4s ease; }
-        @keyframes pop { 0% { transform: scale(0.6); } 100% { transform: scale(1.15); } }
-        @keyframes levelUpPop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        /* ĐƯA THÔNG BÁO (COMBO, TĂNG CẤP, SAI MẠCH) RA CHÍNH GIỮA MÀN HÌNH */
+        .combo-text { 
+            color: #00e5ff; 
+            font-family: 'Share Tech Mono', monospace; 
+            font-size: 20px; 
+            font-weight: 900; 
+            position: absolute; 
+            top: 45%; 
+            left: 50%; 
+            transform: translate(-50%, -50%) scale(0.5); 
+            opacity: 0; 
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            pointer-events: none; 
+            text-shadow: 0 0 15px rgba(0,229,255,1), 0 0 30px rgba(0,229,255,0.8); 
+            z-index: 50; 
+            text-align: center;
+            white-space: nowrap;
+        }
+        .combo-text.active { 
+            opacity: 1; 
+            transform: translate(-50%, -50%) scale(1.15); 
+        }
+        .combo-text.broken { 
+            color: #ff3366; 
+            text-shadow: 0 0 15px #ff3366, 0 0 30px #ff3366; 
+        }
+        .combo-text.level-up { 
+            color: #00ff66; 
+            text-shadow: 0 0 20px #00ff66, 0 0 40px #00ff66; 
+            font-size: 26px; 
+        }
 
         .arena-btn-group { display: flex; gap: 10px; width: 100%; justify-content: center; margin-top: 8px; }
         .arena-btn { background: rgba(0, 229, 255, 0.2); border: 1.5px solid #00e5ff; color: #00e5ff; font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: bold; letter-spacing: 1.5px; padding: 12px 20px; cursor: pointer; transition: all 0.2s; border-radius: 8px; text-transform: uppercase; flex: 1; box-shadow: 0 0 10px rgba(0,229,255,0.3); backdrop-filter: blur(1px); }
@@ -322,6 +347,8 @@
             </div>
             
             <div id="timer-bar-container"><div id="timer-progress"></div></div>
+            
+            <!-- THÔNG BÁO COMBO / TĂNG CẤP / SAI MẠCH HIỆN NGAY TRUNG TÂM -->
             <div id="combo-display" class="combo-text">COMBO x2</div>
             
             <div id="game-1-container" class="game-container">
@@ -374,7 +401,7 @@
             }
         });
 
-        // BỘ ÂM THANH MỚI - TÁCH BIỆT RIÊNG CHO TỪNG TÁC VỤ 1 VÀ 2
+        // BỘ ÂM THANH CHUYÊN BIỆT RIÊNG CHO TỪNG TÁC VỤ
         function playSound(type) {
             try { 
                 const ctx = new (window.AudioContext || window.webkitAudioContext)(); 
@@ -382,23 +409,23 @@
                 osc.connect(gain); gain.connect(ctx.destination);
                 
                 if(type === 'tinh_khí') { 
-                    // Tác vụ 1: Âm thanh giọt nước tĩnh lặng, trong trẻo
+                    // Tác vụ 1 (Tĩnh Khí): Âm thanh giọt nước tĩnh lặng, trong trẻo
                     osc.type = 'sine'; 
-                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // Nốt Do (C5)
-                    osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.12); // Nốt Mi (E5)
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); 
+                    osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.12); 
                     gain.gain.setValueAtTime(0.4, ctx.currentTime); 
                     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15); 
                     osc.start(); osc.stop(ctx.currentTime + 0.15); 
                 } else if(type === 'luu_thuy') {
-                    // Tác vụ 2: Âm thanh dòng suối chảy róc rách, dồn dập hơn
+                    // Tác vụ 2 & 3: Âm thanh dòng suối chảy
                     osc.type = 'triangle'; 
-                    osc.frequency.setValueAtTime(783.99, ctx.currentTime); // Nốt Sol (G5)
-                    osc.frequency.exponentialRampToValueAtTime(1046.50, ctx.currentTime + 0.1); // Nốt Do (C6)
+                    osc.frequency.setValueAtTime(783.99, ctx.currentTime); 
+                    osc.frequency.exponentialRampToValueAtTime(1046.50, ctx.currentTime + 0.1); 
                     gain.gain.setValueAtTime(0.35, ctx.currentTime); 
                     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
                     osc.start(); osc.stop(ctx.currentTime + 0.12);
                 } else if(type === 'deep_thud') {
-                    // Sai / Mất mạng: Sóng ngầm / Trầm đục
+                    // Sai / Mất mạng / Thoát: Sóng ngầm / Trầm đục
                     osc.type = 'sawtooth'; 
                     osc.frequency.setValueAtTime(120, ctx.currentTime); 
                     osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.35);
@@ -729,7 +756,7 @@
             if(type === 'broken') el.className = 'combo-text active broken';
             else if(type === 'levelup') el.className = 'combo-text active level-up';
             else el.className = 'combo-text active';
-            setTimeout(() => el.classList.remove('active'), 600);
+            setTimeout(() => el.classList.remove('active'), 900);
         }
 
         function loseLife(reason = "SAI!") {
@@ -789,6 +816,7 @@
             document.getElementById('timer-progress').classList.remove('danger');
         }
 
+        /* ================= LOGIC RIÊNG CHO ẢI 1 (TĨNH KHÍ) ================= */
         function runGame1() {
             currentRoundId++;
             let myRoundId = currentRoundId;
@@ -820,7 +848,7 @@
         function handleGame1Click(idx, cellEl) {
             if(!canClick || !isPlaying || t1User.includes(idx)) return;
             t1User.push(idx); cellEl.classList.add('user-pick');
-            playSound('tinh_khí'); // Âm thanh Tác vụ 1
+            playSound('tinh_khí'); // Âm thanh chuẩn xác riêng cho Ải 1
             
             if(t1User.length === t1Pattern.length) {
                 canClick = false;
@@ -834,7 +862,9 @@
                     
                     consecutiveWins++;
                     if(consecutiveWins >= 5) {
-                        currentLevel++; consecutiveWins = 0; showCombo(`TĂNG CẤP! (LV.${currentLevel})`, 'levelup');
+                        currentLevel++; 
+                        consecutiveWins = 0; 
+                        showCombo(`TĂNG CẤP! (LV.${currentLevel})`, 'levelup'); // Hiệu ứng thăng cấp bùng nổ giữa màn hình
                     }
                     setTimeout(runGame1, 400);
                 } else {
@@ -877,7 +907,7 @@
             if(!canClick || !isPlaying) return;
             if(idx === t2Path[t2User.length]) {
                 cellEl.classList.add('correct'); t2User.push(idx); 
-                playSound('luu_thuy'); // Âm thanh Tác vụ 2 (dòng chảy)
+                playSound('luu_thuy'); 
                 setTimeout(() => { if(cellEl) cellEl.classList.remove('correct'); }, 150);
                 
                 if(t2User.length === t2Path.length) {
