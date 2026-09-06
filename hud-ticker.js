@@ -1,5 +1,5 @@
 (function() {
-    // 1. Tự động nạp Google Fonts và CSS chuẩn của HUD kèm CSS cho nút ngôn ngữ
+    // 1. Tự động nạp Google Fonts và CSS chuẩn của HUD kèm chỉnh sửa vị trí thấp xuống
     const styleId = 'kdrive-hud-module-styles';
     if (!document.getElementById(styleId)) {
         const linkFont = document.createElement('link');
@@ -10,13 +10,14 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* THANH HUD HỆ THỐNG CỐ ĐỊNH TỐI CAO */
+            /* THANH HUD HỆ THỐNG ĐÃ ĐẨY XUỐNG THẤP KHÔNG BỊ LẸM CHỮ */
             .hud-top-bar {
-                position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 55px !important;
-                display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 15px !important;
-                background: linear-gradient(to bottom, rgba(3,5,8,0.95) 0%, rgba(3,5,8,0.4) 70%, rgba(3,5,8,0) 100%) !important;
+                position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 52px !important;
+                display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 12px !important;
+                background: rgba(3, 5, 8, 0.88) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important;
+                border: 1px solid rgba(0, 229, 255, 0.3) !important; border-radius: 8px !important;
                 z-index: 2147483647 !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 10px !important; color: #00e5ff !important; letter-spacing: 1.2px !important;
-                pointer-events: auto !important;
+                pointer-events: auto !important; box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 10px rgba(0,229,255,0.15) !important;
             }
             .hud-left, .hud-right { display: flex; flex-direction: column; gap: 2px; }
             .hud-right { text-align: right; color: rgba(255,255,255,0.85); }
@@ -41,14 +42,14 @@
                 animation: badgePulse 2s infinite alternate ease-in-out;
             }
 
-            /* NÚT CHỌN NGÔN NGỮ NẰM NGAY DƯỚI GPS TRÊN HUD */
+            /* NÚT CHỌN NGÔN NGỮ NẰM GỌN GÀNG DƯỚI GPS TRÊN HUD */
             .hud-lang-btn {
-                background: rgba(0, 229, 255, 0.12); border: 1px solid rgba(0, 229, 255, 0.5);
+                background: rgba(0, 229, 255, 0.15); border: 1px solid rgba(0, 229, 255, 0.6);
                 border-radius: 4px; color: #00e5ff; font-family: 'Space Grotesk', sans-serif;
                 font-size: 9px; font-weight: 700; padding: 2px 6px; cursor: pointer;
-                text-transform: uppercase; width: fit-content; margin-top: 1px; transition: 0.2s;
+                text-transform: uppercase; width: fit-content; margin-top: 2px; transition: 0.2s;
             }
-            .hud-lang-btn:hover { background: rgba(0, 229, 255, 0.3); box-shadow: 0 0 8px rgba(0,229,255,0.6); }
+            .hud-lang-btn:hover { background: rgba(0, 229, 255, 0.35); box-shadow: 0 0 10px rgba(0,229,255,0.8); color: #fff; }
 
             /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (MODAL) */
             .global-lang-overlay {
@@ -184,7 +185,7 @@
                     </div>
                     <span style="color: #fff;" id="hudUserText">USER: GUEST</span>
                     <span class="hud-gps" id="hudGpsText">GPS: OFFLINE</span>
-                    <!-- Nút chọn ngôn ngữ nằm ngay dưới GPS -->
+                    <!-- Nút chọn ngôn ngữ nằm ngay dưới GPS trên HUD -->
                     <button class="hud-lang-btn" id="hudLangOpenBtn">🌐 LANG [ <span id="hudLangLabel">VI</span> ]</button>
                 </div>
                 <div class="hud-right">
@@ -232,7 +233,6 @@
         `;
         document.body.prepend(container);
 
-        // Gắn hàm toàn cục để mở/đóng và đổi ngôn ngữ mang đi khắp nơi
         window.openGlobalLang = function() {
             playClickSound();
             document.getElementById('globalLangModal').classList.add('active');
@@ -246,7 +246,6 @@
             localStorage.setItem('kdrive_lang', lang);
             updateHudLangUI(lang);
             window.closeGlobalLang();
-            // Tự động kích hoạt sự kiện để các trang tự biên dịch lại nếu có hỗ trợ
             window.dispatchEvent(new CustomEvent('kdriveLangChanged', { detail: { lang } }));
         };
 
@@ -262,7 +261,6 @@
 
         document.getElementById('hudLangOpenBtn').addEventListener('click', window.openGlobalLang);
 
-        // Khởi tạo ngôn ngữ đã lưu sẵn từ trước
         const savedLang = localStorage.getItem('kdrive_lang') || 'vi';
         updateHudLangUI(savedLang);
 
@@ -280,7 +278,6 @@
             });
         }
 
-        // Kiểm tra GPS
         const gpsVerified = sessionStorage.getItem('kdrive_gps_verified');
         const gpsText = document.getElementById('hudGpsText');
         const modalOverlay = document.getElementById('gpsModalOverlay');
