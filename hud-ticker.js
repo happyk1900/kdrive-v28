@@ -1,5 +1,5 @@
 (function() {
-    // 1. Tự động nạp Google Fonts và CSS chuẩn của HUD kèm chỉnh sửa vị trí thấp xuống
+    // 1. Tự động nạp Google Fonts và CSS chuẩn của HUD (Đã gỡ bỏ nền đen và border khung)
     const styleId = 'kdrive-hud-module-styles';
     if (!document.getElementById(styleId)) {
         const linkFont = document.createElement('link');
@@ -10,14 +10,14 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* THANH HUD HỆ THỐNG ĐÃ ĐẨY XUỐNG THẤP KHÔNG BỊ LẸM CHỮ */
+            /* THANH HUD TRONG SUỐT HOÀN TOÀN, KHÔNG NỀN ĐEN */
             .hud-top-bar {
                 position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 52px !important;
-                display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 12px !important;
-                background: rgba(3, 5, 8, 0.88) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important;
-                border: 1px solid rgba(0, 229, 255, 0.3) !important; border-radius: 8px !important;
+                display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 10px !important;
+                background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+                border: none !important; border-radius: 0 !important;
                 z-index: 2147483647 !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 10px !important; color: #00e5ff !important; letter-spacing: 1.2px !important;
-                pointer-events: auto !important; box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 10px rgba(0,229,255,0.15) !important;
+                pointer-events: auto !important; box-shadow: none !important;
             }
             .hud-left, .hud-right { display: flex; flex-direction: column; gap: 2px; }
             .hud-right { text-align: right; color: rgba(255,255,255,0.85); }
@@ -42,7 +42,7 @@
                 animation: badgePulse 2s infinite alternate ease-in-out;
             }
 
-            /* NÚT CHỌN NGÔN NGỮ NẰM GỌN GÀNG DƯỚI GPS TRÊN HUD */
+            /* NÚT CHỌN NGÔN NGỮ NẰM GỌN GÀNG DƯỚI GPS TRÊN HUD TRONG SUỐT */
             .hud-lang-btn {
                 background: rgba(0, 229, 255, 0.15); border: 1px solid rgba(0, 229, 255, 0.6);
                 border-radius: 4px; color: #00e5ff; font-family: 'Space Grotesk', sans-serif;
@@ -166,7 +166,7 @@
         try { new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3').play(); } catch(e){}
     }
 
-    // 3. Tự động chèn HUD, nút đổi ngôn ngữ và Modal vào trang
+    // 3. Tự động chèn HUD vào trang
     document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('kdriveGlobalHud')) return;
 
