@@ -143,7 +143,7 @@
         .hit-flash { animation: flashRed 0.3s ease-out; }
         @keyframes flashRed { 0% { background-color: rgba(255,0,0,0.6); } 100% { background-color: transparent; } }
 
-        /* HIỆU ỨNG COMBO CỰC NGẦU (CHỈ HIỆN X2, X3...) */
+        /* HIỆU ỨNG COMBO CỰC NGẦU */
         #combo-popup {
             position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%) scale(0.1) skewX(-10deg);
             font-family: 'Share Tech Mono', monospace; font-size: 70px; font-weight: 900; font-style: italic;
@@ -161,7 +161,7 @@
             100% { transform: translate(-50%, -50%) scale(1) skewX(-10deg); opacity: 0; }
         }
 
-        /* 1. POPUP DÙNG CHO CẢNH BÁO / BẺ KHÓA */
+        /* POPUP CẢNH BÁO */
         #custom-alert-overlay {
             position: fixed; inset: 0; background: rgba(2, 4, 8, 0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; backdrop-filter: blur(10px);
         }
@@ -195,7 +195,7 @@
             80% { transform: translate(1px, 2px); text-shadow: 3px 0px #00ff66, -3px 0px #ff3366; }
         }
 
-        /* 2. POPUP DÙNG RIÊNG CHO CHI TIẾT TẦN SỐ/DANH VỌNG */
+        /* 2. POPUP DÙNG RIÊNG CHO CHI TIẾT */
         #chart-modal-overlay {
             position: fixed; inset: 0; background: rgba(2, 4, 8, 0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; backdrop-filter: blur(8px);
         }
@@ -221,8 +221,9 @@
     <div class="title-hologram" data-i18n="fire_title">ĐẠO TRƯỜNG HỎA LUÂN</div>
 
     <div id="task-container">
+        <!-- ĐÃ ĐỔI HÀM CHỈ TRUYỀN ID, KHÔNG TRUYỀN TÊN CỐ ĐỊNH NỮA -->
         <div class="card-wrapper" id="wrapper-1">
-            <div class="holo-card float-1" id="card-1" onclick="openArena('1', 'I. BẠO PHÁT')">
+            <div class="holo-card float-1" id="card-1" onclick="openArena('1')">
                 <div class="live-dot"></div>
                 <div class="card-sci-tag" id="sci-max-1">MAX: 0</div>
                 <div class="card-body-content">
@@ -234,7 +235,7 @@
         </div>
         
         <div class="card-wrapper" id="wrapper-2">
-            <div class="holo-card float-2" id="card-2" onclick="openArena('2', 'II. CHÂN HỎA')"> 
+            <div class="holo-card float-2" id="card-2" onclick="openArena('2')"> 
                 <div class="live-dot"></div>
                 <div class="card-sci-tag" id="sci-max-2">MAX: 0</div>
                 <div class="card-body-content">
@@ -246,7 +247,7 @@
         </div>
 
         <div class="card-wrapper" id="wrapper-3">
-            <div class="holo-card float-3" id="card-3" onclick="openArena('3', 'III. THỦ TRẬN')">
+            <div class="holo-card float-3" id="card-3" onclick="openArena('3')">
                 <div class="live-dot"></div>
                 <div class="card-sci-tag" id="sci-max-3">MAX: 0</div>
                 <div class="card-body-content">
@@ -417,7 +418,7 @@
             },
             fr: {
                 page_title: "K-Drive - Arène de Feu", fire_title: "ARÈNE DE FEU", card_1_title: "ÉCLAT", card_2_title: "FEU VRAI", card_3_title: "DÉFENSE",
-                tries_left: "TENTATIVES", exhausted_label: "ÉPUISÉ", fame: "RENOMMÉE", combat_log: ">> JOURNAL COMBAT", today: "AUJOURD'HUI",
+                tries_left: "TOURS", exhausted_label: "ÉPUISÉ", fame: "RENOMMÉE", combat_log: ">> JOURNAL COMBAT", today: "AUJOURD'HUI",
                 click_chart: "TOUCHEZ POUR DÉTAILS", led_msg: "⚡ [LIMITE 3 FOIS/JOUR] ⚡",
                 btn_core: "RETOUR COEUR", btn_save: "SAUVER", btn_start: "JOUER", test_finish: "FIN DU TEST", score_label: "SCORE:", btn_confirm: "OK", lives: "VIES:", points: "PTS:", btn_exit: "QUITTER",
                 alert_limit_title: "LIMITE", alert_limit_msg: "Missions du jour terminées (3/3).<br><br>À demain 00:00!",
@@ -725,7 +726,7 @@
                         statusEl.style.color = '#ffb700';
                     } else {
                         let remainingTries = 3 - validScores.length;
-                        // Thay thế chữ HẾT LƯỢT theo đúng ngôn ngữ
+                        // HẾT LƯỢT ĐƯỢC DỊCH CHUẨN XÁC THEO TỪ ĐIỂN MỚI
                         statusEl.innerText = remainingTries > 0 ? `${remainingTries} ${t.tries_left}` : t.exhausted_label;
                     }
                 }
@@ -759,7 +760,8 @@
         let isPlaying = false;
         let spawnTimer, g3LoopId, stability = 5, projectiles = [];
 
-        function openArena(id, name) {
+        // HÀM MỞ ẢI ĐÃ BỎ TRUYỀN PARAM NAME, TỰ ĐỘNG LẤY THEO NGÔN NGỮ CHỌN
+        function openArena(id) {
             let validRuns = gameRuns[id].filter(v => v !== null);
             if(validRuns.length >= 3 && !isTestMode) {
                 const t = window.currentLangDict || translations['vi'];
@@ -771,7 +773,12 @@
             cGame = id; aScore = 0; currentMultiplier = 1; isPlaying = false; stability = 5;
             
             document.getElementById('task-container').style.pointerEvents = 'none';
-            document.getElementById('holo-box-title').innerText = name;
+            
+            // XỬ LÝ LẤY ĐÚNG TÊN TỪ ĐIỂN (VÍ DỤ: I. BURST)
+            const t = window.currentLangDict || translations['vi'];
+            let titlePrefix = id === '1' ? 'I. ' : (id === '2' ? 'II. ' : 'III. ');
+            let titleKey = `card_${id}_title`;
+            document.getElementById('holo-box-title').innerText = titlePrefix + t[titleKey];
             
             document.getElementById('start-hologram-box').classList.remove('hidden');
             document.getElementById('result-overlay').classList.remove('active');
