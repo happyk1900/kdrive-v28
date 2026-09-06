@@ -162,7 +162,7 @@
         .dot.active { background: #00e5ff; width: 22px; border-radius: 4px; box-shadow: 0 0 10px #00e5ff; }
         .close-info-btn { width: 90%; padding: 11px; background: rgba(0, 229, 255, 0.15); border: 1px solid #00e5ff; color: #00e5ff; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; pointer-events: auto; box-shadow: 0 0 12px rgba(0, 229, 255, 0.2); }
 
-        /* ================= CẢNH 2: CỔNG TORII & KHUNG LOGIN CHUẨN MẪU $RLW80KC.PNG ================= */
+        /* ================= CẢNH 2: CỔNG TORII & KHUNG LOGIN CHUẨN MẪU ================= */
         .kdrive-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; background: #010204; z-index: 1; overflow: hidden; }
         .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; opacity: 0; visibility: hidden; transition: opacity 1.5s ease-in-out; }
         .kdrive-bg-target.active { opacity: 1; visibility: visible; }
@@ -209,20 +209,31 @@
         .sub-modal-desc { color: #d0f0ff; font-size: 11px; margin-bottom: 15px; line-height: 1.5; }
         .sub-modal-close { background: rgba(0,229,255,0.15); border: 1px solid #00e5ff; color: #00e5ff; padding: 8px; width: 100%; border-radius: 4px; font-weight: 700; font-size: 10px; cursor: pointer; text-transform: uppercase; }
 
+        /* HIỆU ỨNG LÓE SÁNG (FLASH / VORTEX GLOW) */
+        #screenFlash {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #ffffff; z-index: 2147483647; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #screenFlash.flash-active { opacity: 1; }
+
         #successVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 9999999; display: none; background: #000; }
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
+    <!-- HIỆU ỨNG LÓE SÁNG CHUYỂN CẢNH -->
+    <div id="screenFlash"></div>
+
     <!-- CÁC NGUỒN AUDIO & VIDEO ĐỘC LẬP -->
     <audio id="bgMusic" crossorigin="anonymous" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Path%20of%20the%20Ninja.mp3" preload="auto" loop></audio>
     <audio id="toriiAudio" crossorigin="anonymous" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Path%20of%20the%20Ninja.mp3" preload="auto" loop></audio>
-    <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20KHAM%20PHA%20SUB.mp4" playsinline></video>
+    <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20DANGNHAP%20FX%20%5E%5E.mp4" playsinline></video>
 
-    <!-- CẢNH 0: MÀN HÌNH KHỞI ĐỘNG (ĐÃ KHÔI PHỤC VIDEO NỀN) -->
+    <!-- CẢNH 0: MÀN HÌNH KHỞI ĐỘNG -->
     <div id="preSplashScreen" onclick="enterPreSplash()">
         <video id="preSplashVideo" autoplay loop muted playsinline>
-            <source src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/video%20khoi%20dau.mp4" type="video/mp4">
+            <source src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/video%20khoi%20dau.mp4" type="video/mp4">
         </video>
         <div class="pre-splash-overlay"></div>
         <div class="core-access-btn">TRUY CẬP LÕI LƯỢNG TỬ</div>
@@ -285,7 +296,7 @@
         </div>
     </div>
 
-    <!-- CẢNH 2: CỔNG TORII & KHUNG LOGIN TINH GỌN CHUẨN MẪU -->
+    <!-- CẢNH 2: CỔNG TORII & KHUNG LOGIN -->
     <div class="kdrive-image-wrapper">
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/TORI%20CYBER.png?raw=true" id="bg-login" class="kdrive-bg-target" alt="Login Background">
         
@@ -300,7 +311,6 @@
                 
                 <button class="login-btn-submit" onclick="playHologramClick(); submitLogin();">LOGIN</button>
                 
-                <!-- HÀNG NÚT PHỤ TỐI GIẢN -->
                 <div class="login-extra-row">
                     <button class="extra-action-btn" onclick="playHologramClick(); openSubModal('register')">+ Đăng ký</button>
                     <button class="extra-action-btn" onclick="playHologramClick(); openSubModal('forgot')">Quên mật khẩu?</button>
@@ -500,18 +510,44 @@
                     
                     const toriiAudio = document.getElementById('toriiAudio'); if(toriiAudio) toriiAudio.pause();
                     
+                    // HIỆU ỨNG LÓE SÁNG CHÓI LỌI KHI ĐĂNG NHẬP THÀNH CÔNG
+                    const flash = document.getElementById('screenFlash');
+                    flash.classList.add('flash-active');
+
                     setTimeout(() => { 
                         document.getElementById('loginPanelContainer').classList.remove('active'); 
+                        
                         setTimeout(() => {
                             const successVid = document.getElementById('successVideo');
                             if(successVid) {
                                 successVid.style.display = 'block'; 
+                                
+                                // Tắt hiệu ứng lóe trắng để lộ video 1 (VIDEO DANGNHAP FX ^^.mp4)
+                                flash.classList.remove('flash-active');
+                                
+                                successVid.src = 'https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20DANGNHAP%20FX%20%5E%5E.mp4';
                                 successVid.play().then(() => { 
-                                    successVid.onended = () => { window.location.href = 'core.html'; }; 
+                                    // Khi video 1 chạy xong -> chuyển tiếp sang video 2 (VIDEO KHAM PHA SUB.mp4 - Ngũ Luân Chi Chiến)
+                                    successVid.onended = () => {
+                                        flash.classList.add('flash-active'); // lóe sáng nhẹ giữa 2 video cho mượt
+                                        setTimeout(() => {
+                                            successVid.src = 'https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20KHAM%20PHA%20SUB.mp4';
+                                            successVid.play();
+                                            flash.classList.remove('flash-active');
+                                        }, 200);
+
+                                        // Khi video 2 chạy xong -> lóe sáng chói lọi lần cuối rồi bay vào core.html
+                                        successVid.onended = () => {
+                                            flash.classList.add('flash-active');
+                                            setTimeout(() => {
+                                                window.location.href = 'core.html';
+                                            }, 400);
+                                        };
+                                    };
                                 }).catch(err => { window.location.href = 'core.html'; });
                             } else { window.location.href = 'core.html'; }
-                        }, 500);
-                    }, 1000); 
+                        }, 400);
+                    }, 400); 
                 } else { statusEl.innerHTML = "❌ SAI THÔNG TIN!"; statusEl.style.color = "#ff3333"; }
             })
             .catch(error => { statusEl.innerHTML = "❌ MẤT KẾT NỐI!"; statusEl.style.color = "#ff3333"; });
