@@ -31,25 +31,15 @@
         .inspect-mode #main-hud { transform: translateY(-50px); opacity: 0 !important; }
         .inspect-mode #dynamic-hud-module { transform: translateX(-50%) translateY(50px); opacity: 0 !important; }
 
-        #main-hud {
-            position: fixed; top: calc(15px + env(safe-area-inset-top)); left: 20px; right: 20px;
-            display: flex; justify-content: space-between; align-items: flex-start;
-            z-index: 9999999; pointer-events: none;
+        /* VÙNG CHỨA THÔNG TIN BÊN TRÁI (LƯỢC BỎ PHẦN HUD CŨ ĐỂ DÙNG hud-ticker.js) */
+        #core-left-sidebar {
+            position: fixed; top: 60px; left: 20px;
+            display: flex; flex-direction: column; gap: 4px;
+            z-index: 99; pointer-events: auto;
             font-family: 'Share Tech Mono', monospace; color: #00e5ff;
             text-shadow: 0 0 8px rgba(0,229,255,0.6);
-            opacity: 0; 
+            opacity: 0; transition: opacity 1s ease;
         }
-        .hud-left, .hud-right { display: flex; flex-direction: column; gap: 4px; }
-        .hud-right { align-items: flex-end; text-align: right; }
-        .hud-line { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; display: flex; align-items: center; gap: 6px; }
-        .hud-gps { font-size: 8.5px; color: rgba(255,255,255,0.6); letter-spacing: 1px; text-transform: uppercase; }
-        .signal-bars { display: flex; gap: 2px; align-items: flex-end; height: 10px; margin-right: 5px; }
-        .bar { width: 3px; background: #00e5ff; animation: signalPulse 1.5s infinite; }
-        .bar:nth-child(1) { height: 4px; animation-delay: 0s; }
-        .bar:nth-child(2) { height: 7px; animation-delay: 0.2s; }
-        .bar:nth-child(3) { height: 10px; animation-delay: 0.4s; }
-        .bar:nth-child(4) { height: 7px; animation-delay: 0.6s; opacity: 0.3; }
-        @keyframes signalPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; box-shadow: 0 0 8px #00e5ff; } }
         
         #lore-btn { color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 900; letter-spacing: 3px; border: none; background: transparent; cursor: pointer; text-shadow: 0 0 8px rgba(255, 255, 255, 0.8); pointer-events: auto; margin-top: 8px; text-transform: uppercase; }
 
@@ -84,7 +74,7 @@
         .face-bottom { transform: rotateX(-90deg) translateZ(70px) rotateZ(180deg); }
 
         #dynamic-hud-module { position: fixed; bottom: calc(50% - 190px); left: 50%; transform: translateX(-50%); background: rgba(10, 15, 20, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 10px; padding: 10px 18px; display: flex; flex-direction: column; align-items: center; z-index: 50; cursor: pointer; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 0 15px rgba(0,229,255,0.15), inset 0 0 8px rgba(0,229,255,0.1); opacity: 0; pointer-events: auto; min-width: 220px; }
-        .hud-top-bar { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; }
+        .hud-top-bar-inner { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #fff; transition: background 0.3s, box-shadow 0.3s; }
         .dot-new { background: #ffd700; box-shadow: 0 0 10px #ffd700; animation: pulseDot 1s infinite alternate; }
         .dot-progress { background: #00e5ff; box-shadow: 0 0 10px #00e5ff; animation: pulseDot 1.5s infinite alternate; }
@@ -284,29 +274,16 @@
 
     <div id="sanctum-bg"></div>
     
-    <div class="cyber-hud-container ui-element" id="main-hud">
-        <div class="hud-left">
-            <div class="hud-line">
-                <div class="signal-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
-                SYS.ONLINE // 2126
-            </div>
-            <div class="hud-line" id="hud-user" style="color: #ffffff;">USER: GUEST</div>
-            <div class="hud-gps" id="hud-gps-display">GPS: ACQUIRING...</div>
-            
-            <div id="luantran-hud">
-                <div class="luantran-title" data-i18n="luantranTitle">KIỂM SOÁT LUÂN TRẬN</div>
-                <div class="matrix-row"><span class="matrix-val" id="sync-dia">--</span> <span data-i18n="diaLuan">ĐỊA LUÂN</span></div>
-                <div class="matrix-row"><span class="matrix-val" id="sync-thuy">--</span> <span data-i18n="thuyLuan">THỦY LUÂN</span></div>
-                <div class="matrix-row"><span class="matrix-val" id="sync-hoa">--</span> <span data-i18n="hoaLuan">HỎA LUÂN</span></div>
-                <div class="matrix-row"><span class="matrix-val" id="sync-phong">--</span> <span data-i18n="phongLuan">PHONG LUÂN</span></div>
-            </div>
+    <!-- THANH SIDEBAR BÊN TRÁI (KHÔNG DÙNG HUD CŨ ĐỂ TRÁNH CHỒNG LẤN) -->
+    <div class="ui-element" id="core-left-sidebar">
+        <div id="luantran-hud">
+            <div class="luantran-title" data-i18n="luantranTitle">KIỂM SOÁT LUÂN TRẬN</div>
+            <div class="matrix-row"><span class="matrix-val" id="sync-dia">--</span> <span data-i18n="diaLuan">ĐỊA LUÂN</span></div>
+            <div class="matrix-row"><span class="matrix-val" id="sync-thuy">--</span> <span data-i18n="thuyLuan">THỦY LUÂN</span></div>
+            <div class="matrix-row"><span class="matrix-val" id="sync-hoa">--</span> <span data-i18n="hoaLuan">HỎA LUÂN</span></div>
+            <div class="matrix-row"><span class="matrix-val" id="sync-phong">--</span> <span data-i18n="phongLuan">PHONG LUÂN</span></div>
         </div>
-        
-        <div class="hud-right">
-            <div class="hud-line" style="letter-spacing: 3px;">K&#8209;DRIVE v2.6</div>
-            <div class="hud-gps" id="hud-date-display" style="color: #ffffff; font-family: 'Orbitron', sans-serif;">2126.08.31</div>
-            <button id="lore-btn" onclick="openLore()" data-i18n="loreBtn">GIAO THỨC</button>
-        </div>
+        <button id="lore-btn" onclick="openLore()" data-i18n="loreBtn">GIAO THỨC</button>
     </div>
 
     <div id="faction-war-hud" class="ui-element">
@@ -345,7 +322,7 @@
     <audio id="bg-music" loop src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20Signal.mp3"></audio>
 
     <div id="dynamic-hud-module" class="ui-element" onclick="toggleMissionHud()">
-        <div class="hud-top-bar">
+        <div class="hud-top-bar-inner">
             <div class="status-dot" id="mission-status-dot"></div>
             <div id="live-clock-inner">
                 <span id="clock-hms">00:00:00</span><span id="clock-ms">:00</span>
@@ -555,7 +532,6 @@
         function fetchRealUser() { 
             let storedUser = sessionStorage.getItem('kdrive_username') || localStorage.getItem('kdrive_logged_in_user'); 
             let actualUser = storedUser ? storedUser.toUpperCase() : (currentLang === 'vi' ? "KHÁCH" : "GUEST"); 
-            document.getElementById('hud-user').innerText = "USER: " + actualUser; 
             document.querySelectorAll('.inspect-username').forEach(el => { if(el) el.innerText = actualUser; }); 
         }
 
@@ -567,26 +543,7 @@
             const ms = String(now.getMilliseconds()).padStart(3, '0').substring(0,2); 
             let elHms = document.getElementById('clock-hms'); if(elHms) elHms.innerText = `${hours}:${minutes}:${seconds}`; 
             let elMs = document.getElementById('clock-ms'); if(elMs) elMs.innerText = `:${ms}`; 
-            
-            const month = String(now.getMonth() + 1).padStart(2, '0'); 
-            const day = String(now.getDate()).padStart(2, '0'); 
-            let elDate = document.getElementById('hud-date-display'); if(elDate) elDate.innerText = `2126.${month}.${day}`; 
             requestAnimationFrame(runHighTechClock); 
-        }
-        
-        async function fetchCityName(lat, lon) { try { let response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=en`); let data = await response.json(); if(data && data.address) { let ad = data.address; let street = ad.road || ad.pedestrian || ad.neighbourhood || ""; let ward = ad.quarter || ad.suburb || ad.village || ""; let district = ad.city_district || ad.borough || ad.county || ""; let city = ad.city || ad.state || ad.town || ""; const clean = (str) => str.replace(/(Phường|Quận|Thành phố|Tỉnh|Thị xã|Huyện|Xã|Đường|Phố)\s+/gi, '').trim(); let parts = []; if (street) parts.push(clean(street)); if (ward) { let w = clean(ward); if (!parts.includes(w)) parts.push(w); } if (district) { let d = clean(district); if (!parts.includes(d)) parts.push(d); } if (parts.length > 0) return parts.slice(0, 2).join(", "); if (city) return clean(city); return "UNKNOWN SECTOR"; } } catch(e) { return null; } return null; }
-        
-        function requestRealGeolocation() { 
-            const gpsEl = document.getElementById('hud-gps-display'); 
-            if(!gpsEl) return;
-            if ("geolocation" in navigator) { 
-                navigator.geolocation.getCurrentPosition( async (position) => { 
-                    const lat = position.coords.latitude; const lon = position.coords.longitude; 
-                    let exactLocation = await fetchCityName(lat, lon); 
-                    if(exactLocation) { gpsEl.innerText = `GPS: ${exactLocation.toUpperCase()}`; } 
-                    else { gpsEl.innerText = `GPS: ${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`; } 
-                }, (error) => { gpsEl.innerText = "GPS: UNKNOWN SECTOR // DENIED"; }, { timeout: 10000 } ); 
-            } else { gpsEl.innerText = "GPS: SYSTEM OFFLINE"; } 
         }
 
         const dustContainer = document.getElementById('dust-container');
@@ -830,7 +787,7 @@
 
         window.addEventListener('load', () => {
             applyTranslations(); 
-            fetchRealUser(); runHighTechClock(); requestRealGeolocation();
+            fetchRealUser(); runHighTechClock();
             
             setTimeout(() => {
                 let sb = document.getElementById('sanctum-bg'); if(sb) sb.style.opacity = '1';
@@ -856,7 +813,7 @@
                 const bgMusic = document.getElementById('bg-music'); if(bgMusic) bgMusic.play().catch(e => console.log(e));
                 const h = new Date().getHours(); if (h >= 23 || h < 6) forceSleep();
 
-                const hudElements = [ document.getElementById('main-hud'), document.getElementById('dynamic-hud-module') ];
+                const hudElements = [ document.getElementById('core-left-sidebar'), document.getElementById('dynamic-hud-module') ];
                 hudElements.forEach(el => { if(el) el.style.opacity = '1'; });
                 
                 setTimeout(() => {
@@ -904,7 +861,6 @@
         }
         renderPhysics();
 
-        // 🌟 CHỈNH SỬA PHẦN NÀY ĐỂ KẾT NỐI VÀ KHÔNG BỊ LỖI SCALE 🌟
         function navToFace(faceName, taskId) { 
             let fpm = document.getElementById('faction-preview-modal');
             let isModalActive = fpm && fpm.classList.contains('active');
@@ -914,7 +870,7 @@
                 
                 // MẶT HỎA (PHẢN XẠ)
                 if (taskId === 'phanxa') {
-                    document.getElementById('core-wrapper').style.opacity = '0'; // Tắt hiệu ứng scale, chỉ mờ đi
+                    document.getElementById('core-wrapper').style.opacity = '0'; 
                     playSound('warp-out');
                     speakMsg(currentLang === 'en' ? "Fire Chakra Matrix Activated!" : "Kích hoạt Đạo Trường Hỏa Luân!");
                     setTimeout(() => { window.location.href = 'HoaLuan.html'; }, 800);
@@ -1218,6 +1174,7 @@
         }
     </script>
     <script src="boo-player.js"></script>
+    <!-- GẮN MODULE HUD CHUẨN ĐỘC LẬP TỪ FILE hud-ticker.js -->
     <script src="hud-ticker.js"></script>
 </body>
 </html>
