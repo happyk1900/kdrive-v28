@@ -1,5 +1,5 @@
 (function() {
-    // 1. Tự động nạp Google Fonts và CSS chuẩn của HUD (Đã gỡ bỏ nền đen và border khung)
+    // 1. Tự động nạp Google Fonts và CSS chuẩn của HUD theo cấu trúc 3 cột cân đối
     const styleId = 'kdrive-hud-module-styles';
     if (!document.getElementById(styleId)) {
         const linkFont = document.createElement('link');
@@ -10,17 +10,18 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* THANH HUD TRONG SUỐT HOÀN TOÀN, KHÔNG NỀN ĐEN */
+            /* THANH HUD 3 CỘT CÂN ĐỐI (TRÁC - GIỮA - PHẢI) */
             .hud-top-bar {
                 position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 52px !important;
-                display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 10px !important;
+                display: grid !important; grid-template-columns: 1fr auto 1fr !important; align-items: center !important; padding: 0 5px !important;
                 background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
                 border: none !important; border-radius: 0 !important;
                 z-index: 2147483647 !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 10px !important; color: #00e5ff !important; letter-spacing: 1.2px !important;
                 pointer-events: auto !important; box-shadow: none !important;
             }
-            .hud-left, .hud-right { display: flex; flex-direction: column; gap: 2px; }
-            .hud-right { text-align: right; color: rgba(255,255,255,0.85); }
+            .hud-left { display: flex; flex-direction: column; gap: 2px; justify-content: flex-start; }
+            .hud-center { display: flex; justify-content: center; align-items: center; }
+            .hud-right { display: flex; flex-direction: column; gap: 2px; text-align: right; color: rgba(255,255,255,0.85); }
             
             .hud-sys-row { display: flex; align-items: center; gap: 6px; }
             .hud-sys-online { 
@@ -30,7 +31,7 @@
                 animation: textWaveGlow 2.5s infinite alternate ease-in-out;
             }
             .hud-gps { 
-                color: #ff007f; 
+                color: #ff007f !important; 
                 font-weight: 700; 
                 text-shadow: 0 0 8px rgba(255,0,127,0.7); 
             }
@@ -42,14 +43,14 @@
                 animation: badgePulse 2s infinite alternate ease-in-out;
             }
 
-            /* NÚT CHỌN NGÔN NGỮ NẰM GỌN GÀNG DƯỚI GPS TRÊN HUD TRONG SUỐT */
+            /* NÚT CHỌN NGÔN NGỮ NẰM CHÍNH GIỮA KHOẢNG TRỐNG TRÊN HUD */
             .hud-lang-btn {
                 background: rgba(0, 229, 255, 0.15); border: 1px solid rgba(0, 229, 255, 0.6);
                 border-radius: 4px; color: #00e5ff; font-family: 'Space Grotesk', sans-serif;
-                font-size: 9px; font-weight: 700; padding: 2px 6px; cursor: pointer;
-                text-transform: uppercase; width: fit-content; margin-top: 2px; transition: 0.2s;
+                font-size: 9px; font-weight: 700; padding: 4px 10px; cursor: pointer;
+                text-transform: uppercase; transition: 0.2s; box-shadow: 0 0 10px rgba(0,229,255,0.2);
             }
-            .hud-lang-btn:hover { background: rgba(0, 229, 255, 0.35); box-shadow: 0 0 10px rgba(0,229,255,0.8); color: #fff; }
+            .hud-lang-btn:hover { background: rgba(0, 229, 255, 0.35); box-shadow: 0 0 15px rgba(0,229,255,0.8); color: #fff; }
 
             /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (MODAL) */
             .global-lang-overlay {
@@ -174,6 +175,7 @@
         container.id = 'kdriveGlobalHud';
         container.innerHTML = `
             <div class="hud-top-bar">
+                <!-- Cột trái: 3 dòng trạng thái -->
                 <div class="hud-left">
                     <div class="hud-sys-row">
                         <div class="signal-bars">
@@ -185,9 +187,14 @@
                     </div>
                     <span style="color: #fff;" id="hudUserText">USER: GUEST</span>
                     <span class="hud-gps" id="hudGpsText">GPS: OFFLINE</span>
-                    <!-- Nút chọn ngôn ngữ nằm ngay dưới GPS trên HUD -->
+                </div>
+
+                <!-- Cột giữa: Nút ngôn ngữ trung tâm -->
+                <div class="hud-center">
                     <button class="hud-lang-btn" id="hudLangOpenBtn">🌐 LANG [ <span id="hudLangLabel">VI</span> ]</button>
                 </div>
+
+                <!-- Cột phải: 3 dòng thông tin hệ thống -->
                 <div class="hud-right">
                     <span style="color: #00e5ff;">K-DRIVE v2.6</span>
                     <span style="color: rgba(255,255,255,0.6);" id="hudDateText">2026.09.06</span>
@@ -287,15 +294,16 @@
             const cachedLon = sessionStorage.getItem('kdrive_gps_lon');
             if (cachedLat && cachedLon) {
                 gpsText.textContent = `GPS: ${Number(cachedLat).toFixed(2)}N, ${Number(cachedLon).toFixed(2)}E`;
-                gpsText.style.color = "#00e5ff";
             } else {
                 gpsText.textContent = "GPS: SYNCHRONIZED";
-                gpsText.style.color = "#00e5ff";
             }
+            gpsText.style.color = "#ff007f";
         } else if (gpsVerified === 'false') {
             gpsText.textContent = "GPS: OFFLINE";
-            gpsText.style.color = "#ff3333";
+            gpsText.style.color = "#ff007f";
         } else {
+            gpsText.textContent = "GPS: OFFLINE";
+            gpsText.style.color = "#ff007f";
             if (modalOverlay) modalOverlay.classList.add('active');
         }
 
@@ -308,6 +316,7 @@
 
             if (isAllowed && navigator.geolocation) {
                 gpsText.textContent = "GPS: LOCATING...";
+                gpsText.style.color = "#ff007f";
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         const lat = pos.coords.latitude;
@@ -317,19 +326,19 @@
                         sessionStorage.setItem('kdrive_gps_lon', lon);
 
                         gpsText.textContent = `GPS: ${lat.toFixed(2)}N, ${lon.toFixed(2)}E`;
-                        gpsText.style.color = "#00e5ff";
+                        gpsText.style.color = "#ff007f";
                     },
                     () => {
                         sessionStorage.setItem('kdrive_gps_verified', 'false');
                         gpsText.textContent = "GPS: OFFLINE";
-                        gpsText.style.color = "#ff3333";
+                        gpsText.style.color = "#ff007f";
                     },
                     { timeout: 5000 }
                 );
             } else {
                 sessionStorage.setItem('kdrive_gps_verified', 'false');
                 gpsText.textContent = "GPS: OFFLINE";
-                gpsText.style.color = "#ff3333";
+                gpsText.style.color = "#ff007f";
             }
         }
     });
