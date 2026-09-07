@@ -76,7 +76,7 @@
                 z-index: 2147483648; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
                 background-color: #050a15; 
-                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/GPS%20NEN.jpg?raw=true'); 
+                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20HUD%20(1).png?raw=true'); 
                 background-size: cover; background-position: center; background-repeat: no-repeat;
             }
             .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
@@ -545,19 +545,41 @@
             chatInput.focus();
         });
 
+        // --- CƠ CHẾ CHỐNG SPAM & BỘ LỌC PII/MẠO DANH ---
+        let lastMessageTime = 0;
+        const COOLDOWN_MS = 3000; // 3 giây
+
         function sendChatMessage() {
             if (!isLoggedIn || isBanned) return;
             const text = chatInput.value.trim();
             if (!text) return;
 
-            // BỘ LỌC KỶ LUẬT THÉP (Cấm chửi thề, cấm link, cấm ảnh)
+            const now = Date.now();
+            if (now - lastMessageTime < COOLDOWN_MS) {
+                playErrorSound();
+                alert("⚠ HỆ THỐNG: Vui lòng đợi 3 giây trước khi gửi tin nhắn tiếp theo!");
+                return;
+            }
+
+            // 1. Chống mạo danh Quản trị viên
+            const restrictedNames = ["SYS.AI", "ADMIN", "KAI", "KAI RIPE", "TELEPATHY"];
+            if (restrictedNames.includes(username.toUpperCase())) {
+                playErrorSound();
+                alert("⚠ LỖI BẢO MẬT: Tên định danh của bạn trùng với Quản trị viên. Đề nghị đổi tên!");
+                return;
+            }
+
+            // 2. Bộ lọc Kỷ luật Thép & PII (Số đt, ngân hàng)
             const linkRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/gi;
             const imgExtRegex = /\.(jpeg|jpg|gif|png|webp|bmp)/gi;
             const swearRegex = /(địt|lồn|cặc|cac|lon|fuck|shit|bitch|ass|đm|vkl|vl|đéo)/gi;
+            const phoneRegex = /\b(0[3|5|7|8|9])+([0-9]{8})\b/g;
+            const bankRegex = /\b(stk|số tài khoản|tk ngân hàng).{0,5}\d{6,15}\b/gi;
 
             let violationType = null;
             if (linkRegex.test(text) || imgExtRegex.test(text)) violationType = "SPAM LINK/IMAGE";
             else if (swearRegex.test(text)) violationType = "NGÔN TỪ THIẾU VĂN HÓA";
+            else if (phoneRegex.test(text) || bankRegex.test(text)) violationType = "CẤM GIAO DỊCH / LỘ THÔNG TIN CÁ NHÂN";
 
             if (violationType) {
                 playErrorSound();
@@ -582,6 +604,7 @@
                 }
             } else {
                 playClickSound();
+                lastMessageTime = now; 
                 chatData.push({ user: username.toUpperCase(), text: text });
             }
 
