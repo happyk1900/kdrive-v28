@@ -1,5 +1,5 @@
 (function() {
-    // 1. NẠP FONT VÀ CSS CHO THANH HUD & FORM GPS
+    // 1. Nạp font và CSS HUD cấu trúc 3 khối (Trái - Giữa - Phải) và form GPS Hologram
     const styleId = 'kdrive-hud-module-styles';
     if (!document.getElementById(styleId)) {
         const linkFont = document.createElement('link');
@@ -10,61 +10,36 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* ================= THANH HUD TOP CƠ BẢN ================= */
+            /* THANH HUD 3 KHỐI: TRÁI - GIỮA - PHẢI TRONG SUỐT (BẤT KHẢ XÂM PHẠM) */
             .hud-top-bar {
-                position: fixed !important; top: 12px !important; left: 12px !important; width: calc(100vw - 24px) !important;
-                display: flex !important; justify-content: space-between !important; align-items: flex-start !important;
-                z-index: 2147483647 !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 10px !important;
-                pointer-events: none !important; /* Cho phép bấm xuyên qua khoảng trống */
+                position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 55px !important;
+                display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 5px !important;
+                background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+                border: none !important; border-radius: 0 !important;
+                z-index: 2147483647 !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 10px !important; color: #00e5ff !important; letter-spacing: 1.2px !important;
+                pointer-events: auto !important; box-shadow: none !important;
             }
-
-            /* CHIA ĐÚNG 3 DÒNG NGANG CHO 2 BÊN */
-            .hud-left { 
-                display: flex; flex-direction: column; gap: 4px; width: 35%; text-align: left; 
-                pointer-events: auto; letter-spacing: 1px;
-            }
-            .hud-right { 
-                display: flex; flex-direction: column; gap: 4px; width: 35%; text-align: right; 
-                pointer-events: auto; letter-spacing: 1px;
-            }
+            .hud-left { display: flex; flex-direction: column; gap: 2px; width: 35%; text-align: left; }
+            .hud-center { display: flex; justify-content: center; align-items: center; width: 30%; }
+            .hud-right { display: flex; flex-direction: column; gap: 2px; width: 35%; text-align: right; color: rgba(255,255,255,0.85); }
             
-            /* NÚT NGÔN NGỮ GHIM CHÍNH GIỮA TUYỆT ĐỐI */
-            .hud-center { 
-                position: absolute; left: 50%; transform: translateX(-50%); top: 0; 
-                pointer-events: auto; 
-            }
-
-            /* MÀU SẮC & HIỆU ỨNG TỪNG DÒNG */
             .hud-sys-row { display: flex; align-items: center; gap: 6px; }
-            .hud-sys-online { color: #00ff66; font-weight: 900; text-shadow: 0 0 8px rgba(0,255,102,0.8); }
-            .hud-user-text { color: #ffffff; font-weight: 600; text-shadow: 0 0 4px rgba(0,0,0,0.8); }
+            .hud-sys-online { color: #00ff66; font-weight: 900; text-shadow: 0 0 10px rgba(0,255,102,0.8); }
             
-            /* GPS KẾT NỐI MÀU HỒNG CYBER */
-            .hud-gps { color: #ff007f !important; font-weight: 800; text-shadow: 0 0 8px rgba(255,0,127,0.8); }
-            
-            .hud-version { color: #00e5ff; font-weight: 800; text-shadow: 0 0 6px rgba(0,229,255,0.6); }
-            .hud-date { color: rgba(255,255,255,0.7); font-weight: 500; text-shadow: 0 0 4px rgba(0,0,0,0.8); }
+            /* GPS ĐỔI THÀNH MÀN SẮC HỒNG CYBER HOÀN TOÀN */
+            .hud-gps { color: #ff007f !important; font-weight: 700; text-shadow: 0 0 8px rgba(255,0,127,0.8); }
             .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 10px rgba(255,215,0,0.8); cursor: pointer; }
 
-            /* NÚT CHỌN NGÔN NGỮ NẰM Ở GIỮA */
+            /* NÚT CHỌN NGÔN NGỮ NẰM Ở GIỮA THANH HUD */
             .hud-lang-btn {
-                background: rgba(0, 229, 255, 0.12); border: 1px solid rgba(0, 229, 255, 0.5);
+                background: rgba(0, 229, 255, 0.15); border: 1px solid rgba(0, 229, 255, 0.6);
                 border-radius: 4px; color: #00e5ff; font-family: 'Space Grotesk', sans-serif;
-                font-size: 9.5px; font-weight: 700; padding: 4px 12px; cursor: pointer;
-                text-transform: uppercase; transition: 0.2s; box-shadow: 0 0 8px rgba(0,229,255,0.2);
-                backdrop-filter: blur(4px);
+                font-size: 9.5px; font-weight: 700; padding: 4px 10px; cursor: pointer;
+                text-transform: uppercase; transition: 0.2s; box-shadow: 0 0 10px rgba(0,229,255,0.3);
             }
             .hud-lang-btn:hover { background: rgba(0, 229, 255, 0.35); box-shadow: 0 0 15px rgba(0,229,255,0.8); color: #fff; }
 
-            /* ================= BỘ CỘT SÓNG NHẤP NHÁY ================= */
-            .signal-bars { display: flex; align-items: flex-end; gap: 2px; height: 10px; }
-            .signal-bar { width: 2.5px; background-color: #00ff66; box-shadow: 0 0 6px rgba(0,255,102,0.8); animation: signalPulse 1.2s infinite ease-in-out alternate; }
-            .signal-bar:nth-child(1) { height: 4px; animation-delay: 0s; }
-            .signal-bar:nth-child(2) { height: 7px; animation-delay: 0.3s; }
-            .signal-bar:nth-child(3) { height: 10px; animation-delay: 0.6s; }
-            @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
-
-            /* ================= MODAL CHỌN NGÔN NGỮ ================= */
+            /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (MODAL) */
             .global-lang-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 background: rgba(1, 3, 8, 0.92); backdrop-filter: blur(15px);
@@ -94,83 +69,87 @@
                 color: #ff3333; border-radius: 6px; font-weight: 800; font-size: 11px; cursor: pointer; text-transform: uppercase;
             }
 
-            /* ================= MODAL GPS ĐÃ ĐƯỢC ÉP ẢNH NỀN ================= */
+            /* BỘ CỘT SÓNG NHẤP NHÁY */
+            .signal-bars { display: flex; align-items: flex-end; gap: 2px; height: 10px; }
+            .signal-bar { width: 2.5px; background-color: #00ff66; box-shadow: 0 0 6px rgba(0,255,102,0.8); animation: signalPulse 1.2s infinite ease-in-out alternate; }
+            .signal-bar:nth-child(1) { height: 4px; animation-delay: 0s; }
+            .signal-bar:nth-child(2) { height: 7px; animation-delay: 0.3s; }
+            .signal-bar:nth-child(3) { height: 10px; animation-delay: 0.6s; }
+
+            @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
+
+            /* ========================================================= */
+            /* HỘP THOẠI XIN QUYỀN GPS - FULL MÀN HÌNH THEO YÊU CẦU MỚI  */
+            /* ========================================================= */
             .gps-modal-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
                 z-index: 2147483648; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
+                /* Background ảnh viễn tưởng bọc ngoài cùng full viền */
+                background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/GPS%20NEN.jpg?raw=true') center/cover no-repeat;
+                background-color: #020406; /* Màu lót dự phòng */
             }
             .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
             
+            /* Lớp phủ phụ làm tối ảnh nền một chút để làm nổi phần nội dung chữ */
+            .gps-modal-dimmer {
+                position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 1;
+            }
+            
+            /* Hộp thoại chính: Căn giữa, không viền, trong suốt */
             .gps-modal-box {
-                width: 90%; max-width: 360px; min-height: 280px;
-                /* ẢNH NỀN ANH GỬI ĐƯỢC ỐP FULL VIỀN TẠI ĐÂY */
-                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20HUD%20(1).png?raw=true'); 
-                background-size: 100% 100%; 
-                background-position: center; 
-                background-repeat: no-repeat;
-                background-color: transparent;
-                border: none; /* Tắt border vì ảnh đã có viền */
-                padding: 40px 25px 35px 25px; /* Căn chỉnh nội dung lọt thỏm vào giữa khung ảnh */
-                display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
-                position: relative;
-                box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+                width: 90%; max-width: 400px;
+                display: flex; flex-direction: column; justify-content: center; align-items: center;
+                z-index: 2; position: relative; padding: 20px 0;
             }
             
+            /* Tiêu đề bay lơ lửng */
             .gps-modal-title {
-                color: #ff3366; font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 900;
-                text-transform: uppercase; letter-spacing: 1px; margin-bottom: 18px;
-                text-shadow: 0 0 8px rgba(255, 51, 102, 0.8); z-index: 2; text-align: center; line-height: 1.4;
+                color: #ff3366; font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 900;
+                text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px;
+                text-shadow: 0 0 15px rgba(255, 51, 102, 1), 0 0 5px rgba(0,0,0,0.8); z-index: 1; text-align: center; line-height: 1.4;
             }
             
-            /* Box làm nền đen cho chữ nổi lên */
+            /* Khối nền đen làm nổi bật text (mô phỏng bảng của ảnh 2) */
             .gps-modal-desc { 
-                background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(0, 229, 255, 0.2);
-                border-radius: 8px; padding: 15px; width: 100%; z-index: 2;
-                box-shadow: inset 0 0 15px rgba(0,0,0,0.9); margin-bottom: 25px;
+                background: rgba(0, 0, 0, 0.65); border: 1.5px solid rgba(0, 229, 255, 0.4);
+                border-radius: 12px; padding: 20px 18px; width: 100%; z-index: 1;
+                box-shadow: inset 0 0 30px rgba(0,0,0,0.9), 0 5px 15px rgba(0,0,0,0.6); margin-bottom: 25px;
+                backdrop-filter: blur(4px);
             }
             .gps-modal-desc p { 
-                color: #e0f7fa; font-size: 12.5px; line-height: 1.6; 
-                font-family: 'Space Grotesk', sans-serif; margin-bottom: 10px; text-shadow: 0 1px 3px #000;
+                color: #e0f7fa; font-size: 13.5px; line-height: 1.6; 
+                font-family: 'Space Grotesk', sans-serif; margin-bottom: 12px; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
             }
             .gps-modal-desc p:last-child { margin-bottom: 0; color: #a0c0d0; font-style: italic; }
             
-            .gps-btn-row { display: flex; gap: 12px; justify-content: center; width: 100%; z-index: 2; margin-top: auto;}
+            /* Nhóm nút bấm */
+            .gps-btn-row { display: flex; gap: 15px; justify-content: center; width: 100%; z-index: 1; }
             
             .gps-action-btn {
-                flex: 1; padding: 12px 5px; border-radius: 8px; font-family: 'Montserrat', sans-serif;
-                font-size: 11px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s;
+                flex: 1; padding: 14px 5px; border-radius: 10px; font-family: 'Montserrat', sans-serif;
+                font-size: 12.5px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s;
                 text-align: center; white-space: nowrap; letter-spacing: 1px;
+                backdrop-filter: blur(2px);
             }
             .gps-btn-allow { 
-                background: rgba(0, 229, 255, 0.1); border: 1.5px solid #00e5ff; color: #00e5ff; 
-                box-shadow: inset 0 0 8px rgba(0,229,255,0.2); 
+                background: rgba(0, 229, 255, 0.2); border: 2px solid #00e5ff; color: #00e5ff; 
+                box-shadow: 0 0 15px rgba(0, 229, 255, 0.5), inset 0 0 10px rgba(0,229,255,0.3); 
             }
-            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3); color: #fff; box-shadow: 0 0 15px #00e5ff; transform: translateY(-2px); }
+            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.4); color: #fff; box-shadow: 0 0 25px #00e5ff; transform: translateY(-2px); }
             
             .gps-btn-deny { 
-                background: rgba(255, 51, 102, 0.1); border: 1.5px solid #ff3366; color: #ff3366; 
-                box-shadow: inset 0 0 8px rgba(255,51,102,0.2);
+                background: rgba(255, 51, 102, 0.2); border: 2px solid #ff3366; color: #ff3366; 
+                box-shadow: 0 0 15px rgba(255, 51, 102, 0.5), inset 0 0 10px rgba(255,51,102,0.3);
             }
-            .gps-btn-deny:hover { background: rgba(255, 51, 102, 0.3); color: #fff; box-shadow: 0 0 15px #ff3366; transform: translateY(-2px); }
+            .gps-btn-deny:hover { background: rgba(255, 51, 102, 0.4); color: #fff; box-shadow: 0 0 25px #ff3366; transform: translateY(-2px); }
         `;
         document.head.appendChild(style);
     }
 
     const globalTranslations = {
         vi: { select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", close_btn: "ĐÓNG LẠI" },
-        en: { select_lang_title: "SELECT GLOBAL LANGUAGE", close_btn: "CLOSE" },
-        zh: { select_lang_title: "选择全球语言", close_btn: "关闭" },
-        ja: { select_lang_title: "グローバル言語を選択", close_btn: "閉じる" },
-        ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기" },
-        fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER" },
-        de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN" },
-        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR" },
-        ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ" },
-        th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด" },
-        id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP" },
-        ar: { select_lang_title: "اختر اللغة العالمية", close_btn: "إغلاق" }
+        en: { select_lang_title: "SELECT GLOBAL LANGUAGE", close_btn: "CLOSE" }
     };
 
     function playClickSound() {
@@ -184,7 +163,6 @@
         container.id = 'kdriveGlobalHud';
         container.innerHTML = `
             <div class="hud-top-bar">
-                <!-- KHỐI BÊN TRÁI ĐÚNG 3 DÒNG NGANG -->
                 <div class="hud-left">
                     <div class="hud-sys-row">
                         <div class="signal-bars">
@@ -194,47 +172,36 @@
                         </div>
                         <span class="hud-sys-online" id="hudSysText">SYS.ONLINE</span>
                     </div>
-                    <span class="hud-user-text" id="hudUserText">USER: GUEST</span>
+                    <span style="color: #fff;" id="hudUserText">USER: GUEST</span>
                     <span class="hud-gps" id="hudGpsText">GPS: OFFLINE</span>
                 </div>
 
-                <!-- NÚT NGÔN NGỮ NẰM CHÍNH GIỮA -->
                 <div class="hud-center">
                     <button class="hud-lang-btn" id="hudLangOpenBtn">🌐 [ <span id="hudLangLabel">VI</span> ]</button>
                 </div>
 
-                <!-- KHỐI BÊN PHẢI ĐÚNG 3 DÒNG NGANG -->
                 <div class="hud-right">
-                    <span class="hud-version">K-DRIVE v2.6</span>
-                    <span class="hud-date" id="hudDateText">2026.09.06</span>
+                    <span style="color: #00e5ff;">K-DRIVE v2.6</span>
+                    <span style="color: rgba(255,255,255,0.6);" id="hudDateText">2026.09.06</span>
                     <span class="hud-chat-badge" id="hudChatText">GLOBAL CHAT 9+</span>
                 </div>
             </div>
 
-            <!-- MODAL BẢNG CHỌN NGÔN NGỮ TOÀN CẦU -->
+            <!-- Modal bảng chọn ngôn ngữ toàn cầu -->
             <div class="global-lang-overlay" id="globalLangModal">
                 <div class="global-lang-content">
                     <div class="global-lang-title" id="langModalTitleText">CHỌN NGÔN NGỮ QUỐC TẾ</div>
                     <div class="global-lang-grid">
                         <div class="global-lang-item" onclick="window.setGlobalLang('vi')">🇻🇳 Tiếng Việt</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('en')">🇬🇧 English</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('zh')">🇨🇳 中文</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('ja')">🇯🇵 日本語</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('ko')">🇰🇷 한국어</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('fr')">🇫🇷 Français</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('de')">🇩🇪 Deutsch</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('es')">🇪🇸 Español</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('ru')">🇷🇺 Русский</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('th')">🇹🇭 ไทย</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('id')">🇮🇩 Indonesia</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('ar')">🇸🇦 العربية</div>
                     </div>
                     <button class="global-lang-close" id="langModalCloseBtn" onclick="window.closeGlobalLang()">ĐÓNG LẠI</button>
                 </div>
             </div>
 
-            <!-- MODAL GPS THEO ẢNH HOLOGRM CỦA USER -->
+            <!-- BẢNG GPS STYLE HOLOGRAM MỚI - NỀN FULL VIỄN TƯỞNG -->
             <div class="gps-modal-overlay" id="gpsModalOverlay">
+                <div class="gps-modal-dimmer"></div> <!-- Lớp lót tối để tôn chữ -->
                 <div class="gps-modal-box">
                     <div class="gps-modal-title">🛰️ XÁC THỰC GPS /<br>GPS VERIFICATION</div>
                     <div class="gps-modal-desc">
@@ -263,7 +230,6 @@
             localStorage.setItem('kdrive_lang', lang);
             updateHudLangUI(lang);
             window.closeGlobalLang();
-            // Bắn tín hiệu để core/các trang nhận diện ngôn ngữ
             window.dispatchEvent(new CustomEvent('kdriveLangChanged', { detail: { lang } }));
         };
 
@@ -279,11 +245,9 @@
 
         document.getElementById('hudLangOpenBtn').addEventListener('click', window.openGlobalLang);
 
-        // Khởi chạy ngôn ngữ đã chọn
         const savedLang = localStorage.getItem('kdrive_lang') || 'vi';
         updateHudLangUI(savedLang);
 
-        // Lấy tên User
         const username = sessionStorage.getItem('kdrive_username');
         if (username) {
             const userEl = document.getElementById('hudUserText');
@@ -298,7 +262,6 @@
             });
         }
 
-        // XỬ LÝ GPS LOGIC
         const gpsVerified = sessionStorage.getItem('kdrive_gps_verified');
         const gpsText = document.getElementById('hudGpsText');
         const modalOverlay = document.getElementById('gpsModalOverlay');
