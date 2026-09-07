@@ -1,5 +1,5 @@
 (function() {
-    // 1. Nạp font và CSS HUD cấu trúc 3 khối, form GPS và Chat Lượng Tử
+    // 1. Nạp font và CSS HUD cấu trúc 3 khối (Trái - Giữa - Phải), form GPS và Chat Lượng Tử
     const styleId = 'kdrive-hud-module-styles';
     if (!document.getElementById(styleId)) {
         const linkFont = document.createElement('link');
@@ -75,27 +75,25 @@
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
             /* ========================================================= */
-            /* HỘP THOẠI GPS - XÓA NỀN ĐEN BÊN NGOÀI, CHỈ ĐỂ VIỀN        */
+            /* HỘP THOẠI GPS HOLOGRAM VỚI ẢNH NỀN FULL VIỀN              */
             /* ========================================================= */
             .gps-modal-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 z-index: 2147483648; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
                 background-color: #050a15; 
-                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/GPS%20NEN.jpg?raw=true'); 
+                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20HUD%20(1).png?raw=true'); 
                 background-size: cover; background-position: center; background-repeat: no-repeat;
             }
             .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
             
-            .gps-modal-dimmer {
-                position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 1;
-            }
+            .gps-modal-dimmer { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 1; }
             
             .gps-modal-box {
                 width: 90%; max-width: 400px;
                 display: flex; flex-direction: column; justify-content: center; align-items: center;
                 z-index: 2; position: relative; padding: 25px 20px;
-                background: transparent; /* TRONG SUỐT HOÀN TOÀN, ĐỂ LỘ ẢNH NỀN */
+                background: transparent; 
                 border: 2px solid #ff007f; border-radius: 16px;
                 box-shadow: 0 0 25px rgba(255, 0, 127, 0.5), inset 0 0 15px rgba(255, 0, 127, 0.2);
             }
@@ -138,20 +136,28 @@
             .gps-btn-deny:hover { background: rgba(255, 51, 102, 0.3); color: #fff; box-shadow: 0 0 25px #ff3366; transform: translateY(-2px); }
 
             /* ========================================================= */
-            /* BẢNG KÊNH CHAT LƯỢNG TỬ (QUANTUM CHAT) - CÓ ĐA NGÔN NGỮ   */
+            /* BẢNG KÊNH CHAT LƯỢNG TỬ ĐÃ THÊM ẢNH NỀN VÀ MỜ             */
             /* ========================================================= */
             .chat-modal-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
                 z-index: 2147483648; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: all 0.3s ease; pointer-events: none;
+                background-color: #050a15; 
+                /* ANH CÓ THỂ THAY LINK ẢNH NỀN CHO KÊNH CHAT TẠI ĐÂY: */
+                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/GPS%20NEN.jpg?raw=true');
+                background-size: cover; background-position: center; background-repeat: no-repeat;
             }
             .chat-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
+            
+            /* Lớp lót đen mờ tương tự GPS để nổi bật khung chat */
+            .chat-modal-dimmer {
+                position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 1; backdrop-filter: blur(5px);
+            }
             
             .chat-modal-box {
                 width: 92%; max-width: 420px; height: 75vh; max-height: 600px;
                 background: transparent; border: 2px solid #00e5ff; border-radius: 12px; padding: 15px;
-                display: flex; flex-direction: column;
+                display: flex; flex-direction: column; z-index: 2;
                 box-shadow: 0 0 30px rgba(0, 229, 255, 0.3), inset 0 0 15px rgba(0, 229, 255, 0.2);
                 position: relative;
             }
@@ -170,7 +176,7 @@
             }
             
             .chat-messages {
-                flex: 1; background: rgba(5, 12, 22, 0.8); border: 1px solid rgba(0, 229, 255, 0.2);
+                flex: 1; background: rgba(5, 12, 22, 0.85); border: 1px solid rgba(0, 229, 255, 0.2);
                 border-radius: 8px; padding: 15px; overflow-y: auto; margin-bottom: 15px;
                 box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
                 background-image: linear-gradient(rgba(0, 229, 255, 0.03) 50%, transparent 50%);
@@ -178,18 +184,18 @@
             }
             
             .sys-chat-msg {
-                background: rgba(255, 51, 102, 0.1); border-left: 3px solid #ff3366;
+                background: rgba(255, 51, 102, 0.15); border-left: 3px solid #ff3366;
                 padding: 10px; border-radius: 4px; color: #e0f7fa; font-family: 'Space Grotesk', sans-serif;
-                font-size: 13px; line-height: 1.5; margin-bottom: 10px;
+                font-size: 13px; line-height: 1.5; margin-bottom: 10px; box-shadow: inset 0 0 10px rgba(255,51,102,0.1);
             }
-            .sys-tag { color: #ff3366; font-weight: bold; font-family: 'Share Tech Mono', monospace;}
+            .sys-tag { color: #ff3366; font-weight: bold; font-family: 'Share Tech Mono', monospace; text-shadow: 0 0 5px rgba(255,51,102,0.5);}
             
             .chat-input-area { display: flex; gap: 10px; }
             
             .chat-input {
-                flex: 1; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 51, 102, 0.5);
+                flex: 1; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255, 51, 102, 0.5);
                 border-radius: 8px; padding: 12px; color: #fff; font-family: 'Space Grotesk', sans-serif;
-                font-size: 13px; outline: none; transition: 0.3s;
+                font-size: 13px; outline: none; transition: 0.3s; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
             }
             .chat-input:focus { border-color: #ff3366; box-shadow: 0 0 10px rgba(255,51,102,0.3); }
             .chat-input::placeholder { color: #888; font-style: italic; }
@@ -204,20 +210,20 @@
         document.head.appendChild(style);
     }
 
-    // TỪ ĐIỂN 12 NGÔN NGỮ CHO CẢ BẢNG CHỌN NGÔN NGỮ VÀ KÊNH CHAT
+    // TỪ ĐIỂN 12 NGÔN NGỮ ĐÃ CẬP NHẬT THÊM DÒNG [SYS.AI] TRONG CHAT
     const globalTranslations = {
-        vi: { select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", close_btn: "ĐÓNG LẠI", chat_title: "KÊNH CHAT LƯỢNG TỬ", chat_placeholder: "⚠ Yêu cầu đăng nhập", chat_send: "GỬI" },
-        en: { select_lang_title: "SELECT GLOBAL LANGUAGE", close_btn: "CLOSE", chat_title: "QUANTUM CHAT", chat_placeholder: "⚠ Login required", chat_send: "SEND" },
-        zh: { select_lang_title: "选择全球语言", close_btn: "关闭", chat_title: "量子聊天", chat_placeholder: "⚠ 需要登录", chat_send: "发送" },
-        ja: { select_lang_title: "グローバル言語を選択", close_btn: "閉じる", chat_title: "量子チャット", chat_placeholder: "⚠ ログインが必要", chat_send: "送信" },
-        ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기", chat_title: "양자 채팅", chat_placeholder: "⚠ 로그인 필요", chat_send: "전송" },
-        fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER", chat_title: "CHAT QUANTIQUE", chat_placeholder: "⚠ Connexion requise", chat_send: "ENVOYER" },
-        de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN", chat_title: "QUANTEN-CHAT", chat_placeholder: "⚠ Anmeldung erforderlich", chat_send: "SENDEN" },
-        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", chat_title: "CHAT CUÁNTICO", chat_placeholder: "⚠ Inicio de sesión req.", chat_send: "ENVIAR" },
-        ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ", chat_title: "КВАНТОВЫЙ ЧАТ", chat_placeholder: "⚠ Требуется вход", chat_send: "ОТПРАВИТЬ" },
-        th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด", chat_title: "แชทควอนตัม", chat_placeholder: "⚠ ต้องการเข้าสู่ระบบ", chat_send: "ส่ง" },
-        id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP", chat_title: "OBROLAN KUANTUM", chat_placeholder: "⚠ Wajib login", chat_send: "KIRIM" },
-        ar: { select_lang_title: "اختر اللغة العالمية", close_btn: "إغلاق", chat_title: "الدردشة الكمومية", chat_placeholder: "⚠ تسجيل الدخول مطلوب", chat_send: "إرسال" }
+        vi: { select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", close_btn: "ĐÓNG LẠI", chat_title: "KÊNH CHAT LƯỢNG TỬ", chat_placeholder: "⚠ Yêu cầu đăng nhập", chat_send: "GỬI", chat_sys_msg: "Kênh Chat Lượng Tử đã mở. Hãy tôn trọng Kỷ Luật." },
+        en: { select_lang_title: "SELECT GLOBAL LANGUAGE", close_btn: "CLOSE", chat_title: "QUANTUM CHAT", chat_placeholder: "⚠ Login required", chat_send: "SEND", chat_sys_msg: "Quantum Chat active. Respect Discipline rules." },
+        zh: { select_lang_title: "选择全球语言", close_btn: "关闭", chat_title: "量子聊天", chat_placeholder: "⚠ 需要登录", chat_send: "发送", chat_sys_msg: "量子聊天已激活。请遵守纪律。" },
+        ja: { select_lang_title: "グローバル言語を選択", close_btn: "閉じる", chat_title: "量子チャット", chat_placeholder: "⚠ ログインが必要", chat_send: "送信", chat_sys_msg: "量子チャットがアクティブです。規律を守ってください。" },
+        ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기", chat_title: "양자 채팅", chat_placeholder: "⚠ 로그인 필요", chat_send: "전송", chat_sys_msg: "양자 채팅 활성화됨. 규율을 존중하십시오." },
+        fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER", chat_title: "CHAT QUANTIQUE", chat_placeholder: "⚠ Connexion requise", chat_send: "ENVOYER", chat_sys_msg: "Chat quantique actif. Respectez les règles." },
+        de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN", chat_title: "QUANTEN-CHAT", chat_placeholder: "⚠ Anmeldung erforderlich", chat_send: "SENDEN", chat_sys_msg: "Quanten-Chat aktiv. Respektiere die Regeln." },
+        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", chat_title: "CHAT CUÁNTICO", chat_placeholder: "⚠ Inicio de sesión req.", chat_send: "ENVIAR", chat_sys_msg: "Chat cuántico activo. Respete las reglas." },
+        ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ", chat_title: "КВАНТОВЫЙ ЧАТ", chat_placeholder: "⚠ Требуется вход", chat_send: "ОТПРАВИТЬ", chat_sys_msg: "Квантовый чат активен. Соблюдайте правила." },
+        th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด", chat_title: "แชทควอนตัม", chat_placeholder: "⚠ ต้องการเข้าสู่ระบบ", chat_send: "ส่ง", chat_sys_msg: "เปิดใช้งานแชทควอนตัมแล้ว โปรดเคารพกฎ" },
+        id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP", chat_title: "OBROLAN KUANTUM", chat_placeholder: "⚠ Wajib login", chat_send: "KIRIM", chat_sys_msg: "Obrolan Kuantum aktif. Hormati aturan Disiplin." },
+        ar: { select_lang_title: "اختر اللغة العالمية", close_btn: "إغلاق", chat_title: "الدردشة الكمومية", chat_placeholder: "⚠ تسجيل الدخول مطلوب", chat_send: "إرسال", chat_sys_msg: "الدردشة الكمومية نشطة. احترم قواعد الانضباط." }
     };
 
     function playClickSound() {
@@ -278,7 +284,7 @@
                 </div>
             </div>
 
-            <!-- BẢNG GPS XÁC THỰC - KHÔNG NỀN ĐEN BÊN TRONG -->
+            <!-- BẢNG GPS XÁC THỰC -->
             <div class="gps-modal-overlay" id="gpsModalOverlay">
                 <div class="gps-modal-dimmer"></div>
                 <div class="gps-modal-box">
@@ -294,8 +300,9 @@
                 </div>
             </div>
 
-            <!-- BẢNG KÊNH CHAT LƯỢNG TỬ (QUANTUM CHAT) MỚI -->
+            <!-- BẢNG KÊNH CHAT LƯỢNG TỬ (QUANTUM CHAT) - CÓ ẢNH NỀN VÀ ĐA NGÔN NGỮ -->
             <div class="chat-modal-overlay" id="chatModalOverlay">
+                <div class="chat-modal-dimmer"></div>
                 <div class="chat-modal-box">
                     <div class="chat-header">
                         <div class="chat-title" id="chatTitleText">📡 KÊNH CHAT LƯỢNG TỬ</div>
@@ -303,9 +310,9 @@
                     </div>
                     <div class="chat-messages">
                         <div class="sys-chat-msg">
-                            <span class="sys-tag">[SYS.AI]</span> Quantum Chat active. Respect Discipline rules.
+                            <!-- Đã gắn ID cho chữ của hệ thống để đổi ngôn ngữ -->
+                            <span class="sys-tag">[SYS.AI]</span> <span id="chatSysMsgText">Kênh Chat Lượng Tử đã mở. Hãy tôn trọng Kỷ Luật.</span>
                         </div>
-                        <!-- Các tin nhắn khác sẽ load vào đây -->
                     </div>
                     <div class="chat-input-area">
                         <input type="text" class="chat-input" id="chatInputBox" placeholder="⚠ Yêu cầu đăng nhập" disabled>
@@ -342,6 +349,7 @@
             if (document.getElementById('chatTitleText')) document.getElementById('chatTitleText').innerHTML = "📡 " + t.chat_title;
             if (document.getElementById('chatInputBox')) document.getElementById('chatInputBox').placeholder = t.chat_placeholder;
             if (document.getElementById('chatSendBtn')) document.getElementById('chatSendBtn').innerText = t.chat_send;
+            if (document.getElementById('chatSysMsgText')) document.getElementById('chatSysMsgText').innerText = t.chat_sys_msg;
         }
 
         document.getElementById('hudLangOpenBtn').addEventListener('click', window.openGlobalLang);
