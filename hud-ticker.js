@@ -10,7 +10,7 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* THANH HUD 3 KHỐI: TRÁI - GIỮA - PHẢI TRONG SUỐT (BẤT KHẢ XÂM PHẠM) */
+            /* THANH HUD 3 KHỐI: TRÁI - GIỮA - PHẢI TRONG SUỐT */
             .hud-top-bar {
                 position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 55px !important;
                 display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 5px !important;
@@ -26,7 +26,7 @@
             .hud-sys-row { display: flex; align-items: center; gap: 6px; }
             .hud-sys-online { color: #00ff66; font-weight: 900; text-shadow: 0 0 10px rgba(0,255,102,0.8); }
             
-            /* GPS ĐỔI THÀNH MÀN SẮC HỒNG CYBER HOÀN TOÀN */
+            /* GPS */
             .hud-gps { color: #ff007f !important; font-weight: 700; text-shadow: 0 0 8px rgba(255,0,127,0.8); }
             .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 10px rgba(255,215,0,0.8); cursor: pointer; }
 
@@ -85,37 +85,46 @@
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 z-index: 2147483648; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
-                /* Background ảnh viễn tưởng bọc ngoài cùng full viền */
-                background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20HUD%20(1).png?raw=true') center/cover no-repeat;
-                background-color: #020406; /* Màu lót dự phòng */
+                
+                background-color: #050a15; 
+                
+                /* =================================================================== */
+                /* ANH DÁN LINK ẢNH NỀN FULL MÀN HÌNH VÀO DÒNG DƯỚI NÀY NHÉ:         */
+                /* =================================================================== */
+                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/GPS%20NEN.jpg?raw=true'); 
+                
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
             }
             .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
             
             /* Lớp phủ phụ làm tối ảnh nền một chút để làm nổi phần nội dung chữ */
             .gps-modal-dimmer {
-                position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 1;
+                position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 1;
             }
             
-            /* Hộp thoại chính: Căn giữa, không viền, trong suốt */
+            /* Hộp thoại chính: Viền Hồng Neon chuẩn Cyberpunk */
             .gps-modal-box {
                 width: 90%; max-width: 400px;
                 display: flex; flex-direction: column; justify-content: center; align-items: center;
-                z-index: 2; position: relative; padding: 20px 0;
+                z-index: 2; position: relative; padding: 25px 20px;
+                background: rgba(5, 12, 22, 0.85);
+                border: 2px solid #ff007f; border-radius: 16px;
+                box-shadow: 0 0 25px rgba(255, 0, 127, 0.5), inset 0 0 15px rgba(255, 0, 127, 0.2);
             }
             
-            /* Tiêu đề bay lơ lửng */
             .gps-modal-title {
                 color: #ff3366; font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 900;
                 text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px;
-                text-shadow: 0 0 15px rgba(255, 51, 102, 1), 0 0 5px rgba(0,0,0,0.8); z-index: 1; text-align: center; line-height: 1.4;
+                text-shadow: 0 0 10px rgba(255, 51, 102, 0.8); z-index: 1; text-align: center; line-height: 1.4;
             }
             
-            /* Khối nền đen làm nổi bật text (mô phỏng bảng của ảnh 2) */
+            /* Khối nền đen làm nổi bật text */
             .gps-modal-desc { 
-                background: rgba(0, 0, 0, 0.65); border: 1.5px solid rgba(0, 229, 255, 0.4);
-                border-radius: 12px; padding: 20px 18px; width: 100%; z-index: 1;
-                box-shadow: inset 0 0 30px rgba(0,0,0,0.9), 0 5px 15px rgba(0,0,0,0.6); margin-bottom: 25px;
-                backdrop-filter: blur(4px);
+                background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(0, 229, 255, 0.3);
+                border-radius: 12px; padding: 20px 18px; width: 100%; z-index: 1; box-sizing: border-box;
+                margin-bottom: 25px; backdrop-filter: blur(4px);
             }
             .gps-modal-desc p { 
                 color: #e0f7fa; font-size: 13.5px; line-height: 1.6; 
@@ -133,14 +142,14 @@
                 backdrop-filter: blur(2px);
             }
             .gps-btn-allow { 
-                background: rgba(0, 229, 255, 0.2); border: 2px solid #00e5ff; color: #00e5ff; 
-                box-shadow: 0 0 15px rgba(0, 229, 255, 0.5), inset 0 0 10px rgba(0,229,255,0.3); 
+                background: rgba(0, 229, 255, 0.15); border: 2px solid #00e5ff; color: #00e5ff; 
+                box-shadow: 0 0 15px rgba(0, 229, 255, 0.4), inset 0 0 8px rgba(0,229,255,0.2); 
             }
-            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.4); color: #fff; box-shadow: 0 0 25px #00e5ff; transform: translateY(-2px); }
+            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3); color: #fff; box-shadow: 0 0 25px #00e5ff; transform: translateY(-2px); }
             
             .gps-btn-deny { 
-                background: rgba(255, 51, 102, 0.2); border: 2px solid #ff3366; color: #ff3366; 
-                box-shadow: 0 0 15px rgba(255, 51, 102, 0.5), inset 0 0 10px rgba(255,51,102,0.3);
+                background: rgba(255, 51, 102, 0.15); border: 2px solid #ff3366; color: #ff3366; 
+                box-shadow: 0 0 15px rgba(255, 51, 102, 0.4), inset 0 0 8px rgba(255,51,102,0.2);
             }
             .gps-btn-deny:hover { background: rgba(255, 51, 102, 0.4); color: #fff; box-shadow: 0 0 25px #ff3366; transform: translateY(-2px); }
         `;
@@ -149,7 +158,17 @@
 
     const globalTranslations = {
         vi: { select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", close_btn: "ĐÓNG LẠI" },
-        en: { select_lang_title: "SELECT GLOBAL LANGUAGE", close_btn: "CLOSE" }
+        en: { select_lang_title: "SELECT GLOBAL LANGUAGE", close_btn: "CLOSE" },
+        zh: { select_lang_title: "选择全球语言", close_btn: "关闭" },
+        ja: { select_lang_title: "グローバル言語を選択", close_btn: "閉じる" },
+        ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기" },
+        fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER" },
+        de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN" },
+        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR" },
+        ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ" },
+        th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด" },
+        id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP" },
+        ar: { select_lang_title: "اختر اللغة العالمية", close_btn: "إغلاق" }
     };
 
     function playClickSound() {
@@ -161,6 +180,8 @@
 
         const container = document.createElement('div');
         container.id = 'kdriveGlobalHud';
+        
+        // ĐÃ PHỤC HỒI HOÀN TOÀN 12 NGÔN NGỮ Ở PHẦN NÀY!
         container.innerHTML = `
             <div class="hud-top-bar">
                 <div class="hud-left">
@@ -194,6 +215,16 @@
                     <div class="global-lang-grid">
                         <div class="global-lang-item" onclick="window.setGlobalLang('vi')">🇻🇳 Tiếng Việt</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('en')">🇬🇧 English</div>
+                        <div class="global-lang-item" onclick="window.setGlobalLang('zh')">🇨🇳 中文</div>
+                        <div class="global-lang-item" onclick="window.setGlobalLang('ja')">🇯🇵 日本語</div>
+                        <div class="global-lang-item" onclick="window.setGlobalLang('ko')">🇰🇷 한국어</div>
+                        <div class="global-lang-item" onclick="window.setGlobalLang('fr')">🇫🇷 Français</div>
+                        <div class="global-lang-item" onclick="window.setGlobalLang('de')">🇩🇪 Deutsch</div>
+                        <div class="global-lang-item" onclick="window.setGlobalLang('es')">🇪🇸 Español</div>
+                        <div class="global-lang-item" onclick="window.setGlobalLang('ru')">🇷🇺 Русский</div>
+                        <div class="global-lang-item" onclick="window.setGlobalLang('th')">🇹🇭 ไทย</div>
+                        <div class="global-lang-item" onclick="window.setGlobalLang('id')">🇮🇩 Indonesia</div>
+                        <div class="global-lang-item" onclick="window.setGlobalLang('ar')">🇸🇦 العربية</div>
                     </div>
                     <button class="global-lang-close" id="langModalCloseBtn" onclick="window.closeGlobalLang()">ĐÓNG LẠI</button>
                 </div>
