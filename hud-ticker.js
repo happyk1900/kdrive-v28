@@ -110,7 +110,7 @@
             }
 
             /* ========================================================= */
-            /* HỘP THOẠI XIN QUYỀN GPS SONG NGỮ - STYLE HOLOGRAM FORM MỚI */
+            /* HỘP THOẠI XIN QUYỀN GPS SONG NGỮ - ĐÃ CHÈN ẢNH NỀN VÀO   */
             /* ========================================================= */
             .gps-modal-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -123,8 +123,8 @@
             .gps-modal-box {
                 width: 92%; max-width: 380px; min-height: 280px;
                 background-color: rgba(5, 12, 22, 0.7); 
-                /* ANH CHÈN LINK ẢNH NỀN CỦA ANH VÀO DÒNG BÊN DƯỚI THAY CHO CHỮ NONE: */
-                background-image: none; 
+                /* ĐÃ CHÈN LINK ẢNH NỀN CỦA ANH */
+                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20HUD%20(1).png?raw=true'); 
                 background-size: 100% 100%; background-position: center; background-repeat: no-repeat;
                 border: 2px solid rgba(0, 229, 255, 0.4); border-radius: 16px; padding: 30px 20px;
                 display: flex; flex-direction: column; justify-content: space-between; align-items: center;
@@ -249,7 +249,6 @@
                 </div>
             </div>
 
-            <!-- BẢNG GPS STYLE HOLOGRAM MỚI -->
             <div class="gps-modal-overlay" id="gpsModalOverlay">
                 <div class="gps-modal-box">
                     <div class="gps-modal-title">🛰️ XÁC THỰC GPS /<br>GPS VERIFICATION</div>
