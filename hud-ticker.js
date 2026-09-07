@@ -1,5 +1,5 @@
 (function() {
-    // 1. Tự động nạp Google Fonts và CSS chuẩn của HUD theo cấu trúc 3 cột cân đối
+    // 1. Tự động nạp Google Fonts và CSS chuẩn của HUD
     const styleId = 'kdrive-hud-module-styles';
     if (!document.getElementById(styleId)) {
         const linkFont = document.createElement('link');
@@ -10,18 +10,17 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* THANH HUD 3 CỘT CÂN ĐỐI (TRÁC - GIỮA - PHẢI) */
+            /* THANH HUD TRONG SUỐT HOÀN TOÀN, KHÔNG NỀN ĐEN */
             .hud-top-bar {
                 position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 52px !important;
-                display: grid !important; grid-template-columns: 1fr auto 1fr !important; align-items: center !important; padding: 0 5px !important;
+                display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 10px !important;
                 background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
                 border: none !important; border-radius: 0 !important;
                 z-index: 2147483647 !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 10px !important; color: #00e5ff !important; letter-spacing: 1.2px !important;
                 pointer-events: auto !important; box-shadow: none !important;
             }
-            .hud-left { display: flex; flex-direction: column; gap: 2px; justify-content: flex-start; }
-            .hud-center { display: flex; justify-content: center; align-items: center; }
-            .hud-right { display: flex; flex-direction: column; gap: 2px; text-align: right; color: rgba(255,255,255,0.85); }
+            .hud-left, .hud-right { display: flex; flex-direction: column; gap: 2px; }
+            .hud-right { text-align: right; color: rgba(255,255,255,0.85); }
             
             .hud-sys-row { display: flex; align-items: center; gap: 6px; }
             .hud-sys-online { 
@@ -31,7 +30,7 @@
                 animation: textWaveGlow 2.5s infinite alternate ease-in-out;
             }
             .hud-gps { 
-                color: #ff007f !important; 
+                color: #ff007f; 
                 font-weight: 700; 
                 text-shadow: 0 0 8px rgba(255,0,127,0.7); 
             }
@@ -43,14 +42,14 @@
                 animation: badgePulse 2s infinite alternate ease-in-out;
             }
 
-            /* NÚT CHỌN NGÔN NGỮ NẰM CHÍNH GIỮA KHOẢNG TRỐNG TRÊN HUD */
+            /* NÚT CHỌN NGÔN NGỮ NẰM GỌN GÀNG DƯỚI GPS TRÊN HUD TRONG SUỐT */
             .hud-lang-btn {
                 background: rgba(0, 229, 255, 0.15); border: 1px solid rgba(0, 229, 255, 0.6);
                 border-radius: 4px; color: #00e5ff; font-family: 'Space Grotesk', sans-serif;
-                font-size: 9px; font-weight: 700; padding: 4px 10px; cursor: pointer;
-                text-transform: uppercase; transition: 0.2s; box-shadow: 0 0 10px rgba(0,229,255,0.2);
+                font-size: 9px; font-weight: 700; padding: 2px 6px; cursor: pointer;
+                text-transform: uppercase; width: fit-content; margin-top: 2px; transition: 0.2s;
             }
-            .hud-lang-btn:hover { background: rgba(0, 229, 255, 0.35); box-shadow: 0 0 15px rgba(0,229,255,0.8); color: #fff; }
+            .hud-lang-btn:hover { background: rgba(0, 229, 255, 0.35); box-shadow: 0 0 10px rgba(0,229,255,0.8); color: #fff; }
 
             /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (MODAL) */
             .global-lang-overlay {
@@ -110,39 +109,71 @@
                 100% { opacity: 1; text-shadow: 0 0 16px rgba(255,215,0,1); }
             }
 
-            /* HỘP THOẠI XIN QUYỀN GPS SONG NGỮ VIỆT - ANH */
+            /* ========================================================= */
+            /* HỘP THOẠI XIN QUYỀN GPS SONG NGỮ - STYLE HOLOGRAM FORM MỚI */
+            /* ========================================================= */
             .gps-modal-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(15px);
+                background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
                 z-index: 2147483648; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
             }
             .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
-            .gps-modal-box {
-                width: 90%; max-width: 340px; background: rgba(5, 12, 22, 0.95);
-                border: 1.5px solid #ff007f; border-radius: 16px; padding: 22px 18px;
-                text-align: center; box-shadow: 0 0 35px rgba(255, 0, 127, 0.4);
-            }
-            .gps-modal-title {
-                color: #ff007f; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 900;
-                text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
-                text-shadow: 0 0 10px rgba(255, 0, 127, 0.8);
-            }
-            .gps-modal-desc { 
-                color: #d0f0ff; font-size: 11.5px; line-height: 1.5; margin-bottom: 20px; 
-                font-family: 'Space Grotesk', sans-serif; text-align: left; 
-                background: rgba(0,229,255,0.05); padding: 10px; border-radius: 8px; border-left: 2px solid #00e5ff;
-            }
-            .gps-modal-desc p { margin-bottom: 6px; }
-            .gps-modal-desc p:last-child { margin-bottom: 0; opacity: 0.85; font-style: italic; }
             
-            .gps-btn-row { display: flex; gap: 10px; justify-content: center; }
-            .gps-action-btn {
-                flex: 1; padding: 12px 8px; border-radius: 10px; font-family: 'Montserrat', sans-serif;
-                font-size: 10.5px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s;
+            .gps-modal-box {
+                width: 92%; max-width: 380px; min-height: 280px;
+                background-color: rgba(5, 12, 22, 0.7); 
+                /* ANH CHÈN LINK ẢNH NỀN CỦA ANH VÀO DÒNG BÊN DƯỚI THAY CHO CHỮ NONE: */
+                background-image: none; 
+                background-size: 100% 100%; background-position: center; background-repeat: no-repeat;
+                border: 2px solid rgba(0, 229, 255, 0.4); border-radius: 16px; padding: 30px 20px;
+                display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+                box-shadow: 0 0 40px rgba(0, 229, 255, 0.2), inset 0 0 20px rgba(0, 229, 255, 0.15);
+                position: relative; overflow: hidden;
             }
-            .gps-btn-allow { background: rgba(0, 229, 255, 0.2); border: 1.5px solid #00e5ff; color: #00e5ff; box-shadow: 0 0 12px rgba(0, 229, 255, 0.3); }
-            .gps-btn-deny { background: rgba(255, 0, 60, 0.15); border: 1.5px solid rgba(255, 0, 60, 0.6); color: #ff3333; }
+            
+            /* Hiệu ứng sọc ngang (scanline) tạo cảm giác Hologram */
+            .gps-modal-box::before {
+                content: ""; position: absolute; inset: 0; pointer-events: none;
+                background: linear-gradient(rgba(0, 229, 255, 0.03) 50%, rgba(0, 0, 0, 0.08) 50%);
+                background-size: 100% 4px; z-index: 0; border-radius: 16px;
+            }
+            
+            .gps-modal-title {
+                color: #ff3366; font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 900;
+                text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;
+                text-shadow: 0 0 10px rgba(255, 51, 102, 0.9); z-index: 1; text-align: center; line-height: 1.4;
+            }
+            
+            .gps-modal-desc { 
+                background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(0, 229, 255, 0.3);
+                border-radius: 12px; padding: 18px 15px; width: 100%; z-index: 1;
+                box-shadow: inset 0 0 20px rgba(0,0,0,0.8); margin-bottom: 25px;
+            }
+            .gps-modal-desc p { 
+                color: #d0f0ff; font-size: 13px; line-height: 1.6; 
+                font-family: 'Space Grotesk', sans-serif; margin-bottom: 12px; text-shadow: 0 2px 4px #000;
+            }
+            .gps-modal-desc p:last-child { margin-bottom: 0; color: #a0c0d0; font-style: italic; }
+            
+            .gps-btn-row { display: flex; gap: 15px; justify-content: center; width: 100%; z-index: 1; }
+            
+            .gps-action-btn {
+                flex: 1; padding: 15px 5px; border-radius: 12px; font-family: 'Montserrat', sans-serif;
+                font-size: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s;
+                text-align: center; white-space: nowrap; letter-spacing: 1px;
+            }
+            .gps-btn-allow { 
+                background: rgba(0, 229, 255, 0.15); border: 2px solid #00e5ff; color: #00e5ff; 
+                box-shadow: 0 0 15px rgba(0, 229, 255, 0.4), inset 0 0 8px rgba(0,229,255,0.2); 
+            }
+            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3); color: #fff; box-shadow: 0 0 25px #00e5ff; transform: translateY(-2px); }
+            
+            .gps-btn-deny { 
+                background: rgba(255, 51, 102, 0.15); border: 2px solid #ff3366; color: #ff3366; 
+                box-shadow: 0 0 15px rgba(255, 51, 102, 0.4), inset 0 0 8px rgba(255,51,102,0.2);
+            }
+            .gps-btn-deny:hover { background: rgba(255, 51, 102, 0.3); color: #fff; box-shadow: 0 0 25px #ff3366; transform: translateY(-2px); }
         `;
         document.head.appendChild(style);
     }
@@ -175,7 +206,6 @@
         container.id = 'kdriveGlobalHud';
         container.innerHTML = `
             <div class="hud-top-bar">
-                <!-- Cột trái: 3 dòng trạng thái -->
                 <div class="hud-left">
                     <div class="hud-sys-row">
                         <div class="signal-bars">
@@ -187,14 +217,9 @@
                     </div>
                     <span style="color: #fff;" id="hudUserText">USER: GUEST</span>
                     <span class="hud-gps" id="hudGpsText">GPS: OFFLINE</span>
-                </div>
-
-                <!-- Cột giữa: Nút ngôn ngữ trung tâm -->
-                <div class="hud-center">
+                    <!-- Nút chọn ngôn ngữ nằm ngay dưới GPS trên HUD -->
                     <button class="hud-lang-btn" id="hudLangOpenBtn">🌐 LANG [ <span id="hudLangLabel">VI</span> ]</button>
                 </div>
-
-                <!-- Cột phải: 3 dòng thông tin hệ thống -->
                 <div class="hud-right">
                     <span style="color: #00e5ff;">K-DRIVE v2.6</span>
                     <span style="color: rgba(255,255,255,0.6);" id="hudDateText">2026.09.06</span>
@@ -224,9 +249,10 @@
                 </div>
             </div>
 
+            <!-- BẢNG GPS STYLE HOLOGRAM MỚI -->
             <div class="gps-modal-overlay" id="gpsModalOverlay">
                 <div class="gps-modal-box">
-                    <div class="gps-modal-title">🛰️ XÁC THỰC GPS / GPS VERIFICATION</div>
+                    <div class="gps-modal-title">🛰️ XÁC THỰC GPS /<br>GPS VERIFICATION</div>
                     <div class="gps-modal-desc">
                         <p>🇻🇳 Hệ thống yêu cầu quyền định vị để đồng bộ Đấu trường Lượng tử toàn cầu.</p>
                         <p>🇬🇧 System requires location access to synchronize global Quantum Arena mapping.</p>
@@ -294,16 +320,15 @@
             const cachedLon = sessionStorage.getItem('kdrive_gps_lon');
             if (cachedLat && cachedLon) {
                 gpsText.textContent = `GPS: ${Number(cachedLat).toFixed(2)}N, ${Number(cachedLon).toFixed(2)}E`;
+                gpsText.style.color = "#00e5ff";
             } else {
                 gpsText.textContent = "GPS: SYNCHRONIZED";
+                gpsText.style.color = "#00e5ff";
             }
-            gpsText.style.color = "#ff007f";
         } else if (gpsVerified === 'false') {
             gpsText.textContent = "GPS: OFFLINE";
-            gpsText.style.color = "#ff007f";
+            gpsText.style.color = "#ff3333";
         } else {
-            gpsText.textContent = "GPS: OFFLINE";
-            gpsText.style.color = "#ff007f";
             if (modalOverlay) modalOverlay.classList.add('active');
         }
 
@@ -316,7 +341,6 @@
 
             if (isAllowed && navigator.geolocation) {
                 gpsText.textContent = "GPS: LOCATING...";
-                gpsText.style.color = "#ff007f";
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         const lat = pos.coords.latitude;
@@ -326,19 +350,19 @@
                         sessionStorage.setItem('kdrive_gps_lon', lon);
 
                         gpsText.textContent = `GPS: ${lat.toFixed(2)}N, ${lon.toFixed(2)}E`;
-                        gpsText.style.color = "#ff007f";
+                        gpsText.style.color = "#00e5ff";
                     },
                     () => {
                         sessionStorage.setItem('kdrive_gps_verified', 'false');
                         gpsText.textContent = "GPS: OFFLINE";
-                        gpsText.style.color = "#ff007f";
+                        gpsText.style.color = "#ff3333";
                     },
                     { timeout: 5000 }
                 );
             } else {
                 sessionStorage.setItem('kdrive_gps_verified', 'false');
                 gpsText.textContent = "GPS: OFFLINE";
-                gpsText.style.color = "#ff007f";
+                gpsText.style.color = "#ff3333";
             }
         }
     });
