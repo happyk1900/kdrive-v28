@@ -86,7 +86,7 @@
                 z-index: 2147483648; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
                 /* Background ảnh viễn tưởng bọc ngoài cùng full viền */
-                background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/GPS%20NEN.jpg?raw=true') center/cover no-repeat;
+                background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20HUD%20(1).png?raw=true') center/cover no-repeat;
                 background-color: #020406; /* Màu lót dự phòng */
             }
             .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
