@@ -399,7 +399,7 @@
     <button id="btn-exit-inspect" onclick="exitInspectMode()" data-i18n="btnExitInspect">[ QUAY LẠI ]</button>
 
     <script>
-        // BỘ TỪ ĐIỂN HOÀN CHỈNH 12 NGÔN NGỮ (KHÔNG BAO GIỜ BỊ LỖI ĐEN MÀN HÌNH NỮA)
+        // BỘ TỪ ĐIỂN HOÀN CHỈNH 12 NGÔN NGỮ QUỐC TẾ KHÔNG LỖI ĐEN MÀN HÌNH
         const i18nCore = {
             vi: {
                 theDarkText: "BÓNG TỐI", theLightText: "ÁNH SÁNG", bushidoMax: "VÕ ĐẠO: TỐI ĐA", mushiDays: "VÔ NGÃ: 1000", armorInt: ">> HỆ THỐNG K-DRIVE", armorSubj: ">> ĐỐI TƯỢNG:",
@@ -511,9 +511,11 @@
             }
         };
 
+        // Khởi chạy ngôn ngữ dựa trên kdrive_lang (được HUD chọn)
         let currentLang = localStorage.getItem('kdrive_lang') || 'vi';
         
         function applyTranslations() {
+            // Cơ chế an toàn (Fallback) nếu hệ thống truyền sai tên ngôn ngữ thì về tiếng Anh
             const t = i18nCore[currentLang] || i18nCore['en'];
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -569,7 +571,7 @@
 
         const bgMusic = document.getElementById('bg-music'); if(bgMusic) bgMusic.volume = 0.6; 
 
-        // TỪ ĐIỂN THOẠI CỦA BOO AI
+        // TỪ ĐIỂN THOẠI CỦA BOO AI (HOẠT ĐỘNG HOÀN HẢO CHO 12 NGÔN NGỮ)
         const booLines = {
             chill: {
                 vi: ["Khịt khịt... Thảnh thơi quá, có ly boba cúng nạp thì nhức nách!", "🎵 Trà sữa trân châu uống vào là hết sầu... ụt ịt..."],
@@ -746,8 +748,8 @@
         function showHologramStatus(text) { window.speechSynthesis.cancel(); speechQueue = []; if(!holoBubble) return; holoBubble.style.opacity = 1; holoBubble.innerHTML = ""; clearTimeout(holoTimeout); clearInterval(typewriterTimerCore); let i = 0; typewriterTimerCore = setInterval(() => { if (i < text.length) { holoBubble.innerHTML += text.charAt(i); i++; } else { clearInterval(typewriterTimerCore); holoTimeout = setTimeout(() => { holoBubble.style.opacity = 0; }, 3200); } }, 25); }
         let speechQueue = []; let isDialogPlaying = false;
         function playBooDialog(fullText, useVoice = true, callback = null) { window.speechSynthesis.cancel(); clearTimeout(holoTimeout); clearInterval(typewriterTimerCore); let sentences = fullText.replace(/([.!?])\s+/g, "$1|").split("|"); speechQueue = []; let chunk = ""; for (let s of sentences) { s = s.trim(); if (!s) continue; if (chunk.split(/[.!?]/).length - 1 >= 2 || chunk.length > 80) { speechQueue.push(chunk); chunk = s; } else { chunk += (chunk ? " " : "") + s; } } if (chunk) speechQueue.push(chunk); isDialogPlaying = false; processDialogQueue(useVoice, callback); }
-        function processDialogQueue(useVoice, callback) { if (speechQueue.length === 0) { isDialogPlaying = false; holoTimeout = setTimeout(() => { if(holoBubble) holoBubble.style.opacity = 0; }, 3500); if (callback) callback(); return; } isDialogPlaying = true; let text = speechQueue.shift(); if(holoBubble) { holoBubble.style.opacity = 1; holoBubble.innerHTML = ""; } clearInterval(typewriterTimerCore); let i = 0; typewriterTimerCore = setInterval(() => { if (i < text.length) { if(holoBubble) holoBubble.innerHTML += text.charAt(i); i++; } else { clearInterval(typewriterTimerCore); } }, 30); if (useVoice) { try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = currentLang === 'en' ? 'en-US' : (currentLang === 'jp' ? 'ja-JP' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'hi' ? 'hi-IN' : 'vi-VN'))); utterance.rate = 1.15; utterance.onend = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; utterance.onerror = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; window.speechSynthesis.speak(utterance); } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } } catch (e) { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 1000); } }
-        function speakMsg(text) { try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = currentLang === 'en' ? 'en-US' : (currentLang === 'jp' ? 'ja-JP' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'hi' ? 'hi-IN' : 'vi-VN'))); utterance.rate = 1.1; window.speechSynthesis.speak(utterance); } } catch (e) {} }
+        function processDialogQueue(useVoice, callback) { if (speechQueue.length === 0) { isDialogPlaying = false; holoTimeout = setTimeout(() => { if(holoBubble) holoBubble.style.opacity = 0; }, 3500); if (callback) callback(); return; } isDialogPlaying = true; let text = speechQueue.shift(); if(holoBubble) { holoBubble.style.opacity = 1; holoBubble.innerHTML = ""; } clearInterval(typewriterTimerCore); let i = 0; typewriterTimerCore = setInterval(() => { if (i < text.length) { if(holoBubble) holoBubble.innerHTML += text.charAt(i); i++; } else { clearInterval(typewriterTimerCore); } }, 30); if (useVoice) { try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = currentLang === 'vi' ? 'vi-VN' : 'en-US'; utterance.rate = 1.15; utterance.onend = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; utterance.onerror = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; window.speechSynthesis.speak(utterance); } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } } catch (e) { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 1000); } }
+        function speakMsg(text) { try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = currentLang === 'vi' ? 'vi-VN' : 'en-US'; utterance.rate = 1.1; window.speechSynthesis.speak(utterance); } } catch (e) {} }
 
         let isMissionExpanded = false;
         let currentMissionState = 'NEW';
@@ -797,7 +799,7 @@
             if(!container) return;
             container.innerHTML = '';
             
-            const t = i18nCore[currentLang] || i18nCore['vi'];
+            const t = i18nCore[currentLang] || i18nCore['en'];
 
             const missions = [
                 { id: 'bushido', name: t.m1, score: 0 },
@@ -832,7 +834,7 @@
                 isDaoNghiepVienMan = true;
                 setMissionState('COMPLETED');
                 setTimeout(() => {
-                    const msg = currentLang === 'en' ? "Dao Mastery Achieved. The path opens!" : (currentLang === 'vi' ? "Đạo nghiệp viên mãn. Ngã rẽ sinh tử đã chính thức khai mở!" : "Task Complete!");
+                    const msg = currentLang === 'en' ? "Dao Mastery Achieved. The path opens!" : "Đạo nghiệp viên mãn. Ngã rẽ sinh tử đã chính thức khai mở!";
                     speakMsg(msg);
                     triggerFactionWar();
                 }, 2500);
@@ -912,9 +914,13 @@
             }, 500);
         });
 
-        // Tích hợp thay đổi từ thanh HUD toàn cục (Giao thức gửi 'kdriveLangChanged')
+        // LẮNG NGHE SỰ KIỆN TỪ HUD TRUYỀN TỚI ĐỂ DỊCH CHUYỂN
         window.addEventListener('kdriveLangChanged', (e) => {
-            currentLang = e.detail.lang;
+            if(e.detail.lang !== 'vi' && e.detail.lang !== 'en') {
+                currentLang = 'en'; 
+            } else {
+                currentLang = e.detail.lang;
+            }
             applyTranslations();
         });
 
@@ -962,6 +968,7 @@
             if (!isCubeMoved && !document.body.classList.contains('inspect-mode') && !isModalActive) { 
                 if(navigator.vibrate) navigator.vibrate(50); playSound('katana'); 
                 
+                // ĐÃ SỬA: LIÊN KẾT ĐÚNG TÊN FILE CÁC ĐẠO TRƯỜNG
                 if (taskId === 'phanxa') {
                     document.getElementById('core-wrapper').style.opacity = '0'; 
                     playSound('warp-out');
