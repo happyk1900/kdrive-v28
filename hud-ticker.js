@@ -43,11 +43,11 @@
                 100% { transform: scale(1.12); box-shadow: 0 0 22px rgba(0,229,255,0.9); border-color: #fff; }
             }
 
-            /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU */
+            /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (ĐƯỢC ĐẨY Z-INDEX CAO NHẤT ĐỂ KHÔNG BỊ CHẶN) */
             .global-lang-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 background: rgba(1, 3, 8, 0.92); backdrop-filter: blur(15px);
-                z-index: 2147483649; display: flex; justify-content: center; align-items: center;
+                z-index: 2147483650 !important; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: 0.3s ease; pointer-events: none;
             }
             .global-lang-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
@@ -134,7 +134,6 @@
         document.head.appendChild(style);
     }
 
-    // BỘ MÃ HÓA KÝ TỰ LƯỢNG TỬ CHUẨN ĐỘC BẢN (1-1 MAPPING CHO TIẾNG VIỆT)
     const quantumMap = {
         'a': '⟡', 'á': '⟡⁺', 'à': '⟡₋', 'ả': '⟡∼', 'ã': '⟡≈', 'ạ': '⟡•',
         'â': '⌖', 'ấ': '⌖⁺', 'ầ': '⌖₋', 'ẩ': '⌖∼', 'ẫ': '⌖≈', 'ậ': '⌖•',
