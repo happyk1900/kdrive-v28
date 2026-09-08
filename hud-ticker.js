@@ -3,7 +3,7 @@
     if (!document.getElementById(styleId)) {
         const linkFont = document.createElement('link');
         linkFont.rel = 'stylesheet';
-        linkFont.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Space+Grotesk:wght@500;700;900&family=Orbitron:wght@700;900&display=swap';
+        linkFont.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Space+Grotesk:wght@500;700;900&display=swap';
         document.head.appendChild(linkFont);
 
         const style = document.createElement('style');
@@ -41,13 +41,6 @@
             @keyframes pulseGlobe {
                 0% { transform: scale(1); box-shadow: 0 0 10px rgba(0,229,255,0.4); border-color: rgba(0,229,255,0.6); }
                 100% { transform: scale(1.12); box-shadow: 0 0 22px rgba(0,229,255,0.9); border-color: #fff; }
-            }
-
-            /* PHÔNG CHỮ MÃ HÓA LƯỢNG TỬ */
-            .quantum-encoded {
-                font-family: 'Orbitron', sans-serif !important;
-                letter-spacing: 2px !important;
-                filter: contrast(180%);
             }
 
             /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU */
@@ -141,13 +134,14 @@
         document.head.appendChild(style);
     }
 
+    // BỘ MÃ HÓA LƯỢNG TỬ ĐỘC BẢN (HOÀN TOÀN KHÔNG CÒN KÝ TỰ LATINH)
     const globalTranslations = {
         encoded: {
-            select_lang_title: "𝚫-𝚲𝚯𝚸-𝚭", close_btn: "𝚫𝚬𝚴𝚼",
-            sys: "𝚫-𝚲𝚯𝚸.𝟶𝟾", user: "𝚬-𝚾𝚼: 𝚪𝚼𝚬", gps: "𝚪𝚷𝚼: 𝚯𝚺𝚲", chat: "𝚾-𝚲𝚰𝚴𝚮 𝟡+",
-            gps_title: "𝚾𝚨𝚬 𝚻𝚬𝚲𝚼 𝚪𝚷𝚼",
-            gps_desc: "◼◼◼ 𝚱-𝚫𝚹𝚨 𝚲𝚰𝚴𝚮 𝚻Ự 𝚫𝚲𝚬𝚺𝚻 𝚪𝚷𝚼 ◼◼◼",
-            deny: "𝚫𝚬𝚴𝚼", allow: "𝚨𝚱𝚻𝚬𝚷"
+            select_lang_title: "⎈ 𝚫-𝚲𝚯𝚸-𝚭 ⎈", close_btn: "[ 𝚫 • 𝚾 ]",
+            sys: "❖ 𝚫.𝚲𝚯𝚸 ❖", user: "⌖ 𝚬-𝚾𝚼: 𝚪𝚼⌖", gps: "🛰 𝚪𝚷𝚼: 𝚯𝚺𝚲", chat: "⚛ 𝚾-𝚲𝚰𝚴𝚮 𝟡+",
+            gps_title: "⎈ 𝚾𝚨𝚬 • 𝚻𝚬𝚲𝚼 • 𝚪𝚷𝚼 ⎈",
+            gps_desc: "⚡ ⟡ 𝚱-𝚫𝚹𝚨 • 𝚲𝚰𝚴𝚮 • 𝚻Ự • 𝚫𝚲𝚬𝚺𝚻 • 𝚪𝚷𝚼 • 𝚳𝚨𝚻 𝚳𝚫 ⟡ ⚡",
+            deny: "❖ 𝚫𝚬𝚴𝚼 ❖", allow: "✦ 𝚨𝚱𝚻𝚬𝚷 ✦"
         },
         vi: {
             select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", close_btn: "ĐÓNG LẠI",
@@ -247,7 +241,7 @@
                 </div>
             </div>
 
-            <!-- BẢNG GPS XÁC THỰC - NÚT QUẢ CẦU GẮN CHUẨN HÀM MỞ MODAL -->
+            <!-- BẢNG GPS XÁC THỰC -->
             <div class="gps-modal-overlay" id="gpsModalOverlay">
                 <div class="gps-modal-dimmer"></div>
                 <div class="gps-modal-box">
@@ -281,7 +275,6 @@
 
         function updateHudLangUI(lang) {
             const t = globalTranslations[lang] || globalTranslations['encoded'];
-            const isEncoded = (lang === 'encoded');
 
             const sysText = document.getElementById('hudSysText');
             const userText = document.getElementById('hudUserText');
@@ -303,19 +296,10 @@
             if (denyBtn) denyBtn.innerText = t.deny;
             if (allowBtn) allowBtn.innerText = t.allow;
 
-            const targets = [sysText, userText, gpsTextVal, chatBadge, gpsTitle, gpsDesc, denyBtn, allowBtn];
-            targets.forEach(el => {
-                if (el) {
-                    if (isEncoded) el.classList.add('quantum-encoded');
-                    else el.classList.remove('quantum-encoded');
-                }
-            });
-
             if (document.getElementById('langModalTitleText')) document.getElementById('langModalTitleText').innerText = t.select_lang_title;
             if (document.getElementById('langModalCloseBtn')) document.getElementById('langModalCloseBtn').innerText = t.close_btn;
         }
 
-        // Gắn sự kiện mở ngôn ngữ cho cả 2 nút quả cầu (trên thanh HUD và trong bảng GPS)
         document.getElementById('hudLangOpenBtn').addEventListener('click', window.openGlobalLang);
         document.getElementById('gpsModalLangBtn').addEventListener('click', window.openGlobalLang);
 
@@ -363,7 +347,6 @@
                         sessionStorage.setItem('kdrive_gps_lat', lat);
                         sessionStorage.setItem('kdrive_gps_lon', lon);
                         if (gpsTextVal) {
-                            gpsTextVal.classList.remove('quantum-encoded');
                             gpsTextVal.textContent = `GPS: ${lat.toFixed(2)}N, ${lon.toFixed(2)}E`;
                         }
                     },
