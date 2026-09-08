@@ -141,19 +141,25 @@
         .highlight-score { color: #00ff66; font-weight: bold; font-size: 14px; text-shadow: 0 0 8px rgba(0,255,102,0.8); }
         .inline-boo-msg { color: #a0c0d0; font-style: italic; font-size: 10px; margin-left: 3px; font-weight: bold; text-shadow: 0 0 4px #000; }
 
-        .wind-target { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: background 0.1s, box-shadow 0.1s, opacity 0.2s, transform 0.1s; } 
-        .t-track { width: 45px; height: 45px; background: rgba(160,192,208,0.5); box-shadow: 0 0 20px #a0c0d0; border: 2px solid #fff; pointer-events: none; }
-        .t-track.hovered { background: #fff; box-shadow: 0 0 30px #fff; border-color: #00ff66; transform: translate(-50%, -50%) scale(1.1); }
+        /* GIAO DIỆN HẠT & VIỀN TRẮNG CHUẨN SANG TRỌNG */
+        .wind-target { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: transform 0.15s ease; } 
         
-        .t-ghost { width: 55px; height: 55px; border-radius: 50%; cursor: crosshair; pointer-events: auto; }
-        .t-ghost.hidden { opacity: 0; pointer-events: none; }
-        
-        /* CÁC KHỐI MÀU ĐẶC PHÁT SÁNG CỰC ĐẸP (CHUẨN ẢI 2 & 3) */
-        .glow-slash { background: radial-gradient(circle, #ff3366 0%, #cc0033 70%); box-shadow: 0 0 25px #ff3366, 0 0 50px #ff3366; border: 2px solid #fff; }
-        .glow-track { background: radial-gradient(circle, #00e5ff 0%, #0088cc 70%); box-shadow: 0 0 25px #00e5ff, 0 0 50px #00e5ff; border: 2px solid #fff; }
-        .glow-tap   { background: radial-gradient(circle, #00ff66 0%, #009933 70%); box-shadow: 0 0 25px #00ff66, 0 0 50px #00ff66; border: 2px solid #fff; }
+        /* ẢI 1: Viền trắng mờ, bên trong tối */
+        .t-track-mode { width: 50px; height: 50px; background: rgba(0, 0, 0, 0.85); border: 2px solid rgba(255, 255, 255, 0.4); box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
+        .t-track-mode.hovered { border-color: #fff; box-shadow: 0 0 25px #fff; background: rgba(255, 255, 255, 0.2); transform: translate(-50%, -50%) scale(1.1); }
 
-        .t-multi { width: 55px; height: 55px; cursor: crosshair; pointer-events: auto; border-radius: 50%; }
+        /* ẢI 2 & ẢI 3: Thiết kế tối giản tinh tế (Viền trắng, Lõi đen hoặc Hiệu ứng lấp loè / Phong to) */
+        .target-base { width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        
+        /* Hạt viền trắng trong đen (Bám theo) */
+        .style-track { background: #000; border: 2.5px solid #fff; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+        
+        /* Hạt trắng lấp loè (Chém / Tap nhanh) */
+        .style-slash { background: #fff; border: 2.5px solid #fff; box-shadow: 0 0 25px #fff, 0 0 45px rgba(255,255,255,0.8); animation: flarePulse 0.4s infinite alternate; }
+        @keyframes flarePulse { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.1); opacity: 1; } }
+
+        /* Hạt trắng phình to cực đại (Click) */
+        .style-tap { background: rgba(255,255,255,0.15); border: 3px solid #fff; box-shadow: 0 0 30px #fff; transition: transform 0.5s ease-out; }
 
         .hit-flash { animation: flashRed 0.3s ease-out; }
         @keyframes flashRed { 0% { background-color: rgba(255,51,102,0.6); } 100% { background-color: transparent; } }
@@ -305,7 +311,7 @@
         <div id="play-area">
             <div id="combo-popup">X2</div>
             <div id="custom-cursor"></div>
-            <div id="game-target" class="wind-target"></div>
+            <div id="game-target" class="wind-target" onmousedown="handleTargetClick(event)" ontouchstart="handleTargetClick(event)"></div>
         </div>
         
         <div class="arena-ui-panel" id="arena-menu-panel">
@@ -352,29 +358,26 @@
                 click_chart: "CHẠM VÀO ĐIỂM ĐỂ XEM CHI TIẾT DANH VỌNG", led_msg: "⚡ [HỆ THỐNG GIỚI HẠN 3 LƯỢT/NGÀY]: HÃY HOÀN THÀNH ẢI VÀ BẤM LƯU ĐIỂM NGAY! ⚡ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⚡ [ĐẠO TRƯỜNG PHONG LUÂN]: LINH HOẠT - NHẠY BÉN - THẦN TỐC! ⚡",
                 btn_core: "TRỞ VỀ LÕI", btn_save: "LƯU ĐIỂM", btn_start: "KHAI TRẬN", test_finish: "KẾT THÚC BÀI TEST", score_label: "ĐIỂM:", btn_confirm: "XÁC NHẬN", lives: "MẠNG:", points: "ĐIỂM:", btn_exit: "THOÁT",
                 alert_limit_title: "GIỚI HẠN KỶ LUẬT", alert_limit_msg: "Nhiệm vụ hôm nay đã hoàn tất (3/3). Kỷ luật không chỉ là tiến lên, mà còn là biết điểm dừng.<br><br>Hẹn gặp lại vào 00:00 ngày mai!",
-                alert_unlock_title: "BẺ KHÓA THÀNH CÔNG", alert_unlock_msg: "Đã mở khóa Giới Hạn KỶ LUẬT! Bạn có thể test các ải vô hạn lần.",
+                alert_unlock_title: "BẺ KHÓA THÀNH CÔNG", alert_unlock_msg: "Đã mở khóa Giới Hạn Kỷ Luật!",
                 chart_detail_title: "CHI TIẾT LƯỢT", fame_achieved: "Tổng Danh Vọng:", status_label: "Trạng thái:", chart_desc: "Dữ liệu được lưu từ tổng điểm Phong Luân của bạn.",
                 eval_high: "🌪️ VÔ CỰC TUYỆT ĐỈNH", eval_mid: "💨 PHONG THẦN THỨC TỈNH", eval_low: "🌱 TÍCH LŨY CƠ BẢN",
-                sys_msg_test: "⚡ [HỆ THỐNG]: CHẾ ĐỘ TEST ĐÃ KÍCH HOẠT - VÔ HIỆU HÓA GIỚI HẠN LƯỢT CHƠI! ⚡", sys_msg_saved: "⚡ ĐÃ LƯU ĐIỂM KỶ LUẬT & ĐỒNG BỘ DANH VỌNG THÀNH CÔNG! ⚡",
-                rule_1: "<b>LUẬT CHƠI - BÁM ĐUỔI:</b><br>• Bám sát tâm luồng gió.<br>• Giữ trong vòng tròn sáng.",
-                rule_2: "<b>LUẬT CHƠI - TIÊN PHONG:</b><br>• Vuốt lướt màn hình để Chém (Slash) mục tiêu đỏ hồng phát sáng.<br>• Quá lâu không chém được sẽ <b>mất 1 mạng</b>!",
-                rule_3: "<b>LUẬT CHƠI - BIẾN ẢO:</b><br>• <b style='color:#00e5ff;'>Xanh Dương:</b> Rê bám theo.<br>• <b style='color:#ff3366;'>Đỏ Hồng:</b> Vuốt chém.<br>• <b style='color:#00ff66;'>Xanh Lá:</b> Chạm bấm.",
-                msg_g1_start: "Bám sát luồng gió!", msg_g2_start: "Vuốt chém mục tiêu đỏ hồng!", msg_g2_ghost: "ĐANG ẨN...", msg_g2_visible: "CHÉM NGAY!", msg_g3_track: "Xanh Dương: Rê bám", msg_g3_slash: "Đỏ Hồng: Vuốt chém", msg_g3_tap: "Xanh Lá: Chạm bấm", hit_g2: "CHÉM CHUẨN (+10)!", hit_g3_track: "BÁM TỐT (+15)!", hit_g3_slash: "CHÉM ĐẸP (+20)!", hit_g3_tap: "BẤM CHUẨN (+25)!", lose_time: "QUÁ HẠN - MẤT 1 MẠNG!"
+                sys_msg_test: "⚡ [HỆ THỐNG]: CHẾ ĐỘ TEST ĐÃ KÍCH HOẠT! ⚡", sys_msg_saved: "⚡ ĐÃ LƯU ĐIỂM KỶ LUẬT & ĐỒNG BỘ DANH VỌNG! ⚡",
+                rule_1: "<b>LUẬT CHƠI - BÁM ĐUỔI:</b><br>• Viền trắng mờ, trong tối.<br>• Rê bám theo. Mất dấu thanh tiến trình sẽ chạy đầy $\rightarrow$ Mất mạng.",
+                rule_2: "<b>LUẬT CHƠI - TIÊN PHONG:</b><br>• Hạt trắng xuất hiện bất ngờ.<br>• Chạm/Click chém ngay khi hiện hữu trước khi hết giờ.",
+                rule_3: "<b>LUẬT CHƠI - BIẾN ẢO (3 DẠNG HẠT TRẮNG ĐEN):</b><br>• <i>Viền trắng, trong đen:</i> Rê bám theo.<br>• <i>Trắng lấp loè:</i> Click chém.<br>• <i>Trắng phình to cực đại:</i> Click bấm.",
+                msg_g1_start: "Bám sát luồng gió tối!", msg_g2_start: "Chém hạt trắng bất ngờ!", msg_g2_ghost: "ĐANG ẨN...", msg_g2_visible: "HIỆN HỮU - CHÉM NGAY!", msg_g3_track: "Viền trắng trong đen: Bám theo", msg_g3_slash: "Trắng lấp loè: Chém", msg_g3_tap: "Trắng phình to: Click", hit_g2: "CHÉM CHUẨN (+10)!", hit_g3_track: "BÁM TỐT (+15)!", hit_g3_slash: "CHÉM ĐẸP (+20)!", hit_g3_tap: "BẤM CHUẨN (+25)!", lose_time: "QUÁ HẠN THỜI GIAN - MẤT 1 MẠNG!"
             },
             en: {
                 page_title: "K-Drive - Wind Arena", phong_title: "WIND ARENA", card_1_title: "PURSUIT", card_2_title: "VANGUARD", card_3_title: "ILLUSION",
-                tries_left: "TURNS", exhausted_label: "NO TURNS", fame: "PRESTIGE", combat_log: ">> COMBAT & JUDGMENT LOG", today: "TODAY",
-                click_chart: "TAP POINTS FOR PRESTIGE DETAILS", led_msg: "⚡ [SYSTEM LIMIT 3 TRIES/DAY]: CLEAR THE STAGE AND SAVE SCORE NOW! ⚡ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⚡ [WIND ARENA]: AGILE - SHARP - SWIFT! ⚡",
-                btn_core: "RETURN CORE", btn_save: "SAVE SCORE", btn_start: "START", test_finish: "TEST COMPLETED", score_label: "SCORE:", btn_confirm: "OK", lives: "LIVES:", points: "SCORE:", btn_exit: "EXIT",
-                alert_limit_title: "DISCIPLINE LIMIT", alert_limit_msg: "Today's missions are complete (3/3).",
-                alert_unlock_title: "UNLOCK SUCCESSFUL", alert_unlock_msg: "Discipline Limit unlocked!",
-                chart_detail_title: "ROUND DETAILS", fame_achieved: "Total Prestige:", status_label: "Status:", chart_desc: "Data recorded from your Total Wind Arena score.",
-                eval_high: "🌪️ ENDLESS PEAK", eval_mid: "💨 WIND GOD AWAKENED", eval_low: "🌱 BASIC ACCUMULATION",
-                sys_msg_test: "⚡ [SYSTEM]: TEST MODE ACTIVATED! ⚡", sys_msg_saved: "⚡ SCORE SYNCED! ⚡",
-                rule_1: "<b>RULES - PURSUIT:</b><br>• Follow wind core.",
-                rule_2: "<b>RULES - VANGUARD:</b><br>• Swipe to Slash target.",
-                rule_3: "<b>RULES - ILLUSION:</b><br>• Blue: Track | Red: Slash | Green: Tap.",
-                msg_g1_start: "Follow the wind!", msg_g2_start: "Slash target!", msg_g2_ghost: "WAITING", msg_g2_visible: "SLASH!", msg_g3_track: "Blue: Track", msg_g3_slash: "Red: Slash", msg_g3_tap: "Green: Tap", hit_g2: "SLASHED!", hit_g3_track: "TRACKED!", hit_g3_slash: "STRUCK!", hit_g3_tap: "TAPPED!", lose_time: "TOO LATE - LOST LIFE!"
+                tries_left: "TURNS", exhausted_label: "NO TURNS", fame: "PRESTIGE", combat_log: ">> COMBAT LOG", today: "TODAY",
+                click_chart: "TAP POINTS", led_msg: "⚡ [WIND ARENA] ⚡",
+                btn_core: "CORE", btn_save: "SAVE", btn_start: "START", test_finish: "DONE", score_label: "SCORE:", btn_confirm: "OK", lives: "LIVES:", points: "PTS:", btn_exit: "EXIT",
+                alert_limit_title: "LIMIT", alert_limit_msg: "Done for today.", alert_unlock_title: "UNLOCKED", alert_unlock_msg: "Infinite mode.",
+                chart_detail_title: "DETAILS", fame_achieved: "Prestige:", status_label: "Status:", chart_desc: "Recorded data.",
+                eval_high: "🌪️ PEAK", eval_mid: "💨 AWAKENED", eval_low: "🌱 BASIC",
+                sys_msg_test: "⚡ TEST MODE ⚡", sys_msg_saved: "⚡ SAVED! ⚡",
+                rule_1: "<b>PURSUIT:</b> Track core.", rule_2: "<b>VANGUARD:</b> Tap appearing target.", rule_3: "<b>ILLUSION:</b> 3 white-black states.",
+                msg_g1_start: "Follow wind!", msg_g2_start: "Slash target!", msg_g2_ghost: "WAITING", msg_g2_visible: "SLASH!", msg_g3_track: "Track", msg_g3_slash: "Slash", msg_g3_tap: "Tap", hit_g2: "HIT!", hit_g3_track: "TRACKED!", hit_g3_slash: "STRUCK!", hit_g3_tap: "TAPPED!", lose_time: "TOO LATE!"
             }
         };
 
@@ -709,8 +712,6 @@
         let g3Mode = 'TRACK'; 
         let g1TrackFrames = 0, g1MissFrames = 0;
 
-        let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
-
         function booMsg(text) { document.getElementById('boo-msg').innerText = text; }
 
         function clearAllTimeouts() {
@@ -811,27 +812,35 @@
         playArea.addEventListener('mousemove', updateMousePos);
         playArea.addEventListener('touchmove', (e) => { e.preventDefault(); updateMousePos(e); }, {passive: false});
 
-        // BẮT SỰ KIỆN VUỐT CHÉM SIÊU NHẠY (GIẢM NGƯỠNG ĐỂ DỄ NHẬN DIỆN HƠN)
-        playArea.addEventListener('pointerdown', (e) => {
+        // BẮT SỰ KIỆN CLICK / TAP CỰC NHẠY (DÙNG CHUNG CHO CẢ ẢI 2 & ẢI 3)
+        function handleTargetClick(e) {
             if(!isPlaying) return;
-            touchStartX = e.clientX;
-            touchStartY = e.clientY;
-            touchStartTime = Date.now();
-        });
+            e.stopPropagation();
+            const t = window.currentLangDict || translations['vi'];
 
-        playArea.addEventListener('pointerup', (e) => {
-            if(!isPlaying) return;
-            let touchEndX = e.clientX;
-            let touchEndY = e.clientY;
-            let touchDuration = Date.now() - touchStartTime;
-            let distMoved = Math.hypot(touchEndX - touchStartX, touchEndY - touchStartY);
-
-            // Nới lỏng điều kiện chém: Chỉ cần dịch chuyển > 15px là tính là nhát chém
-            let isSlash = distMoved > 15 && touchDuration < 500;
-            let isTap = distMoved <= 20 && touchDuration < 400;
-
-            handlePlayerAction(isSlash, isTap);
-        });
+            if(currentGame === '2') {
+                if(!isGhost) {
+                    addScoreAndCheckMultiplier(10);
+                    playSound('katana'); 
+                    booMsg(t.hit_g2);
+                    resetActionTimer(); // Làm mới bộ đếm thời gian khi chém trúng
+                    tx = 60 + Math.random() * (maxX - 120); 
+                    ty = 60 + Math.random() * (maxY - 120);
+                }
+            } 
+            else if(currentGame === '3') {
+                // Ở ải 3, nếu đang ở chế độ SLASH (Trắng lấp loè) hoặc TAP (Trắng phình to) mà click trúng -> ghi điểm
+                if(g3Mode === 'SLASH' || g3Mode === 'TAP') {
+                    addScoreAndCheckMultiplier(g3Mode === 'SLASH' ? 20 : 25);
+                    playSound('katana'); 
+                    booMsg(g3Mode === 'SLASH' ? t.hit_g3_slash : t.hit_g3_tap);
+                    resetActionTimer();
+                    tx = 60 + Math.random() * (maxX - 120); 
+                    ty = 60 + Math.random() * (maxY - 120);
+                }
+                // Nếu bấm nhầm lúc đang ở chế độ TRACK (Bám theo), thao tác click hoàn toàn vô hại, không bị phạt.
+            }
+        }
 
         function addScoreAndCheckMultiplier(basePoints) {
             let oldMultiplier = currentMultiplier;
@@ -868,41 +877,7 @@
             if(stability <= 0) finishGame(reason);
         }
 
-        function handlePlayerAction(isSlash, isTap) {
-            const t = window.currentLangDict || translations['vi'];
-            let distToTarget = Math.hypot(mx - tx, my - ty);
-            let targetRadius = 85; // Mở rộng vùng bắt điểm để dễ chém trúng
-
-            if (currentGame === '2') {
-                if (!isGhost && distToTarget < targetRadius && isSlash) {
-                    addScoreAndCheckMultiplier(10);
-                    playSound('katana'); 
-                    booMsg(t.hit_g2);
-                    resetActionTimer(); 
-                    tx = 60 + Math.random() * (maxX - 120); 
-                    ty = 60 + Math.random() * (maxY - 120);
-                }
-            } 
-            else if (currentGame === '3') {
-                if (g3Mode === 'SLASH' && distToTarget < targetRadius && isSlash) {
-                    addScoreAndCheckMultiplier(20);
-                    playSound('katana'); 
-                    booMsg(t.hit_g3_slash);
-                    resetActionTimer();
-                    tx = 60 + Math.random() * (maxX - 120); 
-                    ty = 60 + Math.random() * (maxY - 120);
-                } 
-                else if (g3Mode === 'TAP' && distToTarget < targetRadius && isTap) {
-                    addScoreAndCheckMultiplier(25);
-                    playSound('coin'); 
-                    booMsg(t.hit_g3_tap);
-                    resetActionTimer();
-                    tx = 60 + Math.random() * (maxX - 120); 
-                    ty = 60 + Math.random() * (maxY - 120);
-                }
-            }
-        }
-
+        // BỘ ĐẾM THỜI GIAN HẾT HẠN (QUÁ LÂU KHÔNG TƯƠNG TÁC ĐÚNG THÌ MẤT MẠNG)
         function resetActionTimer() {
             if(actionTimer) clearTimeout(actionTimer);
             if(!isPlaying) return;
@@ -914,12 +889,12 @@
                 tx = 60 + Math.random() * (maxX - 120); 
                 ty = 60 + Math.random() * (maxY - 120);
                 resetActionTimer();
-            }, 3500); // Sau 3.5 giây không tương tác đúng sẽ trừ 1 mạng
+            }, 3500); // 3.5 giây không chém/bấm hoặc bám hụt sẽ bị trừ mạng
         }
 
         function initG1() {
             const t = window.currentLangDict || translations['vi'];
-            tEl.className = 'wind-target t-track';
+            tEl.className = 'wind-target t-track-mode';
             document.getElementById('custom-cursor').style.display = 'block';
             document.getElementById('warning-bar-container').style.display = 'block';
             g1TrackFrames = 0; g1MissFrames = 0;
@@ -929,7 +904,7 @@
 
         function initG2() {
             const t = window.currentLangDict || translations['vi'];
-            tEl.className = 'wind-target t-ghost glow-slash'; 
+            tEl.className = 'wind-target t-ghost style-slash'; // Hạt trắng lấp loè
             document.getElementById('custom-cursor').style.display = 'none';
             baseSpeed = 1.6;
             isGhost = false;
@@ -953,33 +928,34 @@
 
         function initG3() {
             const t = window.currentLangDict || translations['vi'];
-            tEl.className = 'wind-target t-multi glow-track';
+            tEl.className = 'wind-target t-multi style-track';
             document.getElementById('custom-cursor').style.display = 'none';
             baseSpeed = 1.5;
             
             resetActionTimer();
 
+            // Vòng lặp chuyển đổi 3 trạng thái của ải 3
             let tm = setInterval(() => {
                 if(!isPlaying) return;
                 const modes = ['TRACK', 'SLASH', 'TAP'];
                 g3Mode = modes[Math.floor(Math.random() * modes.length)];
                 
-                tEl.classList.remove('glow-track', 'glow-slash', 'glow-tap');
+                tEl.classList.remove('style-track', 'style-slash', 'style-tap');
                 if(g3Mode === 'TRACK') { 
-                    tEl.classList.add('glow-track'); 
+                    tEl.classList.add('style-track'); // Viền trắng, trong đen (Bám theo)
                     booMsg(t.msg_g3_track); 
                 }
                 else if(g3Mode === 'SLASH') { 
-                    tEl.classList.add('glow-slash'); 
+                    tEl.classList.add('style-slash'); // Trắng lấp loè (Chém)
                     booMsg(t.msg_g3_slash); 
                 }
                 else if(g3Mode === 'TAP') { 
-                    tEl.classList.add('glow-tap');   
+                    tEl.classList.add('style-tap');   // Trắng phình to (Click)
                     booMsg(t.msg_g3_tap); 
                 }
 
                 resetActionTimer();
-            }, 2800);
+            }, 3000);
             gTimeouts.push(tm);
         }
 
@@ -1007,9 +983,10 @@
             }
 
             let dist = Math.hypot(mx - tx, my - ty);
-            let hitRadius = 70;
+            let hitRadius = 75;
             
             if(currentGame === '1') {
+                // Ải 1: Bám theo luồng gió tối viền trắng mờ
                 if(dist < hitRadius) {
                     addScoreAndCheckMultiplier(0.2);
                     tEl.classList.add('hovered');
@@ -1019,7 +996,7 @@
                     tEl.classList.remove('hovered');
                     g1MissFrames++;
                     
-                    let missMax = Math.max(40, 120 - Math.floor(arenaScore * 0.1)); 
+                    let missMax = 100; 
                     let pct = (g1MissFrames / missMax) * 100;
                     document.getElementById('warning-progress').style.width = Math.min(100, pct) + '%';
 
@@ -1031,6 +1008,7 @@
                 }
             } 
             else if(currentGame === '3' && g3Mode === 'TRACK') {
+                // ải 3 khi ở trạng thái TRACK: Rê bám để tích lũy điểm mượt mà
                 if(dist < hitRadius) { 
                     addScoreAndCheckMultiplier(0.25); 
                     resetActionTimer(); 
