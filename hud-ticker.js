@@ -43,7 +43,7 @@
                 100% { transform: scale(1.12); box-shadow: 0 0 22px rgba(0,229,255,0.9); border-color: #fff; }
             }
 
-            /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (ĐƯỢC ĐẨY Z-INDEX CAO NHẤT ĐỂ KHÔNG BỊ CHẶN) */
+            /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (Z-INDEX CAO NHẤT ĐỂ KHÔNG BỊ CHẶN) */
             .global-lang-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 background: rgba(1, 3, 8, 0.92); backdrop-filter: blur(15px);
@@ -230,7 +230,7 @@
 
                 <div class="hud-center">
                     <div style="position: absolute; top: -20px; font-size: 11px; color: #00ff66; animation: bounceGuide 1s infinite ease-in-out;">▼</div>
-                    <button class="hud-lang-btn" id="hudLangOpenBtn" title="Chọn ngôn ngữ">🌐</button>
+                    <button class="hud-lang-btn hudLangTrigger" title="Chọn ngôn ngữ">🌐</button>
                 </div>
 
                 <div class="hud-right">
@@ -268,7 +268,7 @@
                 <div class="gps-modal-dimmer"></div>
                 <div class="gps-modal-box">
                     <div style="position: absolute; top: 14px; right: 14px; z-index: 10;">
-                        <button class="hud-lang-btn" style="width: 34px; height: 34px; font-size: 15px;" id="gpsModalLangBtn" title="Chọn ngôn ngữ">🌐</button>
+                        <button class="hud-lang-btn hudLangTrigger" style="width: 34px; height: 34px; font-size: 15px;" title="Chọn ngôn ngữ">🌐</button>
                     </div>
 
                     <div class="gps-modal-title" id="gpsModalTitleText">XÁC THỰC GPS</div>
@@ -326,8 +326,13 @@
             if (document.getElementById('langModalCloseBtn')) document.getElementById('langModalCloseBtn').innerText = processText(t.close_btn);
         }
 
-        document.getElementById('hudLangOpenBtn').addEventListener('click', window.openGlobalLang);
-        document.getElementById('gpsModalLangBtn').addEventListener('click', window.openGlobalLang);
+        // Gắn sự kiện chuẩn bằng class chung .hudLangTrigger cho mọi nút quả cầu
+        document.querySelectorAll('.hudLangTrigger').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.openGlobalLang();
+            });
+        });
 
         const savedLang = localStorage.getItem('kdrive_lang') || 'encoded';
         updateHudLangUI(savedLang);
