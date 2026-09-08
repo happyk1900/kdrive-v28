@@ -9,6 +9,28 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
+            /* KHÔNG GIAN LƯỢNG TỬ MẮT LƯỚI TỔ ONG (HOÀN TOÀN BẰNG CSS CODE) */
+            .quantum-hex-bg {
+                position: fixed !important; top: 0 !important; left: 0 !important;
+                width: 100vw !important; height: 100vh !important;
+                background-color: #020611 !important;
+                background-image: 
+                    radial-gradient(circle at 50% 50%, rgba(0, 229, 255, 0.08) 0%, transparent 60%),
+                    linear-gradient(30deg, rgba(0, 229, 255, 0.04) 12%, transparent 12.5%, transparent 87%, rgba(0, 229, 255, 0.04) 87.5%, rgba(0, 229, 255, 0.04)),
+                    linear-gradient(150deg, rgba(0, 229, 255, 0.04) 12%, transparent 12.5%, transparent 87%, rgba(0, 229, 255, 0.04) 87.5%, rgba(0, 229, 255, 0.04)),
+                    linear-gradient(30deg, rgba(255, 0, 127, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(255, 0, 127, 0.03) 87.5%, rgba(255, 0, 127, 0.03)),
+                    linear-gradient(150deg, rgba(255, 0, 127, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(255, 0, 127, 0.03) 87.5%, rgba(255, 0, 127, 0.03)) !important;
+                background-size: 80px 140px !important;
+                background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0 !important;
+                animation: hexPulse 6s infinite alternate ease-in-out;
+                z-index: 2147483645 !important;
+                pointer-events: none !important;
+            }
+            @keyframes hexPulse {
+                0% { opacity: 0.7; filter: brightness(1); }
+                100% { opacity: 1; filter: brightness(1.3); }
+            }
+
             /* THANH HUD 3 KHỐI TRONG SUỐT */
             .hud-top-bar {
                 position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 50px !important;
@@ -26,7 +48,7 @@
             .hud-sys-online { color: #00ff66; font-weight: 900; text-shadow: 0 0 8px rgba(0,255,102,0.8); }
             
             .hud-gps { color: #ff007f !important; font-weight: 700; text-shadow: 0 0 6px rgba(255,0,127,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 9px; }
-            .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.8); cursor: pointer; }
+            .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.8); cursor: pointer; pointer-events: auto; }
 
             /* NÚT TRÁI ĐẤT TO VÀ NHẤP NHÁY THU HÚT */
             .hud-lang-btn {
@@ -35,6 +57,7 @@
                 font-size: 18px; display: flex; align-items: center; justify-content: center;
                 cursor: pointer; transition: 0.2s; box-shadow: 0 0 15px rgba(0,229,255,0.6);
                 animation: pulseGlobe 1.5s infinite alternate ease-in-out;
+                pointer-events: auto !important; z-index: 2147483648 !important;
             }
             .hud-lang-btn:hover { background: rgba(0, 229, 255, 0.5); transform: scale(1.1); box-shadow: 0 0 25px #00e5ff; }
 
@@ -43,10 +66,10 @@
                 100% { transform: scale(1.12); box-shadow: 0 0 22px rgba(0,229,255,0.9); border-color: #fff; }
             }
 
-            /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (Z-INDEX CAO NHẤT ĐỂ KHÔNG BỊ CHẶN) */
+            /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (Z-INDEX CAO NHẤT) */
             .global-lang-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: rgba(1, 3, 8, 0.92); backdrop-filter: blur(15px);
+                background: rgba(1, 3, 8, 0.95); backdrop-filter: blur(15px);
                 z-index: 2147483650 !important; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: 0.3s ease; pointer-events: none;
             }
@@ -80,25 +103,24 @@
             .signal-bar:nth-child(3) { height: 9px; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
-            /* BẢNG GPS XÁC THỰC */
+            /* BẢNG GPS XÁC THỰC (KHÔNG ẢNH NỀN, KHÔNG NHÂN VẬT, THUẦN LƯỢNG TỬ) */
             .gps-modal-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                z-index: 2147483648; display: flex; justify-content: center; align-items: center;
+                z-index: 2147483646 !important; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
-                background-color: #050a15; 
-                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20HUD%20(1).png?raw=true'); 
-                background-size: cover; background-position: center; background-repeat: no-repeat;
+                background-color: rgba(2, 6, 17, 0.94) !important;
             }
             .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
-            .gps-modal-dimmer { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 1; }
+            .gps-modal-dimmer { position: absolute; inset: 0; background: transparent; z-index: 1; }
             
             .gps-modal-box {
                 width: 90%; max-width: 400px;
                 display: flex; flex-direction: column; justify-content: center; align-items: center;
                 z-index: 2; position: relative; padding: 25px 20px;
-                background: transparent; 
+                background: rgba(3, 9, 23, 0.9); 
                 border: 2px solid #ff007f; border-radius: 16px;
-                box-shadow: 0 0 25px rgba(255, 0, 127, 0.5), inset 0 0 15px rgba(255, 0, 127, 0.2);
+                box-shadow: 0 0 30px rgba(255, 0, 127, 0.4), inset 0 0 20px rgba(255, 0, 127, 0.2);
+                backdrop-filter: blur(10px);
             }
             
             .gps-modal-title {
@@ -108,9 +130,9 @@
             }
             
             .gps-modal-desc { 
-                background: rgba(0, 0, 0, 0.75); border: 1.5px solid rgba(0, 229, 255, 0.4);
+                background: rgba(0, 0, 0, 0.85); border: 1.5px solid rgba(0, 229, 255, 0.4);
                 border-radius: 12px; padding: 18px 16px; width: 100%; z-index: 2; box-sizing: border-box;
-                margin-bottom: 22px; backdrop-filter: blur(8px); box-shadow: inset 0 0 20px #000;
+                margin-bottom: 22px; box-shadow: inset 0 0 20px #000;
             }
             .gps-modal-desc p { 
                 color: #e0f7fa; font-size: 13px; line-height: 1.6; 
@@ -123,13 +145,13 @@
                 flex: 1; padding: 12px 5px; border-radius: 10px; font-family: 'Montserrat', sans-serif;
                 font-size: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s;
                 text-align: center; white-space: nowrap; letter-spacing: 1px;
-                background: rgba(0,0,0,0.6);
+                background: rgba(0,0,0,0.8);
             }
             .gps-btn-allow { border: 2px solid #00e5ff; color: #00e5ff; box-shadow: 0 0 12px rgba(0, 229, 255, 0.5); }
             .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3); color: #fff; box-shadow: 0 0 22px #00e5ff; }
             
-            .gps-btn-deny { border: 2px solid #ff3366; color: #ff3366; box-shadow: 0 0 12px rgba(255, 51, 102, 0.5); }
-            .gps-btn-deny:hover { background: rgba(255, 51, 102, 0.3); color: #fff; box-shadow: 0 0 22px #ff3366; }
+            .gps-btn-deny { border: 2px solid #ff003c; color: #ff003c; box-shadow: 0 0 12px rgba(255, 0, 60, 0.5); }
+            .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3); color: #fff; box-shadow: 0 0 22px #ff003c; }
         `;
         document.head.appendChild(style);
     }
@@ -150,7 +172,7 @@
         'u': '⋃', 'ú': '⋃⁺', 'ù': '⋃₋', 'ủ': '⋃∼', 'ũ': '⋃≈', 'ụ': '⋃•',
         'ư': '⋲', 'ứ': '⋲⁺', 'ừ': '⋲₋', 'ử': '⋲∼', 'ữ': '⋲≈', 'ự': '⋲•',
         'v': '⟁', 'x': '⨂', 'y': '⋫', 'ý': '⋫⁺', 'ỳ': '⋫₋', 'ỷ': '⋫∼', 'ỹ': '⋫≈', 'ỵ': '⋫•',
-        ' ': ' ', '.': '•', ',': '·', ':': '⁞', '-': '─', '9': '⟡', '+': '⊕'
+        '2': '⟡', '6': '⌖', '.': '•', '/': '╱', '-': '─', ' ': ' '
     };
 
     function encodeQuantum(text) {
@@ -164,6 +186,7 @@
     const vietnameseData = {
         select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", close_btn: "ĐÓNG LẠI",
         sys: "SYS.ONLINE", user: "USER: GUEST", gps: "GPS: NGOẠI TUYẾN", chat: "GLOBAL CHAT 9+",
+        kdrive: "K-DRIVE v2.6", date: "2026.09.06",
         gps_title: "XÁC THỰC GPS",
         gps_desc: "Hệ thống yêu cầu quyền định vị để đồng bộ Đấu trường Lượng tử toàn cầu.",
         deny: "TỪ CHỐI", allow: "ĐỒNG Ý"
@@ -174,20 +197,21 @@
         en: {
             select_lang_title: "SELECT GLOBAL LANGUAGE", close_btn: "CLOSE",
             sys: "SYS.ONLINE", user: "USER: GUEST", gps: "GPS: OFFLINE", chat: "GLOBAL CHAT 9+",
+            kdrive: "K-DRIVE v2.6", date: "2026.09.06",
             gps_title: "GPS VERIFICATION",
             gps_desc: "System requires location access to synchronize global Quantum Arena mapping.",
             deny: "DENY", allow: "ACCEPT"
         },
-        zh: { select_lang_title: "选择全球语言", close_btn: "关闭", sys: "系统.在线", user: "用户: 访客", gps: "GPS: 离线", chat: "全球聊天 9+", gps_title: "GPS 验证", gps_desc: "系统需要位置权限来同步全球量子竞技场映射。", deny: "拒绝", allow: "接受" },
-        ja: { select_lang_title: "グローバル言語を選択", close_btn: "閉じる", sys: "SYS.オンライン", user: "ユーザー: ゲスト", gps: "GPS: オフライン", chat: "グローバルチャット 9+", gps_title: "GPS 認証", gps_desc: "グローバル量子アリーナマッピングを同期するには位置情報が必要です。", deny: "拒否", allow: "同意" },
-        ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기", sys: "SYS.온라인", user: "유저: 게스트", gps: "GPS: 오프라인", chat: "글로벌 채팅 9+", gps_title: "GPS 인증", gps_desc: "글로벌 양자 아레나 매핑을 동기화하려면 위치 권한이 필요합니다.", deny: "거부", allow: "수락" },
-        fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER", sys: "SYS.EN LIGNE", user: "UTILISATEUR: INVITÉ", gps: "GPS: HORS LIGNE", chat: "CHAT GLOBAL 9+", gps_title: "VÉRIFICATION GPS", gps_desc: "Le système requiert l'accès à la position pour synchroniser l'arène.", deny: "REFUSER", allow: "ACCEPTER" },
-        de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN", sys: "SYS.ONLINE", user: "BENUTZER: GAST", gps: "GPS: OFFLINE", chat: "GLOBALES CHAT 9+", gps_title: "GPS-VERIFIZIERUNG", gps_desc: "Das System benötigt Standortzugriff zur Synchronisierung.", deny: "ABLEHNEN", allow: "AKZEPTIEREN" },
-        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", chat: "GLOBAL CHAT 9+", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
-        ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ", sys: "СИСТЕМА.ОНЛАЙН", user: "ПОЛЬЗОВАТЕЛЬ: ГОСТЬ", gps: "GPS: ОФФЛАЙН", chat: "ГЛОБАЛЬНЫЙ ЧАТ 9+", gps_title: "ПРОВЕРКА GPS", gps_desc: "Системе требуется доступ к геолокации.", deny: "ОТКАЗАТЬ", allow: "ПРИНЯТЬ" },
-        th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด", sys: "ระบบ.ออนไลน์", user: "ผู้ใช้: แขก", gps: "GPS: ออฟไลน์", chat: "แชท Global 9+", gps_title: "การยืนยัน GPS", gps_desc: "ระบบต้องการสิทธิ์ตำแหน่งที่ตั้งเพื่อซิงค์ข้อมูล", deny: "ปฏิเสธ", allow: "ยอมรับ" },
-        id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP", sys: "SYS.ONLINE", user: "PENGGUNA: TAMU", gps: "GPS: OFFLINE", chat: "GLOBAL CHAT 9+", gps_title: "VERIFIKASI GPS", gps_desc: "Sistem memerlukan akses lokasi.", deny: "TOLAK", allow: "TERIMA" },
-        ar: { select_lang_title: "اختر اللغة العالمية", close_btn: "إغلاق", sys: "النظام متصل", user: "المستخدم: ضيف", gps: "GPS: غير متصل", chat: "الدردشة العالمية 9+", gps_title: "التحقق من الموقع", gps_desc: "يتطلب النظام إذن الموقع للمزامنة.", deny: "رفض", allow: "قبول" }
+        zh: { select_lang_title: "选择全球语言", close_btn: "关闭", sys: "系统.在线", user: "用户: 访客", gps: "GPS: 离线", chat: "全球聊天 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 验证", gps_desc: "系统需要位置权限来同步全球量子竞技场映射。", deny: "拒绝", allow: "接受" },
+        ja: { select_lang_title: "グローバル言語を選択", close_btn: "閉じる", sys: "SYS.オンライン", user: "ユーザー: ゲスト", gps: "GPS: オフライン", chat: "グローバルチャット 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 認証", gps_desc: "グローバル量子アリーナマッピングを同期するには位置情報が必要です。", deny: "拒否", allow: "同意" },
+        ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기", sys: "SYS.온라인", user: "유저: 게스트", gps: "GPS: 오프라인", chat: "글로벌 채팅 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 인증", gps_desc: "글로벌 양자 아레나 매핑을 동기화하려면 위치 권한이 필요합니다.", deny: "거부", allow: "수락" },
+        fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER", sys: "SYS.EN LIGNE", user: "UTILISATEUR: INVITÉ", gps: "GPS: HORS LIGNE", chat: "CHAT GLOBAL 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VÉRIFICATION GPS", gps_desc: "Le système requiert l'accès à la position pour synchroniser l'arène.", deny: "REFUSER", allow: "ACCEPTER" },
+        de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN", sys: "SYS.ONLINE", user: "BENUTZER: GAST", gps: "GPS: OFFLINE", chat: "GLOBALES CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS-VERIFIZIERUNG", gps_desc: "Das System benötigt Standortzugriff zur Synchronisierung.", deny: "ABLEHNEN", allow: "AKZEPTIEREN" },
+        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", chat: "GLOBAL CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
+        ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ", sys: "СИСТЕМА.ОНЛАЙН", user: "ПОЛЬЗОВАТЕЛЬ: ГОСТЬ", gps: "GPS: ОФФЛАЙН", chat: "ГЛОБАЛЬНЫЙ ЧАТ 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "ПРОВЕРКА GPS", gps_desc: "Системе требуется доступ к геолокации.", deny: "ОТКАЗАТЬ", allow: "ПРИНЯТЬ" },
+        th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด", sys: "ระบบ.ออนไลน์", user: "ผู้ใช้: แขก", gps: "GPS: ออฟไลน์", chat: "แชท Global 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "การยืนยัน GPS", gps_desc: "ระบบต้องการสิทธิ์ตำแหน่งที่ตั้งเพื่อซิงค์ข้อมูล", deny: "ปฏิเสธ", allow: "ยอมรับ" },
+        id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP", sys: "SYS.ONLINE", user: "PENGGUNA: TAMU", gps: "GPS: OFFLINE", chat: "GLOBAL CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFIKASI GPS", gps_desc: "Sistem memerlukan akses lokasi.", deny: "TOLAK", allow: "TERIMA" },
+        ar: { select_lang_title: "اختر اللغة العالمية", close_btn: "إغلاق", sys: "النظام متصل", user: "المستخدم: ضيف", gps: "GPS: غير متصل", chat: "الدردشة العالمية 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "التحقق من الموقع", gps_desc: "يتطلب النظام إذن الموقع للمزامنة.", deny: "رفض", allow: "قبول" }
     };
 
     function playClickSound() {
@@ -209,6 +233,11 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('kdriveGlobalHud')) return;
+
+        // Bổ sung lớp nền mắt lưới tổ ong hoàn toàn bằng code (không ảnh nền)
+        const hexBg = document.createElement('div');
+        hexBg.className = 'quantum-hex-bg';
+        document.body.prepend(hexBg);
 
         const container = document.createElement('div');
         container.id = 'kdriveGlobalHud';
@@ -234,7 +263,7 @@
                 </div>
 
                 <div class="hud-right">
-                    <span style="color: #00e5ff;">K-DRIVE v2.6</span>
+                    <span style="color: #00e5ff;" id="hudKdriveText">K-DRIVE v2.6</span>
                     <span style="color: rgba(255,255,255,0.6);" id="hudDateText">2026.09.06</span>
                     <span class="hud-chat-badge" id="hudChatText">GLOBAL CHAT 9+</span>
                 </div>
@@ -284,27 +313,33 @@
         `;
         document.body.prepend(container);
 
-        window.openGlobalLang = function() { playClickSound(); document.getElementById('globalLangModal').classList.add('active'); };
-        window.closeGlobalLang = function() { playClickSound(); document.getElementById('globalLangModal').classList.remove('active'); };
+        window.openGlobalLang = function() { 
+            playClickSound(); 
+            document.getElementById('globalLangModal').classList.add('active'); 
+        };
+        window.closeGlobalLang = function() { 
+            playClickSound(); 
+            document.getElementById('globalLangModal').classList.remove('active'); 
+        };
         
         window.setGlobalLang = function(lang) {
             playClickSound();
             localStorage.setItem('kdrive_lang', lang);
             updateHudLangUI(lang);
             window.closeGlobalLang();
-            window.dispatchEvent(new CustomEvent('kdriveLangChanged', { detail: { lang } }));
         };
 
         function updateHudLangUI(lang) {
             const isEncoded = (lang === 'encoded' || !globalTranslations[lang]);
             const baseData = vietnameseData;
-
             const processText = (text) => isEncoded ? encodeQuantum(text) : text;
 
             const sysText = document.getElementById('hudSysText');
             const userText = document.getElementById('hudUserText');
             const gpsTextVal = document.getElementById('hudGpsText');
             const chatBadge = document.getElementById('hudChatText');
+            const kdriveText = document.getElementById('hudKdriveText');
+            const dateText = document.getElementById('hudDateText');
 
             const gpsTitle = document.getElementById('gpsModalTitleText');
             const gpsDesc = document.getElementById('gpsDescText');
@@ -315,6 +350,8 @@
             if (userText) userText.innerText = processText(baseData.user);
             if (gpsTextVal) gpsTextVal.innerText = processText(baseData.gps);
             if (chatBadge) chatBadge.innerText = processText(baseData.chat);
+            if (kdriveText) kdriveText.innerText = processText(baseData.kdrive);
+            if (dateText) dateText.innerText = processText(baseData.date);
 
             if (gpsTitle) gpsTitle.innerText = processText(baseData.gps_title);
             if (gpsDesc) gpsDesc.innerText = processText(baseData.gps_desc);
@@ -326,12 +363,13 @@
             if (document.getElementById('langModalCloseBtn')) document.getElementById('langModalCloseBtn').innerText = processText(t.close_btn);
         }
 
-        // Gắn sự kiện chuẩn bằng class chung .hudLangTrigger cho mọi nút quả cầu
-        document.querySelectorAll('.hudLangTrigger').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        // Bắt sự kiện quả cầu cực kỳ chính xác cho mọi nút kích hoạt
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.hudLangTrigger')) {
+                e.preventDefault();
                 e.stopPropagation();
                 window.openGlobalLang();
-            });
+            }
         });
 
         const savedLang = localStorage.getItem('kdrive_lang') || 'encoded';
