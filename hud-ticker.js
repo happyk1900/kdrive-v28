@@ -150,7 +150,7 @@
         document.head.appendChild(style);
     }
 
-    // Từ điển gốc dựa hoàn toàn trên Tiếng Việt thuần túy
+    // Từ điển gốc dựa hoàn toàn trên Tiếng Việt thuần túy và mã hóa lượng tử
     const hudDictionary = {
         encoded: {
             sys: "𝚫-𝚲𝚯𝚸.𝟶𝟾",
@@ -159,10 +159,10 @@
             version: "𝚱-𝚫𝚹𝚨 v2.6",
             date: "𝟚𝟘𝟚𝟞.𝟘𝟡.𝟘𝟞",
             chat: "𝚾-𝚲𝚰𝚴𝚮 𝟡+",
-            modal_title: "CHỌN NGÔN NGỮ QUỐC TẾ",
-            close_btn: "ĐÓNG LẠI",
-            gps_title: "XÁC THỰC GPS",
-            gps_desc: "Hệ thống yêu cầu quyền định vị để đồng bộ Đấu trường Lượng tử toàn cầu.",
+            modal_title: "𝚲𝚫𝚴𝚪 𝚻ỌẠ",
+            close_btn: "𝚫𝚬𝚴𝚼",
+            gps_title: "𝚾Á𝙲 𝚻𝙷Ự𝙲 𝚉𝚸𝚺",
+            gps_desc: "𝙷ệ 𝚻𝚑ố𝚗𝚐 𝚈ê𝚞 Cầ𝚞 Q𝚞yề𝚗 Đị𝚗𝚑 Vị Để Đồ𝚗𝚐 Bộ Đấ𝚞 T𝚛ườ𝚗𝚐 Lượ𝚗𝚐 Tử T𝚘à𝚗 Cầ𝚞.",
             deny: "TỪ CHỐI",
             allow: "ĐỒNG Ý"
         },
@@ -226,8 +226,22 @@
         }
     };
 
+    // Hàm phát âm thanh tích tích tích lofi nhỏ khi bấm nút
     function playClickSound() {
-        try { new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3').play(); } catch(e){}
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1200, audioCtx.currentTime); // Âm cao lofi công nghệ
+            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.05);
+            gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime); // Âm lượng nhỏ êm tai
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        } catch(e) {}
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -253,7 +267,7 @@
 
                 <div class="hud-center">
                     <div class="guide-pointer-anim">▼</div>
-                    <button class="hud-lang-btn" id="hudLangOpenBtn" title="Chọn ngôn ngữ / Select Language">🌐</button>
+                    <button class="hud-lang-btn" id="hudLangOpenBtn" title="Chọn ngôn ngữ">🌐</button>
                 </div>
 
                 <div class="hud-right">
@@ -285,12 +299,12 @@
                 </div>
             </div>
 
-            <!-- BẢNG GPS XÁC THỰC - TÍCH HỢP QUẢ CẦU NGÔN NGỮ VÀ TIẾNG VIỆT GỐC -->
+            <!-- BẢNG GPS XÁC THỰC - MÃ HÓA HOÀN TOÀN KHI CHƯA CHỌN -->
             <div class="gps-modal-overlay" id="gpsModalOverlay">
                 <div class="gps-modal-dimmer"></div>
                 <div class="gps-modal-box">
                     <div style="position: absolute; top: 15px; right: 15px; z-index: 5;">
-                        <button class="hud-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
+                        <button class="hud-lang-btn" id="gpsLangGlobeBtn" title="Chọn ngôn ngữ">🌐</button>
                     </div>
                     <div class="gps-modal-title" id="gpsTitleNode">XÁC THỰC GPS</div>
                     <div class="gps-modal-desc">
@@ -353,7 +367,7 @@
             document.getElementById('langModalTitleText').innerText = data.modal_title;
             document.getElementById('langModalCloseBtn').innerText = data.close_btn;
 
-            // Bật / tắt class mã hóa lượng tử toàn cục cho các chữ
+            // Bật / tắt class mã hóa lượng tử toàn cục cho tất cả chữ
             const elementsToToggle = [sysEl, userEl, gpsEl, verEl, dateEl, chatEl, gpsTitleEl, gpsDescEl, gpsDenyEl, gpsAllowEl];
             elementsToToggle.forEach(el => {
                 if (el) {
@@ -363,9 +377,25 @@
             });
         }
 
-        document.getElementById('hudLangOpenBtn').addEventListener('click', window.openGlobalLang);
+        document.getElementById('hudLangOpenBtn').addEventListener('click', () => {
+            playClickSound();
+            window.openGlobalLang();
+        });
+        
+        const gpsGlobe = document.getElementById('gpsLangGlobeBtn');
+        if(gpsGlobe) {
+            gpsGlobe.addEventListener('click', () => {
+                playClickSound();
+                window.openGlobalLang();
+            });
+        }
 
-        // Mặc định ban đầu là chế độ mã hóa lượng tử ('encoded')
+        // Gắn âm thanh cho các mục chọn ngôn ngữ trong danh sách
+        document.querySelectorAll('.global-lang-item').forEach(item => {
+            item.addEventListener('click', playClickSound);
+        });
+
+        // Mặc định ban đầu chưa chọn gì sẽ là chế độ mã hóa lượng tử ('encoded')
         const savedLang = localStorage.getItem('kdrive_lang');
         if (savedLang && hudDictionary[savedLang]) {
             applyLanguageToHud(savedLang);
