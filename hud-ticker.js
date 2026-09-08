@@ -27,7 +27,7 @@
             .hud-gps { color: #ff007f !important; font-weight: 700; text-shadow: 0 0 8px rgba(255,0,127,0.8); }
             .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 10px rgba(255,215,0,0.8); cursor: pointer; }
 
-            /* NÚT TRÁI ĐẤT SIÊU TO VÀ NHẤP NHÁY THU HÚT */
+            /* NÚT TRÁI ĐẤT TO VÀ NHẤP NHÁY THU HÚT */
             .hud-lang-btn {
                 background: rgba(0, 229, 255, 0.25); border: 2px solid #00e5ff;
                 border-radius: 50%; width: 42px; height: 42px; color: #fff;
@@ -52,6 +52,7 @@
                 50% { transform: translateX(-50%) translateY(-5px); }
             }
 
+            /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (MODAL) */
             .global-lang-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 background: rgba(1, 3, 8, 0.92); backdrop-filter: blur(15px);
@@ -88,11 +89,68 @@
             .signal-bar:nth-child(2) { height: 7px; animation-delay: 0.3s; }
             .signal-bar:nth-child(3) { height: 10px; animation-delay: 0.6s; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
+
+            /* BẢNG GPS MÃ HÓA MẶC ĐỊNH VỚI ẢNH NỀN VIỄN TƯỞNG */
+            .gps-modal-overlay {
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                z-index: 2147483648; display: flex; justify-content: center; align-items: center;
+                opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
+                background-color: #050a15;
+                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/GPS%20NEN.jpg?raw=true');
+                background-size: cover; background-position: center; background-repeat: no-repeat;
+            }
+            .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
+            .gps-modal-dimmer { position: absolute; inset: 0; background: rgba(0,0,0,0.65); z-index: 1; }
+            
+            .gps-modal-box {
+                width: 90%; max-width: 400px;
+                display: flex; flex-direction: column; justify-content: center; align-items: center;
+                z-index: 2; position: relative; padding: 25px 20px;
+                background: rgba(5, 12, 22, 0.9);
+                border: 2px solid #ff007f; border-radius: 16px;
+                box-shadow: 0 0 25px rgba(255, 0, 127, 0.5), inset 0 0 15px rgba(255, 0, 127, 0.2);
+            }
+            
+            .gps-modal-title {
+                color: #ff3366; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900;
+                text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;
+                text-shadow: 0 0 10px rgba(255, 51, 102, 0.8); z-index: 1; text-align: center; line-height: 1.5;
+            }
+            
+            .gps-modal-desc { 
+                background: rgba(0, 0, 0, 0.75); border: 1px solid rgba(0, 229, 255, 0.3);
+                border-radius: 12px; padding: 20px 18px; width: 100%; z-index: 1; box-sizing: border-box;
+                margin-bottom: 25px; backdrop-filter: blur(4px);
+            }
+            .gps-modal-desc p { 
+                color: #e0f7fa; font-size: 13px; line-height: 1.6; 
+                font-family: 'Share Tech Mono', monospace; margin-bottom: 12px; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+                letter-spacing: 1px;
+            }
+            .gps-modal-desc p:last-child { margin-bottom: 0; color: #a0c0d0; }
+            
+            .gps-btn-row { display: flex; gap: 15px; justify-content: center; width: 100%; z-index: 1; }
+            
+            .gps-action-btn {
+                flex: 1; padding: 14px 5px; border-radius: 10px; font-family: 'Share Tech Mono', monospace;
+                font-size: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s;
+                text-align: center; white-space: nowrap; letter-spacing: 1.5px;
+            }
+            .gps-btn-allow { 
+                background: rgba(0, 229, 255, 0.15); border: 2px solid #00e5ff; color: #00e5ff; 
+                box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); 
+            }
+            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3); color: #fff; box-shadow: 0 0 25px #00e5ff; }
+            
+            .gps-btn-deny { 
+                background: rgba(255, 51, 102, 0.15); border: 2px solid #ff3366; color: #ff3366; 
+                box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);
+            }
+            .gps-btn-deny:hover { background: rgba(255, 51, 102, 0.4); color: #fff; box-shadow: 0 0 25px #ff3366; }
         `;
         document.head.appendChild(style);
     }
 
-    // Từ điển song song: Mã hóa lượng tử độc quyền vs Ngôn ngữ thực tế
     const hudDictionary = {
         encoded: {
             sys: "𝚫-𝚲𝚯𝚸.𝟶𝟾",
@@ -102,7 +160,12 @@
             date: "𝟚𝟘𝟚𝟞.𝟘𝟡.𝟘𝟞",
             chat: "𝚾-𝚲𝚰𝚴𝚮 𝟡+",
             modal_title: "CHỌN NGÔN NGỮ QUỐC TẾ",
-            close_btn: "ĐÓNG LẠI"
+            close_btn: "ĐÓNG LẠI",
+            gps_title: "🛰️ 𝚫-𝚲𝚯𝚸-𝚭 /<br>𝚪𝚷𝚼 𝚫𝚲𝚬𝚺𝚻",
+            gps_p1: "◼◼◼ 𝚱-𝚫𝚹𝚨 𝚲𝚰𝚴𝚮 𝚻Ự 𝚫𝚲𝚬𝚺𝚻 𝚪𝚷𝚼 ◼◼◼",
+            gps_p2: ">>> 𝚨𝚱𝚻𝚰𝚳 𝚺𝚼𝚴𝚾 𝚪𝚰𝚫 <<<",
+            deny: "𝚫𝚬𝚴𝚼 / 𝚾",
+            allow: "𝚨𝚱𝚻𝚬𝚷𝚻 / ✔"
         },
         vi: {
             sys: "SYS.ONLINE",
@@ -112,7 +175,12 @@
             date: "2026.09.06",
             chat: "GLOBAL CHAT 9+",
             modal_title: "CHỌN NGÔN NGỮ QUỐC TẾ",
-            close_btn: "ĐÓNG LẠI"
+            close_btn: "ĐÓNG LẠI",
+            gps_title: "🛰️ XÁC THỰC GPS /<br>GPS VERIFICATION",
+            gps_p1: "🇻🇳 Hệ thống yêu cầu quyền định vị để đồng bộ Đấu trường Lượng tử toàn cầu.",
+            gps_p2: "🇬🇧 System requires location access to synchronize global Quantum Arena mapping.",
+            deny: "TỪ CHỐI / DENY",
+            allow: "ĐỒNG Ý / ACCEPT"
         },
         en: {
             sys: "SYS.ONLINE",
@@ -122,37 +190,52 @@
             date: "2026.09.06",
             chat: "GLOBAL CHAT 9+",
             modal_title: "SELECT GLOBAL LANGUAGE",
-            close_btn: "CLOSE"
+            close_btn: "CLOSE",
+            gps_title: "🛰️ GPS VERIFICATION /<br>XÁC THỰC GPS",
+            gps_p1: "🇬🇧 System requires location access to synchronize global Quantum Arena mapping.",
+            gps_p2: "🇻🇳 Hệ thống yêu cầu quyền định vị để đồng bộ Đấu trường Lượng tử toàn cầu.",
+            deny: "DENY",
+            allow: "ACCEPT"
         },
         zh: {
-            sys: "系统.在线", user: "用户: 访客", gps: "GPS: 离线", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "全球聊天 9+", modal_title: "选择全球语言", close_btn: "关闭"
+            sys: "系统.在线", user: "用户: 访客", gps: "GPS: 离线", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "全球聊天 9+", modal_title: "选择全球语言", close_btn: "关闭",
+            gps_title: "🛰️ GPS 验证", gps_p1: "🇨🇳 系统需要位置权限来同步全球量子竞技场映射。", gps_p2: "🌐 System requires location access.", deny: "拒绝", allow: "接受"
         },
         ja: {
-            sys: "SYS.オンライン", user: "ユーザー: ゲスト", gps: "GPS: オフライン", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "グローバルチャット 9+", modal_title: "グローバル言語を選択", close_btn: "閉じる"
+            sys: "SYS.オンライン", user: "ユーザー: ゲスト", gps: "GPS: オフライン", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "グローバルチャット 9+", modal_title: "グローバル言語を選択", close_btn: "閉じる",
+            gps_title: "🛰️ GPS 認証", gps_p1: "🇯🇵 グローバル量子アリーナマッピングを同期するには位置情報が必要です。", gps_p2: "🌐 System requires location access.", deny: "拒否", allow: "同意"
         },
         ko: {
-            sys: "SYS.온라인", user: "유저: 게스트", gps: "GPS: 오프라인", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "글로벌 채팅 9+", modal_title: "글로벌 언어 선택", close_btn: "닫기"
+            sys: "SYS.온라인", user: "유저: 게스트", gps: "GPS: 오프라인", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "글로벌 채팅 9+", modal_title: "글로벌 언어 선택", close_btn: "닫기",
+            gps_title: "🛰️ GPS 인증", gps_p1: "🇰🇷 글로벌 양자 아레나 매핑을 동기화하려면 위치 권한이 필요합니다.", gps_p2: "🌐 System requires location access.", deny: "거부", allow: "수락"
         },
         fr: {
-            sys: "SYS.EN LIGNE", user: "UTILISATEUR: INVITÉ", gps: "GPS: HORS LIGNE", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "CHAT GLOBAL 9+", modal_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER"
+            sys: "SYS.EN LIGNE", user: "UTILISATEUR: INVITÉ", gps: "GPS: HORS LIGNE", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "CHAT GLOBAL 9+", modal_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER",
+            gps_title: "🛰️ VÉRIFICATION GPS", gps_p1: "🇫🇷 Le système requiert l'accès à la position pour synchroniser l'arène.", gps_p2: "🌐 System requires location access.", deny: "REFUSER", allow: "ACCEPTER"
         },
         de: {
-            sys: "SYS.ONLINE", user: "BENUTZER: GAST", gps: "GPS: OFFLINE", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "GLOBALES CHAT 9+", modal_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN"
+            sys: "SYS.ONLINE", user: "BENUTZER: GAST", gps: "GPS: OFFLINE", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "GLOBALES CHAT 9+", modal_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN",
+            gps_title: "🛰️ GPS-VERIFIZIERUNG", gps_p1: "🇩🇪 Das System benötigt Standortzugriff zur Synchronisierung.", gps_p2: "🌐 System requires location access.", deny: "ABLEHNEN", allow: "AKZEPTIEREN"
         },
         es: {
-            sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "CHAT GLOBAL 9+", modal_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR"
+            sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "CHAT GLOBAL 9+", modal_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR",
+            gps_title: "🛰️ VERIFICACIÓN GPS", gps_p1: "🇪🇸 El sistema requiere acceso a la ubicación.", gps_p2: "🌐 System requires location access.", deny: "DENEGAR", allow: "ACEPTAR"
         },
         ru: {
-            sys: "СИСТЕМА.ОНЛАЙН", user: "ПОЛЬЗОВАТЕЛЬ: ГОСТЬ", gps: "GPS: ОФФЛАЙН", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "ГЛОБАЛЬНЫЙ ЧАТ 9+", modal_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ"
+            sys: "СИСТЕМА.ОНЛАЙН", user: "ПОЛЬЗОВАТЕЛЬ: ГОСТЬ", gps: "GPS: ОФФЛАЙН", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "ГЛОБАЛЬНЫЙ ЧАТ 9+", modal_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ",
+            gps_title: "🛰️ ПРОВЕРКА GPS", gps_p1: "🇷🇺 Системе требуется доступ к геолокации.", gps_p2: "🌐 System requires location access.", deny: "ОТКАЗАТЬ", allow: "ПРИНЯТЬ"
         },
         th: {
-            sys: "ระบบ.ออนไลน์", user: "ผู้ใช้: แขก", gps: "GPS: ออฟไลน์", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "แชท Global 9+", modal_title: "เลือกภาษา", close_btn: "ปิด"
+            sys: "ระบบ.ออนไลน์", user: "ผู้ใช้: แขก", gps: "GPS: ออฟไลน์", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "แชท Global 9+", modal_title: "เลือกภาษา", close_btn: "ปิด",
+            gps_title: "🛰️ การยืนยัน GPS", gps_p1: "🇹🇭 ระบบต้องการสิทธิ์ตำแหน่งที่ตั้งเพื่อซิงค์ข้อมูล", gps_p2: "🌐 System requires location access.", deny: "ปฏิเสธ", allow: "ยอมรับ"
         },
         id: {
-            sys: "SYS.ONLINE", user: "PENGGUNA: TAMU", gps: "GPS: OFFLINE", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "CHAT GLOBAL 9+", modal_title: "PILIH BAHASA", close_btn: "TUTUP"
+            sys: "SYS.ONLINE", user: "PENGGUNA: TAMU", gps: "GPS: OFFLINE", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "CHAT GLOBAL 9+", modal_title: "PILIH BAHASA", close_btn: "TUTUP",
+            gps_title: "🛰️ VERIFIKASI GPS", gps_p1: "🇮🇩 Sistem memerlukan akses lokasi.", gps_p2: "🌐 System requires location access.", deny: "TOLAK", allow: "TERIMA"
         },
         ar: {
-            sys: "النظام متصل", user: "المستخدم: ضيف", gps: "GPS: غير متصل", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "الدردشة العالمية 9+", modal_title: "اختر اللغة العالمية", close_btn: "إغلاق"
+            sys: "النظام متصل", user: "المستخدم: ضيف", gps: "GPS: غير متصل", version: "K-DRIVE v2.6", date: "2026.09.06", chat: "الدردشة العالمية 9+", modal_title: "اختر اللغة العالمية", close_btn: "إغلاق",
+            gps_title: "🛰️ التحقق من الموقع", gps_p1: "🇸🇦 يتطلب النظام إذن الموقع للمزامنة.", gps_p2: "🌐 System requires location access.", deny: "رفض", allow: "قبول"
         }
     };
 
@@ -214,6 +297,22 @@
                     <button class="global-lang-close" id="langModalCloseBtn" onclick="window.closeGlobalLang()">ĐÓNG LẠI</button>
                 </div>
             </div>
+
+            <!-- BẢNG GPS MÃ HÓA HOẶC GIẢI MÃ THEO NGÔN NGỮ -->
+            <div class="gps-modal-overlay" id="gpsModalOverlay">
+                <div class="gps-modal-dimmer"></div>
+                <div class="gps-modal-box">
+                    <div class="gps-modal-title" id="gpsTitleNode"></div>
+                    <div class="gps-modal-desc">
+                        <p id="gpsP1Node"></p>
+                        <p id="gpsP2Node"></p>
+                    </div>
+                    <div class="gps-btn-row">
+                        <button class="gps-action-btn gps-btn-deny" id="gpsDenyBtn"></button>
+                        <button class="gps-action-btn gps-btn-allow" id="gpsAllowBtn"></button>
+                    </div>
+                </div>
+            </div>
         `;
         document.body.prepend(container);
 
@@ -246,11 +345,17 @@
             
             document.getElementById('langModalTitleText').innerText = data.modal_title;
             document.getElementById('langModalCloseBtn').innerText = data.close_btn;
+
+            document.getElementById('gpsTitleNode').innerHTML = data.gps_title;
+            document.getElementById('gpsP1Node').innerText = data.gps_p1;
+            document.getElementById('gpsP2Node').innerText = data.gps_p2;
+            document.getElementById('gpsDenyBtn').innerText = data.deny;
+            document.getElementById('gpsAllowBtn').innerText = data.allow;
         }
 
         document.getElementById('hudLangOpenBtn').addEventListener('click', window.openGlobalLang);
 
-        // Mặc định ban đầu sẽ hiển thị hoàn toàn bằng mã hóa (encoded), trừ khi người dùng đã tự bấm chọn ngôn ngữ từ trước
+        // Khởi tạo ngôn ngữ theo trạng thái lưu hoặc mã hóa mặc định
         const savedLang = localStorage.getItem('kdrive_lang');
         if (savedLang && hudDictionary[savedLang]) {
             applyLanguageToHud(savedLang);
@@ -270,6 +375,58 @@
                 playClickSound();
                 alert("Mở kênh Global Chat lượng tử.");
             });
+        }
+
+        // Kiểm tra trạng thái GPS để hiện popup nếu chưa xác thực
+        const gpsVerified = sessionStorage.getItem('kdrive_gps_verified');
+        const gpsText = document.getElementById('hudGpsText');
+        const modalOverlay = document.getElementById('gpsModalOverlay');
+
+        if (gpsVerified === 'true') {
+            const cachedLat = sessionStorage.getItem('kdrive_gps_lat');
+            const cachedLon = sessionStorage.getItem('kdrive_gps_lon');
+            const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+            const dict = hudDictionary[currentLang] || hudDictionary['encoded'];
+            gpsText.textContent = cachedLat ? `GPS: ${Number(cachedLat).toFixed(2)}N` : dict.gps_sync;
+        } else if (gpsVerified === 'false') {
+            const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+            const dict = hudDictionary[currentLang] || hudDictionary['encoded'];
+            gpsText.textContent = dict.gps_off;
+        } else {
+            if (modalOverlay) modalOverlay.classList.add('active');
+        }
+
+        document.getElementById('gpsAllowBtn').addEventListener('click', () => handleGpsResponse(true));
+        document.getElementById('gpsDenyBtn').addEventListener('click', () => handleGpsResponse(false));
+
+        function handleGpsResponse(isAllowed) {
+            playClickSound();
+            if (modalOverlay) modalOverlay.classList.remove('active');
+
+            const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+            const dict = hudDictionary[currentLang] || hudDictionary['encoded'];
+
+            if (isAllowed && navigator.geolocation) {
+                gpsText.textContent = dict.gps_loc;
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lon = pos.coords.longitude;
+                        sessionStorage.setItem('kdrive_gps_verified', 'true');
+                        sessionStorage.setItem('kdrive_gps_lat', lat);
+                        sessionStorage.setItem('kdrive_gps_lon', lon);
+                        gpsText.textContent = `GPS: ${lat.toFixed(2)}N, ${lon.toFixed(2)}E`;
+                    },
+                    () => {
+                        sessionStorage.setItem('kdrive_gps_verified', 'false');
+                        gpsText.textContent = dict.gps_off;
+                    },
+                    { timeout: 5000 }
+                );
+            } else {
+                sessionStorage.setItem('kdrive_gps_verified', 'false');
+                gpsText.textContent = dict.gps_off;
+            }
         }
     });
 })();
