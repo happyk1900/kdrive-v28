@@ -27,29 +27,29 @@
             .hud-gps { color: #ff007f !important; font-weight: 700; text-shadow: 0 0 8px rgba(255,0,127,0.8); }
             .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 10px rgba(255,215,0,0.8); cursor: pointer; }
 
-            /* NÚT TRÁI ĐẤT TO VÀ NHẤP NHÁY THU HÚT */
+            /* QUẢ CẦU / TRÁI ĐẤT TO VÀ NHẤP NHÁY LIÊN TỤC */
             .hud-lang-btn {
-                background: rgba(0, 229, 255, 0.25); border: 2px solid #00e5ff;
-                border-radius: 50%; width: 42px; height: 42px; color: #fff;
-                font-size: 20px; display: flex; align-items: center; justify-content: center;
-                cursor: pointer; transition: 0.2s; box-shadow: 0 0 20px rgba(0,229,255,0.6);
-                animation: pulseGlobe 1.5s infinite alternate ease-in-out;
+                background: rgba(0, 229, 255, 0.3); border: 2.5px solid #00e5ff;
+                border-radius: 50%; width: 46px; height: 46px; color: #fff;
+                font-size: 22px; display: flex; align-items: center; justify-content: center;
+                cursor: pointer; transition: 0.2s; box-shadow: 0 0 25px rgba(0,229,255,0.8);
+                animation: pulseGlobe 1.2s infinite alternate ease-in-out;
             }
-            .hud-lang-btn:hover { background: rgba(0, 229, 255, 0.5); transform: scale(1.1); box-shadow: 0 0 30px #00e5ff; }
+            .hud-lang-btn:hover { background: rgba(0, 229, 255, 0.6); transform: scale(1.15); box-shadow: 0 0 35px #00e5ff; }
 
             @keyframes pulseGlobe {
-                0% { transform: scale(1); box-shadow: 0 0 10px rgba(0,229,255,0.4); border-color: rgba(0,229,255,0.6); }
-                100% { transform: scale(1.12); box-shadow: 0 0 25px rgba(0,229,255,0.9); border-color: #fff; }
+                0% { transform: scale(1); box-shadow: 0 0 12px rgba(0,229,255,0.5); border-color: rgba(0,229,255,0.7); }
+                100% { transform: scale(1.18); box-shadow: 0 0 30px #00ff66; border-color: #00ff66; }
             }
 
             .guide-pointer-anim {
-                position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
-                color: #00ff66; font-size: 14px; font-weight: bold; text-shadow: 0 0 8px #00ff66;
-                animation: bounceGuide 1s infinite ease-in-out; pointer-events: none;
+                position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+                color: #00ff66; font-size: 15px; font-weight: bold; text-shadow: 0 0 10px #00ff66;
+                animation: bounceGuide 0.9s infinite ease-in-out; pointer-events: none;
             }
             @keyframes bounceGuide {
                 0%, 100% { transform: translateX(-50%) translateY(0); }
-                50% { transform: translateX(-50%) translateY(-5px); }
+                50% { transform: translateX(-50%) translateY(-6px); }
             }
 
             /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (MODAL) */
@@ -90,7 +90,7 @@
             .signal-bar:nth-child(3) { height: 10px; animation-delay: 0.6s; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
-            /* BẢNG GPS MÃ HÓA MẶC ĐỊNH VỚI ẢNH NỀN VIỄN TƯỞNG */
+            /* BẢNG GPS CÓ ẢNH NỀN VIỄN TƯỞNG VÀ MÃ HÓA 100% MẶC ĐỊNH */
             .gps-modal-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 z-index: 2147483648; display: flex; justify-content: center; align-items: center;
@@ -298,7 +298,7 @@
                 </div>
             </div>
 
-            <!-- BẢNG GPS MÃ HÓA HOẶC GIẢI MÃ THEO NGÔN NGỮ -->
+            <!-- BẢNG GPS CÓ ẢNH NỀN VÀ MÃ HÓA HOÀN TOÀN MẶC ĐỊNH -->
             <div class="gps-modal-overlay" id="gpsModalOverlay">
                 <div class="gps-modal-dimmer"></div>
                 <div class="gps-modal-box">
@@ -355,7 +355,6 @@
 
         document.getElementById('hudLangOpenBtn').addEventListener('click', window.openGlobalLang);
 
-        // Khởi tạo ngôn ngữ theo trạng thái lưu hoặc mã hóa mặc định
         const savedLang = localStorage.getItem('kdrive_lang');
         if (savedLang && hudDictionary[savedLang]) {
             applyLanguageToHud(savedLang);
@@ -377,7 +376,7 @@
             });
         }
 
-        // Kiểm tra trạng thái GPS để hiện popup nếu chưa xác thực
+        // BẮT BUỘC HIỆN BẢNG GPS NẾU CHƯA XÁC THỰC HOẶC LUÔN HIỆN Ở LẦN ĐẦU
         const gpsVerified = sessionStorage.getItem('kdrive_gps_verified');
         const gpsText = document.getElementById('hudGpsText');
         const modalOverlay = document.getElementById('gpsModalOverlay');
