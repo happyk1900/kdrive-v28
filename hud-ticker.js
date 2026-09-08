@@ -134,22 +134,45 @@
         document.head.appendChild(style);
     }
 
-    // BỘ MÃ HÓA LƯỢNG TỬ ĐỘC BẢN (HOÀN TOÀN KHÔNG CÒN KÝ TỰ LATINH)
+    // BẢNG ÁNH XẠ KÝ TỰ LƯỢNG TỬ (QUANTRUM CIPHER MAPPING 1-1 CHO TIẾNG VIỆT)
+    const quantumMap = {
+        'a': '⟡', 'á': '⟡⁺', 'à': '⟡₋', 'ả': '⟡∼', 'ã': '⟡≈', 'ạ': '⟡•',
+        'â': '⌖', 'ấ': '⌖⁺', 'ầ': '⌖₋', 'ẩ': '⌖∼', 'ẫ': '⌖≈', 'ậ': '⌖•',
+        'ă': '⍜', 'ắ': '⍜⁺', 'ằ': '⍜₋', 'ẳ': '⍜∼', 'ẵ': '⍜≈', 'ặ': '⍜•',
+        'b': '⎈', 'c': '⌈', 'd': '⍚', 'đ': '⟬',
+        'e': '⟍', 'é': '⟍⁺', 'è': '⟍₋', 'ẻ': '⟍∼', 'ẽ': '⟍≈', 'ẹ': '⟍•',
+        'ê': '⍎', 'ế': '⍎⁺', 'ề': '⍎₋', 'ể': '⍎∼', 'ễ': '⍎≈', 'ệ': '⍎•',
+        'g': '⍟', 'h': 'ℋ', 'i': '│', 'í': '│⁺', 'ì': '│₋', 'ỉ': '│∼', 'ĩ': '│≈', 'ị': '│•',
+        'k': '𝒦', 'l': '⌊', 'm': 'ℳ', 'n': '𝒩',
+        'o': '⨀', 'ó': '⨀⁺', 'ò': '⨀₋', 'ỏ': '⨀∼', 'õ': '⨀≈', 'ọ': '⨀•',
+        'ô': '⍜', 'ố': '⍜⁺', 'ồ': '⍜₋', 'ổ': '⍜∼', 'ỗ': '⍜≈', 'ộ': '⍜•',
+        'ơ': '⍥', 'ớ': '⍥⁺', 'ờ': '⍥₋', 'ở': '⍥∼', 'ỡ': '⍥≈', 'ợ': '⍥•',
+        'p': '∏', 'q': 'ℚ', 'r': 'ℜ', 's': 'ξ', 't': 'τ',
+        'u': '⋃', 'ú': '⋃⁺', 'ù': '⋃₋', 'ủ': '⋃∼', 'ũ': '⋃≈', 'ụ': '⋃•',
+        'ư': '⋲', 'ứ': '⋲⁺', 'ừ': '⋲₋', 'ử': '⋲∼', 'ữ': '⋲≈', 'ự': '⋲•',
+        'v': '∇', 'x': 'χ', 'y': '⋫', 'ý': '⋫⁺', 'ỳ': '⋫₋', 'ỷ': '⋫∼', 'ỹ': '⋫≈', 'ỵ': '⋫•',
+        ' ': ' ', '.': '•', ',': '·', ':': '⁞', '-': '─', '9': '⟡', '+': '⊕'
+    };
+
+    function encodeQuantum(text) {
+        if (!text) return '';
+        return text.split('').map(char => {
+            const lower = char.toLowerCase();
+            return quantumMap[lower] !== undefined ? quantumMap[lower] : char;
+        }).join('');
+    }
+
+    // NGÔN NGỮ GỐC TIẾNG VIỆT
+    const vietnameseData = {
+        select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", close_btn: "ĐÓNG LẠI",
+        sys: "SYS.ONLINE", user: "USER: GUEST", gps: "GPS: NGOẠI TUYẾN", chat: "GLOBAL CHAT 9+",
+        gps_title: "XÁC THỰC GPS",
+        gps_desc: "Hệ thống yêu cầu quyền định vị để đồng bộ Đấu trường Lượng tử toàn cầu.",
+        deny: "TỪ CHỐI", allow: "ĐỒNG Ý"
+    };
+
     const globalTranslations = {
-        encoded: {
-            select_lang_title: "⎈ 𝚫-𝚲𝚯𝚸-𝚭 ⎈", close_btn: "[ 𝚫 • 𝚾 ]",
-            sys: "❖ 𝚫.𝚲𝚯𝚸 ❖", user: "⌖ 𝚬-𝚾𝚼: 𝚪𝚼⌖", gps: "🛰 𝚪𝚷𝚼: 𝚯𝚺𝚲", chat: "⚛ 𝚾-𝚲𝚰𝚴𝚮 𝟡+",
-            gps_title: "⎈ 𝚾𝚨𝚬 • 𝚻𝚬𝚲𝚼 • 𝚪𝚷𝚼 ⎈",
-            gps_desc: "⚡ ⟡ 𝚱-𝚫𝚹𝚨 • 𝚲𝚰𝚴𝚮 • 𝚻Ự • 𝚫𝚲𝚬𝚺𝚻 • 𝚪𝚷𝚼 • 𝚳𝚨𝚻 𝚳𝚫 ⟡ ⚡",
-            deny: "❖ 𝚫𝚬𝚴𝚼 ❖", allow: "✦ 𝚨𝚱𝚻𝚬𝚷 ✦"
-        },
-        vi: {
-            select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", close_btn: "ĐÓNG LẠI",
-            sys: "SYS.ONLINE", user: "USER: GUEST", gps: "GPS: NGOẠI TUYẾN", chat: "GLOBAL CHAT 9+",
-            gps_title: "XÁC THỰC GPS",
-            gps_desc: "Hệ thống yêu cầu quyền định vị để đồng bộ Đấu trường Lượng tử toàn cầu.",
-            deny: "TỪ CHỐI", allow: "ĐỒNG Ý"
-        },
+        vi: vietnameseData,
         en: {
             select_lang_title: "SELECT GLOBAL LANGUAGE", close_btn: "CLOSE",
             sys: "SYS.ONLINE", user: "USER: GUEST", gps: "GPS: OFFLINE", chat: "GLOBAL CHAT 9+",
@@ -162,7 +185,7 @@
         ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기", sys: "SYS.온라인", user: "유저: 게스트", gps: "GPS: 오프라인", chat: "글로벌 채팅 9+", gps_title: "GPS 인증", gps_desc: "글로벌 양자 아레나 매핑을 동기화하려면 위치 권한이 필요합니다.", deny: "거부", allow: "수락" },
         fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER", sys: "SYS.EN LIGNE", user: "UTILISATEUR: INVITÉ", gps: "GPS: HORS LIGNE", chat: "CHAT GLOBAL 9+", gps_title: "VÉRIFICATION GPS", gps_desc: "Le système requiert l'accès à la position pour synchroniser l'arène.", deny: "REFUSER", allow: "ACCEPTER" },
         de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN", sys: "SYS.ONLINE", user: "BENUTZER: GAST", gps: "GPS: OFFLINE", chat: "GLOBALES CHAT 9+", gps_title: "GPS-VERIFIZIERUNG", gps_desc: "Das System benötigt Standortzugriff zur Synchronisierung.", deny: "ABLEHNEN", allow: "AKZEPTIEREN" },
-        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", chat: "CHAT GLOBAL 9+", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
+        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", chat: "GLOBAL CHAT 9+", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
         ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ", sys: "СИСТЕМА.ОНЛАЙН", user: "ПОЛЬЗОВАТЕЛЬ: ГОСТЬ", gps: "GPS: ОФФЛАЙН", chat: "ГЛОБАЛЬНЫЙ ЧАТ 9+", gps_title: "ПРОВЕРКА GPS", gps_desc: "Системе требуется доступ к геолокации.", deny: "ОТКАЗАТЬ", allow: "ПРИНЯТЬ" },
         th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด", sys: "ระบบ.ออนไลน์", user: "ผู้ใช้: แขก", gps: "GPS: ออฟไลน์", chat: "แชท Global 9+", gps_title: "การยืนยัน GPS", gps_desc: "ระบบต้องการสิทธิ์ตำแหน่งที่ตั้งเพื่อซิงค์ข้อมูล", deny: "ปฏิเสธ", allow: "ยอมรับ" },
         id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP", sys: "SYS.ONLINE", user: "PENGGUNA: TAMU", gps: "GPS: OFFLINE", chat: "CHAT GLOBAL 9+", gps_title: "VERIFIKASI GPS", gps_desc: "Sistem memerlukan akses lokasi.", deny: "TOLAK", allow: "TERIMA" },
@@ -274,7 +297,11 @@
         };
 
         function updateHudLangUI(lang) {
-            const t = globalTranslations[lang] || globalTranslations['encoded'];
+            // Lấy dữ liệu nguồn từ tiếng Việt, nếu chọn 'encoded' thì tự động chạy hàm mã hóa lượng tử 1-1
+            const baseData = vietnameseData;
+            const isEncoded = (lang === 'encoded');
+
+            const processText = (text) => isEncoded ? encodeQuantum(text) : text;
 
             const sysText = document.getElementById('hudSysText');
             const userText = document.getElementById('hudUserText');
@@ -286,16 +313,17 @@
             const denyBtn = document.getElementById('gpsDenyBtn');
             const allowBtn = document.getElementById('gpsAllowBtn');
 
-            if (sysText) sysText.innerText = t.sys;
-            if (userText) userText.innerText = t.user;
-            if (gpsTextVal) gpsTextVal.innerText = t.gps;
-            if (chatBadge) chatBadge.innerText = t.chat;
+            if (sysText) sysText.innerText = processText(baseData.sys);
+            if (userText) userText.innerText = processText(baseData.user);
+            if (gpsTextVal) gpsTextVal.innerText = processText(baseData.gps);
+            if (chatBadge) chatBadge.innerText = processText(baseData.chat);
 
-            if (gpsTitle) gpsTitle.innerText = t.gps_title;
-            if (gpsDesc) gpsDesc.innerText = t.gps_desc;
-            if (denyBtn) denyBtn.innerText = t.deny;
-            if (allowBtn) allowBtn.innerText = t.allow;
+            if (gpsTitle) gpsTitle.innerText = processText(baseData.gps_title);
+            if (gpsDesc) gpsDesc.innerText = processText(baseData.gps_desc);
+            if (denyBtn) denyBtn.innerText = processText(baseData.deny);
+            if (allowBtn) allowBtn.innerText = processText(baseData.allow);
 
+            const t = globalTranslations[lang] || baseData;
             if (document.getElementById('langModalTitleText')) document.getElementById('langModalTitleText').innerText = t.select_lang_title;
             if (document.getElementById('langModalCloseBtn')) document.getElementById('langModalCloseBtn').innerText = t.close_btn;
         }
@@ -309,7 +337,11 @@
         const username = sessionStorage.getItem('kdrive_username');
         if (username) {
             const userEl = document.getElementById('hudUserText');
-            if (userEl) userEl.textContent = `USER: ${username.toUpperCase()}`;
+            if (userEl) {
+                const rawUser = `USER: ${username.toUpperCase()}`;
+                const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+                userEl.innerText = (currentLang === 'encoded') ? encodeQuantum(rawUser) : rawUser;
+            }
         }
 
         document.querySelectorAll('button').forEach(btn => {
@@ -324,7 +356,9 @@
             const cachedLon = sessionStorage.getItem('kdrive_gps_lon');
             const gpsTextVal = document.getElementById('hudGpsText');
             if (cachedLat && cachedLon && gpsTextVal) {
-                gpsTextVal.textContent = `GPS: ${Number(cachedLat).toFixed(2)}N, ${Number(cachedLon).toFixed(2)}E`;
+                const val = `GPS: ${Number(cachedLat).toFixed(2)}N, ${Number(cachedLon).toFixed(2)}E`;
+                const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+                gpsTextVal.innerText = (currentLang === 'encoded') ? encodeQuantum(val) : val;
             }
         } else if (gpsVerified !== 'false' && modalOverlay) {
             modalOverlay.classList.add('active');
@@ -338,7 +372,7 @@
             const gpsTextVal = document.getElementById('hudGpsText');
 
             if (isAllowed && navigator.geolocation) {
-                if (gpsTextVal) gpsTextVal.textContent = "GPS: LOCATING...";
+                if (gpsTextVal) gpsTextVal.innerText = encodeQuantum("GPS: Đang định vị...");
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         const lat = pos.coords.latitude;
@@ -347,18 +381,28 @@
                         sessionStorage.setItem('kdrive_gps_lat', lat);
                         sessionStorage.setItem('kdrive_gps_lon', lon);
                         if (gpsTextVal) {
-                            gpsTextVal.textContent = `GPS: ${lat.toFixed(2)}N, ${lon.toFixed(2)}E`;
+                            const val = `GPS: ${lat.toFixed(2)}N, ${lon.toFixed(2)}E`;
+                            const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+                            gpsTextVal.innerText = (currentLang === 'encoded') ? encodeQuantum(val) : val;
                         }
                     },
                     () => {
                         sessionStorage.setItem('kdrive_gps_verified', 'false');
-                        if (gpsTextVal) gpsTextVal.textContent = "GPS: OFFLINE";
+                        if (gpsTextVal) {
+                            const val = "GPS: NGOẠI TUYẾN";
+                            const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+                            gpsTextVal.innerText = (currentLang === 'encoded') ? encodeQuantum(val) : val;
+                        }
                     },
                     { timeout: 5000 }
                 );
             } else {
                 sessionStorage.setItem('kdrive_gps_verified', 'false');
-                if (gpsTextVal) gpsTextVal.textContent = "GPS: OFFLINE";
+                if (gpsTextVal) {
+                    const val = "GPS: NGOẠI TUYẾN";
+                    const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+                    gpsTextVal.innerText = (currentLang === 'encoded') ? encodeQuantum(val) : val;
+                }
             }
         }
     });
