@@ -134,23 +134,23 @@
         document.head.appendChild(style);
     }
 
-    // BẢNG ÁNH XẠ KÝ TỰ LƯỢNG TỬ (QUANTRUM CIPHER MAPPING 1-1 CHO TIẾNG VIỆT)
+    // BỘ MÃ HÓA KÝ TỰ LƯỢNG TỬ CHUẨN ĐỘC BẢN (1-1 MAPPING CHO TIẾNG VIỆT)
     const quantumMap = {
         'a': '⟡', 'á': '⟡⁺', 'à': '⟡₋', 'ả': '⟡∼', 'ã': '⟡≈', 'ạ': '⟡•',
         'â': '⌖', 'ấ': '⌖⁺', 'ầ': '⌖₋', 'ẩ': '⌖∼', 'ẫ': '⌖≈', 'ậ': '⌖•',
         'ă': '⍜', 'ắ': '⍜⁺', 'ằ': '⍜₋', 'ẳ': '⍜∼', 'ẵ': '⍜≈', 'ặ': '⍜•',
-        'b': '⎈', 'c': '⌈', 'd': '⍚', 'đ': '⟬',
+        'b': '❖', 'c': '⟨', 'd': '⎔', 'đ': '⟠',
         'e': '⟍', 'é': '⟍⁺', 'è': '⟍₋', 'ẻ': '⟍∼', 'ẽ': '⟍≈', 'ẹ': '⟍•',
         'ê': '⍎', 'ế': '⍎⁺', 'ề': '⍎₋', 'ể': '⍎∼', 'ễ': '⍎≈', 'ệ': '⍎•',
-        'g': '⍟', 'h': 'ℋ', 'i': '│', 'í': '│⁺', 'ì': '│₋', 'ỉ': '│∼', 'ĩ': '│≈', 'ị': '│•',
-        'k': '𝒦', 'l': '⌊', 'm': 'ℳ', 'n': '𝒩',
+        'g': '◎', 'h': '☩', 'i': '║', 'í': '║⁺', 'ì': '║₋', 'ỉ': '║∼', 'ĩ': '║≈', 'ị': '║•',
+        'k': '⎈', 'l': '⫷', 'm': '☲', 'n': '☱',
         'o': '⨀', 'ó': '⨀⁺', 'ò': '⨀₋', 'ỏ': '⨀∼', 'õ': '⨀≈', 'ọ': '⨀•',
         'ô': '⍜', 'ố': '⍜⁺', 'ồ': '⍜₋', 'ổ': '⍜∼', 'ỗ': '⍜≈', 'ộ': '⍜•',
         'ơ': '⍥', 'ớ': '⍥⁺', 'ờ': '⍥₋', 'ở': '⍥∼', 'ỡ': '⍥≈', 'ợ': '⍥•',
-        'p': '∏', 'q': 'ℚ', 'r': 'ℜ', 's': 'ξ', 't': 'τ',
+        'p': '⨁', 'q': '⍟', 'r': 'Ⱬ', 's': '⟡', 't': '⍂',
         'u': '⋃', 'ú': '⋃⁺', 'ù': '⋃₋', 'ủ': '⋃∼', 'ũ': '⋃≈', 'ụ': '⋃•',
         'ư': '⋲', 'ứ': '⋲⁺', 'ừ': '⋲₋', 'ử': '⋲∼', 'ữ': '⋲≈', 'ự': '⋲•',
-        'v': '∇', 'x': 'χ', 'y': '⋫', 'ý': '⋫⁺', 'ỳ': '⋫₋', 'ỷ': '⋫∼', 'ỹ': '⋫≈', 'ỵ': '⋫•',
+        'v': '⟁', 'x': '⨂', 'y': '⋫', 'ý': '⋫⁺', 'ỳ': '⋫₋', 'ỷ': '⋫∼', 'ỹ': '⋫≈', 'ỵ': '⋫•',
         ' ': ' ', '.': '•', ',': '·', ':': '⁞', '-': '─', '9': '⟡', '+': '⊕'
     };
 
@@ -162,7 +162,6 @@
         }).join('');
     }
 
-    // NGÔN NGỮ GỐC TIẾNG VIỆT
     const vietnameseData = {
         select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", close_btn: "ĐÓNG LẠI",
         sys: "SYS.ONLINE", user: "USER: GUEST", gps: "GPS: NGOẠI TUYẾN", chat: "GLOBAL CHAT 9+",
@@ -188,7 +187,7 @@
         es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", chat: "GLOBAL CHAT 9+", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
         ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ", sys: "СИСТЕМА.ОНЛАЙН", user: "ПОЛЬЗОВАТЕЛЬ: ГОСТЬ", gps: "GPS: ОФФЛАЙН", chat: "ГЛОБАЛЬНЫЙ ЧАТ 9+", gps_title: "ПРОВЕРКА GPS", gps_desc: "Системе требуется доступ к геолокации.", deny: "ОТКАЗАТЬ", allow: "ПРИНЯТЬ" },
         th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด", sys: "ระบบ.ออนไลน์", user: "ผู้ใช้: แขก", gps: "GPS: ออฟไลน์", chat: "แชท Global 9+", gps_title: "การยืนยัน GPS", gps_desc: "ระบบต้องการสิทธิ์ตำแหน่งที่ตั้งเพื่อซิงค์ข้อมูล", deny: "ปฏิเสธ", allow: "ยอมรับ" },
-        id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP", sys: "SYS.ONLINE", user: "PENGGUNA: TAMU", gps: "GPS: OFFLINE", chat: "CHAT GLOBAL 9+", gps_title: "VERIFIKASI GPS", gps_desc: "Sistem memerlukan akses lokasi.", deny: "TOLAK", allow: "TERIMA" },
+        id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP", sys: "SYS.ONLINE", user: "PENGGUNA: TAMU", gps: "GPS: OFFLINE", chat: "GLOBAL CHAT 9+", gps_title: "VERIFIKASI GPS", gps_desc: "Sistem memerlukan akses lokasi.", deny: "TOLAK", allow: "TERIMA" },
         ar: { select_lang_title: "اختر اللغة العالمية", close_btn: "إغلاق", sys: "النظام متصل", user: "المستخدم: ضيف", gps: "GPS: غير متصل", chat: "الدردشة العالمية 9+", gps_title: "التحقق من الموقع", gps_desc: "يتطلب النظام إذن الموقع للمزامنة.", deny: "رفض", allow: "قبول" }
     };
 
@@ -247,6 +246,7 @@
                 <div class="global-lang-content">
                     <div class="global-lang-title" id="langModalTitleText">CHỌN NGÔN NGỮ QUỐC TẾ</div>
                     <div class="global-lang-grid">
+                        <div class="global-lang-item" onclick="window.setGlobalLang('encoded')">⚛ Ký Hiệu Lượng Tử</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('vi')">🇻🇳 Tiếng Việt</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('en')">🇬🇧 English</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('zh')">🇨🇳 中文</div>
@@ -297,9 +297,8 @@
         };
 
         function updateHudLangUI(lang) {
-            // Lấy dữ liệu nguồn từ tiếng Việt, nếu chọn 'encoded' thì tự động chạy hàm mã hóa lượng tử 1-1
+            const isEncoded = (lang === 'encoded' || !globalTranslations[lang]);
             const baseData = vietnameseData;
-            const isEncoded = (lang === 'encoded');
 
             const processText = (text) => isEncoded ? encodeQuantum(text) : text;
 
@@ -324,8 +323,8 @@
             if (allowBtn) allowBtn.innerText = processText(baseData.allow);
 
             const t = globalTranslations[lang] || baseData;
-            if (document.getElementById('langModalTitleText')) document.getElementById('langModalTitleText').innerText = t.select_lang_title;
-            if (document.getElementById('langModalCloseBtn')) document.getElementById('langModalCloseBtn').innerText = t.close_btn;
+            if (document.getElementById('langModalTitleText')) document.getElementById('langModalTitleText').innerText = processText(t.select_lang_title);
+            if (document.getElementById('langModalCloseBtn')) document.getElementById('langModalCloseBtn').innerText = processText(t.close_btn);
         }
 
         document.getElementById('hudLangOpenBtn').addEventListener('click', window.openGlobalLang);
