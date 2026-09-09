@@ -384,7 +384,5 @@
             if (hudTopBar) hudTopBar.classList.add('active');
             sessionStorage.setItem('kdrive_gps_verified', 'false');
         });
-        <script src="boo-player.js"></script>
-
     });
 })();
