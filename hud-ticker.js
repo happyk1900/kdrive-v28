@@ -9,13 +9,13 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* HUD TOP BAR (Z-INDEX: 99000) */
+            /* THANH HUD BÊN TRONG GAME (Z-INDEX: 999950) */
             .hud-top-bar {
                 position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 50px !important;
                 display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 5px !important;
                 background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
                 border: none !important; border-radius: 0 !important;
-                z-index: 99000 !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 9.5px !important; color: #00e5ff !important; letter-spacing: 1px !important;
+                z-index: 999950 !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 9.5px !important; color: #00e5ff !important; letter-spacing: 1px !important;
                 pointer-events: auto !important; box-shadow: none !important;
                 opacity: 0; visibility: hidden; transition: opacity 0.5s ease;
             }
@@ -46,11 +46,11 @@
                 100% { transform: scale(1.12); box-shadow: 0 0 22px rgba(0,229,255,0.9); border-color: #fff; }
             }
 
-            /* BẢNG CHỌN NGÔN NGỮ QUỐC TẾ - ÉP LÊN LỚP CAO NHẤT (Z-INDEX: 99999) ĐỂ KHÔNG BỊ ĐÈ */
+            /* BẢNG CHỌN NGÔN NGỮ ĐƯỢC ĐẨY LÊN CAO NHẤT (Z-INDEX: 999999) ĐỂ KHÔNG BAO GIỜ BỊ ĐÈ */
             .global-lang-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 background: rgba(1, 3, 8, 0.95); backdrop-filter: blur(15px);
-                z-index: 99999 !important; display: flex; justify-content: center; align-items: center;
+                z-index: 999999 !important; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: 0.3s ease; pointer-events: none;
             }
             .global-lang-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
@@ -98,43 +98,51 @@
             .signal-bar:nth-child(3) { height: 9px; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
-            /* CẢNH 1: LỚP PHỦ GPS (Z-INDEX: 99500) NẰM TRÊN LOGIN NHƯNG DƯỚI BẢNG NGÔN NGỮ */
+            /* =========================================
+               LỚP NỀN CASSETTE BỌC NGOÀI (LOAD NGẦM)
+               ========================================= */
             .gps-modal-overlay {
                 position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important;
-                z-index: 99500 !important; display: flex !important; justify-content: center !important; align-items: center !important;
-                opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
-                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20GPS%20LOFI.png?raw=true') !important;
+                z-index: 999900 !important; display: flex !important; justify-content: center !important; align-items: center !important;
+                opacity: 0; visibility: hidden; transition: opacity 0.5s ease; pointer-events: none;
+                background-color: #010204 !important; /* Màu đen tuyền khi đang đợi tải ảnh */
                 background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important;
-                background-color: #000 !important;
             }
             .gps-modal-overlay.active { opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; }
             
-            /* CĂN GIỮA TUYỆT ĐỐI HỘP GPS VÀO KÍNH CASSETTE (CHE CHỮ TIẾNG ANH) */
+            /* =========================================
+               HỘP XÁC NHẬN - CHỜ ẢNH LOAD XONG MỚI HIỆN HIỆU ỨNG NẢY
+               ========================================= */
             .gps-modal-box {
                 position: absolute !important; width: 85% !important; max-width: 320px !important;
-                top: 45% !important; /* Kéo dịch lên để nằm chính giữa ô cửa sổ trong suốt */
-                left: 50% !important; transform: translate(-50%, -50%) !important;
-                display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important;
-                padding: 18px 12px !important; /* Làm mỏng padding để gọn gàng hơn */
-                background: transparent !important; border: none !important; box-shadow: none !important;
-                z-index: 99501 !important;
+                top: 50% !important; left: 50% !important; 
+                transform: translate(-50%, -40%) scale(0.95) !important; /* Dìm xuống dưới & thu nhỏ lúc đầu */
+                display: flex !important; flex-direction: column !important; align-items: center !important;
+                padding: 16px 12px !important; background: transparent !important; border: none !important; box-shadow: none !important;
+                z-index: 999910 !important;
+                opacity: 0; visibility: hidden; 
+                transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* Hiệu ứng nảy mượt mà của Apple */
+            }
+            .gps-modal-box.show-ui {
+                opacity: 1; visibility: visible;
+                transform: translate(-50%, -50%) scale(1) !important; /* Nảy lên nằm chuẩn ngay giữa để che chữ PROJEKT */
             }
             
-            /* NÚT QUẢ CẦU 🌐 ỐP CHUẨN VÀO GÓC CON ỐC BÊN PHẢI */
+            /* QUẢ CẦU NGÔN NGỮ ĐẶT CHUẨN GÓC CON ỐC BÊN PHẢI */
             .cassette-lang-btn {
                 position: absolute !important; 
-                top: -8px !important; right: 0px !important; /* Tinh chỉnh vị trí nằm ngay con ốc */
+                top: -24px !important; right: -5px !important; /* Anh có thể tăng giảm 2 số này để khớp 100% vào tâm con ốc trên ảnh */
                 background: rgba(0, 229, 255, 0.2) !important; border: 1.5px solid #00e5ff !important;
-                border-radius: 50% !important; width: 32px !important; height: 32px !important; color: #fff !important;
-                font-size: 15px !important; display: flex !important; align-items: center !important; justify-content: center !important;
+                border-radius: 50% !important; width: 34px !important; height: 34px !important; color: #fff !important;
+                font-size: 16px !important; display: flex !important; align-items: center !important; justify-content: center !important;
                 cursor: pointer !important; transition: 0.2s !important; box-shadow: 0 0 12px rgba(0,229,255,0.5) !important;
                 animation: pulseGlobe 1.5s infinite alternate ease-in-out !important;
-                z-index: 99502 !important; pointer-events: auto !important;
+                z-index: 999920 !important; pointer-events: auto !important;
             }
-            .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.4) !important; transform: scale(1.1) !important; box-shadow: 0 0 20px #00e5ff !important; }
+            .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.5) !important; transform: scale(1.1) !important; box-shadow: 0 0 20px #00e5ff !important; }
 
             .gps-modal-desc { 
-                background: rgba(0, 0, 0, 0.7) !important; border: 1px solid rgba(0, 229, 255, 0.3) !important;
+                background: rgba(0, 0, 0, 0.75) !important; border: 1px solid rgba(0, 229, 255, 0.3) !important;
                 border-radius: 8px !important; padding: 12px 10px !important; width: 100% !important; box-sizing: border-box !important;
                 margin-bottom: 12px !important; backdrop-filter: blur(5px) !important;
             }
@@ -149,7 +157,7 @@
                 flex: 1 !important; padding: 10px 4px !important; border-radius: 8px !important; font-family: 'Montserrat', sans-serif !important;
                 font-size: 11px !important; font-weight: 900 !important; text-transform: uppercase !important; cursor: pointer !important; transition: 0.3s !important;
                 text-align: center !important; white-space: nowrap !important; letter-spacing: 1px !important;
-                background: rgba(0,0,0,0.8) !important; backdrop-filter: blur(5px) !important;
+                background: rgba(0,0,0,0.85) !important; backdrop-filter: blur(5px) !important;
             }
             .gps-btn-allow { border: 1.5px solid #00e5ff !important; color: #00e5ff !important; box-shadow: 0 0 10px rgba(0, 229, 255, 0.4) !important; }
             .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3) !important; color: #fff !important; box-shadow: 0 0 18px #00e5ff !important; }
@@ -256,7 +264,7 @@
                 </div>
 
                 <div class="hud-center">
-                    <button class="hud-lang-btn hudLangTrigger" title="Chọn ngôn ngữ">🌐</button>
+                    <button class="hud-lang-btn hudLangTrigger" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
                 </div>
 
                 <div class="hud-right">
@@ -290,9 +298,10 @@
                 </div>
             </div>
 
-            <div class="gps-modal-overlay active" id="gpsModalOverlay">
-                <div class="gps-modal-box">
-                    <button class="cassette-lang-btn hudLangTrigger" title="Chọn ngôn ngữ">🌐</button>
+            <!-- CẢNH 1: GIAO DIỆN LÚC ĐẦU BỊ ẨN, CHỜ LOAD XONG ẢNH MỚI BẬT LÊN -->
+            <div class="gps-modal-overlay" id="gpsModalOverlay">
+                <div class="gps-modal-box" id="gpsModalBox">
+                    <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
 
                     <div class="gps-modal-desc">
                         <p id="gpsDescText">Hệ thống yêu cầu quyền định vị để đồng bộ Đấu trường Lượng tử toàn cầu.</p>
@@ -354,38 +363,51 @@
             if (document.getElementById('langModalCloseBtn')) document.getElementById('langModalCloseBtn').innerText = processText(t.close_btn);
         }
 
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.hudLangTrigger')) {
-                e.preventDefault();
-                e.stopPropagation();
-                window.openGlobalLang();
-            }
-        });
-
         const savedLang = localStorage.getItem('kdrive_lang') || 'encoded';
         updateHudLangUI(savedLang);
 
         document.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('click', playClickSound);
+            if(!btn.onclick && !btn.classList.contains('cassette-lang-btn') && !btn.classList.contains('hudLangTrigger')) {
+                btn.addEventListener('click', playClickSound);
+            }
         });
 
         const modalOverlay = document.getElementById('gpsModalOverlay');
+        const modalBox = document.getElementById('gpsModalBox');
         const hudTopBar = document.getElementById('hudTopBar');
 
         const gpsVerified = sessionStorage.getItem('kdrive_gps_verified');
+        
+        // CƠ CHẾ TẢI ẢNH NGẦM TRƯỚC KHI HIỆN GIAO DIỆN HỘP THOẠI
         if (gpsVerified === 'true' || gpsVerified === 'false') {
             if (modalOverlay) modalOverlay.classList.remove('active');
             if (hudTopBar) hudTopBar.classList.add('active');
         } else {
-            if (modalOverlay) modalOverlay.classList.add('active');
+            if (modalOverlay) {
+                modalOverlay.classList.add('active'); // Mở phông đen ngay lập tức để che màn đăng nhập
+                
+                const bgUrl = 'https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20GPS%20LOFI.png?raw=true';
+                const bgImg = new Image();
+                bgImg.src = bgUrl;
+                
+                // Đợi ảnh nét căng mới bắt đầu đổ ra nền và nhảy hiệu ứng lên
+                bgImg.onload = () => {
+                    modalOverlay.style.backgroundImage = `url('${bgUrl}')`;
+                    setTimeout(() => {
+                        if(modalBox) modalBox.classList.add('show-ui');
+                    }, 250); // Delay 0.25s để ảnh lên mịn màng rồi hộp UI nảy ra
+                };
+            }
         }
 
         document.getElementById('gpsAllowBtn').addEventListener('click', () => {
+            playClickSound();
             if (modalOverlay) modalOverlay.classList.remove('active');
             if (hudTopBar) hudTopBar.classList.add('active');
             sessionStorage.setItem('kdrive_gps_verified', 'true');
         });
         document.getElementById('gpsDenyBtn').addEventListener('click', () => {
+            playClickSound();
             if (modalOverlay) modalOverlay.classList.remove('active');
             if (hudTopBar) hudTopBar.classList.add('active');
             sessionStorage.setItem('kdrive_gps_verified', 'false');
