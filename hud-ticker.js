@@ -96,12 +96,12 @@
             .signal-bar:nth-child(3) { height: 9px; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
-            /* CẢNH 1: SỬ DỤNG LINK ẢNH MỚI CỦA ANH, FULL MÀN HÌNH CHE KÍN TRANG LOGIN */
+            /* CẢNH 1: ÉP FULL MÀN HÌNH ĐÈ TRÊN TẤT CẢ VỚI Z-INDEX TUYỆT ĐỐI (2147483649) */
             .gps-modal-overlay {
                 position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important;
                 z-index: 2147483649 !important; display: flex !important; justify-content: center !important; align-items: center !important;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
-                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20NEN%20GPS%20NEN.png?raw=true') !important;
+                background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20GPS%20LOFI.png?raw=true') !important;
                 background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important;
                 background-color: #000 !important;
             }
@@ -263,8 +263,10 @@
                 <div class="global-lang-content">
                     <div class="global-lang-title" id="langModalTitleText">CHỌN NGÔN NGỮ QUỐC TẾ</div>
                     
+                    <!-- Nút Alien nhấp nháy chiếm 100% chiều ngang -->
                     <div class="global-alien-top-btn" onclick="window.setGlobalLang('encoded')" title="Ký Hiệu Lượng Tử">👽</div>
 
+                    <!-- 12 quốc gia xếp 2 cột cân đối -->
                     <div class="global-lang-grid">
                         <div class="global-lang-item" onclick="window.setGlobalLang('vi')">🇻🇳 Tiếng Việt</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('en')">🇬🇧 English</div>
@@ -283,6 +285,7 @@
                 </div>
             </div>
 
+            <!-- CẢNH 1: FULL MÀN HÌNH CASSETTE CHE KÍN LOGIN -->
             <div class="gps-modal-overlay active" id="gpsModalOverlay">
                 <div class="gps-modal-box">
                     <button class="cassette-lang-btn hudLangTrigger" title="Chọn ngôn ngữ">🌐</button>
