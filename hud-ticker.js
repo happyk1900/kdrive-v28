@@ -31,7 +31,6 @@
             .hud-gps { color: #ff007f !important; font-weight: 700; text-shadow: 0 0 6px rgba(255,0,127,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 9px; }
             .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.8); cursor: pointer; pointer-events: auto; }
 
-            /* QUẢ CẦU HUD TĨNH, PHÁT SÁNG NHẸ (KHÔNG CÒN RUNG LẮC MẠNH) */
             .hud-lang-btn {
                 background: rgba(0, 229, 255, 0.2); border: 2px solid #00e5ff;
                 border-radius: 50%; width: 38px; height: 38px; color: #fff;
@@ -145,7 +144,7 @@
             
             .gps-btn-row { display: flex !important; gap: 10px !important; justify-content: center !important; width: 100% !important; }
             
-            /* ĐƯA HIỆU ỨNG NHỊP THỞ VÀ NHẤP NHÁY SANG HAI NÚT ACCEPT & DENY */
+            /* HAI NÚT ACCEPT & DENY NHỊP THỞ NHƯ CŨ */
             .gps-action-btn {
                 flex: 1 !important; padding: 10px 4px !important; border-radius: 8px !important; font-family: 'Montserrat', sans-serif !important;
                 font-size: 11px !important; font-weight: 900 !important; text-transform: uppercase !important; cursor: pointer !important; transition: 0.3s !important;
@@ -169,32 +168,39 @@
                 margin-top: 25px !important; width: 100% !important;
             }
 
-            /* QUẢ CẦU TĨNH Ở BẢNG CASSETTE */
+            /* QUẢ CẦU PHÁT SÁNG MỜ ẢO */
             .cassette-lang-btn {
                 position: relative !important; 
-                background: rgba(0, 229, 255, 0.25) !important; border: 2px solid #00e5ff !important;
-                border-radius: 50% !important; width: 42px !important; height: 42px !important; color: #fff !important;
+                background: rgba(0, 229, 255, 0.18) !important; border: 2px solid #00e5ff !important;
+                border-radius: 50% !important; width: 44px !important; height: 44px !important; color: #fff !important;
                 font-size: 20px !important; display: flex !important; align-items: center !important; justify-content: center !important;
                 cursor: pointer !important; transition: 0.2s !important; 
-                box-shadow: 0 0 15px rgba(0,229,255,0.5) !important;
+                box-shadow: 0 0 18px rgba(0,229,255,0.4), inset 0 0 8px rgba(0,229,255,0.3) !important;
+                animation: globeSoftGlow 2.5s infinite alternate ease-in-out !important;
                 z-index: 999920 !important; pointer-events: auto !important;
             }
-            .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.5) !important; transform: scale(1.1) !important; box-shadow: 0 0 25px #00e5ff !important; }
+            .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.4) !important; transform: scale(1.1) !important; box-shadow: 0 0 30px #00e5ff !important; }
 
-            /* NGÓN TAY CHỈ DI CHUYỂN QUA LẠI GIỮA HAI NÚT BẤM GPS */
+            @keyframes globeSoftGlow {
+                0% { box-shadow: 0 0 10px rgba(0,229,255,0.3); border-color: rgba(0,229,255,0.5); }
+                100% { box-shadow: 0 0 25px rgba(0,229,255,0.8), inset 0 0 12px rgba(0,229,255,0.6); border-color: #fff; }
+            }
+
+            /* NGÓN TAY PHÓNG TO GẤP 2.5 LẦN, CHỈ XUỐNG QUẢ ĐỊA CẦU */
             .finger-pointer {
                 position: absolute !important;
-                left: calc(50% - 30px) !important; 
-                top: -55px !important; 
-                width: 65px !important; 
+                left: calc(50% + 15px) !important; 
+                top: -30px !important; 
+                width: 140px !important; 
                 height: auto !important;
                 z-index: 999930 !important; pointer-events: none !important;
-                animation: fingerPointGPS 1.2s infinite alternate ease-in-out !important;
-                filter: drop-shadow(0 0 10px #00e5ff) !important;
+                transform: rotate(180deg) scaleX(-1);
+                animation: fingerPointGlobe 1s infinite alternate ease-in-out !important;
+                filter: drop-shadow(0 0 15px #00e5ff) !important;
             }
-            @keyframes fingerPointGPS {
-                0% { transform: translateY(0px) scale(0.95); opacity: 0.8; }
-                100% { transform: translateY(8px) scale(1.05); opacity: 1; }
+            @keyframes fingerPointGlobe {
+                0% { transform: translate(0px, 0px) rotate(180deg) scaleX(-1) scale(0.95); opacity: 0.75; }
+                100% { transform: translate(0px, 12px) rotate(180deg) scaleX(-1) scale(1.05); opacity: 1; }
             }
         `;
         document.head.appendChild(style);
@@ -278,7 +284,6 @@
     let kdriveBgMusic = null;
     let particleAnimationId = null;
 
-    // HÀM KÍCH HOẠT NHẠC NỀN CHUNG CHO MỌI ĐIỂM CHẠM TRONG LOGIN
     function triggerLoginMusic() {
         if (!kdriveBgMusic) {
             kdriveBgMusic = new Audio("https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/K_Drive_Initialized.mp3");
@@ -356,7 +361,6 @@
                     
                     <div class="globe-pointer-wrapper">
                         <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
-                        <!-- NGÓN TAY CHỈ ĐỘNG GIỮA HAI NÚT GPS -->
                         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Ngon%20tay.png?raw=true" class="finger-pointer" id="hudFingerPointer" alt="Pointer">
                     </div>
                 </div>
@@ -430,7 +434,7 @@
 
         window.openGlobalLang = function() { 
             playClickSound(); 
-            triggerLoginMusic(); // PHÁT NHẠC KHI MỞ BẢNG NGÔN NGỮ
+            triggerLoginMusic(); 
             document.getElementById('globalLangModal').classList.add('active'); 
             setTimeout(initQuantumParticles, 100);
         };
@@ -443,7 +447,7 @@
         
         window.setGlobalLang = function(lang) {
             playClickSound();
-            triggerLoginMusic(); // PHÁT NHẠC KHI CHỌN NGÔN NGỮ
+            triggerLoginMusic(); 
             localStorage.setItem('kdrive_lang', lang);
             updateHudLangUI(lang);
             window.closeGlobalLang();
@@ -483,7 +487,6 @@
         const savedLang = localStorage.getItem('kdrive_lang') || 'encoded';
         updateHudLangUI(savedLang);
 
-        // KÍCH HOẠT PHÁT NHẠC KHI BẤM BẤT CỨ NÚT NÀO TRONG MÀN HÌNH LOGIN
         document.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {
                 playClickSound();
@@ -517,29 +520,30 @@
             }
         }
 
-        // KHI BẤM NÚT ĐỒNG Ý HOẶC TỪ CHỐI GPS -> DỪNG NHẠC (HẾT PHẦN LOGIN) VÀ ẨN MODAL
-        function handleGpsChoice() {
+        // HÀM XỬ LÝ KHI BẤM NÚT GPS: PHÁT NHẠC RỒI MỚI TẮT MÀN HÌNH LOGIN
+        function handleGpsChoice(choiceValue) {
             playClickSound();
-            triggerLoginMusic();
-            
-            // DỪNG VÀ HỦY NHẠC TRƯỚC KHI VÀO GAME
-            if (kdriveBgMusic) {
-                kdriveBgMusic.pause();
-                kdriveBgMusic.currentTime = 0;
-                kdriveBgMusic = null;
-            }
+            triggerLoginMusic(); // ÉP PHÁT NHẠC NGAY LẬP TỨC
 
-            if (modalOverlay) modalOverlay.classList.remove('active');
-            if (hudTopBar) hudTopBar.classList.add('active');
+            sessionStorage.setItem('kdrive_gps_verified', choiceValue);
+
+            // Cho nhạc chạy mượt mà nửa giây rồi mới ẩn modal và tắt hẳn nhạc login
+            setTimeout(() => {
+                if (kdriveBgMusic) {
+                    kdriveBgMusic.pause();
+                    kdriveBgMusic.currentTime = 0;
+                    kdriveBgMusic = null;
+                }
+                if (modalOverlay) modalOverlay.classList.remove('active');
+                if (hudTopBar) hudTopBar.classList.add('active');
+            }, 500);
         }
 
         document.getElementById('gpsAllowBtn').addEventListener('click', () => {
-            handleGpsChoice();
-            sessionStorage.setItem('kdrive_gps_verified', 'true');
+            handleGpsChoice('true');
         });
         document.getElementById('gpsDenyBtn').addEventListener('click', () => {
-            handleGpsChoice();
-            sessionStorage.setItem('kdrive_gps_verified', 'false');
+            handleGpsChoice('false');
         });
     });
 })();
