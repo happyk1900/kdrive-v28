@@ -98,7 +98,7 @@
             .signal-bar:nth-child(3) { height: 9px; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
-            /* LỚP NỀN CASSETTE BỌC NGOÀI (LOAD NGẦM) */
+            /* LỚP NỀN CASSETTE BỌC NGOÀI */
             .gps-modal-overlay {
                 position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important;
                 z-index: 999900 !important; display: flex !important; justify-content: center !important; align-items: center !important;
@@ -150,45 +150,46 @@
             .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3) !important; color: #fff !important; box-shadow: 0 0 18px #ff003c !important; }
             
             /* =========================================
-               KHU VỰC CỤM QUẢ CẦU VÀ NGÓN TAY CHỈ ĐƯỜNG
+               KHU VỰC CỤM QUẢ CẦU VÀ NGÓN TAY CHỈ BÊN TRÁI
                ========================================= */
             .globe-pointer-wrapper {
                 position: relative !important; display: flex !important; justify-content: center !important; align-items: center !important;
-                margin-top: 18px !important; width: 100% !important;
+                margin-top: 25px !important; width: 100% !important;
             }
 
-            /* QUẢ CẦU TỎA NĂNG LƯỢNG MẠNH, NHANH, RÕ NÉT */
+            /* QUẢ CẦU TỎA NĂNG LƯỢNG GẤT HƠN, NHANH HƠN */
             .cassette-lang-btn {
                 position: relative !important; 
                 background: rgba(0, 229, 255, 0.3) !important; border: 2px solid #00e5ff !important;
-                border-radius: 50% !important; width: 40px !important; height: 40px !important; color: #fff !important;
-                font-size: 18px !important; display: flex !important; align-items: center !important; justify-content: center !important;
+                border-radius: 50% !important; width: 42px !important; height: 42px !important; color: #fff !important;
+                font-size: 20px !important; display: flex !important; align-items: center !important; justify-content: center !important;
                 cursor: pointer !important; transition: 0.2s !important; 
                 box-shadow: 0 0 20px rgba(0,229,255,0.7), inset 0 0 10px rgba(0,229,255,0.5) !important;
-                animation: pulseGlobeSuper 0.5s infinite alternate ease-in-out !important; /* Tốc độ 0.5s cực nhanh */
+                animation: pulseGlobeSuper 0.45s infinite alternate ease-in-out !important; /* Đập cực nhanh (0.45s) */
                 z-index: 999920 !important; pointer-events: auto !important;
             }
-            .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.6) !important; transform: scale(1.15) !important; box-shadow: 0 0 35px #00e5ff !important; }
+            .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.6) !important; transform: scale(1.15) !important; box-shadow: 0 0 40px #00e5ff !important; }
 
-            /* HIỆU ỨNG PHÓNG TO THU NHỎ MẠNH BẠO */
+            /* BIÊN ĐỘ PHÓNG TO THU NHỎ MẠNH BẠO */
             @keyframes pulseGlobeSuper {
                 0% { transform: scale(0.9); box-shadow: 0 0 15px rgba(0,229,255,0.6); border-color: rgba(0,229,255,0.8); }
-                100% { transform: scale(1.3); box-shadow: 0 0 35px #00e5ff, 0 0 55px #00e5ff, inset 0 0 15px #fff; border-color: #fff; }
+                100% { transform: scale(1.3); box-shadow: 0 0 35px #00e5ff, 0 0 60px #00e5ff, inset 0 0 20px #fff; border-color: #fff; }
             }
 
-            /* NGÓN TAY CHỈ ĐƯỜNG CÓ HIỆU ỨNG NHẤP NHÁY THÚC GIỤC */
+            /* NGÓN TAY TO RA, NẰM DƯỚI BÊN TRÁI, CHỈ CHÉO LÊN */
             .finger-pointer {
                 position: absolute !important;
-                right: calc(50% - 65px) !important; /* Vị trí nằm vắt chéo bên phải quả cầu */
-                top: 15px !important;
-                width: 45px !important; height: auto !important;
-                z-index: 999930 !important; pointer-events: none !important; /* Xuyên qua ngón tay để bấm được nút dưới */
-                animation: fingerPoint 0.5s infinite alternate ease-in-out !important;
-                filter: drop-shadow(0 0 8px #00e5ff) !important; /* Phủ sáng neon quanh ngón tay */
+                left: calc(50% - 85px) !important; /* Kéo lệch hẳn sang trái */
+                top: 25px !important; /* Thụt xuống dưới quả cầu */
+                width: 75px !important; /* Phóng to gấp đôi */
+                height: auto !important;
+                z-index: 999930 !important; pointer-events: none !important; /* Bấm xuyên qua được */
+                animation: fingerPointLeftUp 0.5s infinite alternate ease-in-out !important;
+                filter: drop-shadow(0 0 12px #00e5ff) !important; /* Tỏa sáng viền */
             }
-            @keyframes fingerPoint {
-                0% { transform: translate(15px, 15px) rotate(-15deg); opacity: 0.7; }
-                100% { transform: translate(-5px, -5px) rotate(-15deg); opacity: 1; }
+            @keyframes fingerPointLeftUp {
+                0% { transform: translate(-15px, 15px) scale(0.9); opacity: 0.7; }
+                100% { transform: translate(5px, -5px) scale(1.1); opacity: 1; }
             }
         `;
         document.head.appendChild(style);
@@ -269,6 +270,9 @@
         } catch(e){}
     }
 
+    // BIẾN TOÀN CỤC CHỨA NHẠC NỀN
+    let kdriveBgMusic = null;
+
     document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('kdriveGlobalHud')) return;
 
@@ -337,18 +341,34 @@
                     <!-- WRAPPER CHỨA QUẢ CẦU VÀ NGÓN TAY CHỈ -->
                     <div class="globe-pointer-wrapper">
                         <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
-                        <!-- LINK ẢNH NGÓN TAY THAY VÀO DƯỚI ĐÂY -->
-                        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Ngon%20tay.png?raw=true" class="finger-pointer" alt="Pointer">
+                        
+                        <!-- DÁN LINK ẢNH NGÓN TAY CỦA ANH VÀO ĐÂY NHÉ -->
+                        <img src="LINK_ANH_NGON_TAY_CUA_ANH_VAO_DAY" class="finger-pointer" id="hudFingerPointer" alt="Pointer">
                     </div>
                 </div>
             </div>
         `;
         document.body.prepend(container);
 
+        // HÀM MỞ BẢNG NGÔN NGỮ VÀ PHÁT NHẠC
         window.openGlobalLang = function() { 
             playClickSound(); 
             document.getElementById('globalLangModal').classList.add('active'); 
+            
+            // Ẩn ngón tay đi khi người dùng đã bấm vào
+            const finger = document.getElementById('hudFingerPointer');
+            if (finger) finger.style.display = 'none';
+
+            // DÁN LINK NHẠC 30 GIÂY CỦA ANH VÀO ĐÂY NHÉ
+            if (!kdriveBgMusic) {
+                kdriveBgMusic = new Audio("LINK_NHAC_CUA_ANH_VAO_DAY");
+                kdriveBgMusic.loop = true; // Cho lặp lại nếu nghe chưa đã
+                kdriveBgMusic.volume = 0.9;
+            }
+            // Phát nhạc và bắt lỗi nếu trình duyệt chặn autoplay
+            kdriveBgMusic.play().catch(e => console.log("Trình duyệt chặn phát nhạc tự động:", e));
         };
+        
         window.closeGlobalLang = function() { 
             playClickSound(); 
             document.getElementById('globalLangModal').classList.remove('active'); 
