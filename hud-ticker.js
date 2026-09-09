@@ -98,9 +98,7 @@
             .signal-bar:nth-child(3) { height: 9px; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
-            /* =========================================
-               LỚP NỀN CASSETTE BỌC NGOÀI (LOAD NGẦM)
-               ========================================= */
+            /* LỚP NỀN CASSETTE BỌC NGOÀI (LOAD NGẦM) */
             .gps-modal-overlay {
                 position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important;
                 z-index: 999900 !important; display: flex !important; justify-content: center !important; align-items: center !important;
@@ -110,9 +108,7 @@
             }
             .gps-modal-overlay.active { opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; }
             
-            /* =========================================
-               HỘP XÁC NHẬN CHÍNH
-               ========================================= */
+            /* HỘP XÁC NHẬN CHÍNH */
             .gps-modal-box {
                 position: absolute !important; width: 85% !important; max-width: 320px !important;
                 top: 50% !important; left: 50% !important; 
@@ -125,15 +121,12 @@
             }
             .gps-modal-box.show-ui {
                 opacity: 1; visibility: visible;
-                transform: translate(-50%, -50%) scale(1) !important; /* Căn giữa hoàn hảo che chữ PROJEKT */
+                transform: translate(-50%, -50%) scale(1) !important; 
             }
 
-            /* =========================================
-               HỘP CHỮ MÔ TẢ ĐEN XÌ & VIỀN DÀY
-               ========================================= */
+            /* HỘP CHỮ MÔ TẢ ĐEN XÌ & VIỀN DÀY */
             .gps-modal-desc { 
-                background: #000000 !important; /* Đen xì hoàn toàn */
-                border: 2px solid #00e5ff !important; /* Viền dày 2px */
+                background: #000000 !important; border: 2px solid #00e5ff !important; 
                 border-radius: 8px !important; padding: 14px 12px !important; width: 100% !important; box-sizing: border-box !important;
                 margin-bottom: 15px !important; box-shadow: 0 0 15px rgba(0,229,255,0.3) !important;
             }
@@ -157,19 +150,46 @@
             .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3) !important; color: #fff !important; box-shadow: 0 0 18px #ff003c !important; }
             
             /* =========================================
-               QUẢ CẦU 🌐 CHUYỂN XUỐNG DƯỚI NÚT ĐỒNG Ý
+               KHU VỰC CỤM QUẢ CẦU VÀ NGÓN TAY CHỈ ĐƯỜNG
                ========================================= */
+            .globe-pointer-wrapper {
+                position: relative !important; display: flex !important; justify-content: center !important; align-items: center !important;
+                margin-top: 18px !important; width: 100% !important;
+            }
+
+            /* QUẢ CẦU TỎA NĂNG LƯỢNG MẠNH, NHANH, RÕ NÉT */
             .cassette-lang-btn {
-                position: relative !important; /* Chuyển từ absolute sang relative để tự động rớt xuống dưới */
-                margin-top: 18px !important; /* Khoảng cách với 2 nút ở trên */
-                background: rgba(0, 229, 255, 0.2) !important; border: 2px solid #00e5ff !important;
-                border-radius: 50% !important; width: 38px !important; height: 38px !important; color: #fff !important;
+                position: relative !important; 
+                background: rgba(0, 229, 255, 0.3) !important; border: 2px solid #00e5ff !important;
+                border-radius: 50% !important; width: 40px !important; height: 40px !important; color: #fff !important;
                 font-size: 18px !important; display: flex !important; align-items: center !important; justify-content: center !important;
-                cursor: pointer !important; transition: 0.2s !important; box-shadow: 0 0 15px rgba(0,229,255,0.6) !important;
-                animation: pulseGlobe 1.5s infinite alternate ease-in-out !important;
+                cursor: pointer !important; transition: 0.2s !important; 
+                box-shadow: 0 0 20px rgba(0,229,255,0.7), inset 0 0 10px rgba(0,229,255,0.5) !important;
+                animation: pulseGlobeSuper 0.5s infinite alternate ease-in-out !important; /* Tốc độ 0.5s cực nhanh */
                 z-index: 999920 !important; pointer-events: auto !important;
             }
-            .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.5) !important; transform: scale(1.1) !important; box-shadow: 0 0 25px #00e5ff !important; }
+            .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.6) !important; transform: scale(1.15) !important; box-shadow: 0 0 35px #00e5ff !important; }
+
+            /* HIỆU ỨNG PHÓNG TO THU NHỎ MẠNH BẠO */
+            @keyframes pulseGlobeSuper {
+                0% { transform: scale(0.9); box-shadow: 0 0 15px rgba(0,229,255,0.6); border-color: rgba(0,229,255,0.8); }
+                100% { transform: scale(1.3); box-shadow: 0 0 35px #00e5ff, 0 0 55px #00e5ff, inset 0 0 15px #fff; border-color: #fff; }
+            }
+
+            /* NGÓN TAY CHỈ ĐƯỜNG CÓ HIỆU ỨNG NHẤP NHÁY THÚC GIỤC */
+            .finger-pointer {
+                position: absolute !important;
+                right: calc(50% - 65px) !important; /* Vị trí nằm vắt chéo bên phải quả cầu */
+                top: 15px !important;
+                width: 45px !important; height: auto !important;
+                z-index: 999930 !important; pointer-events: none !important; /* Xuyên qua ngón tay để bấm được nút dưới */
+                animation: fingerPoint 0.5s infinite alternate ease-in-out !important;
+                filter: drop-shadow(0 0 8px #00e5ff) !important; /* Phủ sáng neon quanh ngón tay */
+            }
+            @keyframes fingerPoint {
+                0% { transform: translate(15px, 15px) rotate(-15deg); opacity: 0.7; }
+                100% { transform: translate(-5px, -5px) rotate(-15deg); opacity: 1; }
+            }
         `;
         document.head.appendChild(style);
     }
@@ -222,7 +242,7 @@
         },
         zh: { select_lang_title: "选择全球语言", close_btn: "关闭", sys: "系统.在线", user: "用户: 访客", gps: "GPS: 离线", chat: "全球聊天 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 验证", gps_desc: "系统需要位置权限来同步全球量子竞技场映射。", deny: "拒绝", allow: "接受" },
         ja: { select_lang_title: "グローバル言語を選択", close_btn: "閉じる", sys: "SYS.オンライン", user: "ユーザー: ゲスト", gps: "GPS: オフライン", chat: "グローバルチャット 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 認証", gps_desc: "グローバル量子アリーナマッピングを同期するには位置情報が必要です。", deny: "拒否", allow: "同意" },
-        ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기", sys: "SYS.온라인", user: "유저: 게스트", gps: "GPS: 오프라인", chat: "글로벌 채팅 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 인증", 전_desc: "글로벌 양자 아레나 매핑을 동기화하려면 위치 권한이 필요합니다.", deny: "거부", allow: "수락" },
+        ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기", sys: "SYS.온라인", user: "유저: 게스트", gps: "GPS: 오프라인", chat: "글로벌 채팅 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 인증", gps_desc: "글로벌 양자 아레나 매핑을 동기화하려면 위치 권한이 필요합니다.", deny: "거부", allow: "수락" },
         fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER", sys: "SYS.EN LIGNE", user: "UTILISATEUR: INVITÉ", gps: "GPS: HORS LIGNE", chat: "CHAT GLOBAL 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VÉRIFICATION GPS", gps_desc: "Le système requiert l'accès à la position pour synchroniser l'arène.", deny: "REFUSER", allow: "ACCEPTER" },
         de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN", sys: "SYS.ONLINE", user: "BENUTZER: GAST", gps: "GPS: OFFLINE", chat: "GLOBALES CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS-VERIFIZIERUNG", gps_desc: "Das System benötigt Standortzugriff zur Synchronisierung.", deny: "ABLEHNEN", allow: "AKZEPTIEREN" },
         es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", chat: "CHAT GLOBAL 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
@@ -304,7 +324,6 @@
                 </div>
             </div>
 
-            <!-- CẢNH 1: GIAO DIỆN HỘP THOẠI ĐƯỢC LOAD LÊN SAU ẢNH NỀN -->
             <div class="gps-modal-overlay" id="gpsModalOverlay">
                 <div class="gps-modal-box" id="gpsModalBox">
                     <div class="gps-modal-desc">
@@ -315,8 +334,12 @@
                         <button class="gps-action-btn gps-btn-allow" id="gpsAllowBtn">ĐỒNG Ý</button>
                     </div>
                     
-                    <!-- NÚT QUẢ CẦU ĐƯỢC CHUYỂN XUỐNG VỊ TRÍ DƯỚI CÙNG (CHỖ TAM GIÁC VÀNG) -->
-                    <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
+                    <!-- WRAPPER CHỨA QUẢ CẦU VÀ NGÓN TAY CHỈ -->
+                    <div class="globe-pointer-wrapper">
+                        <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
+                        <!-- LINK ẢNH NGÓN TAY THAY VÀO DƯỚI ĐÂY -->
+                        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Ngon%20tay.png?raw=true" class="finger-pointer" alt="Pointer">
+                    </div>
                 </div>
             </div>
         `;
