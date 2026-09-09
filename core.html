@@ -305,7 +305,7 @@
     <div class="cyber-floor ui-element" id="floor-grid"></div>
     <div id="dust-container" class="ui-element"></div>
     
-    <audio id="bg-music" loop src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20Signal.mp3"></audio>
+    <audio id="bg-music" loop src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/Kai%20Ripe%20Signal.mp3"></audio>
 
     <!-- BẢNG THEO DÕI NHIỆM VỤ -->
     <div id="dynamic-hud-module" class="ui-element" onclick="toggleMissionHud()">
@@ -399,7 +399,35 @@
     <button id="btn-exit-inspect" onclick="exitInspectMode()" data-i18n="btnExitInspect">[ QUAY LẠI ]</button>
 
     <script>
-        // BỘ TỪ ĐIỂN HOÀN CHỈNH 12 NGÔN NGỮ QUỐC TẾ KHÔNG LỖI ĐEN MÀN HÌNH
+        // BẢNG ÁNH XẠ KÝ HIỆU LƯỢNG TỬ
+        const quantumMap = {
+            'a': '⟡', 'á': '⟡⁺', 'à': '⟡₋', 'ả': '⟡∼', 'ã': '⟡≈', 'ạ': '⟡•',
+            'â': '⌖', 'ấ': '⌖⁺', 'ầ': '⌖₋', 'ẩ': '⌖∼', 'ẫ': '⌖≈', 'ậ': '⌖•',
+            'ă': '⍜', 'ắ': '⍜⁺', 'ằ': '⍜₋', 'ẳ': '⍜∼', 'ẵ': '⍜≈', 'ặ': '⍜•',
+            'b': '❖', 'c': '⟨', 'd': '⎔', 'đ': '⟠',
+            'e': '⟍', 'é': '⟍⁺', 'è': '⟍₋', 'ẻ': '⟍∼', 'ẽ': '⟍≈', 'ẹ': '⟍•',
+            'ê': '⍎', 'ế': '⍎⁺', 'ề': '⍎₋', 'ể': '⍎∼', 'ễ': '⍎≈', 'ệ': '⍎•',
+            'g': '◎', 'h': '☩', 'i': '║', 'í': '║⁺', 'ì': '║₋', 'ỉ': '║∼', 'ĩ': '║≈', 'ị': '║•',
+            'k': '⎈', 'l': '⫷', 'm': '☲', 'n': '☱',
+            'o': '⨀', 'ó': '⨀⁺', 'ò': '⨀₋', 'ỏ': '⨀∼', 'õ': '⨀≈', 'ọ': '⨀•',
+            'ô': '⍜', 'ố': '⍜⁺', 'ồ': '⍜₋', 'ổ': '⍜∼', 'ỗ': '⍜≈', 'ộ': '⍜•',
+            'ơ': '⍥', 'ớ': '⍥⁺', 'ờ': '⍥₋', 'ở': '⍥∼', 'ỡ': '⍥≈', 'ợ': '⍥•',
+            'p': '⨁', 'q': '⍟', 'r': 'Ⱬ', 's': '⟡', 't': '⍂',
+            'u': '⋃', 'ú': '⋃⁺', 'ù': '⋃₋', 'ủ': '⋃∼', 'ũ': '⋃≈', 'ụ': '⋃•',
+            'ư': '⋲', 'ứ': '⋲⁺', 'ừ': '⋲₋', 'ử': '⋲∼', 'ữ': '⋲≈', 'ự': '⋲•',
+            'v': '⟁', 'x': '⨂', 'y': '⋫', 'ý': '⋫⁺', 'ỳ': '⋫₋', 'ỷ': '⋫∼', 'ỹ': '⋫≈', 'ỵ': '⋫•',
+            '2': '⟡', '6': '⌖', '.': '•', '/': '╱', '-': '─', ' ': ' '
+        };
+
+        function encodeQuantum(text) {
+            if (!text) return '';
+            return text.split('').map(char => {
+                const lower = char.toLowerCase();
+                return quantumMap[lower] !== undefined ? quantumMap[lower] : char;
+            }).join('');
+        }
+
+        // BỘ TỪ ĐIỂN ĐA NGÔN NGỮ HOÀN CHỈNH
         const i18nCore = {
             vi: {
                 theDarkText: "BÓNG TỐI", theLightText: "ÁNH SÁNG", bushidoMax: "VÕ ĐẠO: TỐI ĐA", mushiDays: "VÔ NGÃ: 1000", armorInt: ">> HỆ THỐNG K-DRIVE", armorSubj: ">> ĐỐI TƯỢNG:",
@@ -511,15 +539,18 @@
             }
         };
 
-        // Khởi chạy ngôn ngữ dựa trên kdrive_lang (được HUD chọn)
-        let currentLang = localStorage.getItem('kdrive_lang') || 'vi';
+        let currentLang = localStorage.getItem('kdrive_lang'] || 'vi';
         
         function applyTranslations() {
-            // Cơ chế an toàn (Fallback) nếu hệ thống truyền sai tên ngôn ngữ thì về tiếng Anh
-            const t = i18nCore[currentLang] || i18nCore['en'];
+            const isEncoded = (currentLang === 'encoded');
+            const langKey = isEncoded ? 'vi' : (i18nCore[currentLang] ? currentLang : 'en');
+            const t = i18nCore[langKey];
+
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (t[key]) el.innerHTML = t[key];
+                if (t[key]) {
+                    el.innerHTML = isEncoded ? encodeQuantum(t[key]) : t[key];
+                }
             });
             updateSystemTerminal(); 
         }
@@ -571,7 +602,6 @@
 
         const bgMusic = document.getElementById('bg-music'); if(bgMusic) bgMusic.volume = 0.6; 
 
-        // TỪ ĐIỂN THOẠI CỦA BOO AI (HOẠT ĐỘNG HOÀN HẢO CHO 12 NGÔN NGỮ)
         const booLines = {
             chill: {
                 vi: ["Khịt khịt... Thảnh thơi quá, có ly boba cúng nạp thì nhức nách!", "🎵 Trà sữa trân châu uống vào là hết sầu... ụt ịt..."],
@@ -745,11 +775,29 @@
 
         let isBooMuted = false;
         const holoBubble = document.getElementById('holo-bubble'); let holoTimeout; let typewriterTimerCore;
-        function showHologramStatus(text) { window.speechSynthesis.cancel(); speechQueue = []; if(!holoBubble) return; holoBubble.style.opacity = 1; holoBubble.innerHTML = ""; clearTimeout(holoTimeout); clearInterval(typewriterTimerCore); let i = 0; typewriterTimerCore = setInterval(() => { if (i < text.length) { holoBubble.innerHTML += text.charAt(i); i++; } else { clearInterval(typewriterTimerCore); holoTimeout = setTimeout(() => { holoBubble.style.opacity = 0; }, 3200); } }, 25); }
+        function showHologramStatus(text) { 
+            window.speechSynthesis.cancel(); speechQueue = []; if(!holoBubble) return; 
+            const isEncoded = (currentLang === 'encoded');
+            const displayText = isEncoded ? encodeQuantum(text) : text;
+            holoBubble.style.opacity = 1; holoBubble.innerHTML = ""; clearTimeout(holoTimeout); clearInterval(typewriterTimerCore); let i = 0; typewriterTimerCore = setInterval(() => { if (i < displayText.length) { holoBubble.innerHTML += displayText.charAt(i); i++; } else { clearInterval(typewriterTimerCore); holoTimeout = setTimeout(() => { holoBubble.style.opacity = 0; }, 3200); } }, 25); 
+        }
         let speechQueue = []; let isDialogPlaying = false;
         function playBooDialog(fullText, useVoice = true, callback = null) { window.speechSynthesis.cancel(); clearTimeout(holoTimeout); clearInterval(typewriterTimerCore); let sentences = fullText.replace(/([.!?])\s+/g, "$1|").split("|"); speechQueue = []; let chunk = ""; for (let s of sentences) { s = s.trim(); if (!s) continue; if (chunk.split(/[.!?]/).length - 1 >= 2 || chunk.length > 80) { speechQueue.push(chunk); chunk = s; } else { chunk += (chunk ? " " : "") + s; } } if (chunk) speechQueue.push(chunk); isDialogPlaying = false; processDialogQueue(useVoice, callback); }
-        function processDialogQueue(useVoice, callback) { if (speechQueue.length === 0) { isDialogPlaying = false; holoTimeout = setTimeout(() => { if(holoBubble) holoBubble.style.opacity = 0; }, 3500); if (callback) callback(); return; } isDialogPlaying = true; let text = speechQueue.shift(); if(holoBubble) { holoBubble.style.opacity = 1; holoBubble.innerHTML = ""; } clearInterval(typewriterTimerCore); let i = 0; typewriterTimerCore = setInterval(() => { if (i < text.length) { if(holoBubble) holoBubble.innerHTML += text.charAt(i); i++; } else { clearInterval(typewriterTimerCore); } }, 30); if (useVoice) { try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = currentLang === 'vi' ? 'vi-VN' : 'en-US'; utterance.rate = 1.15; utterance.onend = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; utterance.onerror = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; window.speechSynthesis.speak(utterance); } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } } catch (e) { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 1000); } }
-        function speakMsg(text) { try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = currentLang === 'vi' ? 'vi-VN' : 'en-US'; utterance.rate = 1.1; window.speechSynthesis.speak(utterance); } } catch (e) {} }
+        function processDialogQueue(useVoice, callback) { 
+            if (speechQueue.length === 0) { isDialogPlaying = false; holoTimeout = setTimeout(() => { if(holoBubble) holoBubble.style.opacity = 0; }, 3500); if (callback) callback(); return; } 
+            isDialogPlaying = true; let text = speechQueue.shift(); 
+            const isEncoded = (currentLang === 'encoded');
+            let displayText = isEncoded ? encodeQuantum(text) : text;
+            if(holoBubble) { holoBubble.style.opacity = 1; holoBubble.innerHTML = ""; } 
+            clearInterval(typewriterTimerCore); let i = 0; typewriterTimerCore = setInterval(() => { if (i < displayText.length) { if(holoBubble) holoBubble.innerHTML += displayText.charAt(i); i++; } else { clearInterval(typewriterTimerCore); } }, 30); 
+            if (useVoice && !isEncoded) { 
+                try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = currentLang === 'vi' ? 'vi-VN' : 'en-US'; utterance.rate = 1.15; utterance.onend = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; utterance.onerror = () => { setTimeout(() => processDialogQueue(useVoice, callback), 300); }; window.speechSynthesis.speak(utterance); } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } } catch (e) { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 500); } 
+            } else { setTimeout(() => processDialogQueue(useVoice, callback), text.length * 60 + 1000); } 
+        }
+        function speakMsg(text) { 
+            if (currentLang === 'encoded') return;
+            try { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = currentLang === 'vi' ? 'vi-VN' : 'en-US'; utterance.rate = 1.1; window.speechSynthesis.speak(utterance); } } catch (e) {} 
+        }
 
         let isMissionExpanded = false;
         let currentMissionState = 'NEW';
@@ -799,7 +847,9 @@
             if(!container) return;
             container.innerHTML = '';
             
-            const t = i18nCore[currentLang] || i18nCore['en'];
+            const isEncoded = (currentLang === 'encoded');
+            const langKey = isEncoded ? 'vi' : (i18nCore[currentLang] ? currentLang : 'en');
+            const t = i18nCore[langKey];
 
             const missions = [
                 { id: 'bushido', name: t.m1, score: 0 },
@@ -822,10 +872,12 @@
 
                 if (!isDone) allDone = false;
 
+                let displayName = isEncoded ? encodeQuantum(m.name) : m.name;
+
                 container.innerHTML += `
                     <div class="check-item ${isDone ? 'done' : ''}">
                         <div class="check-box">${isDone ? '✓' : ''}</div>
-                        <span>${m.name}</span>
+                        <span>${displayName}</span>
                     </div>
                 `;
             });
@@ -914,13 +966,9 @@
             }, 500);
         });
 
-        // LẮNG NGHE SỰ KIỆN TỪ HUD TRUYỀN TỚI ĐỂ DỊCH CHUYỂN
+        // BẮT SỰ KIỆN ĐỔI NGÔN NGỮ TỪ HUD CHUNG CHUẨN XÁC
         window.addEventListener('kdriveLangChanged', (e) => {
-            if(e.detail.lang !== 'vi' && e.detail.lang !== 'en') {
-                currentLang = 'en'; 
-            } else {
-                currentLang = e.detail.lang;
-            }
+            currentLang = e.detail.lang;
             applyTranslations();
         });
 
@@ -968,7 +1016,6 @@
             if (!isCubeMoved && !document.body.classList.contains('inspect-mode') && !isModalActive) { 
                 if(navigator.vibrate) navigator.vibrate(50); playSound('katana'); 
                 
-                // ĐÃ SỬA: LIÊN KẾT ĐÚNG TÊN FILE CÁC ĐẠO TRƯỜNG
                 if (taskId === 'phanxa') {
                     document.getElementById('core-wrapper').style.opacity = '0'; 
                     playSound('warp-out');
@@ -1052,19 +1099,23 @@
             let bmc = document.getElementById('boo-module-container'); if(bmc) bmc.style.opacity = '0';
             let dhm = document.getElementById('dynamic-hud-module'); if(dhm) dhm.style.opacity = '0';
             
-            const t = i18nCore[currentLang] || i18nCore['vi'];
+            const isEncoded = (currentLang === 'encoded');
+            const langKey = isEncoded ? 'vi' : (i18nCore[currentLang] ? currentLang : 'en');
+            const t = i18nCore[langKey];
+
+            const formatText = (txt) => isEncoded ? encodeQuantum(txt) : txt;
 
             if (side === 'light') {
                 let al = document.getElementById('arrow-left'); if(al) al.classList.remove('show-arrow');
                 bg.style.backgroundImage = "url('https://github.com/happyk1900/-m-thanh-app/blob/main/LIGH%20NEN.png?raw=true')";
                 modal.style.borderColor = "rgba(0, 229, 255, 0.5)";
                 content.innerHTML = `
-                    <div class="holo-title-legend" style="color: #00e5ff; text-shadow: 0 0 15px rgba(0,229,255,0.7), 0 2px 4px rgba(0,0,0,0.9);">${t.factionLight}</div>
+                    <div class="holo-title-legend" style="color: #00e5ff; text-shadow: 0 0 15px rgba(0,229,255,0.7), 0 2px 4px rgba(0,0,0,0.9);">${formatText(t.factionLight)}</div>
                     <div class="holo-divider"></div>
                     <div class="holo-mini-info">
-                        <div><span data-i18n="popText">SĨ SỐ THÀNH VIÊN:</span> <span class="holo-population">0 / 0</span></div>
-                        <div style="color: #00e5ff; font-weight: 900; text-shadow: 0 0 8px rgba(0,229,255,0.6), 0 2px 4px rgba(0,0,0,0.9); margin-top: 2px;" data-i18n="statusNotEligible">${t.statusNotEligible}</div>
-                        <div style="color: #ffd700; font-size: 10.5px; margin-top: 2px; text-shadow: 0 0 5px rgba(255,215,0,0.5), 0 2px 4px rgba(0,0,0,0.9);" data-i18n="statusReq">${t.statusReq}</div>
+                        <div><span>${formatText(t.popText)}</span> <span class="holo-population">0 / 0</span></div>
+                        <div style="color: #00e5ff; font-weight: 900; text-shadow: 0 0 8px rgba(0,229,255,0.6), 0 2px 4px rgba(0,0,0,0.9); margin-top: 2px;">${formatText(t.statusNotEligible)}</div>
+                        <div style="color: #ffd700; font-size: 10.5px; margin-top: 2px; text-shadow: 0 0 5px rgba(255,215,0,0.5), 0 2px 4px rgba(0,0,0,0.9);">${formatText(t.statusReq)}</div>
                     </div>
                 `;
             } else {
@@ -1072,12 +1123,12 @@
                 bg.style.backgroundImage = "url('https://github.com/happyk1900/-m-thanh-app/blob/main/DARK%20NEN.png?raw=true')";
                 modal.style.borderColor = "rgba(255, 42, 42, 0.5)";
                 content.innerHTML = `
-                    <div class="holo-title-legend" style="color: #ff2a2a; text-shadow: 0 0 15px rgba(255,42,42,0.7), 0 2px 4px rgba(0,0,0,0.9);">${t.factionDark}</div>
+                    <div class="holo-title-legend" style="color: #ff2a2a; text-shadow: 0 0 15px rgba(255,42,42,0.7), 0 2px 4px rgba(0,0,0,0.9);">${formatText(t.factionDark)}</div>
                     <div class="holo-divider"></div>
                     <div class="holo-mini-info">
-                        <div><span data-i18n="popText">SĨ SỐ THÀNH VIÊN:</span> <span class="holo-population">0 / 0</span></div>
-                        <div style="color: #ff2a2a; font-weight: 900; text-shadow: 0 0 8px rgba(255,42,42,0.6), 0 2px 4px rgba(0,0,0,0.9); margin-top: 2px;" data-i18n="statusNotEligible">${t.statusNotEligible}</div>
-                        <div style="color: #ffd700; font-size: 10.5px; margin-top: 2px; text-shadow: 0 0 5px rgba(255,215,0,0.5), 0 2px 4px rgba(0,0,0,0.9);" data-i18n="statusReq">${t.statusReq}</div>
+                        <div><span>${formatText(t.popText)}</span> <span class="holo-population">0 / 0</span></div>
+                        <div style="color: #ff2a2a; font-weight: 900; text-shadow: 0 0 8px rgba(255,42,42,0.6), 0 2px 4px rgba(0,0,0,0.9); margin-top: 2px;">${formatText(t.statusNotEligible)}</div>
+                        <div style="color: #ffd700; font-size: 10.5px; margin-top: 2px; text-shadow: 0 0 5px rgba(255,215,0,0.5), 0 2px 4px rgba(0,0,0,0.9);">${formatText(t.statusReq)}</div>
                     </div>
                 `;
             }
@@ -1123,24 +1174,22 @@
             if(!boo) return;
             if (!isBooActivePhase || isBooSleeping || document.body.classList.contains('inspect-mode') || isVoiceChatActive || isDialogPlaying || isBooMuted) return;
             const h = new Date().getHours(); if (h >= 23 || h < 6) return; if (booEnergy <= 0) return;
-            let missingTasks = taskList.filter(t => !t.done).map(t => t.name); let nextTask = missingTasks.length > 0 ? missingTasks[0] : "";
+            const langKey = (currentLang === 'encoded') ? 'vi' : (i18nCore[currentLang] ? currentLang : 'en');
             if (booEnergy > 70) { 
-                const chillArr = booLines.chill[currentLang] || booLines.chill['en'];
+                const chillArr = booLines.chill[langKey] || booLines.chill['en'];
                 let line = chillArr[Math.floor(Math.random() * chillArr.length)]; playBooDialog(line); 
                 if (line.includes('🎵')) { boo.classList.add('boo-spin'); setTimeout(() => boo.classList.remove('boo-spin'), 1500); const note = document.createElement('div'); note.innerHTML = '🎵'; note.style.position = 'absolute'; note.style.top = '-20px'; note.style.left = '15px'; note.style.fontSize = '24px'; note.style.animation = 'floatNotes 2s forwards'; boo.appendChild(note); setTimeout(() => note.remove(), 2000); } 
             } 
             else if (booEnergy > 40 && booEnergy <= 70) { 
-                if (nextTask !== "") { 
-                    const msg = booLines.taskWait[currentLang] || booLines.taskWait['en'];
-                    playBooDialog(msg); playSound('boing'); 
-                } 
+                const msg = booLines.taskWait[langKey] || booLines.taskWait['en'];
+                playBooDialog(msg); playSound('boing'); 
             } 
             else if (booEnergy > 10 && booEnergy <= 40) { 
-                const msg = booLines.hungry[currentLang] || booLines.hungry['en'];
+                const msg = booLines.hungry[langKey] || booLines.hungry['en'];
                 playBooDialog(msg); boo.classList.add('boo-glitch'); setTimeout(() => boo.classList.remove('boo-glitch'), 1000); 
             } 
             else if (booEnergy > 0 && booEnergy <= 10) { 
-                const msg = booLines.dying[currentLang] || booLines.dying['en'];
+                const msg = booLines.dying[langKey] || booLines.dying['en'];
                 playBooDialog(msg); document.body.classList.add('critical-warning'); setTimeout(() => document.body.classList.remove('critical-warning'), 2000); 
             }
         }, 35000); 
@@ -1150,7 +1199,7 @@
             const h = new Date().getHours(); const isDND = (h >= 23 || h < 6); 
             if (isDND && !awakeOverride) { if (!isBooSleeping) forceSleep(); return; }
             if (isDaoNghiepVienMan && !awakeOverride) { booEnergy = 100; if(booEnergyBorder) booEnergyBorder.style.setProperty('--energy', `100%`); if (!isBooSleeping) forceSleep(); return; }
-            if (booEnergy > 0 && !isBooSleeping) { booEnergy -= DROP_RATE_PER_SECOND; if(booEnergyBorder) booEnergyBorder.style.setProperty('--energy', `${Math.max(0, booEnergy)}%`); if (booEnergy <= 10 && booEnergy > 0) boo.classList.add('boo-glitch'); else boo.classList.remove('boo-glitch'); if (booEnergy <= 0) { booEnergy = 0; if(booEnergyBorder) booEnergyBorder.style.setProperty('--energy', `0%`); document.body.classList.add('critical-warning'); boo.classList.add('boo-fainted'); const msg = booLines.faintedStatus[currentLang] || booLines.faintedStatus['en']; speakMsg(msg); showHologramStatus(msg); } }
+            if (booEnergy > 0 && !isBooSleeping) { booEnergy -= DROP_RATE_PER_SECOND; if(booEnergyBorder) booEnergyBorder.style.setProperty('--energy', `${Math.max(0, booEnergy)}%`); if (booEnergy <= 10 && booEnergy > 0) boo.classList.add('boo-glitch'); else boo.classList.remove('boo-glitch'); if (booEnergy <= 0) { booEnergy = 0; if(booEnergyBorder) booEnergyBorder.style.setProperty('--energy', `0%`); document.body.classList.add('critical-warning'); boo.classList.add('boo-fainted'); const langKey = (currentLang === 'encoded') ? 'vi' : (i18nCore[currentLang] ? currentLang : 'en'); const msg = booLines.faintedStatus[langKey] || booLines.faintedStatus['en']; speakMsg(msg); showHologramStatus(msg); } }
         }, 1000);
 
         function forceSleep() { if(!boo) return; isBooSleeping = true; boo.classList.add('boo-sleeping'); if(navigator.vibrate) navigator.vibrate([30, 30, 30]); if(holoBubble) holoBubble.style.opacity = 0; }
@@ -1161,7 +1210,11 @@
         
         if (SpeechRecognition) {
             recognition = new SpeechRecognition(); recognition.lang = currentLang === 'vi' ? 'vi-VN' : 'en-US'; recognition.interimResults = false; recognition.maxAlternatives = 1;
-            recognition.onstart = function() { showHologramStatus(booLines.voiceOpen[currentLang] || booLines.voiceOpen['en']); if(boo) boo.classList.add('boo-glitch'); };
+            recognition.onstart = function() { 
+                const langKey = (currentLang === 'encoded') ? 'vi' : (i18nCore[currentLang] ? currentLang : 'en');
+                showHologramStatus(booLines.voiceOpen[langKey] || booLines.voiceOpen['en']); 
+                if(boo) boo.classList.add('boo-glitch'); 
+            };
             recognition.onresult = function(event) { const speechResult = event.results[0][0].transcript; showHologramStatus(`Hearing: "${speechResult}"...`); if(boo) boo.classList.add('boo-spin'); askGemini(speechResult); };
             recognition.onerror = function(event) { let errorMsg = event.error; showHologramStatus(`Voice Error: ${errorMsg}`); if(boo) { boo.classList.remove('boo-glitch'); boo.classList.remove('boo-spin'); } isVoiceChatActive = false; };
             recognition.onend = function() { if(boo) boo.classList.remove('boo-glitch'); }
@@ -1184,7 +1237,7 @@
 
         if(boo) {
             boo.addEventListener('pointerdown', (e) => { 
-                e.preventDefault(); holdFired = false; holdTimer = setTimeout(() => { holdFired = true; if (isBooSleeping && booEnergy > 0) { awakeOverride = true; wakeUpBoo(); playSound('boing'); if (!isBooMuted) { const msg = booLines.wakeUp[currentLang] || booLines.wakeUp['en']; playBooDialog(msg); } if (navigator.vibrate) navigator.vibrate([100, 50, 100]); clearTimeout(awakeTimeout); awakeTimeout = setTimeout(() => { awakeOverride = false; }, 3 * 60 * 1000); } }, 1000); 
+                e.preventDefault(); holdFired = false; holdTimer = setTimeout(() => { holdFired = true; if (isBooSleeping && booEnergy > 0) { awakeOverride = true; wakeUpBoo(); playSound('boing'); if (!isBooMuted) { const langKey = (currentLang === 'encoded') ? 'vi' : (i18nCore[currentLang] ? currentLang : 'en'); const msg = booLines.wakeUp[langKey] || booLines.wakeUp['en']; playBooDialog(msg); } if (navigator.vibrate) navigator.vibrate([100, 50, 100]); clearTimeout(awakeTimeout); awakeTimeout = setTimeout(() => { awakeOverride = false; }, 3 * 60 * 1000); } }, 1000); 
             }); 
             boo.addEventListener('pointerleave', () => { clearTimeout(holdTimer); });
             
@@ -1200,15 +1253,24 @@
                     return; 
                 }
                 
+                const langKey = (currentLang === 'encoded') ? 'vi' : (i18nCore[currentLang] ? currentLang : 'en');
+
                 booClickCount++; clearTimeout(booClickTimer);
-                if (booClickCount >= 3) { isBooMuted = !isBooMuted; const muteIcon = document.getElementById('boo-mute-icon'); if (isBooMuted) { window.speechSynthesis.cancel(); speechQueue = []; isDialogPlaying = false; clearInterval(typewriterTimerCore); clearTimeout(holoTimeout); if(holoBubble) holoBubble.style.opacity = 0; if(muteIcon) muteIcon.style.opacity = 1; playSound('brake'); } else { if(muteIcon) muteIcon.style.opacity = 0; playSound('warp-in'); playBooDialog(booLines.unmuted[currentLang] || booLines.unmuted['en']); } booClickCount = 0; } else {
+                if (booClickCount >= 3) { 
+                    isBooMuted = !isBooMuted; 
+                    const muteIcon = document.getElementById('boo-mute-icon'); 
+                    if (isBooMuted) { 
+                        window.speechSynthesis.cancel(); speechQueue = []; isDialogPlaying = false; clearInterval(typewriterTimerCore); clearTimeout(holoTimeout); if(holoBubble) holoBubble.style.opacity = 0; if(muteIcon) muteIcon.style.opacity = 1; playSound('brake'); 
+                    } else { 
+                        if(muteIcon) muteIcon.style.opacity = 0; playSound('warp-in'); playBooDialog(booLines.unmuted[langKey] || booLines.unmuted['en']); 
+                    } 
+                    booClickCount = 0; 
+                } else {
                     booClickTimer = setTimeout(() => {
                         if(isBooMuted) { booClickCount = 0; return; } 
                         if (booClickCount === 1) { 
-                            let missing = taskList.filter(t => !t.done).map(t => t.name); 
-                            if (isDaoNghiepVienMan) playBooDialog(booLines.doneAll[currentLang] || booLines.doneAll['en']); 
-                            else if (missing.length === 1) playBooDialog(booLines.almostDone[currentLang] || booLines.almostDone['en']); 
-                            else playBooDialog(booLines.manyTasks[currentLang] || booLines.manyTasks['en']); 
+                            if (isDaoNghiepVienMan) playBooDialog(booLines.doneAll[langKey] || booLines.doneAll['en']); 
+                            else playBooDialog(booLines.almostDone[langKey] || booLines.almostDone['en']); 
                         } else if (booClickCount === 2) { if(navigator.vibrate) navigator.vibrate([100, 50, 100]); playSound('warp-in'); triggerVoiceChat(); } booClickCount = 0;
                     }, 350);
                 }
@@ -1250,7 +1312,8 @@
                         
                         bobaReward.style.display = 'none'; 
                         
-                        if (!isBooMuted) playBooDialog(booLines.charged[currentLang] || booLines.charged['en']); 
+                        const langKey = (currentLang === 'encoded') ? 'vi' : (i18nCore[currentLang] ? currentLang : 'en');
+                        if (!isBooMuted) playBooDialog(booLines.charged[langKey] || booLines.charged['en']); 
                     } else { 
                         playSound('brake');
                         bobaReward.style.left = '30px'; 
