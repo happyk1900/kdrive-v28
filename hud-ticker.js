@@ -46,18 +46,21 @@
                 100% { transform: scale(1.12); box-shadow: 0 0 22px rgba(0,229,255,0.9); border-color: #fff; }
             }
 
-            /* BẢNG CHỌN NGÔN NGỮ ĐƯỢC ĐẨY LÊN CAO NHẤT (Z-INDEX: 999999) */
+            /* BẢNG CHỌN NGÔN NGỮ PHỦ NỀN LƯỢNG TƯ FULL MÀN HÌNH (Z-INDEX: 999999) */
             .global-lang-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: rgba(1, 3, 8, 0.95); backdrop-filter: blur(15px);
+                background-image: url('https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/CHON%20NGON%20NGU.png') !important;
+                background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important;
                 z-index: 999999 !important; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: 0.3s ease; pointer-events: none;
             }
             .global-lang-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
+            
             .global-lang-content {
                 width: 90%; max-width: 360px; max-height: 85vh; overflow-y: auto;
-                background: rgba(5, 12, 22, 0.98); border: 1.5px solid #00e5ff; border-radius: 14px;
-                padding: 20px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.4);
+                background: rgba(3, 9, 22, 0.88); border: 2px solid #00e5ff; border-radius: 14px;
+                padding: 20px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.5), inset 0 0 20px rgba(0, 229, 255, 0.2);
+                backdrop-filter: blur(10px);
                 display: flex; flex-direction: column; align-items: center;
             }
             .global-lang-title {
@@ -150,14 +153,13 @@
             .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3) !important; color: #fff !important; box-shadow: 0 0 18px #ff003c !important; }
             
             /* =========================================
-               KHU VỰC CỤM QUẢ CẦU VÀ NGÓN TAY CHỈ BÊN TRÁI
+               QUẢ CẦU VÀ NGÓN TAY CHỈ TỪ BÊN TRÁI HƯỚNG LÊN
                ========================================= */
             .globe-pointer-wrapper {
                 position: relative !important; display: flex !important; justify-content: center !important; align-items: center !important;
                 margin-top: 25px !important; width: 100% !important;
             }
 
-            /* QUẢ CẦU TỎA NĂNG LƯỢNG GẤT HƠN, NHANH HƠN */
             .cassette-lang-btn {
                 position: relative !important; 
                 background: rgba(0, 229, 255, 0.3) !important; border: 2px solid #00e5ff !important;
@@ -165,27 +167,25 @@
                 font-size: 20px !important; display: flex !important; align-items: center !important; justify-content: center !important;
                 cursor: pointer !important; transition: 0.2s !important; 
                 box-shadow: 0 0 20px rgba(0,229,255,0.7), inset 0 0 10px rgba(0,229,255,0.5) !important;
-                animation: pulseGlobeSuper 0.45s infinite alternate ease-in-out !important; /* Đập cực nhanh (0.45s) */
+                animation: pulseGlobeSuper 0.45s infinite alternate ease-in-out !important;
                 z-index: 999920 !important; pointer-events: auto !important;
             }
             .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.6) !important; transform: scale(1.15) !important; box-shadow: 0 0 40px #00e5ff !important; }
 
-            /* BIÊN ĐỘ PHÓNG TO THU NHỎ MẠNH BẠO */
             @keyframes pulseGlobeSuper {
                 0% { transform: scale(0.9); box-shadow: 0 0 15px rgba(0,229,255,0.6); border-color: rgba(0,229,255,0.8); }
                 100% { transform: scale(1.3); box-shadow: 0 0 35px #00e5ff, 0 0 60px #00e5ff, inset 0 0 20px #fff; border-color: #fff; }
             }
 
-            /* NGÓN TAY TO RA, NẰM DƯỚI BÊN TRÁI, CHỈ CHÉO LÊN */
             .finger-pointer {
                 position: absolute !important;
-                left: calc(50% - 85px) !important; /* Kéo lệch hẳn sang trái */
-                top: 25px !important; /* Thụt xuống dưới quả cầu */
-                width: 75px !important; /* Phóng to gấp đôi */
+                left: calc(50% - 85px) !important; 
+                top: 25px !important; 
+                width: 75px !important; 
                 height: auto !important;
-                z-index: 999930 !important; pointer-events: none !important; /* Bấm xuyên qua được */
+                z-index: 999930 !important; pointer-events: none !important;
                 animation: fingerPointLeftUp 0.5s infinite alternate ease-in-out !important;
-                filter: drop-shadow(0 0 12px #00e5ff) !important; /* Tỏa sáng viền */
+                filter: drop-shadow(0 0 12px #00e5ff) !important;
             }
             @keyframes fingerPointLeftUp {
                 0% { transform: translate(-15px, 15px) scale(0.9); opacity: 0.7; }
@@ -342,7 +342,7 @@
                     <div class="globe-pointer-wrapper">
                         <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
                         
-                        <!-- DÁN LINK ẢNH NGÓN TAY CỦA ANH VÀO ĐÂY NHÉ -->
+                        <!-- ẢNH NGÓN TAY ĐÃ ĐƯỢC TÍCH HỢP ĐÚNG LINK -->
                         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Ngon%20tay.png?raw=true" class="finger-pointer" id="hudFingerPointer" alt="Pointer">
                     </div>
                 </div>
@@ -359,13 +359,12 @@
             const finger = document.getElementById('hudFingerPointer');
             if (finger) finger.style.display = 'none';
 
-            // DÁN LINK NHẠC 30 GIÂY CỦA ANH VÀO ĐÂY NHÉ
+            // TÍCH HỢP LINK NHẠC KHỞI ĐỘNG CHUẨN XÁC
             if (!kdriveBgMusic) {
                 kdriveBgMusic = new Audio("https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/K_Drive_Initialized.mp3");
-                kdriveBgMusic.loop = true; // Cho lặp lại nếu nghe chưa đã
+                kdriveBgMusic.loop = true; 
                 kdriveBgMusic.volume = 0.9;
             }
-            // Phát nhạc và bắt lỗi nếu trình duyệt chặn autoplay
             kdriveBgMusic.play().catch(e => console.log("Trình duyệt chặn phát nhạc tự động:", e));
         };
         
