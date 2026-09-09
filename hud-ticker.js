@@ -343,7 +343,7 @@
                         <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
                         
                         <!-- DÁN LINK ẢNH NGÓN TAY CỦA ANH VÀO ĐÂY NHÉ -->
-                        <img src="LINK_ANH_NGON_TAY_CUA_ANH_VAO_DAY" class="finger-pointer" id="hudFingerPointer" alt="Pointer">
+                        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Ngon%20tay.png?raw=true" class="finger-pointer" id="hudFingerPointer" alt="Pointer">
                     </div>
                 </div>
             </div>
@@ -361,7 +361,7 @@
 
             // DÁN LINK NHẠC 30 GIÂY CỦA ANH VÀO ĐÂY NHÉ
             if (!kdriveBgMusic) {
-                kdriveBgMusic = new Audio("LINK_NHAC_CUA_ANH_VAO_DAY");
+                kdriveBgMusic = new Audio("https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/System%20Boot%20Failure.mp3");
                 kdriveBgMusic.loop = true; // Cho lặp lại nếu nghe chưa đã
                 kdriveBgMusic.volume = 0.9;
             }
