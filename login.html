@@ -7,7 +7,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
     
-    <!-- Tích hợp Google Identity Services SDK chính thức -->
+    <!-- Google Identity Services SDK -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
@@ -19,11 +19,10 @@
         .kdrive-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; background: #010204; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; opacity: 1; }
         
-        /* BỐ CỤC CHÍNH (HIỆN NGAY LẬP TỨC KHÔNG QUA PRE-SPLASH) */
+        /* BỐ CỤC CHÍNH */
         .gateway-container {
             position: relative; width: 90%; max-width: 340px; z-index: 99999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 1; transform: scale(1); transition: all 0.6s cubic-bezier(0.25, 1, 0.3, 1);
         }
 
         /* HỘP ĐĂNG NHẬP / ĐĂNG KÝ THỦ CÔNG (Ở PHÍA TRÊN) */
@@ -82,20 +81,17 @@
         .social-btn.facebook:hover { border-color: #4267B2; background: rgba(66,103,178,0.2); color: #4267B2; }
         .social-btn.icloud:hover { border-color: #a2aaad; background: rgba(162,170,173,0.2); color: #fff; }
 
-        /* VIDEO BAY VÀO MỚI KHI ĐĂNG NHẬP THÀNH CÔNG */
         #successVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 9999999; display: none; background: #000; }
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
     <audio id="bgMusic" crossorigin="anonymous" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Path%20of%20the%20Ninja.mp3" preload="auto" loop></audio>
-    
-    <!-- SỬ DỤNG VIDEO BAY VÀO MỚI -->
-    <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20GPS%20FULL.mp4" playsinline></video>
+    <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20KAI%20RIEP%20Super.mp4" playsinline></video>
 
-    <!-- KHUNG GIAO DIỆN CHÍNH (DÙNG ẢNH NỀN ĐĂNG NHẬP MỚI) -->
+    <!-- KHUNG GIAO DIỆN CHÍNH (ĐÃ BỎ VIDEO KHỞI ĐỘNG VÀ BAY THẲNG VÀO ĐÂY) -->
     <div class="kdrive-image-wrapper">
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20NEN%20GPS%20NEN.png?raw=true" class="kdrive-bg-target" alt="New GPS Login Background">
+        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20HUD%20(1).png?raw=true" class="kdrive-bg-target" alt="Core Background">
         
         <div class="gateway-container active" id="loginPanelContainer">
             <!-- HỘP ĐĂNG NHẬP / ĐĂNG KÝ THỦ CÔNG (Ở PHÍA TRÊN) -->
@@ -150,7 +146,6 @@
                 status_terms: "⚠️ BẠN PHẢI ĐỒNG Ý ĐIỀU KHOẢN SỬ DỤNG!",
                 status_checking: "🛰️ ĐANG KẾT NỐI LÕI LƯỢNG TỬ...",
                 status_success: "✅ ĐĂNG NHẬP THÀNH CÔNG!",
-                status_reg_success: "✨ ĐĂNG KÝ THÀNH CÔNG! ĐANG VÀO LÕI...",
                 status_error: "❌ TÀI KHOẢN HOẶC MẬT KHẨU KHÔNG ĐÚNG!",
                 status_exist: "❌ TÀI KHOẢN ĐÃ TỒN TẠI TRÊN HỆ THỐNG!",
                 status_disconnect: "❌ MẤT KẾT NỐI MÁY CHỦ LƯỢNG TỬ!"
@@ -169,7 +164,6 @@
                 status_terms: "⚠️ YOU MUST AGREE TO THE TERMS!",
                 status_checking: "🛰️ CONNECTING TO QUANTUM CORE...",
                 status_success: "✅ LOGIN SUCCESSFUL!",
-                status_reg_success: "✨ REGISTRATION SUCCESSFUL! ENTERING...",
                 status_error: "❌ INVALID USERNAME OR PASSWORD!",
                 status_exist: "❌ ACCOUNT ALREADY EXISTS!",
                 status_disconnect: "❌ QUANTUM SERVER DISCONNECTED!"
@@ -211,10 +205,9 @@
         window.addEventListener('DOMContentLoaded', () => { 
             applyLanguage(localStorage.getItem('kdrive_lang') || 'vi');
             initGoogleAuth();
-            
-            // Tự động phát nhạc nền khi người dùng tương tác lần đầu
+            // Tự động phát nhạc nền ngay khi vào trang đăng nhập
             const bgm = document.getElementById('bgMusic');
-            if(bgm) { bgm.volume = 0.5; bgm.play().catch(e => {}); }
+            if(bgm) { bgm.currentTime = 0; bgm.play().catch(e => {}); }
         });
 
         function playHologramClick() { try { const snd = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'); snd.volume = 0.5; snd.play().catch(e=>{}); } catch(err) {} }
@@ -260,7 +253,7 @@
             .catch(error => { statusEl.innerHTML = t.status_disconnect; statusEl.style.color = "#ff3333"; });
         }
 
-        // Khởi tạo Google Identity Services với Client ID
+        // Khởi tạo Google Identity Services chuẩn One-Touch
         function initGoogleAuth() {
             try {
                 if (typeof google !== 'undefined' && google.accounts) {
@@ -289,8 +282,10 @@
                 statusEl.style.color = "#00e5ff";
                 try {
                     if (typeof google !== 'undefined' && google.accounts) {
+                        // Kích hoạt bảng chọn tài khoản Google chuẩn xịn của thiết bị
                         google.accounts.id.prompt((notification) => {
                             if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                                // Nếu trình duyệt chặn popup, dùng prompt nhập trực tiếp làm phương án dự phòng
                                 fallbackGmailPrompt();
                             }
                         });
@@ -382,6 +377,6 @@
         }
     </script>
     <script src="boo-player.js"></script>
-    <script src="hud-ticker.js"></script>
+<script src="hud-ticker.js"></script>
 </body>
 </html>
