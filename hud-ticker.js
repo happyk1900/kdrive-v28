@@ -270,6 +270,9 @@
         } catch(e){}
     }
 
+    // BIẾN TOÀN CỤC CHỨA NHẠC HIỆU KHỞI ĐỘNG
+    let kdriveBgMusic = null;
+
     document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('kdriveGlobalHud')) return;
 
@@ -347,7 +350,7 @@
         `;
         document.body.prepend(container);
 
-        // TỰ ĐỘNG CHÈN SCRIPT BOO-PLAYER ĐỂ ĐỌC NHẠC NỀN
+        // TỰ ĐỘNG CHÈN SCRIPT BOO-PLAYER ĐỂ HỖ TRỢ
         if (!document.getElementById('booPlayerScript')) {
             const booScript = document.createElement('script');
             booScript.id = 'booPlayerScript';
@@ -355,7 +358,7 @@
             document.body.appendChild(booScript);
         }
 
-        // HÀM MỞ BẢNG NGÔN NGỮ VÀ KÍCH HOẠT PLAYER
+        // HÀM MỞ BẢNG NGÔN NGỮ VÀ PHÁT NHẠC KHỞI ĐỘNG CHUẨN XÁC
         window.openGlobalLang = function() { 
             playClickSound(); 
             document.getElementById('globalLangModal').classList.add('active'); 
@@ -364,12 +367,13 @@
             const finger = document.getElementById('hudFingerPointer');
             if (finger) finger.style.display = 'none';
 
-            // Kích hoạt trình phát nhạc boo-player nếu có hàm hỗ trợ toàn cục
-            if (typeof window.playBooMusic === 'function') {
-                window.playBooMusic();
-            } else if (window.booAudio && typeof window.booAudio.play === 'function') {
-                window.booAudio.play().catch(e => console.log("Trình duyệt chặn phát nhạc tự động:", e));
+            // GẮN VÀ KÍCH HOẠT LINK NHẠC CHUẨN XÁC
+            if (!kdriveBgMusic) {
+                kdriveBgMusic = new Audio("https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/K_Drive_Initialized.mp3");
+                kdriveBgMusic.loop = true; 
+                kdriveBgMusic.volume = 0.9;
             }
+            kdriveBgMusic.play().catch(e => console.log("Trình duyệt chặn phát nhạc tự động:", e));
         };
         
         window.closeGlobalLang = function() { 
