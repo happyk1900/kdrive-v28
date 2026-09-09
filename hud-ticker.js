@@ -96,58 +96,59 @@
             .signal-bar:nth-child(3) { height: 9px; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
-            /* CẢNH 1: ẢNH NỀN CASSETTE FULL MÀN HÌNH - HIỆN THANH HUD SẴN SÀNG */
+            /* CẢNH 1: ÉP FULL MÀN HÌNH ĐÈ TRÊN TẤT CẢ VỚI Z-INDEX TUYỆT ĐỐI (2147483649) */
             .gps-modal-overlay {
-                position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
-                z-index: 2147483645 !important; display: flex; justify-content: center; align-items: center;
+                position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important;
+                z-index: 2147483649 !important; display: flex !important; justify-content: center !important; align-items: center !important;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
-                background-image: url('https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/ANH%20CASSETTE%20(1).png');
-                background-size: cover; background-position: center; background-repeat: no-repeat;
+                background-image: url('https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/ANH%20CASSETTE%20(1).png') !important;
+                background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important;
+                background-color: #000 !important;
             }
-            .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
+            .gps-modal-overlay.active { opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; }
             
             .gps-modal-box {
-                position: absolute; width: 84%; max-width: 320px;
-                top: 48%; left: 50%; transform: translate(-50%, -50%);
-                display: flex; flex-direction: column; align-items: center;
-                padding: 35px 14px 18px 14px; background: transparent; border: none; box-shadow: none;
-                z-index: 2147483646 !important;
+                position: absolute !important; width: 84% !important; max-width: 320px !important;
+                top: 48% !important; left: 50% !important; transform: translate(-50%, -50%) !important;
+                display: flex !important; flex-direction: column !important; align-items: center !important;
+                padding: 35px 14px 18px 14px !important; background: transparent !important; border: none !important; box-shadow: none !important;
+                z-index: 2147483650 !important;
             }
             
             .cassette-lang-btn {
-                position: absolute; top: 4px; right: 8px;
-                background: rgba(0, 229, 255, 0.2); border: 1.5px solid #00e5ff;
-                border-radius: 50%; width: 32px; height: 32px; color: #fff;
-                font-size: 15px; display: flex; align-items: center; justify-content: center;
-                cursor: pointer; transition: 0.2s; box-shadow: 0 0 12px rgba(0,229,255,0.5);
-                animation: pulseGlobe 1.5s infinite alternate ease-in-out;
-                z-index: 2147483648 !important; pointer-events: auto !important;
+                position: absolute !important; top: 4px !important; right: 8px !important;
+                background: rgba(0, 229, 255, 0.2) !important; border: 1.5px solid #00e5ff !important;
+                border-radius: 50% !important; width: 32px !important; height: 32px !important; color: #fff !important;
+                font-size: 15px !important; display: flex !important; align-items: center !important; justify-content: center !important;
+                cursor: pointer !important; transition: 0.2s !important; box-shadow: 0 0 12px rgba(0,229,255,0.5) !important;
+                animation: pulseGlobe 1.5s infinite alternate ease-in-out !important;
+                z-index: 2147483651 !important; pointer-events: auto !important;
             }
-            .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.4); transform: scale(1.1); box-shadow: 0 0 20px #00e5ff; }
+            .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.4) !important; transform: scale(1.1) !important; box-shadow: 0 0 20px #00e5ff !important; }
 
             .gps-modal-desc { 
-                background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(0, 229, 255, 0.3);
-                border-radius: 8px; padding: 12px 10px; width: 100%; box-sizing: border-box;
-                margin-bottom: 15px; backdrop-filter: blur(4px);
+                background: rgba(0, 0, 0, 0.65) !important; border: 1px solid rgba(0, 229, 255, 0.3) !important;
+                border-radius: 8px !important; padding: 12px 10px !important; width: 100% !important; box-sizing: border-box !important;
+                margin-bottom: 15px !important; backdrop-filter: blur(4px) !important;
             }
             .gps-modal-desc p { 
-                color: #e0f7fa; font-size: 11.5px; line-height: 1.5; 
-                font-family: 'Space Grotesk', sans-serif; margin-bottom: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.9); text-align: center;
+                color: #e0f7fa !important; font-size: 11.5px !important; line-height: 1.5 !important; 
+                font-family: 'Space Grotesk', sans-serif !important; margin-bottom: 0 !important; text-shadow: 0 2px 4px rgba(0,0,0,0.9) !important; text-align: center !important;
             }
             
-            .gps-btn-row { display: flex; gap: 10px; justify-content: center; width: 100%; }
+            .gps-btn-row { display: flex !important; gap: 10px !important; justify-content: center !important; width: 100% !important; }
             
             .gps-action-btn {
-                flex: 1; padding: 10px 4px; border-radius: 8px; font-family: 'Montserrat', sans-serif;
-                font-size: 11px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s;
-                text-align: center; white-space: nowrap; letter-spacing: 1px;
-                background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+                flex: 1 !important; padding: 10px 4px !important; border-radius: 8px !important; font-family: 'Montserrat', sans-serif !important;
+                font-size: 11px !important; font-weight: 900 !important; text-transform: uppercase !important; cursor: pointer !important; transition: 0.3s !important;
+                text-align: center !important; white-space: nowrap !important; letter-spacing: 1px !important;
+                background: rgba(0,0,0,0.75) !important; backdrop-filter: blur(4px) !important;
             }
-            .gps-btn-allow { border: 1.5px solid #00e5ff; color: #00e5ff; box-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
-            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3); color: #fff; box-shadow: 0 0 18px #00e5ff; }
+            .gps-btn-allow { border: 1.5px solid #00e5ff !important; color: #00e5ff !important; box-shadow: 0 0 10px rgba(0, 229, 255, 0.4) !important; }
+            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3) !important; color: #fff !important; box-shadow: 0 0 18px #00e5ff !important; }
             
-            .gps-btn-deny { border: 1.5px solid #ff003c; color: #ff003c; box-shadow: 0 0 10px rgba(255, 0, 60, 0.4); }
-            .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3); color: #fff; box-shadow: 0 0 18px #ff003c; }
+            .gps-btn-deny { border: 1.5px solid #ff003c !important; color: #ff003c !important; box-shadow: 0 0 10px rgba(255, 0, 60, 0.4) !important; }
+            .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3) !important; color: #fff !important; box-shadow: 0 0 18px #ff003c !important; }
         `;
         document.head.appendChild(style);
     }
@@ -282,6 +283,7 @@
                 </div>
             </div>
 
+            <!-- CẢNH 1: FULL MÀN HÌNH CASSETTE CHE KÍN LOGIN -->
             <div class="gps-modal-overlay active" id="gpsModalOverlay">
                 <div class="gps-modal-box">
                     <button class="cassette-lang-btn hudLangTrigger" title="Chọn ngôn ngữ">🌐</button>
@@ -368,6 +370,8 @@
         if (gpsVerified === 'true' || gpsVerified === 'false') {
             if (modalOverlay) modalOverlay.classList.remove('active');
             if (hudTopBar) hudTopBar.classList.add('active');
+        } else {
+            if (modalOverlay) modalOverlay.classList.add('active');
         }
 
         document.getElementById('gpsAllowBtn').addEventListener('click', () => {
