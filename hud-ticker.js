@@ -144,7 +144,7 @@
             
             .gps-btn-row { display: flex !important; gap: 10px !important; justify-content: center !important; width: 100% !important; }
             
-            /* HAI NÚT ACCEPT & DENY NHỊP THỞ NHƯ CŨ */
+            /* HAI NÚT ACCEPT & DENY NHỊP THỞ */
             .gps-action-btn {
                 flex: 1 !important; padding: 10px 4px !important; border-radius: 8px !important; font-family: 'Montserrat', sans-serif !important;
                 font-size: 11px !important; font-weight: 900 !important; text-transform: uppercase !important; cursor: pointer !important; transition: 0.3s !important;
@@ -186,21 +186,21 @@
                 100% { box-shadow: 0 0 25px rgba(0,229,255,0.8), inset 0 0 12px rgba(0,229,255,0.6); border-color: #fff; }
             }
 
-            /* NGÓN TAY PHÓNG TO GẤP 2.5 LẦN, CHỈ XUỐNG QUẢ ĐỊA CẦU */
+            /* NGÓN TAY PHÓNG TO GẤP 2.5 LẦN, ĐẶT Ở DƯỚI BÊN PHẢI CHÉO LÊN CHỈ THẲNG VÀO QUẢ ĐỊA CẦU */
             .finger-pointer {
                 position: absolute !important;
                 left: calc(50% + 15px) !important; 
-                top: -30px !important; 
-                width: 140px !important; 
+                top: -5px !important; 
+                width: 140px !important; /* Phóng to gấp 2.5 lần */
                 height: auto !important;
                 z-index: 999930 !important; pointer-events: none !important;
-                transform: rotate(180deg) scaleX(-1);
-                animation: fingerPointGlobe 1s infinite alternate ease-in-out !important;
+                transform: rotate(-35deg) scaleX(-1); /* Góc chéo từ dưới lên hướng vào quả cầu */
+                animation: fingerPointClassic 1.2s infinite alternate ease-in-out !important;
                 filter: drop-shadow(0 0 15px #00e5ff) !important;
             }
-            @keyframes fingerPointGlobe {
-                0% { transform: translate(0px, 0px) rotate(180deg) scaleX(-1) scale(0.95); opacity: 0.75; }
-                100% { transform: translate(0px, 12px) rotate(180deg) scaleX(-1) scale(1.05); opacity: 1; }
+            @keyframes fingerPointClassic {
+                0% { transform: translate(0px, 0px) rotate(-35deg) scaleX(-1) scale(0.95); opacity: 0.75; }
+                100% { transform: translate(-8px, -6px) rotate(-35deg) scaleX(-1) scale(1.05); opacity: 1; }
             }
         `;
         document.head.appendChild(style);
@@ -281,16 +281,16 @@
         } catch(e){}
     }
 
-    let kdriveBgMusic = null;
-    let particleAnimationId = null;
+    // QUẢN LÝ NHẠC NỀN TOÀN CỤC (DUY TRÌ XUYÊN SUỐT ĐẾN HẾT VIDEO CORE)
+    window.kdriveGlobalMusic = window.kdriveGlobalMusic || null;
 
-    function triggerLoginMusic() {
-        if (!kdriveBgMusic) {
-            kdriveBgMusic = new Audio("https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/K_Drive_Initialized.mp3");
-            kdriveBgMusic.loop = true; 
-            kdriveBgMusic.volume = 0.9;
+    function triggerGlobalLoginMusic() {
+        if (!window.kdriveGlobalMusic) {
+            window.kdriveGlobalMusic = new Audio("https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/K_Drive_Initialized.mp3");
+            window.kdriveGlobalMusic.loop = true; 
+            window.kdriveGlobalMusic.volume = 0.9;
         }
-        kdriveBgMusic.play().catch(e => console.log("Trình duyệt chặn phát nhạc tự động:", e));
+        window.kdriveGlobalMusic.play().catch(e => console.log("Trình duyệt chặn phát nhạc tự động:", e));
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -360,7 +360,9 @@
                     </div>
                     
                     <div class="globe-pointer-wrapper">
+                        <!-- QUẢ ĐỊA CẦU PHÁT SÁNG MỜ -->
                         <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
+                        <!-- NGÓN TAY CHUẨN GÓC CHÉO TỪ DƯỚI LÊN, CHỈ THẲNG VÀO QUẢ CẦU -->
                         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Ngon%20tay.png?raw=true" class="finger-pointer" id="hudFingerPointer" alt="Pointer">
                     </div>
                 </div>
@@ -434,7 +436,7 @@
 
         window.openGlobalLang = function() { 
             playClickSound(); 
-            triggerLoginMusic(); 
+            triggerGlobalLoginMusic(); 
             document.getElementById('globalLangModal').classList.add('active'); 
             setTimeout(initQuantumParticles, 100);
         };
@@ -447,7 +449,7 @@
         
         window.setGlobalLang = function(lang) {
             playClickSound();
-            triggerLoginMusic(); 
+            triggerGlobalLoginMusic(); 
             localStorage.setItem('kdrive_lang', lang);
             updateHudLangUI(lang);
             window.closeGlobalLang();
@@ -487,10 +489,11 @@
         const savedLang = localStorage.getItem('kdrive_lang') || 'encoded';
         updateHudLangUI(savedLang);
 
+        // KÍCH HOẠT PHÁT NHẠC XUYÊN SUỐT KHI BẤM BẤT CỨ NÚT NÀO
         document.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {
                 playClickSound();
-                triggerLoginMusic();
+                triggerGlobalLoginMusic();
             });
         });
 
@@ -520,23 +523,15 @@
             }
         }
 
-        // HÀM XỬ LÝ KHI BẤM NÚT GPS: PHÁT NHẠC RỒI MỚI TẮT MÀN HÌNH LOGIN
+        // HÀM XỬ LÝ CHỌN GPS: TIẾP TỤC GIỮ NHẠC CHẠY XUYÊN SUỐT QUA VIDEO
         function handleGpsChoice(choiceValue) {
             playClickSound();
-            triggerLoginMusic(); // ÉP PHÁT NHẠC NGAY LẬP TỨC
+            triggerGlobalLoginMusic(); // GIỮ NHẠC CHẠY LIÊN TỤC
 
             sessionStorage.setItem('kdrive_gps_verified', choiceValue);
 
-            // Cho nhạc chạy mượt mà nửa giây rồi mới ẩn modal và tắt hẳn nhạc login
-            setTimeout(() => {
-                if (kdriveBgMusic) {
-                    kdriveBgMusic.pause();
-                    kdriveBgMusic.currentTime = 0;
-                    kdriveBgMusic = null;
-                }
-                if (modalOverlay) modalOverlay.classList.remove('active');
-                if (hudTopBar) hudTopBar.classList.add('active');
-            }, 500);
+            if (modalOverlay) modalOverlay.classList.remove('active');
+            if (hudTopBar) hudTopBar.classList.add('active');
         }
 
         document.getElementById('gpsAllowBtn').addEventListener('click', () => {
