@@ -46,7 +46,7 @@
                 100% { transform: scale(1.12); box-shadow: 0 0 22px rgba(0,229,255,0.9); border-color: #fff; }
             }
 
-            /* BẢNG CHỌN NGÔN NGỮ PHỦ NỀN LƯỢNG TƯ FULL MÀN HÌNH (Z-INDEX: 999999) */
+            /* BẢNG CHỌN NGÔN NGỮ PHỦ NỀN LƯỢNG TỬ FULL MÀN HÌNH (Z-INDEX: 999999) */
             .global-lang-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 background-image: url('https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/CHON%20NGON%20NGU.png') !important;
@@ -385,8 +385,8 @@
         };
 
         function updateHudLangUI(lang) {
-            const isEncoded = (lang === 'encoded' || !globalTranslations[lang]);
-            const baseData = vietnameseData;
+            const isEncoded = (lang === 'encoded');
+            const t = globalTranslations[lang] || vietnameseData;
             const processText = (text) => isEncoded ? encodeQuantum(text) : text;
 
             const sysText = document.getElementById('hudSysText');
@@ -400,18 +400,17 @@
             const denyBtn = document.getElementById('gpsDenyBtn');
             const allowBtn = document.getElementById('gpsAllowBtn');
 
-            if (sysText) sysText.innerText = processText(baseData.sys);
-            if (userText) userText.innerText = processText(baseData.user);
-            if (gpsTextVal) gpsTextVal.innerText = processText(baseData.gps);
-            if (chatBadge) chatBadge.innerText = processText(baseData.chat);
-            if (kdriveText) kdriveText.innerText = processText(baseData.kdrive);
-            if (dateText) dateText.innerText = processText(baseData.date);
+            if (sysText) sysText.innerText = processText(t.sys);
+            if (userText) userText.innerText = processText(t.user);
+            if (gpsTextVal) gpsTextVal.innerText = processText(t.gps);
+            if (chatBadge) chatBadge.innerText = processText(t.chat);
+            if (kdriveText) kdriveText.innerText = processText(t.kdrive);
+            if (dateText) dateText.innerText = processText(t.date);
 
-            if (gpsDesc) gpsDesc.innerText = processText(baseData.gps_desc);
-            if (denyBtn) denyBtn.innerText = processText(baseData.deny);
-            if (allowBtn) allowBtn.innerText = processText(baseData.allow);
+            if (gpsDesc) gpsDesc.innerText = processText(t.gps_desc);
+            if (denyBtn) denyBtn.innerText = processText(t.deny);
+            if (allowBtn) allowBtn.innerText = processText(t.allow);
 
-            const t = globalTranslations[lang] || baseData;
             if (document.getElementById('langModalTitleText')) document.getElementById('langModalTitleText').innerText = processText(t.select_lang_title);
             if (document.getElementById('langModalCloseBtn')) document.getElementById('langModalCloseBtn').innerText = processText(t.close_btn);
         }
