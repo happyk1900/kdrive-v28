@@ -9,7 +9,6 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* THANH HUD 3 KHỐI HOÀN CHỈNH (CHỈ XUẤT HIỆN Ở CẢNH SAU KHI XONG GPS) */
             .hud-top-bar {
                 position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 50px !important;
                 display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 5px !important;
@@ -31,7 +30,6 @@
             .hud-gps { color: #ff007f !important; font-weight: 700; text-shadow: 0 0 6px rgba(255,0,127,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 9px; }
             .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.8); cursor: pointer; pointer-events: auto; }
 
-            /* NÚT TRÁI ĐẤT TO VÀ NHẤP NHÁY THU HÚT */
             .hud-lang-btn {
                 background: rgba(0, 229, 255, 0.25); border: 2px solid #00e5ff;
                 border-radius: 50%; width: 38px; height: 38px; color: #fff;
@@ -47,7 +45,6 @@
                 100% { transform: scale(1.12); box-shadow: 0 0 22px rgba(0,229,255,0.9); border-color: #fff; }
             }
 
-            /* BẢNG CHỌN NGÔN NGỮ TOÀN CẦU (Z-INDEX CAO NHẤT) */
             .global-lang-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 background: rgba(1, 3, 8, 0.95); backdrop-filter: blur(15px);
@@ -56,20 +53,36 @@
             }
             .global-lang-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
             .global-lang-content {
-                width: 90%; max-width: 360px; max-height: 80vh; overflow-y: auto;
+                width: 90%; max-width: 360px; max-height: 85vh; overflow-y: auto;
                 background: rgba(5, 12, 22, 0.98); border: 1.5px solid #00e5ff; border-radius: 14px;
                 padding: 20px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.4);
                 display: flex; flex-direction: column; align-items: center;
             }
             .global-lang-title {
                 color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 900;
-                text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,215,0,0.7);
+                text-transform: uppercase; margin-bottom: 12px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,215,0,0.7);
             }
+            
+            /* Ô ALIEN KÉO DÀI 100% CHIỀU NGANG, NHẤP NHÁY PHÁT SÁNG */
+            .global-alien-top-btn {
+                width: 100%; padding: 12px; margin-bottom: 10px; background: rgba(0, 229, 255, 0.15);
+                border: 1px solid rgba(0, 229, 255, 0.6); border-radius: 8px; cursor: pointer;
+                display: flex; justify-content: center; align-items: center;
+                font-size: 24px; animation: alienBlink 1.5s infinite ease-in-out;
+                box-shadow: 0 0 15px rgba(0, 229, 255, 0.3); transition: 0.2s;
+            }
+            .global-alien-top-btn:hover { background: rgba(0, 229, 255, 0.3); box-shadow: 0 0 25px #00e5ff; }
+
+            @keyframes alienBlink {
+                0%, 100% { opacity: 1; text-shadow: 0 0 12px #00e5ff, 0 0 25px #00e5ff; border-color: rgba(0, 229, 255, 0.9); }
+                50% { opacity: 0.3; text-shadow: 0 0 3px #00e5ff; border-color: rgba(0, 229, 255, 0.3); }
+            }
+
             .global-lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; margin-bottom: 15px; }
             .global-lang-item {
                 background: rgba(0, 229, 255, 0.08); border: 1px solid rgba(0, 229, 255, 0.25);
                 color: #ffffff; padding: 10px; border-radius: 6px; font-size: 11px; font-weight: 700;
-                text-align: center; cursor: pointer; transition: 0.2s;
+                text-align: center; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
             }
             .global-lang-item:hover { background: rgba(0, 229, 255, 0.3); border-color: #00e5ff; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); color: #ffd700; }
             .global-lang-close {
@@ -84,7 +97,6 @@
             .signal-bar:nth-child(3) { height: 9px; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
-            /* BẢNG GPS XÁC THỰC (CẢNH 1 - NỀN ĐEN TUYỆT ĐỐI, KHÔNG CÓ THANH HUD PHÍA TRÊN) */
             .gps-modal-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 z-index: 2147483646 !important; display: flex; justify-content: center; align-items: center;
@@ -218,7 +230,6 @@
         const container = document.createElement('div');
         container.id = 'kdriveGlobalHud';
         container.innerHTML = `
-            <!-- THANH HUD 3 KHỐI HOÀN CHỈNH (MẶC ĐỊNH ẨN Ở CẢNH 1) -->
             <div class="hud-top-bar" id="hudTopBar">
                 <div class="hud-left">
                     <div class="hud-sys-row">
@@ -244,12 +255,15 @@
                 </div>
             </div>
 
-            <!-- BẢNG CHỌN NGÔN NGỮ TOÀN CẦU -->
             <div class="global-lang-overlay" id="globalLangModal">
                 <div class="global-lang-content">
                     <div class="global-lang-title" id="langModalTitleText">CHỌN NGÔN NGỮ QUỐC TẾ</div>
+                    
+                    <!-- Nút Alien nhấp nháy chiếm 100% chiều ngang -->
+                    <div class="global-alien-top-btn" onclick="window.setGlobalLang('encoded')" title="Ký Hiệu Lượng Tử">👽</div>
+
+                    <!-- 12 quốc gia xếp 2 cột cân đối -->
                     <div class="global-lang-grid">
-                        <div class="global-lang-item" onclick="window.setGlobalLang('encoded')">⚛ Ký Hiệu Lượng Tử</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('vi')">🇻🇳 Tiếng Việt</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('en')">🇬🇧 English</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('zh')">🇨🇳 中文</div>
@@ -267,7 +281,6 @@
                 </div>
             </div>
 
-            <!-- BẢNG GPS XÁC THỰC (CẢNH 1) -->
             <div class="gps-modal-overlay active" id="gpsModalOverlay">
                 <div class="gps-modal-dimmer"></div>
                 <div class="gps-modal-box">
@@ -356,7 +369,6 @@
         const modalOverlay = document.getElementById('gpsModalOverlay');
         const hudTopBar = document.getElementById('hudTopBar');
 
-        // Kiểm tra nếu đã xác thực GPS từ trước thì hiện luôn thanh HUD cảnh 2
         const gpsVerified = sessionStorage.getItem('kdrive_gps_verified');
         if (gpsVerified === 'true' || gpsVerified === 'false') {
             if (modalOverlay) modalOverlay.classList.remove('active');
@@ -365,12 +377,12 @@
 
         document.getElementById('gpsAllowBtn').addEventListener('click', () => {
             if (modalOverlay) modalOverlay.classList.remove('active');
-            if (hudTopBar) hudTopBar.classList.add('active'); // Chuyển sang Cảnh 2: hiện HUD phía trên
+            if (hudTopBar) hudTopBar.classList.add('active');
             sessionStorage.setItem('kdrive_gps_verified', 'true');
         });
         document.getElementById('gpsDenyBtn').addEventListener('click', () => {
             if (modalOverlay) modalOverlay.classList.remove('active');
-            if (hudTopBar) hudTopBar.classList.add('active'); // Chuyển sang Cảnh 2: hiện HUD phía trên
+            if (hudTopBar) hudTopBar.classList.add('active');
             sessionStorage.setItem('kdrive_gps_verified', 'false');
         });
     });
