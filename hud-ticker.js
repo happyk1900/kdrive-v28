@@ -270,9 +270,6 @@
         } catch(e){}
     }
 
-    // BIẾN TOÀN CỤC CHỨA NHẠC NỀN
-    let kdriveBgMusic = null;
-
     document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('kdriveGlobalHud')) return;
 
@@ -342,7 +339,7 @@
                     <div class="globe-pointer-wrapper">
                         <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
                         
-                        <!-- ẢNH NGÓN TAY ĐÃ ĐƯỢC TÍCH HỢP ĐÚNG LINK -->
+                        <!-- ẢNH NGÓN TAY -->
                         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Ngon%20tay.png?raw=true" class="finger-pointer" id="hudFingerPointer" alt="Pointer">
                     </div>
                 </div>
@@ -350,7 +347,15 @@
         `;
         document.body.prepend(container);
 
-        // HÀM MỞ BẢNG NGÔN NGỮ VÀ PHÁT NHẠC
+        // TỰ ĐỘNG CHÈN SCRIPT BOO-PLAYER ĐỂ ĐỌC NHẠC NỀN
+        if (!document.getElementById('booPlayerScript')) {
+            const booScript = document.createElement('script');
+            booScript.id = 'booPlayerScript';
+            booScript.src = 'boo-player.js';
+            document.body.appendChild(booScript);
+        }
+
+        // HÀM MỞ BẢNG NGÔN NGỮ VÀ KÍCH HOẠT PLAYER
         window.openGlobalLang = function() { 
             playClickSound(); 
             document.getElementById('globalLangModal').classList.add('active'); 
@@ -359,13 +364,12 @@
             const finger = document.getElementById('hudFingerPointer');
             if (finger) finger.style.display = 'none';
 
-            // TÍCH HỢP LINK NHẠC KHỞI ĐỘNG CHUẨN XÁC
-            if (!kdriveBgMusic) {
-                kdriveBgMusic = new Audio("https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/K_Drive_Initialized.mp3");
-                kdriveBgMusic.loop = true; 
-                kdriveBgMusic.volume = 0.9;
+            // Kích hoạt trình phát nhạc boo-player nếu có hàm hỗ trợ toàn cục
+            if (typeof window.playBooMusic === 'function') {
+                window.playBooMusic();
+            } else if (window.booAudio && typeof window.booAudio.play === 'function') {
+                window.booAudio.play().catch(e => console.log("Trình duyệt chặn phát nhạc tự động:", e));
             }
-            kdriveBgMusic.play().catch(e => console.log("Trình duyệt chặn phát nhạc tự động:", e));
         };
         
         window.closeGlobalLang = function() { 
