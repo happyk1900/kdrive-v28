@@ -122,6 +122,5 @@
         }
     </script>
         <script src="boo-player.js"></script>
-        <script src="hud-ticker.js"></script>
 </body>
 </html>
