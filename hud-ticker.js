@@ -63,7 +63,6 @@
                 text-transform: uppercase; margin-bottom: 12px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,215,0,0.7);
             }
             
-            /* Ô ALIEN KÉO DÀI 100% CHIỀU NGANG, NHẤP NHÁY PHÁT SÁNG */
             .global-alien-top-btn {
                 width: 100%; padding: 12px; margin-bottom: 10px; background: rgba(0, 229, 255, 0.15);
                 border: 1px solid rgba(0, 229, 255, 0.6); border-radius: 8px; cursor: pointer;
@@ -97,6 +96,7 @@
             .signal-bar:nth-child(3) { height: 9px; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
+            /* BẢNG GPS XÁC THỰC - KHỚP TRỰC TIẾP VỚI ẢNH BĂNG CASSETTE LO-FI */
             .gps-modal-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 z-index: 2147483646 !important; display: flex; justify-content: center; align-items: center;
@@ -107,44 +107,41 @@
             .gps-modal-dimmer { position: absolute; inset: 0; background: transparent; z-index: 1; }
             
             .gps-modal-box {
-                width: 90%; max-width: 400px;
-                display: flex; flex-direction: column; justify-content: center; align-items: center;
-                z-index: 2; position: relative; padding: 25px 20px;
-                background: rgba(3, 9, 23, 0.95); 
-                border: 2px solid #ff007f; border-radius: 16px;
-                box-shadow: 0 0 30px rgba(255, 0, 127, 0.4), inset 0 0 20px rgba(255, 0, 127, 0.2);
-                backdrop-filter: blur(10px);
+                width: 90%; max-width: 360px; aspect-ratio: 3 / 4;
+                display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+                z-index: 2; position: relative; padding: 25px 20px; box-sizing: border-box;
+                background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20GPS%20LOFI.png?raw=true') no-repeat center center;
+                background-size: cover; border: 2px solid rgba(0, 229, 255, 0.4); border-radius: 16px;
+                box-shadow: 0 0 35px rgba(0, 229, 255, 0.3); backdrop-filter: blur(5px);
             }
             
             .gps-modal-title {
-                color: #ff3366; font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 900;
-                text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 18px;
-                text-shadow: 0 0 12px rgba(255, 51, 102, 1); z-index: 2; text-align: center;
+                display: none; /* Ẩn tiêu đề cũ để nhường chỗ hoàn toàn cho thiết kế băng cassette */
             }
             
             .gps-modal-desc { 
-                background: rgba(0, 0, 0, 0.85); border: 1.5px solid rgba(0, 229, 255, 0.4);
-                border-radius: 12px; padding: 18px 16px; width: 100%; z-index: 2; box-sizing: border-box;
-                margin-bottom: 22px; box-shadow: inset 0 0 20px #000;
+                background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(0, 229, 255, 0.3);
+                border-radius: 8px; padding: 10px 12px; width: 100%; z-index: 2; box-sizing: border-box;
+                margin-bottom: 15px; backdrop-filter: blur(4px);
             }
             .gps-modal-desc p { 
-                color: #e0f7fa; font-size: 13px; line-height: 1.6; 
-                font-family: 'Space Grotesk', sans-serif; margin-bottom: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.8); text-align: center;
+                color: #e0f7fa; font-size: 11px; line-height: 1.4; 
+                font-family: 'Space Grotesk', sans-serif; margin-bottom: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.9); text-align: center;
             }
             
-            .gps-btn-row { display: flex; gap: 15px; justify-content: center; width: 100%; z-index: 2; }
+            .gps-btn-row { display: flex; gap: 10px; justify-content: center; width: 100%; z-index: 2; margin-bottom: 5px; }
             
             .gps-action-btn {
-                flex: 1; padding: 12px 5px; border-radius: 10px; font-family: 'Montserrat', sans-serif;
-                font-size: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s;
+                flex: 1; padding: 10px 5px; border-radius: 8px; font-family: 'Montserrat', sans-serif;
+                font-size: 11px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s;
                 text-align: center; white-space: nowrap; letter-spacing: 1px;
-                background: rgba(0,0,0,0.8);
+                background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
             }
-            .gps-btn-allow { border: 2px solid #00e5ff; color: #00e5ff; box-shadow: 0 0 12px rgba(0, 229, 255, 0.5); }
-            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3); color: #fff; box-shadow: 0 0 22px #00e5ff; }
+            .gps-btn-allow { border: 1.5px solid #00e5ff; color: #00e5ff; box-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
+            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3); color: #fff; box-shadow: 0 0 20px #00e5ff; }
             
-            .gps-btn-deny { border: 2px solid #ff003c; color: #ff003c; box-shadow: 0 0 12px rgba(255, 0, 60, 0.5); }
-            .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3); color: #fff; box-shadow: 0 0 22px #ff003c; }
+            .gps-btn-deny { border: 1.5px solid #ff003c; color: #ff003c; box-shadow: 0 0 10px rgba(255, 0, 60, 0.4); }
+            .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3); color: #fff; box-shadow: 0 0 20px #ff003c; }
         `;
         document.head.appendChild(style);
     }
@@ -259,10 +256,8 @@
                 <div class="global-lang-content">
                     <div class="global-lang-title" id="langModalTitleText">CHỌN NGÔN NGỮ QUỐC TẾ</div>
                     
-                    <!-- Nút Alien nhấp nháy chiếm 100% chiều ngang -->
                     <div class="global-alien-top-btn" onclick="window.setGlobalLang('encoded')" title="Ký Hiệu Lượng Tử">👽</div>
 
-                    <!-- 12 quốc gia xếp 2 cột cân đối -->
                     <div class="global-lang-grid">
                         <div class="global-lang-item" onclick="window.setGlobalLang('vi')">🇻🇳 Tiếng Việt</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('en')">🇬🇧 English</div>
@@ -284,11 +279,10 @@
             <div class="gps-modal-overlay active" id="gpsModalOverlay">
                 <div class="gps-modal-dimmer"></div>
                 <div class="gps-modal-box">
-                    <div style="position: absolute; top: 14px; right: 14px; z-index: 10;">
-                        <button class="hud-lang-btn hudLangTrigger" style="width: 34px; height: 34px; font-size: 15px;" title="Chọn ngôn ngữ">🌐</button>
+                    <div style="position: absolute; top: 12px; right: 12px; z-index: 10;">
+                        <button class="hud-lang-btn hudLangTrigger" style="width: 32px; height: 32px; font-size: 14px;" title="Chọn ngôn ngữ">🌐</button>
                     </div>
 
-                    <div class="gps-modal-title" id="gpsModalTitleText">XÁC THỰC GPS</div>
                     <div class="gps-modal-desc">
                         <p id="gpsDescText">Hệ thống yêu cầu quyền định vị để đồng bộ Đấu trường Lượng tử toàn cầu.</p>
                     </div>
@@ -329,7 +323,6 @@
             const kdriveText = document.getElementById('hudKdriveText');
             const dateText = document.getElementById('hudDateText');
 
-            const gpsTitle = document.getElementById('gpsModalTitleText');
             const gpsDesc = document.getElementById('gpsDescText');
             const denyBtn = document.getElementById('gpsDenyBtn');
             const allowBtn = document.getElementById('gpsAllowBtn');
@@ -341,7 +334,6 @@
             if (kdriveText) kdriveText.innerText = processText(baseData.kdrive);
             if (dateText) dateText.innerText = processText(baseData.date);
 
-            if (gpsTitle) gpsTitle.innerText = processText(baseData.gps_title);
             if (gpsDesc) gpsDesc.innerText = processText(baseData.gps_desc);
             if (denyBtn) denyBtn.innerText = processText(baseData.deny);
             if (allowBtn) allowBtn.innerText = processText(baseData.allow);
