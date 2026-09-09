@@ -9,7 +9,29 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* THANH HUD 3 KHỐI HOÀN CHỈNH (CHỈ XUẤT HIỆN Ở CẢNH SAU KHI XONG GPS) */
+            /* KHÔNG GIAN LƯỢNG TỬ MẮT LƯỚI TỔ ONG (HOÀN TOÀN BẰNG CSS CODE) */
+            .quantum-hex-bg {
+                position: fixed !important; top: 0 !important; left: 0 !important;
+                width: 100vw !important; height: 100vh !important;
+                background-color: #020611 !important;
+                background-image: 
+                    radial-gradient(circle at 50% 50%, rgba(0, 229, 255, 0.08) 0%, transparent 60%),
+                    linear-gradient(30deg, rgba(0, 229, 255, 0.04) 12%, transparent 12.5%, transparent 87%, rgba(0, 229, 255, 0.04) 87.5%, rgba(0, 229, 255, 0.04)),
+                    linear-gradient(150deg, rgba(0, 229, 255, 0.04) 12%, transparent 12.5%, transparent 87%, rgba(0, 229, 255, 0.04) 87.5%, rgba(0, 229, 255, 0.04)),
+                    linear-gradient(30deg, rgba(255, 0, 127, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(255, 0, 127, 0.03) 87.5%, rgba(255, 0, 127, 0.03)),
+                    linear-gradient(150deg, rgba(255, 0, 127, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(255, 0, 127, 0.03) 87.5%, rgba(255, 0, 127, 0.03)) !important;
+                background-size: 80px 140px !important;
+                background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0 !important;
+                animation: hexPulse 6s infinite alternate ease-in-out;
+                z-index: 2147483645 !important;
+                pointer-events: none !important;
+            }
+            @keyframes hexPulse {
+                0% { opacity: 0.7; filter: brightness(1); }
+                100% { opacity: 1; filter: brightness(1.3); }
+            }
+
+            /* THANH HUD 3 KHỐI TRONG SUỐT */
             .hud-top-bar {
                 position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 50px !important;
                 display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 5px !important;
@@ -17,10 +39,7 @@
                 border: none !important; border-radius: 0 !important;
                 z-index: 2147483647 !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 9.5px !important; color: #00e5ff !important; letter-spacing: 1px !important;
                 pointer-events: auto !important; box-shadow: none !important;
-                opacity: 0; visibility: hidden; transition: opacity 0.5s ease;
             }
-            .hud-top-bar.active { opacity: 1; visibility: visible; }
-
             .hud-left { display: flex; flex-direction: column; gap: 1px; width: 38%; text-align: left; }
             .hud-center { display: flex; justify-content: center; align-items: center; width: 24%; position: relative; }
             .hud-right { display: flex; flex-direction: column; gap: 1px; width: 38%; text-align: right; color: rgba(255,255,255,0.85); }
@@ -65,6 +84,25 @@
                 color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 900;
                 text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,215,0,0.7);
             }
+            
+            /* HÀNG TRÊN CÙNG: NÚT ALIEN CHIẾM TRỌN 100% CHIỀU NGANG VÀ NHẤP NHÁY */
+            .global-lang-alien-full {
+                width: 100%; grid-column: span 2;
+                background: rgba(255, 0, 127, 0.15); border: 1.5px solid #ff007f;
+                color: #ff3366; padding: 12px; border-radius: 8px; font-size: 20px;
+                text-align: center; cursor: pointer; transition: 0.2s;
+                box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+                animation: alienPulse 1.2s infinite alternate ease-in-out;
+                margin-bottom: 4px;
+            }
+            .global-lang-alien-full:hover {
+                background: rgba(255, 0, 127, 0.35); border-color: #fff; box-shadow: 0 0 25px #ff007f; color: #fff;
+            }
+            @keyframes alienPulse {
+                0% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 5px rgba(255,0,127,0.5)); }
+                100% { transform: scale(1.02); opacity: 1; filter: drop-shadow(0 0 15px rgba(255,0,127,1)); }
+            }
+
             .global-lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; margin-bottom: 15px; }
             .global-lang-item {
                 background: rgba(0, 229, 255, 0.08); border: 1px solid rgba(0, 229, 255, 0.25);
@@ -84,12 +122,12 @@
             .signal-bar:nth-child(3) { height: 9px; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
-            /* BẢNG GPS XÁC THỰC (CẢNH 1 - NỀN ĐEN TUYỆT ĐỐI, KHÔNG CÓ THANH HUD PHÍA TRÊN) */
+            /* BẢNG GPS XÁC THỰC */
             .gps-modal-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 z-index: 2147483646 !important; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
-                background-color: #020611 !important;
+                background-color: rgba(2, 6, 17, 0.94) !important;
             }
             .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
             .gps-modal-dimmer { position: absolute; inset: 0; background: transparent; z-index: 1; }
@@ -98,7 +136,7 @@
                 width: 90%; max-width: 400px;
                 display: flex; flex-direction: column; justify-content: center; align-items: center;
                 z-index: 2; position: relative; padding: 25px 20px;
-                background: rgba(3, 9, 23, 0.95); 
+                background: rgba(3, 9, 23, 0.9); 
                 border: 2px solid #ff007f; border-radius: 16px;
                 box-shadow: 0 0 30px rgba(255, 0, 127, 0.4), inset 0 0 20px rgba(255, 0, 127, 0.2);
                 backdrop-filter: blur(10px);
@@ -188,7 +226,7 @@
         ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기", sys: "SYS.온라인", user: "유저: 게스트", gps: "GPS: 오프라인", chat: "글로벌 채팅 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 인증", gps_desc: "글로벌 양자 아레나 매핑을 동기화하려면 위치 권한이 필요합니다.", deny: "거부", allow: "수락" },
         fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER", sys: "SYS.EN LIGNE", user: "UTILISATEUR: INVITÉ", gps: "GPS: HORS LIGNE", chat: "CHAT GLOBAL 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VÉRIFICATION GPS", gps_desc: "Le système requiert l'accès à la position pour synchroniser l'arène.", deny: "REFUSER", allow: "ACCEPTER" },
         de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN", sys: "SYS.ONLINE", user: "BENUTZER: GAST", gps: "GPS: OFFLINE", chat: "GLOBALES CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS-VERIFIZIERUNG", gps_desc: "Das System benötigt Standortzugriff zur Synchronisierung.", deny: "ABLEHNEN", allow: "AKZEPTIEREN" },
-        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", chat: "CHAT GLOBAL 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
+        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", chat: "GLOBAL CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
         ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ", sys: "СИСТЕМА.ОНЛАЙН", user: "ПОЛЬЗОВАТЕЛЬ: ГОСТЬ", gps: "GPS: ОФФЛАЙН", chat: "ГЛОБАЛЬНЫЙ ЧАТ 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "ПРОВЕРКА GPS", gps_desc: "Системе требуется доступ к геолокации.", deny: "ОТКАЗАТЬ", allow: "ПРИНЯТЬ" },
         th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด", sys: "ระบบ.ออนไลน์", user: "ผู้ใช้: แขก", gps: "GPS: ออฟไลน์", chat: "แชท Global 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "การยืนยัน GPS", gps_desc: "ระบบต้องการสิทธิ์ตำแหน่งที่ตั้งเพื่อซิงค์ข้อมูล", deny: "ปฏิเสธ", allow: "ยอมรับ" },
         id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP", sys: "SYS.ONLINE", user: "PENGGUNA: TAMU", gps: "GPS: OFFLINE", chat: "GLOBAL CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFIKASI GPS", gps_desc: "Sistem memerlukan akses lokasi.", deny: "TOLAK", allow: "TERIMA" },
@@ -215,11 +253,15 @@
     document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('kdriveGlobalHud')) return;
 
+        const hexBg = document.createElement('div');
+        hexBg.className = 'quantum-hex-bg';
+        document.body.prepend(hexBg);
+
         const container = document.createElement('div');
         container.id = 'kdriveGlobalHud';
         container.innerHTML = `
-            <!-- THANH HUD 3 KHỐI HOÀN CHỈNH (MẶC ĐỊNH ẨN Ở CẢNH 1) -->
-            <div class="hud-top-bar" id="hudTopBar">
+            <!-- THANH HUD CHÍNH -->
+            <div class="hud-top-bar">
                 <div class="hud-left">
                     <div class="hud-sys-row">
                         <div class="signal-bars">
@@ -234,6 +276,7 @@
                 </div>
 
                 <div class="hud-center">
+                    <div style="position: absolute; top: -20px; font-size: 11px; color: #00ff66; animation: bounceGuide 1s infinite ease-in-out;">▼</div>
                     <button class="hud-lang-btn hudLangTrigger" title="Chọn ngôn ngữ">🌐</button>
                 </div>
 
@@ -249,7 +292,7 @@
                 <div class="global-lang-content">
                     <div class="global-lang-title" id="langModalTitleText">CHỌN NGÔN NGỮ QUỐC TẾ</div>
                     <div class="global-lang-grid">
-                        <div class="global-lang-item" onclick="window.setGlobalLang('encoded')">⚛ Ký Hiệu Lượng Tử</div>
+                        <div class="global-lang-alien-full" onclick="window.setGlobalLang('encoded')" title="Ký hiệu lượng tử">👽</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('vi')">🇻🇳 Tiếng Việt</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('en')">🇬🇧 English</div>
                         <div class="global-lang-item" onclick="window.setGlobalLang('zh')">🇨🇳 中文</div>
@@ -267,8 +310,8 @@
                 </div>
             </div>
 
-            <!-- BẢNG GPS XÁC THỰC (CẢNH 1) -->
-            <div class="gps-modal-overlay active" id="gpsModalOverlay">
+            <!-- BẢNG GPS XÁC THỰC -->
+            <div class="gps-modal-overlay" id="gpsModalOverlay">
                 <div class="gps-modal-dimmer"></div>
                 <div class="gps-modal-box">
                     <div style="position: absolute; top: 14px; right: 14px; z-index: 10;">
@@ -349,29 +392,76 @@
         const savedLang = localStorage.getItem('kdrive_lang') || 'encoded';
         updateHudLangUI(savedLang);
 
+        const username = sessionStorage.getItem('kdrive_username');
+        if (username) {
+            const userEl = document.getElementById('hudUserText');
+            if (userEl) {
+                const rawUser = `USER: ${username.toUpperCase()}`;
+                const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+                userEl.innerText = (currentLang === 'encoded') ? encodeQuantum(rawUser) : rawUser;
+            }
+        }
+
         document.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', playClickSound);
         });
 
-        const modalOverlay = document.getElementById('gpsModalOverlay');
-        const hudTopBar = document.getElementById('hudTopBar');
-
-        // Kiểm tra nếu đã xác thực GPS từ trước thì hiện luôn thanh HUD cảnh 2
         const gpsVerified = sessionStorage.getItem('kdrive_gps_verified');
-        if (gpsVerified === 'true' || gpsVerified === 'false') {
-            if (modalOverlay) modalOverlay.classList.remove('active');
-            if (hudTopBar) hudTopBar.classList.add('active');
+        const modalOverlay = document.getElementById('gpsModalOverlay');
+
+        if (gpsVerified === 'true') {
+            const cachedLat = sessionStorage.getItem('kdrive_gps_lat');
+            const cachedLon = sessionStorage.getItem('kdrive_gps_lon');
+            const gpsTextVal = document.getElementById('hudGpsText');
+            if (cachedLat && cachedLon && gpsTextVal) {
+                const val = `GPS: ${Number(cachedLat).toFixed(2)}N, ${Number(cachedLon).toFixed(2)}E`;
+                const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+                gpsTextVal.innerText = (currentLang === 'encoded') ? encodeQuantum(val) : val;
+            }
+        } else if (gpsVerified !== 'false' && modalOverlay) {
+            modalOverlay.classList.add('active');
         }
 
-        document.getElementById('gpsAllowBtn').addEventListener('click', () => {
+        document.getElementById('gpsAllowBtn').addEventListener('click', () => handleGpsResponse(true));
+        document.getElementById('gpsDenyBtn').addEventListener('click', () => handleGpsResponse(false));
+
+        function handleGpsResponse(isAllowed) {
             if (modalOverlay) modalOverlay.classList.remove('active');
-            if (hudTopBar) hudTopBar.classList.add('active'); // Chuyển sang Cảnh 2: hiện HUD phía trên
-            sessionStorage.setItem('kdrive_gps_verified', 'true');
-        });
-        document.getElementById('gpsDenyBtn').addEventListener('click', () => {
-            if (modalOverlay) modalOverlay.classList.remove('active');
-            if (hudTopBar) hudTopBar.classList.add('active'); // Chuyển sang Cảnh 2: hiện HUD phía trên
-            sessionStorage.setItem('kdrive_gps_verified', 'false');
-        });
+            const gpsTextVal = document.getElementById('hudGpsText');
+
+            if (isAllowed && navigator.geolocation) {
+                if (gpsTextVal) gpsTextVal.innerText = encodeQuantum("GPS: Đang định vị...");
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lon = pos.coords.longitude;
+                        sessionStorage.setItem('kdrive_gps_verified', 'true');
+                        sessionStorage.setItem('kdrive_gps_lat', lat);
+                        sessionStorage.setItem('kdrive_gps_lon', lon);
+                        if (gpsTextVal) {
+                            const val = `GPS: ${lat.toFixed(2)}N, ${lon.toFixed(2)}E`;
+                            const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+                            gpsTextVal.innerText = (currentLang === 'encoded') ? encodeQuantum(val) : val;
+                        }
+                    },
+                    () => {
+                        sessionStorage.setItem('kdrive_gps_verified', 'false');
+                        if (gpsTextVal) {
+                            const val = "GPS: NGOẠI TUYẾN";
+                            const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+                            gpsTextVal.innerText = (currentLang === 'encoded') ? encodeQuantum(val) : val;
+                        }
+                    },
+                    { timeout: 5000 }
+                );
+            } else {
+                sessionStorage.setItem('kdrive_gps_verified', 'false');
+                if (gpsTextVal) {
+                    const val = "GPS: NGOẠI TUYẾN";
+                    const currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
+                    gpsTextVal.innerText = (currentLang === 'encoded') ? encodeQuantum(val) : val;
+                }
+            }
+        }
     });
 })();
