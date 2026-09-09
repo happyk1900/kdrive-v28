@@ -96,25 +96,24 @@
             .signal-bar:nth-child(3) { height: 9px; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
-            /* CẢNH 1: ẢNH NỀN CASSETTE FULL MÀN HÌNH, NỘI DUNG LỌT THỎM TRONG HỘP BĂNG */
+            /* CẢNH 1: ẢNH NỀN CASSETTE FULL MÀN HÌNH - HIỆN THANH HUD SẴN SÀNG */
             .gps-modal-overlay {
                 position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
-                z-index: 2147483646 !important; display: flex; justify-content: center; align-items: center;
+                z-index: 2147483645 !important; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
                 background-image: url('https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/ANH%20CASSETTE%20(1).png');
                 background-size: cover; background-position: center; background-repeat: no-repeat;
             }
             .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
             
-            /* HỘP NỘI DUNG KHỚP CHUẨN VÀO KHUNG GIỮA BĂNG CASSETTE */
             .gps-modal-box {
                 position: absolute; width: 84%; max-width: 320px;
                 top: 48%; left: 50%; transform: translate(-50%, -50%);
                 display: flex; flex-direction: column; align-items: center;
                 padding: 35px 14px 18px 14px; background: transparent; border: none; box-shadow: none;
+                z-index: 2147483646 !important;
             }
             
-            /* NÚT QUẢ CẦU NGÔN NGỮ NẰM CHUẨN VỊ TRÍ ỐC VẮT GÓC TRÊN BĂNG */
             .cassette-lang-btn {
                 position: absolute; top: 4px; right: 8px;
                 background: rgba(0, 229, 255, 0.2); border: 1.5px solid #00e5ff;
@@ -122,12 +121,10 @@
                 font-size: 15px; display: flex; align-items: center; justify-content: center;
                 cursor: pointer; transition: 0.2s; box-shadow: 0 0 12px rgba(0,229,255,0.5);
                 animation: pulseGlobe 1.5s infinite alternate ease-in-out;
-                z-index: 10; pointer-events: auto !important;
+                z-index: 2147483648 !important; pointer-events: auto !important;
             }
             .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.4); transform: scale(1.1); box-shadow: 0 0 20px #00e5ff; }
 
-            .gps-modal-title { display: none; } /* Ẩn tiêu đề ngoài vì trên băng đã có chữ thiết kế sẵn */
-            
             .gps-modal-desc { 
                 background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(0, 229, 255, 0.3);
                 border-radius: 8px; padding: 12px 10px; width: 100%; box-sizing: border-box;
@@ -285,7 +282,6 @@
                 </div>
             </div>
 
-            <!-- CẢNH 1: FULL MÀN HÌNH CASSETTE, NỘI DUNG NẰM TRỌN TRONG HỘP -->
             <div class="gps-modal-overlay active" id="gpsModalOverlay">
                 <div class="gps-modal-box">
                     <button class="cassette-lang-btn hudLangTrigger" title="Chọn ngôn ngữ">🌐</button>
