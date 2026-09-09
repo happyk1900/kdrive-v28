@@ -9,7 +9,7 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* THANH HUD BÊN TRONG GAME (Z-INDEX: 999950) */
+            /* THANH HUD BÊN TRONG GAME */
             .hud-top-bar {
                 position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 50px !important;
                 display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 5px !important;
@@ -46,19 +46,33 @@
                 100% { transform: scale(1.12); box-shadow: 0 0 22px rgba(0,229,255,0.9); border-color: #fff; }
             }
 
-            /* BẢNG CHỌN NGÔN NGỮ PHỦ NỀN LƯỢNG TỬ FULL MÀN HÌNH (Z-INDEX: 999999) */
+            /* BẢNG CHỌN NGÔN NGỮ PHỦ NỀN LƯỢNG TỬ ĐỘNG + HẠT BAY */
             .global-lang-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 background-image: url('https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/CHON%20NGON%20NGU.png') !important;
                 background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important;
                 z-index: 999999 !important; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: 0.3s ease; pointer-events: none;
+                animation: bgPanMove 20s infinite alternate linear;
             }
             .global-lang-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
+
+            /* HIỆU ỨNG ẢNH NỀN TRÔI DỊCH CHUYỂN KHÔNG GIAN */
+            @keyframes bgPanMove {
+                0% { background-position: 0% 0%; }
+                100% { background-position: 100% 100%; }
+            }
+
+            /* CANVAS HẠT LƯỢNG TỬ BAY BAY */
+            .quantum-particles-canvas {
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                pointer-events: none; z-index: 1;
+            }
             
             .global-lang-content {
+                position: relative; z-index: 2;
                 width: 90%; max-width: 360px; max-height: 85vh; overflow-y: auto;
-                background: rgba(3, 9, 22, 0.88); border: 2px solid #00e5ff; border-radius: 14px;
+                background: rgba(3, 9, 22, 0.82); border: 2px solid #00e5ff; border-radius: 14px;
                 padding: 20px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.5), inset 0 0 20px rgba(0, 229, 255, 0.2);
                 backdrop-filter: blur(10px);
                 display: flex; flex-direction: column; align-items: center;
@@ -111,7 +125,6 @@
             }
             .gps-modal-overlay.active { opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; }
             
-            /* HỘP XÁC NHẬN CHÍNH */
             .gps-modal-box {
                 position: absolute !important; width: 85% !important; max-width: 320px !important;
                 top: 50% !important; left: 50% !important; 
@@ -127,7 +140,6 @@
                 transform: translate(-50%, -50%) scale(1) !important; 
             }
 
-            /* HỘP CHỮ MÔ TẢ ĐEN XÌ & VIỀN DÀY */
             .gps-modal-desc { 
                 background: #000000 !important; border: 2px solid #00e5ff !important; 
                 border-radius: 8px !important; padding: 14px 12px !important; width: 100% !important; box-sizing: border-box !important;
@@ -152,9 +164,6 @@
             .gps-btn-deny { border: 1.5px solid #ff003c !important; color: #ff003c !important; box-shadow: 0 0 10px rgba(255, 0, 60, 0.4) !important; }
             .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3) !important; color: #fff !important; box-shadow: 0 0 18px #ff003c !important; }
             
-            /* =========================================
-               QUẢ CẦU VÀ NGÓN TAY CHỈ TỪ BÊN TRÁI HƯỚNG LÊN
-               ========================================= */
             .globe-pointer-wrapper {
                 position: relative !important; display: flex !important; justify-content: center !important; align-items: center !important;
                 margin-top: 25px !important; width: 100% !important;
@@ -270,8 +279,8 @@
         } catch(e){}
     }
 
-    // BIẾN TOÀN CỤC CHỨA NHẠC HIỆU KHỞI ĐỘNG
     let kdriveBgMusic = null;
+    let particleAnimationId = null;
 
     document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('kdriveGlobalHud')) return;
@@ -304,7 +313,9 @@
                 </div>
             </div>
 
+            <!-- BẢNG CHỌN NGÔN NGỮ TÍCH HỢP CANVAS HẠT LƯỢNG TỬ -->
             <div class="global-lang-overlay" id="globalLangModal">
+                <canvas class="quantum-particles-canvas" id="quantumParticlesCanvas"></canvas>
                 <div class="global-lang-content">
                     <div class="global-lang-title" id="langModalTitleText">CHỌN NGÔN NGỮ QUỐC TẾ</div>
                     
@@ -338,11 +349,8 @@
                         <button class="gps-action-btn gps-btn-allow" id="gpsAllowBtn">ĐỒNG Ý</button>
                     </div>
                     
-                    <!-- WRAPPER CHỨA QUẢ CẦU VÀ NGÓN TAY CHỈ -->
                     <div class="globe-pointer-wrapper">
                         <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
-                        
-                        <!-- ẢNH NGÓN TAY -->
                         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Ngon%20tay.png?raw=true" class="finger-pointer" id="hudFingerPointer" alt="Pointer">
                     </div>
                 </div>
@@ -350,7 +358,6 @@
         `;
         document.body.prepend(container);
 
-        // TỰ ĐỘNG CHÈN SCRIPT BOO-PLAYER ĐỂ HỖ TRỢ
         if (!document.getElementById('booPlayerScript')) {
             const booScript = document.createElement('script');
             booScript.id = 'booPlayerScript';
@@ -358,16 +365,74 @@
             document.body.appendChild(booScript);
         }
 
-        // HÀM MỞ BẢNG NGÔN NGỮ VÀ PHÁT NHẠC KHỞI ĐỘNG CHUẨN XÁC
+        // HÀM KHỞI TẠO VÀ CHẠY HIỆU ỨNG HẠT LƯỢNG TỬ BAY LÊN
+        function initQuantumParticles() {
+            const canvas = document.getElementById('quantumParticlesCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particlesArray = [];
+            const numberOfParticles = 40;
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = canvas.height + Math.random() * 100;
+                    this.size = Math.random() * 2.5 + 0.8;
+                    this.speedY = Math.random() * 1.5 + 0.5;
+                    this.speedX = (Math.random() - 0.5) * 0.6;
+                    this.color = Math.random() > 0.3 ? '#00e5ff' : '#ffd700';
+                    this.alpha = Math.random() * 0.7 + 0.3;
+                }
+                update() {
+                    this.y -= this.speedY;
+                    this.x += this.speedX;
+                    if (this.y < 0) {
+                        this.y = canvas.height + 10;
+                        this.x = Math.random() * canvas.width;
+                    }
+                }
+                draw() {
+                    ctx.save();
+                    ctx.globalAlpha = this.alpha;
+                    ctx.fillStyle = this.color;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                    particlesArray[i].draw();
+                }
+                particleAnimationId = requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+        }
+
         window.openGlobalLang = function() { 
             playClickSound(); 
             document.getElementById('globalLangModal').classList.add('active'); 
             
-            // Ẩn ngón tay đi khi người dùng đã bấm vào
             const finger = document.getElementById('hudFingerPointer');
             if (finger) finger.style.display = 'none';
 
-            // GẮN VÀ KÍCH HOẠT LINK NHẠC CHUẨN XÁC
+            // Khởi chạy hạt lượng tử
+            setTimeout(initQuantumParticles, 100);
+
             if (!kdriveBgMusic) {
                 kdriveBgMusic = new Audio("https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/K_Drive_Initialized.mp3");
                 kdriveBgMusic.loop = true; 
@@ -378,7 +443,8 @@
         
         window.closeGlobalLang = function() { 
             playClickSound(); 
-            document.getElementById('globalLangModal').classList.remove('active'); 
+            document.getElementById('globalLangModal').classList.remove('active');
+            if (particleAnimationId) cancelAnimationFrame(particleAnimationId);
         };
         
         window.setGlobalLang = function(lang) {
@@ -464,7 +530,7 @@
             playClickSound();
             if (modalOverlay) modalOverlay.classList.remove('active');
             if (hudTopBar) hudTopBar.classList.add('active');
-            sessionStorage.setItem('kdrive_gps_verified', 'false');
+            sessionStorage.setItem('kgrade_gps_verified', 'false');
         });
     });
 })();
