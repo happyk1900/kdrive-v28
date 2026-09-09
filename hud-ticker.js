@@ -96,52 +96,61 @@
             .signal-bar:nth-child(3) { height: 9px; }
             @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
 
-            /* BẢNG GPS XÁC THỰC - KHỚP TRỰC TIẾP VỚI ẢNH BĂNG CASSETTE LO-FI */
+            /* CẢNH 1: ẢNH NỀN CASSETTE FULL MÀN HÌNH, NỘI DUNG LỌT THỎM TRONG HỘP BĂNG */
             .gps-modal-overlay {
-                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
                 z-index: 2147483646 !important; display: flex; justify-content: center; align-items: center;
                 opacity: 0; visibility: hidden; transition: all 0.4s ease; pointer-events: none;
-                background-color: #020611 !important;
+                background-image: url('https://raw.githubusercontent.com/happyk1900/-m-thanh-app/main/ANH%20CASSETTE%20(1).png');
+                background-size: cover; background-position: center; background-repeat: no-repeat;
             }
             .gps-modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
-            .gps-modal-dimmer { position: absolute; inset: 0; background: transparent; z-index: 1; }
             
+            /* HỘP NỘI DUNG KHỚP CHUẨN VÀO KHUNG GIỮA BĂNG CASSETTE */
             .gps-modal-box {
-                width: 90%; max-width: 360px; aspect-ratio: 3 / 4;
-                display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
-                z-index: 2; position: relative; padding: 25px 20px; box-sizing: border-box;
-                background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20GPS%20LOFI.png?raw=true') no-repeat center center;
-                background-size: cover; border: 2px solid rgba(0, 229, 255, 0.4); border-radius: 16px;
-                box-shadow: 0 0 35px rgba(0, 229, 255, 0.3); backdrop-filter: blur(5px);
+                position: absolute; width: 84%; max-width: 320px;
+                top: 48%; left: 50%; transform: translate(-50%, -50%);
+                display: flex; flex-direction: column; align-items: center;
+                padding: 35px 14px 18px 14px; background: transparent; border: none; box-shadow: none;
             }
             
-            .gps-modal-title {
-                display: none; /* Ẩn tiêu đề cũ để nhường chỗ hoàn toàn cho thiết kế băng cassette */
+            /* NÚT QUẢ CẦU NGÔN NGỮ NẰM CHUẨN VỊ TRÍ ỐC VẮT GÓC TRÊN BĂNG */
+            .cassette-lang-btn {
+                position: absolute; top: 4px; right: 8px;
+                background: rgba(0, 229, 255, 0.2); border: 1.5px solid #00e5ff;
+                border-radius: 50%; width: 32px; height: 32px; color: #fff;
+                font-size: 15px; display: flex; align-items: center; justify-content: center;
+                cursor: pointer; transition: 0.2s; box-shadow: 0 0 12px rgba(0,229,255,0.5);
+                animation: pulseGlobe 1.5s infinite alternate ease-in-out;
+                z-index: 10; pointer-events: auto !important;
             }
+            .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.4); transform: scale(1.1); box-shadow: 0 0 20px #00e5ff; }
+
+            .gps-modal-title { display: none; } /* Ẩn tiêu đề ngoài vì trên băng đã có chữ thiết kế sẵn */
             
             .gps-modal-desc { 
                 background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(0, 229, 255, 0.3);
-                border-radius: 8px; padding: 10px 12px; width: 100%; z-index: 2; box-sizing: border-box;
+                border-radius: 8px; padding: 12px 10px; width: 100%; box-sizing: border-box;
                 margin-bottom: 15px; backdrop-filter: blur(4px);
             }
             .gps-modal-desc p { 
-                color: #e0f7fa; font-size: 11px; line-height: 1.4; 
+                color: #e0f7fa; font-size: 11.5px; line-height: 1.5; 
                 font-family: 'Space Grotesk', sans-serif; margin-bottom: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.9); text-align: center;
             }
             
-            .gps-btn-row { display: flex; gap: 10px; justify-content: center; width: 100%; z-index: 2; margin-bottom: 5px; }
+            .gps-btn-row { display: flex; gap: 10px; justify-content: center; width: 100%; }
             
             .gps-action-btn {
-                flex: 1; padding: 10px 5px; border-radius: 8px; font-family: 'Montserrat', sans-serif;
+                flex: 1; padding: 10px 4px; border-radius: 8px; font-family: 'Montserrat', sans-serif;
                 font-size: 11px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s;
                 text-align: center; white-space: nowrap; letter-spacing: 1px;
-                background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
+                background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
             }
             .gps-btn-allow { border: 1.5px solid #00e5ff; color: #00e5ff; box-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
-            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3); color: #fff; box-shadow: 0 0 20px #00e5ff; }
+            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3); color: #fff; box-shadow: 0 0 18px #00e5ff; }
             
             .gps-btn-deny { border: 1.5px solid #ff003c; color: #ff003c; box-shadow: 0 0 10px rgba(255, 0, 60, 0.4); }
-            .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3); color: #fff; box-shadow: 0 0 20px #ff003c; }
+            .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3); color: #fff; box-shadow: 0 0 18px #ff003c; }
         `;
         document.head.appendChild(style);
     }
@@ -276,12 +285,10 @@
                 </div>
             </div>
 
+            <!-- CẢNH 1: FULL MÀN HÌNH CASSETTE, NỘI DUNG NẰM TRỌN TRONG HỘP -->
             <div class="gps-modal-overlay active" id="gpsModalOverlay">
-                <div class="gps-modal-dimmer"></div>
                 <div class="gps-modal-box">
-                    <div style="position: absolute; top: 12px; right: 12px; z-index: 10;">
-                        <button class="hud-lang-btn hudLangTrigger" style="width: 32px; height: 32px; font-size: 14px;" title="Chọn ngôn ngữ">🌐</button>
-                    </div>
+                    <button class="cassette-lang-btn hudLangTrigger" title="Chọn ngôn ngữ">🌐</button>
 
                     <div class="gps-modal-desc">
                         <p id="gpsDescText">Hệ thống yêu cầu quyền định vị để đồng bộ Đấu trường Lượng tử toàn cầu.</p>
