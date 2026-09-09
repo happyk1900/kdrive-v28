@@ -39,15 +39,23 @@
             100% { transform: translate(0, 0) scale(1); filter: hue-rotate(0deg) brightness(1); }
         }
 
-        /* ẢNH NÚT GOOGLE */
+        /* ẢNH NÚT GOOGLE CÓ VIỀN PHÁT SÁNG NỆN NEON */
         .google-auth-btn-img {
-            width: 100%; max-width: 240px; height: auto; cursor: pointer;
-            filter: drop-shadow(0 0 20px rgba(0, 229, 255, 0.6));
+            width: 100%; max-width: 250px; height: auto; cursor: pointer;
+            border-radius: 16px;
+            filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.7));
+            animation: buttonPulseGlow 1.5s infinite alternate ease-in-out;
             transition: transform 0.2s ease, filter 0.2s ease;
+            pointer-events: auto !important;
         }
         .google-auth-btn-img:hover {
-            transform: scale(1.06);
-            filter: drop-shadow(0 0 30px rgba(0, 229, 255, 0.9));
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 35px #00e5ff);
+        }
+
+        @keyframes buttonPulseGlow {
+            0% { filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.5)); box-shadow: 0 0 10px rgba(0,229,255,0.3); }
+            100% { filter: drop-shadow(0 0 30px rgba(0, 229, 255, 0.95)); box-shadow: 0 0 25px rgba(0,229,255,0.8); }
         }
 
         #loginStatus {
@@ -55,7 +63,11 @@
             text-shadow: 0 0 8px rgba(0,229,255,0.6); letter-spacing: 1px;
         }
 
-        /* VIDEO THÀNH CÔNG FULL MÀN HÌNH */
+        /* CONTAINER CHỨA NÚT GOOGLE CHUẨN SDK (DỰ PHÒNG TỰ ĐỘNG BẬT KHI CẦN) */
+        #g_id_onload { display: none; }
+        .g_id_signin { margin-top: 10px; display: none; }
+
+        /* VIDEO THÀNH CÔNG FULL MÀN HÌNH (ĐÚNG LINK VIDEO GPS FULL) */
         #successVideo { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; 
             object-fit: cover; z-index: 9999999; display: none; background: #000; 
@@ -66,7 +78,7 @@
 
     <audio id="bgMusic" crossorigin="anonymous" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Path%20of%20the%20Ninja.mp3" preload="auto" loop></audio>
     
-    <!-- VIDEO BAY VÀO (LINK MỚI THEO YÊU CẦU) -->
+    <!-- VIDEO CHÍNH XÁC THEO YÊU CẦU: VIDEO GPS FULL.mp4 -->
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20GPS%20FULL.mp4" playsinline></video>
 
     <!-- KHUNG GIAO DIỆN CHÍNH -->
@@ -74,9 +86,16 @@
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20HUD%20(1).png?raw=true" class="kdrive-bg-target" alt="Core Background">
         
         <div class="gateway-container active" id="loginPanelContainer">
-            <!-- NÚT GOOGLE ĐỘC QUYỀN Ở TÂM -->
-            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL.png?raw=true" class="google-auth-btn-img" onclick="triggerGoogleOneTouch()" alt="Google Login">
+            <!-- NÚT GOOGLE ĐỘC QUYỀN Ở TÂM VỚI VIỀN PHÁT SÁNG -->
+            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL.png?raw=true" class="google-auth-btn-img" onclick="triggerGoogleLogin()" alt="Google Login">
             <div id="loginStatus"></div>
+
+            <!-- VÙNG SDK GOOGLE ẨN ĐỂ HỖ TRỢ HIỆN BẢNG CHỌN TÀI KHOẢN -->
+            <div id="g_id_onload"
+                 data-client_id="916035082915-656vp11qf63hmoplvtjfvbci053jti8r.apps.googleusercontent.com"
+                 data-callback="handleGoogleResponse"
+                 data-auto_prompt="false">
+            </div>
         </div>
     </div>
 
@@ -107,7 +126,7 @@
             }
         }
 
-        function triggerGoogleOneTouch() {
+        function triggerGoogleLogin() {
             playHologramClick();
             
             // Kích hoạt hiệu ứng điện xẹt Glitch
@@ -115,12 +134,14 @@
             container.classList.add('glitching');
 
             var statusEl = document.getElementById('loginStatus');
-            statusEl.innerHTML = "🛰️ ĐANG KẾT NỐI MẠNG LƯỢNG TỬ GMAIL...";
+            statusEl.innerHTML = "🛰️ ĐANG KÍCH HOẠT MẠNG LƯỢNG TỬ GMAIL...";
 
             try {
                 if (typeof google !== 'undefined' && google.accounts) {
+                    // Thử gọi bảng chọn tài khoản Google chuẩn xịn
                     google.accounts.id.prompt((notification) => {
                         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                            // Nếu bị trình duyệt chặn, mở phương án nhập tài khoản nhanh
                             fallbackGmailPrompt();
                         }
                     });
@@ -153,7 +174,7 @@
         }
 
         function fallbackGmailPrompt() {
-            var userEmail = prompt("Nhập địa chỉ GMAIL của bạn để đồng bộ lượng tử:", "player@gmail.com");
+            var userEmail = prompt("Chọn hoặc nhập địa chỉ GMAIL chính chủ của bạn:", "player@gmail.com");
             if (userEmail && userEmail.includes('@')) {
                 executeSocialSync(userEmail, userEmail.split('@')[0]);
             } else {
@@ -166,7 +187,7 @@
 
         function executeSocialSync(email, username) {
             var statusEl = document.getElementById('loginStatus');
-            statusEl.innerHTML = "⚡ ĐỒNG BỘ THÀNH CÔNG: " + email;
+            statusEl.innerHTML = "⚡ ĐÃ CHỌN GMAIL: " + email;
 
             const dataForm = new FormData();
             dataForm.append('action', 'register');
@@ -203,7 +224,7 @@
                 container.style.transform = 'scale(0)';
             }, 600);
 
-            // Bật video bay vào rồi chuyển trang core.html
+            // Bật video GPS FULL rồi chuyển trang core.html
             setTimeout(() => {
                 const successVid = document.getElementById('successVideo');
                 if(successVid) {
