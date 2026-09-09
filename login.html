@@ -89,13 +89,14 @@
         <div class="gateway-container active" id="loginPanelContainer">
             <!-- NÚT GMAIL -->
             <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL.png?raw=true" class="google-auth-btn-img" onclick="triggerGoogleOAuth()" alt="Google Login">
-            <div id="loginStatus"></div>
+            <div id="loginStatus" data-i18n="status_idle"></div>
         </div>
     </div>
 
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec';
         let googleTokenClient = null;
+        let lastUserEmail = "";
 
         // BẢNG ÁNH XẠ KÝ HIỆU LƯỢNG TỬ ĐỒNG BỘ VỚI HUD
         const quantumMap = {
@@ -126,23 +127,45 @@
         }
 
         const loginTranslations = {
-            vi: { welcome: "⚡ CHÀO MỪNG: ", connecting: "🛰️ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...", error: "❌ LỖI KẾT NỐI GOOGLE!" },
-            en: { welcome: "⚡ WELCOME: ", connecting: "🛰️ CONNECTING GOOGLE ACCOUNT...", error: "❌ GOOGLE CONNECTION ERROR!" },
-            zh: { welcome: "⚡ 欢迎: ", connecting: "🛰️ 正在连接谷歌账号...", error: "❌ 谷歌连接错误!" },
-            ja: { welcome: "⚡ ようこそ: ", connecting: "🛰️ Googleアカウントに接続中...", error: "❌ Google接続エラー!" },
-            ko: { welcome: "⚡ 환영합니다: ", connecting: "🛰️ Google 계정 연결 중...", error: "❌ Google 연결 오류!" }
+            vi: { page_title: "K-Drive: Lõi Lượng Tử", status_idle: "", connecting: "🛰️ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...", error: "❌ KHÔNG THỂ KẾT NỐI GOOGLE SDK!", welcome: "⚡ CHÀO MỪNG: " },
+            en: { page_title: "K-Drive: Quantum Core", status_idle: "", connecting: "🛰️ CONNECTING GOOGLE ACCOUNT...", error: "❌ GOOGLE SDK CONNECTION ERROR!", welcome: "⚡ WELCOME: " },
+            zh: { page_title: "K-Drive: 量子核心", status_idle: "", connecting: "🛰️ 正在连接谷歌账号...", error: "❌ 谷歌连接错误!", welcome: "⚡ 欢迎: " },
+            ja: { page_title: "K-Drive: 量子コア", status_idle: "", connecting: "🛰️ Googleアカウントに接続中...", error: "❌ Google接続エラー!", welcome: "⚡ ようこそ: " },
+            ko: { page_title: "K-Drive: 양자 코어", status_idle: "", connecting: "🛰️ Google 계정 연결 중...", error: "❌ Google 연결 오류!", welcome: "⚡ 환영합니다: " },
+            fr: { page_title: "K-Drive: Noyau Quantique", status_idle: "", connecting: "🛰️ CONNEXION COMPTE GOOGLE...", error: "❌ ERREUR DE CONNEXION GOOGLE!", welcome: "⚡ BIENVENUE: " },
+            de: { page_title: "K-Drive: Quantenkern", status_idle: "", connecting: "🛰️ VERBINDE GOOGLE-KONTO...", error: "❌ GOOGLE VERBINDUNGSFEHLER!", welcome: "⚡ WILLKOMMEN: " },
+            es: { page_title: "K-Drive: Núcleo Cuántico", status_idle: "", connecting: "🛰️ CONECTANDO CUENTA DE GOOGLE...", error: "❌ ERROR DE CONEXIÓN DE GOOGLE!", welcome: "⚡ BIENVENIDO: " },
+            ru: { page_title: "K-Drive: Квантовое ядро", status_idle: "", connecting: "🛰️ ПОДКЛЮЧЕНИЕ АККАУНТА GOOGLE...", error: "❌ ОШИБКА ПОДКЛЮЧЕНИЯ GOOGLE!", welcome: "⚡ ДОБРО ПОЖАЛОВАТЬ: " },
+            th: { page_title: "K-Drive: ควอนตัมคอร์", status_idle: "", connecting: "🛰️ กำลังเชื่อมต่อบัญชี GOOGLE...", error: "❌ ข้อผิดพลาดในการเชื่อมต่อ GOOGLE!", welcome: "⚡ ยินดีต้อนรับ: " },
+            id: { page_title: "K-Drive: Inti Kuantum", status_idle: "", connecting: "🛰️ MENGHUBUNGKAN AKUN GOOGLE...", error: "❌ KESALAHAN KONEKSI GOOGLE!", welcome: "⚡ SELAMAT DATANG: " },
+            ar: { page_title: "K-Drive: النواة الكمومية", status_idle: "", connecting: "🛰️ جاري الاتصال بحساب جوجل...", error: "❌ خطأ في الاتصال بجوجل!", welcome: "⚡ أهلاً بك: " }
         };
 
-        function getLocalizedText(key, fallback) {
-            const currentLang = localStorage.getItem('kdrive_lang') || 'vi';
-            if (currentLang === 'encoded') {
-                return encodeQuantum(fallback);
+        function applyLoginLanguage(lang) {
+            const t = loginTranslations[lang] || loginTranslations['vi'];
+            const isEncoded = (lang === 'encoded');
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) {
+                    el.innerText = isEncoded ? encodeQuantum(t[key]) : t[key];
+                }
+            });
+
+            // Nếu đang hiển thị trạng thái chào mừng, cập nhật lại ngôn ngữ ngay lập tức
+            if (lastUserEmail) {
+                const welcomePrefix = isEncoded ? encodeQuantum("⚡ CHÀO MỪNG: ") : (t.welcome || "⚡ CHÀO MỪNG: ");
+                document.getElementById('loginStatus').innerText = welcomePrefix + lastUserEmail;
             }
-            const dict = loginTranslations[currentLang] || loginTranslations['vi'];
-            return dict[key] || fallback;
         }
 
+        window.addEventListener('kdriveLangChanged', (e) => {
+            applyLoginLanguage(e.detail.lang);
+        });
+
         window.addEventListener('DOMContentLoaded', () => { 
+            const currentLang = localStorage.getItem('kdrive_lang') || 'vi';
+            applyLoginLanguage(currentLang);
             initGoogleOAuthClient();
             const bgm = document.getElementById('bgMusic');
             if(bgm) { bgm.currentTime = 0; bgm.play().catch(e => {}); }
@@ -174,8 +197,12 @@
             const container = document.getElementById('loginPanelContainer');
             container.classList.add('glitching');
 
-            var statusEl = document.getElementById('loginStatus');
-            statusEl.innerHTML = getLocalizedText('connecting', "🛰️ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...");
+            const currentLang = localStorage.getItem('kdrive_lang') || 'vi';
+            const t = loginTranslations[currentLang] || loginTranslations['vi'];
+            const statusEl = document.getElementById('loginStatus');
+            
+            statusEl.removeAttribute('data-i18n');
+            statusEl.innerText = (currentLang === 'encoded') ? encodeQuantum(t.connecting) : t.connecting;
 
             try {
                 if (googleTokenClient) {
@@ -190,14 +217,16 @@
                 }
             } catch (e) {
                 container.classList.remove('glitching');
-                statusEl.innerHTML = getLocalizedText('error', "❌ KHÔNG THỂ KẾT NỐI GOOGLE SDK!");
+                statusEl.innerText = (currentLang === 'encoded') ? encodeQuantum(t.error) : t.error;
                 statusEl.style.color = "#ff3333";
             }
         }
 
         function fetchUserProfile(accessToken) {
-            var statusEl = document.getElementById('loginStatus');
-            statusEl.innerHTML = getLocalizedText('connecting', "⚡ ĐANG XÁC THỰC DỮ LIỆU LƯỢNG TỬ...");
+            const currentLang = localStorage.getItem('kdrive_lang') || 'vi';
+            const t = loginTranslations[currentLang] || loginTranslations['vi'];
+            const statusEl = document.getElementById('loginStatus');
+            statusEl.innerText = (currentLang === 'encoded') ? encodeQuantum("⚡ XÁC THỰC LƯỢNG TỬ...") : "⚡ XÁC THỰC LƯỢNG TỬ...";
 
             fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                 headers: { 'Authorization': 'Bearer ' + accessToken }
@@ -209,7 +238,7 @@
                 executeSocialSync(userEmail, userName);
             })
             .catch(error => {
-                statusEl.innerHTML = getLocalizedText('error', "❌ LỖI KẾT NỐI THÔNG TIN GMAIL!");
+                statusEl.innerText = (currentLang === 'encoded') ? encodeQuantum(t.error) : t.error;
                 statusEl.style.color = "#ff3333";
                 const container = document.getElementById('loginPanelContainer');
                 container.classList.remove('glitching');
@@ -217,9 +246,13 @@
         }
 
         function executeSocialSync(email, username) {
-            var statusEl = document.getElementById('loginStatus');
-            const welcomeText = getLocalizedText('welcome', "⚡ CHÀO MỪNG: ");
-            statusEl.innerHTML = welcomeText + email;
+            lastUserEmail = email;
+            const currentLang = localStorage.getItem('kdrive_lang') || 'vi';
+            const t = loginTranslations[currentLang] || loginTranslations['vi'];
+            const statusEl = document.getElementById('loginStatus');
+            
+            const welcomeText = (currentLang === 'encoded') ? encodeQuantum(t.welcome) : (t.welcome || "⚡ CHÀO MỪNG: ");
+            statusEl.innerText = welcomeText + email;
             statusEl.style.color = "#00e5ff";
 
             const dataForm = new FormData();
