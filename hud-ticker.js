@@ -9,21 +9,33 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* THANH HUD TỐI GIẢN CHỈ CÓ QUẢ CẦU NGÔN NGỮ Ở PHÍA TRÊN */
+            /* THANH HUD 3 KHỐI HOÀN CHỈNH (CHỈ XUẤT HIỆN Ở CẢNH SAU KHI XONG GPS) */
             .hud-top-bar {
                 position: fixed !important; top: 10px !important; left: 10px !important; width: calc(100% - 20px) !important; height: 50px !important;
-                display: flex !important; justify-content: center !important; align-items: center !important; padding: 0 5px !important;
+                display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 5px !important;
                 background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
                 border: none !important; border-radius: 0 !important;
-                z-index: 2147483647 !important; pointer-events: auto !important; box-shadow: none !important;
+                z-index: 2147483647 !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 9.5px !important; color: #00e5ff !important; letter-spacing: 1px !important;
+                pointer-events: auto !important; box-shadow: none !important;
+                opacity: 0; visibility: hidden; transition: opacity 0.5s ease;
             }
-            .hud-center { display: flex; justify-content: center; align-items: center; width: 100%; position: relative; }
+            .hud-top-bar.active { opacity: 1; visibility: visible; }
+
+            .hud-left { display: flex; flex-direction: column; gap: 1px; width: 38%; text-align: left; }
+            .hud-center { display: flex; justify-content: center; align-items: center; width: 24%; position: relative; }
+            .hud-right { display: flex; flex-direction: column; gap: 1px; width: 38%; text-align: right; color: rgba(255,255,255,0.85); }
             
+            .hud-sys-row { display: flex; align-items: center; gap: 5px; }
+            .hud-sys-online { color: #00ff66; font-weight: 900; text-shadow: 0 0 8px rgba(0,255,102,0.8); }
+            
+            .hud-gps { color: #ff007f !important; font-weight: 700; text-shadow: 0 0 6px rgba(255,0,127,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 9px; }
+            .hud-chat-badge { color: #ffd700; font-weight: 900; text-shadow: 0 0 8px rgba(255,215,0,0.8); cursor: pointer; pointer-events: auto; }
+
             /* NÚT TRÁI ĐẤT TO VÀ NHẤP NHÁY THU HÚT */
             .hud-lang-btn {
                 background: rgba(0, 229, 255, 0.25); border: 2px solid #00e5ff;
-                border-radius: 50%; width: 42px; height: 42px; color: #fff;
-                font-size: 20px; display: flex; align-items: center; justify-content: center;
+                border-radius: 50%; width: 38px; height: 38px; color: #fff;
+                font-size: 18px; display: flex; align-items: center; justify-content: center;
                 cursor: pointer; transition: 0.2s; box-shadow: 0 0 15px rgba(0,229,255,0.6);
                 animation: pulseGlobe 1.5s infinite alternate ease-in-out;
                 pointer-events: auto !important; z-index: 2147483648 !important;
@@ -65,7 +77,14 @@
                 color: #ff3333; border-radius: 6px; font-weight: 800; font-size: 11px; cursor: pointer; text-transform: uppercase;
             }
 
-            /* BẢNG GPS XÁC THỰC (NỀN ĐEN TUYỆT ĐỐI, KHÔNG ẢNH NỀN, KHÔNG LƯỚI TỔ ONG) */
+            .signal-bars { display: flex; align-items: flex-end; gap: 2px; height: 9px; }
+            .signal-bar { width: 2px; background-color: #00ff66; box-shadow: 0 0 5px rgba(0,255,102,0.8); animation: signalPulse 1.2s infinite ease-in-out alternate; }
+            .signal-bar:nth-child(1) { height: 3px; }
+            .signal-bar:nth-child(2) { height: 6px; }
+            .signal-bar:nth-child(3) { height: 9px; }
+            @keyframes signalPulse { 0% { opacity: 0.3; transform: scaleY(0.6); } 100% { opacity: 1; transform: scaleY(1); } }
+
+            /* BẢNG GPS XÁC THỰC (CẢNH 1 - NỀN ĐEN TUYỆT ĐỐI, KHÔNG CÓ THANH HUD PHÍA TRÊN) */
             .gps-modal-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 z-index: 2147483646 !important; display: flex; justify-content: center; align-items: center;
@@ -147,6 +166,8 @@
 
     const vietnameseData = {
         select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", close_btn: "ĐÓNG LẠI",
+        sys: "SYS.ONLINE", user: "USER: GUEST", gps: "GPS: NGOẠI TUYẾN", chat: "GLOBAL CHAT 9+",
+        kdrive: "K-DRIVE v2.6", date: "2026.09.06",
         gps_title: "XÁC THỰC GPS",
         gps_desc: "Hệ thống yêu cầu quyền định vị để đồng bộ Đấu trường Lượng tử toàn cầu.",
         deny: "TỪ CHỐI", allow: "ĐỒNG Ý"
@@ -156,20 +177,22 @@
         vi: vietnameseData,
         en: {
             select_lang_title: "SELECT GLOBAL LANGUAGE", close_btn: "CLOSE",
+            sys: "SYS.ONLINE", user: "USER: GUEST", gps: "GPS: OFFLINE", chat: "GLOBAL CHAT 9+",
+            kdrive: "K-DRIVE v2.6", date: "2026.09.06",
             gps_title: "GPS VERIFICATION",
             gps_desc: "System requires location access to synchronize global Quantum Arena mapping.",
             deny: "DENY", allow: "ACCEPT"
         },
-        zh: { select_lang_title: "选择全球语言", close_btn: "关闭", gps_title: "GPS 验证", gps_desc: "系统需要位置权限来同步全球量子竞技场映射。", deny: "拒绝", allow: "接受" },
-        ja: { select_lang_title: "グローバル言語を選択", close_btn: "閉じる", gps_title: "GPS 認証", gps_desc: "グローバル量子アリーナマッピングを同期するには位置情報が必要です。", deny: "拒否", allow: "同意" },
-        ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기", gps_title: "GPS 인증", gps_desc: "글로벌 양자 아레나 매핑을 동기화하려면 위치 권한이 필요합니다.", deny: "거부", allow: "수락" },
-        fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER", gps_title: "VÉRIFICATION GPS", gps_desc: "Le système requiert l'accès à la position pour synchroniser l'arène.", deny: "REFUSER", allow: "ACCEPTER" },
-        de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN", gps_title: "GPS-VERIFIZIERUNG", gps_desc: "Das System benötigt Standortzugriff zur Synchronisierung.", deny: "ABLEHNEN", allow: "AKZEPTIEREN" },
-        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
-        ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ", gps_title: "ПРОВЕРКА GPS", gps_desc: "Системе требуется доступ к геолокации.", deny: "ОТКАЗАТЬ", allow: "ПРИНЯТЬ" },
-        th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด", gps_title: "การยืนยัน GPS", gps_desc: "ระบบต้องการสิทธิ์ตำแหน่งที่ตั้งเพื่อซิงค์ข้อมูล", deny: "ปฏิเสธ", allow: "ยอมรับ" },
-        id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP", gps_title: "VERIFIKASI GPS", gps_desc: "Sistem memerlukan akses lokasi.", deny: "TOLAK", allow: "TERIMA" },
-        ar: { select_lang_title: "اختر اللغة العالمية", close_btn: "إغلاق", gps_title: "التحقق من الموقع", gps_desc: "يتطلب النظام إذن الموقع للمزامنة.", deny: "رفض", allow: "قبول" }
+        zh: { select_lang_title: "选择全球语言", close_btn: "关闭", sys: "系统.在线", user: "用户: 访客", gps: "GPS: 离线", chat: "全球聊天 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 验证", gps_desc: "系统需要位置权限来同步全球量子竞技场映射。", deny: "拒绝", allow: "接受" },
+        ja: { select_lang_title: "グローバル言語を選択", close_btn: "閉じる", sys: "SYS.オンライン", user: "ユーザー: ゲスト", gps: "GPS: オフライン", chat: "グローバルチャット 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 認証", gps_desc: "グローバル量子アリーナマッピングを同期するには位置情報が必要です。", deny: "拒否", allow: "同意" },
+        ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기", sys: "SYS.온라인", user: "유저: 게스트", gps: "GPS: 오프라인", chat: "글로벌 채팅 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 인증", gps_desc: "글로벌 양자 아레나 매핑을 동기화하려면 위치 권한이 필요합니다.", deny: "거부", allow: "수락" },
+        fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER", sys: "SYS.EN LIGNE", user: "UTILISATEUR: INVITÉ", gps: "GPS: HORS LIGNE", chat: "CHAT GLOBAL 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VÉRIFICATION GPS", gps_desc: "Le système requiert l'accès à la position pour synchroniser l'arène.", deny: "REFUSER", allow: "ACCEPTER" },
+        de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN", sys: "SYS.ONLINE", user: "BENUTZER: GAST", gps: "GPS: OFFLINE", chat: "GLOBALES CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS-VERIFIZIERUNG", gps_desc: "Das System benötigt Standortzugriff zur Synchronisierung.", deny: "ABLEHNEN", allow: "AKZEPTIEREN" },
+        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", chat: "CHAT GLOBAL 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
+        ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ", sys: "СИСТЕМА.ОНЛАЙН", user: "ПОЛЬЗОВАТЕЛЬ: ГОСТЬ", gps: "GPS: ОФФЛАЙН", chat: "ГЛОБАЛЬНЫЙ ЧАТ 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "ПРОВЕРКА GPS", gps_desc: "Системе требуется доступ к геолокации.", deny: "ОТКАЗАТЬ", allow: "ПРИНЯТЬ" },
+        th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด", sys: "ระบบ.ออนไลน์", user: "ผู้ใช้: แขก", gps: "GPS: ออฟไลน์", chat: "แชท Global 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "การยืนยัน GPS", gps_desc: "ระบบต้องการสิทธิ์ตำแหน่งที่ตั้งเพื่อซิงค์ข้อมูล", deny: "ปฏิเสธ", allow: "ยอมรับ" },
+        id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP", sys: "SYS.ONLINE", user: "PENGGUNA: TAMU", gps: "GPS: OFFLINE", chat: "GLOBAL CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFIKASI GPS", gps_desc: "Sistem memerlukan akses lokasi.", deny: "TOLAK", allow: "TERIMA" },
+        ar: { select_lang_title: "اختر اللغة العالمية", close_btn: "إغلاق", sys: "النظام متصل", user: "المستخدم: ضيف", gps: "GPS: غير متصل", chat: "الدردشة العالمية 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "التحقق من الموقع", gps_desc: "يتطلب النظام إذن الموقع للمزامنة.", deny: "رفض", allow: "قبول" }
     };
 
     function playClickSound() {
@@ -195,10 +218,29 @@
         const container = document.createElement('div');
         container.id = 'kdriveGlobalHud';
         container.innerHTML = `
-            <!-- THANH HUD TỐI GIẢN CHỈ CÓ QUẢ CẦU NGÔN NGỮ Ở TRÊN -->
-            <div class="hud-top-bar">
+            <!-- THANH HUD 3 KHỐI HOÀN CHỈNH (MẶC ĐỊNH ẨN Ở CẢNH 1) -->
+            <div class="hud-top-bar" id="hudTopBar">
+                <div class="hud-left">
+                    <div class="hud-sys-row">
+                        <div class="signal-bars">
+                            <div class="signal-bar"></div>
+                            <div class="signal-bar"></div>
+                            <div class="signal-bar"></div>
+                        </div>
+                        <span class="hud-sys-online" id="hudSysText">SYS.ONLINE</span>
+                    </div>
+                    <span style="color: #fff;" id="hudUserText">USER: GUEST</span>
+                    <span class="hud-gps" id="hudGpsText">GPS: OFFLINE</span>
+                </div>
+
                 <div class="hud-center">
                     <button class="hud-lang-btn hudLangTrigger" title="Chọn ngôn ngữ">🌐</button>
+                </div>
+
+                <div class="hud-right">
+                    <span style="color: #00e5ff;" id="hudKdriveText">K-DRIVE v2.6</span>
+                    <span style="color: rgba(255,255,255,0.6);" id="hudDateText">2026.09.06</span>
+                    <span class="hud-chat-badge" id="hudChatText">GLOBAL CHAT 9+</span>
                 </div>
             </div>
 
@@ -225,7 +267,7 @@
                 </div>
             </div>
 
-            <!-- BẢNG GPS XÁC THỰC (CHỈ CÓ BẢNG HOLOGRAM VÀ QUẢ CẦU) -->
+            <!-- BẢNG GPS XÁC THỰC (CẢNH 1) -->
             <div class="gps-modal-overlay active" id="gpsModalOverlay">
                 <div class="gps-modal-dimmer"></div>
                 <div class="gps-modal-box">
@@ -267,10 +309,24 @@
             const baseData = vietnameseData;
             const processText = (text) => isEncoded ? encodeQuantum(text) : text;
 
+            const sysText = document.getElementById('hudSysText');
+            const userText = document.getElementById('hudUserText');
+            const gpsTextVal = document.getElementById('hudGpsText');
+            const chatBadge = document.getElementById('hudChatText');
+            const kdriveText = document.getElementById('hudKdriveText');
+            const dateText = document.getElementById('hudDateText');
+
             const gpsTitle = document.getElementById('gpsModalTitleText');
             const gpsDesc = document.getElementById('gpsDescText');
             const denyBtn = document.getElementById('gpsDenyBtn');
             const allowBtn = document.getElementById('gpsAllowBtn');
+
+            if (sysText) sysText.innerText = processText(baseData.sys);
+            if (userText) userText.innerText = processText(baseData.user);
+            if (gpsTextVal) gpsTextVal.innerText = processText(baseData.gps);
+            if (chatBadge) chatBadge.innerText = processText(baseData.chat);
+            if (kdriveText) kdriveText.innerText = processText(baseData.kdrive);
+            if (dateText) dateText.innerText = processText(baseData.date);
 
             if (gpsTitle) gpsTitle.innerText = processText(baseData.gps_title);
             if (gpsDesc) gpsDesc.innerText = processText(baseData.gps_desc);
@@ -298,13 +354,23 @@
         });
 
         const modalOverlay = document.getElementById('gpsModalOverlay');
+        const hudTopBar = document.getElementById('hudTopBar');
+
+        // Kiểm tra nếu đã xác thực GPS từ trước thì hiện luôn thanh HUD cảnh 2
+        const gpsVerified = sessionStorage.getItem('kdrive_gps_verified');
+        if (gpsVerified === 'true' || gpsVerified === 'false') {
+            if (modalOverlay) modalOverlay.classList.remove('active');
+            if (hudTopBar) hudTopBar.classList.add('active');
+        }
 
         document.getElementById('gpsAllowBtn').addEventListener('click', () => {
             if (modalOverlay) modalOverlay.classList.remove('active');
+            if (hudTopBar) hudTopBar.classList.add('active'); // Chuyển sang Cảnh 2: hiện HUD phía trên
             sessionStorage.setItem('kdrive_gps_verified', 'true');
         });
         document.getElementById('gpsDenyBtn').addEventListener('click', () => {
             if (modalOverlay) modalOverlay.classList.remove('active');
+            if (hudTopBar) hudTopBar.classList.add('active'); // Chuyển sang Cảnh 2: hiện HUD phía trên
             sessionStorage.setItem('kdrive_gps_verified', 'false');
         });
     });
