@@ -39,7 +39,7 @@
             100% { transform: translate(0, 0) scale(1); filter: hue-rotate(0deg) brightness(1); }
         }
 
-        /* HIỆU ỨNG NHỊP THỞ CHO NÚT GMAIL */
+        /* NÚT GMAIL VỚI HIỆU ỨNG NHỊP THỞ */
         .google-auth-btn-img {
             width: 100%; max-width: 240px; height: auto; cursor: pointer;
             filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.7));
@@ -87,7 +87,7 @@
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20NEN%20GPS%20NEN.png?raw=true" class="kdrive-bg-target" alt="Core Background">
         
         <div class="gateway-container active" id="loginPanelContainer">
-            <!-- NÚT GMAIL VỚI HIỆU ỨNG NHỊP THỞ -->
+            <!-- NÚT GMAIL -->
             <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL.png?raw=true" class="google-auth-btn-img" onclick="triggerGoogleOAuth()" alt="Google Login">
             <div id="loginStatus"></div>
         </div>
@@ -97,6 +97,51 @@
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwPVjsQ6bd9RFcOB7BUBl2bSsYa6gccHoirg66hbNCruFYJ3HP9w-xJD6JpCupjUKSr/exec';
         let googleTokenClient = null;
 
+        // BẢNG ÁNH XẠ KÝ HIỆU LƯỢNG TỬ ĐỒNG BỘ VỚI HUD
+        const quantumMap = {
+            'a': '⟡', 'á': '⟡⁺', 'à': '⟡₋', 'ả': '⟡∼', 'ã': '⟡≈', 'ạ': '⟡•',
+            'â': '⌖', 'ấ': '⌖⁺', 'ầ': '⌖₋', 'ẩ': '⌖∼', 'ẫ': '⌖≈', 'ậ': '⌖•',
+            'ă': '⍜', 'ắ': '⍜⁺', 'ằ': '⍜₋', 'ẳ': '⍜∼', 'ẵ': '⍜≈', 'ặ': '⍜•',
+            'b': '❖', 'c': '⟨', 'd': '⎔', 'đ': '⟠',
+            'e': '⟍', 'é': '⟍⁺', 'è': '⟍₋', 'ẻ': '⟍∼', 'ẽ': '⟍≈', 'ẹ': '⟍•',
+            'ê': '⍎', 'ế': '⍎⁺', 'ề': '⍎₋', 'ể': '⍎∼', 'ễ': '⍎≈', 'ệ': '⍎•',
+            'g': '◎', 'h': '☩', 'i': '║', 'í': '║⁺', 'ì': '║₋', 'ỉ': '║∼', 'ĩ': '║≈', 'ị': '║•',
+            'k': '⎈', 'l': '⫷', 'm': '☲', 'n': '☱',
+            'o': '⨀', 'ó': '⨀⁺', 'ò': '⨀₋', 'ỏ': '⨀∼', 'õ': '⨀≈', 'ọ': '⨀•',
+            'ô': '⍜', 'ố': '⍜⁺', 'ồ': '⍜₋', 'ổ': '⍜∼', 'ỗ': '⍜≈', 'ộ': '⍜•',
+            'ơ': '⍥', 'ớ': '⍥⁺', 'ờ': '⍥₋', 'ở': '⍥∼', 'ỡ': '⍥≈', 'ợ': '⍥•',
+            'p': '⨁', 'q': '⍟', 'r': 'Ⱬ', 's': '⟡', 't': '⍂',
+            'u': '⋃', 'ú': '⋃⁺', 'ù': '⋃₋', 'ủ': '⋃∼', 'ũ': '⋃≈', 'ụ': '⋃•',
+            'ư': '⋲', 'ứ': '⋲⁺', 'ừ': '⋲₋', 'ử': '⋲∼', 'ữ': '⋲≈', 'ự': '⋲•',
+            'v': '⟁', 'x': '⨂', 'y': '⋫', 'ý': '⋫⁺', 'ỳ': '⋫₋', 'ỷ': '⋫∼', 'ỹ': '⋫≈', 'ỵ': '⋫•',
+            '2': '⟡', '6': '⌖', '.': '•', '@': '⌖', '_': '─', '-': '─', ' ': ' '
+        };
+
+        function encodeQuantum(text) {
+            if (!text) return '';
+            return text.split('').map(char => {
+                const lower = char.toLowerCase();
+                return quantumMap[lower] !== undefined ? quantumMap[lower] : char;
+            }).join('');
+        }
+
+        const loginTranslations = {
+            vi: { welcome: "⚡ CHÀO MỪNG: ", connecting: "🛰️ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...", error: "❌ LỖI KẾT NỐI GOOGLE!" },
+            en: { welcome: "⚡ WELCOME: ", connecting: "🛰️ CONNECTING GOOGLE ACCOUNT...", error: "❌ GOOGLE CONNECTION ERROR!" },
+            zh: { welcome: "⚡ 欢迎: ", connecting: "🛰️ 正在连接谷歌账号...", error: "❌ 谷歌连接错误!" },
+            ja: { welcome: "⚡ ようこそ: ", connecting: "🛰️ Googleアカウントに接続中...", error: "❌ Google接続エラー!" },
+            ko: { welcome: "⚡ 환영합니다: ", connecting: "🛰️ Google 계정 연결 중...", error: "❌ Google 연결 오류!" }
+        };
+
+        function getLocalizedText(key, fallback) {
+            const currentLang = localStorage.getItem('kdrive_lang') || 'vi';
+            if (currentLang === 'encoded') {
+                return encodeQuantum(fallback);
+            }
+            const dict = loginTranslations[currentLang] || loginTranslations['vi'];
+            return dict[key] || fallback;
+        }
+
         window.addEventListener('DOMContentLoaded', () => { 
             initGoogleOAuthClient();
             const bgm = document.getElementById('bgMusic');
@@ -105,7 +150,6 @@
 
         function playHologramClick() { try { const snd = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'); snd.volume = 0.5; snd.play().catch(e=>{}); } catch(err) {} }
 
-        // Khởi tạo Google OAuth2 Token Client chuẩn xịn để hiện bảng chọn tài khoản trên máy
         function initGoogleOAuthClient() {
             try {
                 if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
@@ -131,14 +175,12 @@
             container.classList.add('glitching');
 
             var statusEl = document.getElementById('loginStatus');
-            statusEl.innerHTML = "🛰️ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...";
+            statusEl.innerHTML = getLocalizedText('connecting', "🛰️ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...");
 
             try {
                 if (googleTokenClient) {
-                    // Lệnh này ép mở bảng chọn tài khoản Google có sẵn trên thiết bị
                     googleTokenClient.requestAccessToken({ prompt: 'select_account' });
                 } else {
-                    // Phương án dự phòng nếu SDK chưa kịp tải
                     initGoogleOAuthClient();
                     if (googleTokenClient) {
                         googleTokenClient.requestAccessToken({ prompt: 'select_account' });
@@ -148,15 +190,14 @@
                 }
             } catch (e) {
                 container.classList.remove('glitching');
-                statusEl.innerHTML = "❌ KHÔNG THỂ KẾT NỐI GOOGLE SDK!";
+                statusEl.innerHTML = getLocalizedText('error', "❌ KHÔNG THỂ KẾT NỐI GOOGLE SDK!");
                 statusEl.style.color = "#ff3333";
             }
         }
 
-        // Lấy thông tin email trực tiếp từ Google API sau khi người dùng chọn tài khoản
         function fetchUserProfile(accessToken) {
             var statusEl = document.getElementById('loginStatus');
-            statusEl.innerHTML = "⚡ ĐANG XÁC THỰC DỮ LIỆU LƯỢNG TỬ...";
+            statusEl.innerHTML = getLocalizedText('connecting', "⚡ ĐANG XÁC THỰC DỮ LIỆU LƯỢNG TỬ...");
 
             fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                 headers: { 'Authorization': 'Bearer ' + accessToken }
@@ -168,7 +209,7 @@
                 executeSocialSync(userEmail, userName);
             })
             .catch(error => {
-                statusEl.innerHTML = "❌ LỖI KẾT NỐI THÔNG TIN GMAIL!";
+                statusEl.innerHTML = getLocalizedText('error', "❌ LỖI KẾT NỐI THÔNG TIN GMAIL!");
                 statusEl.style.color = "#ff3333";
                 const container = document.getElementById('loginPanelContainer');
                 container.classList.remove('glitching');
@@ -177,7 +218,8 @@
 
         function executeSocialSync(email, username) {
             var statusEl = document.getElementById('loginStatus');
-            statusEl.innerHTML = "⚡ CHÀO MỪNG: " + email;
+            const welcomeText = getLocalizedText('welcome', "⚡ CHÀO MỪNG: ");
+            statusEl.innerHTML = welcomeText + email;
             statusEl.style.color = "#00e5ff";
 
             const dataForm = new FormData();
