@@ -97,7 +97,6 @@
             .global-lang-item:hover { background: rgba(0, 229, 255, 0.3); border-color: #00e5ff; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); color: #ffd700; }
             .global-lang-item.selected { background: rgba(255, 215, 0, 0.25); border-color: #ffd700; color: #ffd700; box-shadow: 0 0 12px rgba(255,215,0,0.6); }
 
-            /* NÚT ĐỒNG Ý VÀ ĐÓNG XẾP THÀNH 1 DÒNG NGANG Ở DƯỚI CÙNG */
             .global-btn-row {
                 display: flex; gap: 8px; width: 100%; margin-top: 4px;
             }
@@ -215,7 +214,6 @@
                 100% { transform: translate(-8px, -6px) rotate(-35deg) scaleX(-1) scale(1.05); opacity: 1; }
             }
 
-            /* HIỆU ỨNG ĐIỆN XẸT LƯỢNG TỬ KHI RELOAD */
             #globalQuantumFlashOverlay {
                 position: fixed; inset: 0; width: 100vw; height: 100vh; background: #00ffff;
                 z-index: 999999999; opacity: 0; pointer-events: none; transition: opacity 0.15s ease;
@@ -322,7 +320,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('kdriveGlobalHud')) return;
 
-        // Lớp phủ điện xẹt lượng tử khi reload trang
         const flashDiv = document.createElement('div');
         flashDiv.id = 'globalQuantumFlashOverlay';
         document.body.appendChild(flashDiv);
@@ -475,7 +472,7 @@
             triggerGlobalLoginMusic(); 
             document.getElementById('globalLangModal').classList.add('active'); 
             pendingSelectedLang = localStorage.getItem('kdrive_lang') || 'encoded';
-            highlightSelectedLangUI(pendingSelectedLang);
+            updateHudLangUI(pendingSelectedLang);
             setTimeout(initQuantumParticles, 100);
         };
         
@@ -488,7 +485,7 @@
         window.tempSelectLang = function(lang) {
             playClickSound();
             pendingSelectedLang = lang;
-            highlightSelectedLangUI(lang);
+            updateHudLangUI(lang); // CẬP NHẬT NGAY LẬP TỨC CHỮ TRÊN BẢNG MODAL VÀ NÚT XÁC NHẬN
         };
 
         function highlightSelectedLangUI(lang) {
@@ -501,7 +498,6 @@
             });
         }
 
-        // HÀM XÁC NHẬN VÀ RELOAD TRANG KÈM HIỆU ỨNG ĐIỆN XẸT
         window.confirmAndReloadLang = function() {
             playClickSound();
             triggerGlobalLoginMusic();
@@ -550,6 +546,8 @@
             if (document.getElementById('langModalTitleText')) document.getElementById('langModalTitleText').innerText = processText(t.select_lang_title);
             if (document.getElementById('langModalCloseBtn')) document.getElementById('langModalCloseBtn').innerText = processText(t.close_btn);
             if (document.getElementById('langModalConfirmBtn')) document.getElementById('langModalConfirmBtn').innerText = processText(t.confirm_btn);
+
+            highlightSelectedLangUI(lang);
         }
 
         const savedLang = localStorage.getItem('kdrive_lang') || 'encoded';
