@@ -64,21 +64,21 @@
             .global-lang-content {
                 position: relative; z-index: 2;
                 width: 90%; max-width: 360px; max-height: 85vh; overflow-y: auto;
-                background: rgba(3, 9, 22, 0.82); border: 2px solid #00e5ff; border-radius: 14px;
-                padding: 20px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.5), inset 0 0 20px rgba(0, 229, 255, 0.2);
+                background: rgba(3, 9, 22, 0.88); border: 2px solid #00e5ff; border-radius: 14px;
+                padding: 18px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.5), inset 0 0 20px rgba(0, 229, 255, 0.2);
                 backdrop-filter: blur(10px);
                 display: flex; flex-direction: column; align-items: center;
             }
             .global-lang-title {
                 color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 900;
-                text-transform: uppercase; margin-bottom: 12px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,215,0,0.7);
+                text-transform: uppercase; margin-bottom: 10px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,215,0,0.7);
             }
             
             .global-alien-top-btn {
-                width: 100%; padding: 12px; margin-bottom: 10px; background: rgba(0, 229, 255, 0.15);
+                width: 100%; padding: 10px; margin-bottom: 8px; background: rgba(0, 229, 255, 0.15);
                 border: 1px solid rgba(0, 229, 255, 0.6); border-radius: 8px; cursor: pointer;
                 display: flex; justify-content: center; align-items: center;
-                font-size: 24px; animation: alienBlink 1.5s infinite ease-in-out;
+                font-size: 22px; animation: alienBlink 1.5s infinite ease-in-out;
                 box-shadow: 0 0 15px rgba(0, 229, 255, 0.3); transition: 0.2s;
             }
             .global-alien-top-btn:hover { background: rgba(0, 229, 255, 0.3); box-shadow: 0 0 25px #00e5ff; }
@@ -88,17 +88,32 @@
                 50% { opacity: 0.3; text-shadow: 0 0 3px #00e5ff; border-color: rgba(0, 229, 255, 0.3); }
             }
 
-            .global-lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; margin-bottom: 15px; }
+            .global-lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; margin-bottom: 10px; }
             .global-lang-item {
                 background: rgba(0, 229, 255, 0.08); border: 1px solid rgba(0, 229, 255, 0.25);
-                color: #ffffff; padding: 10px; border-radius: 6px; font-size: 11px; font-weight: 700;
+                color: #ffffff; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
                 text-align: center; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
             }
             .global-lang-item:hover { background: rgba(0, 229, 255, 0.3); border-color: #00e5ff; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); color: #ffd700; }
-            .global-lang-close {
-                width: 100%; padding: 10px; background: rgba(255, 0, 60, 0.2); border: 1px solid #ff003c;
-                color: #ff3333; border-radius: 6px; font-weight: 800; font-size: 11px; cursor: pointer; text-transform: uppercase;
+            .global-lang-item.selected { background: rgba(255, 215, 0, 0.25); border-color: #ffd700; color: #ffd700; box-shadow: 0 0 12px rgba(255,215,0,0.6); }
+
+            /* NÚT ĐỒNG Ý VÀ ĐÓNG XẾP THÀNH 1 DÒNG NGANG Ở DƯỚI CÙNG */
+            .global-btn-row {
+                display: flex; gap: 8px; width: 100%; margin-top: 4px;
             }
+            .global-lang-confirm {
+                flex: 1; padding: 10px; background: rgba(255, 215, 0, 0.2); border: 1.5px solid #ffd700;
+                color: #ffd700; border-radius: 6px; font-weight: 900; font-size: 10.5px; cursor: pointer; text-transform: uppercase;
+                box-shadow: 0 0 10px rgba(255,215,0,0.4); transition: 0.2s; text-align: center;
+            }
+            .global-lang-confirm:hover { background: rgba(255, 215, 0, 0.4); box-shadow: 0 0 20px #ffd700; color: #fff; }
+
+            .global-lang-close {
+                flex: 1; padding: 10px; background: rgba(255, 0, 60, 0.2); border: 1.5px solid #ff003c;
+                color: #ff3333; border-radius: 6px; font-weight: 900; font-size: 10.5px; cursor: pointer; text-transform: uppercase;
+                box-shadow: 0 0 10px rgba(255,0,60,0.4); transition: 0.2s; text-align: center;
+            }
+            .global-lang-close:hover { background: rgba(255, 0, 60, 0.4); box-shadow: 0 0 20px #ff003c; color: #fff; }
 
             .signal-bars { display: flex; align-items: flex-end; gap: 2px; height: 9px; }
             .signal-bar { width: 2px; background-color: #00ff66; box-shadow: 0 0 5px rgba(0,255,102,0.8); animation: signalPulse 1.2s infinite ease-in-out alternate; }
@@ -144,7 +159,6 @@
             
             .gps-btn-row { display: flex !important; gap: 10px !important; justify-content: center !important; width: 100% !important; }
             
-            /* HAI NÚT ACCEPT & DENY NHỊP THỞ */
             .gps-action-btn {
                 flex: 1 !important; padding: 10px 4px !important; border-radius: 8px !important; font-family: 'Montserrat', sans-serif !important;
                 font-size: 11px !important; font-weight: 900 !important; text-transform: uppercase !important; cursor: pointer !important; transition: 0.3s !important;
@@ -168,7 +182,6 @@
                 margin-top: 25px !important; width: 100% !important;
             }
 
-            /* QUẢ CẦU PHÁT SÁNG MỜ ẢO */
             .cassette-lang-btn {
                 position: relative !important; 
                 background: rgba(0, 229, 255, 0.18) !important; border: 2px solid #00e5ff !important;
@@ -186,21 +199,35 @@
                 100% { box-shadow: 0 0 25px rgba(0,229,255,0.8), inset 0 0 12px rgba(0,229,255,0.6); border-color: #fff; }
             }
 
-            /* NGÓN TAY PHÓNG TO GẤP 2.5 LẦN, ĐẶT Ở DƯỚI BÊN PHẢI CHÉO LÊN CHỈ THẲNG VÀO QUẢ ĐỊA CẦU */
             .finger-pointer {
                 position: absolute !important;
                 left: calc(50% + 15px) !important; 
                 top: -5px !important; 
-                width: 140px !important; /* Phóng to gấp 2.5 lần */
+                width: 140px !important; 
                 height: auto !important;
                 z-index: 999930 !important; pointer-events: none !important;
-                transform: rotate(-35deg) scaleX(-1); /* Góc chéo từ dưới lên hướng vào quả cầu */
+                transform: rotate(-35deg) scaleX(-1); 
                 animation: fingerPointClassic 1.2s infinite alternate ease-in-out !important;
                 filter: drop-shadow(0 0 15px #00e5ff) !important;
             }
             @keyframes fingerPointClassic {
                 0% { transform: translate(0px, 0px) rotate(-35deg) scaleX(-1) scale(0.95); opacity: 0.75; }
                 100% { transform: translate(-8px, -6px) rotate(-35deg) scaleX(-1) scale(1.05); opacity: 1; }
+            }
+
+            /* HIỆU ỨNG ĐIỆN XẸT LƯỢNG TỬ KHI RELOAD */
+            #globalQuantumFlashOverlay {
+                position: fixed; inset: 0; width: 100vw; height: 100vh; background: #00ffff;
+                z-index: 999999999; opacity: 0; pointer-events: none; transition: opacity 0.15s ease;
+                mix-blend-mode: screen;
+            }
+            #globalQuantumFlashOverlay.flash {
+                animation: quantumFlashAnimGlobal 0.4s ease-out;
+            }
+            @keyframes quantumFlashAnimGlobal {
+                0% { opacity: 0.95; filter: brightness(3) drop-shadow(0 0 60px #00e5ff); }
+                50% { opacity: 0.5; filter: brightness(1.8); }
+                100% { opacity: 0; filter: none; }
             }
         `;
         document.head.appendChild(style);
@@ -234,7 +261,7 @@
     }
 
     const vietnameseData = {
-        select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", close_btn: "ĐÓNG LẠI",
+        select_lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", confirm_btn: "ĐỒNG Ý CHUYỂN ĐỔI", close_btn: "ĐÓNG LẠI",
         sys: "SYS.ONLINE", user: "USER: GUEST", gps: "GPS: NGOẠI TUYẾN", chat: "GLOBAL CHAT 9+",
         kdrive: "K-DRIVE v2.6", date: "2026.09.06",
         gps_title: "XÁC THỰC GPS",
@@ -245,23 +272,23 @@
     const globalTranslations = {
         vi: vietnameseData,
         en: {
-            select_lang_title: "SELECT GLOBAL LANGUAGE", close_btn: "CLOSE",
+            select_lang_title: "SELECT GLOBAL LANGUAGE", confirm_btn: "CONFIRM & APPLY", close_btn: "CLOSE",
             sys: "SYS.ONLINE", user: "USER: GUEST", gps: "GPS: OFFLINE", chat: "GLOBAL CHAT 9+",
             kdrive: "K-DRIVE v2.6", date: "2026.09.06",
             gps_title: "GPS VERIFICATION",
             gps_desc: "System requires location access to synchronize global Quantum Arena mapping.",
             deny: "DENY", allow: "ACCEPT"
         },
-        zh: { select_lang_title: "选择全球语言", close_btn: "关闭", sys: "系统.在线", user: "用户: 访客", gps: "GPS: 离线", chat: "全球聊天 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 验证", gps_desc: "系统需要位置权限来同步全球量子竞技场映射。", deny: "拒绝", allow: "接受" },
-        ja: { select_lang_title: "グローバル言語を選択", close_btn: "閉じる", sys: "SYS.オンライン", user: "ユーザー: ゲスト", gps: "GPS: オフライン", chat: "グローバルチャット 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 認証", gps_desc: "グローバル量子アリーナマッピングを同期するには位置情報が必要です。", deny: "拒否", allow: "同意" },
-        ko: { select_lang_title: "글로벌 언어 선택", close_btn: "닫기", sys: "SYS.온라인", user: "유저: 게스트", gps: "GPS: 오프라인", chat: "글로벌 채팅 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 인증", gps_desc: "글로벌 양자 아레나 매핑을 동기화하려면 위치 권한이 필요합니다.", deny: "거부", allow: "수락" },
-        fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", close_btn: "FERMER", sys: "SYS.EN LIGNE", user: "UTILISATEUR: INVITÉ", gps: "GPS: HORS LIGNE", chat: "CHAT GLOBAL 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VÉRIFICATION GPS", gps_desc: "Le système requiert l'accès à la position pour synchroniser l'arène.", deny: "REFUSER", allow: "ACCEPTER" },
-        de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", close_btn: "SCHLIESSEN", sys: "SYS.ONLINE", user: "BENUTZER: GAST", gps: "GPS: OFFLINE", chat: "GLOBALES CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS-VERIFIZIERUNG", gps_desc: "Das System benötigt Standortzugriff zur Synchronisierung.", deny: "ABLEHNEN", allow: "AKZEPTIEREN" },
-        es: { select_lang_title: "SELECCIONAR IDIOMA", close_btn: "CERRAR", sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", chat: "CHAT GLOBAL 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
-        ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", close_btn: "ЗАКРЫТЬ", sys: "СИСТЕМА.ОНЛАЙН", user: "ПОЛЬЗОВАТЕЛЬ: ГОСТЬ", gps: "GPS: ОФФЛАЙН", chat: "ГЛОБАЛЬНЫЙ ЧАТ 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "ПРОВЕРКА GPS", gps_desc: "Системе требуется доступ к геолокации.", deny: "ОТКАЗАТЬ", allow: "ПРИНЯТЬ" },
-        th: { select_lang_title: "เลือกภาษา", close_btn: "ปิด", sys: "ระบบ.ออนไลน์", user: "ผู้ใช้: แขก", gps: "GPS: ออฟไลน์", chat: "แชท Global 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "การยืนยัน GPS", gps_desc: "ระบบต้องการสิทธิ์ตำแหน่งที่ตั้งเพื่อซิงค์ข้อมูล", deny: "ปฏิเสธ", allow: "ยอมรับ" },
-        id: { select_lang_title: "PILIH BAHASA", close_btn: "TUTUP", sys: "SYS.ONLINE", user: "PENGGUNA: TAMU", gps: "GPS: OFFLINE", chat: "GLOBAL CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFIKASI GPS", gps_desc: "Sistem memerlukan akses lokasi.", deny: "TOLAK", allow: "TERIMA" },
-        ar: { select_lang_title: "اختر اللغة العالمية", close_btn: "إغلاق", sys: "النظام متصل", user: "المستخدم: ضيف", gps: "GPS: غير متصل", chat: "الدردشة العالمية 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "التحقق من الموقع", gps_desc: "يتطلب النظام إذن الموقع للمزامنة.", deny: "رفض", allow: "قبول" }
+        zh: { select_lang_title: "选择全球语言", confirm_btn: "确认并应用", close_btn: "关闭", sys: "系统.在线", user: "用户: 访客", gps: "GPS: 离线", chat: "全球聊天 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 验证", gps_desc: "系统需要位置权限来同步全球量子竞技场映射。", deny: "拒绝", allow: "接受" },
+        ja: { select_lang_title: "グローバル言語を選択", confirm_btn: "確認して適用", close_btn: "閉じる", sys: "SYS.オンライン", user: "ユーザー: ゲスト", gps: "GPS: オフライン", chat: "グローバルチャット 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 認証", gps_desc: "グローバル量子アリーナマッピングを同期するには位置情報が必要です。", deny: "拒否", allow: "同意" },
+        ko: { select_lang_title: "글로벌 언어 선택", confirm_btn: "확인 및 적용", close_btn: "닫기", sys: "SYS.온라인", user: "유저: 게스트", gps: "GPS: 오프라인", chat: "글로벌 채팅 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS 인증", gps_desc: "글로벌 양자 아레나 매핑을 동기화하려면 위치 권한이 필요합니다.", deny: "거부", allow: "수락" },
+        fr: { select_lang_title: "SÉLECTIONNER LA LANGUE", confirm_btn: "CONFIRMER", close_btn: "FERMER", sys: "SYS.EN LIGNE", user: "UTILISATEUR: INVITÉ", gps: "GPS: HORS LIGNE", chat: "CHAT GLOBAL 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VÉRIFICATION GPS", gps_desc: "Le système requiert l'accès à la position pour synchroniser l'arène.", deny: "REFUSER", allow: "ACCEPTER" },
+        de: { select_lang_title: "WELTSPRACHE AUSWÄHLEN", confirm_btn: "BESTÄTIGEN", close_btn: "SCHLIESSEN", sys: "SYS.ONLINE", user: "BENUTZER: GAST", gps: "GPS: OFFLINE", chat: "GLOBALES CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "GPS-VERIFIZIERUNG", gps_desc: "Das System benötigt Standortzugriff zur Synchronisierung.", deny: "ABLEHNEN", allow: "AKZEPTIEREN" },
+        es: { select_lang_title: "SELECCIONAR IDIOMA", confirm_btn: "CONFIRMAR", close_btn: "CERRAR", sys: "SYS.EN LÍNEA", user: "USUARIO: INVITADO", gps: "GPS: DESCONECTADO", chat: "CHAT GLOBAL 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFICACIÓN GPS", gps_desc: "El sistema requiere acceso a la ubicación.", deny: "DENEGAR", allow: "ACEPTAR" },
+        ru: { select_lang_title: "ВЫБЕРИТЕ ЯЗЫК", confirm_btn: "ПОДТВЕРДИТЬ", close_btn: "ЗАКРЫТЬ", sys: "СИСТЕМА.ОНЛАЙН", user: "ПОЛЬЗОВАТЕЛЬ: ГОСТЬ", gps: "GPS: ОФФЛАЙН", chat: "ГЛОБАЛЬНЫЙ ЧАТ 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "ПРОВЕРКА GPS", gps_desc: "Системе требуется доступ к геолокации.", deny: "ОТКАЗАТЬ", allow: "ПРИНЯТЬ" },
+        th: { select_lang_title: "เลือกภาษา", confirm_btn: "ยืนยันและใช้งาน", close_btn: "ปิด", sys: "ระบบ.ออนไลน์", user: "ผู้ใช้: แขก", gps: "GPS: ออฟไลน์", chat: "แชท Global 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "การยืนยัน GPS", gps_desc: "ระบบต้องการสิทธิ์ตำแหน่งที่ตั้งเพื่อซิงค์ข้อมูล", deny: "ปฏิเสธ", allow: "ยอมรับ" },
+        id: { select_lang_title: "PILIH BAHASA", confirm_btn: "KONFIRMASI", close_btn: "TUTUP", sys: "SYS.ONLINE", user: "PENGGUNA: TAMU", gps: "GPS: OFFLINE", chat: "GLOBAL CHAT 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "VERIFIKASI GPS", gps_desc: "Sistem memerlukan akses lokasi.", deny: "TOLAK", allow: "TERIMA" },
+        ar: { select_lang_title: "اختر اللغة العالمية", confirm_btn: "تأكيد وتطبيق", close_btn: "إغلاق", sys: "النظام متصل", user: "المستخدم: ضيف", gps: "GPS: غير متصل", chat: "الدردشة العالمية 9+", kdrive: "K-DRIVE v2.6", date: "2026.09.06", gps_title: "التحقق من الموقع", gps_desc: "يتطلب النظام إذن الموقع للمزامنة.", deny: "رفض", allow: "قبول" }
     };
 
     function playClickSound() {
@@ -281,7 +308,6 @@
         } catch(e){}
     }
 
-    // QUẢN LÝ NHẠC NỀN TOÀN CỤC (DUY TRÌ XUYÊN SUỐT ĐẾN HẾT VIDEO CORE)
     window.kdriveGlobalMusic = window.kdriveGlobalMusic || null;
 
     function triggerGlobalLoginMusic() {
@@ -295,6 +321,11 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('kdriveGlobalHud')) return;
+
+        // Lớp phủ điện xẹt lượng tử khi reload trang
+        const flashDiv = document.createElement('div');
+        flashDiv.id = 'globalQuantumFlashOverlay';
+        document.body.appendChild(flashDiv);
 
         const container = document.createElement('div');
         container.id = 'kdriveGlobalHud';
@@ -329,23 +360,28 @@
                 <div class="global-lang-content">
                     <div class="global-lang-title" id="langModalTitleText">CHỌN NGÔN NGỮ QUỐC TẾ</div>
                     
-                    <div class="global-alien-top-btn" onclick="window.setGlobalLang('encoded')" title="Ký Hiệu Lượng Tử">👽</div>
+                    <div class="global-alien-top-btn" onclick="window.tempSelectLang('encoded')" title="Ký Hiệu Lượng Tử">👽</div>
 
-                    <div class="global-lang-grid">
-                        <div class="global-lang-item" onclick="window.setGlobalLang('vi')">🇻🇳 Tiếng Việt</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('en')">🇬🇧 English</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('zh')">🇨🇳 中文</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('ja')">🇯🇵 日本語</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('ko')">🇰🇷 한국어</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('fr')">🇫🇷 Français</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('de')">🇩🇪 Deutsch</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('es')">🇪🇸 Español</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('ru')">🇷🇺 Русский</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('th')">🇹🇭 ไทย</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('id')">🇮🇩 Indonesia</div>
-                        <div class="global-lang-item" onclick="window.setGlobalLang('ar')">🇸🇦 العربية</div>
+                    <div class="global-lang-grid" id="globalLangGrid">
+                        <div class="global-lang-item" data-lang="vi" onclick="window.tempSelectLang('vi')">🇻🇳 Tiếng Việt</div>
+                        <div class="global-lang-item" data-lang="en" onclick="window.tempSelectLang('en')">🇬🇧 English</div>
+                        <div class="global-lang-item" data-lang="zh" onclick="window.tempSelectLang('zh')">🇨🇳 中文</div>
+                        <div class="global-lang-item" data-lang="ja" onclick="window.tempSelectLang('ja')">🇯🇵 日本語</div>
+                        <div class="global-lang-item" data-lang="ko" onclick="window.tempSelectLang('ko')">🇰🇷 한국어</div>
+                        <div class="global-lang-item" data-lang="fr" onclick="window.tempSelectLang('fr')">🇫🇷 Français</div>
+                        <div class="global-lang-item" data-lang="de" onclick="window.tempSelectLang('de')">🇩🇪 Deutsch</div>
+                        <div class="global-lang-item" data-lang="es" onclick="window.tempSelectLang('es')">🇪🇸 Español</div>
+                        <div class="global-lang-item" data-lang="ru" onclick="window.tempSelectLang('ru')">🇷🇺 Русский</div>
+                        <div class="global-lang-item" data-lang="th" onclick="window.tempSelectLang('th')">🇹🇭 ไทย</div>
+                        <div class="global-lang-item" data-lang="id" onclick="window.tempSelectLang('id')">🇮🇩 Indonesia</div>
+                        <div class="global-lang-item" data-lang="ar" onclick="window.tempSelectLang('ar')">🇸🇦 العربية</div>
                     </div>
-                    <button class="global-lang-close" id="langModalCloseBtn" onclick="window.closeGlobalLang()">ĐÓNG LẠI</button>
+
+                    <!-- NÚT ĐỒNG Ý VÀ ĐÓNG XẾP THÀNH 1 DÒNG NGANG Ở DƯỚI CÙNG -->
+                    <div class="global-btn-row">
+                        <button class="global-lang-close" id="langModalCloseBtn" onclick="window.closeGlobalLang()">ĐÓNG LẠI</button>
+                        <button class="global-lang-confirm" id="langModalConfirmBtn" onclick="window.confirmAndReloadLang()">ĐỒNG Ý CHUYỂN ĐỔI</button>
+                    </div>
                 </div>
             </div>
 
@@ -360,9 +396,7 @@
                     </div>
                     
                     <div class="globe-pointer-wrapper">
-                        <!-- QUẢ ĐỊA CẦU PHÁT SÁNG MỜ -->
                         <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
-                        <!-- NGÓN TAY CHUẨN GÓC CHÉO TỪ DƯỚI LÊN, CHỈ THẲNG VÀO QUẢ CẦU -->
                         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Ngon%20tay.png?raw=true" class="finger-pointer" id="hudFingerPointer" alt="Pointer">
                     </div>
                 </div>
@@ -434,10 +468,14 @@
             animateParticles();
         }
 
+        let pendingSelectedLang = localStorage.getItem('kdrive_lang') || 'encoded';
+
         window.openGlobalLang = function() { 
             playClickSound(); 
             triggerGlobalLoginMusic(); 
             document.getElementById('globalLangModal').classList.add('active'); 
+            pendingSelectedLang = localStorage.getItem('kdrive_lang') || 'encoded';
+            highlightSelectedLangUI(pendingSelectedLang);
             setTimeout(initQuantumParticles, 100);
         };
         
@@ -447,12 +485,39 @@
             if (particleAnimationId) cancelAnimationFrame(particleAnimationId);
         };
         
-        window.setGlobalLang = function(lang) {
+        window.tempSelectLang = function(lang) {
             playClickSound();
-            triggerGlobalLoginMusic(); 
-            localStorage.setItem('kdrive_lang', lang);
-            updateHudLangUI(lang);
+            pendingSelectedLang = lang;
+            highlightSelectedLangUI(lang);
+        };
+
+        function highlightSelectedLangUI(lang) {
+            document.querySelectorAll('.global-lang-item').forEach(item => {
+                if (item.getAttribute('data-lang') === lang) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        // HÀM XÁC NHẬN VÀ RELOAD TRANG KÈM HIỆU ỨNG ĐIỆN XẸT
+        window.confirmAndReloadLang = function() {
+            playClickSound();
+            triggerGlobalLoginMusic();
+            localStorage.setItem('kdrive_lang', pendingSelectedLang);
+
             window.closeGlobalLang();
+
+            const flashOverlay = document.getElementById('globalQuantumFlashOverlay');
+            if (flashOverlay) {
+                flashOverlay.classList.add('flash');
+                if (navigator.vibrate) navigator.vibrate([70, 30, 100]);
+            }
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 350);
         };
 
         function updateHudLangUI(lang) {
@@ -484,12 +549,12 @@
 
             if (document.getElementById('langModalTitleText')) document.getElementById('langModalTitleText').innerText = processText(t.select_lang_title);
             if (document.getElementById('langModalCloseBtn')) document.getElementById('langModalCloseBtn').innerText = processText(t.close_btn);
+            if (document.getElementById('langModalConfirmBtn')) document.getElementById('langModalConfirmBtn').innerText = processText(t.confirm_btn);
         }
 
         const savedLang = localStorage.getItem('kdrive_lang') || 'encoded';
         updateHudLangUI(savedLang);
 
-        // KÍCH HOẠT PHÁT NHẠC XUYÊN SUỐT KHI BẤM BẤT CỨ NÚT NÀO
         document.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {
                 playClickSound();
@@ -523,10 +588,9 @@
             }
         }
 
-        // HÀM XỬ LÝ CHỌN GPS: TIẾP TỤC GIỮ NHẠC CHẠY XUYÊN SUỐT QUA VIDEO
         function handleGpsChoice(choiceValue) {
             playClickSound();
-            triggerGlobalLoginMusic(); // GIỮ NHẠC CHẠY LIÊN TỤC
+            triggerGlobalLoginMusic();
 
             sessionStorage.setItem('kdrive_gps_verified', choiceValue);
 
