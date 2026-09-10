@@ -163,17 +163,25 @@
                 font-size: 11px !important; font-weight: 900 !important; text-transform: uppercase !important; cursor: pointer !important; transition: 0.3s !important;
                 text-align: center !important; white-space: nowrap !important; letter-spacing: 1px !important;
                 background: rgba(0,0,0,0.85) !important; backdrop-filter: blur(5px) !important;
+                pointer-events: none !important; /* BAN ĐẦU CHƯA CHO BẤM CHO ĐẾN KHI CHỌN NGÔN NGỮ */
+                opacity: 0.4 !important;
+                animation: none !important;
+            }
+            .gps-action-btn.unlocked {
+                pointer-events: auto !important;
+                opacity: 1 !important;
                 animation: buttonBreatheGPS 2s infinite ease-in-out !important;
             }
+
             .gps-btn-allow { border: 1.5px solid #00e5ff !important; color: #00e5ff !important; box-shadow: 0 0 12px rgba(0, 229, 255, 0.6) !important; }
-            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3) !important; color: #fff !important; box-shadow: 0 0 22px #00e5ff !important; }
+            .gps-btn-allow.unlocked:hover { background: rgba(0, 229, 255, 0.3) !important; color: #fff !important; box-shadow: 0 0 22px #00e5ff !important; }
             
             .gps-btn-deny { border: 1.5px solid #ff003c !important; color: #ff003c !important; box-shadow: 0 0 12px rgba(255, 0, 60, 0.6) !important; }
-            .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3) !important; color: #fff !important; box-shadow: 0 0 22px #ff003c !important; }
+            .gps-btn-deny.unlocked:hover { background: rgba(255, 0, 60, 0.3) !important; color: #fff !important; box-shadow: 0 0 22px #ff003c !important; }
 
             @keyframes buttonBreatheGPS {
-                0%, 100% { transform: scale(1); filter: brightness(1); }
-                50% { transform: scale(1.05); filter: brightness(1.25); }
+                0%, 100% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 10px currentColor; }
+                50% { transform: scale(1.05); filter: brightness(1.3); box-shadow: 0 0 22px currentColor; }
             }
             
             .globe-pointer-wrapper {
@@ -188,14 +196,14 @@
                 font-size: 20px !important; display: flex !important; align-items: center !important; justify-content: center !important;
                 cursor: pointer !important; transition: 0.2s !important; 
                 box-shadow: 0 0 18px rgba(0,229,255,0.4), inset 0 0 8px rgba(0,229,255,0.3) !important;
-                animation: globeSoftGlow 2.5s infinite alternate ease-in-out !important;
+                animation: globeSoftGlow 2s infinite alternate ease-in-out !important;
                 z-index: 999920 !important; pointer-events: auto !important;
             }
             .cassette-lang-btn:hover { background: rgba(0, 229, 255, 0.4) !important; transform: scale(1.1) !important; box-shadow: 0 0 30px #00e5ff !important; }
 
             @keyframes globeSoftGlow {
-                0% { box-shadow: 0 0 10px rgba(0,229,255,0.3); border-color: rgba(0,229,255,0.5); }
-                100% { box-shadow: 0 0 25px rgba(0,229,255,0.8), inset 0 0 12px rgba(0,229,255,0.6); border-color: #fff; }
+                0% { box-shadow: 0 0 10px rgba(0,229,255,0.3); border-color: rgba(0,229,255,0.5); transform: scale(1); }
+                100% { box-shadow: 0 0 28px rgba(0,229,255,0.9), inset 0 0 14px rgba(0,229,255,0.8); border-color: #fff; transform: scale(1.08); }
             }
 
             .finger-pointer {
@@ -393,7 +401,7 @@
                     </div>
                     
                     <div class="globe-pointer-wrapper">
-                        <button class="cassette-lang-btn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
+                        <button class="cassette-lang-btn" id="cassetteLangGlobeBtn" onclick="window.openGlobalLang()" title="Chọn ngôn ngữ">🌐</button>
                         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Ngon%20tay.png?raw=true" class="finger-pointer" id="hudFingerPointer" alt="Pointer">
                     </div>
                 </div>
@@ -467,6 +475,9 @@
 
         let pendingSelectedLang = localStorage.getItem('kdrive_lang') || 'encoded';
 
+        // Biến kiểm tra người dùng đã từng mở chọn ngôn ngữ trong phiên này chưa
+        let hasInteractedWithLang = false;
+
         window.openGlobalLang = function() { 
             playClickSound(); 
             triggerGlobalLoginMusic(); 
@@ -480,12 +491,15 @@
             playClickSound(); 
             document.getElementById('globalLangModal').classList.remove('active');
             if (particleAnimationId) cancelAnimationFrame(particleAnimationId);
+            
+            // Sau khi đóng bảng chọn ngôn ngữ, mở khóa 2 nút GPS và ẩn ngón tay chỉ hướng đi
+            unlockGpsButtons();
         };
         
         window.tempSelectLang = function(lang) {
             playClickSound();
             pendingSelectedLang = lang;
-            updateHudLangUI(lang); // CẬP NHẬT NGAY LẬP TỨC CHỮ TRÊN BẢNG MODAL VÀ NÚT XÁC NHẬN
+            updateHudLangUI(lang);
         };
 
         function highlightSelectedLangUI(lang) {
@@ -515,6 +529,19 @@
                 window.location.reload();
             }, 350);
         };
+
+        function unlockGpsButtons() {
+            hasInteractedWithLang = true;
+            const denyBtn = document.getElementById('gpsDenyBtn');
+            const allowBtn = document.getElementById('gpsAllowBtn');
+            const fingerPointer = document.getElementById('hudFingerPointer');
+            const globeBtn = document.getElementById('cassetteLangGlobeBtn');
+
+            if (denyBtn) denyBtn.classList.add('unlocked');
+            if (allowBtn) allowBtn.classList.add('unlocked');
+            if (fingerPointer) fingerPointer.style.display = 'none'; // Ẩn ngón tay sau khi đã chọn xong ngôn ngữ
+            if (globeBtn) globeBtn.style.animation = 'none'; // Quả địa cầu ngừng nhấp nháy
+        }
 
         function updateHudLangUI(lang) {
             const isEncoded = (lang === 'encoded');
@@ -573,6 +600,11 @@
             if (modalOverlay) {
                 modalOverlay.classList.add('active'); 
                 
+                // Nếu đã lưu ngôn ngữ từ trước (hoặc đã bấm qua rồi), tự động mở khóa luôn nút GPS cho mượt
+                if (localStorage.getItem('kdrive_lang')) {
+                    unlockGpsButtons();
+                }
+
                 const bgUrl = 'https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20GPS%20LOFI.png?raw=true';
                 const bgImg = new Image();
                 bgImg.src = bgUrl;
@@ -597,9 +629,11 @@
         }
 
         document.getElementById('gpsAllowBtn').addEventListener('click', () => {
+            if (!hasInteractedWithLang && !localStorage.getItem('kdrive_lang')) return;
             handleGpsChoice('true');
         });
         document.getElementById('gpsDenyBtn').addEventListener('click', () => {
+            if (!hasInteractedWithLang && !localStorage.getItem('kdrive_lang')) return;
             handleGpsChoice('false');
         });
     });
