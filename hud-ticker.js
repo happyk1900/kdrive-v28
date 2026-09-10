@@ -158,26 +158,24 @@
             
             .gps-btn-row { display: flex !important; gap: 10px !important; justify-content: center !important; width: 100% !important; }
             
+            /* BAN ĐẦU ẨN HOÀN TOÀN 2 NÚT GPS CHO ĐẾN KHI CHỌN NGÔN NGỮ */
             .gps-action-btn {
+                display: none !important; 
                 flex: 1 !important; padding: 10px 4px !important; border-radius: 8px !important; font-family: 'Montserrat', sans-serif !important;
                 font-size: 11px !important; font-weight: 900 !important; text-transform: uppercase !important; cursor: pointer !important; transition: 0.3s !important;
                 text-align: center !important; white-space: nowrap !important; letter-spacing: 1px !important;
                 background: rgba(0,0,0,0.85) !important; backdrop-filter: blur(5px) !important;
-                pointer-events: none !important; /* BAN ĐẦU CHƯA CHO BẤM CHO ĐẾN KHI CHỌN NGÔN NGỮ */
-                opacity: 0.4 !important;
-                animation: none !important;
             }
             .gps-action-btn.unlocked {
-                pointer-events: auto !important;
-                opacity: 1 !important;
+                display: flex !important;
                 animation: buttonBreatheGPS 2s infinite ease-in-out !important;
             }
 
             .gps-btn-allow { border: 1.5px solid #00e5ff !important; color: #00e5ff !important; box-shadow: 0 0 12px rgba(0, 229, 255, 0.6) !important; }
-            .gps-btn-allow.unlocked:hover { background: rgba(0, 229, 255, 0.3) !important; color: #fff !important; box-shadow: 0 0 22px #00e5ff !important; }
+            .gps-btn-allow:hover { background: rgba(0, 229, 255, 0.3) !important; color: #fff !important; box-shadow: 0 0 22px #00e5ff !important; }
             
             .gps-btn-deny { border: 1.5px solid #ff003c !important; color: #ff003c !important; box-shadow: 0 0 12px rgba(255, 0, 60, 0.6) !important; }
-            .gps-btn-deny.unlocked:hover { background: rgba(255, 0, 60, 0.3) !important; color: #fff !important; box-shadow: 0 0 22px #ff003c !important; }
+            .gps-btn-deny:hover { background: rgba(255, 0, 60, 0.3) !important; color: #fff !important; box-shadow: 0 0 22px #ff003c !important; }
 
             @keyframes buttonBreatheGPS {
                 0%, 100% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 10px currentColor; }
@@ -475,9 +473,6 @@
 
         let pendingSelectedLang = localStorage.getItem('kdrive_lang') || 'encoded';
 
-        // Biến kiểm tra người dùng đã từng mở chọn ngôn ngữ trong phiên này chưa
-        let hasInteractedWithLang = false;
-
         window.openGlobalLang = function() { 
             playClickSound(); 
             triggerGlobalLoginMusic(); 
@@ -492,7 +487,6 @@
             document.getElementById('globalLangModal').classList.remove('active');
             if (particleAnimationId) cancelAnimationFrame(particleAnimationId);
             
-            // Sau khi đóng bảng chọn ngôn ngữ, mở khóa 2 nút GPS và ẩn ngón tay chỉ hướng đi
             unlockGpsButtons();
         };
         
@@ -531,7 +525,6 @@
         };
 
         function unlockGpsButtons() {
-            hasInteractedWithLang = true;
             const denyBtn = document.getElementById('gpsDenyBtn');
             const allowBtn = document.getElementById('gpsAllowBtn');
             const fingerPointer = document.getElementById('hudFingerPointer');
@@ -539,8 +532,8 @@
 
             if (denyBtn) denyBtn.classList.add('unlocked');
             if (allowBtn) allowBtn.classList.add('unlocked');
-            if (fingerPointer) fingerPointer.style.display = 'none'; // Ẩn ngón tay sau khi đã chọn xong ngôn ngữ
-            if (globeBtn) globeBtn.style.animation = 'none'; // Quả địa cầu ngừng nhấp nháy
+            if (fingerPointer) fingerPointer.style.display = 'none';
+            if (globeBtn) globeBtn.style.animation = 'none';
         }
 
         function updateHudLangUI(lang) {
@@ -577,8 +570,9 @@
             highlightSelectedLangUI(lang);
         }
 
-        const savedLang = localStorage.getItem('kdrive_lang') || 'encoded';
-        updateHudLangUI(savedLang);
+        // LUÔN MẶC ĐỊNH LÀ KÝ HIỆU LƯỢNG TỬ KHI VÀO LẦN ĐẦU (NẾU CHƯA CHỌN)
+        const currentSavedLang = localStorage.getItem('kdrive_lang') || 'encoded';
+        updateHudLangUI(currentSavedLang);
 
         document.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -600,7 +594,7 @@
             if (modalOverlay) {
                 modalOverlay.classList.add('active'); 
                 
-                // Nếu đã lưu ngôn ngữ từ trước (hoặc đã bấm qua rồi), tự động mở khóa luôn nút GPS cho mượt
+                // Nếu người dùng đã từng chọn ngôn ngữ từ trước, tự động hiện 2 nút GPS luôn
                 if (localStorage.getItem('kdrive_lang')) {
                     unlockGpsButtons();
                 }
@@ -629,11 +623,9 @@
         }
 
         document.getElementById('gpsAllowBtn').addEventListener('click', () => {
-            if (!hasInteractedWithLang && !localStorage.getItem('kdrive_lang')) return;
             handleGpsChoice('true');
         });
         document.getElementById('gpsDenyBtn').addEventListener('click', () => {
-            if (!hasInteractedWithLang && !localStorage.getItem('kdrive_lang')) return;
             handleGpsChoice('false');
         });
     });
