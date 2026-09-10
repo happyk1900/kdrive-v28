@@ -31,6 +31,21 @@
         .inspect-mode #main-hud { transform: translateY(-50px); opacity: 0 !important; }
         .inspect-mode #dynamic-hud-module { transform: translateX(-50%) translateY(50px); opacity: 0 !important; }
 
+        /* HIỆU ỨNG ĐIỆN XẸT LƯỢNG TỬ KHI ĐỔI NGÔN NGỮ */
+        #quantum-flash-overlay {
+            position: fixed; inset: 0; width: 100vw; height: 100vh; background: #00ffff;
+            z-index: 999999; opacity: 0; pointer-events: none; transition: opacity 0.15s ease;
+            mix-blend-mode: screen;
+        }
+        #quantum-flash-overlay.flash {
+            animation: quantumFlashAnim 0.4s ease-out;
+        }
+        @keyframes quantumFlashAnim {
+            0% { opacity: 0.95; filter: brightness(3) drop-shadow(0 0 50px #00e5ff); }
+            50% { opacity: 0.4; filter: brightness(1.5); }
+            100% { opacity: 0; filter: none; }
+        }
+
         /* VÙNG CHỨA THÔNG TIN BÊN TRÁI - HẠ THẤP XUỐNG 75PX ĐỂ TRÁNH HUD CHUNG */
         #core-left-sidebar {
             position: fixed; top: 75px; left: 15px;
@@ -256,6 +271,9 @@
     </style>
 </head>
 <body>
+
+    <!-- LỚP PHỦ HIỆU ỨNG ĐIỆN XẸT LƯỢNG TỬ -->
+    <div id="quantum-flash-overlay"></div>
 
     <div id="sanctum-bg"></div>
     
@@ -555,6 +573,18 @@
             updateSystemTerminal(); 
         }
 
+        // KÍCH HOẠT HIỆU ỨNG ĐIỆN XẸT LƯỢNG TỬ KHI ĐỔI NGÔN NGỮ
+        function triggerQuantumFlash() {
+            const overlay = document.getElementById('quantum-flash-overlay');
+            if (!overlay) return;
+            overlay.classList.add('flash');
+            playSound('warp-in');
+            if (navigator.vibrate) navigator.vibrate([70, 30, 100]);
+            setTimeout(() => {
+                overlay.classList.remove('flash');
+            }, 400);
+        }
+
         let fxCtx = null;
         function initAudio() {
             if (!fxCtx) { fxCtx = new (window.AudioContext || window.webkitAudioContext)(); }
@@ -600,7 +630,8 @@
             for(let i = 0; i < 50; i++) { let p = document.createElement('div'); let type = Math.random(); if(type < 0.5) p.className = 'dust-particle dust-small'; else if(type < 0.8) p.className = 'dust-particle dust-large'; else p.className = 'dust-particle dust-large dust-flicker'; p.style.left = (Math.random() * 100) + 'vw'; p.style.animationDuration = (Math.random() * 15 + 10) + 's'; p.style.animationDelay = (Math.random() * 10) + 's'; dustContainer.appendChild(p); }
         }
 
-        const bgMusic = document.getElementById('bg-music'); if(bgMusic) bgMusic.volume = 0.6; 
+        const bgMusic = document.getElementById('bg-music'); 
+        if(bgMusic) bgMusic.volume = 0.6; 
 
         const booLines = {
             chill: {
@@ -1007,6 +1038,13 @@
         }, 4000); 
 
         window.addEventListener('load', () => {
+            // TRIỆT TIÊU HOÀN TOÀN NHẠC ĐĂNG NHẬP CŨ KHI ĐÃ VÀO CORE
+            if (window.kdriveGlobalMusic) {
+                window.kdriveGlobalMusic.pause();
+                window.kdriveGlobalMusic.currentTime = 0;
+                window.kdriveGlobalMusic = null;
+            }
+
             applyTranslations(); 
             fetchRealUser(); runHighTechClock();
             
@@ -1031,7 +1069,9 @@
                 let aiz = document.getElementById('armor-inspect-zone');
                 if(aiz) { aiz.style.opacity = '1'; aiz.style.pointerEvents = 'auto'; }
 
-                const bgMusic = document.getElementById('bg-music'); if(bgMusic) bgMusic.play().catch(e => console.log(e));
+                const bgMusic = document.getElementById('bg-music'); 
+                if(bgMusic) bgMusic.play().catch(e => console.log(e));
+                
                 const h = new Date().getHours(); if (h >= 23 || h < 6) forceSleep();
 
                 const hudElements = [ document.getElementById('core-left-sidebar'), document.getElementById('dynamic-hud-module') ];
@@ -1045,9 +1085,18 @@
             }, 500);
         });
 
-        // LẮNG NGHE SỰ KIỆN TỪ HUD TRUYỀN TỚI ĐỂ DỊCH CHUYỂN
+        // LẮNG NGHE SỰ KIỆN TỪ HUD TRUYỀN TỚI ĐỂ DỊCH CHUYỂN NGAY LẬP TỨC + HIỆU ỨNG ĐIỆN XẸT
         window.addEventListener('kdriveLangChanged', (e) => {
             currentLang = e.detail.lang;
+            
+            // DỪNG HẲN NHẠC ĐĂNG NHẬP NẾU CÒN SÓT LẠI
+            if (window.kdriveGlobalMusic) {
+                window.kdriveGlobalMusic.pause();
+                window.kdriveGlobalMusic.currentTime = 0;
+                window.kdriveGlobalMusic = null;
+            }
+
+            triggerQuantumFlash();
             applyTranslations();
         });
 
@@ -1095,7 +1144,6 @@
             if (!isCubeMoved && !document.body.classList.contains('inspect-mode') && !isModalActive) { 
                 if(navigator.vibrate) navigator.vibrate(50); playSound('katana'); 
                 
-                // LIÊN KẾT ĐÚNG TÊN FILE CÁC ĐẠO TRƯỜNG
                 if (taskId === 'phanxa') {
                     document.getElementById('core-wrapper').style.opacity = '0'; 
                     playSound('warp-out');
