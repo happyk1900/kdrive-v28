@@ -158,7 +158,7 @@
             
             .gps-btn-row { display: flex !important; gap: 10px !important; justify-content: center !important; width: 100% !important; }
             
-            /* BAN ĐẦU ẨN HOÀN TOÀN 2 NÚT GPS CHO ĐẾN KHI CHỌN XONG NGÔN NGỮ */
+            /* BAN ĐẦU ẨN HOÀN TOÀN 2 NÚT GPS CHO ĐẾN KHI CHỌN NGÔN NGỮ */
             .gps-action-btn {
                 display: none !important; 
                 flex: 1 !important; padding: 10px 4px !important; border-radius: 8px !important; font-family: 'Montserrat', sans-serif !important;
@@ -471,7 +471,7 @@
             animateParticles();
         }
 
-        let pendingSelectedLang = 'encoded';
+        let pendingSelectedLang = localStorage.getItem('kdrive_lang') || 'encoded';
 
         window.openGlobalLang = function() { 
             playClickSound(); 
@@ -487,7 +487,6 @@
             document.getElementById('globalLangModal').classList.remove('active');
             if (particleAnimationId) cancelAnimationFrame(particleAnimationId);
             
-            // Đóng bảng ngôn ngữ xong mới mở khóa hiện 2 nút GPS
             unlockGpsButtons();
         };
         
@@ -520,16 +519,21 @@
                 if (navigator.vibrate) navigator.vibrate([70, 30, 100]);
             }
 
-            // Gửi sự kiện báo cho toàn hệ thống core cập nhật ngôn ngữ ngay lập tức mà không cần reload
-            window.dispatchEvent(new CustomEvent('kdriveLangChanged', { detail: { lang: pendingSelectedLang } }));
+            setTimeout(() => {
+                window.location.reload();
+            }, 350);
         };
 
         function unlockGpsButtons() {
             const denyBtn = document.getElementById('gpsDenyBtn');
             const allowBtn = document.getElementById('gpsAllowBtn');
+            const fingerPointer = document.getElementById('hudFingerPointer');
+            const globeBtn = document.getElementById('cassetteLangGlobeBtn');
 
             if (denyBtn) denyBtn.classList.add('unlocked');
             if (allowBtn) allowBtn.classList.add('unlocked');
+            if (fingerPointer) fingerPointer.style.display = 'none';
+            if (globeBtn) globeBtn.style.animation = 'none';
         }
 
         function updateHudLangUI(lang) {
@@ -566,9 +570,9 @@
             highlightSelectedLangUI(lang);
         }
 
-        // LUÔN MẶC ĐỊNH LÀ KÝ HIỆU LƯỢNG TỬ KHI MỚI VÀO APP (CHƯA CÓ NÚT GPS HIỆN RA)
-        localStorage.removeItem('kdrive_lang');
-        updateHudLangUI('encoded');
+        // LUÔN MẶC ĐỊNH LÀ KÝ HIỆU LƯỢNG TỬ KHI VÀO LẦN ĐẦU (NẾU CHƯA CHỌN)
+        const currentSavedLang = localStorage.getItem('kdrive_lang') || 'encoded';
+        updateHudLangUI(currentSavedLang);
 
         document.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -581,20 +585,31 @@
         const modalBox = document.getElementById('gpsModalBox');
         const hudTopBar = document.getElementById('hudTopBar');
 
-        // MỖI KHI VÀO APP LÀ HIỆN MÀN HÌNH CHỜ NỀN LOFI VÀ CHƯA CÓ NÚT GPS
-        if (modalOverlay) {
-            modalOverlay.classList.add('active'); 
+        const gpsVerified = sessionStorage.getItem('kdrive_gps_verified');
+        
+        if (gpsVerified === 'true' || gpsVerified === 'false') {
+            if (modalOverlay) modalOverlay.classList.remove('active');
+            if (hudTopBar) hudTopBar.classList.add('active');
+        } else {
+            if (modalOverlay) {
+                modalOverlay.classList.add('active'); 
+                
+                // Nếu người dùng đã từng chọn ngôn ngữ từ trước, tự động hiện 2 nút GPS luôn
+                if (localStorage.getItem('kdrive_lang')) {
+                    unlockGpsButtons();
+                }
 
-            const bgUrl = 'https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20GPS%20LOFI.png?raw=true';
-            const bgImg = new Image();
-            bgImg.src = bgUrl;
-            
-            bgImg.onload = () => {
-                modalOverlay.style.backgroundImage = `url('${bgUrl}')`;
-                setTimeout(() => {
-                    if(modalBox) modalBox.classList.add('show-ui');
-                }, 250); 
-            };
+                const bgUrl = 'https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20GPS%20LOFI.png?raw=true';
+                const bgImg = new Image();
+                bgImg.src = bgUrl;
+                
+                bgImg.onload = () => {
+                    modalOverlay.style.backgroundImage = `url('${bgUrl}')`;
+                    setTimeout(() => {
+                        if(modalBox) modalBox.classList.add('show-ui');
+                    }, 250); 
+                };
+            }
         }
 
         function handleGpsChoice(choiceValue) {
@@ -615,4 +630,3 @@
         });
     });
 })();
-```[cite: 9]
