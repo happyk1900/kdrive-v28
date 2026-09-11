@@ -448,7 +448,6 @@
                 if(firefly) firefly.style.display = 'none';
             }
 
-            // TỰ ĐỘNG KHÔI PHỤC THÔNG TIN NẾU ĐÃ TỪNG ĐĂNG NHẬP TRƯỚC ĐÓ
             const savedEmail = localStorage.getItem('kdrive_user_email');
             const savedAgent = localStorage.getItem('kdrive_masked_agent');
 
@@ -515,18 +514,21 @@
 
             playSound('warp-in');
             
-            // NẾU ĐÃ LƯU EMAIL TRONG LOCALSTORAGE -> BỎ QUA HOÀN TOÀN POPUP CHỌN TÀI KHOẢN, GỌI THẲNG API ĐỒNG BỘ VÀO GAME
-            const savedEmail = localStorage.getItem('kdrive_user_email');
-            if (savedEmail) {
-                executeSocialSync(savedEmail, savedEmail.split('@')[0]);
-                return;
-            }
-
+            // LUÔN KÍCH HOẠT HIỆU ỨNG GLITCH VÀ TRẠNG THÁI KẾT NỐI MỖI KHI BẤM NÚT
             const container = document.getElementById('loginPanelContainer');
             container.classList.add('glitching');
 
             statusEl.style.color = "#00e5ff";
             statusEl.innerText = (currentLang === 'encoded') ? encodeQuantum("🛰️ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...") : (t.connecting || "🛰️ CONNECTING GOOGLE ACCOUNT...");
+
+            const savedEmail = localStorage.getItem('kdrive_user_email');
+            if (savedEmail) {
+                // Đã lưu email từ trước: Vẫn hiển thị hiệu ứng mượt mà, sau đó gọi ngầm sync rồi vào game
+                setTimeout(() => {
+                    executeSocialSync(savedEmail, savedEmail.split('@')[0]);
+                }, 800);
+                return;
+            }
 
             try {
                 if (googleTokenClient) {
@@ -561,7 +563,6 @@
                 const maskedEmail = userEmail.substring(0, 3) + "***@" + userEmail.split('@')[1];
                 maskedAgentName = maskedEmail;
                 
-                // LƯU VĨNH VIỄN VÀO LOCALSTORAGE CHO CÁC LẦN TRUY CẬP SAU
                 localStorage.setItem('kdrive_user_email', userEmail);
                 localStorage.setItem('kdrive_secure_token', 'active_encrypted_' + btoa(userEmail));
                 localStorage.setItem('kdrive_masked_agent', maskedEmail);
