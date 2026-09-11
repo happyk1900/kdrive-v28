@@ -168,6 +168,8 @@
             }
             .gps-action-btn.unlocked {
                 display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
                 animation: buttonBreatheGPS 2s infinite ease-in-out !important;
             }
 
