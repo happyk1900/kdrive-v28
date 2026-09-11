@@ -10,10 +10,9 @@
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
-        /* Xóa background-color: #000 để không che lấp video bên dưới */
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: transparent; font-family: 'Space Grotesk', sans-serif; color: #fff; }
 
-        /* --- VIDEO NỀN BACKGROUND --- */
+        /* --- VIDEO NỀN BACKGROUND - RÕ NÉT 100%, KHÔNG LÀM MỜ --- */
         #bg-video {
             position: fixed;
             top: 0;
@@ -21,18 +20,8 @@
             width: 100vw;
             height: 100vh;
             object-fit: cover;
-            z-index: 0; /* Đưa lên lớp 0 để thoát khỏi nền đen */
-        }
-
-        /* --- LỚP PHỦ TỐI GIẢN CHỐNG LÓA MẮT --- */
-        .video-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(to bottom, rgba(10, 15, 25, 0.4) 0%, rgba(5, 8, 14, 0.8) 100%);
-            z-index: 1; /* Nằm đè lên trên video */
+            z-index: 0;
+            opacity: 1; /* Sáng rõ hoàn toàn */
             pointer-events: none;
         }
 
@@ -43,8 +32,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 60px;
-            z-index: 10; /* Nằm trên cùng */
+            padding-top: 55px; /* Căn từ trên xuống */
+            z-index: 10;
             animation: fadeIn 1s ease-out forwards;
         }
 
@@ -56,46 +45,133 @@
         /* --- TIÊU ĐỀ TRANG --- */
         .page-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 900;
-            letter-spacing: 6px;
+            letter-spacing: 8px;
             color: #ff2a2a;
             text-transform: uppercase;
-            text-shadow: 0 0 15px rgba(255, 42, 42, 0.6);
-            margin-bottom: 30px;
+            text-shadow: 0 0 15px rgba(255, 42, 42, 0.8), 0 0 5px #fff;
+            margin-bottom: 25px;
         }
 
-        .title-divider {
-            width: 120px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(255, 42, 42, 0.8), transparent);
-            margin-bottom: 20px;
-        }
-
-        /* --- VÙNG THÔNG SỐ --- */
-        .stats-container {
-            width: 85%;
-            max-width: 400px;
-            background: rgba(15, 20, 25, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 42, 42, 0.3);
+        /* --- BẢNG THÔNG SỐ (KIỂM ĐIỂM NGŨ LUÂN) --- */
+        .stats-card {
+            width: 90%;
+            max-width: 360px;
+            background: rgba(10, 14, 20, 0.65); /* Kính trong suốt tối màu để tôn chữ */
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 42, 42, 0.5);
             border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 14px;
-            color: #d1d1d1;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(255, 42, 42, 0.2);
         }
 
-        /* --- NÚT TRỞ VỀ LÕI --- */
+        /* TẦNG 1: SCI TỐI CAO */
+        .sci-header {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .sci-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .sci-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 36px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 5px #00e5ff;
+        }
+
+        .stats-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 42, 42, 0.6), transparent);
+        }
+
+        /* TẦNG 2: TỨ LUÂN (THANH NĂNG LƯỢNG) */
+        .stat-row {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .stat-info {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            color: #d1d1d1;
+            letter-spacing: 1px;
+        }
+        .stat-info span:last-child {
+            font-family: 'Share Tech Mono', monospace;
+            color: #fff;
+        }
+        
+        .stat-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+        }
+        .stat-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Các màu thanh năng lượng đặc trưng */
+        .fill-dia { background: #ffeb3b; box-shadow: 0 0 8px #ffeb3b; }
+        .fill-thuy { background: #0088ff; box-shadow: 0 0 8px #0088ff; }
+        .fill-hoa { background: #ff2a2a; box-shadow: 0 0 8px #ff2a2a; }
+        .fill-phong { background: #00ffff; box-shadow: 0 0 8px #00ffff; }
+
+        /* TẦNG 3: CẢNH GIỚI VÔ NGÃ */
+        .vo-nga-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 5px;
+        }
+        .vo-nga-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 13px;
+            font-weight: 900;
+            color: #ff2a2a;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(255, 42, 42, 0.6);
+        }
+        .vo-nga-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+            animation: pulseVoNga 2s infinite alternate;
+        }
+        @keyframes pulseVoNga {
+            from { opacity: 0.8; filter: brightness(1); }
+            to { opacity: 1; filter: brightness(1.3); }
+        }
+
+        /* --- NÚT TRỞ VỀ LÕI (ĐẨY LÊN CAO ĐỂ CHỪA CHỖ CHO BOO PLAYER) --- */
         .btn-back {
             position: absolute;
-            bottom: 50px;
+            bottom: 120px; /* Chừa 120px ở đáy cho hộp nhạc */
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(0, 229, 255, 0.4);
             color: #00e5ff;
             font-family: 'Montserrat', sans-serif;
@@ -108,7 +184,8 @@
             text-transform: uppercase;
             transition: all 0.3s ease;
             backdrop-filter: blur(4px);
-            z-index: 15; /* Nổi hẳn lên trên để dễ bấm */
+            z-index: 15;
+            white-space: nowrap; /* Ép chữ trên 1 dòng, sửa lỗi rớt chữ */
         }
 
         .btn-back:active {
@@ -120,39 +197,56 @@
 </head>
 <body>
 
-    <!-- VIDEO NỀN CHẠY VÒNG LẶP -->
+    <!-- VIDEO NỀN CHẠY VÒNG LẶP (Giữ tốc độ gốc cực mượt) -->
     <video id="bg-video" autoplay loop muted playsinline>
         <source src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20LUC%20CHIEN.mp4" type="video/mp4">
     </video>
 
-    <!-- LỚP PHỦ TỐI GIẢN -->
-    <div class="video-overlay"></div>
-
     <!-- KHUNG NỘI DUNG CHÍNH -->
     <div id="content-wrapper">
         <div class="page-title">LỰC CHIẾN</div>
-        <div class="title-divider"></div>
         
-        <!-- Khu vực này anh có thể đắp các thanh bar biểu đồ, chỉ số radar vào sau -->
-        <div class="stats-container">
-            <p style="margin-bottom: 10px; color: rgba(255,255,255,0.6); font-family: 'Space Grotesk', sans-serif;">ĐANG ĐỒNG BỘ DỮ LIỆU ĐẠO TRƯỜNG...</p>
-            <p style="font-size: 24px; font-weight: bold; color: #fff; text-shadow: 0 0 10px #fff;">SCI: 85.00</p>
+        <!-- BẢNG KIỂM ĐIỂM CHỈ SỐ -->
+        <div class="stats-card">
+            
+            <!-- Tầng 1: Tối cao -->
+            <div class="sci-header">
+                <div class="sci-label">CHỈ SỐ ĐẠO TRƯỜNG TOÀN DIỆN</div>
+                <div class="sci-value">SCI: 85.00</div>
+            </div>
+            
+            <div class="stats-divider"></div>
+
+            <!-- Tầng 2: Tứ Luân -->
+            <div class="stat-row">
+                <div class="stat-info"><span>SỨC MẠNH (ĐỊA)</span> <span>80/100</span></div>
+                <div class="stat-bar-bg"><div class="stat-bar-fill fill-dia" style="width: 80%;"></div></div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-info"><span>TRÍ NHỚ (THỦY)</span> <span>85/100</span></div>
+                <div class="stat-bar-bg"><div class="stat-bar-fill fill-thuy" style="width: 85%;"></div></div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-info"><span>PHẢN XẠ (HỎA)</span> <span>95/100</span></div>
+                <div class="stat-bar-bg"><div class="stat-bar-fill fill-hoa" style="width: 95%;"></div></div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-info"><span>PHÁN ĐOÁN (PHONG)</span> <span>90/100</span></div>
+                <div class="stat-bar-bg"><div class="stat-bar-fill fill-phong" style="width: 90%;"></div></div>
+            </div>
+
+            <div class="stats-divider"></div>
+
+            <!-- Tầng 3: Cảnh giới Vô Ngã -->
+            <div class="vo-nga-row">
+                <span class="vo-nga-label">CẢNH GIỚI VÔ NGÃ</span>
+                <span class="vo-nga-value">1000 NGÀY</span>
+            </div>
         </div>
     </div>
 
-    <!-- NÚT TRỞ VỀ LÕI -->
-    <!-- Thay đổi đường link tương ứng với tên file giao diện lõi của anh -->
+    <!-- NÚT TRỞ VỀ LÕI (Đã đẩy lên chừa chỗ đáy màn hình) -->
     <button class="btn-back" onclick="window.location.href='core new_5.html'">[ TRỞ VỀ LÕI ]</button>
 
-    <script>
-        // Hãm tốc độ video cho tĩnh lặng và nguy hiểm hơn
-        window.addEventListener('DOMContentLoaded', () => {
-            const bgVideo = document.getElementById('bg-video');
-            if (bgVideo) {
-                // 1.0 là bình thường. 0.5 là chậm đi một nửa
-                bgVideo.playbackRate = 0.5; 
-            }
-        });
-    </script>
 </body>
 </html>
