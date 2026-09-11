@@ -12,7 +12,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: transparent; font-family: 'Space Grotesk', sans-serif; color: #fff; }
 
-        /* --- VIDEO NỀN BACKGROUND - RÕ NÉT 100%, KHÔNG LÀM MỜ --- */
+        /* --- VIDEO NỀN BACKGROUND - RÕ NÉT 100% --- */
         #bg-video {
             position: fixed;
             top: 0;
@@ -21,7 +21,7 @@
             height: 100vh;
             object-fit: cover;
             z-index: 0;
-            opacity: 1; /* Sáng rõ 100% */
+            opacity: 1;
             pointer-events: none;
         }
 
@@ -29,11 +29,8 @@
         #content-wrapper {
             position: absolute;
             inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 50px; 
             z-index: 10;
+            pointer-events: none; /* Tránh chặn click của HUD và Player */
             animation: fadeIn 1s ease-out forwards;
         }
 
@@ -42,8 +39,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- TIÊU ĐỀ TRANG (TREO CAO Ở TRÊN) --- */
+        /* --- TIÊU ĐỀ TRANG (TREO Ở TRÊN, DƯỚI HUD) --- */
         .page-title {
+            position: absolute;
+            top: 70px; /* Cách đỉnh 70px để nhường chỗ cho thanh HUD */
+            left: 50%;
+            transform: translateX(-50%);
             font-family: 'Montserrat', sans-serif;
             font-size: 26px;
             font-weight: 900;
@@ -51,32 +52,34 @@
             color: #ff2a2a;
             text-transform: uppercase;
             text-shadow: 0 0 15px rgba(255, 42, 42, 0.8), 0 0 5px #fff;
-            margin-bottom: 25px;
-            z-index: 10;
+            pointer-events: auto;
         }
 
-        /* --- BẢNG THÔNG SỐ (KIỂM ĐIỂM NGŨ LUÂN) - HẠ THẤP XUỐNG --- */
+        /* --- BẢNG THÔNG SỐ - ÉP XUỐNG DƯỚI ĐỂ LỘ NGỰC SAMURAI --- */
         .stats-card {
+            position: absolute;
+            bottom: 90px; /* Cách đáy 90px để nhường chỗ cho Boo Player */
+            left: 50%;
+            transform: translateX(-50%);
             width: 90%;
             max-width: 380px;
-            /* Đẩy hộp xuống dưới để lộ phần đầu & ngực Samurai */
-            margin-top: 25vh; 
-            background: rgba(10, 14, 20, 0.4); /* Rất mờ để thấy video xuyên thấu */
+            background: rgba(10, 14, 20, 0.45);
             backdrop-filter: blur(2px);
             -webkit-backdrop-filter: blur(2px);
             border: 1px solid rgba(255, 42, 42, 0.4);
             border-radius: 12px;
-            padding: 20px 20px;
+            padding: 15px 20px; /* Căn chỉnh lại cho hộp lùn gọn hơn */
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px; /* Thu hẹp khoảng cách giữa các dòng */
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 42, 42, 0.15);
+            pointer-events: auto; /* Mở lại click cho hộp này */
         }
 
         /* TẦNG 1: SCI TỐI CAO */
         .sci-header {
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
         .sci-label {
             font-family: 'Space Grotesk', sans-serif;
@@ -84,7 +87,7 @@
             color: #a0a0a0;
             letter-spacing: 2px;
             text-transform: uppercase;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
         .sci-value {
             font-family: 'Share Tech Mono', monospace;
@@ -94,17 +97,9 @@
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 5px #00e5ff;
         }
 
-        /* TẦNG 2: TỨ LUÂN (THANH NĂNG LƯỢNG) */
-        .stat-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .stat-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        /* TẦNG 2: TỨ LUÂN */
+        .stat-group { display: flex; flex-direction: column; gap: 5px; }
+        .stat-info { display: flex; justify-content: space-between; align-items: center; }
         .stat-name {
             display: flex;
             align-items: center;
@@ -118,17 +113,16 @@
             text-shadow: 0 0 5px rgba(255,255,255,0.3);
         }
         
-        /* Xử lý Icon cắt viền trong suốt bị thừa */
         .icon-wrap {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: visible;
         }
         .icon-wrap img {
-            width: 220%; /* Phóng to để lấp đầy viền trong suốt thừa */
+            width: 220%;
             height: 220%;
             object-fit: contain;
             filter: drop-shadow(0 0 4px rgba(255,255,255,0.4));
@@ -142,14 +136,12 @@
             text-shadow: 0 0 5px rgba(255,255,255,0.5);
         }
         
-        /* Cấu trúc thanh vạch đứt đoạn (Segmented Bar) */
         .stat-bar-container {
             width: 100%;
             height: 6px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
             overflow: hidden;
-            /* Tạo hiệu ứng vạch đứt đoạn */
             mask-image: repeating-linear-gradient(to right, black 0, black 15px, transparent 15px, transparent 18px);
             -webkit-mask-image: repeating-linear-gradient(to right, black 0, black 15px, transparent 15px, transparent 18px);
         }
@@ -158,38 +150,36 @@
             transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* Cấu hình màu Tứ Luân */
+        /* Màu năng lượng */
         .fill-dia { background: linear-gradient(90deg, #d4af37, #ffe066); box-shadow: 0 0 8px #ffe066; }
         .fill-thuy { background: linear-gradient(90deg, #0055ff, #00aaff); box-shadow: 0 0 8px #00aaff; }
         .fill-hoa { background: linear-gradient(90deg, #cc0000, #ff4d4d); box-shadow: 0 0 8px #ff4d4d; }
         .fill-phong { background: linear-gradient(90deg, #cccccc, #ffffff); box-shadow: 0 0 10px #ffffff; }
 
-        /* TẦNG 3: CẢNH GIỚI VÔ NGÃ (HỘP ẢNH TÙY CHỈNH) */
+        /* TẦNG 3: CẢNH GIỚI VÔ NGÃ */
         .mushi-box-wrapper {
             position: relative;
             width: 100%;
-            height: 40px; /* Chiều cao cố định của hộp Vô Ngã */
-            margin-top: 5px;
+            height: 38px;
+            margin-top: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 15px;
         }
-        /* Phóng to ảnh Mushi để bù lại khoảng padding thừa */
         .mushi-box-wrapper img.mushi-bg {
             position: absolute;
             top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(1.6); /* Căn chỉnh tỷ lệ crop tại đây */
+            transform: translate(-50%, -50%) scale(1.6);
             width: 100%;
             height: 100%;
             object-fit: contain;
             z-index: -1;
             pointer-events: none;
         }
-
         .vo-nga-label {
             font-family: 'Montserrat', sans-serif;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 900;
             color: #ff2a2a;
             letter-spacing: 1px;
@@ -197,7 +187,7 @@
         }
         .vo-nga-value {
             font-family: 'Share Tech Mono', monospace;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             color: #ffd700;
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
@@ -208,33 +198,33 @@
             to { opacity: 1; filter: brightness(1.3); }
         }
 
-        /* --- NÚT TRỞ VỀ LÕI (ĐẨY LÊN CHỪA CHỖ CHO BOO PLAYER) --- */
-        .btn-back {
-            position: absolute;
-            bottom: 120px; /* Chừa không gian rộng 120px ở đáy */
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
+        /* --- NÚT BACK NHỎ GỌN (GÓC TRÁI DƯỚI CÙNG) --- */
+        .btn-back-small {
+            position: fixed;
+            bottom: 25px; /* Ngang hàng với Boo Player */
+            left: 20px;   /* Bám góc trái */
+            background: rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(0, 229, 255, 0.4);
             color: #00e5ff;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 800;
-            font-size: 12px;
-            letter-spacing: 3px;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: bold;
+            font-size: 18px;
             cursor: pointer;
-            padding: 12px 35px;
-            border-radius: 6px;
-            text-transform: uppercase;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
             transition: all 0.3s ease;
             backdrop-filter: blur(4px);
-            z-index: 15;
-            white-space: nowrap; /* Chữ nằm ngang 1 dòng */
+            z-index: 100;
         }
 
-        .btn-back:active {
-            transform: translateX(-50%) scale(0.95);
-            background: rgba(0, 229, 255, 0.2);
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+        .btn-back-small:active {
+            transform: scale(0.9);
+            background: rgba(0, 229, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
         }
     </style>
 </head>
@@ -245,13 +235,15 @@
         <source src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20LUC%20CHIEN.mp4" type="video/mp4">
     </video>
 
+    <!-- NÚT TRỞ VỀ LÕI NHỎ GỌN (GÓC TRÁI) -->
+    <button class="btn-back-small" onclick="window.location.href='core new.html'">«</button>
+
     <!-- KHUNG NỘI DUNG CHÍNH -->
     <div id="content-wrapper">
         <div class="page-title">LỰC CHIẾN</div>
         
         <!-- BẢNG KIỂM ĐIỂM CHỈ SỐ -->
         <div class="stats-card">
-            
             <!-- Tầng 1: Tối cao -->
             <div class="sci-header">
                 <div class="sci-label">CHỈ SỐ ĐẠO TRƯỜNG TOÀN DIỆN</div>
@@ -303,18 +295,18 @@
                 <div class="stat-bar-container"><div class="stat-bar-fill fill-phong" style="width: 90%;"></div></div>
             </div>
 
-            <!-- Tầng 3: Cảnh giới Vô Ngã (Dùng Background Box Ảnh) -->
+            <!-- Tầng 3: Cảnh giới Vô Ngã -->
             <div class="mushi-box-wrapper">
                 <img class="mushi-bg" src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20MUSHI.png?raw=true" alt="Mushi Box">
                 <span class="vo-nga-label">CẢNH GIỚI VÔ NGÃ</span>
                 <span class="vo-nga-value">1000 NGÀY</span>
             </div>
-
         </div>
     </div>
 
-    <!-- NÚT TRỞ VỀ LÕI (Chừa 120px dưới đáy) -->
-    <button class="btn-back" onclick="window.location.href='core new_5.html'">[ TRỞ VỀ LÕI ]</button>
+    <!-- TÍCH HỢP SCRIPTS: HUD & BOO PLAYER -->
+    <script src="hud-ticker.js"></script>
+    <script src="boo-player.js"></script>
 
 </body>
 </html>
