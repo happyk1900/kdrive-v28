@@ -126,15 +126,12 @@
                 opacity: 1;
                 transform: translate(-50px, 30px) scale(1.2);
             }
-            /* Ghé qua điều khoản (mục chữ vàng) */
             30% {
                 transform: translate(20px, -15px) scale(1);
             }
-            /* Bay sang ô dấu tích (checkbox) */
             50% {
                 transform: translate(-45px, 25px) scale(1.1);
             }
-            /* Bay lên đậu nhấp nháy tại nút Google */
             70%, 90% {
                 transform: translate(-5px, -75px) scale(1.3);
                 box-shadow: 0 0 25px #ffd700, 0 0 50px #00ffff;
@@ -260,7 +257,7 @@
                 <div class="terms-text" data-i18n="terms_checkbox_label">
                     Tôi đồng ý với <span class="terms-link" onclick="openTermsModal()">Điều khoản dịch vụ</span> & <span class="terms-link" onclick="openTermsModal()">Quy chế thi đấu</span> của Telepathy.
                 </div>
-                <!-- HẠT ĐOM ĐÓM LƯỢNG TỬ LẤP LÁNH DẪN ĐƯỜNG (TỰ ĐỘNG BIẾN MẤT KHI ĐÃ ĐỒNG Ý) -->
+                <!-- HẠT ĐOM ĐÓM LƯỢNG TỬ LẤP LÁNH DẪN ĐƯỜNG -->
                 <div class="quantum-firefly" id="quantumFirefly"></div>
             </div>
 
@@ -403,7 +400,7 @@
                 googleBtn.classList.add('unlocked');
                 statusEl.innerText = "";
                 localStorage.setItem('kdrive_terms_agreed', 'true');
-                if(firefly) firefly.style.display = 'none'; // Ẩn vĩnh viễn hạt đom đóm khi đã đồng ý
+                if(firefly) firefly.style.display = 'none';
                 playSound('warp-in');
             } else {
                 googleBtn.classList.remove('unlocked');
@@ -461,15 +458,16 @@
                 checkbox.checked = true;
                 document.getElementById('googleBtn').classList.add('unlocked');
                 const firefly = document.getElementById('quantumFirefly');
-                if(firefly) firefly.style.display = 'none'; // Ẩn đom đóm nếu đã lưu cấu hình
+                if(firefly) firefly.style.display = 'none';
             }
 
+            // KIỂM TRA TÀI KHOẢN ĐÃ LƯU TRỮ VĨNH VIỄN
             const savedSession = localStorage.getItem('kdrive_secure_token');
             const savedAgent = localStorage.getItem('kdrive_masked_agent');
             const savedUsername = sessionStorage.getItem('kdrive_username');
 
-            if (savedSession && savedUsername) {
-                maskedAgentName = savedAgent || "AGENT_xxxx***";
+            if (savedSession && savedAgent) {
+                maskedAgentName = savedAgent;
                 const t = getTranslation(currentLangSaved);
                 const welcomePrefix = (currentLangSaved === 'encoded') ? encodeQuantum("⚡ ĐỊNH DANH AN TOÀN: ") : (t.welcome || "⚡ SECURE AGENT: ");
                 document.getElementById('loginStatus').innerText = welcomePrefix + maskedAgentName;
@@ -530,6 +528,7 @@
 
             playSound('warp-in');
             
+            // NẾU ĐÃ LƯU TÀI KHOẢN VĨNH VIỄN TRONG LOCALSTORAGE -> BỎ QUA GOOGLE PROMPT, VÀO THẲNG GAME
             const savedSession = localStorage.getItem('kdrive_secure_token');
             const savedUsername = sessionStorage.getItem('kdrive_username');
             if (savedSession && savedUsername) {
@@ -545,11 +544,12 @@
 
             try {
                 if (googleTokenClient) {
-                    googleTokenClient.requestAccessToken({ prompt: 'select_account' });
+                    // prompt: '' giúp sử dụng lại tài khoản đã đăng nhập gần nhất nếu có thể, hoặc yêu cầu chọn tài khoản nếu chưa
+                    googleTokenClient.requestAccessToken({ prompt: '' });
                 } else {
                     initGoogleOAuthClient();
                     if (googleTokenClient) {
-                        googleTokenClient.requestAccessToken({ prompt: 'select_account' });
+                        googleTokenClient.requestAccessToken({ prompt: '' });
                     } else {
                         throw new Error("SDK not ready");
                     }
@@ -576,8 +576,10 @@
                 const maskedEmail = userEmail.substring(0, 3) + "***@" + userEmail.split('@')[1];
                 maskedAgentName = maskedEmail;
                 
+                // LƯU VĨNH VIỄN VÀO LOCALSTORAGE
                 localStorage.setItem('kdrive_secure_token', 'active_encrypted_' + btoa(userEmail));
                 localStorage.setItem('kdrive_masked_agent', maskedEmail);
+                localStorage.setItem('kdrive_user_email', userEmail);
 
                 executeSocialSync(userEmail, userName);
             })
