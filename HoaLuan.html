@@ -71,17 +71,17 @@
             padding: 30px 20px 20px 20px;
         }
 
-        /* BỘ ĐÔI NINJA: TRẢ VỀ KÍCH THƯỚC TO VÀ HẠ THẤP XUỐNG BÁM MẶT HỘP */
+        /* ẢNH NINJA TRÊN ĐỈNH (N_DO 4.png) */
         #ninja-top-decor {
             position: absolute; top: -112px; left: 50%; transform: translateX(-50%);
-            width: 250px; height: auto; z-index: 15; pointer-events: none; user-select: none;
+            width: 185px; height: auto; z-index: 15; pointer-events: none; user-select: none;
             filter: drop-shadow(0 0 10px rgba(255, 69, 0, 0.4));
         }
 
-        /* NINJA ĐỎ GÓC DƯỚI - HIỆU ỨNG NHÚN NHẢY */
+        /* NINJA ĐỎ GÓC DƯỚI - NHỎ XUỐNG 1 XÍU VÀ HẠ THẤP ĐỂ KHÔNG CHE NÚT */
         #ninja-red-decor {
-            position: absolute; bottom: -15px; right: -15px;
-            width: 85px; height: auto; z-index: 20; pointer-events: none; user-select: none;
+            position: absolute; bottom: -25px; right: 0px;
+            width: 75px; height: auto; z-index: 20; pointer-events: none; user-select: none;
             filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6));
             animation: ninjaBop 2s infinite alternate ease-in-out;
         }
@@ -366,12 +366,14 @@
     <div id="sanctum-bg"></div>
     <div id="dust-container"></div>
     
-    <!-- TRẠM CỬA NGÕ (GATEWAY) - KHÔNG CÓ NÚT X -->
+    <!-- TRẠM CỬA NGÕ (GATEWAY) -->
     <div id="gateway-void-overlay">
         <div class="gateway-box">
+            <div class="box-close-x" onclick="closeGatewayToLobby()" title="Thoát">×</div>
+
             <img id="ninja-top-decor" src="https://github.com/happyk1900/-m-thanh-app/blob/main/N_DO%204.png?raw=true" alt="Bộ Ba Ninja Phong Cách Mới">
             
-            <!-- NINJA ĐỎ GÓC DƯỚI ĐÃ ĐƯỢC KHÔI PHỤC KÈM HIỆU ỨNG NHÚN -->
+            <!-- NINJA ĐỎ GÓC DƯỚI - NHỎ HƠN, THẤP XUỐNG ĐỂ KHÔNG CHE NÚT -->
             <img id="ninja-red-decor" src="https://github.com/happyk1900/-m-thanh-app/blob/main/N_DO%201%20(1).png?raw=true" alt="Ninja Đỏ Giật Mình">
 
             <div class="gateway-content">
@@ -390,7 +392,7 @@
         </div>
     </div>
 
-    <!-- BẢNG TỔNG KẾT (COMMAND HUB) - CÓ NÚT X VÀ NINJA NHỊP THỞ -->
+    <!-- BẢNG TỔNG KẾT (COMMAND HUB) -->
     <div id="auto-master-summary">
         <div class="summary-box">
             <div class="box-close-x" onclick="closeSummaryToLobby()" title="Thoát">×</div>
@@ -632,7 +634,7 @@
 
         let gameRuns = { '1': [null, null, null], '2': [null, null, null], '3': [null, null, null] };
         
-        // CƠ CHẾ RESET THEO KHUNG GIỜ (MỖI 1 TIẾNG)
+        // CƠ CHẾ RESET MỖI 1 GIỜ ĐỒNG HỒ
         const currentHourBlock = Math.floor(Date.now() / (1000 * 60 * 60));
         const hourKey = 'hualuan_runs_hour_' + currentHourBlock;
         const savedScoreKey = 'hualuan_saved_score_' + currentHourBlock;
@@ -705,14 +707,24 @@
             }
         }
 
+        function closeGatewayToLobby() {
+            playSound('error');
+            let overlay = document.getElementById('gateway-void-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => { overlay.style.display = 'none'; }, 300);
+            document.getElementById('task-container').classList.add('active');
+        }
+
         function closeSummaryToLobby() {
             playSound('error');
             document.getElementById('auto-master-summary').classList.remove('active');
             document.getElementById('task-container').classList.add('active');
         }
 
-        function getNextAvailableStage() {
-            for(let id of ['1', '2', '3']) {
+        // HÀM TÌM ẢI TIẾP THEO THEO LOGIC: LUÔN TÌM ẢI LỚN HƠN ẢI HIỆN TẠI (BỎ QUA CÁC LƯỢT CÒN THỪA)
+        function getNextAvailableStage(startAfter = 0) {
+            for(let i = startAfter + 1; i <= 3; i++) {
+                let id = i.toString();
                 let validRuns = gameRuns[id].filter(v => v !== null);
                 if(validRuns.length < 3 || isTestMode) return id;
             }
@@ -720,12 +732,33 @@
         }
 
         function triggerAutoRoute() {
-            let nextId = getNextAvailableStage();
+            let nextId = getNextAvailableStage(0); // Bắt đầu quét từ ải đầu tiên
             if(!nextId) {
                 showAutoMasterSummary();
                 return;
             }
             openArena(nextId);
+        }
+
+        function proceedNextStage() {
+            playSound('coin');
+            document.getElementById('task-arena').classList.remove('active');
+            updateHologramUI();
+
+            if (selectedMode === 'auto') {
+                // LOGIC MỚI: Chỉ tìm các ải có ID lớn hơn ải hiện tại (cGame)
+                let nextId = getNextAvailableStage(parseInt(cGame));
+                setTimeout(() => { 
+                    if(nextId) {
+                        openArena(nextId);
+                    } else {
+                        // Nếu đang ở ải 3 thì nextId sẽ là null -> Bật bảng tổng kết
+                        showAutoMasterSummary();
+                    }
+                }, 400);
+            } else {
+                document.getElementById('task-container').classList.add('active');
+            }
         }
 
         function showAutoMasterSummary() {
@@ -891,18 +924,6 @@
         }
 
         function retryCurrentStage() { playSound('katana'); openArena(cGame); }
-
-        function proceedNextStage() {
-            playSound('coin');
-            document.getElementById('task-arena').classList.remove('active');
-            updateHologramUI();
-
-            if (selectedMode === 'auto') {
-                setTimeout(() => { triggerAutoRoute(); }, 400);
-            } else {
-                document.getElementById('task-container').classList.add('active');
-            }
-        }
 
         function saveScore() {
             playSound('coin'); const t = window.currentLangDict || translations['vi'];
