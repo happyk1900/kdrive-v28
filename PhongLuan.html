@@ -29,8 +29,122 @@
             100% { transform: translateX(-50%) translateY(2px) skewX(4deg); text-shadow: 4px -2px 15px rgba(0,229,255,0.5); color: #ffffff; }
         }
 
-        #task-container { position: fixed; top: 25.5%; left: 50%; transform: translate(-50%, -50%); display: flex; gap: 12px; z-index: 10; align-items: center; justify-content: center; width: 100%; max-width: 380px; pointer-events: auto; }
-        .card-wrapper { transition: all 1.5s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: auto; }
+        /* =========================================
+           TRẠM CỬA NGÕ (GATEWAY) PHONG LUÂN
+           ========================================= */
+        #gateway-void-overlay {
+            position: fixed; inset: 0; background-color: #020406; z-index: 99999;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            transition: opacity 0.5s ease, visibility 0.5s;
+            background-image: 
+                linear-gradient(rgba(0, 229, 255, 0.12) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.12) 1px, transparent 1px);
+            background-size: 40px 40px; background-position: center bottom;
+        }
+        #gateway-void-overlay::after {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at center, transparent 20%, #020406 85%);
+            pointer-events: none; z-index: 1;
+        }
+
+        .gateway-box {
+            width: 88%; max-width: 360px;
+            background: rgba(5, 15, 25, 0.95);
+            border: 1.5px solid #a0c0d0; border-radius: 12px;
+            box-shadow: 0 0 40px rgba(160, 192, 208, 0.25), inset 0 0 15px rgba(160, 192, 208, 0.1);
+            position: relative; z-index: 10; padding: 30px 20px 20px 20px;
+        }
+        .gateway-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+        .gateway-title { color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: 900; margin-bottom: 8px; text-shadow: 0 0 10px rgba(160,192,208,0.8); letter-spacing: 3px; text-align: center; text-transform: uppercase; }
+        .gateway-desc { color: #a0c0d0; font-size: 11.5px; margin-bottom: 25px; font-family: 'Space Grotesk', sans-serif; text-align: center; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; }
+
+        .mode-selector-container { display: flex; gap: 14px; width: 100%; margin-bottom: 25px; }
+        .mode-btn {
+            flex: 1; padding: 15px 5px; background: rgba(0, 0, 0, 0.6); border: 1.5px solid rgba(160, 192, 208, 0.5);
+            color: #a0c0d0; font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: bold;
+            text-align: center; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .mode-btn.active {
+            background: rgba(0, 255, 102, 0.15); border-color: #00ff66; color: #00ff66;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.3), inset 0 0 10px rgba(0, 255, 102, 0.15);
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.8); transform: translateY(-2px);
+        }
+
+        .main-start-btn {
+            width: 100%; background: rgba(160, 192, 208, 0.2); border: 1.5px solid #fff;
+            border-radius: 8px; color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 17px;
+            font-weight: 900; letter-spacing: 4px; text-transform: uppercase; cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.2);
+            text-shadow: 0 0 8px #fff; transition: all 0.4s ease;
+            opacity: 0; height: 0; pointer-events: none; overflow: hidden; padding: 0; margin-bottom: 0;
+        }
+        .main-start-btn.ready {
+            opacity: 1; height: 50px; pointer-events: auto; padding: 0; margin-bottom: 20px;
+            animation: mainBtnGlow 1.5s infinite alternate ease-in-out;
+        }
+        @keyframes mainBtnGlow {
+            0% { box-shadow: 0 0 15px rgba(160, 192, 208, 0.4); text-shadow: 0 0 8px #fff; }
+            100% { box-shadow: 0 0 30px rgba(0, 255, 102, 0.7); text-shadow: 0 0 15px #00ff66; }
+        }
+
+        .gateway-exit { 
+            color: #ff3366; font-size: 12px; cursor: pointer; text-decoration: none; 
+            font-family: 'Share Tech Mono', monospace; letter-spacing: 2px; font-weight: bold; 
+            transition: all 0.3s; padding: 10px 20px; text-transform: uppercase; opacity: 0.8;
+        }
+        .gateway-exit:hover { opacity: 1; text-shadow: 0 0 10px rgba(255, 51, 102, 0.8); background: rgba(255, 51, 102, 0.1); border-radius: 6px; }
+
+        /* =========================================
+           BẢNG TỔNG KẾT LUỒNG TỰ ĐỘNG & ĐIỀU HƯỚNG LIÊN HOÀN
+           ========================================= */
+        #auto-master-summary {
+            position: fixed; inset: 0; background: rgba(2, 4, 8, 0.92); z-index: 9999;
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px);
+        }
+        #auto-master-summary.active { display: flex; animation: fadeInSum 0.4s ease; }
+        @keyframes fadeInSum { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        .summary-box {
+            width: 90%; max-width: 350px; background: rgba(5, 10, 15, 0.98);
+            border: 2px solid #a0c0d0; border-radius: 14px; padding: 25px 20px;
+            text-align: center; box-shadow: 0 0 40px rgba(160, 192, 208, 0.4), inset 0 0 20px rgba(160, 192, 208, 0.2);
+            position: relative;
+        }
+        .summary-title { font-family: 'Share Tech Mono', monospace; font-size: 18px; color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 12px; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,255,255,0.8); }
+        .summary-score { font-family: 'Share Tech Mono', monospace; font-size: 34px; color: #00ff66; font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 12px rgba(0,255,102,0.6); }
+        
+        .btn-master-save {
+            width: 100%; padding: 14px; background: rgba(0, 255, 102, 0.2); border: 1.5px solid #00ff66;
+            color: #00ff66; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: bold;
+            border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4); margin-bottom: 25px; transition: 0.2s;
+            animation: pulseSaveBtn 1.2s infinite alternate ease-in-out;
+        }
+        @keyframes pulseSaveBtn {
+            0% { box-shadow: 0 0 15px rgba(0, 255, 102, 0.3); border-color: #00ff66; }
+            100% { box-shadow: 0 0 30px rgba(0, 255, 102, 0.8); border-color: #fff; color: #fff; background: rgba(0, 255, 102, 0.4); }
+        }
+        .btn-master-save.saved { background: rgba(160, 192, 208, 0.3); border-color: #a0c0d0; color: #fff; animation: none; pointer-events: none; }
+
+        .navigation-wings { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; }
+        .wing-btn {
+            flex: 1; padding: 12px 6px; background: rgba(160, 192, 208, 0.15); border: 1.5px solid #a0c0d0;
+            color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold;
+            border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            transition: 0.3s; text-align: center; box-shadow: 0 0 15px rgba(160, 192, 208, 0.3);
+            animation: pulseWings 1.5s infinite alternate ease-in-out;
+        }
+        .wing-btn:hover { background: rgba(160, 192, 208, 0.4); color: #fff; border-color: #fff; transform: translateY(-2px); }
+        @keyframes pulseWings {
+            0% { box-shadow: 0 0 10px rgba(160, 192, 208, 0.2); }
+            100% { box-shadow: 0 0 22px rgba(255, 255, 255, 0.7); }
+        }
+
+        /* ========================================= */
+
+        #task-container { position: fixed; top: 25.5%; left: 50%; transform: translate(-50%, -50%); display: flex; gap: 12px; z-index: 10; align-items: center; justify-content: center; width: 100%; max-width: 380px; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #task-container.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
         
         .holo-card { 
             width: 105px; height: 110px; 
@@ -39,7 +153,6 @@
         }
         .holo-card::before { content: ''; position: absolute; inset: 0; background: rgba(5, 10, 15, 0.4); z-index: 1; transition: background 0.3s; }
         .holo-card > * { position: relative; z-index: 2; }
-        
         .holo-card:hover::before { background: rgba(5, 10, 15, 0.1); }
         .holo-card:hover { box-shadow: inset 0 0 25px rgba(255, 255, 255, 0.9), 0 0 20px rgba(255, 255, 255, 0.8); border-color: #fff; transform: translateY(-3px); }
         
@@ -61,17 +174,8 @@
 
         #dual-metrics-box { position: fixed; top: 38.5%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 360px; display: flex; gap: 12px; z-index: 38; }
         .metric-card { 
-            flex: 1; 
-            background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/PHONG%20SCI.png?raw=true');
-            background-size: cover; 
-            background-position: center; 
-            border: 1.5px solid rgba(160, 192, 208, 0.6); 
-            border-radius: 8px; 
-            padding: 8px 10px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.7), inset 0 0 12px rgba(160, 192, 208, 0.2); 
+            flex: 1; background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/PHONG%20SCI.png?raw=true');
+            background-size: cover; background-position: center; border: 1.5px solid rgba(160, 192, 208, 0.6); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.7), inset 0 0 12px rgba(160, 192, 208, 0.2); 
         }
         .metric-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #a0c0d0; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; font-weight: bold; text-shadow: 0 0 4px #000; cursor: pointer; user-select: none; }
         .metric-val { font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: bold; color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,0.8); }
@@ -85,7 +189,6 @@
         }
 
         .holo-box-header { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #a0c0d0; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid rgba(160,192,208,0.4); padding-bottom: 6px; display: flex; justify-content: space-between; font-weight: bold; }
-        
         .holo-row { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #ddd; padding: 3px 0; border-bottom: 1px dashed rgba(160,192,208,0.15); font-weight: 500; }
         .holo-row:last-child { border-bottom: none; }
         .holo-label { color: #a0c0d0; font-weight: bold; width: 35px; text-shadow: 0 0 5px rgba(160,192,208,0.5); }
@@ -103,7 +206,6 @@
         .terminal-text { color: #00ff66; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(0,255,102,0.8); }
         
         #action-panel { position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 50; pointer-events: auto; width: 90%; max-width: 360px; justify-content: center; align-items: center; }
-
         .img-action-btn {
             flex: 1; height: 42px; background-size: cover; background-position: center; border: 1.5px solid rgba(160, 192, 208, 0.6); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.7), inset 0 0 12px rgba(160, 192, 208, 0.2); display: flex; align-items: center; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase;
         }
@@ -141,14 +243,11 @@
         .highlight-score { color: #00ff66; font-weight: bold; font-size: 14px; text-shadow: 0 0 8px rgba(0,255,102,0.8); }
         .inline-boo-msg { color: #a0c0d0; font-style: italic; font-size: 10px; margin-left: 3px; font-weight: bold; text-shadow: 0 0 4px #000; }
 
-        /* KÍCH THƯỚC CHUẨN 60PX KHÔNG BAO GIỜ BỊ NHỎ TÍ */
         .wind-target { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: transform 0.1s ease; } 
         
-        /* ẢI 1: Viền trắng mờ, bên trong tối */
         .t-track-mode { background: rgba(0, 0, 0, 0.85); border: 2px solid rgba(255, 255, 255, 0.4); box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
         .t-track-mode.hovered { border-color: #fff; box-shadow: 0 0 25px #fff; background: rgba(255, 255, 255, 0.2); transform: translate(-50%, -50%) scale(1.1); }
 
-        /* ẢI 2 & ẢI 3: 3 TRẠNG THÁI CHUẨN ĐẸP */
         .style-track { background: #000; border: 2.5px solid #fff; box-shadow: 0 0 15px rgba(255,255,255,0.6); }
         .style-slash { background: #fff; border: 2.5px solid #fff; box-shadow: 0 0 25px #fff, 0 0 45px rgba(255,255,255,0.9); animation: flarePulse 0.4s infinite alternate; }
         @keyframes flarePulse { 0% { transform: scale(0.92); opacity: 0.85; } 100% { transform: scale(1.08); opacity: 1; } }
@@ -179,7 +278,6 @@
 
         #custom-alert-overlay { position: fixed; inset: 0; background: rgba(0, 5, 10, 0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(8px); }
         #custom-alert-overlay.active { opacity: 1; pointer-events: auto; }
-        
         .custom-alert-box { width: 85%; max-width: 320px; background: rgba(5, 10, 15, 0.95); border: 2px solid #ff3366; border-radius: 12px; padding: 25px 20px; text-align: center; box-shadow: 0 0 30px rgba(255, 51, 102, 0.5), inset 0 0 15px rgba(255, 51, 102, 0.3); position: relative; overflow: hidden; }
         .alert-title { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #ff3366; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; display: inline-block; }
         .alert-text { font-family: 'Space Grotesk', sans-serif; font-size: 15px; color: #fff; line-height: 1.6; margin-bottom: 22px; text-shadow: 0 0 5px rgba(255,255,255,0.6); }
@@ -197,7 +295,6 @@
 
         #chart-modal-overlay { position: fixed; inset: 0; background: rgba(2, 4, 8, 0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; backdrop-filter: blur(8px); }
         #chart-modal-overlay.active { opacity: 1; pointer-events: auto; }
-
         .chart-modal-box { width: 88%; max-width: 330px; background: rgba(5, 10, 15, 0.96); border: 2px solid #a0c0d0; border-radius: 12px; padding: 24px 20px; text-align: center; box-shadow: 0 0 30px rgba(160, 192, 208, 0.4), inset 0 0 15px rgba(160, 192, 208, 0.2); }
         .chart-modal-title { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); }
         .chart-modal-text { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #ddd; line-height: 1.6; margin-bottom: 20px; letter-spacing: 0.5px; }
@@ -210,6 +307,41 @@
     <div id="sanctum-bg"></div>
     <div id="dust-container"></div>
     
+    <!-- TRẠM CỬA NGÕ (GATEWAY) PHONG LUÂN -->
+    <div id="gateway-void-overlay">
+        <div class="gateway-box">
+            <div class="gateway-content">
+                <div class="gateway-title" data-i18n="gateway_title">ĐẠO TRƯỜNG PHONG LUÂN</div>
+                <div class="gateway-desc" data-i18n="gateway_desc">Chọn phương thức xuất trận</div>
+                
+                <div class="mode-selector-container">
+                    <div class="mode-btn" id="mode-manual" onclick="selectMode('manual')" data-i18n="mode_manual">TỰ CHỌN ẢI</div>
+                    <div class="mode-btn" id="mode-auto" onclick="selectMode('auto')" data-i18n="mode_auto">LUỒNG TỰ ĐỘNG</div>
+                </div>
+                
+                <button class="main-start-btn" id="main-action-btn" onclick="executeStart()" data-i18n="btn_main_start">KHAI TRẬN</button>
+                
+                <div class="gateway-exit" onclick="navToCore()" data-i18n="gateway_exit">TRỞ VỀ LÕI</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BẢNG TỔNG KẾT LUỒNG TỰ ĐỘNG & ĐIỀU HƯỚNG LIÊN HOÀN -->
+    <div id="auto-master-summary">
+        <div class="summary-box">
+            <div class="summary-title" data-i18n="sum_title">HOÀN TẤT PHONG LUÂN</div>
+            <div style="font-family:'Share Tech Mono'; font-size:12px; color:#aaa; margin-bottom:5px;" data-i18n="sum_score_lbl">TỔNG ĐIỂM CHIẾN TÍCH</div>
+            <div class="summary-score" id="master-total-score">0</div>
+            
+            <button class="btn-master-save" id="btn-master-save" onclick="saveMasterScore()" data-i18n="btn_master_save">LƯU ĐIỂM TỔNG</button>
+            
+            <div class="navigation-wings">
+                <button class="wing-btn" onclick="navToDomain('1HỎA_2.html')">« HỎA LUÂN</button>
+                <button class="wing-btn" onclick="navToDomain('thuy_luan.html')">THỦY LUÂN »</button>
+            </div>
+        </div>
+    </div>
+
     <audio id="bg-music" loop src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20(1).mp3"></audio>
 
     <div class="title-hologram" data-i18n="phong_title">ĐẠO TRƯỜNG PHONG LUÂN</div>
@@ -263,7 +395,7 @@
 
     <div id="hologram-stats-box">
         <div class="holo-box-header">
-            <span data-i18n="combat_log">>> NHẬT KÝ CHIẾN TÍCH & PHÁN ĐOÁN</span>
+            <span data-i18n="combat_log">NHẬT KÝ CHIẾN TÍCH & PHÁN ĐOÁN</span>
             <span id="date-label" data-i18n="today">HÔM NAY</span>
         </div>
         
@@ -347,9 +479,12 @@
         const translations = {
             vi: {
                 page_title: "K-Drive - Đạo Trường Phong Luân", phong_title: "ĐẠO TRƯỜNG PHONG LUÂN", card_1_title: "BÁM ĐUỔI", card_2_title: "TIÊN PHONG", card_3_title: "BIẾN ẢO",
-                tries_left: "LƯỢT", exhausted_label: "HẾT LƯỢT", fame: "DANH VỌNG", combat_log: ">> NHẬT KÝ CHIẾN TÍCH", today: "HÔM NAY",
+                tries_left: "LƯỢT", exhausted_label: "HẾT LƯỢT", fame: "DANH VỌNG", combat_log: "NHẬT KÝ CHIẾN TÍCH", today: "HÔM NAY",
                 click_chart: "CHẠM VÀO ĐIỂM ĐỂ XEM CHI TIẾT", led_msg: "⚡ [HỆ THỐNG]: HOÀN THÀNH ẢI VÀ BẤM LƯU ĐIỂM NGAY! ⚡",
                 btn_core: "TRỞ VỀ LÕI", btn_save: "LƯU ĐIỂM", btn_start: "KHAI TRẬN", test_finish: "KẾT THÚC BÀI TEST", score_label: "ĐIỂM:", btn_confirm: "XÁC NHẬN", btn_exit: "THOÁT",
+                mode_manual: "TỰ CHỌN ẢI", mode_auto: "LUỒNG TỰ ĐỘNG", btn_main_start: "KHAI TRẬN",
+                gateway_title: "ĐẠO TRƯỜNG PHONG LUÂN", gateway_desc: "Chọn phương thức xuất trận", gateway_exit: "TRỞ VỀ LÕI",
+                sum_title: "HOÀN TẤT PHONG LUÂN", sum_score_lbl: "TỔNG ĐIỂM CHIẾN TÍCH", btn_master_save: "LƯU ĐIỂM TỔNG",
                 alert_limit_title: "GIỚI HẠN KỶ LUẬT", alert_unlock_title: "BẺ KHÓA THÀNH CÔNG",
                 chart_detail_title: "CHI TIẾT LƯỢT", fame_achieved: "Tổng Danh Vọng:", status_label: "Trạng thái:", chart_desc: "Dữ liệu được lưu từ tổng điểm Phong Luân.",
                 eval_high: "🌪️ VÔ CỰC TUYỆT ĐỈNH", eval_mid: "💨 PHONG THẦN THỨC TỈNH", eval_low: "🌱 TÍCH LŨY CƠ BẢN",
@@ -361,9 +496,12 @@
             },
             en: {
                 page_title: "K-Drive - Wind Arena", phong_title: "WIND ARENA", card_1_title: "PURSUIT", card_2_title: "VANGUARD", card_3_title: "ILLUSION",
-                tries_left: "TURNS", exhausted_label: "NO TURNS", fame: "PRESTIGE", combat_log: ">> LOG", today: "TODAY",
+                tries_left: "TURNS", exhausted_label: "NO TURNS", fame: "PRESTIGE", combat_log: "LOG", today: "TODAY",
                 click_chart: "TAP POINTS", led_msg: "⚡ [WIND ARENA] ⚡",
                 btn_core: "CORE", btn_save: "SAVE", btn_start: "START", test_finish: "DONE", score_label: "SCORE:", btn_confirm: "OK", btn_exit: "EXIT",
+                mode_manual: "MANUAL", mode_auto: "AUTO-ROUTE", btn_main_start: "START BATTLE",
+                gateway_title: "WIND ARENA", gateway_desc: "Select deployment mode", gateway_exit: "RETURN TO CORE",
+                sum_title: "WIND ARENA COMPLETED", sum_score_lbl: "TOTAL PRESTIGE SCORE", btn_master_save: "SAVE TOTAL SCORE",
                 alert_limit_title: "LIMIT", alert_unlock_title: "UNLOCKED",
                 chart_detail_title: "DETAILS", fame_achieved: "Prestige:", status_label: "Status:", chart_desc: "Data recorded.",
                 eval_high: "🌪️ PEAK", eval_mid: "💨 AWAKENED", eval_low: "🌱 BASIC",
@@ -388,6 +526,7 @@
         let isTestMode = false;
         let secretClicks = 0;
         let chartPointsCoords = [];
+        let selectedMode = null;
 
         document.getElementById('secret-test-trigger').addEventListener('click', () => {
             secretClicks++;
@@ -477,7 +616,6 @@
             drawWaveChart();
 
             if(localStorage.getItem('bg_music_muted') !== 'true') { bgMusic.play().catch(e => {}); }
-            setTimeout(() => { document.body.classList.add('assembled'); }, 300);
         };
 
         function drawWaveChart() {
@@ -561,6 +699,68 @@
                     `<span style="font-size:12px; color:#aaa;">${t.chart_desc}</span>`
                 );
             }
+        }
+
+        function selectMode(mode) {
+            playSound('coin');
+            selectedMode = mode;
+            document.getElementById('mode-manual').classList.remove('active');
+            document.getElementById('mode-auto').classList.remove('active');
+            document.getElementById(`mode-${mode}`).classList.add('active');
+            const startBtn = document.getElementById('main-action-btn');
+            startBtn.classList.add('ready');
+        }
+
+        function executeStart() {
+            if (!selectedMode) return;
+            playSound('katana');
+            let overlay = document.getElementById('gateway-void-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => { overlay.style.display = 'none'; }, 500);
+
+            if (selectedMode === 'auto') {
+                triggerAutoRoute();
+            } else {
+                let tc = document.getElementById('task-container');
+                tc.classList.add('active');
+            }
+        }
+
+        function getNextAvailableStage() {
+            for(let id of ['1', '2', '3']) {
+                let validRuns = gameRuns[id].filter(v => v !== null);
+                if(validRuns.length < 3 || isTestMode) return id;
+            }
+            return null; 
+        }
+
+        function triggerAutoRoute() {
+            let nextId = getNextAvailableStage();
+            if(!nextId) {
+                showAutoMasterSummary();
+                return;
+            }
+            openArena(nextId);
+        }
+
+        function showAutoMasterSummary() {
+            let totalMaxSum = parseInt(document.getElementById('max-total-val').innerText) || 0;
+            document.getElementById('master-total-score').innerText = totalMaxSum;
+            document.getElementById('auto-master-summary').classList.add('active');
+            playSound('coin');
+        }
+
+        function saveMasterScore() {
+            saveScore();
+            document.getElementById('btn-master-save').classList.add('saved');
+            document.getElementById('btn-master-save').innerText = "ĐÃ LƯU ĐIỂM TỔNG ✓";
+            playSound('coin', 1.5);
+        }
+
+        function navToDomain(url) {
+            playSound('katana');
+            document.body.style.opacity = '0';
+            setTimeout(() => { window.location.href = url; }, 800);
         }
 
         function updateHologramUI() {
@@ -792,7 +992,6 @@
         playArea.addEventListener('mousemove', updateMousePos);
         playArea.addEventListener('touchmove', (e) => { e.preventDefault(); updateMousePos(e); }, {passive: false});
 
-        // BẮT SỰ KIỆN CLICK / TAP CHO ẢI 2 & ẢI 3
         function handleTargetClick(e) {
             if(!isPlaying) return;
             e.stopPropagation();
@@ -809,7 +1008,6 @@
                 }
             } 
             else if(currentGame === '3') {
-                // Ải 3: Yêu cầu click đúng lúc khi ở dạng SLASH hoặc TAP
                 if(g3Mode === 'SLASH' || g3Mode === 'TAP') {
                     addScoreAndCheckMultiplier(g3Mode === 'SLASH' ? 20 : 25);
                     playSound('katana'); 
@@ -854,7 +1052,6 @@
             if(stability <= 0) finishGame(reason);
         }
 
-        // BỘ ĐẾM THỜI GIAN CHUẨN KHẮT KHE (HẾT GIỜ KHÔNG TƯƠNG TÁC ĐÚNG THÌ MẤT MẠNG)
         function resetActionTimer() {
             if(actionTimer) clearTimeout(actionTimer);
             if(!isPlaying) return;
@@ -866,7 +1063,7 @@
                 tx = 60 + Math.random() * (maxX - 120); 
                 ty = 60 + Math.random() * (maxY - 120);
                 resetActionTimer();
-            }, 3000); // ĐÚNG 3 GIÂY CHO PHÉP PHẢN XẠ MỖI LƯỢT
+            }, 3000); 
         }
 
         function initG1() {
@@ -913,7 +1110,6 @@
             
             resetActionTimer();
 
-            // Vòng lặp chuyển đổi 3 trạng thái của ải 3 chuẩn kích thước
             let tm = setInterval(() => {
                 if(!isPlaying) return;
                 const modes = ['TRACK', 'SLASH', 'TAP'];
@@ -982,7 +1178,6 @@
                 }
             } 
             else if(currentGame === '3' && g3Mode === 'TRACK') {
-                // Ở ải 3 dạng TRACK: Rê bám đè lên hạt viền trắng trong đen
                 if(dist < hitRadius) { 
                     addScoreAndCheckMultiplier(0.25); 
                     resetActionTimer(); 
@@ -1025,12 +1220,23 @@
             
             localStorage.setItem(todayDateKey, JSON.stringify(gameRuns));
             updateHologramUI();
+            
+            // Nếu chạy chế độ Tự động -> Kiểm tra xem đã hết lượt tất cả ải chưa để bật Command Hub liên hoàn
+            if (selectedMode === 'auto') {
+                setTimeout(() => {
+                    let nextId = getNextAvailableStage();
+                    if (!nextId) {
+                        showAutoMasterSummary();
+                    } else {
+                        openArena(nextId);
+                    }
+                }, 800);
+            }
         }
 
         function navToCore() {
             playSound('error');
-            document.body.classList.remove('assembled');
-            document.getElementById('sanctum-bg').style.opacity = '0';
+            document.body.style.opacity = '0';
             setTimeout(() => { window.location.href = 'core.html'; }, 800); 
         }
     </script>
