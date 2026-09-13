@@ -314,17 +314,6 @@
         } catch(e){}
     }
 
-    window.kdriveGlobalMusic = window.kdriveGlobalMusic || null;
-
-    function triggerGlobalLoginMusic() {
-        if (!window.kdriveGlobalMusic) {
-            window.kdriveGlobalMusic = new Audio("https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/K_Drive_Initialized.mp3");
-            window.kdriveGlobalMusic.loop = true; 
-            window.kdriveGlobalMusic.volume = 0.9;
-        }
-        window.kdriveGlobalMusic.play().catch(e => console.log("Trình duyệt chặn phát nhạc tự động:", e));
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('kdriveGlobalHud')) return;
 
@@ -382,7 +371,6 @@
                         <div class="global-lang-item" data-lang="ar" onclick="window.tempSelectLang('ar')">🇸🇦 العربية</div>
                     </div>
 
-                    <!-- NÚT ĐỒNG Ý VÀ ĐÓNG XẾP THÀNH 1 DÒNG NGANG Ở DƯỚI CÙNG -->
                     <div class="global-btn-row">
                         <button class="global-lang-close" id="langModalCloseBtn" onclick="window.closeGlobalLang()">ĐÓNG LẠI</button>
                         <button class="global-lang-confirm" id="langModalConfirmBtn" onclick="window.confirmAndReloadLang()">ĐỒNG Ý CHUYỂN ĐỔI</button>
@@ -477,7 +465,6 @@
 
         window.openGlobalLang = function() { 
             playClickSound(); 
-            triggerGlobalLoginMusic(); 
             document.getElementById('globalLangModal').classList.add('active'); 
             pendingSelectedLang = localStorage.getItem('kdrive_lang') || 'encoded';
             updateHudLangUI(pendingSelectedLang);
@@ -510,7 +497,6 @@
 
         window.confirmAndReloadLang = function() {
             playClickSound();
-            triggerGlobalLoginMusic();
             localStorage.setItem('kdrive_lang', pendingSelectedLang);
 
             window.closeGlobalLang();
@@ -572,14 +558,12 @@
             highlightSelectedLangUI(lang);
         }
 
-        // LUÔN MẶC ĐỊNH LÀ KÝ HIỆU LƯỢNG TỬ KHI VÀO LẦN ĐẦU (NẾU CHƯA CHỌN)
         const currentSavedLang = localStorage.getItem('kdrive_lang') || 'encoded';
         updateHudLangUI(currentSavedLang);
 
         document.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {
                 playClickSound();
-                triggerGlobalLoginMusic();
             });
         });
 
@@ -596,7 +580,6 @@
             if (modalOverlay) {
                 modalOverlay.classList.add('active'); 
                 
-                // Nếu người dùng đã từng chọn ngôn ngữ từ trước, tự động hiện 2 nút GPS luôn
                 if (localStorage.getItem('kdrive_lang')) {
                     unlockGpsButtons();
                 }
@@ -616,7 +599,6 @@
 
         function handleGpsChoice(choiceValue) {
             playClickSound();
-            triggerGlobalLoginMusic();
 
             sessionStorage.setItem('kdrive_gps_verified', choiceValue);
 
