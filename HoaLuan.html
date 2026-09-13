@@ -214,20 +214,37 @@
         .blackout-bg { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .blackout-bg.active { opacity: 1; pointer-events: auto; }
         
+        /* KHUNG CHỨA ĐẠI BẠO PHÁT VÀ VÒNG TRÒN GIỚI HẠN */
+        .burst-container {
+            position: absolute; width: 220px; height: 260px;
+            left: 50%; top: 45%; transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center; z-index: 105;
+        }
+
+        /* VÒNG TRÒN NĂNG LƯỢNG DO CSS VẼ RA ĐỂ GIỚI HẠN VÙNG BẤM */
+        .burst-boundary-circle {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 3px dashed #ff66cc;
+            box-shadow: 0 0 30px #ff0066, inset 0 0 20px #ffb700;
+            animation: boundarySpin 10s linear infinite;
+            pointer-events: none; z-index: 106;
+        }
+        @keyframes boundarySpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .orb-giant { 
             position: absolute; 
-            width: 240px; height: 280px; 
-            left: 50%; bottom: 0px; 
-            transform: translateX(-50%);
+            width: 200px; height: 240px; 
+            bottom: 0px; left: 50%; transform: translateX(-50%);
             background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/A%20KAME%20ZOKO.png?raw=true'); 
             background-size: contain; background-repeat: no-repeat; background-position: bottom center; 
-            z-index: 105; cursor: pointer; 
-            transition: transform 0.05s;
-            filter: drop-shadow(0 0 30px #ff0066);
+            z-index: 107; cursor: pointer; 
+            filter: drop-shadow(0 0 25px #ff0066);
         }
-        .orb-giant:active { transform: translateX(-50%) scale(0.95); filter: drop-shadow(0 0 50px #fff); }
 
-        .burst-text { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #ff66cc; font-weight: 900; letter-spacing: 3px; z-index: 105; text-shadow: 0 0 15px #ff0066; margin-bottom: 280px; animation: pulseText 0.3s infinite alternate; pointer-events: none; }
+        .burst-text { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #ff66cc; font-weight: 900; letter-spacing: 3px; z-index: 105; text-shadow: 0 0 15px #ff0066; margin-bottom: 290px; animation: pulseText 0.3s infinite alternate; pointer-events: none; }
         @keyframes pulseText { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
 
         .beam { position: absolute; bottom: 50%; left: 50%; transform: translateX(-50%); z-index: 106; transform-origin: bottom center; pointer-events: none; }
@@ -363,7 +380,7 @@
 
     <div id="terminal-bar">
         <div class="terminal-track">
-            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - 7 CẤP ĐỘ SIÊU SAIYA & CHU KỲ 20 HẠT ĐÃ SẴN SÀNG! ⚡</span>
+            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - HẠT HỒNG TỶ LỆ NGHỊCH & VÒNG TRÒN GIỚI HẠN BẠO PHÁT ĐÃ KÍCH HOẠT! ⚡</span>
         </div>
     </div>
 
@@ -454,8 +471,8 @@
         let aScore = 0; 
         let reflexScore = 0;
         let burstScore = 0;
-        let currentMultiplier = 1; // Hệ số nhân X1 đến X7
-        let consecutiveGoldOrbs = 0; // Đếm số hạt vàng ăn liên tiếp (đạt 20 sẽ đẻ hạt hồng)
+        let currentMultiplier = 1; // Hệ số X1 đến X7
+        let consecutiveGoldOrbs = 0; 
         let isPlaying = false; 
         let isPausedForStart = true;
         let spawnTimer, pinkSpawnTimer, burstTimer, g3LoopId, stability = 5, projectiles = [];
@@ -536,13 +553,13 @@
 
         function getTierColor(tier) {
             switch(tier) {
-                case 1: return '#00ff66'; // Xanh lá
-                case 2: return '#00e5ff'; // Xanh ngọc
-                case 3: return '#ffb700'; // Vàng hoàng kim
-                case 4: return '#ff4500'; // Cam hỏa diệm
-                case 5: return '#ff66cc'; // Hồng bạo phát
-                case 6: return '#00ffff'; // Xanh điện quang
-                case 7: return '#ffffff'; // Trắng tối thượng
+                case 1: return '#00ff66';
+                case 2: return '#00e5ff';
+                case 3: return '#ffb700';
+                case 4: return '#ff4500';
+                case 5: return '#ff66cc';
+                case 6: return '#00ffff';
+                case 7: return '#ffffff';
                 default: return '#ffb700';
             }
         }
@@ -704,7 +721,6 @@
             playSound('coin', 1);
 
             consecutiveGoldOrbs++;
-            // ĐẠT TRÒN 20 HẠT VÀNG LIÊN TIẾP THÌ KÍCH HOẠT HẠT HỒNG (ĐẠI BẠO PHÁT)
             if (consecutiveGoldOrbs >= 20) {
                 consecutiveGoldOrbs = 0;
                 spawnPinkOrbDirectly();
@@ -757,7 +773,9 @@
             
             playArea.appendChild(el); 
 
-            let lifespan = Math.max(450, 1400 - (currentMultiplier * 140));
+            // TỐC ĐỘ DI CHUYỂN VÀ XUẤT HIỆN TĂNG CỰC MẠNH THEO CẤP ĐỘ X7
+            let speedFactor = 1 + (currentMultiplier * 0.25);
+            let lifespan = Math.max(300, 1300 - (currentMultiplier * 150));
             setTimeout(() => { 
                 if(el.parentElement && !clicked) { 
                     spData.deathTime = Date.now() - matchStartTime;
@@ -766,14 +784,14 @@
                 } 
             }, lifespan);
 
-            let nextSpawnDelay = Math.max(250, 950 - (currentMultiplier * 100));
+            let nextSpawnDelay = Math.max(180, 850 - (currentMultiplier * 95));
             if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG1, nextSpawnDelay); }
         }
 
-        // HẠT HỒNG (ĐẠI BẠO PHÁT) XUẤT HIỆN CHÍNH XÁC Ở HẠT THỨ 20
+        // HẠT HỒNG (ĐẠI BẠO PHÁT): TỶ LỆ NGHỊCH VỚI CẤP ĐỘ (CÀNG CAO CÀNG XUẤT HIỆN NHANH VÀ BIẾN MẤT TRONG TÍCH TẮC)
         function spawnPinkOrbDirectly() {
             if(!isPlaying || isPausedForStart) return;
-            clearTimeout(spawnTimer); // Tạm dừng hạt vàng để nhường sân khấu cho Đại bạo phát
+            clearTimeout(spawnTimer);
 
             let playArea = document.getElementById('play-area');
             let maxX = playArea.clientWidth - 45, maxY = playArea.clientHeight - 45;
@@ -801,12 +819,12 @@
 
             playArea.appendChild(el);
 
-            let pinkLifespan = 2500;
+            // TỶ LỆ NGHỊCH: Cấp càng cao, thời gian tồn tại hạt hồng càng ngắn (từ 2000ms xuống chỉ còn 600ms ở X7)
+            let pinkLifespan = Math.max(600, 2200 - (currentMultiplier * 230));
             setTimeout(() => {
                 if(el.parentElement && !clicked) {
                     spData.deathTime = Date.now() - matchStartTime;
                     el.remove();
-                    // Nếu bỏ lỡ hạt hồng, tiếp tục luồng hạt vàng
                     if(isPlaying && !isPausedForStart) { spawnG1(); }
                 }
             }, pinkLifespan);
@@ -831,28 +849,53 @@
             let centerX = playArea.clientWidth / 2;
             let centerY = playArea.clientHeight / 2;
 
+            // KHUNG BẠO PHÁT & VÒNG TRÒN NĂNG LƯỢNG GIỚI HẠN VÙNG BẤM
+            let burstContainer = document.createElement('div');
+            burstContainer.className = 'burst-container';
+
+            let boundaryCircle = document.createElement('div');
+            boundaryCircle.className = 'burst-boundary-circle';
+            burstContainer.appendChild(boundaryCircle);
+
             let giantOrb = document.createElement('div');
             giantOrb.className = 'orb-giant';
+            burstContainer.appendChild(giantOrb);
 
             let burstSpData = { t: Date.now() - matchStartTime, x: centerX, y: centerY, type: 'giant', deathTime: Infinity };
             currentReplayData.spawns.push(burstSpData);
 
             let burstClicks = 0;
-            let duration = 5000;
             
-            giantOrb.onmousedown = giantOrb.ontouchstart = (e) => {
-                e.preventDefault(); e.stopPropagation();
-                burstClicks++;
-                playSound('boom', 1.5 + (burstClicks * 0.03));
-                triggerVibration(40);
-            };
+            // CÀNG LÊN CẤP CAO (X7), NẾU VƯỢT QUA ĐƯỢC ĐỘ KHÓ THÌ THỜI GIAN BẠO PHÁT ĐƯỢC KÉO DÀI HƠN (ĐỂ TÍCH ĐIỂM KHỦNG)
+            let duration = Math.min(8000, 5000 + (currentMultiplier * 400));
+            
+            // KIỂM TRA ĐIỀU KIỆN CHỈ TÁP TRONG VÒNG TRÒN GIỚI HẠN
+            playArea.addEventListener('pointerdown', handleBurstTouch);
 
-            playArea.appendChild(giantOrb);
-            showSpeedPopup("🔥 ĐẠI BẠO PHÁT 🔥");
+            function handleBurstTouch(e) {
+                if (!isPlaying) return;
+                let rect = burstContainer.getBoundingClientRect();
+                let bCenterX = rect.left + rect.width / 2;
+                let bCenterY = rect.top + rect.height / 2;
+                let radius = rect.width / 2;
+
+                let dist = Math.hypot(e.clientX - bCenterX, e.clientY - bCenterY);
+                
+                // NẾU TÁP NẰM TRONG VÒNG TRÒN GIỚI HẠN THÌ TÍNH ĐIỂM
+                if (dist <= radius) {
+                    burstClicks++;
+                    playSound('boom', 1.5 + (burstClicks * 0.03));
+                    triggerVibration(40);
+                }
+            }
+
+            playArea.appendChild(burstContainer);
+            showSpeedPopup(`🔥 BẠO PHÁT (X${currentMultiplier}) 🔥`);
 
             burstTimer = setTimeout(() => {
+                playArea.removeEventListener('pointerdown', handleBurstTouch);
                 burstSpData.deathTime = Date.now() - matchStartTime;
-                giantOrb.remove(); burstText.remove();
+                burstContainer.remove(); burstText.remove();
                 fireBeam(burstClicks, blackout);
             }, duration);
         }
@@ -862,7 +905,6 @@
             let cps = Math.round((clicks / 5) * 10) / 10;
             if (cps > bestCps) bestCps = cps;
 
-            // XÁC ĐỊNH TIER BẠO PHÁT
             let tier = 1;
             let beamTime = 2500;
             
@@ -911,9 +953,8 @@
                 if (earnedScore < 5) earnedScore = 5; 
 
                 aScore += earnedScore;
-                burstScore += earnedScore; // LƯU ĐIỂM BẠO PHÁT RIÊNG BIỆT
+                burstScore += earnedScore; 
                 
-                // SAU KHI HOÀN THÀNH BẠO PHÁT, TĂNG HỆ SỐ X LÊN 1 NẤC (TỐI ĐA X7)
                 if (currentMultiplier < 7) {
                     currentMultiplier++;
                 }
@@ -1044,7 +1085,6 @@
                 } else {
                     document.getElementById('final-score-display').innerText = aScore;
                     
-                    // GÁN MÀU SẮC ĐỒNG BỘ THEO CẤP ĐỘ HIỆN TẠI (X1 - X7) CHO TẤT CẢ CÁC CHỈ SỐ TRONG NGOẶC
                     let activeColor = getTierColor(currentMultiplier);
                     
                     let refScoreEl = document.getElementById('res-reflex-score');
@@ -1062,8 +1102,6 @@
                     let rankBadge = document.getElementById('bio-rank-badge');
                     let rankDesc = document.getElementById('bio-rank-desc');
 
-                    // TÍNH ĐIỂM TRUNG BÌNH TỔNG HỢP TỪ CÁC CHỈ SỐ ĐỂ XẾP HẠNG CHUẨN XÁC
-                    // Điểm tổng hợp dựa trên tổng điểm (aScore) và tốc độ tay đỉnh (CPS)
                     let compositeRating = aScore + (bestCps * 20);
 
                     if (aScore === 0) {
