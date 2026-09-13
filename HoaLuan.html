@@ -214,7 +214,6 @@
         .blackout-bg { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .blackout-bg.active { opacity: 1; pointer-events: auto; }
         
-        /* CĂN CHỈNH LINH ẢNH BÀN TAY CHỌC TỪ DƯỚI LÊN ÔM TRỌN QUẢ CẦU */
         .orb-giant { 
             position: absolute; 
             width: 240px; height: 280px; 
@@ -364,7 +363,7 @@
 
     <div id="terminal-bar">
         <div class="terminal-track">
-            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: 7 CẤP ĐỘ SIÊU SAIYA & TĂNG TỐC THEO CHU KỲ 20 HẠT VÀNG ĐÃ KÍCH HOẠT! ⚡</span>
+            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - 7 CẤP ĐỘ SIÊU SAIYA & CHU KỲ 20 HẠT ĐÃ SẴN SÀNG! ⚡</span>
         </div>
     </div>
 
@@ -387,7 +386,7 @@
                 </div>
             </div>
 
-            <div id="speed-popup">X2</div>
+            <div id="speed-popup">X1</div>
             <div id="freeze-overlay">
                 <div class="freeze-text">KẾT THÚC</div>
             </div>
@@ -399,19 +398,19 @@
                 <div class="bio-metrics-box">
                     <div class="bio-row">
                         <span>ĐIỂM PHẢN XẠ THƯỜNG:</span>
-                        <span><b id="res-reflex-score" style="color:#00e5ff;">0</b> đ</span>
+                        <span>(<b id="res-reflex-score" style="color:#00e5ff;">0</b> đ)</span>
                     </div>
                     <div class="bio-row">
                         <span>ĐIỂM BẠO PHÁT (SIÊU TỐC):</span>
-                        <span><b id="res-burst-score" style="color:#ff66cc;">0</b> đ</span>
+                        <span>(<b id="res-burst-score" style="color:#ff66cc;">0</b> đ)</span>
                     </div>
                     <div class="bio-row">
                         <span>PHẢN XẠ TRUNG BÌNH:</span>
-                        <span><b id="bio-avg-val">0</b> ms</span>
+                        <span>(<b id="bio-avg-val">0</b> ms)</span>
                     </div>
                     <div class="bio-row">
                         <span>TỐC ĐỘ TAY ĐỈNH (CPS):</span>
-                        <span><b id="bio-cps-val" style="color:#ffb700;">0</b> click/s</span>
+                        <span>(<b id="bio-cps-val" style="color:#ffb700;">0</b> click/s)</span>
                     </div>
                     <div class="bio-rank-badge" id="bio-rank-badge" style="color: #ffb700;">ĐANG PHÂN TÍCH...</div>
                     <div class="bio-rank-desc" id="bio-rank-desc">Đánh giá hệ thống thần kinh</div>
@@ -455,8 +454,8 @@
         let aScore = 0; 
         let reflexScore = 0;
         let burstScore = 0;
-        let currentMultiplier = 1; // X1 đến X7 (Siêu Saiya)
-        let consecutiveGoldOrbs = 0; // Đếm hạt vàng liên tiếp để tăng cấp X
+        let currentMultiplier = 1; // Hệ số nhân X1 đến X7
+        let consecutiveGoldOrbs = 0; // Đếm số hạt vàng ăn liên tiếp (đạt 20 sẽ đẻ hạt hồng)
         let isPlaying = false; 
         let isPausedForStart = true;
         let spawnTimer, pinkSpawnTimer, burstTimer, g3LoopId, stability = 5, projectiles = [];
@@ -490,7 +489,7 @@
             for(let i=0; i<30; i++) { clickTimestamps.push(Date.now() + i*10); clickCoordinates.push({x: 100, y: 100}); }
         }
 
-        // GHI NHẬN TỌA ĐỘ CHẠM THỰC TẾ 100% KHÔNG NẮN TÂM
+        // GHI NHẬN TỌA ĐỘ CHẠM THỰC TẾ 100% (KHÔNG NẮN TÂM)
         document.addEventListener('pointerdown', function(e) {
             let ripple = document.createElement('div');
             ripple.className = 'touch-ripple';
@@ -533,6 +532,19 @@
 
         function triggerVibration(pattern) {
             try { if (navigator.vibrate) { navigator.vibrate(pattern); } } catch(e) {}
+        }
+
+        function getTierColor(tier) {
+            switch(tier) {
+                case 1: return '#00ff66'; // Xanh lá
+                case 2: return '#00e5ff'; // Xanh ngọc
+                case 3: return '#ffb700'; // Vàng hoàng kim
+                case 4: return '#ff4500'; // Cam hỏa diệm
+                case 5: return '#ff66cc'; // Hồng bạo phát
+                case 6: return '#00ffff'; // Xanh điện quang
+                case 7: return '#ffffff'; // Trắng tối thượng
+                default: return '#ffb700';
+            }
         }
 
         function showCustomAlertBox(title, msg, isBan = false) {
@@ -668,7 +680,7 @@
             matchStartTime = Date.now();
             currentReplayData = { score: 0, actions: [], spawns: [] };
             reactionTimes = [];
-            if(cGame === '1') { runG1(); runPinkG1(); } 
+            if(cGame === '1') { runG1(); } 
             else if(cGame === '2') { runG2(); } 
             else if(cGame === '3') { runG3(); } 
         }
@@ -676,12 +688,12 @@
         function showSpeedPopup(text) {
             let popup = document.getElementById('speed-popup');
             popup.innerText = text;
+            popup.style.color = getTierColor(currentMultiplier);
             popup.classList.add('show');
             playSound('coin', 1.8);
             setTimeout(() => { popup.classList.remove('show'); }, 1200);
         }
 
-        // TĂNG ĐIỂM VÀ ĐẾM CHU KỲ 20 HẠT VÀNG ĐỂ TĂNG X (TỐI ĐA X7)
         function addScoreAndCheckMultiplier(pointsToAdd = 1) {
             if(isPausedForStart) return;
 
@@ -692,19 +704,18 @@
             playSound('coin', 1);
 
             consecutiveGoldOrbs++;
+            // ĐẠT TRÒN 20 HẠT VÀNG LIÊN TIẾP THÌ KÍCH HOẠT HẠT HỒNG (ĐẠI BẠO PHÁT)
             if (consecutiveGoldOrbs >= 20) {
                 consecutiveGoldOrbs = 0;
-                if (currentMultiplier < 7) {
-                    currentMultiplier++;
-                    showSpeedPopup(`X${currentMultiplier}`);
-                    updateScoreUI();
-                }
+                spawnPinkOrbDirectly();
             }
         }
 
         function updateScoreUI() { 
             document.getElementById('boo-points').innerText = aScore; 
-            document.getElementById('multiplier-tag').innerText = `X${currentMultiplier}`; 
+            let tag = document.getElementById('multiplier-tag');
+            tag.innerText = `X${currentMultiplier}`;
+            tag.style.color = getTierColor(currentMultiplier);
         }
 
         function loseLife() {
@@ -746,7 +757,7 @@
             
             playArea.appendChild(el); 
 
-            let lifespan = Math.max(500, 1400 - (currentMultiplier * 120));
+            let lifespan = Math.max(450, 1400 - (currentMultiplier * 140));
             setTimeout(() => { 
                 if(el.parentElement && !clicked) { 
                     spData.deathTime = Date.now() - matchStartTime;
@@ -755,12 +766,15 @@
                 } 
             }, lifespan);
 
-            let nextSpawnDelay = Math.max(300, 950 - (currentMultiplier * 90));
+            let nextSpawnDelay = Math.max(250, 950 - (currentMultiplier * 100));
             if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG1, nextSpawnDelay); }
         }
 
-        function runPinkG1() {
+        // HẠT HỒNG (ĐẠI BẠO PHÁT) XUẤT HIỆN CHÍNH XÁC Ở HẠT THỨ 20
+        function spawnPinkOrbDirectly() {
             if(!isPlaying || isPausedForStart) return;
+            clearTimeout(spawnTimer); // Tạm dừng hạt vàng để nhường sân khấu cho Đại bạo phát
+
             let playArea = document.getElementById('play-area');
             let maxX = playArea.clientWidth - 45, maxY = playArea.clientHeight - 45;
             let px = Math.max(10, Math.random() * maxX), py = Math.max(10, Math.random() * maxY);
@@ -787,21 +801,18 @@
 
             playArea.appendChild(el);
 
-            let pinkLifespan = 800;
+            let pinkLifespan = 2500;
             setTimeout(() => {
                 if(el.parentElement && !clicked) {
                     spData.deathTime = Date.now() - matchStartTime;
                     el.remove();
+                    // Nếu bỏ lỡ hạt hồng, tiếp tục luồng hạt vàng
+                    if(isPlaying && !isPausedForStart) { spawnG1(); }
                 }
             }, pinkLifespan);
-
-            // MỖI CHU KỲ BẠO PHÁT XUẤT HIỆN 1 HẠT HỒNG ĐỘC QUYỀN
-            let randomInterval = Math.random() * 5000 + 7000;
-            if(isPlaying && !isPausedForStart) { pinkSpawnTimer = setTimeout(runPinkG1, randomInterval); }
         }
 
         function triggerGreatBurst() {
-            clearTimeout(spawnTimer); clearTimeout(pinkSpawnTimer);
             isPausedForStart = true; 
 
             let playArea = document.getElementById('play-area');
@@ -851,7 +862,7 @@
             let cps = Math.round((clicks / 5) * 10) / 10;
             if (cps > bestCps) bestCps = cps;
 
-            // XÁC ĐỊNH TIER BẠO PHÁT VÀ KÍCH HOẠT TIẾN HÓA X SAU KHI BẠO PHÁT XONG
+            // XÁC ĐỊNH TIER BẠO PHÁT
             let tier = 1;
             let beamTime = 2500;
             
@@ -902,7 +913,7 @@
                 aScore += earnedScore;
                 burstScore += earnedScore; // LƯU ĐIỂM BẠO PHÁT RIÊNG BIỆT
                 
-                // SAU KHI BẠO PHÁT XONG, TĂNG HỆ SỐ NHÂN LÊN 1 NẤC (TỐI ĐA X7)
+                // SAU KHI HOÀN THÀNH BẠO PHÁT, TĂNG HỆ SỐ X LÊN 1 NẤC (TỐI ĐA X7)
                 if (currentMultiplier < 7) {
                     currentMultiplier++;
                 }
@@ -925,7 +936,6 @@
                     isPausedForStart = false; 
                     if (isPlaying) {
                         spawnG1(); 
-                        pinkSpawnTimer = setTimeout(runPinkG1, Math.random() * 5000 + 7000);
                     }
                 }, 1000);
             }, beamTime);
@@ -1034,28 +1044,40 @@
                 } else {
                     document.getElementById('final-score-display').innerText = aScore;
                     
-                    // HIỂN THỊ ĐIỂM SỐ TÁCH BIỆT RÕ RÀNG
-                    document.getElementById('res-reflex-score').innerText = reflexScore;
-                    document.getElementById('res-burst-score').innerText = burstScore;
+                    // GÁN MÀU SẮC ĐỒNG BỘ THEO CẤP ĐỘ HIỆN TẠI (X1 - X7) CHO TẤT CẢ CÁC CHỈ SỐ TRONG NGOẶC
+                    let activeColor = getTierColor(currentMultiplier);
+                    
+                    let refScoreEl = document.getElementById('res-reflex-score');
+                    let burstScoreEl = document.getElementById('res-burst-score');
+                    let avgValEl = document.getElementById('bio-avg-val');
+                    let cpsValEl = document.getElementById('bio-cps-val');
 
+                    refScoreEl.innerText = reflexScore; refScoreEl.style.color = activeColor;
+                    burstScoreEl.innerText = burstScore; burstScoreEl.style.color = activeColor;
+                    
                     let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
-                    document.getElementById('bio-avg-val').innerText = avgMs;
-                    document.getElementById('bio-cps-val').innerText = bestCps; 
+                    avgValEl.innerText = avgMs; avgValEl.style.color = activeColor;
+                    cpsValEl.innerText = bestCps; cpsValEl.style.color = activeColor;
 
                     let rankBadge = document.getElementById('bio-rank-badge');
                     let rankDesc = document.getElementById('bio-rank-desc');
-                    if (avgMs === 0) {
-                        rankBadge.innerText = "CHƯA XÁC ĐỊNH"; rankBadge.style.color = "#888"; rankDesc.innerText = "Không đủ dữ liệu chạm để tính toán";
-                    } else if (avgMs < 160) {
-                        rankBadge.innerText = "TÂM VÔ THỦY"; rankBadge.style.color = "#ff007f"; rankDesc.innerText = "Cảnh giới tối thượng. Phản xạ trước khi nhận thức!";
-                    } else if (avgMs <= 209) {
-                        rankBadge.innerText = "CAO THỦ"; rankBadge.style.color = "#00e5ff"; rankDesc.innerText = "Phản xạ xuất chúng, vượt ngưỡng phản ứng thông thường";
-                    } else if (avgMs <= 259) {
+
+                    // TÍNH ĐIỂM TRUNG BÌNH TỔNG HỢP TỪ CÁC CHỈ SỐ ĐỂ XẾP HẠNG CHUẨN XÁC
+                    // Điểm tổng hợp dựa trên tổng điểm (aScore) và tốc độ tay đỉnh (CPS)
+                    let compositeRating = aScore + (bestCps * 20);
+
+                    if (aScore === 0) {
+                        rankBadge.innerText = "CHƯA XÁC ĐỊNH"; rankBadge.style.color = "#888"; rankDesc.innerText = "Không đủ dữ liệu chiến đấu để tính toán";
+                    } else if (compositeRating >= 800 || currentMultiplier >= 6) {
+                        rankBadge.innerText = "CHÂN HỎA CHI VƯƠNG"; rankBadge.style.color = "#ff007f"; rankDesc.innerText = "Cảnh giới tối thượng. Hỏa luân hợp nhất!";
+                    } else if (compositeRating >= 500 || currentMultiplier >= 4) {
+                        rankBadge.innerText = "SIÊU SAIYA"; rankBadge.style.color = "#ffb700"; rankDesc.innerText = "Năng lượng bùng nổ, uy lực áp đảo toàn diện";
+                    } else if (compositeRating >= 300) {
+                        rankBadge.innerText = "CAO THỦ"; rankBadge.style.color = "#00e5ff"; rankDesc.innerText = "Phản xạ xuất chúng, vượt ngưỡng thông thường";
+                    } else if (compositeRating >= 150) {
                         rankBadge.innerText = "CHIẾN BINH"; rankBadge.style.color = "#00ff66"; rankDesc.innerText = "Đã qua rèn luyện kỷ luật, tay mắt sắc bén";
-                    } else if (avgMs <= 320) {
-                        rankBadge.innerText = "NGƯỜI BÌNH THƯỜNG"; rankBadge.style.color = "#ffb700"; rankDesc.innerText = "Tốc độ phản xạ nằm ở mức phổ thông";
                     } else {
-                        rankBadge.innerText = "KÉM"; rankBadge.style.color = "#ff3333"; rankDesc.innerText = "Phản xạ chậm chạp, tâm trí phân tán";
+                        rankBadge.innerText = "NGƯỜI BÌNH THƯỜNG"; rankBadge.style.color = "#ffb700"; rankDesc.innerText = "Tốc độ phản xạ nằm ở mức phổ thông";
                     }
 
                     document.getElementById('result-overlay').classList.add('active');
