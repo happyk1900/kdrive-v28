@@ -21,8 +21,8 @@
         .dust-large { width: 3px; height: 3px; background: #ff4500; box-shadow: 0 0 8px #ff4500; }
         @keyframes floatDust { 0% { transform: translateY(100vh); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.4; } 100% { transform: translateY(-20vh); opacity: 0; } }
 
-        /* TIÊU ĐỀ SẢNH CHÍNH CÂN ĐỐI */
-        .title-hologram { position: fixed; top: 7%; left: 50%; transform: translateX(-50%); color: #fff; font-family: 'Share Tech Mono', monospace; font-size: clamp(20px, 5vw, 24px); letter-spacing: 3px; padding: 4px 10px; z-index: 35; pointer-events: none; font-weight: 900; white-space: nowrap; text-shadow: 0 0 10px #ff4500, 0 0 20px #ff0000; }
+        /* TIÊU ĐỀ SẢNH CHÍNH (Đã hạ thấp xuống để thoáng với HUD) */
+        .title-hologram { position: fixed; top: 17%; left: 50%; transform: translateX(-50%); color: #fff; font-family: 'Share Tech Mono', monospace; font-size: clamp(20px, 5vw, 24px); letter-spacing: 3px; padding: 4px 10px; z-index: 35; pointer-events: none; font-weight: 900; white-space: nowrap; text-shadow: 0 0 10px #ff4500, 0 0 20px #ff0000; }
 
         .touch-ripple {
             position: fixed; border: 2px solid #ffb700; border-radius: 50%; pointer-events: none; 
@@ -35,62 +35,41 @@
             100% { width: 70px; height: 70px; opacity: 0; border-width: 1px; }
         }
 
-        
-        /* TRẠM CỬA NGÕ: LƯỚI KHÔNG GIAN CYBERPUNK 3D (WALL + FLOOR) */
+        /* TRẠM CỬA NGÕ: LƯỚI KHÔNG GIAN CYBERPUNK 2D PHẲNG CHUẨN ẢNH MẪU */
         #gateway-void-overlay {
             position: fixed; inset: 0; background-color: #010204; z-index: 99999;
             display: flex; align-items: center; justify-content: center; flex-direction: column;
             transition: opacity 0.5s ease; overflow: hidden;
-            perspective: 800px;
         }
-        /* Lớp lưới tường (Wall grid): chạy thẳng từ trên xuống và DỪNG LẠI CHÍNH XÁC ở 75% */
+        /* Lớp trên: Lưới Cyan phẳng, nhạt dần về giữa */
         #gateway-void-overlay::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 75%;
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: 
                 linear-gradient(rgba(0, 229, 255, 0.4) 1px, transparent 1px), 
                 linear-gradient(90deg, rgba(0, 229, 255, 0.4) 1px, transparent 1px);
-            background-size: 60px 60px;
-            background-position: center bottom;
+            background-size: 50px 50px; background-position: center;
             z-index: 1; pointer-events: none;
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0.5) 100%);
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0.5) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%);
         }
-        /* Lớp lưới sàn (Floor grid): bắt đầu TỪ CHÍNH 75% chéo ra ngoài, khít khìn khịt không có khe hở, đổi màu liên tục */
+        /* Lớp dưới: Lưới Magenta phẳng, đổi màu liên tục, nhạt dần lên trên */
         #gateway-void-overlay::after {
-            content: ''; position: absolute; top: 75%; left: -50%; width: 200%; height: 100%;
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: 
-                linear-gradient(rgba(255, 0, 127, 0.7) 2px, transparent 2px), 
-                linear-gradient(90deg, rgba(255, 0, 127, 0.7) 2px, transparent 2px);
-            background-size: 60px 60px;
-            background-position: center top;
+                linear-gradient(rgba(255, 0, 127, 0.6) 1px, transparent 1px), 
+                linear-gradient(90deg, rgba(255, 0, 127, 0.6) 1px, transparent 1px);
+            background-size: 50px 50px; background-position: center;
             z-index: 2; pointer-events: none;
-            transform: rotateX(75deg); transform-origin: top center;
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 40%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 40%);
             animation: gridColorShift 6s infinite linear;
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
         }
         @keyframes gridColorShift {
             0% { filter: hue-rotate(0deg); }
             50% { filter: hue-rotate(180deg); }
             100% { filter: hue-rotate(360deg); }
         }
-        /* Sàn lưới (Floor grid) chạy chéo lên từ đáy đến 75%, góc nghiêng 3D mạnh */
-        #gateway-void-overlay::after {
-            content: ''; position: absolute; bottom: -20%; left: -50%; width: 200%; height: 50%;
-            background-image: 
-                linear-gradient(rgba(255, 0, 127, 0.6) 2px, transparent 2px), 
-                linear-gradient(90deg, rgba(255, 0, 127, 0.6) 2px, transparent 2px);
-            background-size: 60px 60px;
-            background-position: center bottom;
-            z-index: 2; pointer-events: none;
-            /* Kéo nghiêng góc 3D để tạo mặt sàn chéo lên */
-            transform: rotateX(70deg);
-            transform-origin: bottom center;
-            mask-image: linear-gradient(to top, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
-            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
-        }
 
-        
         .gateway-box {
             width: 88%; max-width: 360px; background: rgba(12, 5, 5, 0.96);
             border: 1.5px solid #ff4500; border-radius: 12px;
@@ -98,7 +77,8 @@
             position: relative; z-index: 10; padding: 26px 20px 18px 20px;
         }
         #ninja-top-decor { position: absolute; top: -112px; left: 50%; transform: translateX(-50%); width: 250px; height: auto; z-index: 15; pointer-events: none; filter: drop-shadow(0 0 10px rgba(255, 69, 0, 0.4)); }
-        #ninja-red-decor { position: absolute; bottom: -45px; right: 0px; width: 75px; height: auto; z-index: 20; pointer-events: none; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
+        /* Ninja đỏ hạ thấp để tránh nút luồng tự động */
+        #ninja-red-decor { position: absolute; bottom: -45px; right: -5px; width: 75px; height: auto; z-index: 20; pointer-events: none; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
 
         .gateway-content { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; }
         .gateway-title { color: #ffb700; font-family: 'Share Tech Mono', monospace; font-size: 19px; font-weight: 900; margin-bottom: 6px; text-shadow: 0 0 10px #ff4500; letter-spacing: 2px; text-transform: uppercase; }
@@ -129,9 +109,9 @@
         }
         .gateway-exit:hover { color: #fff; text-shadow: 0 0 15px #fff; }
 
-        /* SẢNH CHÍNH */
+        /* SẢNH CHÍNH (3 Thẻ bài hạ xuống Top 30%) */
         #task-container { 
-            position: fixed; top: 16%; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; align-items: center; justify-content: center; width: 100%; max-width: 380px; 
+            position: fixed; top: 30%; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; align-items: center; justify-content: center; width: 100%; max-width: 380px; 
             opacity: 0; pointer-events: none; transition: all 0.3s ease; 
         }
         #task-container.active { opacity: 1; pointer-events: auto; }
@@ -144,7 +124,8 @@
         .card-title { font-family: 'Share Tech Mono', monospace; font-size: 10.5px; font-weight: bold; color: #ffffff; text-align: center; }
         .card-status { font-family: 'Share Tech Mono', monospace; font-size: 7.5px; color: #ffb700; font-weight: bold; text-transform: uppercase; }
 
-        #hologram-stats-box { position: fixed; top: 34%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 360px; background: rgba(10, 2, 2, 0.94); border: 1.5px solid rgba(255, 69, 0, 0.6); box-shadow: 0 10px 25px rgba(0,0,0,0.8); border-radius: 10px; padding: 10px 12px; z-index: 40; display: flex; flex-direction: column; gap: 8px; }
+        /* Khung thống kê hạ xuống Top 52% */
+        #hologram-stats-box { position: fixed; top: 52%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 360px; background: rgba(10, 2, 2, 0.94); border: 1.5px solid rgba(255, 69, 0, 0.6); box-shadow: 0 10px 25px rgba(0,0,0,0.8); border-radius: 10px; padding: 10px 12px; z-index: 40; display: flex; flex-direction: column; gap: 8px; }
         .stat-row { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #ffb700; font-weight: bold; border-bottom: 1px dashed rgba(255,69,0,0.3); padding-bottom: 5px; }
         .stat-val { font-size: 16px; color: #00ff66; text-shadow: 0 0 6px rgba(0,255,102,0.6); }
 
@@ -152,12 +133,14 @@
         #reflex-canvas { width: 100%; height: 38px; display: block; }
         .chart-label { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: #ff4500; text-align: center; margin-top: 2px; font-weight: bold; }
 
-        #terminal-bar { position: fixed; bottom: 135px; left: 0; width: 100vw; background: rgba(10, 0, 0, 0.9); border-top: 1px solid rgba(255, 69, 0, 0.6); border-bottom: 1px solid rgba(255, 69, 0, 0.6); padding: 6px 0; z-index: 45; overflow: hidden; display: flex; align-items: center; }
+        /* THANH ĐÁY (Đã nâng lên 125px tránh đụng nhạc) */
+        #terminal-bar { position: fixed; bottom: 125px; left: 0; width: 100vw; background: rgba(10, 0, 0, 0.9); border-top: 1px solid rgba(255, 69, 0, 0.6); border-bottom: 1px solid rgba(255, 69, 0, 0.6); padding: 6px 0; z-index: 45; overflow: hidden; display: flex; align-items: center; }
         .terminal-track { display: inline-flex; white-space: nowrap; animation: ledScroll 15s linear infinite; }
         @keyframes ledScroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
         .terminal-text { color: #ffb700; font-family: 'Share Tech Mono', monospace; font-size: 11.5px; font-weight: bold; letter-spacing: 1px; }
         
-        #action-panel { position: fixed; bottom: 82px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 50; width: 90%; max-width: 360px; justify-content: center; align-items: center; }
+        /* NÚT TRỞ VỀ LÕI (Đã nâng lên 75px an toàn) */
+        #action-panel { position: fixed; bottom: 75px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 50; width: 90%; max-width: 360px; justify-content: center; align-items: center; }
         .img-action-btn { 
             flex: 1; height: 38px; background-size: cover; background-position: center; border: 1.5px solid #00ff66; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 12.5px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #00ff66; 
             text-shadow: 0 0 8px rgba(0,255,102,0.8); box-shadow: 0 0 15px rgba(0,255,102,0.4), inset 0 0 8px rgba(0,255,102,0.2);
@@ -245,8 +228,9 @@
         .burst-effect { position: absolute; inset: 0; background: radial-gradient(circle, rgba(255,102,204,0.6) 0%, transparent 70%); z-index: 90; pointer-events: none; animation: burstFlash 0.5s ease-out forwards; }
         @keyframes burstFlash { 0% { opacity: 1; transform: scale(0.8); } 100% { opacity: 0; transform: scale(1.4); } }
 
+        /* CLASS ĐỂ REPLAY HIỂN THỊ CHUẨN XÁC, KHÔNG BỊ DỊCH TÂM */
+        .replay-spawn { pointer-events: none; border: 2px dashed #ffff00 !important; opacity: 0.8; z-index: 240 !important; }
         .ghost-orb { position: absolute; width: 24px; height: 24px; background: rgba(0, 255, 102, 0.9); border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 12px #00ff66; z-index: 250; transform: translate(-50%, -50%); pointer-events: none; }
-        .ghost-target { position: absolute; width: 56px; height: 56px; background: radial-gradient(circle, #ffb700, #ff003c); border-radius: 50%; border: 2px dashed #ffff00; z-index: 240; pointer-events: none; box-shadow: 0 0 20px #ff4500; } /* Removed translate for ghost-target to match orb */
 
         #custom-alert-overlay { position: fixed; inset: 0; background: rgba(2, 4, 8, 0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; backdrop-filter: blur(8px); }
         #custom-alert-overlay.active { opacity: 1; pointer-events: auto; }
@@ -263,11 +247,12 @@
     <div id="sanctum-bg"></div>
     <div id="dust-container"></div>
 
-    <!-- TRẠM CỬA NGÕ (HAI TẦNG LƯỚI GIAO NHAU TẠI 75% MÀN HÌNH) -->
+    <!-- TRẠM CỬA NGÕ (HAI TẦNG LƯỚI GIAO NHAU) -->
     <div id="gateway-void-overlay">
         <div class="gateway-box">
             <div class="box-close-x" onclick="closeGatewayToLobby()" title="Thoát">×</div>
             <img id="ninja-top-decor" src="https://github.com/happyk1900/-m-thanh-app/blob/main/N_DO%204.png?raw=true" alt="Ninja Decor">
+            <!-- NINJA ĐỎ ĐÃ ĐƯỢC HẠ XUỐNG -->
             <img id="ninja-red-decor" src="https://github.com/happyk1900/-m-thanh-app/blob/main/N_DO%201%20(1).png?raw=true" alt="Ninja Red">
 
             <div class="gateway-content">
@@ -289,7 +274,7 @@
 
     <div class="title-hologram">ĐẠO TRƯỜNG HỎA LUÂN</div>
 
-    <!-- SẢNH CHÍNH -->
+    <!-- SẢNH CHÍNH CÂN ĐỐI -->
     <div id="task-container">
         <div class="holo-card float-1" id="card-1" onclick="openArena('1')">
             <div class="live-dot"></div>
@@ -337,6 +322,7 @@
         </div>
     </div>
 
+    <!-- NÂNG CAO TERMINAL VÀ NÚT -->
     <div id="terminal-bar">
         <div class="terminal-track">
             <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐÃ KÍCH HOẠT LƯU TRỮ KỶ LỤC TỰ ĐỘNG & BỘ LỌC AN NINH QUÉT GIAN LẬN! ⚡</span>
@@ -441,6 +427,7 @@
             for(let i=0; i<30; i++) { clickTimestamps.push(Date.now() + i*10); clickCoordinates.push({x: 100, y: 100}); }
         }
 
+        // CHỈ LƯU TỌA ĐỘ CLICK TRƯỢT. NẾU CLICK TRÚNG QUẢ CẦU SẼ ĐƯỢC SNAP TÂM BÊN TRONG onmousedown
         document.addEventListener('pointerdown', function(e) {
             let ripple = document.createElement('div');
             ripple.className = 'touch-ripple';
@@ -449,7 +436,7 @@
             document.body.appendChild(ripple);
             setTimeout(() => { if(ripple && ripple.parentElement) ripple.remove(); }, 350);
 
-            if (isPlaying && !isPausedForStart && matchStartTime > 0) {
+            if (isPlaying && !isPausedForStart && matchStartTime > 0 && !e.isOrbHit) {
                 let playArea = document.getElementById('play-area');
                 let rect = playArea.getBoundingClientRect();
                 let relX = e.clientX - rect.left;
@@ -500,7 +487,9 @@
         function closeCustomAlert() { playSound('katana'); document.getElementById('custom-alert-overlay').classList.remove('active'); }
 
         window.onload = () => {
-            localStorage.removeItem('hualuan_arena_records'); let savedArenaRecords = null;
+            // ĐÃ XÓA KỶ LỤC CŨ ĐỂ CHƠI LẠI TỪ ĐẦU
+            localStorage.removeItem('hualuan_arena_records'); 
+            let savedArenaRecords = null;
             if(savedArenaRecords) arenaRecords = JSON.parse(savedArenaRecords);
             updateHologramUI();
             drawReflexChart7Days();
@@ -580,7 +569,7 @@
 
             document.getElementById('task-container').classList.remove('active');
             let playArea = document.getElementById('play-area');
-            let oldOrbs = playArea.querySelectorAll('.orb, .projectile, .core-reactor, .ghost-orb, .ghost-target, .burst-effect');
+            let oldOrbs = playArea.querySelectorAll('.orb, .projectile, .core-reactor, .ghost-orb, .replay-spawn, .burst-effect');
             oldOrbs.forEach(o => o.remove());
 
             document.getElementById('preview-max-val').innerText = arenaRecords[id].maxScore;
@@ -664,13 +653,14 @@
             if(stability <= 0) { finishGame(); }
         }
 
-        /* ========================================================
-         * ẢI 1 (BẠO PHÁT):
-         * - Hạt chuẩn (orb-fire): Không bấm kịp tự biến mất -> MẤT MẠNG.
-         * - Hạt hồng hiếm (orb-pink): Nhỏ hơn, biến mất nhanh hơn, 
-         *   xuất hiện bất thình lình, KHÔNG MẤT MẠNG KHI TRƯỢT, 
-         *   bấm trúng được thưởng điểm bùng nổ cực nhanh!
-         * ======================================================== */
+        // HÀM SNAP REPLAY: GHI LẠI TỌA ĐỘ TÂM QUẢ CẦU NẾU NGƯỜI CHƠI BẤM TRÚNG (BẮT DÍNH 100%)
+        function registerSnappingAction(perfectX, perfectY) {
+            let now = Date.now();
+            let actionTime = now - matchStartTime;
+            // Ép tọa độ replay ngón tay vào đúng tâm hạt
+            currentReplayData.actions.push({ t: actionTime, x: perfectX, y: perfectY });
+        }
+
         function runG1() { spawnG1(); }
         
         function spawnG1() {
@@ -679,7 +669,9 @@
             let maxX = playArea.clientWidth - 60, maxY = playArea.clientHeight - 60;
             let px = Math.max(10, Math.random() * maxX), py = Math.max(10, Math.random() * maxY);
             
-            currentReplayData.spawns.push({ t: Date.now() - matchStartTime, x: px, y: py, type: 'fire' });
+            // Ghi nhận vòng đời của hạt đỏ
+            let spData = { t: Date.now() - matchStartTime, x: px, y: py, type: 'fire', deathTime: Infinity };
+            currentReplayData.spawns.push(spData);
 
             let el = document.createElement('div'); 
             el.className = 'orb orb-fire'; 
@@ -688,38 +680,39 @@
             
             let clicked = false; 
             el.onmousedown = el.ontouchstart = (e) => { 
-                e.preventDefault(); 
+                e.preventDefault(); e.stopPropagation();
                 if(!isPlaying || isPausedForStart || clicked) return; 
-                clicked = true; 
+                e.isOrbHit = true; clicked = true; 
+                spData.deathTime = Date.now() - matchStartTime; // Chết ngay lúc bấm
+                registerSnappingAction(px + 28, py + 28); // Hút dính tâm (56/2=28)
                 addScoreAndCheckMultiplier(1); 
                 el.remove(); 
             };
             
             playArea.appendChild(el); 
 
-            // Hạt đỏ: Không bấm kịp -> Mất mạng
             let lifespan = Math.max(600, 1400 - (currentSpeedLevel * 200));
             setTimeout(() => { 
                 if(el.parentElement && !clicked) { 
+                    spData.deathTime = Date.now() - matchStartTime; // Chết do hết giờ
                     el.remove(); 
-                    if(isPlaying && !isPausedForStart) {
-                        loseLife(); // Hạt đỏ không bấm kịp -> Mất mạng
-                    }
+                    if(isPlaying && !isPausedForStart) { loseLife(); }
                 } 
             }, lifespan);
 
             let nextSpawnDelay = Math.max(350, 950 - (currentSpeedLevel * 150));
-            if(isPlaying && !isPausedForStart) { 
-                spawnTimer = setTimeout(spawnG1, nextSpawnDelay); 
-            }
+            if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG1, nextSpawnDelay); }
         }
 
-        // Xuất hiện bất thình lình hạt hồng hiếm
+        // HẠT HỒNG ĐẠI BẠO PHÁT
         function runPinkG1() {
             if(!isPlaying || isPausedForStart) return;
             let playArea = document.getElementById('play-area');
             let maxX = playArea.clientWidth - 45, maxY = playArea.clientHeight - 45;
             let px = Math.max(10, Math.random() * maxX), py = Math.max(10, Math.random() * maxY);
+
+            let spData = { t: Date.now() - matchStartTime, x: px, y: py, type: 'pink', deathTime: Infinity };
+            currentReplayData.spawns.push(spData);
 
             let el = document.createElement('div');
             el.className = 'orb orb-pink';
@@ -728,12 +721,13 @@
 
             let clicked = false;
             el.onmousedown = el.ontouchstart = (e) => {
-                e.preventDefault();
+                e.preventDefault(); e.stopPropagation();
                 if(!isPlaying || isPausedForStart || clicked) return;
-                clicked = true;
-                // Bấm trúng hạt hồng: Thưởng điểm bùng nổ cực nhanh (+5 điểm gốc nhân multiplier)
-                addScoreAndCheckMultiplier(5);
+                e.isOrbHit = true; clicked = true;
+                spData.deathTime = Date.now() - matchStartTime;
+                registerSnappingAction(px + 19, py + 19); // Hút dính tâm hạt hồng (38/2=19)
                 
+                addScoreAndCheckMultiplier(5);
                 let burst = document.createElement('div');
                 burst.className = 'burst-effect';
                 playArea.appendChild(burst);
@@ -744,19 +738,16 @@
 
             playArea.appendChild(el);
 
-            // Hạt hồng biến mất nhanh hơn và KHÔNG bị trừ mạng nếu trượt
             let pinkLifespan = 800;
             setTimeout(() => {
                 if(el.parentElement && !clicked) {
-                    el.remove(); // Trượt hạt hồng hoàn toàn vô hại, không mất mạng
+                    spData.deathTime = Date.now() - matchStartTime;
+                    el.remove(); // Trượt hạt hồng không mất mạng
                 }
             }, pinkLifespan);
 
-            // Thời gian xuất hiện bất thình lình ngẫu nhiên (từ 4 đến 8 giây)
             let randomInterval = Math.random() * 4000 + 4000;
-            if(isPlaying && !isPausedForStart) {
-                pinkSpawnTimer = setTimeout(runPinkG1, randomInterval);
-            }
+            if(isPlaying && !isPausedForStart) { pinkSpawnTimer = setTimeout(runPinkG1, randomInterval); }
         }
 
         function runG2() { spawnG2(); }
@@ -764,11 +755,28 @@
             if(!isPlaying || isPausedForStart) return; let playArea = document.getElementById('play-area'); let maxX = playArea.clientWidth - 60, maxY = playArea.clientHeight - 60;
             let isFire = Math.random() > 0.3; let px = Math.max(10, Math.random() * maxX), py = Math.max(10, Math.random() * maxY);
             
-            currentReplayData.spawns.push({ t: Date.now() - matchStartTime, x: px, y: py, type: isFire ? 'fire' : 'ice' });
+            let spData = { t: Date.now() - matchStartTime, x: px, y: py, type: isFire ? 'fire' : 'ice', deathTime: Infinity };
+            currentReplayData.spawns.push(spData);
 
             let el = document.createElement('div'); el.className = isFire ? 'orb orb-fire' : 'orb orb-ice'; el.style.left = px + 'px'; el.style.top = py + 'px';
-            let handled = false; el.onmousedown = el.ontouchstart = (e) => { e.preventDefault(); if(!isPlaying || isPausedForStart || handled) return; handled = true; if(isFire) { addScoreAndCheckMultiplier(1); } else { loseLife(); } el.remove(); };
-            playArea.appendChild(el); setTimeout(() => { if(el.parentElement && !handled) { el.remove(); if(isFire && isPlaying && !isPausedForStart) { loseLife(); } } }, Math.max(350, 1000 - (aScore * 10)));
+            let handled = false; 
+            el.onmousedown = el.ontouchstart = (e) => { 
+                e.preventDefault(); e.stopPropagation();
+                if(!isPlaying || isPausedForStart || handled) return; 
+                e.isOrbHit = true; handled = true; 
+                spData.deathTime = Date.now() - matchStartTime;
+                registerSnappingAction(px + 28, py + 28);
+                if(isFire) { addScoreAndCheckMultiplier(1); } else { loseLife(); } 
+                el.remove(); 
+            };
+            playArea.appendChild(el); 
+            setTimeout(() => { 
+                if(el.parentElement && !handled) { 
+                    spData.deathTime = Date.now() - matchStartTime;
+                    el.remove(); 
+                    if(isFire && isPlaying && !isPausedForStart) { loseLife(); } 
+                } 
+            }, Math.max(350, 1000 - (aScore * 10)));
             if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG2, Math.max(250, 750 - (aScore * 7))); }
         }
 
@@ -777,18 +785,30 @@
             if(!isPlaying || isPausedForStart) return; let playArea = document.getElementById('play-area'); let centerX = playArea.clientWidth / 2, centerY = playArea.clientHeight / 2;
             let el = document.createElement('div'); el.className = 'projectile'; el.style.left = centerX + 'px'; el.style.top = centerY + 'px';
             let angle = Math.random() * Math.PI * 2, speed = 2.5 + (aScore * 0.1); 
+            let vx = Math.cos(angle)*speed, vy = Math.sin(angle)*speed;
             
-            currentReplayData.spawns.push({ t: Date.now() - matchStartTime, x: centerX, y: centerY, type: 'projectile' });
+            let spData = { t: Date.now() - matchStartTime, x: centerX, y: centerY, vx: vx, vy: vy, type: 'projectile', deathTime: Infinity };
+            currentReplayData.spawns.push(spData);
 
-            let pObj = { x: centerX, y: centerY, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, el: el }; projectiles.push(pObj);
-            el.onmousedown = el.ontouchstart = (e) => { if(!isPlaying || isPausedForStart) return; e.preventDefault(); addScoreAndCheckMultiplier(1); el.remove(); let idx = projectiles.indexOf(pObj); if(idx > -1) projectiles.splice(idx, 1); };
+            let pObj = { x: centerX, y: centerY, vx: vx, vy: vy, el: el, spData: spData }; projectiles.push(pObj);
+            el.onmousedown = el.ontouchstart = (e) => { 
+                if(!isPlaying || isPausedForStart) return; 
+                e.preventDefault(); e.stopPropagation(); e.isOrbHit = true;
+                pObj.spData.deathTime = Date.now() - matchStartTime;
+                registerSnappingAction(pObj.x, pObj.y);
+                addScoreAndCheckMultiplier(1); el.remove(); 
+                let idx = projectiles.indexOf(pObj); if(idx > -1) projectiles.splice(idx, 1); 
+            };
             playArea.appendChild(el); if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG3, Math.max(200, 900 - (aScore * 12))); }
         }
         function loopG3() {
             if(!isPlaying || isPausedForStart) return; let playArea = document.getElementById('play-area'), maxX = playArea.clientWidth, maxY = playArea.clientHeight;
             for(let i = projectiles.length - 1; i >= 0; i--) {
                 let p = projectiles[i]; p.x += p.vx; p.y += p.vy; p.el.style.left = p.x + 'px'; p.el.style.top = p.y + 'px';
-                if(p.x < 10 || p.x > maxX - 10 || p.y < 10 || p.y > maxY - 10) { p.el.remove(); projectiles.splice(i, 1); loseLife(); if(!isPlaying || isPausedForStart) return; }
+                if(p.x < 10 || p.x > maxX - 10 || p.y < 10 || p.y > maxY - 10) { 
+                    p.spData.deathTime = Date.now() - matchStartTime;
+                    p.el.remove(); projectiles.splice(i, 1); loseLife(); if(!isPlaying || isPausedForStart) return; 
+                }
             }
             g3LoopId = requestAnimationFrame(loopG3);
         }
@@ -844,6 +864,7 @@
             if(parseInt(nextId) <= 3) { setTimeout(() => { openArena(nextId); }, 300); } else { navToCore(); }
         }
 
+        /* TÁI HIỆN REPLAY HOÀN HẢO 100%: DỰA TRÊN THỜI GIAN SỐNG-CHẾT THỰC TẾ */
         function playBestReplay() {
             let bestRep = arenaRecords[cGame].replay;
             if (!bestRep || !bestRep.actions || bestRep.actions.length === 0) {
@@ -854,12 +875,13 @@
             document.getElementById('start-prompt-overlay').classList.add('hidden');
             
             let playArea = document.getElementById('play-area');
-            let oldElements = playArea.querySelectorAll('.ghost-orb, .ghost-target');
+            let oldElements = playArea.querySelectorAll('.ghost-orb, .replay-spawn');
             oldElements.forEach(g => g.remove());
 
             let startTime = Date.now();
             let actions = bestRep.actions;
             let spawns = bestRep.spawns || [];
+            let activeReplaySpawns = []; 
 
             showCustomAlertBox("ĐANG PHÁT REPLAY", `Đang tái hiện trận kỷ lục: <b style="color:#00ff66;">${bestRep.score} điểm</b>`);
 
@@ -870,17 +892,36 @@
                     if(now - parseInt(g.dataset.creationTime) > 350) g.remove();
                 });
 
+                // Render hạt theo loại chính xác (Đỏ, Hồng, Băng, Đạn)
                 spawns.forEach((sp) => {
-                    if(Math.abs(sp.t - now) < 25 && !sp.rendered) {
+                    if(sp.t <= now && sp.deathTime > now && !sp.rendered) {
                         sp.rendered = true;
                         let target = document.createElement('div');
-                        target.className = 'ghost-target';
+                        if (sp.type === 'projectile') { target.className = 'projectile replay-spawn'; }
+                        else if (sp.type === 'pink') { target.className = 'orb orb-pink replay-spawn'; }
+                        else if (sp.type === 'ice') { target.className = 'orb orb-ice replay-spawn'; }
+                        else { target.className = 'orb orb-fire replay-spawn'; }
+                        
                         target.style.left = sp.x + 'px';
                         target.style.top = sp.y + 'px';
                         playArea.appendChild(target);
-                        setTimeout(() => target.remove(), 800);
+                        
+                        activeReplaySpawns.push({ el: target, sp: sp });
                     }
                 });
+
+                // Cập nhật đạn bay và xóa hạt khi đến thời điểm deathTime
+                for(let i = activeReplaySpawns.length - 1; i >= 0; i--) {
+                    let active = activeReplaySpawns[i];
+                    if (now >= active.sp.deathTime) {
+                        active.el.remove();
+                        activeReplaySpawns.splice(i, 1);
+                    } else if (active.sp.type === 'projectile') {
+                        let frames = (now - active.sp.t) / 16.666;
+                        active.el.style.left = (active.sp.x + active.sp.vx * frames) + 'px';
+                        active.el.style.top = (active.sp.y + active.sp.vy * frames) + 'px';
+                    }
+                }
 
                 actions.forEach((act) => {
                     if(Math.abs(act.t - now) < 20 && !act.played) {
@@ -897,7 +938,7 @@
 
                 let maxTime = Math.max(
                     actions.length > 0 ? actions[actions.length - 1].t : 0,
-                    spawns.length > 0 ? spawns[spawns.length - 1].t : 0
+                    spawns.length > 0 ? spawns[spawns.length - 1].deathTime : 0
                 );
 
                 if(now < maxTime + 600) {
