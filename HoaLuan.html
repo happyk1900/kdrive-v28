@@ -377,7 +377,7 @@
 
     <div id="terminal-bar">
         <div class="terminal-track">
-            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - 3 ẢI CHUẨN HÓA & HẠT HỒNG MỖI 20 CHẠM ĐÃ KÍCH HOẠT! ⚡</span>
+            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - LOGIC GIA TỐC ĐÚNG CHUẨN 20 HẠT ĐÃ SỬA LỖI! ⚡</span>
         </div>
     </div>
 
@@ -488,12 +488,12 @@
         let reflexScore = 0;
         let burstScore = 0;
         let currentMultiplier = 1; 
-        let consecutiveGoldOrbs = 0; 
+        let consecutiveGoldOrbs = 0; // Đếm chuẩn mỗi 20 hạt thành công để sinh quả hồng & tăng cấp X
         let isPlaying = false; 
         let isPausedForStart = true;
         let spawnTimer, pinkSpawnTimer, burstTimer, g3LoopId, stability = 5, projectiles = [];
         let bestCps = 0;
-        let g3SpawnCounter = 0; // Đếm hạt cho ải 3
+        let g3SpawnCounter = 0; 
 
         let arenaRecords = {
             '1': { maxScore: 0, replay: null },
@@ -728,6 +728,7 @@
             setTimeout(() => { popup.classList.remove('show'); }, 1200);
         }
 
+        // HÀM QUẢN LÝ CHU KỲ 20 HẠT VÀNG: TĂNG CẤP ĐỘ X VÀ KÍCH HOẠT HẠT HỒNG
         function addScoreAndCheckMultiplier(pointsToAdd = 1) {
             if(isPausedForStart) return;
 
@@ -737,13 +738,20 @@
             updateScoreUI();
             playSound('coin', 1);
 
-            // Ở ải 1 và 2, đếm số hạt vàng thành công để sinh hạt hồng (mỗi 20 hạt)
-            if (cGame !== '3') {
-                consecutiveGoldOrbs++;
-                if (consecutiveGoldOrbs >= 20) {
-                    consecutiveGoldOrbs = 0;
-                    spawnPinkOrbDirectly();
+            // Cứ đúng mỗi 20 hạt thành công (cho cả 3 ải)
+            consecutiveGoldOrbs++;
+            if (consecutiveGoldOrbs >= 20) {
+                consecutiveGoldOrbs = 0;
+                
+                // Tăng cấp độ nhân X lên 1 nấc (tối đa cấp 7)
+                if (currentMultiplier < 7) {
+                    currentMultiplier++;
+                    showSpeedPopup(`⚡ GIA TỐC X${currentMultiplier} (CẤP ${currentMultiplier}/7) ⚡`);
+                    updateScoreUI();
                 }
+
+                // Sinh hạt hồng bạo phát
+                spawnPinkOrbDirectly();
             }
         }
 
@@ -762,16 +770,6 @@
             playSound('boom');
             triggerVibration([100, 50, 100]);
             if(stability <= 0) { finishGame(); }
-        }
-
-        function checkLevelProgression() {
-            let scoreInt = Math.floor(aScore);
-            let targetLevel = Math.min(7, Math.floor(scoreInt / 30) + 1);
-            if (targetLevel > currentMultiplier) {
-                currentMultiplier = targetLevel;
-                showSpeedPopup(`⚡ GIA TỐC X${currentMultiplier} (CẤP ${currentMultiplier}/7) ⚡`);
-                updateScoreUI();
-            }
         }
 
         // ẢI 1: BẠO PHÁT (1 điểm / hạt)
@@ -798,7 +796,6 @@
                 spData.deathTime = Date.now() - matchStartTime;
                 reactionTimes.push(Date.now() - (matchStartTime + spData.t));
                 addScoreAndCheckMultiplier(1); 
-                checkLevelProgression();
                 el.remove(); 
             };
             
@@ -847,7 +844,6 @@
 
             playArea.appendChild(el);
 
-            // Tốc độ xuất hiện hạt hồng tuân theo chuẩn thông thường không lũy tiến nhanh quá
             let pinkLifespan = Math.max(800, 2000 - (currentMultiplier * 100));
             setTimeout(() => {
                 if(el.parentElement && !clicked) {
@@ -971,10 +967,7 @@
                 aScore = Math.round((aScore + earnedScore) * 10) / 10;
                 burstScore = Math.round((burstScore + earnedScore) * 10) / 10; 
                 
-                if (currentMultiplier < 7) currentMultiplier++;
-                showSpeedPopup(`X${currentMultiplier} (CẤP ${currentMultiplier}/7)`);
                 updateScoreUI();
-
                 playSound('boom', 0.5);
 
                 let floatScore = document.createElement('div');
@@ -1023,7 +1016,6 @@
                 
                 if(isFire) { 
                     addScoreAndCheckMultiplier(1.5); // Hạt lửa 1.5 điểm
-                    checkLevelProgression();
                 } else { 
                     loseLife(); // Ấn nhầm băng mất mạng
                 } 
@@ -1045,7 +1037,7 @@
             if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG2, nextDelay); }
         }
 
-        // ẢI 3: THỦ TRẬN (Đạn bay 3 điểm, cứ hạt thứ 20 là hạt hồng bạo phát, gia tốc 7 cấp mượt mà)
+        // ẢI 3: THỦ TRẬN (Đạn bay 3 điểm, cứ hạt thứ 20 là hạt hồng bạo phát, tốc độ chuẩn)
         function runG3() { projectiles = []; spawnG3(); g3LoopId = requestAnimationFrame(loopG3); }
         function spawnG3() {
             if(!isPlaying || isPausedForStart) return; 
@@ -1063,7 +1055,7 @@
             el.style.left = centerX + 'px'; el.style.top = centerY + 'px';
             
             let angle = Math.random() * Math.PI * 2;
-            // Tốc độ bay khởi đầu chậm rãi ở cấp 1, tăng dần mượt mà theo 7 cấp
+            // Tốc độ bay khởi đầu chậm rãi, tăng dần mượt mà theo 7 cấp
             let baseSpeed = 1.0 + (currentMultiplier * 0.35); 
             let vx = Math.cos(angle) * baseSpeed, vy = Math.sin(angle) * baseSpeed;
             
@@ -1080,10 +1072,16 @@
                 if (pObj.isPink) {
                     el.remove();
                     let idx = projectiles.indexOf(pObj); if(idx > -1) projectiles.splice(idx, 1);
+                    
+                    // Đạt cấp độ X tăng thêm 1 nấc khi ăn hạt hồng ải 3
+                    if (currentMultiplier < 7) {
+                        currentMultiplier++;
+                        showSpeedPopup(`⚡ GIA TỐC X${currentMultiplier} (CẤP ${currentMultiplier}/7) ⚡`);
+                        updateScoreUI();
+                    }
                     triggerGreatBurst(); // Kích hoạt bạo phát 7 giây
                 } else {
                     addScoreAndCheckMultiplier(3); // Hạt vàng thủ trận 3 điểm
-                    checkLevelProgression();
                     el.remove(); 
                     let idx = projectiles.indexOf(pObj); if(idx > -1) projectiles.splice(idx, 1); 
                 }
@@ -1091,7 +1089,6 @@
             
             playArea.appendChild(el); 
 
-            // Tốc độ sinh hạt tương ứng mượt mà
             let nextSpawnDelay = Math.max(350, 1200 - (currentMultiplier * 100));
             if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG3, nextSpawnDelay); }
         }
@@ -1157,10 +1154,10 @@
                     
                     let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
                     document.getElementById('bio-avg-val').innerText = (avgMs > 0 ? avgMs : 435) + " ms";
-                    document.getElementById('bio-cps-val').innerText = (bestCps > 0 ? bestCps : 8.4) + " c/s";
+                    document.getElementById('bio-cps-val').innerText = (bestCps > 0 ? bestCps : 7.0) + " c/s";
 
                     let refMs = avgMs > 0 ? avgMs : 435;
-                    let cRate = bestCps > 0 ? bestCps : 8.4;
+                    let cRate = bestCps > 0 ? bestCps : 7.0;
 
                     let reflexStars = 1;
                     if (refMs <= 150) reflexStars = 5;
