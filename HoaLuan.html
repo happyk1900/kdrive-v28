@@ -18,11 +18,17 @@
         }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: #0c0814; font-family: 'Space Grotesk', sans-serif; }
 
+        /* HIỆU ỨNG CHUYỂN CẢNH VÀO SẢNH: ZOOM-IN KẾT HỢP FADE-IN MƯỢT MÀ */
         #sanctum-bg { 
             position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; 
             background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/PIC%20SANH%20HL.png?raw=true');
-            background-size: cover; background-position: center; opacity: 1; 
+            background-size: cover; background-position: center; opacity: 0; 
             filter: brightness(1.05) contrast(1.05); 
+            animation: sanctumEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes sanctumEntrance {
+            0% { opacity: 0; transform: scale(1.08); filter: brightness(1.4) contrast(1.2) blur(6px); }
+            100% { opacity: 1; transform: scale(1); filter: brightness(1.05) contrast(1.05) blur(0px); }
         }
         
         #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
@@ -104,18 +110,33 @@
         }
         .gateway-exit:hover { color: #fff; text-shadow: 0 0 15px #fff; }
 
+        /* 3 THẺ ẢI SÁT PHÍA TRÊN - HIỆU ỨNG TRƯỢT XUỐNG ĐỘNG */
         #task-container { 
             position: fixed; top: 13%; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; align-items: center; justify-content: center; width: 100%; max-width: 380px; 
-            opacity: 0; pointer-events: none; transition: all 0.3s ease; 
+            opacity: 0; pointer-events: none; transition: all 0.4s ease; 
         }
-        #task-container.active { opacity: 1; pointer-events: auto; }
+        #task-container.active { opacity: 1; pointer-events: auto; animation: cardsSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes cardsSlideIn {
+            0% { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+            100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
 
         .holo-card { 
             width: 110px; height: 95px; background: rgba(14, 8, 22, 0.6); 
             border: 1.5px solid rgba(0, 255, 204, 0.6); display: flex; flex-direction: column; justify-content: space-between; 
             align-items: center; padding: 6px 4px; box-shadow: 0 8px 25px rgba(0,0,0,0.4), inset 0 0 12px rgba(0,255,204,0.15); 
             cursor: pointer; border-radius: 10px; position: relative; backdrop-filter: blur(4px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: floatingCard 3s ease-in-out infinite alternate;
         }
+        .holo-card:nth-child(2) { animation-delay: 0.5s; }
+        .holo-card:nth-child(3) { animation-delay: 1s; }
+        @keyframes floatingCard {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,255,204,0.25), inset 0 0 15px rgba(0,255,204,0.3); }
+        }
+        .holo-card:active { transform: scale(0.95); }
+
         .live-dot { position: absolute; top: 4px; right: 4px; width: 5px; height: 5px; background-color: #00ff66; border-radius: 50%; box-shadow: 0 0 6px #00ff66; }
         .card-sci-tag { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #00ffcc; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 255, 204, 0.4); padding: 2px 4px; border-radius: 3px; font-weight: bold; }
         .card-body-content { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; flex-grow: 1; }
@@ -123,18 +144,26 @@
         .card-title { font-family: 'Share Tech Mono', monospace; font-size: 10.5px; font-weight: bold; color: #ffffff; text-align: center; }
         .card-status { font-family: 'Share Tech Mono', monospace; font-size: 7.5px; color: #00ffcc; font-weight: bold; text-transform: uppercase; }
 
+        /* HỘP THÔNG SỐ LƠ LỬNG SỐNG ĐỘNG Ở SẢNH */
         #floating-hud-panel {
             position: fixed; top: 27%; left: 50%; transform: translateX(-50%);
             width: 92%; max-width: 350px; z-index: 40;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 4px; pointer-events: none;
+            animation: fadeInHud 0.8s ease forwards;
+        }
+        @keyframes fadeInHud {
+            0% { opacity: 0; transform: translateX(-50%) scale(0.95); }
+            100% { opacity: 1; transform: translateX(-50%) scale(1); }
         }
         .floating-stat-item {
             width: 48%; display: flex; flex-direction: column; align-items: center; justify-content: center;
             pointer-events: auto; background: rgba(14, 8, 22, 0.75); border: 1.5px solid rgba(0, 255, 204, 0.5);
             padding: 7px 10px; border-radius: 8px; backdrop-filter: blur(4px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center;
+            transition: border-color 0.3s;
         }
+        .floating-stat-item:hover { border-color: #00ffcc; box-shadow: 0 0 20px rgba(0,255,204,0.4); }
         .floating-stat-label { font-family: 'Share Tech Mono', monospace; font-size: 9.5px; color: #b8b8dc; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
         .floating-stat-val { font-family: 'Share Tech Mono', monospace; font-size: 16px; color: #00ffcc; font-weight: 900; text-shadow: 0 0 8px rgba(0,255,204,0.6); }
 
@@ -146,10 +175,15 @@
         }
         #reflex-canvas { width: 100%; height: 32px; display: block; filter: drop-shadow(0 0 6px #00ffcc); }
         
-        /* BIỂU ĐỒ PHONG ĐỘ: CHỮ TRẮNG TO RÕ NỔI BẬT */
+        /* BIỂU ĐỒ PHONG ĐỘ: CHỮ TRẮNG TO RÕ, HIỆU ỨNG NHẤP NHÁY NĂNG LƯỢNG */
         .chart-floating-label { 
             font-family: 'Share Tech Mono', monospace; font-size: 13px; color: #ffffff; font-weight: 900; 
-            letter-spacing: 2px; margin-top: 4px; text-shadow: 0 0 10px rgba(0, 255, 204, 0.8), 0 0 20px rgba(0, 255, 204, 0.4); 
+            letter-spacing: 2px; margin-top: 4px; text-shadow: 0 0 10px rgba(0, 255, 204, 0.9), 0 0 20px rgba(0, 255, 204, 0.5); 
+            animation: labelGlow 2s infinite alternate ease-in-out;
+        }
+        @keyframes labelGlow {
+            0% { text-shadow: 0 0 8px rgba(0,255,204,0.6); }
+            100% { text-shadow: 0 0 16px rgba(0,255,204,1), 0 0 25px rgba(255,183,0,0.6); }
         }
 
         #terminal-bar { position: fixed; bottom: 125px; left: 0; width: 100vw; background: rgba(12, 6, 18, 0.85); border-top: 1px solid rgba(0, 255, 204, 0.5); border-bottom: 1px solid rgba(0, 255, 204, 0.5); padding: 6px 0; z-index: 45; overflow: hidden; display: flex; align-items: center; backdrop-filter: blur(4px); }
@@ -157,7 +191,7 @@
         @keyframes ledScroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
         .terminal-text { color: #00ffcc; font-family: 'Share Tech Mono', monospace; font-size: 11.5px; font-weight: bold; letter-spacing: 1px; }
         
-        /* NÚT QUAY VỀ (MŨI TÊN ĐÔI) NẰM GÓC TRÁI DƯỚI CÙNG, ĐỐI XỨNG HÀNG VỚI HỘP NHẠC PLAYER */
+        /* NÚT MŨI TÊN QUAY VỀ: NẰM GÓC TRÁI DƯỚI CÙNG, ĐỐI XỨNG HÀNG VỚI HỘP NHẠC PLAYER */
         .nav-back-corner-btn {
             position: fixed; bottom: 15px; left: 15px; width: 44px; height: 38px;
             background: rgba(14, 8, 22, 0.9); border: 1.5px solid #00ffcc; border-radius: 8px;
@@ -168,8 +202,15 @@
         }
         .nav-back-corner-btn:active { transform: scale(0.92); background: rgba(0, 255, 204, 0.3); color: #fff; }
 
-        #task-arena { position: fixed; inset: 0; background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/HOA%20GAME.png?raw=true'); background-size: cover; background-position: center; z-index: 120; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 18px 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        #task-arena.active { opacity: 1; pointer-events: auto; }
+        /* KHUNG CHUYỂN CẢNH VÀO TRẬN ĐẤU MƯỢT MÀ */
+        #task-arena { 
+            position: fixed; inset: 0; background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/HOA%20GAME.png?raw=true'); 
+            background-size: cover; background-position: center; z-index: 120; display: flex; flex-direction: column; 
+            align-items: center; justify-content: flex-start; padding: 18px 20px; opacity: 0; pointer-events: none; 
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(1.05);
+        }
+        #task-arena.active { opacity: 1; pointer-events: auto; transform: scale(1); }
         
         .play-area { width: 100%; max-width: 360px; height: 60vh; background: transparent; border: 1.5px solid rgba(0, 255, 204, 0.5); border-radius: 12px; position: relative; overflow: hidden; margin-top: 45px; box-shadow: inset 0 0 25px rgba(0,255,204,0.2); }
 
@@ -196,7 +237,7 @@
         .preview-row { font-family: 'Share Tech Mono', monospace; font-size: 11.5px; color: #ffb700; width: 100%; display: flex; justify-content: space-between; align-items: center; }
         .preview-row span b { color: #00ffcc; text-shadow: 0 0 6px rgba(0,255,204,0.6); }
         .preview-replay-btn {
-            background: rgba(255, 183, 0, 0.2); border: 1px solid #ffb700; color: #ffb700; font-family: 'Share Tech Mono', monospace; font-size: 10.5px; font-weight: bold; padding: 5px 10px; border-radius: 4px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; width: 100%; text-align: center; margin-top: 2px;
+            background: rgba(255, 183, 0, 0.2); border: 1.5px solid #ffb700; color: #ffb700; font-family: 'Share Tech Mono', monospace; font-size: 10.5px; font-weight: bold; padding: 5px 10px; border-radius: 4px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; width: 100%; text-align: center; margin-top: 2px;
         }
         .preview-replay-btn:hover { background: rgba(255, 183, 0, 0.4); color: #fff; box-shadow: 0 0 10px rgba(255,183,0,0.6); }
 
@@ -314,7 +355,7 @@
             100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
         }
 
-        /* ẢI 2: ĐÃ ĐẨY 2 NÚT BẤM RA SÁT BIÊN 15% CHO KHỚP HOÀN TOÀN VỚI TÂM QUẢ CẦU LỬA TO */
+        /* ẢI 2: ĐÃ CHỈNH LẠI TỌA ĐỘ 15% CHO KHỚP CHUẨN XÁC VỚI LÕI QUẢ CẦU TRONG ẢNH BAO PHAP 2 */
         .burst-btn-dual {
             position: absolute; width: 45px; height: 45px;
             background: radial-gradient(circle, #00ffcc, #ff007f);
@@ -527,7 +568,7 @@
         </div>
     </div>
 
-    <!-- BIỂU ĐỒ PHONG ĐỘ (ĐÃ ĐỔI TỪ PHONG ĐỘ 7 NGÀY) - CHỮ TRẮNG TO RÕ -->
+    <!-- BIỂU ĐỒ PHONG ĐỘ - CHỮ TRẮNG TO RÕ, NỔI BẬT -->
     <div id="floating-chart-box">
         <canvas id="reflex-canvas"></canvas>
         <div class="chart-floating-label">BIỂU ĐỒ PHONG ĐỘ</div>
@@ -535,11 +576,11 @@
 
     <div id="terminal-bar">
         <div class="terminal-track">
-            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - BỐ CỤC HOÀN HẢO THEO ĐÚNG TỪNG CÂU CHỮ CỦA ANH! ⚡</span>
+            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - NÚT QUAY VỀ ĐÃ NẰM GỌN GÀNG GÓC TRÁI DƯỚI ĐÁY! ⚡</span>
         </div>
     </div>
 
-    <!-- NÚT QUAY VỀ Ở GÓC TRÁI DƯỚI CÙNG, ĐỐI XỨNG NGANG HÀNG VỚI HỘP NHẠC PLAYER -->
+    <!-- NÚT MŨI TÊN QUAY VỀ: NẰM GÓC TRÁI DƯỚI CÙNG, ĐỐI XỨNG NGANG HÀNG VỚI HỘP NHẠC PLAYER -->
     <div class="nav-back-corner-btn" onclick="navToCore()" title="Trở về lõi">◀◀</div>
 
     <div id="task-arena">
@@ -568,7 +609,7 @@
                 <div class="freeze-text">KẾT THÚC</div>
             </div>
 
-            <!-- BẢNG TỔNG KẾT CUỐI TRẬN: ĐÚNG 100% CẤU TRÚC TEXT ANH VỪA CHỈ ĐỊNH -->
+            <!-- BẢNG TỔNG KẾT CUỐI TRẬN: CHUẨN 100% CẤU TRÚC YÊU CẦU -->
             <div id="result-overlay">
                 <div class="stage-badge-header" id="stage-badge-title">ẢI I</div>
                 
@@ -1553,7 +1594,7 @@
                     document.getElementById('burst-stars').innerText = generateStarString(burstStars);
                     document.getElementById('total-stars').innerText = generateStarString(totalStars);
 
-                    // ĐỒNG BỘ CẤP BỆNH CHUẨN XÁC 100% THEO SỐ SAO (2 SAO BẮT BUỘC LÀ CHIẾN BINH)
+                    // SỬA LỖI MAPPING SỐ SAO VÀ CẤP BẬC: ÁNH XÁ CHUẨN 100% THEO YÊU CẦU CỦA ANH
                     document.getElementById('bio-rank-badge-1').innerText = "Cấp: " + getRankTitleByStars(reflexStars);
                     document.getElementById('bio-rank-badge-2').innerText = "Cấp: " + getRankTitleByStars(burstStars);
                     document.getElementById('bio-rank-badge-final').innerText = "Cấp: " + getRankTitleByStars(totalStars);
@@ -1647,7 +1688,7 @@
                                     orbW.appendChild(core); bWrap.appendChild(orbW);
                                 } else if (sp.stage === '2') {
                                     let bL = document.createElement('div'); bL.className = 'burst-btn-dual replay-spawn'; bL.id = 'dual-btn-left';
-                                    let bR = document.createElement('div'); bR.className = 'burst-btn-dual replay-spawn'; bR.id = 'dual-btn-right';
+                                    let bR = document.createElement('div'); bL.className = 'burst-btn-dual replay-spawn'; bR.id = 'dual-btn-right';
                                     bWrap.appendChild(bL); bWrap.appendChild(bR);
                                 } else if (sp.stage === '3') {
                                     let track = document.createElement('div'); track.className = 'orbit-track replay-spawn';
