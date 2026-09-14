@@ -200,7 +200,6 @@
         
         .bio-metrics-box { width: 92%; max-width: 300px; background: rgba(18, 5, 5, 0.9); border: 1.5px solid rgba(255, 69, 0, 0.6); border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; box-shadow: inset 0 0 15px rgba(255,69,0,0.15); }
         
-        /* CẤU TRÚC 3 TẦNG SAO TRỰC QUAN RIÊNG BIỆT */
         .metric-card-row { display: flex; flex-direction: column; gap: 2px; border-bottom: 1px dashed rgba(255,69,0,0.3); padding-bottom: 5px; }
         .metric-top-line { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11.5px; color: #ffb700; font-weight: bold; }
         .metric-bot-line { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #aaa; }
@@ -378,7 +377,7 @@
 
     <div id="terminal-bar">
         <div class="terminal-track">
-            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - HỆ THỐNG 3 TẦNG SAO & QUY CHUẨN 3 ẢI ĐÃ KÍCH HOẠT! ⚡</span>
+            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - 3 ẢI CHUẨN HÓA & HẠT HỒNG MỖI 20 CHẠM ĐÃ KÍCH HOẠT! ⚡</span>
         </div>
     </div>
 
@@ -419,7 +418,6 @@
                 </div>
                 
                 <div class="bio-metrics-box">
-                    <!-- TẦNG 1: PHẢN XẠ THẦN KINH + SAO -->
                     <div class="metric-card-row">
                         <div class="metric-top-line">
                             <span>PHẢN XẠ THẦN KINH</span>
@@ -431,7 +429,6 @@
                         </div>
                     </div>
 
-                    <!-- TẦNG 2: CƯỚC LỰC BẠO PHÁT + SAO -->
                     <div class="metric-card-row">
                         <div class="metric-top-line">
                             <span>CƯỚC LỰC BẠO PHÁT</span>
@@ -443,7 +440,6 @@
                         </div>
                     </div>
 
-                    <!-- TẦNG 3: XẾP HẠNG TỔNG KẾT + SAO TỔNG -->
                     <div style="display:flex; flex-direction:column; gap:2px; margin-top:2px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <span class="bio-rank-badge" id="bio-rank-badge" style="color: #ffb700; flex:1; text-align:left; border:none; padding:0;">CAO THỦ</span>
@@ -497,6 +493,7 @@
         let isPausedForStart = true;
         let spawnTimer, pinkSpawnTimer, burstTimer, g3LoopId, stability = 5, projectiles = [];
         let bestCps = 0;
+        let g3SpawnCounter = 0; // Đếm hạt cho ải 3
 
         let arenaRecords = {
             '1': { maxScore: 0, replay: null },
@@ -677,6 +674,7 @@
             cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; currentMultiplier = 1; consecutiveGoldOrbs = 0; isPlaying = false; stability = 5;
             isPausedForStart = true;
             clickTimestamps = []; clickCoordinates = []; cheatReason = ""; bestCps = 0;
+            g3SpawnCounter = 0;
 
             document.getElementById('task-container').classList.remove('active');
             let playArea = document.getElementById('play-area');
@@ -739,10 +737,13 @@
             updateScoreUI();
             playSound('coin', 1);
 
-            consecutiveGoldOrbs++;
-            if (consecutiveGoldOrbs >= 20) {
-                consecutiveGoldOrbs = 0;
-                spawnPinkOrbDirectly();
+            // Ở ải 1 và 2, đếm số hạt vàng thành công để sinh hạt hồng (mỗi 20 hạt)
+            if (cGame !== '3') {
+                consecutiveGoldOrbs++;
+                if (consecutiveGoldOrbs >= 20) {
+                    consecutiveGoldOrbs = 0;
+                    spawnPinkOrbDirectly();
+                }
             }
         }
 
@@ -765,7 +766,7 @@
 
         function checkLevelProgression() {
             let scoreInt = Math.floor(aScore);
-            let targetLevel = Math.min(7, Math.floor(scoreInt / 25) + 1);
+            let targetLevel = Math.min(7, Math.floor(scoreInt / 30) + 1);
             if (targetLevel > currentMultiplier) {
                 currentMultiplier = targetLevel;
                 showSpeedPopup(`⚡ GIA TỐC X${currentMultiplier} (CẤP ${currentMultiplier}/7) ⚡`);
@@ -846,12 +847,16 @@
 
             playArea.appendChild(el);
 
-            let pinkLifespan = Math.max(700, 2200 - (currentMultiplier * 200));
+            // Tốc độ xuất hiện hạt hồng tuân theo chuẩn thông thường không lũy tiến nhanh quá
+            let pinkLifespan = Math.max(800, 2000 - (currentMultiplier * 100));
             setTimeout(() => {
                 if(el.parentElement && !clicked) {
                     spData.deathTime = Date.now() - matchStartTime;
                     el.remove();
-                    if(isPlaying && !isPausedForStart) { cGame === '2' ? spawnG2() : spawnG1(); }
+                    if(isPlaying && !isPausedForStart) { 
+                        if(cGame === '2') spawnG2(); 
+                        else if(cGame === '1') spawnG1();
+                    }
                 }
             }, pinkLifespan);
         }
@@ -860,7 +865,7 @@
             isPausedForStart = true; 
 
             let playArea = document.getElementById('play-area');
-            playArea.querySelectorAll('.orb-fire, .orb-ice').forEach(o => o.remove()); 
+            playArea.querySelectorAll('.orb-fire, .orb-ice, .projectile').forEach(o => o.remove()); 
 
             let blackout = document.createElement('div');
             blackout.className = 'blackout-bg';
@@ -983,7 +988,11 @@
                     blackoutBg.classList.remove('active');
                     setTimeout(() => blackoutBg.remove(), 300);
                     isPausedForStart = false; 
-                    if (isPlaying) { cGame === '2' ? spawnG2() : spawnG1(); }
+                    if (isPlaying) { 
+                        if(cGame === '2') spawnG2(); 
+                        else if(cGame === '1') spawnG1();
+                        else if(cGame === '3') spawnG3();
+                    }
                 }, 1000);
             }, beamTime);
         }
@@ -1036,38 +1045,54 @@
             if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG2, nextDelay); }
         }
 
-        // ẢI 3: THỦ TRẬN (Đạn bay 3 điểm, gia tốc 7 cấp mượt mà từ chậm đến nhanh)
+        // ẢI 3: THỦ TRẬN (Đạn bay 3 điểm, cứ hạt thứ 20 là hạt hồng bạo phát, gia tốc 7 cấp mượt mà)
         function runG3() { projectiles = []; spawnG3(); g3LoopId = requestAnimationFrame(loopG3); }
         function spawnG3() {
             if(!isPlaying || isPausedForStart) return; 
             let playArea = document.getElementById('play-area'); 
             let centerX = playArea.clientWidth / 2, centerY = playArea.clientHeight / 2;
-            let el = document.createElement('div'); el.className = 'projectile'; el.style.left = centerX + 'px'; el.style.top = centerY + 'px';
+            
+            g3SpawnCounter++;
+            let isPink = (g3SpawnCounter % 20 === 0); // Hạt thứ 20 là hạt hồng bạo phát
+
+            let el = document.createElement('div'); 
+            el.className = isPink ? 'projectile orb-pink' : 'projectile'; 
+            if (isPink) {
+                el.style.width = '32px'; el.style.height = '32px';
+            }
+            el.style.left = centerX + 'px'; el.style.top = centerY + 'px';
             
             let angle = Math.random() * Math.PI * 2;
-            // Tốc độ bay khởi đầu chậm rãi ở cấp 1, tăng dần theo cấp độ
-            let baseSpeed = 1.2 + (currentMultiplier * 0.4); 
+            // Tốc độ bay khởi đầu chậm rãi ở cấp 1, tăng dần mượt mà theo 7 cấp
+            let baseSpeed = 1.0 + (currentMultiplier * 0.35); 
             let vx = Math.cos(angle) * baseSpeed, vy = Math.sin(angle) * baseSpeed;
             
-            let spData = { t: Date.now() - matchStartTime, x: centerX, y: centerY, vx: vx, vy: vy, type: 'projectile', deathTime: Infinity };
+            let spData = { t: Date.now() - matchStartTime, x: centerX, y: centerY, vx: vx, vy: vy, type: isPink ? 'pink' : 'projectile', deathTime: Infinity };
             currentReplayData.spawns.push(spData);
 
-            let pObj = { x: centerX, y: centerY, vx: vx, vy: vy, el: el, spData: spData }; projectiles.push(pObj);
+            let pObj = { x: centerX, y: centerY, vx: vx, vy: vy, el: el, spData: spData, isPink: isPink }; projectiles.push(pObj);
             
             el.onmousedown = el.ontouchstart = (e) => { 
-                if(!isPlaying || isPausedForStart) return; 
                 e.preventDefault(); e.stopPropagation();
                 pObj.spData.deathTime = Date.now() - matchStartTime;
                 reactionTimes.push(Date.now() - (matchStartTime + pObj.spData.t));
-                addScoreAndCheckMultiplier(3); // Hạt vàng thủ trận 3 điểm
-                checkLevelProgression();
-                el.remove(); 
-                let idx = projectiles.indexOf(pObj); if(idx > -1) projectiles.splice(idx, 1); 
+                
+                if (pObj.isPink) {
+                    el.remove();
+                    let idx = projectiles.indexOf(pObj); if(idx > -1) projectiles.splice(idx, 1);
+                    triggerGreatBurst(); // Kích hoạt bạo phát 7 giây
+                } else {
+                    addScoreAndCheckMultiplier(3); // Hạt vàng thủ trận 3 điểm
+                    checkLevelProgression();
+                    el.remove(); 
+                    let idx = projectiles.indexOf(pObj); if(idx > -1) projectiles.splice(idx, 1); 
+                }
             };
             
             playArea.appendChild(el); 
 
-            let nextSpawnDelay = Math.max(300, 1100 - (currentMultiplier * 110));
+            // Tốc độ sinh hạt tương ứng mượt mà
+            let nextSpawnDelay = Math.max(350, 1200 - (currentMultiplier * 100));
             if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG3, nextSpawnDelay); }
         }
 
@@ -1137,7 +1162,6 @@
                     let refMs = avgMs > 0 ? avgMs : 435;
                     let cRate = bestCps > 0 ? bestCps : 8.4;
 
-                    // TÍNH SAO TRÍ NÃO (MS)
                     let reflexStars = 1;
                     if (refMs <= 150) reflexStars = 5;
                     else if (refMs <= 220) reflexStars = 4;
@@ -1145,7 +1169,6 @@
                     else if (refMs <= 450) reflexStars = 2;
                     else reflexStars = 1;
 
-                    // TÍNH SAO CƠ BẮP (CPS)
                     let burstStars = 1;
                     if (cRate >= 15) burstStars = 5;
                     else if (cRate >= 11) burstStars = 4;
@@ -1153,7 +1176,6 @@
                     else if (cRate >= 5) burstStars = 2;
                     else burstStars = 1;
 
-                    // TÍNH SAO TỔNG KẾT VÀ DANH HIỆU
                     let totalStars = Math.round((reflexStars + burstStars) / 2);
                     totalStars = Math.max(1, Math.min(5, totalStars));
 
@@ -1271,7 +1293,7 @@
                     if (now >= active.sp.deathTime) {
                         active.el.remove();
                         activeReplaySpawns.splice(i, 1);
-                    } else if (active.sp.type === 'projectile') {
+                    } else if (active.sp.type === 'projectile' || active.sp.type === 'pink') {
                         let frames = (now - active.sp.t) / 16.666;
                         active.el.style.left = (active.sp.x + active.sp.vx * frames) + 'px';
                         active.el.style.top = (active.sp.y + active.sp.vy * frames) + 'px';
