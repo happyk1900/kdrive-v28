@@ -187,8 +187,8 @@
         @keyframes ledScroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
         .terminal-text { color: #00ffcc; font-family: 'Share Tech Mono', monospace; font-size: 11.5px; font-weight: bold; letter-spacing: 1px; }
         
-        /* NÚT THOÁT ĐỎ CHUẨN XÁC Ở GÓC TRÁI DƯỚI CÙNG SẢNH CHÍNH */
-        .nav-exit-corner-btn {
+        /* NÚT THOÁT ĐỎ ĐỘC LẬP CHỈ XUẤT HIỆN Ở SẢNH CHÍNH (LOBBY) */
+        .lobby-exit-btn {
             position: fixed; bottom: 15px; left: 15px; width: 75px; height: 38px;
             background: rgba(255, 0, 90, 0.4); border: 1.5px solid rgba(255, 0, 90, 0.8); border-radius: 6px;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -196,7 +196,7 @@
             text-transform: uppercase; box-shadow: 0 0 15px rgba(255, 0, 90, 0.4);
             backdrop-filter: blur(4px); z-index: 9999; transition: all 0.2s ease;
         }
-        .nav-exit-corner-btn:active { transform: scale(0.92); background: rgba(255, 0, 90, 0.7); }
+        .lobby-exit-btn:active { transform: scale(0.92); background: rgba(255, 0, 90, 0.7); }
 
         #task-arena { 
             position: fixed; inset: 0; background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/HOA%20GAME.png?raw=true'); 
@@ -570,12 +570,12 @@
 
     <div id="terminal-bar">
         <div class="terminal-track">
-            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - ĐÃ SẠCH SẼ NÚT THOÁT THƯA VÀ CHUẨN HÓA KHOA HỌC PHẢN XẠ! ⚡</span>
+            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - ĐÃ DỌN SẠCH NÚT THOÁT THƯA VÀ KHÔI PHỤC TIẾN TRÌNH LEVEL TĂNG DẦN! ⚡</span>
         </div>
     </div>
 
-    <!-- NÚT THOÁT ĐỎ CHUẨN XÁC Ở GÓC TRÁI DƯỚI CÙNG SẢNH CHÍNH -->
-    <button class="nav-exit-corner-btn" onclick="navToCore()" title="Trở về lõi">THOÁT</button>
+    <!-- NÚT THOÁT ĐỎ CHUẨN XÁC Ở GÓC TRÁI DƯỚI CÙNG SẢNH CHÍNH (ĐỘC LẬP HOÀN TOÀN KHỎI ẢI) -->
+    <button class="lobby-exit-btn" onclick="navToCore()" title="Trở về lõi">THOÁT</button>
 
     <div id="task-arena">
         <div class="play-area" id="play-area">
@@ -673,7 +673,7 @@
             </div>
         </div>
 
-        <!-- NÚT THOÁT ĐỎ CHUẨN XÁC TRONG ẢI (ĐÃ ĐƯỢC DỌN SẠCH CHỒNG CHÉO) -->
+        <!-- NÚT THOÁT ĐỎ DUY NHẤT TRONG ẢI -->
         <div class="arena-controls-group">
             <button class="arena-btn" onclick="closeArena()">THOÁT</button>
         </div>
@@ -696,6 +696,7 @@
         let reflexScore = 0;
         let burstScore = 0;
         let currentMultiplier = 1; 
+        let successfulHitsCount = 0; // Đếm số hạt trúng để tăng cấp độ tốc độ dần dần
         let isPlaying = false; 
         let isPausedForStart = true;
         let spawnTimer, pinkSpawnTimer, burstTimer, g3LoopId, stability = 5, projectiles = [];
@@ -911,7 +912,7 @@
 
         function openArena(id) {
             playSound('katana');
-            cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; currentMultiplier = 1; isPlaying = false; stability = 5;
+            cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; currentMultiplier = 1; successfulHitsCount = 0; isPlaying = false; stability = 5;
             isPausedForStart = true;
             clickTimestamps = []; clickCoordinates = []; cheatReason = ""; bestCps = 0;
             g3SpawnCounter = 0;
@@ -989,11 +990,19 @@
             let finalAdd = Math.round(pointsToAdd * currentMultiplier * 10) / 10;
             aScore = Math.round((aScore + finalAdd) * 10) / 10;
             reflexScore = Math.round((reflexScore + finalAdd) * 10) / 10; 
+            
+            // CƠ CHẾ TĂNG CẤP ĐỘ (LEVEL UP) TỰ ĐỘNG DỰA TRÊN SỐ LƯỢNG HẠT ĂN ĐƯỢC (CỨ 10 HẠT LÊN 1 CẤP, TỐI ĐA CẤP 7)
+            successfulHitsCount++;
+            if (successfulHitsCount % 10 === 0 && currentMultiplier < 7) {
+                currentMultiplier++;
+                showSpeedPopup(`X${currentMultiplier} (CẤP ${currentMultiplier}/7)`);
+            }
+
             updateScoreUI();
             playSound('coin', 1);
 
             if (cGame !== '3') {
-                // ĐIỀU CHỈNH TỶ LỆ XUẤT HIỆN HẠT HỒNG SIÊU HIẾM (1/100 Ở ẢI I VÀ 1/80 Ở ẢI II)
+                // TỶ LỆ HẠT HỒNG CỰC KỲ HIẾM (1/100) XUẤT HIỆN NGẪU NHIÊN BẤT CỨ LÚC NÀO
                 let rareChance = (cGame === '1') ? 0.01 : 0.0125;
                 if (Math.random() < rareChance) {
                     spawnPinkOrbDirectly();
@@ -1042,7 +1051,6 @@
                 let hitTime = Date.now();
                 spData.deathTime = hitTime - matchStartTime;
                 
-                // ĐO THỜI GIAN PHẢN XẠ THỰC TẾ TỪ LÚC HẠT XUẤT HIỆN ĐẾN KHI BẤM TRÚNG
                 let exactReaction = hitTime - spawnTimestamp;
                 reactionTimes.push(exactReaction);
 
@@ -1559,7 +1567,6 @@
                     document.getElementById('res-pink-display').innerText = Math.round(burstScore);
                     document.getElementById('final-score-display').innerText = Math.round(aScore);
                     
-                    // THUẬT TOÁN ĐO PHẢN XẠ TRỰC TIẾP TỪ THỜI GIAN TRUNG BÌNH BẤM TRÚNG HẠT VÀNG (CHUẨN KHOA HỌC THỰC TẾ)
                     let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 328;
                     document.getElementById('bio-avg-val').innerText = avgMs + " mili-giây";
                     document.getElementById('bio-cps-val').innerText = (bestCps > 0 ? bestCps : 9.9) + " lần / giây";
