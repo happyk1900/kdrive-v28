@@ -187,16 +187,20 @@
         @keyframes ledScroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
         .terminal-text { color: #00ffcc; font-family: 'Share Tech Mono', monospace; font-size: 11.5px; font-weight: bold; letter-spacing: 1px; }
         
-        /* NÚT THOÁT ĐỎ ĐỘC LẬP CHỈ XUẤT HIỆN Ở SẢNH CHÍNH (LOBBY) */
-        .lobby-exit-btn {
-            position: fixed; bottom: 15px; left: 15px; width: 75px; height: 38px;
-            background: rgba(255, 0, 90, 0.4); border: 1.5px solid rgba(255, 0, 90, 0.8); border-radius: 6px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; letter-spacing: 1px; color: #fff;
-            text-transform: uppercase; box-shadow: 0 0 15px rgba(255, 0, 90, 0.4);
-            backdrop-filter: blur(4px); z-index: 9999; transition: all 0.2s ease;
+        /* 
+         * NÚT THOÁT ĐỘC TÔN: VỊ TRÍ NEO CỨNG, KHÔNG BAO GIỜ BỊ CHỒNG CHÉO 
+         * Hiển thị xuyên suốt từ Sảnh đến Ải ở cùng một mốc tọa độ 
+         */
+        #global-exit-btn {
+            position: fixed; bottom: 25px; left: 20px;
+            background: rgba(255, 0, 90, 0.4); border: 1.5px solid rgba(255, 0, 90, 0.6); 
+            color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; 
+            letter-spacing: 1px; padding: 8px 24px; cursor: pointer; border-radius: 6px; 
+            text-transform: uppercase; z-index: 99999; backdrop-filter: blur(4px);
+            box-shadow: 0 0 15px rgba(255, 0, 90, 0.3); transition: all 0.2s;
         }
-        .lobby-exit-btn:active { transform: scale(0.92); background: rgba(255, 0, 90, 0.7); }
+        @media (min-width: 400px) { #global-exit-btn { left: calc(50% - 165px); } }
+        #global-exit-btn:active { transform: scale(0.92); background: rgba(255, 0, 90, 0.7); }
 
         #task-arena { 
             position: fixed; inset: 0; background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/HOA%20GAME.png?raw=true'); 
@@ -241,9 +245,6 @@
         .boo-dialog { font-family: 'Share Tech Mono', monospace; width: 100%; height: 38px; display: flex; align-items: center; justify-content: space-between; background: rgba(12, 6, 18, 0.85); padding: 0 12px; border-radius: 6px; border: 1px solid rgba(0, 255, 204, 0.5); flex-grow: 1; }
         .boo-stats-inline { font-family: 'Share Tech Mono', monospace; font-size: 12.5px; color: rgba(255,255,255,0.9); display: flex; width: 100%; justify-content: space-around; align-items: center; }
         .boo-stats-inline span { color: #ffb700; font-weight: bold; }
-
-        .arena-controls-group { display: flex; width: 100%; max-width: 360px; justify-content: flex-start; margin-top: 6px; }
-        .arena-btn { background: rgba(255, 0, 90, 0.4); border: 1.5px solid rgba(255, 0, 90, 0.6); color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; letter-spacing: 1px; padding: 8px 20px; cursor: pointer; border-radius: 6px; text-transform: uppercase; }
 
         #freeze-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 200; backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; }
         #freeze-overlay.active { display: flex; }
@@ -562,7 +563,7 @@
         </div>
     </div>
 
-    <!-- BIỂU ĐỒ PHONG ĐỘ - CHỮ TRẮNG TO RÕ -->
+    <!-- BIỂU ĐỒ PHONG ĐỘ -->
     <div id="floating-chart-box">
         <canvas id="reflex-canvas"></canvas>
         <div class="chart-floating-label">BIỂU ĐỒ PHONG ĐỘ</div>
@@ -570,12 +571,12 @@
 
     <div id="terminal-bar">
         <div class="terminal-track">
-            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - ĐÃ DỌN SẠCH NÚT THOÁT THƯA VÀ KHÔI PHỤC TIẾN TRÌNH LEVEL TĂNG DẦN! ⚡</span>
+            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - ĐÃ DỌN SẠCH THỪA VÀ CHUẨN HOÁ KHOA HỌC PHẢN XẠ 100%! ⚡</span>
         </div>
     </div>
 
-    <!-- NÚT THOÁT ĐỎ CHUẨN XÁC Ở GÓC TRÁI DƯỚI CÙNG SẢNH CHÍNH (ĐỘC LẬP HOÀN TOÀN KHỎI ẢI) -->
-    <button class="lobby-exit-btn" onclick="navToCore()" title="Trở về lõi">THOÁT</button>
+    <!-- NÚT THOÁT ĐỘC TÔN: VỊ TRÍ DUY NHẤT ÁP DỤNG XUYÊN SUỐT GAME, KHÔNG ĐÈ CHÉO -->
+    <button id="global-exit-btn" onclick="handleGlobalExit()" title="Thoát / Trở về">THOÁT</button>
 
     <div id="task-arena">
         <div class="play-area" id="play-area">
@@ -627,30 +628,30 @@
                     <div class="metric-card-row">
                         <div class="metric-top-line">
                             <span style="color:#b8b8dc;">Độ nhạy trí não</span>
-                            <span id="bio-avg-val" style="color:#00ffcc; font-size:13px;">328 mili-giây</span>
+                            <span id="bio-avg-val" style="color:#00ffcc; font-size:13px;">0 mili-giây</span>
                         </div>
                         <div class="metric-bot-line">
-                            <span id="bio-rank-badge-1" style="color:#ffb700; font-weight:bold;">Cấp: Chiến binh</span>
-                            <div class="star-container" id="reflex-stars">★★★☆☆</div>
+                            <span id="bio-rank-badge-1" style="color:#ffb700; font-weight:bold;">Cấp: Người Bình Thường</span>
+                            <div class="star-container" id="reflex-stars">★☆☆☆☆</div>
                         </div>
                     </div>
 
                     <div class="metric-card-row">
                         <div class="metric-top-line">
                             <span style="color:#b8b8dc;">Uy lực bạo phát (7s)</span>
-                            <span id="bio-cps-val" style="color:#ffb700;">9.9 lần / giây</span>
+                            <span id="bio-cps-val" style="color:#ffb700;">0 lần / giây</span>
                         </div>
                         <div class="metric-bot-line">
-                            <span id="bio-rank-badge-2" style="color:#ffb700; font-weight:bold;">Cấp: Cao thủ</span>
-                            <div class="star-container" id="burst-stars">★★★★☆</div>
+                            <span id="bio-rank-badge-2" style="color:#ffb700; font-weight:bold;">Cấp: Người Bình Thường</span>
+                            <div class="star-container" id="burst-stars">★☆☆☆☆</div>
                         </div>
                     </div>
 
                     <div style="display:flex; justify-content:space-between; align-items:center; padding-top:2px;">
-                        <span style="font-family:'Share Tech Mono', monospace; font-size:11px; color:#00ffcc; font-weight:bold;" id="bio-rank-badge-final">Cấp: Chiến binh</span>
+                        <span style="font-family:'Share Tech Mono', monospace; font-size:11px; color:#00ffcc; font-weight:bold;" id="bio-rank-badge-final">Cấp: Người Bình Thường</span>
                         <div style="display:flex; align-items:center; gap:6px;">
                             <span style="font-family:'Share Tech Mono', monospace; font-size:10px; color:#b8b8dc;">Đánh giá chung:</span>
-                            <div class="star-container" id="total-stars" style="font-size:13px;">★★★☆☆</div>
+                            <div class="star-container" id="total-stars" style="font-size:13px;">★☆☆☆☆</div>
                         </div>
                     </div>
                 </div>
@@ -672,11 +673,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- NÚT THOÁT ĐỎ DUY NHẤT TRONG ẢI -->
-        <div class="arena-controls-group">
-            <button class="arena-btn" onclick="closeArena()">THOÁT</button>
-        </div>
     </div>
 
     <div id="custom-alert-overlay">
@@ -696,7 +692,7 @@
         let reflexScore = 0;
         let burstScore = 0;
         let currentMultiplier = 1; 
-        let successfulHitsCount = 0; // Đếm số hạt trúng để tăng cấp độ tốc độ dần dần
+        let successfulHitsCount = 0; 
         let isPlaying = false; 
         let isPausedForStart = true;
         let spawnTimer, pinkSpawnTimer, burstTimer, g3LoopId, stability = 5, projectiles = [];
@@ -910,6 +906,17 @@
             document.getElementById('task-container').classList.add('active');
         }
 
+        // HÀM ĐIỀU HƯỚNG TỪ NÚT THOÁT ĐỘC TÔN
+        function handleGlobalExit() {
+            playSound('error');
+            let arena = document.getElementById('task-arena');
+            if (arena && arena.classList.contains('active')) {
+                closeArena();
+            } else {
+                navToCore();
+            }
+        }
+
         function openArena(id) {
             playSound('katana');
             cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; currentMultiplier = 1; successfulHitsCount = 0; isPlaying = false; stability = 5;
@@ -950,7 +957,6 @@
         }
 
         function closeArena() {
-            playSound('error'); 
             isPlaying = false; 
             isPausedForStart = true; 
             clearTimeout(spawnTimer); 
@@ -991,7 +997,6 @@
             aScore = Math.round((aScore + finalAdd) * 10) / 10;
             reflexScore = Math.round((reflexScore + finalAdd) * 10) / 10; 
             
-            // CƠ CHẾ TĂNG CẤP ĐỘ (LEVEL UP) TỰ ĐỘNG DỰA TRÊN SỐ LƯỢNG HẠT ĂN ĐƯỢC (CỨ 10 HẠT LÊN 1 CẤP, TỐI ĐA CẤP 7)
             successfulHitsCount++;
             if (successfulHitsCount % 10 === 0 && currentMultiplier < 7) {
                 currentMultiplier++;
@@ -1002,9 +1007,8 @@
             playSound('coin', 1);
 
             if (cGame !== '3') {
-                // TỶ LỆ HẠT HỒNG CỰC KỲ HIẾM (1/100) XUẤT HIỆN NGẪU NHIÊN BẤT CỨ LÚC NÀO
-                let rareChance = (cGame === '1') ? 0.01 : 0.0125;
-                if (Math.random() < rareChance) {
+                // TỶ LỆ HẠT HỒNG CỰC KỲ HIẾM (1/100 TỨC 1%) ÁP DỤNG CẢ ẢI 1 & ẢI 2
+                if (Math.random() < 0.01) {
                     spawnPinkOrbDirectly();
                 }
             }
@@ -1444,7 +1448,7 @@
             let spawnTimestamp = Date.now();
             
             g3SpawnCounter++;
-            let isPink = (Math.random() < 0.0125); 
+            let isPink = (Math.random() < 0.01); 
 
             let el = document.createElement('div'); 
             el.className = isPink ? 'projectile orb-pink' : 'projectile'; 
@@ -1529,14 +1533,6 @@
             return '★'.repeat(s) + '☆'.repeat(5 - s);
         }
 
-        function getRankTitleByStars(stars) {
-            if (stars === 5) return "Chân Hỏa Vương";
-            if (stars === 4) return "Siêu Saiya";
-            if (stars === 3) return "Cao thủ";
-            if (stars === 2) return "Chiến binh";
-            return "Người bình thường";
-        }
-
         function finishGame() {
             isPlaying = false; isPausedForStart = true; clearTimeout(spawnTimer); clearTimeout(pinkSpawnTimer); clearTimeout(burstTimer); 
             if(g3LoopId) { cancelAnimationFrame(g3LoopId); g3LoopId = null; }
@@ -1567,37 +1563,64 @@
                     document.getElementById('res-pink-display').innerText = Math.round(burstScore);
                     document.getElementById('final-score-display').innerText = Math.round(aScore);
                     
-                    let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 328;
-                    document.getElementById('bio-avg-val').innerText = avgMs + " mili-giây";
-                    document.getElementById('bio-cps-val').innerText = (bestCps > 0 ? bestCps : 9.9) + " lần / giây";
-
-                    let refMs = avgMs;
-                    let cRate = bestCps > 0 ? bestCps : 9.9;
+                    // XỬ LÝ KHOA HỌC CHUẨN XÁC NẾU CHƯA KỊP CHƠI ĐÃ THOÁT HOẶC ĐIỂM = 0
+                    let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
+                    document.getElementById('bio-avg-val').innerText = avgMs > 0 ? avgMs + " mili-giây" : "0 mili-giây";
+                    document.getElementById('bio-cps-val').innerText = (bestCps > 0 ? bestCps : 0) + " lần / giây";
 
                     let reflexStars = 1;
-                    if (refMs <= 180) reflexStars = 5;
-                    else if (refMs <= 240) reflexStars = 4;
-                    else if (refMs <= 350) reflexStars = 3;
-                    else if (refMs <= 450) reflexStars = 2;
-                    else reflexStars = 1;
+                    let reflexRank = "Người Bình Thường";
+
+                    if (avgMs === 0) {
+                        reflexStars = 1;
+                        reflexRank = "Chưa xác định";
+                    } else if (avgMs <= 160) { 
+                        reflexStars = 5; reflexRank = "Phi Công";
+                    } else if (avgMs <= 240) { 
+                        reflexStars = 4; reflexRank = "Cao Thủ";
+                    } else if (avgMs <= 350) { 
+                        reflexStars = 3; reflexRank = "Chiến Binh";
+                    } else if (avgMs <= 450) { 
+                        reflexStars = 2; reflexRank = "Người Luyện Tập";
+                    } else { 
+                        reflexStars = 1; reflexRank = "Người Bình Thường"; 
+                    }
 
                     let burstStars = 1;
-                    if (cRate >= 14) burstStars = 5;
-                    else if (cRate >= 11) burstStars = 4;
-                    else if (cRate >= 8) burstStars = 3;
-                    else if (cRate >= 5) burstStars = 2;
-                    else burstStars = 1;
+                    let burstRank = "Người Bình Thường";
+                    let cRate = bestCps;
+                    
+                    if (cRate === 0) {
+                        burstStars = 1; burstRank = "Chưa xác định";
+                    } else if (cRate >= 14) { 
+                        burstStars = 5; burstRank = "Phi Công";
+                    } else if (cRate >= 11) { 
+                        burstStars = 4; burstRank = "Cao Thủ";
+                    } else if (cRate >= 8) { 
+                        burstStars = 3; burstRank = "Chiến Binh";
+                    } else if (cRate >= 5) { 
+                        burstStars = 2; burstRank = "Người Luyện Tập";
+                    } else { 
+                        burstStars = 1; burstRank = "Người Bình Thường"; 
+                    }
 
                     let totalStars = Math.round((reflexStars + burstStars) / 2);
                     totalStars = Math.max(1, Math.min(5, totalStars));
+                    
+                    let totalRank = "Người Bình Thường";
+                    if (totalStars === 5) totalRank = "Phi Công";
+                    else if (totalStars === 4) totalRank = "Cao Thủ";
+                    else if (totalStars === 3) totalRank = "Chiến Binh";
+                    else if (totalStars === 2) totalRank = "Người Luyện Tập";
+                    else if (totalStars === 1 && avgMs === 0 && bestCps === 0) totalRank = "Chưa xác định";
 
                     document.getElementById('reflex-stars').innerText = generateStarString(reflexStars);
                     document.getElementById('burst-stars').innerText = generateStarString(burstStars);
                     document.getElementById('total-stars').innerText = generateStarString(totalStars);
 
-                    document.getElementById('bio-rank-badge-1').innerText = "Cấp: " + getRankTitleByStars(reflexStars);
-                    document.getElementById('bio-rank-badge-2').innerText = "Cấp: " + getRankTitleByStars(burstStars);
-                    document.getElementById('bio-rank-badge-final').innerText = "Cấp: " + getRankTitleByStars(totalStars);
+                    document.getElementById('bio-rank-badge-1').innerText = "Cấp: " + reflexRank;
+                    document.getElementById('bio-rank-badge-2').innerText = "Cấp: " + burstRank;
+                    document.getElementById('bio-rank-badge-final').innerText = "Cấp: " + totalRank;
 
                     document.getElementById('result-overlay').classList.add('active');
                     playSound('coin');
