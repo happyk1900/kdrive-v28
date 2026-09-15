@@ -291,7 +291,11 @@
         .orb-pink { width: 32px; height: 32px; background: radial-gradient(circle, #ff66cc, #ff007f); box-shadow: 0 0 15px #ff007f; z-index: 15; }
         .orb-ice { width: 56px; height: 56px; background: radial-gradient(circle, #ffffff, #00ffcc); box-shadow: 0 0 20px #00ffcc; }
         .core-reactor { position: absolute; width: 40px; height: 40px; background: radial-gradient(circle, #fff, #ff007f); border-radius: 50%; box-shadow: 0 0 25px #ff007f; z-index: 5; transform: translate(-50%, -50%); }
-        .projectile { position: absolute; width: 20px; height: 20px; background: #ffb700; border-radius: 50%; box-shadow: 0 0 10px #ff007f; z-index: 10; transform: translate(-50%, -50%); }
+        
+        /* Hạt con phân thể Ải III */
+        .child-projectile { position: absolute; width: 24px; height: 24px; border-radius: 50%; z-index: 10; transform: translate(-50%, -50%); cursor: crosshair; }
+        .child-yellow { background: radial-gradient(circle, #ffdf70, #ffb700); box-shadow: 0 0 10px #ffb700; }
+        .child-white { background: radial-gradient(circle, #ffffff, #00ffcc); box-shadow: 0 0 10px #00ffcc; }
 
         .blackout-bg { 
             position: absolute; inset: 0; background-color: rgba(8, 4, 12, 0.95); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; flex-direction: column; 
@@ -606,7 +610,7 @@
 
     <div id="terminal-bar">
         <div class="terminal-track">
-            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - ĐÃ XÓA SẠCH NÚT THOÁT THỪA VÀ CẬP NHẬT KHOA HỌC PHẢN XẠ VÀO BẢNG CẤP ĐỘ! ⚡</span>
+            <span class="terminal-text">⚡ [HỆ THỐNG K-DRIVE]: ĐẠO TRƯỜNG HỎA LUÂN - ẢI III CƠ CHẾ PHÂN THỂ (VÀNG & TRẮNG) ĐÃ ĐƯỢC TÍCH HỢP HOÀN HẢO! ⚡</span>
         </div>
     </div>
 
@@ -774,7 +778,7 @@
         let successfulHitsCount = 0; 
         let isPlaying = false; 
         let isPausedForStart = true;
-        let spawnTimer, pinkSpawnTimer, burstTimer, g3LoopId, stability = 5, projectiles = [];
+        let spawnTimer, pinkSpawnTimer, burstTimer, g3LoopId, stabilityHP = 10, projectiles = [];
         let bestCps = 0;
         let g3SpawnCounter = 0; 
 
@@ -1005,23 +1009,23 @@
 
         function openArena(id) {
             playSound('katana');
-            cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; currentMultiplier = 1; successfulHitsCount = 0; isPlaying = false; stability = 5;
+            cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; currentMultiplier = 1; successfulHitsCount = 0; isPlaying = false; stabilityHP = 10;
             isPausedForStart = true;
             clickTimestamps = []; clickCoordinates = []; cheatReason = ""; bestCps = 0;
             g3SpawnCounter = 0;
 
             document.getElementById('task-container').classList.remove('active');
             let playArea = document.getElementById('play-area');
-            let oldOrbs = playArea.querySelectorAll('.orb, .projectile, .core-reactor, .ghost-orb, .replay-spawn, .burst-effect, .blackout-bg, .beam, .explosion, .flashbang, .float-score, .pink-shockwave, .vortex-collapse');
+            let oldOrbs = playArea.querySelectorAll('.orb, .child-projectile, .core-reactor, .ghost-orb, .replay-spawn, .burst-effect, .blackout-bg, .beam, .explosion, .flashbang, .float-score, .pink-shockwave, .vortex-collapse');
             oldOrbs.forEach(o => o.remove());
 
             let multTextEl = document.getElementById('start-multiplier-text');
             if (id === '1') multTextEl.innerText = "+1 ĐIỂM";
             else if (id === '2') multTextEl.innerText = "+2 ĐIỂM (CHẠM BĂNG MẤT MẠNG)";
-            else if (id === '3') multTextEl.innerText = "+3 ĐIỂM (THỦ TRẬN)";
+            else if (id === '3') multTextEl.innerText = "+3 ĐIỂM (THỦ TRẬN - PHÂN THỂ)";
 
             document.getElementById('preview-max-val').innerText = arenaRecords[id].maxScore;
-            document.getElementById('boo-lives').innerHTML = "❤️❤️❤️❤️❤️";
+            updateHpDisplay();
             document.getElementById('boo-points').innerText = "0";
             
             let mTag = document.getElementById('multiplier-tag');
@@ -1110,14 +1114,29 @@
             tag.style.color = getTierColor(currentMultiplier);
         }
 
-        function loseLife() {
+        function updateHpDisplay() {
+            let fullHearts = Math.floor(stabilityHP / 2);
+            let hasHalf = (stabilityHP % 2 !== 0);
+            let heartsStr = "❤️".repeat(Math.max(0, fullHearts)) + (hasHalf ? "💔" : "");
+            document.getElementById('boo-lives').innerText = heartsStr;
+        }
+
+        function loseHalfLife() {
             if(isPausedForStart) return;
-            stability--; 
-            let heartsStr = "❤️".repeat(Math.max(0, stability)); 
-            document.getElementById('boo-lives').innerText = heartsStr; 
+            stabilityHP -= 1; // Mất 1 HP (nửa trái tim)
+            updateHpDisplay();
             playSound('boom');
             triggerVibration([100, 50, 100]);
-            if(stability <= 0) { finishGame(); }
+            if(stabilityHP <= 0) { finishGame(); }
+        }
+
+        function loseFullLife() {
+            if(isPausedForStart) return;
+            stabilityHP -= 2; // Mất nguyên 1 trái tim
+            updateHpDisplay();
+            playSound('boom');
+            triggerVibration([150, 50, 150]);
+            if(stabilityHP <= 0) { finishGame(); }
         }
 
         function runG1() { spawnG1(); }
@@ -1158,7 +1177,7 @@
                 if(el.parentElement && !clicked) { 
                     spData.deathTime = Date.now() - matchStartTime;
                     el.remove(); 
-                    if(isPlaying && !isPausedForStart) { loseLife(); }
+                    if(isPlaying && !isPausedForStart) { loseFullLife(); }
                 } 
             }, lifespan);
 
@@ -1504,7 +1523,7 @@
                     reactionTimes.push(exactReaction);
                     addScoreAndCheckMultiplier(2);
                 } else { 
-                    loseLife(); 
+                    loseFullLife(); 
                 } 
                 el.remove(); 
             };
@@ -1516,7 +1535,7 @@
                 if(el.parentElement && !handled) { 
                     spData.deathTime = Date.now() - matchStartTime;
                     el.remove(); 
-                    if(isFire && isPlaying && !isPausedForStart) { loseLife(); } 
+                    if(isFire && isPlaying && !isPausedForStart) { loseFullLife(); } 
                 } 
             }, lifespan);
 
@@ -1524,78 +1543,145 @@
             if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG2, nextDelay); }
         }
 
+        // ==================== CƠ CHẾ ẢI III: PHÂN THỂ ====================
+        let stage3Projectiles = [];
+
         function runG3() { 
-            projectiles = []; 
-            spawnG3Single(); 
+            stage3Projectiles = []; 
+            spawnG3Parent(); 
             if(!g3LoopId) g3LoopId = requestAnimationFrame(loopG3); 
         }
 
-        function spawnG3Single() {
+        function spawnG3Parent() {
             if(!isPlaying || isPausedForStart) return; 
             let playArea = document.getElementById('play-area'); 
-            let centerX = playArea.clientWidth / 2, centerY = playArea.clientHeight / 2;
+            let maxX = playArea.clientWidth - 60, maxY = playArea.clientHeight - 60;
+            let px = Math.max(10, Math.random() * maxX), py = Math.max(10, Math.random() * maxY);
             let spawnTimestamp = Date.now();
             
-            g3SpawnCounter++;
-            let isPink = (Math.random() < 0.01); 
-
-            let el = document.createElement('div'); 
-            el.className = isPink ? 'projectile orb-pink' : 'projectile'; 
-            if (isPink) {
-                el.style.width = '24px'; el.style.height = '24px'; 
-            }
-            el.style.left = centerX + 'px'; el.style.top = centerY + 'px';
-            
-            let angle = Math.random() * Math.PI * 2;
-            let baseSpeed = 1.5 + (currentMultiplier * 0.4); 
-            let vx = Math.cos(angle) * baseSpeed, vy = Math.sin(angle) * baseSpeed;
-            
-            let spData = { t: spawnTimestamp - matchStartTime, x: centerX, y: centerY, vx: vx, vy: vy, type: isPink ? 'pink' : 'projectile', deathTime: Infinity };
+            let spData = { t: spawnTimestamp - matchStartTime, x: px, y: py, type: 'parent_yellow', deathTime: Infinity };
             currentReplayData.spawns.push(spData);
 
-            let pObj = { x: centerX, y: centerY, vx: vx, vy: vy, el: el, spData: spData, isPink: isPink, spawnTime: spawnTimestamp }; 
-            projectiles.push(pObj);
+            let el = document.createElement('div'); 
+            el.className = 'orb orb-fire'; // Hạt vàng to ban đầu
+            el.style.left = px + 'px'; el.style.top = py + 'px';
             
+            let clicked = false; 
             el.onmousedown = el.ontouchstart = (e) => { 
                 e.preventDefault(); e.stopPropagation();
+                if(!isPlaying || isPausedForStart || clicked) return; 
+                clicked = true; 
                 let hitTime = Date.now();
-                pObj.spData.deathTime = hitTime - matchStartTime;
+                spData.deathTime = hitTime - matchStartTime;
                 
-                if (pObj.isPink) {
-                    el.remove();
-                    let idx = projectiles.indexOf(pObj); if(idx > -1) projectiles.splice(idx, 1);
-                    triggerGreatBurst(); 
-                } else {
-                    let exactReaction = hitTime - pObj.spawnTime;
-                    reactionTimes.push(exactReaction);
-                    addScoreAndCheckMultiplier(3);
-                    el.remove(); 
-                    let idx = projectiles.indexOf(pObj); if(idx > -1) projectiles.splice(idx, 1); 
-                }
+                let exactReaction = hitTime - spawnTimestamp;
+                reactionTimes.push(exactReaction);
+
+                // Thưởng 3 điểm cho hạt vàng to gốc
+                addScoreAndCheckMultiplier(3); 
+                el.remove(); 
+
+                // Tách ra 2 hạt con trôi về tâm
+                spawnG3Children(px + 28, py + 28);
             };
             
             playArea.appendChild(el); 
 
-            let nextSpawnDelay = g1SpawnDelays[currentMultiplier] || 200;
-            if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG3Single, nextSpawnDelay); }
+            let lifespan = g1Lifespans[currentMultiplier];
+            setTimeout(() => { 
+                if(el.parentElement && !clicked) { 
+                    spData.deathTime = Date.now() - matchStartTime;
+                    el.remove(); 
+                    if(isPlaying && !isPausedForStart) { loseFullLife(); }
+                } 
+            }, lifespan);
+
+            let nextSpawnDelay = g1SpawnDelays[currentMultiplier];
+            if(isPlaying && !isPausedForStart) { spawnTimer = setTimeout(spawnG3Parent, nextSpawnDelay); }
+        }
+
+        function spawnG3Children(parentX, parentY) {
+            if(!isPlaying || isPausedForStart) return;
+            let playArea = document.getElementById('play-area');
+            let centerX = playArea.clientWidth / 2;
+            let centerY = playArea.clientHeight / 2;
+
+            // Ngẫu nhiên màu 2 hạt con (Vàng hoặc Trắng)
+            let colors = [
+                Math.random() > 0.4 ? 'yellow' : 'white',
+                Math.random() > 0.4 ? 'yellow' : 'white'
+            ];
+
+            colors.forEach((col, idx) => {
+                let el = document.createElement('div');
+                el.className = col === 'yellow' ? 'child-projectile child-yellow' : 'child-projectile child-white';
+                
+                let startX = parentX + (idx === 0 ? -15 : 15);
+                let startY = parentY;
+                el.style.left = startX + 'px';
+                el.style.top = startY + 'px';
+
+                let angle = Math.atan2(centerY - startY, centerX - startX);
+                let speed = 1.1 + (currentMultiplier * 0.2);
+                let vx = Math.cos(angle) * speed;
+                let vy = Math.sin(angle) * speed;
+
+                let childObj = {
+                    el: el, x: startX, y: startY, vx: vx, vy: vy, color: col
+                };
+                stage3Projectiles.push(childObj);
+
+                let childClicked = false;
+                el.onmousedown = el.ontouchstart = (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    if(!isPlaying || isPausedForStart || childClicked) return;
+                    childClicked = true;
+
+                    if (col === 'yellow') {
+                        // Đập đúng hạt vàng con: +1 điểm
+                        addScoreAndCheckMultiplier(1);
+                        playSound('coin', 1.2);
+                    } else {
+                        // Đập nhầm hạt trắng: Trừ 0.5 điểm
+                        aScore = Math.max(0, Math.round((aScore - 0.5) * 10) / 10);
+                        updateScoreUI();
+                        playSound('error');
+                    }
+                    el.remove();
+                    let idxx = stage3Projectiles.indexOf(childObj); if(idxx > -1) stage3Projectiles.splice(idxx, 1);
+                };
+
+                playArea.appendChild(el);
+            });
         }
 
         function loopG3() {
             if(!isPlaying) { g3LoopId = null; return; }
             if(!isPausedForStart) {
-                let playArea = document.getElementById('play-area'), maxX = playArea.clientWidth, maxY = playArea.clientHeight;
-                for(let i = projectiles.length - 1; i >= 0; i--) {
-                    let p = projectiles[i]; 
-                    p.x += p.vx; p.y += p.vy; 
-                    p.el.style.left = p.x + 'px'; 
+                let playArea = document.getElementById('play-area');
+                let centerX = playArea.clientWidth / 2;
+                let centerY = playArea.clientHeight / 2;
+
+                for(let i = stage3Projectiles.length - 1; i >= 0; i--) {
+                    let p = stage3Projectiles[i];
+                    p.x += p.vx; p.y += p.vy;
+                    p.el.style.left = p.x + 'px';
                     p.el.style.top = p.y + 'px';
-                    
-                    if(p.x < 10 || p.x > maxX - 10 || p.y < 10 || p.y > maxY - 10) { 
-                        p.spData.deathTime = Date.now() - matchStartTime;
-                        p.el.remove(); 
-                        projectiles.splice(i, 1); 
-                        loseLife(); 
-                        if(!isPlaying) return; 
+
+                    let distToCenter = Math.hypot(p.x - centerX, p.y - centerY);
+                    if (distToCenter < 22) {
+                        p.el.remove();
+                        stage3Projectiles.splice(i, 1);
+
+                        if (p.color === 'yellow') {
+                            // Hạt vàng con trôi chạm lõi: Trừ 1 HP (mất nửa máu)
+                            loseHalfLife();
+                        } else {
+                            // Hạt trắng con trôi về lõi an toàn: Thưởng +0.5 điểm
+                            aScore = Math.round((aScore + 0.5) * 10) / 10;
+                            updateScoreUI();
+                            playSound('coin', 0.5);
+                        }
                     }
                 }
             }
@@ -1704,10 +1790,11 @@
             }, 1200);
         }
 
-        function retryCurrentStage() { playSound('katana'); openArena(cGame); }
+        function retryCurrentStage() { playSound('katana'); document.getElementById('result-overlay').classList.remove('active'); openArena(cGame); }
 
         function proceedNextStage() {
             playSound('coin');
+            document.getElementById('result-overlay').classList.remove('active');
             document.getElementById('task-arena').classList.remove('active');
             updateHologramUI();
             let nextId = (parseInt(cGame) + 1).toString();
