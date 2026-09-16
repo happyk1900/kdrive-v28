@@ -21,7 +21,7 @@
         img, video { -webkit-user-drag: none; pointer-events: none; }
 
         .kdrive-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; background: #010204; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; opacity: 1; }
+        .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; opacity: 1; transition: opacity 0.5s ease; }
         
         #quantum-flash-overlay {
             position: fixed; inset: 0; width: 100vw; height: 100vh; background: #00ffff;
@@ -37,15 +37,37 @@
             100% { opacity: 0; filter: none; }
         }
 
+        /* KHUNG CHỌN NGÔN NGỮ BAN ĐẦU */
+        .lang-gate-overlay {
+            position: fixed; inset: 0; z-index: 999999; background: rgba(1, 5, 10, 0.92);
+            display: flex; justify-content: center; align-items: center; transition: 0.4s ease;
+        }
+        .lang-gate-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        
+        .lang-box {
+            width: 90%; max-width: 320px; background: rgba(3, 15, 30, 0.92);
+            border: 2px solid #00e5ff; border-radius: 12px; padding: 20px;
+            box-shadow: 0 0 30px rgba(0,229,255,0.4); text-align: center; color: #fff;
+        }
+        .lang-box h3 { color: #ffd700; font-size: 14px; margin-bottom: 15px; letter-spacing: 1px; }
+        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .lang-btn {
+            background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.4);
+            color: #00e5ff; padding: 10px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 11px;
+        }
+        .lang-btn.active, .lang-btn:hover { background: #00e5ff; color: #000; box-shadow: 0 0 10px #00e5ff; }
+        .lang-confirm-btn {
+            width: 100%; padding: 12px; background: #ffd700; border: none; color: #000;
+            font-weight: 900; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+        }
+
         .gateway-container {
             position: relative; width: 85%; max-width: 270px; z-index: 99999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: opacity 0.3s ease, transform 0.3s ease;
             opacity: 0; pointer-events: none; 
         }
-        .gateway-container.show-login {
-            opacity: 1; pointer-events: auto;
-        }
+        .gateway-container.show-login { opacity: 1; pointer-events: auto; }
 
         .gateway-container.glitching {
             animation: glitchAnim 0.3s infinite alternate;
@@ -111,32 +133,6 @@
         }
         .terms-link:hover { color: #fff; }
 
-        .quantum-firefly {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: radial-gradient(circle, #ffffff 0%, #00ffff 60%, transparent 100%);
-            border-radius: 50%;
-            box-shadow: 0 0 15px #00ffff, 0 0 30px #00e5ff, 0 0 45px #ffffff;
-            z-index: 99999;
-            pointer-events: none;
-            opacity: 0;
-            animation: fireflyGuideWorkflow 7s infinite ease-in-out;
-        }
-
-        @keyframes fireflyGuideWorkflow {
-            0% { transform: translate(-120px, 80px) scale(0.6); opacity: 0; }
-            10% { opacity: 1; transform: translate(-50px, 30px) scale(1.2); }
-            30% { transform: translate(20px, -15px) scale(1); }
-            50% { transform: translate(-45px, 25px) scale(1.1); }
-            70%, 90% {
-                transform: translate(-5px, -75px) scale(1.3);
-                box-shadow: 0 0 25px #ffd700, 0 0 50px #00ffff;
-                background: radial-gradient(circle, #ffffff 0%, #ffd700 60%, transparent 100%);
-            }
-            100% { transform: translate(-5px, -75px) scale(0.8); opacity: 0; }
-        }
-
         #loginStatus {
             margin-top: 10px; font-weight: 700; text-align: center; font-size: 10px; color: #00e5ff;
             text-shadow: 0 0 8px rgba(0,229,255,0.6); letter-spacing: 0.5px; min-height: 14px;
@@ -185,63 +181,36 @@
 
     <div id="quantum-flash-overlay"></div>
 
-    <!-- ĐÃ SỬA: Dùng link gốc raw.githubusercontent.com và bỏ chặn crossorigin -->
+    <!-- FILE NHẠC KHỞI ĐỘNG K-DRIVE -->
     <audio id="bgMusic" src="https://raw.githubusercontent.com/happyk1900/HOSOGOC/main/K_Drive_Initialized.mp3" preload="auto" loop></audio>
-    
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20GPS%20FULL.mp4" playsinline></video>
+
+    <!-- MÀN HÌNH CHỌN NGÔN NGỮ BAN ĐẦU (VỚI ẢNH NỀN MỚI THỨ 1) -->
+    <div class="lang-gate-overlay" id="langGateModal">
+        <div class="lang-box">
+            <h3>CHỌN NGÔN NGỮ QUỐC TẾ</h3>
+            <div class="lang-grid">
+                <button class="lang-btn active" onclick="selectLang('vi', this)">🇻🇳 Tiếng Việt</button>
+                <button class="lang-btn" onclick="selectLang('en', this)">🇬🇧 English</button>
+            </div>
+            <button class="lang-confirm-btn" onclick="confirmLanguage()">XÁC NHẬN & VÀO TRẠM</button>
+        </div>
+    </div>
 
     <!-- MODAL ĐIỀU KHOẢN -->
     <div class="terms-modal-overlay" id="termsModal">
         <div class="terms-modal-content" id="termsModalBody">
             <h3 data-i18n="terms_modal_title">QUY CHẾ K-DRIVE (CORE PROTOCOLS)</h3>
             <p style="color: #b0e0e6; margin-bottom: 8px;" data-i18n="terms_subtitle">K-Drive vận hành trên nguyên tắc sòng phẳng và minh bạch tuyệt đối:</p>
-            
             <h4 data-i18n="terms_h1">1. BẢO MẬT SINH TRẮC HỌC</h4>
-            <p data-i18n="terms_desc1">Hệ thống thu thập nhịp tim và giấc ngủ chỉ để tính toán Lực chiến (SCI). Dữ liệu được mã hóa đám mây, tuyệt đối không chia sẻ cho bên thứ ba (Tuân thủ Nghị định 13).</p>
-            
-            <h4 data-i18n="terms_h2">2. CHÍNH SÁCH THUÊ BAO</h4>
-            <p data-i18n="terms_desc2">Các gói cước sẽ tự động gia hạn. Phí dịch vụ đã thanh toán sẽ không được hoàn lại dưới mọi hình thức.</p>
-            
-            <h4 data-i18n="terms_h3">3. MIỄN TRỪ Y TẾ</h4>
-            <p data-i18n="terms_desc3">K-Drive là công cụ rèn luyện, không phải thiết bị y tế. Người dùng tự chịu trách nhiệm về an toàn thể lực khi tham gia các thử thách cường độ cao.</p>
-            
-            <h4 data-i18n="terms_h4">4. BÀN TAY SẮT (ANTI-CHEAT)</h4>
-            <p data-i18n="terms_desc4">Nghiêm cấm dùng tool auto-click, macro hoặc làm giả dữ liệu nhịp tim. Vi phạm sẽ bị khóa tài khoản vĩnh viễn và tước quyền chia quỹ thưởng 9/9.</p>
-
-            <div class="full-terms-container" id="fullTermsSection">
-                <h3 style="margin-top: 10px; color: #00e5ff;" data-i18n="full_title">--- TOÀN VĂN 7 ĐIỀU KHOẢN PHÁP LÝ ---</h3>
-                
-                <h4 data-i18n="f_h1">ĐIỀU 1: BẢN CHẤT DỊCH VỤ VÀ ĐỊNH VỊ PHÁP LÝ</h4>
-                <p data-i18n="f_desc1">1.1. Bản chất nền tảng: Ứng dụng Sức khỏe & Thể thao.<br>1.2. Lực chiến SCI: Đo lường chuyên cần qua dữ liệu sinh trắc học.<br>1.3. Không phải cờ bạc: 100% dựa trên năng lực cá nhân.</p>
-
-                <h4 data-i18n="f_h2">ĐIỀU 2: THU THẬP & XỬ LÝ DỮ LIỆU SINH TRẮC HỌC</h4>
-                <p data-i18n="f_desc2">2.1. Đồng thuận theo Nghị định 13/2023/NĐ-CP.<br>2.2. Mục đích cá nhân hóa bài tập.<br>2.3. Bảo mật tuyệt đối, không chia sẻ bên thứ ba.</p>
-
-                <h4 data-i18n="f_h3">ĐIỀU 3: CƠ CHẾ THUÊ BAO VÀ DUY TRÌ TÀI KHOẢN</h4>
-                <p data-i18n="f_desc3">3.1. Gói thuê bao duy trì hạ tầng AI Dynamic Scaling.<br>3.2. Gia hạn tự động hoặc hủy bất kỳ lúc nào.<br>3.3. Phí dịch vụ không hoàn lại.</p>
-
-                <h4 data-i18n="f_h4">ĐIỀU 4: QUY CHẾ GIẢI ĐẤU THƯỜNG NIÊN & QUỸ THƯỞNG</h4>
-                <p data-i18n="f_desc4">4.1. Quỹ thưởng tôn vinh cá nhân xuất sắc ngày 9/9.<br>4.2. Tiêu chuẩn SCI vượt ngưỡng quy định.<br>4.3. Khấu trừ thuế TNCN (10%) tại nguồn.</p>
-
-                <h4 data-i18n="f_h5">ĐIỀU 5: NGUYÊN TẮC CÔNG BẰNG & CHỐNG GIAN LẬN</h4>
-                <p data-i18n="f_desc5">5.1. Nghiêm cấm tool, giả lập, làm giả dữ liệu.<br>5.2. Đóng băng tài khoản vĩnh viễn khi vi phạm.</p>
-
-                <h4 data-i18n="f_h6">ĐIỀU 6: MIỄN TRỪ TRÁCH NHIỆM Y TẾ</h4>
-                <p data-i18n="f_desc6">6.1. Không thay thế chẩn đoán y khoa chuyên khoa.<br>6.2. Trách nhiệm thể lực thuộc về cá nhân người dùng.</p>
-
-                <h4 data-i18n="f_h7">ĐIỀU 7: LUẬT ĐIỀU CHỈNH & GIẢI QUYẾT TRANH CHẤP</h4>
-                <p data-i18n="f_desc7">Tuân theo pháp luật Việt Nam. Giải quyết tại Tòa án nơi Telepathy đặt trụ sở.</p>
-            </div>
-
-            <span class="read-full-link" id="toggleFullLink" onclick="toggleFullTerms()" data-i18n="read_full_text">[ Đọc Toàn Văn Điều Khoản Dịch Vụ ]</span>
-
+            <p data-i18n="terms_desc1">Hệ thống thu thập nhịp tim và giấc ngủ chỉ để tính toán Lực chiến (SCI). Dữ liệu được mã hóa đám mây, tuyệt đối không chia sẻ cho bên thứ ba.</p>
             <button class="terms-close-btn" onclick="closeTermsModal()" data-i18n="terms_close_btn">ĐÃ HIỂU & ĐÓNG</button>
         </div>
     </div>
 
-    <!-- KHUNG GIAO DIỆN CHÍNH -->
+    <!-- KHUNG GIAO DIỆN CHÍNH (VỚI ẢNH NỀN ĐĂNG NHẬP MỚI THỨ 2) -->
     <div class="kdrive-image-wrapper">
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20NEN%20GPS%20NEN.png?raw=true" class="kdrive-bg-target" alt="Core Background">
+        <img id="bgImageElement" src="https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true" class="kdrive-bg-target" alt="Core Background">
         
         <div class="gateway-container" id="loginPanelContainer">
             <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL%20CAT.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="triggerGoogleOAuth()" alt="Google Login">
@@ -251,7 +220,6 @@
                 <div class="terms-text" data-i18n="terms_checkbox_label">
                     Tôi đồng ý với <span class="terms-link" onclick="openTermsModal()">Điều khoản dịch vụ</span> & <span class="terms-link" onclick="openTermsModal()">Quy chế thi đấu</span> của Telepathy.
                 </div>
-                <div class="quantum-firefly" id="quantumFirefly"></div>
             </div>
 
             <div id="loginStatus"></div>
@@ -264,122 +232,44 @@
         let lastUserEmail = "";
         let maskedAgentName = "";
         let hasReadTerms = false;
+        let selectedLangChoice = 'vi';
 
-        const quantumMap = {
-            'a': '⟡', 'á': '⟡⁺', 'à': '⟡₋', 'ả': '⟡∼', 'ã': '⟡≈', 'ạ': '⟡•',
-            'â': '⌖', 'ấ': '⌖⁺', 'ầ': '⌖₋', 'ẩ': '⌖∼', 'ẫ': '⌖≈', 'ậ': '⌖•',
-            'ă': '⍜', 'ắ': '⍜⁺', 'ằ': '⍜₋', 'ẳ': '⍜∼', 'ẵ': '⍜≈', 'ặ': '⍜•',
-            'b': '❖', 'c': '⟨', 'd': '⎔', 'đ': '⟠',
-            'e': '⟍', 'é': '⟍⁺', 'è': '⟍₋', 'ẻ': '⟍∼', 'ẽ': '⟍≈', 'ẹ': '⟍•',
-            'ê': '⍎', 'ế': '⍎⁺', 'ề': '⍎₋', 'ể': '⍎∼', 'ễ': '⍎≈', 'ệ': '⍎•',
-            'g': '◎', 'h': '☩', 'i': '║', 'í': '║⁺', 'ì': '║₋', 'ỉ': '║∼', 'ĩ': '║≈', 'ị': '║•',
-            'k': '⎈', 'l': '⫷', 'm': '☲', 'n': '☱',
-            'o': '⨀', 'ó': '⨀⁺', 'ò': '⨀₋', 'ỏ': '⨀∼', 'õ': '⨀≈', 'ọ': '⨀•',
-            'ô': '⍜', 'ố': '⍜⁺', 'ồ': '⍜₋', 'ổ': '⍜∼', 'ỗ': '⍜≈', 'ộ': '⍜•',
-            'ơ': '⍥', 'ớ': '⍥⁺', 'ờ': '⍥₋', 'ở': '⍥∼', 'ỡ': '⍥≈', 'ợ': '⍥•',
-            'p': '⨁', 'q': '⍟', 'r': 'Ⱬ', 's': '⟡', 't': '⍂',
-            'u': '⋃', 'ú': '⋃⁺', 'ù': '⋃₋', 'ủ': '⋃∼', 'ũ': '⋃≈', 'ụ': '⋃•',
-            'ư': '⋲', 'ứ': '⋲⁺', 'ừ': '⋲₋', 'ử': '⋲∼', 'ữ': '⋲≈', 'ự': '⋲•',
-            'v': '⟁', 'x': '⨂', 'y': '⋫', 'ý': '⋫⁺', 'ỳ': '⋫₋', 'ỷ': '⋫∼', 'ỹ': '⋫≈', 'ỵ': '⋫•',
-            '2': '⟡', '6': '⌖', '.': '•', '@': '⌖', '_': '─', '-': '─', ' ': ' '
-        };
-
-        function encodeQuantum(text) {
-            if (!text) return '';
-            return text.split('').map(char => {
-                const lower = char.toLowerCase();
-                return quantumMap[lower] !== undefined ? quantumMap[lower] : char;
-            }).join('');
+        function selectLang(lang, btnElement) {
+            selectedLangChoice = lang;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
         }
 
-        const loginTranslations = {
-            vi: { 
-                page_title: "K-Drive: Trạm Kiểm Xoát", connecting: "🛰️ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...", error: "❌ KHÔNG THỂ KẾT NỐI GOOGLE SDK!", welcome: "⚡ ĐỊNH DANH AN TOÀN: ", alert_terms: "⚠️ BẠN PHẢI ĐỌC VÀ ĐỒNG Ý ĐIỀU KHOẢN!",
-                terms_checkbox_label: 'Tôi đồng ý với <span class="terms-link" onclick="openTermsModal()">Điều khoản dịch vụ</span> & <span class="terms-link" onclick="openTermsModal()">Quy chế thi đấu</span> của Telepathy.',
-                terms_modal_title: "QUY CHẾ K-DRIVE (CORE PROTOCOLS)", terms_subtitle: "K-Drive vận hành trên nguyên tắc sòng phẳng và minh bạch tuyệt đối:",
-                terms_h1: "1. BẢO MẬT SINH TRẮC HỌC", terms_desc1: "Hệ thống thu thập nhịp tim và giấc ngủ chỉ để tính toán Lực chiến (SCI). Dữ liệu được mã hóa đám mây, tuyệt đối không chia sẻ cho bên thứ ba (Tuân thủ Nghị định 13).",
-                terms_h2: "2. CHÍNH SÁCH THUÊ BAO", terms_desc2: "Các gói cước sẽ tự động gia hạn. Phí dịch vụ đã thanh toán sẽ không được hoàn lại dưới mọi hình thức.",
-                terms_h3: "3. MIỄN TRỪ Y TẾ", terms_desc3: "K-Drive là công cụ rèn luyện, không phải thiết bị y tế. Người dùng tự chịu trách nhiệm về an toàn thể lực khi tham gia các thử thách cường độ cao.",
-                terms_h4: "4. BÀN TAY SẮT (ANTI-CHEAT)", terms_desc4: "Nghiêm cấm dùng tool auto-click, macro hoặc làm giả dữ liệu nhịp tim. Vi phạm sẽ bị khóa tài khoản vĩnh viễn và tước quyền chia quỹ thưởng 9/9.",
-                full_title: "--- TOÀN VĂN 7 ĐIỀU KHOẢN PHÁP LÝ ---",
-                f_h1: "ĐIỀU 1: BẢN CHẤT DỊCH VỤ VÀ ĐỊNH VỊ PHÁP LÝ", f_desc1: "1.1. Bản chất nền tảng: Ứng dụng Sức khỏe & Thể thao.<br>1.2. Lực chiến SCI: Đo lường chuyên cần qua dữ liệu sinh trắc học.<br>1.3. Không phải cờ bạc: 100% dựa trên năng lực cá nhân.",
-                f_h2: "ĐIỀU 2: THU THẬP & XỬ LÝ DỮ LIỆU SINH TRẮC HỌC", f_desc2: "2.1. Đồng thuận theo Nghị định 13/2023/NĐ-CP.<br>2.2. Mục đích cá nhân hóa bài tập.<br>2.3. Bảo mật tuyệt đối, không chia sẻ bên thứ ba.",
-                f_h3: "ĐIỀU 3: CƠ CHẾ THUÊ BAO VÀ DUY TRÌ TÀI KHOẢN", f_desc3: "3.1. Gói thuê bao duy trì hạ tầng AI Dynamic Scaling.<br>3.2. Gia hạn tự động hoặc hủy bất kỳ lúc nào.<br>3.3. Phí dịch vụ không hoàn lại.",
-                f_h4: "ĐIỀU 4: QUY CHẾ GIẢI ĐẤU THƯỜNG NIÊN & QUỸ THƯỞNG", f_desc4: "4.1. Quỹ thưởng tôn vinh cá nhân xuất sắc ngày 9/9.<br>4.2. Tiêu chuẩn SCI vượt ngưỡng quy định.<br>4.3. Khấu trừ thuế TNCN (10%) tại nguồn.",
-                f_h5: "ĐIỀU 5: NGUYÊN TẮC CÔNG BẰNG & CHỐNG GIAN LẬN", f_desc5: "5.1. Nghiêm cấm tool, giả lập, làm giả dữ liệu.<br>5.2. Đóng băng tài khoản vĩnh viễn khi vi phạm.",
-                f_h6: "ĐIỀU 6: MIỄN TRỪ TRÁCH NHIỆM Y TẾ", f_desc6: "6.1. Không thay thế chẩn đoán y khoa chuyên khoa.<br>6.2. Trách nhiệm thể lực thuộc về cá nhân người dùng.",
-                f_h7: "ĐIỀU 7: LUẬT ĐIỀU CHỈNH & GIẢI QUYẾT TRANH CHẤP", f_desc7: "Tuân theo pháp luật Việt Nam. Giải quyết tại Tòa án nơi Telepathy đặt trụ sở.",
-                read_full_text: "[ Đọc Toàn Văn Điều Khoản Dịch Vụ ]",
-                read_less_text: "[ Thu Gọn Bản Tóm Tắt ]",
-                terms_close_btn: "ĐÃ HIỂU & ĐÓNG"
-            },
-            en: { 
-                page_title: "K-Drive: Checkpoint", connecting: "🛰️ CONNECTING GOOGLE ACCOUNT...", error: "❌ GOOGLE SDK CONNECTION ERROR!", welcome: "⚡ SECURE AGENT: ", alert_terms: "⚠️ YOU MUST READ & AGREE TO TERMS!",
-                terms_checkbox_label: 'I agree to Telepathy\'s <span class="terms-link" onclick="openTermsModal()">Terms of Service</span> & <span class="terms-link" onclick="openTermsModal()">Competition Rules</span>.',
-                terms_modal_title: "K-DRIVE CORE PROTOCOLS", terms_subtitle: "K-Drive operates on absolute transparency and fairness:",
-                terms_h1: "1. BIOMETRIC SECURITY", terms_desc1: "Heart rate and sleep data are collected solely to calculate SCI. Data is encrypted and never shared with third parties.",
-                terms_h2: "2. SUBSCRIPTION POLICY", terms_desc2: "Subscriptions auto-renew. Paid service fees are non-refundable under any circumstances.",
-                terms_h3: "3. MEDICAL DISCLAIMER", terms_desc3: "K-Drive is a training tool, not a medical device. Users take full responsibility for physical safety.",
-                terms_h4: "4. ANTI-CHEAT POLICY", terms_desc4: "Auto-clickers, macros, or forged biometric data are strictly prohibited. Violators face permanent bans.",
-                full_title: "--- FULL 7 LEGAL ARTICLES ---",
-                f_h1: "ARTICLE 1: NATURE OF SERVICE", f_desc1: "1.1. Health & Sports performance app.<br>1.2. SCI index tracking.<br>1.3. No gambling.",
-                f_h2: "ARTICLE 2: BIOMETRIC DATA", f_desc2: "2.1. Decree 13/2023/NĐ-CP compliant.<br>2.2. Workout personalization.<br>2.3. Strictly confidential.",
-                f_h3: "ARTICLE 3: SUBSCRIPTION", f_desc3: "3.1. Cloud infrastructure maintenance.<br>3.2. Auto-renewal management.<br>3.3. Non-refundable.",
-                f_h4: "ARTICLE 4: TOURNAMENTS", f_desc4: "4.1. Annual prize pool on Sep 9.<br>4.2. SCI threshold standards.<br>4.3. Tax withholding (10%).",
-                f_h5: "ARTICLE 5: FAIR PLAY", f_desc5: "5.1. Prohibited tools and emulators.<br>5.2. Permanent account freezing.",
-                f_h6: "ARTICLE 6: MEDICAL DISCLAIMER", f_desc6: "6.1. Not medical advice.<br>6.2. Personal physical responsibility.",
-                f_h7: "ARTICLE 7: GOVERNING LAW", f_desc7: "Governed by Vietnamese laws. Jurisdiction at Telepathy HQ.",
-                read_full_text: "[ Read Full Terms of Service ]",
-                read_less_text: "[ Collapse Summary ]",
-                terms_close_btn: "UNDERSTOOD & CLOSE"
+        // --- XÁC NHẬN NGÔN NGỮ: BẬT NHẠC, ĐỔI ẢNH NỀN SANG ẢNH ĐĂNG NHẬP & HIỆN FORM ---
+        function confirmLanguage() {
+            // Phát bài K_Drive_Initialized ngay lập tức
+            const bgm = document.getElementById('bgMusic');
+            if (bgm) {
+                bgm.volume = 1.0;
+                bgm.play().then(() => {
+                    console.log("Nhạc nền khởi động đã phát thành công!");
+                }).catch(err => console.log("Lỗi phát nhạc:", err));
             }
-        };
 
-        function getTranslation(lang) {
-            if (lang === 'encoded') return loginTranslations['vi'];
-            return loginTranslations[lang] || loginTranslations['en'];
-        }
-
-        let currentLang = localStorage.getItem('kdrive_lang') || 'encoded';
-
-        function applyLoginLanguage(lang) {
-            currentLang = lang;
-            const isEncoded = (lang === 'encoded');
-            const t = getTranslation(lang);
-
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (t[key]) {
-                    el.innerHTML = isEncoded ? encodeQuantum(t[key]) : t[key];
-                }
-            });
-
-            if (lastUserEmail || maskedAgentName) {
-                const welcomePrefix = isEncoded ? encodeQuantum("⚡ ĐỊNH DANH AN TOÀN: ") : (t.welcome || "⚡ SECURE AGENT: ");
-                document.getElementById('loginStatus').innerText = welcomePrefix + (maskedAgentName || lastUserEmail);
+            // Đổi ảnh nền sang ảnh đăng nhập mới
+            const bgImg = document.getElementById('bgImageElement');
+            if (bgImg) {
+                bgImg.src = "https://github.com/happyk1900/HOSOGOC/blob/main/k%20login.png?raw=true";
             }
-        }
 
-        window.addEventListener('kdriveLangChanged', (e) => {
-            const newLang = e.detail.lang;
-            localStorage.setItem('kdrive_lang', newLang);
-            triggerQuantumFlash();
-            applyLoginLanguage(newLang);
-        });
+            // Ẩn bảng chọn ngôn ngữ
+            const gateModal = document.getElementById('langGateModal');
+            if (gateModal) gateModal.classList.add('hidden');
 
-        function triggerQuantumFlash() {
-            const overlay = document.getElementById('quantum-flash-overlay');
-            if (!overlay) return;
-            overlay.classList.add('flash');
-            if (navigator.vibrate) navigator.vibrate([70, 30, 100]);
-            setTimeout(() => { overlay.classList.remove('flash'); }, 400);
+            // Hiển thị khung đăng nhập chính
+            const loginPanel = document.getElementById('loginPanelContainer');
+            if (loginPanel) loginPanel.classList.add('show-login');
         }
 
         function toggleTermsAgreement() {
             const checkbox = document.getElementById('termsCheck');
             const googleBtn = document.getElementById('googleBtn');
             const statusEl = document.getElementById('loginStatus');
-            const firefly = document.getElementById('quantumFirefly');
 
             if (!hasReadTerms) {
                 checkbox.checked = false;
@@ -393,18 +283,14 @@
                 googleBtn.classList.add('unlocked');
                 statusEl.innerText = "";
                 localStorage.setItem('kdrive_terms_agreed', 'true');
-                if(firefly) firefly.style.display = 'none';
-                playSound('warp-in');
             } else {
                 googleBtn.classList.remove('unlocked');
                 localStorage.removeItem('kdrive_terms_agreed');
-                if(firefly) firefly.style.display = 'block';
             }
         }
 
         function openTermsModal() {
             document.getElementById('termsModal').classList.add('active');
-            playSound('brake');
         }
 
         function closeTermsModal() {
@@ -415,29 +301,9 @@
             checkbox.disabled = false;
             checkbox.checked = true;
             toggleTermsAgreement();
-
-            playSound('brake');
-        }
-
-        function toggleFullTerms() {
-            const section = document.getElementById('fullTermsSection');
-            const link = document.getElementById('toggleFullLink');
-            const t = getTranslation(currentLang);
-            const isEncoded = (currentLang === 'encoded');
-
-            if (section.classList.contains('show')) {
-                section.classList.remove('show');
-                link.innerHTML = isEncoded ? encodeQuantum(t.read_full_text) : t.read_full_text;
-            } else {
-                section.classList.add('show');
-                link.innerHTML = isEncoded ? encodeQuantum(t.read_less_text) : t.read_less_text;
-            }
-            playSound('brake');
         }
 
         window.addEventListener('DOMContentLoaded', () => { 
-            const currentLangSaved = localStorage.getItem('kdrive_lang') || 'encoded';
-            applyLoginLanguage(currentLangSaved);
             initGoogleOAuthClient();
             
             const isAgreedBefore = localStorage.getItem('kdrive_terms_agreed');
@@ -447,82 +313,8 @@
                 checkbox.disabled = false;
                 checkbox.checked = true;
                 document.getElementById('googleBtn').classList.add('unlocked');
-                const firefly = document.getElementById('quantumFirefly');
-                if(firefly) firefly.style.display = 'none';
-            }
-
-            const savedEmail = localStorage.getItem('kdrive_user_email');
-            const savedAgent = localStorage.getItem('kdrive_masked_agent');
-
-            if (savedEmail && savedAgent) {
-                lastUserEmail = savedEmail;
-                maskedAgentName = savedAgent;
-                const t = getTranslation(currentLangSaved);
-                const welcomePrefix = (currentLangSaved === 'encoded') ? encodeQuantum("⚡ ĐỊNH DANH AN TOÀN: ") : (t.welcome || "⚡ SECURE AGENT: ");
-                document.getElementById('loginStatus').innerText = welcomePrefix + maskedAgentName;
-            }
-
-            const isSessionLangConfirmed = sessionStorage.getItem('kdrive_session_lang_confirmed');
-
-            if (!isSessionLangConfirmed) {
-                const waitForHud = setInterval(() => {
-                    if (typeof window.openGlobalLang === 'function' && document.getElementById('globalLangModal')) {
-                        clearInterval(waitForHud);
-                        window.openGlobalLang(); 
-
-                        const confirmBtn = document.getElementById('langModalConfirmBtn');
-                        if (confirmBtn) {
-                            confirmBtn.addEventListener('click', () => {
-                                sessionStorage.setItem('kdrive_session_lang_confirmed', 'true');
-                            });
-                        }
-                    }
-                }, 50);
-            } else {
-                const loginPanel = document.getElementById('loginPanelContainer');
-                if (loginPanel) {
-                    loginPanel.classList.add('show-login');
-                }
             }
         });
-
-        // --- ĐÃ SỬA: Ép trình duyệt bắt mọi cú chạm (Capture = true) xuyên qua mọi bảng chọn ---
-        let isMusicStarted = false;
-        function unlockAudio() {
-            if (!isMusicStarted) {
-                const bgm = document.getElementById('bgMusic');
-                if (bgm && bgm.paused) {
-                    bgm.volume = 1.0;
-                    bgm.play().then(() => {
-                        isMusicStarted = true;
-                    }).catch(err => console.log("Trình duyệt vẫn chặn phát nhạc:", err));
-                }
-            }
-        }
-        window.addEventListener('click', unlockAudio, true);
-        window.addEventListener('touchstart', unlockAudio, true);
-
-        function playSound(type) {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                if(type === 'warp-in') {
-                    osc.frequency.setValueAtTime(300, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.15);
-                } else {
-                    osc.frequency.setValueAtTime(500, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.1);
-                }
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.15);
-            } catch(e){}
-        }
 
         function initGoogleOAuthClient() {
             try {
@@ -543,30 +335,22 @@
         function triggerGoogleOAuth() {
             const checkbox = document.getElementById('termsCheck');
             const statusEl = document.getElementById('loginStatus');
-            const t = getTranslation(currentLang);
 
             if (!hasReadTerms || !checkbox.checked) {
                 statusEl.style.color = "#ff3333";
-                statusEl.innerText = "⚠️ BẠN PHẢI ĐỌC VÀ ĐỒNG Ý ĐIỀU KHOẢN TRƯỚC!";
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                playSound('brake');
+                statusEl.innerText = "⚠️ BẠN PHẢI BẤM ĐỌC ĐIỀU KHOẢN TRƯỚC!";
                 openTermsModal();
                 return;
             }
 
-            playSound('warp-in');
-            
             const container = document.getElementById('loginPanelContainer');
             container.classList.add('glitching');
-
             statusEl.style.color = "#00e5ff";
-            statusEl.innerText = (currentLang === 'encoded') ? encodeQuantum("🛰️ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...") : (t.connecting || "🛰️ CONNECTING GOOGLE ACCOUNT...");
+            statusEl.innerText = "🛰️ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...";
 
             const savedEmail = localStorage.getItem('kdrive_user_email');
             if (savedEmail) {
-                setTimeout(() => {
-                    executeSocialSync(savedEmail, savedEmail.split('@')[0]);
-                }, 800);
+                setTimeout(() => { executeSocialSync(savedEmail, savedEmail.split('@')[0]); }, 800);
                 return;
             }
 
@@ -583,14 +367,14 @@
                 }
             } catch (e) {
                 container.classList.remove('glitching');
-                statusEl.innerText = (currentLang === 'encoded') ? encodeQuantum("❌ KHÔNG THỂ KẾT NỐI GOOGLE SDK!") : (t.error || "❌ GOOGLE SDK CONNECTION ERROR!");
+                statusEl.innerText = "❌ KHÔNG THỂ KẾT NỐI GOOGLE SDK!";
                 statusEl.style.color = "#ff3333";
             }
         }
 
         function fetchUserProfile(accessToken) {
             const statusEl = document.getElementById('loginStatus');
-            statusEl.innerText = (currentLang === 'encoded') ? encodeQuantum("⚡ XÁC THỰC DỮ LIỆU LƯỢNG TỬ...") : "⚡ XÁC THỰC DỮ LIỆU LƯỢNG TỬ...";
+            statusEl.innerText = "⚡ XÁC THỰC DỮ LIỆU LƯỢNG TỬ...";
 
             fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                 headers: { 'Authorization': 'Bearer ' + accessToken }
@@ -599,7 +383,6 @@
             .then(data => {
                 const userEmail = data.email;
                 const userName = data.name || userEmail.split('@')[0];
-                
                 const maskedEmail = userEmail.substring(0, 3) + "***@" + userEmail.split('@')[1];
                 maskedAgentName = maskedEmail;
                 
@@ -610,7 +393,7 @@
                 executeSocialSync(userEmail, userName);
             })
             .catch(error => {
-                statusEl.innerText = (currentLang === 'encoded') ? encodeQuantum("❌ LỖI XÁC THỰC GMAIL!") : "❌ LỖI XÁC THỰC GMAIL!";
+                statusEl.innerText = "❌ LỖI XÁC THỰC GMAIL!";
                 statusEl.style.color = "#ff3333";
                 document.getElementById('loginPanelContainer').classList.remove('glitching');
             });
@@ -619,10 +402,7 @@
         function executeSocialSync(email, username) {
             lastUserEmail = email;
             const statusEl = document.getElementById('loginStatus');
-            const t = getTranslation(currentLang);
-            
-            const welcomeText = (currentLang === 'encoded') ? encodeQuantum("⚡ ĐỊNH DANH AN TOÀN: ") : (t.welcome || "⚡ SECURE AGENT: ");
-            statusEl.innerText = welcomeText + (maskedAgentName || (email.substring(0, 3) + "***@" + email.split('@')[1]));
+            statusEl.innerText = "⚡ ĐỊNH DANH AN TOÀN: " + maskedAgentName;
             statusEl.style.color = "#00e5ff";
 
             const dataForm = new FormData();
@@ -639,12 +419,6 @@
         }
 
         function triggerSuccessFlow(username) {
-            try {
-                const sndVortex = new Audio('https://assets.mixkit.co/active_storage/sfx/2771/2771-preview.mp3');
-                sndVortex.volume = 1.0; sndVortex.play().catch(e=>{});
-                if (navigator.vibrate) navigator.vibrate([300, 100, 400, 100, 500]);
-            } catch(e) {}
-            
             sessionStorage.setItem('kdrive_session', 'active'); 
             sessionStorage.setItem('kdrive_username', username); 
             
@@ -668,10 +442,6 @@
             }, 900);
         }
     </script>
-    
-    <!-- ĐÃ TẮT HẲN BOO-PLAYER ĐỂ DIỆT GỐC NHẠC CŨ -->
-    <!-- <script src="boo-player.js"></script> -->
-    <script src="hud-ticker.js"></script>
     
     <script>
       if ('serviceWorker' in navigator) {
