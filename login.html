@@ -21,7 +21,7 @@
         img, video { -webkit-user-drag: none; pointer-events: none; }
 
         .kdrive-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; background: #010204; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; opacity: 1; }
+        .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; opacity: 1; transition: opacity 0.4s ease; }
         
         #quantum-flash-overlay {
             position: fixed; inset: 0; width: 100vw; height: 100vh; background: #00ffff;
@@ -37,7 +37,6 @@
             100% { opacity: 0; filter: none; }
         }
 
-        /* ĐÃ SỬA: Ẩn Gateway lúc đầu để nhường chỗ cho bảng chọn ngôn ngữ */
         .gateway-container {
             position: relative; width: 85%; max-width: 270px; z-index: 99999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -186,7 +185,8 @@
 
     <div id="quantum-flash-overlay"></div>
 
-    <audio id="bgMusic" crossorigin="anonymous" src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Path%20of%20the%20Ninja.mp3" preload="auto" loop></audio>
+    <!-- ĐÃ CẬP NHẬT: Link nhạc khởi động K-Drive -->
+    <audio id="bgMusic" crossorigin="anonymous" src="https://github.com/happyk1900/HOSOGOC/raw/refs/heads/main/K_Drive_Initialized.mp3" preload="auto" loop></audio>
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20GPS%20FULL.mp4" playsinline></video>
 
     <!-- MODAL ĐIỀU KHOẢN -->
@@ -240,7 +240,8 @@
 
     <!-- KHUNG GIAO DIỆN CHÍNH -->
     <div class="kdrive-image-wrapper">
-        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20NEN%20GPS%20NEN.png?raw=true" class="kdrive-bg-target" alt="Core Background">
+        <!-- Ảnh nền được gán ID để xử lý đổi màu nền động -->
+        <img id="coreBg" src="https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true" class="kdrive-bg-target" alt="Core Background">
         
         <div class="gateway-container" id="loginPanelContainer">
             <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL%20CAT.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="triggerGoogleOAuth()" alt="Google Login">
@@ -364,6 +365,11 @@
             localStorage.setItem('kdrive_lang', newLang);
             triggerQuantumFlash();
             applyLoginLanguage(newLang);
+
+            const bgm = document.getElementById('bgMusic');
+            if (bgm && bgm.paused) {
+                bgm.play().catch(err => console.log("Audio play blocked:", err));
+            }
         });
 
         function triggerQuantumFlash() {
@@ -439,9 +445,17 @@
             applyLoginLanguage(currentLangSaved);
             initGoogleOAuthClient();
             
-            const bgm = document.getElementById('bgMusic');
-            if(bgm) { bgm.currentTime = 0; bgm.play().catch(e => {}); }
+            // Xử lý đổi nền động
+            const isSessionLangConfirmed = sessionStorage.getItem('kdrive_session_lang_confirmed');
+            const coreBg = document.getElementById('coreBg');
+            const bgLangUrl = 'https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true';
+            const bgLoginUrl = 'https://github.com/happyk1900/HOSOGOC/blob/main/k%20login.png?raw=true';
 
+            // Nếu đã từng chọn xong ngôn ngữ thì ốp luôn ảnh cảnh thành phố
+            if (coreBg) {
+                coreBg.src = isSessionLangConfirmed ? bgLoginUrl : bgLangUrl;
+            }
+            
             const isAgreedBefore = localStorage.getItem('kdrive_terms_agreed');
             if (isAgreedBefore === 'true') {
                 hasReadTerms = true;
@@ -464,27 +478,23 @@
                 document.getElementById('loginStatus').innerText = welcomePrefix + maskedAgentName;
             }
 
-            // --- LÔGIC GATEKEEPER ÉP CHỌN NGÔN NGỮ ĐẦU TIÊN ---
-            const isSessionLangConfirmed = sessionStorage.getItem('kdrive_session_lang_confirmed');
-
             if (!isSessionLangConfirmed) {
-                // Chưa confirm trong phiên này -> Mở bảng chọn ngôn ngữ
                 const waitForHud = setInterval(() => {
                     if (typeof window.openGlobalLang === 'function' && document.getElementById('globalLangModal')) {
                         clearInterval(waitForHud);
-                        window.openGlobalLang(); // Gọi thẳng bảng ngôn ngữ đè lên màn hình
+                        window.openGlobalLang(); 
 
-                        // Lắng nghe nút xác nhận để cắm cờ
                         const confirmBtn = document.getElementById('langModalConfirmBtn');
                         if (confirmBtn) {
                             confirmBtn.addEventListener('click', () => {
                                 sessionStorage.setItem('kdrive_session_lang_confirmed', 'true');
+                                // Chuyển nền ngay khoảnh khắc bấm Confirm
+                                if (coreBg) coreBg.src = bgLoginUrl; 
                             });
                         }
                     }
                 }, 50);
             } else {
-                // Đã qua cổng ngôn ngữ -> Hiện form đăng nhập
                 const loginPanel = document.getElementById('loginPanelContainer');
                 if (loginPanel) {
                     loginPanel.classList.add('show-login');
