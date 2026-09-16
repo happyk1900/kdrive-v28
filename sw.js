@@ -1,14 +1,16 @@
-self.addEventListener('install', (e) => {
-    console.log('[Service Worker] Đã cài đặt');
-    self.skipWaiting();
-});
-
-self.addEventListener('activate', (e) => {
-    console.log('[Service Worker] Đã kích hoạt');
-    e.waitUntil(clients.claim());
-});
-
-self.addEventListener('fetch', (e) => {
-    // Chuyển tiếp tất cả request mạng đi bình thường để app load mượt mà
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-});
+{
+  "name": "K-Drive",
+  "short_name": "K-Drive",
+  "start_url": "./login.html",
+  "display": "standalone",
+  "background_color": "#010a14",
+  "theme_color": "#00ffcc",
+  "icons": [
+    {
+      "src": "./k-icon-sci.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
