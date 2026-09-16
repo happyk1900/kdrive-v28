@@ -143,7 +143,6 @@
         .card-icon { font-family: 'Share Tech Mono', monospace; font-size: 15px; color: #ffb700; font-weight: bold; margin-bottom: 2px; }
         .card-title { font-family: 'Share Tech Mono', monospace; font-size: 10.5px; font-weight: bold; color: #ffffff; text-align: center; margin-bottom: 4px; }
         
-        /* CẬP NHẬT: ĐÓNG KHUNG NHƯ NÚT CHO 3 ẢI */
         .card-status { 
             font-family: 'Share Tech Mono', monospace; 
             font-size: 10px; 
@@ -262,7 +261,6 @@
         .record-btn.burst-color { background: rgba(255, 183, 0, 0.1); border-color: #ffb700; }
         .record-btn.burst-color:hover { background: #ffb700; color: #000; box-shadow: 0 0 12px #ffb700; }
         
-        /* CẬP NHẬT: HIỆU ỨNG NHẤP NHÁY LIÊN TỤC CHO KHUNG BRIEFING */
         .briefing-panel {
             background: rgba(10, 5, 20, 0.85); border: 2px solid #00ffcc;
             border-radius: 10px; padding: 16px 20px; width: 95%; max-width: 330px;
@@ -344,8 +342,14 @@
 
         .orb { position: absolute; border-radius: 50%; cursor: crosshair; display: flex; justify-content: center; align-items: center; }
         .orb-fire { width: 56px; height: 56px; background: radial-gradient(circle, #ffb700, #ff007f); box-shadow: 0 0 15px #ff007f; }
-        .orb-pink { width: 32px; height: 32px; background: radial-gradient(circle, #ff66cc, #ff007f); box-shadow: 0 0 15px #ff007f; z-index: 15; }
         .orb-ice { width: 56px; height: 56px; background: radial-gradient(circle, #ffffff, #00ffcc); box-shadow: 0 0 20px #00ffcc; }
+        
+        /* CẬP NHẬT: CSS 3 LOẠI HẠT BẪY MỚI (TÍM, XANH LÁ, ĐỎ) */
+        .orb-purple { width: 56px; height: 56px; background: radial-gradient(circle, #ff66cc, #8a2be2); box-shadow: 0 0 20px #8a2be2; }
+        .orb-green { width: 56px; height: 56px; background: radial-gradient(circle, #bfff00, #00ff00); box-shadow: 0 0 20px #00ff00; }
+        .orb-blood { width: 56px; height: 56px; background: radial-gradient(circle, #ff3333, #b30000); box-shadow: 0 0 20px #b30000; }
+        
+        .orb-pink { width: 32px; height: 32px; background: radial-gradient(circle, #ff66cc, #ff007f); box-shadow: 0 0 15px #ff007f; z-index: 15; }
         
         .core-reactor { position: absolute; width: 20px; height: 20px; background: radial-gradient(circle, #fff, #ff007f); border-radius: 50%; box-shadow: 0 0 15px #ff007f; z-index: 5; transform: translate(-50%, -50%); }
         
@@ -786,6 +790,7 @@
         </div>
     </div>
 
+    <!-- BẢNG POPUP THÔNG TIN CÁC MỐC TỐC ĐỘ -->
     <div id="tier-guide-overlay" onclick="closeTierGuide()">
         <div class="tier-guide-box" onclick="event.stopPropagation()">
             <div class="tier-guide-header">BẢNG PHÂN CẤP TỐC ĐỘ</div>
@@ -1110,7 +1115,7 @@
                 bTarget = "Chạm để triệt tiêu mọi tụ điểm năng lượng xuất hiện.<br><br><b>⚠️ MỤC TIÊU:</b> Tuyệt đối không bỏ lỡ bất cứ hạt năng lượng nào!";
             } else if (id === '2') {
                 bTitle = "PHẢN XẠ CÓ ĐIỀU KIỆN";
-                bTarget = "Chỉ bấm hạt Vàng, né tất cả các hạt màu khác.<br><br><b>⚠️ MỤC TIÊU:</b> Tuyệt đối không được bấm nhầm!";
+                bTarget = "Chỉ bấm hạt Vàng. Tuyệt đối né tránh các hạt Trắng, Xanh lá, Đỏ thẫm, Tím.<br><br><b>⚠️ MỤC TIÊU:</b> Tuyệt đối không được bấm nhầm!";
             } else if (id === '3') {
                 bTitle = "CHIẾN ĐẤU: THỦ TRẬN LƯỢNG TỬ";
                 bTarget = "Phá hủy Hỏa Cầu Mẹ để giải phóng phân tử. Tiêu diệt hạt Vàng, né tránh hạt Trắng.<br><br><b>⚠️ MỤC TIÊU:</b> Tuyệt đối không bỏ lỡ bất cứ hạt Vàng nào!";
@@ -1312,7 +1317,7 @@
             isPausedForStart = true; 
 
             let playArea = document.getElementById('play-area');
-            playArea.querySelectorAll('.orb-fire, .orb-ice, .projectile').forEach(o => o.remove()); 
+            playArea.querySelectorAll('.orb-fire, .orb-ice, .orb-purple, .orb-green, .orb-blood, .projectile').forEach(o => o.remove()); 
 
             let blackout = document.createElement('div');
             blackout.className = 'blackout-bg';
@@ -1581,20 +1586,32 @@
             }, beamTime);
         }
 
+        // --- CẬP NHẬT LOGIC TẠO 5 LOẠI HẠT CHO ẢI 2 ---
         function runG2() { spawnG2(); }
         function spawnG2() {
             if(!isPlaying || isPausedForStart) return; 
             let playArea = document.getElementById('play-area'); 
             let maxX = playArea.clientWidth - 60, maxY = playArea.clientHeight - 60;
-            let isFire = Math.random() > 0.3; 
+            
+            // Randomize 5 loại hạt (Khoảng 35% là Vàng (fire), 65% là 4 hạt bẫy)
+            let rand = Math.random();
+            let orbType = '';
+            if (rand < 0.35) orbType = 'fire';
+            else if (rand < 0.51) orbType = 'ice';
+            else if (rand < 0.67) orbType = 'purple';
+            else if (rand < 0.83) orbType = 'green';
+            else orbType = 'blood';
+            
+            let isTarget = (orbType === 'fire');
+            
             let px = Math.max(10, Math.random() * maxX), py = Math.max(10, Math.random() * maxY);
             let spawnTimestamp = Date.now();
             
-            let spData = { t: spawnTimestamp - matchStartTime, x: px, y: py, type: isFire ? 'fire' : 'ice', deathTime: Infinity };
+            let spData = { t: spawnTimestamp - matchStartTime, x: px, y: py, type: orbType, deathTime: Infinity };
             currentReplayData.spawns.push(spData);
 
             let el = document.createElement('div'); 
-            el.className = isFire ? 'orb orb-fire' : 'orb orb-ice'; 
+            el.className = 'orb orb-' + orbType; 
             el.style.left = px + 'px'; el.style.top = py + 'px';
             
             let handled = false; 
@@ -1605,7 +1622,7 @@
                 let hitTime = Date.now();
                 spData.deathTime = hitTime - matchStartTime;
                 
-                if(isFire) { 
+                if(isTarget) { 
                     let exactReaction = hitTime - spawnTimestamp;
                     reactionTimes.push(exactReaction);
                     addScoreAndCheckMultiplier(2);
@@ -1622,7 +1639,7 @@
                 if(el.parentElement && !handled) { 
                     spData.deathTime = Date.now() - matchStartTime;
                     el.remove(); 
-                    if(isFire && isPlaying && !isPausedForStart) { loseFullLife(); } 
+                    if(isTarget && isPlaying && !isPausedForStart) { loseFullLife(); } 
                 } 
             }, lifespan);
 
@@ -1900,7 +1917,6 @@
                     document.getElementById('bio-rank-badge-2').innerText = "Cấp: " + burstRank;
                     document.getElementById('bio-rank-badge-final').innerText = "Cấp: " + totalRank;
 
-                    // ĐỔI TÊN NÚT NEXT TÙY THEO ẢI VỪA HOÀN THÀNH
                     let btnNext = document.getElementById('btn-next');
                     if (cGame === '1') {
                         btnNext.innerText = "TIẾP ẢI II";
@@ -1957,6 +1973,7 @@
             );
         }
 
+        // --- CẬP NHẬT HIỂN THỊ REPLAY CHO CÁC MÀU BẪY MỚI CỦA ẢI 2 ---
         function startReplayPlayback(bestRep) {
             playSound('coin');
             document.getElementById('start-prompt-overlay').classList.add('hidden');
@@ -2032,9 +2049,13 @@
                             } 
                             else {
                                 let target = document.createElement('div');
-                                if (sp.type === 'projectile') target.className = 'projectile replay-spawn';
+                                if (sp.type === 'projectile') target.className = 'child-projectile child-yellow replay-spawn';
+                                else if (sp.type === 'parent_yellow') target.className = 'orb orb-fire replay-spawn';
                                 else if (sp.type === 'pink') target.className = 'orb orb-pink replay-spawn';
                                 else if (sp.type === 'ice') target.className = 'orb orb-ice replay-spawn';
+                                else if (sp.type === 'purple') target.className = 'orb orb-purple replay-spawn';
+                                else if (sp.type === 'green') target.className = 'orb orb-green replay-spawn';
+                                else if (sp.type === 'blood') target.className = 'orb orb-blood replay-spawn';
                                 else target.className = 'orb orb-fire replay-spawn';
                                 
                                 target.style.left = sp.x + 'px'; target.style.top = sp.y + 'px';
