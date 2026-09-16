@@ -20,13 +20,15 @@
         body { background-color: #010204; height: 100vh; height: 100dvh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; }
         img, video { -webkit-user-drag: none; pointer-events: none; }
 
-        /* ÉP HIỂN THỊ NỀN NGAY LẬP TỨC, CHỐNG NHÁ HÀNG */
+        /* KHUNG NỀN RÕ NÉT 100%, HỖ TRỢ HIỆU ỨNG CHUYỂN CẢNH MƯỢT MÀ */
         .kdrive-image-wrapper { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; 
-            background: #010204 url('https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true') no-repeat center center; 
-            background-size: cover; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            background: #010204; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; 
         }
-        .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; opacity: 1; transition: opacity 0.4s ease; }
+        .kdrive-bg-target { 
+            width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; 
+            opacity: 1; transition: opacity 0.6s ease-in-out; 
+        }
         
         #quantum-flash-overlay {
             position: fixed; inset: 0; width: 100vw; height: 100vh; background: #00ffff;
@@ -40,20 +42,23 @@
             100% { opacity: 0; filter: none; }
         }
 
-        /* BẢNG CHỌN NGÔN NGỮ ĐỒ HOẠ XỊN SÒ */
+        /* BẢNG CHỌN NGÔN NGỮ VỚI HIỆU ỨNG MỜ DẦN KHI ĐÓNG */
         .lang-gate-overlay {
-            position: fixed; inset: 0; z-index: 999999; background: rgba(1, 5, 10, 0.78);
-            display: flex; justify-content: center; align-items: center; transition: 0.4s ease;
-            backdrop-filter: blur(5px);
+            position: fixed; inset: 0; z-index: 999999; background: rgba(1, 5, 10, 0.75);
+            display: flex; justify-content: center; align-items: center; 
+            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+            backdrop-filter: blur(6px); opacity: 1; visibility: visible;
         }
         .lang-gate-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         
         .lang-box {
-            width: 90%; max-width: 325px; background: rgba(2, 12, 24, 0.95);
+            width: 90%; max-width: 325px; background: rgba(2, 12, 24, 0.96);
             border: 2px solid #00e5ff; border-radius: 14px; padding: 16px 12px;
-            box-shadow: 0 0 35px rgba(0,229,255,0.4), inset 0 0 15px rgba(0,229,255,0.15); 
+            box-shadow: 0 0 40px rgba(0,229,255,0.45), inset 0 0 15px rgba(0,229,255,0.15); 
             text-align: center; color: #fff; z-index: 10;
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
         }
+        .lang-gate-overlay.hidden .lang-box { transform: scale(0.92); opacity: 0; }
         
         .lang-title-area {
             font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 800;
@@ -107,11 +112,11 @@
         }
         .btn-confirm-lang:hover { background: #fff; box-shadow: 0 0 18px #ffd700; }
 
-        /* KHUNG ĐĂNG NHẬP ẨN TRƯỚC KHI CHỌN NGÔN NGỮ */
+        /* KHUNG ĐĂNG NHẬP HIỆN DẦN MƯỢT MÀ (FADE IN) */
         .gateway-container {
             position: relative; width: 85%; max-width: 270px; z-index: 10;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
             opacity: 0; pointer-events: none; transform: scale(0.95);
         }
         .gateway-container.show-login { opacity: 1; pointer-events: auto; transform: scale(1); }
@@ -129,7 +134,7 @@
         .google-auth-btn-img {
             width: 100%; max-width: 170px; height: auto; cursor: pointer;
             filter: grayscale(1) brightness(0.4) drop-shadow(0 0 5px rgba(255,0,60,0.4));
-            opacity: 0.4; pointer-events: none; transition: 0.3s ease;
+            opacity: 0.4; pointer-events: none; transition: 0.5s ease;
         }
         .google-auth-btn-img.unlocked {
             opacity: 1; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.7));
@@ -312,6 +317,7 @@
 
     <!-- KHUNG GIAO DIỆN CHÍNH -->
     <div class="kdrive-image-wrapper">
+        <!-- Ảnh nền chọn ngôn ngữ ban đầu (Rõ nét 100%) -->
         <img id="bgImageElement" src="https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true" class="kdrive-bg-target" alt="Core Background">
         
         <div class="gateway-container" id="loginPanelContainer">
@@ -442,7 +448,6 @@
             }
         };
 
-        // Bổ sung tự động fallback cho các ngôn ngữ còn lại sang tiếng Anh để không bao giờ bị mất chữ
         function getTranslation(lang) {
             return loginTranslations[lang] || loginTranslations['en'];
         }
@@ -451,14 +456,9 @@
             selectedLangChoice = lang;
             document.querySelectorAll('.lang-cell').forEach(c => c.classList.remove('selected'));
             document.querySelectorAll('.alien-box-container').forEach(a => a.classList.remove('selected'));
-            
-            if(cellElement.classList.contains('alien-box-container')) {
-                cellElement.classList.add('selected');
-            } else {
-                cellElement.classList.add('selected');
-            }
+            cellElement.classList.add('selected');
 
-            // DỊCH TỨC THÌ GIAO DIỆN NGAY KHI BẤM CHỌN
+            // Dịch tức thì giao diện bảng chọn ngay khi bấm
             applyLoginLanguage(lang);
         }
 
@@ -490,16 +490,25 @@
                 bgm.play().catch(err => console.log("Lỗi phát nhạc:", err));
             }
 
+            // Hiệu ứng mờ dần (Fade out) bảng chọn ngôn ngữ
             const gateModal = document.getElementById('langGateModal');
             if (gateModal) gateModal.classList.add('hidden');
 
+            // Hiệu ứng chuyển đổi ảnh nền mượt mà sang ảnh đăng nhập
             const bgImg = document.getElementById('bgImageElement');
             if (bgImg) {
-                bgImg.src = "https://github.com/happyk1900/HOSOGOC/blob/main/k%20login.png?raw=true";
+                bgImg.style.opacity = 0;
+                setTimeout(() => {
+                    bgImg.src = "https://github.com/happyk1900/HOSOGOC/blob/main/k%20login.png?raw=true";
+                    bgImg.style.opacity = 1;
+                }, 300);
             }
 
-            const loginPanel = document.getElementById('loginPanelContainer');
-            if (loginPanel) loginPanel.classList.add('show-login');
+            // Hiệu ứng hiện dần (Fade in) khung đăng nhập trơn tru
+            setTimeout(() => {
+                const loginPanel = document.getElementById('loginPanelContainer');
+                if (loginPanel) loginPanel.classList.add('show-login');
+            }, 300);
         }
 
         function closeLangModal() { confirmLanguage(); }
