@@ -21,7 +21,7 @@
         img, video { -webkit-user-drag: none; pointer-events: none; }
 
         .kdrive-image-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; background: #010204; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; opacity: 1; transition: opacity 0.4s ease; }
+        .kdrive-bg-target { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; opacity: 1; }
         
         #quantum-flash-overlay {
             position: fixed; inset: 0; width: 100vw; height: 100vh; background: #00ffff;
@@ -185,8 +185,9 @@
 
     <div id="quantum-flash-overlay"></div>
 
-    <!-- ĐÃ FIX: Xóa crossorigin để không bị Github chặn CORS -->
-    <audio id="bgMusic" src="https://github.com/happyk1900/HOSOGOC/raw/refs/heads/main/K_Drive_Initialized.mp3" preload="auto" loop></audio>
+    <!-- ĐÃ THAY LINK NHẠC MỚI CỦA ANH -->
+    <audio id="bgMusic" crossorigin="anonymous" src="https://github.com/happyk1900/HOSOGOC/raw/refs/heads/main/K_Drive_Initialized.mp3" preload="auto" loop></audio>
+    
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20GPS%20FULL.mp4" playsinline></video>
 
     <!-- MODAL ĐIỀU KHOẢN -->
@@ -240,7 +241,7 @@
 
     <!-- KHUNG GIAO DIỆN CHÍNH -->
     <div class="kdrive-image-wrapper">
-        <img id="coreBg" src="https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true" class="kdrive-bg-target" alt="Core Background">
+        <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20NEN%20GPS%20NEN.png?raw=true" class="kdrive-bg-target" alt="Core Background">
         
         <div class="gateway-container" id="loginPanelContainer">
             <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL%20CAT.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="triggerGoogleOAuth()" alt="Google Login">
@@ -439,23 +440,6 @@
             applyLoginLanguage(currentLangSaved);
             initGoogleOAuthClient();
             
-            // ĐÃ FIX: Lắng nghe cú chạm đầu tiên trên màn hình (khi người dùng bấm chọn ngôn ngữ) để bật nhạc lách luật Chrome
-            document.body.addEventListener('click', () => {
-                const bgm = document.getElementById('bgMusic');
-                if (bgm && bgm.paused) {
-                    bgm.play().catch(e => console.log("Lỗi phát nhạc:", e));
-                }
-            }, { once: true });
-
-            const isSessionLangConfirmed = sessionStorage.getItem('kdrive_session_lang_confirmed');
-            const coreBg = document.getElementById('coreBg');
-            const bgLangUrl = 'https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true';
-            const bgLoginUrl = 'https://github.com/happyk1900/HOSOGOC/blob/main/k%20login.png?raw=true';
-
-            if (coreBg) {
-                coreBg.src = isSessionLangConfirmed ? bgLoginUrl : bgLangUrl;
-            }
-            
             const isAgreedBefore = localStorage.getItem('kdrive_terms_agreed');
             if (isAgreedBefore === 'true') {
                 hasReadTerms = true;
@@ -478,6 +462,8 @@
                 document.getElementById('loginStatus').innerText = welcomePrefix + maskedAgentName;
             }
 
+            const isSessionLangConfirmed = sessionStorage.getItem('kdrive_session_lang_confirmed');
+
             if (!isSessionLangConfirmed) {
                 const waitForHud = setInterval(() => {
                     if (typeof window.openGlobalLang === 'function' && document.getElementById('globalLangModal')) {
@@ -488,7 +474,6 @@
                         if (confirmBtn) {
                             confirmBtn.addEventListener('click', () => {
                                 sessionStorage.setItem('kdrive_session_lang_confirmed', 'true');
-                                if (coreBg) coreBg.src = bgLoginUrl; 
                             });
                         }
                     }
@@ -500,6 +485,21 @@
                 }
             }
         });
+
+        // --- ĐÃ THÊM: CHẠM LÀ KÍCH HOẠT NHẠC XUYÊN LỚP BẢO MẬT ---
+        let isMusicStarted = false;
+        function unlockAudio() {
+            if (!isMusicStarted) {
+                const bgm = document.getElementById('bgMusic');
+                if (bgm && bgm.paused) {
+                    bgm.play().then(() => {
+                        isMusicStarted = true;
+                    }).catch(err => console.log("Bị trình duyệt chặn:", err));
+                }
+            }
+        }
+        document.body.addEventListener('click', unlockAudio, { once: false });
+        document.body.addEventListener('touchstart', unlockAudio, { once: false });
 
         function playSound(type) {
             try {
@@ -667,7 +667,8 @@
             }, 900);
         }
     </script>
-    <script src="boo-player.js"></script>
+    <!-- ĐÃ ĐÓNG BĂNG BOO-PLAYER ĐỂ DIỆT GỐC NHẠC CŨ -->
+    <!-- <script src="boo-player.js"></script> -->
     <script src="hud-ticker.js"></script>
     
     <script>
