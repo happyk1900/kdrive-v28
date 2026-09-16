@@ -6,7 +6,6 @@
     
     <title>K-Drive</title>
     
-    <!-- ĐÃ THÊM: Liên kết file manifest và icon cho PWA -->
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#010a14">
     <link rel="apple-touch-icon" href="./k-icon-sci.png">
@@ -38,10 +37,15 @@
             100% { opacity: 0; filter: none; }
         }
 
+        /* ĐÃ SỬA: Ẩn Gateway lúc đầu để nhường chỗ cho bảng chọn ngôn ngữ */
         .gateway-container {
             position: relative; width: 85%; max-width: 270px; z-index: 99999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0; pointer-events: none; 
+        }
+        .gateway-container.show-login {
+            opacity: 1; pointer-events: auto;
         }
 
         .gateway-container.glitching {
@@ -56,7 +60,6 @@
             100% { transform: translate(0, 0) scale(1); filter: hue-rotate(0deg) brightness(1); }
         }
 
-        /* Nút Gmail chuẩn tỷ lệ nhỏ gọn */
         .google-auth-btn-img {
             width: 100%; max-width: 170px; height: auto; cursor: pointer;
             filter: grayscale(1) brightness(0.4) drop-shadow(0 0 5px rgba(255,0,60,0.4));
@@ -109,7 +112,6 @@
         }
         .terms-link:hover { color: #fff; }
 
-        /* HẠT ĐOM ĐÓM LƯỢNG TỬ DẪN ĐƯỜNG SIÊU THỰC */
         .quantum-firefly {
             position: absolute;
             width: 10px;
@@ -141,7 +143,6 @@
             text-shadow: 0 0 8px rgba(0,229,255,0.6); letter-spacing: 0.5px; min-height: 14px;
         }
 
-        /* MODAL ĐIỀU KHOẢN */
         .terms-modal-overlay {
             position: fixed; inset: 0; background: rgba(1, 2, 4, 0.92); backdrop-filter: blur(10px);
             z-index: 9999999; display: flex; justify-content: center; align-items: center;
@@ -241,8 +242,7 @@
     <div class="kdrive-image-wrapper">
         <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/ANH%20NEN%20GPS%20NEN.png?raw=true" class="kdrive-bg-target" alt="Core Background">
         
-        <div class="gateway-container active" id="loginPanelContainer">
-            <!-- Nút Gmail chuẩn tỷ lệ nhỏ gọn -->
+        <div class="gateway-container" id="loginPanelContainer">
             <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL%20CAT.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="triggerGoogleOAuth()" alt="Google Login">
             
             <div class="terms-box-container">
@@ -250,7 +250,6 @@
                 <div class="terms-text" data-i18n="terms_checkbox_label">
                     Tôi đồng ý với <span class="terms-link" onclick="openTermsModal()">Điều khoản dịch vụ</span> & <span class="terms-link" onclick="openTermsModal()">Quy chế thi đấu</span> của Telepathy.
                 </div>
-                <!-- HẠT ĐOM ĐÓM LƯỢNG TỬ LẤP LÁNH DẪN ĐƯỜNG -->
                 <div class="quantum-firefly" id="quantumFirefly"></div>
             </div>
 
@@ -464,6 +463,33 @@
                 const welcomePrefix = (currentLangSaved === 'encoded') ? encodeQuantum("⚡ ĐỊNH DANH AN TOÀN: ") : (t.welcome || "⚡ SECURE AGENT: ");
                 document.getElementById('loginStatus').innerText = welcomePrefix + maskedAgentName;
             }
+
+            // --- LÔGIC GATEKEEPER ÉP CHỌN NGÔN NGỮ ĐẦU TIÊN ---
+            const isSessionLangConfirmed = sessionStorage.getItem('kdrive_session_lang_confirmed');
+
+            if (!isSessionLangConfirmed) {
+                // Chưa confirm trong phiên này -> Mở bảng chọn ngôn ngữ
+                const waitForHud = setInterval(() => {
+                    if (typeof window.openGlobalLang === 'function' && document.getElementById('globalLangModal')) {
+                        clearInterval(waitForHud);
+                        window.openGlobalLang(); // Gọi thẳng bảng ngôn ngữ đè lên màn hình
+
+                        // Lắng nghe nút xác nhận để cắm cờ
+                        const confirmBtn = document.getElementById('langModalConfirmBtn');
+                        if (confirmBtn) {
+                            confirmBtn.addEventListener('click', () => {
+                                sessionStorage.setItem('kdrive_session_lang_confirmed', 'true');
+                            });
+                        }
+                    }
+                }, 50);
+            } else {
+                // Đã qua cổng ngôn ngữ -> Hiện form đăng nhập
+                const loginPanel = document.getElementById('loginPanelContainer');
+                if (loginPanel) {
+                    loginPanel.classList.add('show-login');
+                }
+            }
         });
 
         function playSound(type) {
@@ -520,7 +546,6 @@
 
             playSound('warp-in');
             
-            // LUÔN KÍCH HOẠT HIỆU ỨNG GLITCH VÀ TRẠNG THÁI KẾT NỐI MỖI KHI BẤM NÚT
             const container = document.getElementById('loginPanelContainer');
             container.classList.add('glitching');
 
@@ -529,7 +554,6 @@
 
             const savedEmail = localStorage.getItem('kdrive_user_email');
             if (savedEmail) {
-                // Đã lưu email từ trước: Vẫn hiển thị hiệu ứng mượt mà, sau đó gọi ngầm sync rồi vào game
                 setTimeout(() => {
                     executeSocialSync(savedEmail, savedEmail.split('@')[0]);
                 }, 800);
@@ -637,7 +661,6 @@
     <script src="boo-player.js"></script>
     <script src="hud-ticker.js"></script>
     
-    <!-- ĐÃ THÊM: Bùa chú bắt buộc để kích hoạt cài đặt App -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
