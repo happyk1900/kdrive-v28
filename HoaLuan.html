@@ -443,22 +443,6 @@
         }
         .shaking { animation: shakyOrb 0.1s infinite ease-in-out; }
 
-        /* HIỆU ỨNG TEXT NỔ TẠI CHỖ (MS & CPS) */
-        .float-ms {
-            position: absolute;
-            font-family: 'Share Tech Mono', monospace;
-            font-weight: 900;
-            pointer-events: none;
-            z-index: 10000;
-            transform: translate(-50%, -50%);
-            animation: floatMsAnim 0.8s ease-out forwards;
-        }
-        @keyframes floatMsAnim {
-            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.8); }
-            20% { opacity: 1; transform: translate(-50%, -70%) scale(1.2); }
-            100% { opacity: 0; transform: translate(-50%, -150%) scale(1); }
-        }
-
         .blackout-bg { 
             position: fixed; inset: 0; width: 100vw; height: 100dvh; background-color: rgba(8, 4, 12, 0.98); z-index: 99999; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; flex-direction: column; 
             background-size: cover; background-position: center; background-repeat: no-repeat;
@@ -628,6 +612,51 @@
         .flashbang { position: fixed; inset: 0; background: #fff; z-index: 999999; pointer-events: none; animation: flash 1s forwards; }
         @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
 
+        /* HIỆU ỨNG CHỮ NỔI (FLOATING TEXT) KHI CHẠM HẠT */
+        .floating-ms {
+            position: absolute;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 20px;
+            font-weight: 900;
+            pointer-events: none;
+            z-index: 100000;
+            transform: translate(-50%, -50%);
+            animation: floatUpMs 0.8s ease-out forwards;
+        }
+        .ms-fast { color: #ffffff; text-shadow: 0 0 10px #fff, 0 0 20px #00ffcc; }
+        .ms-good { color: #00ffcc; text-shadow: 0 0 10px #00ffcc; }
+        .ms-slow { color: #ff3333; text-shadow: 0 0 10px #ff3333; }
+        .ms-pink { color: #ff66cc; text-shadow: 0 0 10px #ff66cc, 0 0 20px #ff007f; font-size: 24px; }
+        
+        @keyframes floatUpMs {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.8); }
+            20% { transform: translate(-50%, -60%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -100%) scale(1); }
+        }
+
+        /* HIỆU ỨNG CHỮ NỔI KẾT QUẢ CPS SAU KHI BẠO PHÁT */
+        .floating-cps {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 34px;
+            font-weight: 900;
+            color: #ffb700;
+            text-shadow: 0 0 20px #ffb700, 0 0 40px #ff007f;
+            pointer-events: none;
+            z-index: 100005;
+            white-space: nowrap;
+            animation: popCps 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes popCps {
+            0% { opacity: 0; transform: translate(-50%, -30%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -80%) scale(1.5); }
+        }
+
         .float-score { position: absolute; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 32px; font-weight: 900; color: #00ff66; text-shadow: 0 0 20px #00ff66, 0 0 40px #fff; z-index: 110; animation: floatUpScore 1s forwards; pointer-events: none; }
         @keyframes floatUpScore { 0% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50px) scale(1.5); } }
 
@@ -784,7 +813,7 @@
         </div>
     </div>
 
-    <!-- NÚT THOÁT TOÀN CỤC CHỈ DÙNG Ở SẢNH HOẶC BẢNG TỔNG KẾT -->
+    <!-- NÚT THOÁT TOÀN CỤC -->
     <button id="global-exit-btn" class="btn-corner-left" onclick="handleGlobalExit()" title="Thoát / Trở về">THOÁT</button>
 
     <div id="task-arena">
@@ -893,6 +922,8 @@
                     <button class="result-action-btn" id="btn-replay" onclick="retryCurrentStage()">CHƠI LẠI</button>
                     <button class="result-action-btn" id="btn-next" onclick="proceedNextStage()">XONG & TIẾP</button>
                 </div>
+                
+                <button class="btn-corner-left" style="z-index: 160;" onclick="closeArena()">THOÁT</button>
             </div>
         </div>
     </div>
@@ -976,11 +1007,9 @@
         let bestCps = 0;
         let g3SpawnCounter = 0; 
 
-        // Tốc độ Ải 1 & 2
         const g1Lifespans = [0, 900, 750, 600, 500, 420, 360, 300, 250, 200, 170, 140, 120];
         const g1SpawnDelays = [0, 800, 700, 600, 500, 450, 400, 350, 300, 250, 200, 150, 120];
         
-        // Tốc độ riêng biệt cho Ải 3 (Đi từ cực chậm đến nhanh)
         const g3Speeds = [0, 0.4, 0.6, 0.8, 1.1, 1.4, 1.8, 2.2, 2.7, 3.2, 3.8, 4.5, 5.5];
         const g3Lifespans = [0, 3000, 2500, 2000, 1600, 1300, 1000, 800, 650, 550, 450, 350, 300];
         const g3SpawnDelays = [0, 2500, 2000, 1600, 1300, 1000, 800, 650, 500, 400, 300, 250, 200];
@@ -991,7 +1020,6 @@
             '3': { bestReflexMs: 0, bestBurstCps: 0, reflexReplay: null, burstReplay: null, maxScore: 0 }
         };
 
-        // LƯU TRỮ VÀ KHÓA ẢI THEO NGÀY
         let dailyData = { date: '', unlocked: ['1'], ms1: 0, ms2: 0 };
         function initDailyData() {
             let today = new Date().toDateString();
@@ -1027,21 +1055,6 @@
             });
         }
 
-        // HÀM HIỂN THỊ CHỮ NỔI MS
-        function showFloatingText(x, y, text, color, isPink = false) {
-            let f = document.createElement('div');
-            f.className = 'float-ms';
-            f.innerHTML = text;
-            f.style.left = x + 'px';
-            f.style.top = y + 'px';
-            f.style.color = color;
-            f.style.textShadow = `0 0 10px ${color}`;
-            if(isPink) f.style.fontSize = '20px';
-            else f.style.fontSize = '16px';
-            document.getElementById('play-area').appendChild(f);
-            setTimeout(() => { if(f.parentElement) f.remove(); }, 800);
-        }
-
         function triggerBotTestHack() {
             playSound('coin', 2);
             showCustomAlertBox("🧪 CHẾ ĐỘ TEST HACK", "Đã bật Bot giả lập Tool. Bấm BẮT ĐẦU để kiểm chứng hệ thống quét gian lận!");
@@ -1056,7 +1069,6 @@
             document.body.appendChild(ripple);
             setTimeout(() => { if(ripple && ripple.parentElement) ripple.remove(); }, 350);
 
-            // CHỈ GHI NHẬN TỌA ĐỘ CLICK KHI TRẬN ĐẤU ĐANG DIỄN RA VÀ KHÔNG BỊ PAUSE/SẢNH CHỜ
             let taskArena = document.getElementById('task-arena');
             let isArenaActive = taskArena && taskArena.classList.contains('active');
             let promptOverlay = document.getElementById('start-prompt-overlay');
@@ -1105,6 +1117,24 @@
             if(tier <= 8) return '#ffb700';
             if(tier <= 10) return '#ff007f';
             return '#ffffff';
+        }
+
+        /* TÍNH NĂNG CHỮ NỔI HIỂN THỊ MILI-GIÂY KHI CHẠM HẠT */
+        function showFloatingMs(x, y, ms, type) {
+            let el = document.createElement('div');
+            el.className = 'floating-ms';
+            if (type === 'pink') {
+                el.classList.add('ms-pink');
+                el.innerHTML = `🔥 ${ms}ms`;
+            } else {
+                if (ms <= 160) { el.classList.add('ms-fast'); el.innerHTML = `⚡ ${ms}ms`; }
+                else if (ms <= 350) { el.classList.add('ms-good'); el.innerHTML = `${ms}ms`; }
+                else { el.classList.add('ms-slow'); el.innerHTML = `${ms}ms`; }
+            }
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            document.getElementById('play-area').appendChild(el);
+            setTimeout(() => { if(el.parentElement) el.remove(); }, 800);
         }
 
         let alertConfirmCallback = null;
@@ -1264,10 +1294,9 @@
 
             document.getElementById('task-container').classList.remove('active');
             let playArea = document.getElementById('play-area');
-            // LUÔN XÓA FULLSCREEN KHI Ở MÀN HÌNH CHỜ ĐỂ TRÁNH CO RÚM
             playArea.classList.remove('fullscreen-mode');
 
-            let oldOrbs = playArea.querySelectorAll('.orb, .child-projectile, .core-reactor, .ghost-orb, .replay-spawn, .burst-effect, .blackout-bg, .beam, .explosion, .flashbang, .float-score, .pink-shockwave, .vortex-collapse, .burst-full-particle, .float-ms');
+            let oldOrbs = playArea.querySelectorAll('.orb, .child-projectile, .core-reactor, .ghost-orb, .replay-spawn, .burst-effect, .blackout-bg, .beam, .explosion, .flashbang, .float-score, .pink-shockwave, .vortex-collapse, .burst-full-particle, .floating-ms, .floating-cps');
             oldOrbs.forEach(o => o.remove());
 
             updateHpDisplay();
@@ -1276,11 +1305,9 @@
             document.getElementById('result-overlay').classList.remove('active');
             document.getElementById('freeze-overlay').classList.remove('active');
             
-            // RESET MÀN HÌNH CHỜ (HIỆN LÊN VÀ BỎ LỚP ẨN)
             let promptOverlay = document.getElementById('start-prompt-overlay');
             promptOverlay.classList.remove('hidden');
             
-            // ĐIỀU CHỈNH NÚT THOÁT TOÀN CỤC CHỈ HIỆN LÚC PHÙ HỢP
             document.getElementById('global-exit-btn').style.display = 'none';
             document.getElementById('arena-exit-btn').style.display = 'block';
             document.getElementById('arena-guide-btn').style.display = 'block';
@@ -1338,10 +1365,8 @@
             document.getElementById('task-arena').classList.add('active');
         }
 
-        // BẤM BẮT ĐẦU -> BÙNG NỔ FULL MÀN HÌNH VỚI NỀN CÁ KOI
         function triggerStartGame() {
             playSound('coin');
-            // ẨN MÀN HÌNH CHỜ VÀ CÁC NÚT ĐIỀU HƯỚNG BÊN NGOÀI
             document.getElementById('start-prompt-overlay').classList.add('hidden');
             document.getElementById('arena-exit-btn').style.display = 'none';
             document.getElementById('arena-guide-btn').style.display = 'none';
@@ -1410,7 +1435,6 @@
 
             document.getElementById('ingame-hud').classList.add('hidden');
             
-            // TRẢ LẠI GIAO DIỆN SẢNH
             document.getElementById('global-exit-btn').style.display = 'block';
             document.getElementById('result-overlay').classList.remove('active');
             document.getElementById('freeze-overlay').classList.remove('active');
@@ -1453,7 +1477,6 @@
             updateScoreUI();
             playSound('coin', 1);
 
-            // TĂNG TỈ LỆ HẠT HIẾM LÊN 6% VÀ KIỂM TRA ĐỂ KHÔNG BỊ TRÙNG
             if (document.querySelectorAll('.orb-pink').length === 0) {
                 if (Math.random() < 0.06) { spawnPinkOrbDirectly(); }
             }
@@ -1517,11 +1540,7 @@
                 
                 let exactReaction = hitTime - spawnTimestamp;
                 reactionTimes.push(exactReaction);
-
-                // --- CHÈN LỆNH NẢY SỐ MS TẠI ĐÂY ---
-                let textColor = exactReaction <= 160 ? '#ffffff' : (exactReaction <= 350 ? '#00ffcc' : '#ff3366');
-                let textStr = exactReaction <= 160 ? `⚡ ${exactReaction}ms` : `${exactReaction}ms`;
-                showFloatingText(px + 28, py + 28, textStr, textColor); // +28 để số nảy ra giữa tâm hạt
+                showFloatingMs(px + 28, py + 28, exactReaction, 'normal');
 
                 addScoreAndCheckMultiplier(1); 
                 el.remove(); 
@@ -1549,8 +1568,7 @@
             let maxX = playArea.clientWidth - 45, maxY = playArea.clientHeight - 45;
             let px = Math.max(10, Math.random() * maxX), py = Math.max(10, Math.random() * maxY);
 
-            let spawnTimestamp = Date.now(); // Cần mốc sinh hạt hồng để tính reaction
-            let spData = { t: spawnTimestamp - matchStartTime, x: px, y: py, type: 'pink', deathTime: Infinity };
+            let spData = { t: Date.now() - matchStartTime, x: px, y: py, type: 'pink', deathTime: Infinity };
             currentReplayData.spawns.push(spData);
 
             let el = document.createElement('div');
@@ -1562,14 +1580,12 @@
                 e.preventDefault(); e.stopPropagation();
                 if(!isPlaying || isPausedForStart || clicked) return;
                 clicked = true;
-                let hitTime = Date.now();
-                spData.deathTime = hitTime - matchStartTime;
+                spData.deathTime = Date.now() - matchStartTime;
+                
+                let exactReaction = Date.now() - (spData.t + matchStartTime);
+                showFloatingMs(px + 16, py + 16, exactReaction, 'pink');
+                
                 playSound('coin', 2.2);
-
-                // --- NẢY SỐ MÀU HỒNG KHI BẤM TRÚNG HẠT HIẾM ---
-                let exactReaction = hitTime - spawnTimestamp;
-                showFloatingText(px + 16, py + 16, `🔥 ${exactReaction}ms`, '#ff007f', true);
-
                 el.remove();
                 triggerGreatBurst();
             };
@@ -1714,7 +1730,6 @@
                 track.onpointerup = () => { lastAngle = null; };
             }
 
-            // --- HIỆU ỨNG MƯA HẠT LƯỢNG TỬ (QUANTUM RAIN) TOÀN MÀN HÌNH ---
             let particleCount = 80; 
             let colors = ['#ff0033', '#ff0033', '#ff0033', '#ff3366', '#ff007f', '#00ffcc', '#ffb700']; 
             
@@ -1816,6 +1831,13 @@
             beam.className = `beam beam-t${tier}`;
             playArea.appendChild(beam);
 
+            // TẠO CHỮ NỔI HIỂN THỊ KẾT QUẢ TỐC ĐỘ BẠO PHÁT TẠI ĐÂY
+            let cpsEl = document.createElement('div');
+            cpsEl.className = 'floating-cps';
+            cpsEl.innerHTML = `🔥 TỐC ĐỘ: ${normalizedCps} LẦN/S 🔥`;
+            playArea.appendChild(cpsEl);
+            setTimeout(() => { if(cpsEl.parentElement) cpsEl.remove(); }, 1500);
+
             currentReplayData.spawns.push({ t: Date.now() - matchStartTime, type: 'beam', tier: tier, deathTime: Date.now() - matchStartTime + beamTime });
 
             if (tier === 3) { playArea.classList.add('screen-shake-light'); triggerVibration([100, 100]); }
@@ -1850,17 +1872,6 @@
                 updateScoreUI();
 
                 playSound('boom', 0.5);
-
-                // --- TẠO RA DÒNG CHỮ BAY LÊN BÁO HIỆU CPS (SỐ LẦN CHẠM/S) ---
-                let floatCps = document.createElement('div');
-                floatCps.className = 'float-score';
-                floatCps.innerText = `🔥 ${normalizedCps} LẦN/S 🔥`;
-                floatCps.style.left = '50%'; 
-                floatCps.style.top = '30%'; 
-                floatCps.style.color = '#ff007f';
-                floatCps.style.textShadow = '0 0 20px #ff007f, 0 0 40px #fff';
-                playArea.appendChild(floatCps);
-                setTimeout(() => floatCps.remove(), 1500);
 
                 let floatScore = document.createElement('div');
                 floatScore.className = 'float-score';
@@ -1922,12 +1933,7 @@
                 if(isTarget) { 
                     let exactReaction = hitTime - spawnTimestamp;
                     reactionTimes.push(exactReaction);
-
-                    // --- CHÈN LỆNH NẢY SỐ MS TẠI ĐÂY ---
-                    let textColor = exactReaction <= 160 ? '#ffffff' : (exactReaction <= 350 ? '#00ffcc' : '#ff3366');
-                    let textStr = exactReaction <= 160 ? `⚡ ${exactReaction}ms` : `${exactReaction}ms`;
-                    showFloatingText(px + 28, py + 28, textStr, textColor);
-
+                    showFloatingMs(px + 28, py + 28, exactReaction, 'normal');
                     addScoreAndCheckMultiplier(2);
                 } else { 
                     loseFullLife(); 
@@ -1982,11 +1988,7 @@
                 
                 let exactReaction = hitTime - spawnTimestamp;
                 reactionTimes.push(exactReaction);
-
-                // --- CHÈN LỆNH NẢY SỐ MS CHO HẠT MẸ TẠI ẢI 3 ---
-                let textColor = exactReaction <= 160 ? '#ffffff' : (exactReaction <= 350 ? '#00ffcc' : '#ff3366');
-                let textStr = exactReaction <= 160 ? `⚡ ${exactReaction}ms` : `${exactReaction}ms`;
-                showFloatingText(px + 28, py + 28, textStr, textColor);
+                showFloatingMs(px + 28, py + 28, exactReaction, 'normal');
 
                 addScoreAndCheckMultiplier(3); 
                 el.remove(); 
@@ -2043,7 +2045,6 @@
                     if(!isPlaying || isPausedForStart || childClicked) return;
                     childClicked = true;
 
-                    // Ở ĐÂY LÀ HẠT CON ẢI 3 -> KHÔNG CHẠY LỆNH NẢY SỐ MÀ CHỈ CỘNG ĐIỂM
                     if (col === 'yellow') {
                         addScoreAndCheckMultiplier(1);
                         playSound('coin', 1.2);
