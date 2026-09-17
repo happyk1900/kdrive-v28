@@ -23,12 +23,12 @@
         /* KHUNG NỀN RÕ NÉT 100% VÀ HIỆU ỨNG HẠT LƯỢNG TỬ BAY LƠ LỬNG VÀNG/XANH */
         .kdrive-image-wrapper { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; 
-            background: #010204 url('https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true') no-repeat center center; 
-            background-size: cover; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            background: #010204; 
+            z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; 
         }
         .kdrive-bg-target { 
             width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; 
-            opacity: 1; transition: opacity 0.6s ease-in-out; 
+            opacity: 1; transition: opacity 0.5s ease-in-out; 
         }
 
         .particles-container { position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: hidden; }
@@ -61,6 +61,16 @@
             50% { opacity: 0.4; filter: brightness(1.5); }
             100% { opacity: 0; filter: none; }
         }
+
+        /* LỜI CHÀO ĐIỆN ẢNH (CINEMATIC WELCOME) */
+        #cinematic-welcome {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; text-align: center; z-index: 5;
+            color: #00e5ff; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; line-height: 1.6;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.8), 0 0 30px rgba(0, 229, 255, 0.4);
+            opacity: 0; visibility: hidden; transition: opacity 0.8s ease-in-out;
+        }
+        #cinematic-welcome.show { opacity: 1; visibility: visible; }
 
         /* BẢNG CHỌN NGÔN NGỮ */
         .lang-gate-overlay {
@@ -340,6 +350,9 @@
     <div class="kdrive-image-wrapper">
         <img id="bgImageElement" src="https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true" class="kdrive-bg-target" alt="Core Background">
         
+        <!-- THÔNG ĐIỆP CHÀO MỪNG ĐIỆN ẢNH -->
+        <div id="cinematic-welcome" data-i18n="welcome_msg"></div>
+
         <div class="gateway-container" id="loginPanelContainer">
             <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL%20CAT.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="triggerGoogleOAuth()" alt="Google Login">
             
@@ -362,11 +375,11 @@
         let hasReadTerms = false;
         let selectedLangChoice = localStorage.getItem('kdrive_lang') || 'vi';
 
-        // KHỞI TẠO PRELOAD HÌNH ẢNH ĐỂ TRÁNH GIẬT/CHỚP LÚC CHUYỂN CẢNH
+        // KHỞI TẠO PRELOAD HÌNH ẢNH THÀNH PHỐ VIỄN TƯỞNG ĐỂ TRÁNH GIẬT LÚC CHUYỂN CẢNH
         const preloadedLoginBg = new Image();
         preloadedLoginBg.src = "https://github.com/happyk1900/HOSOGOC/blob/main/k%20login.png?raw=true";
 
-        // TẠO HẠT NGUYÊN TỬ BAY LƠ LỬNG (MÀU XANH VÀ VÀNG)
+        // TẠO HẠT NGUYÊN TỬ BAY LƠ LỬNG
         window.addEventListener('DOMContentLoaded', () => {
             const wrapper = document.querySelector('.kdrive-image-wrapper');
             const pContainer = document.createElement('div');
@@ -375,13 +388,12 @@
             
             for(let i=0; i<45; i++){
                 let p = document.createElement('div');
-                const isYellow = Math.random() > 0.6; // 40% là hạt màu vàng
+                const isYellow = Math.random() > 0.6;
                 p.className = isYellow ? 'atom-particle yellow-particle' : 'atom-particle cyan-particle';
                 
                 p.style.left = Math.random() * 100 + 'vw';
                 p.style.top = Math.random() * 100 + 'vh';
                 
-                // Phóng to kích thước hạt
                 const size = isYellow ? (Math.random() * 5 + 3.5) : (Math.random() * 4 + 2.5);
                 p.style.width = size + 'px';
                 p.style.height = size + 'px';
@@ -419,10 +431,11 @@
             }).join('');
         }
 
-        // TỪ ĐIỂN ĐẦY ĐỦ 12 NGÔN NGỮ (CHỈNH SỬA ĐIỀU 4)
+        // TỪ ĐIỂN ĐẦY ĐỦ BAO GỒM CÂU CHÀO MỪNG "welcome_msg"
         const loginTranslations = {
             vi: {
                 lang_title: "CHỌN NGÔN NGỮ QUỐC TẾ", btn_close: "ĐÓNG LẠI", btn_confirm: "ĐỒNG Ý CHUYỂN ĐỔI",
+                welcome_msg: "Chào mừng bạn đến chương trình tuyển chọn đặc vụ của thế giới lượng tử.",
                 terms_checkbox_label: 'Tôi đồng ý với <span class="terms-link" onclick="openTermsModal()">Điều khoản dịch vụ</span> & <span class="terms-link" onclick="openTermsModal()">Quy chế thi đấu</span> của Telepathy.',
                 warning: "⚠️ BẠN PHẢI BẤM ĐỌC ĐIỀU KHOẢN TRƯỚC!", connecting: "🛰️ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...", welcome: "⚡ ĐỊNH DANH AN TOÀN: ",
                 terms_modal_title: "QUY CHẾ K-DRIVE (CORE PROTOCOLS)", terms_subtitle: "K-Drive vận hành trên nguyên tắc sòng phẳng và minh bạch tuyệt đối:",
@@ -442,6 +455,7 @@
             },
             en: {
                 lang_title: "SELECT INTERNATIONAL LANGUAGE", btn_close: "CLOSE", btn_confirm: "AGREE & SWITCH",
+                welcome_msg: "Welcome to the agent selection program of the quantum realm.",
                 terms_checkbox_label: 'I agree to Telepathy\'s <span class="terms-link" onclick="openTermsModal()">Terms of Service</span> & <span class="terms-link" onclick="openTermsModal()">Rules</span>.',
                 warning: "⚠️ YOU MUST READ & AGREE TO TERMS FIRST!", connecting: "🛰️ CONNECTING GOOGLE ACCOUNT...", welcome: "⚡ SECURE AGENT: ",
                 terms_modal_title: "K-DRIVE CORE PROTOCOLS", terms_subtitle: "K-Drive operates on absolute transparency and fairness:",
@@ -461,6 +475,7 @@
             },
             zh: {
                 lang_title: "选择国际语言", btn_close: "关闭", btn_confirm: "同意并切换",
+                welcome_msg: "欢迎来到量子世界的特工选拔计划。",
                 terms_checkbox_label: '我同意 Telepathy 的 <span class="terms-link" onclick="openTermsModal()">服务条款</span> 和 <span class="terms-link" onclick="openTermsModal()">竞赛规则</span>。',
                 warning: "⚠️ 您必须先阅读并同意条款！", connecting: "🛰️ 正在连接谷歌账号...", welcome: "⚡ 安全特工: ",
                 terms_modal_title: "K-DRIVE 核心协议", terms_subtitle: "K-Drive 运行在绝对透明和公平的原则上：",
@@ -480,6 +495,7 @@
             },
             ja: {
                 lang_title: "国際言語を選択", btn_close: "閉じる", btn_confirm: "同意して切り替え",
+                welcome_msg: "量子世界のエージェント選抜プログラムへようこそ。",
                 terms_checkbox_label: 'Telepathyの<span class="terms-link" onclick="openTermsModal()">利用規約</span>と<span class="terms-link" onclick="openTermsModal()">規則</span>に同意します。',
                 warning: "⚠️ まず規約に同意してください！", connecting: "🛰️ Googleアカウントに接続中...", welcome: "⚡ セキュアエージェント: ",
                 terms_modal_title: "K-DRIVE コアプロトコル", terms_subtitle: "K-Driveは透明性と公平性で運営されています：",
@@ -495,6 +511,7 @@
             },
             ko: {
                 lang_title: "국제 언어 선택", btn_close: "닫기", btn_confirm: "동의 및 전환",
+                welcome_msg: "양자 세계의 요원 선발 프로그램에 오신 것을 환영합니다.",
                 terms_checkbox_label: 'Telepathy의 <span class="terms-link" onclick="openTermsModal()">서비스 약관</span> 및 <span class="terms-link" onclick="openTermsModal()">규칙</span>에 동의합니다.',
                 warning: "⚠️ 약관에 동의해야 합니다!", connecting: "🛰️ 구글 계정 연결 중...", welcome: "⚡ 보안 에이전트: ",
                 terms_modal_title: "K-DRIVE 프로토콜", terms_subtitle: "투명성과 공정성:",
@@ -510,6 +527,7 @@
             },
             fr: {
                 lang_title: "CHOISIR LA LANGUE", btn_close: "FERMER", btn_confirm: "ACCEPTER",
+                welcome_msg: "Bienvenue dans le programme de sélection d'agents du royaume quantique.",
                 terms_checkbox_label: 'J\'accepte les <span class="terms-link" onclick="openTermsModal()">Conditions</span> de Telepathy.',
                 warning: "⚠️ VEUILLEZ ACCEPTER LES CONDITIONS!", connecting: "🛰️ CONNEXION EN COURS...", welcome: "⚡ AGENT: ",
                 terms_modal_title: "PROTOCOLES K-DRIVE", terms_subtitle: "Transparence et équité:",
@@ -524,6 +542,7 @@
             },
             de: {
                 lang_title: "SPRACHE WÄHLEN", btn_close: "SCHLIEßEN", btn_confirm: "AKZEPTIEREN",
+                welcome_msg: "Willkommen beim Agentenauswahlprogramm der Quantenwelt.",
                 terms_checkbox_label: 'Ich akzeptiere die <span class="terms-link" onclick="openTermsModal()">Bedingungen</span>.',
                 warning: "⚠️ BITTE BEDINGUNGEN AKZEPTIEREN!", connecting: "🛰️ VERBINDUNG...", welcome: "⚡ AGENT: ",
                 terms_modal_title: "K-DRIVE REGELN", terms_subtitle: "Transparenz und Fairness:",
@@ -538,6 +557,7 @@
             },
             es: {
                 lang_title: "SELECCIONAR IDIOMA", btn_close: "CERRAR", btn_confirm: "ACEPTAR",
+                welcome_msg: "Bienvenido al programa de selección de agentes del reino cuántico.",
                 terms_checkbox_label: 'Acepto los <span class="terms-link" onclick="openTermsModal()">Términos</span>.',
                 warning: "⚠️ ¡ACEPTE LOS TÉRMINOS!", connecting: "🛰️ CONECTANDO...", welcome: "⚡ AGENTE: ",
                 terms_modal_title: "REGLAS K-DRIVE", terms_subtitle: "Transparencia y equidad:",
@@ -552,6 +572,7 @@
             },
             ru: {
                 lang_title: "ВЫБЕРИТЕ ЯЗЫК", btn_close: "ЗАКРЫТЬ", btn_confirm: "ПРИНЯТЬ",
+                welcome_msg: "Добро пожаловать в программу отбора агентов квантового мира.",
                 terms_checkbox_label: 'Я согласен с <span class="terms-link" onclick="openTermsModal()">Условиями</span>.',
                 warning: "⚠️ ПРИМИТЕ УСЛОВИЯ!", connecting: "🛰️ ПОДКЛЮЧЕНИЕ...", welcome: "⚡ АГЕНТ: ",
                 terms_modal_title: "ПРАВИЛА K-DRIVE", terms_subtitle: "Прозрачность и честность:",
@@ -566,6 +587,7 @@
             },
             th: {
                 lang_title: "เลือกภาษา", btn_close: "ปิด", btn_confirm: "ยอมรับ",
+                welcome_msg: "ยินดีต้อนรับสู่โปรแกรมคัดเลือกตัวแทนของโลกควอนตัม",
                 terms_checkbox_label: 'ฉันยอมรับ<span class="terms-link" onclick="openTermsModal()">เงื่อนไข</span>',
                 warning: "⚠️ โปรดยอมรับเงื่อนไข!", connecting: "🛰️ กำลังเชื่อมต่อ...", welcome: "⚡ ตัวแทน: ",
                 terms_modal_title: "กฎ K-DRIVE", terms_subtitle: "ความโปร่งใสและยุติธรรม:",
@@ -580,6 +602,7 @@
             },
             id: {
                 lang_title: "PILIH BAHASA", btn_close: "TUTUP", btn_confirm: "SETUJU",
+                welcome_msg: "Selamat datang di program seleksi agen dari dunia kuantum.",
                 terms_checkbox_label: 'Saya setuju dengan <span class="terms-link" onclick="openTermsModal()">Syarat</span>.',
                 warning: "⚠️ HARAP SETUJUI SYARAT!", connecting: "🛰️ MENGHUBUNGKAN...", welcome: "⚡ AGEN: ",
                 terms_modal_title: "ATURAN K-DRIVE", terms_subtitle: "Transparansi dan keadilan:",
@@ -594,6 +617,7 @@
             },
             ar: {
                 lang_title: "اختر لغة", btn_close: "إغلاق", btn_confirm: "موافق",
+                welcome_msg: "مرحبًا بك في برنامج اختيار الوكلاء في العالم الكمي.",
                 terms_checkbox_label: 'أوافق على <span class="terms-link" onclick="openTermsModal()">الشروط</span>.',
                 warning: "⚠️ يرجى الموافقة على الشروط!", connecting: "🛰️ جاري الاتصال...", welcome: "⚡ العميل: ",
                 terms_modal_title: "قواعد K-DRIVE", terms_subtitle: "الشفافية والعدالة:",
@@ -639,6 +663,7 @@
             }
         }
 
+        // LUỒNG UX MỚI: TẮT BẢNG NGÔN NGỮ -> HIỆN CHÀO MỪNG -> ĐỔI NỀN -> HIỆN LOGIN
         function confirmLanguage() {
             localStorage.setItem('kdrive_lang', selectedLangChoice);
             applyLoginLanguage(selectedLangChoice);
@@ -649,25 +674,39 @@
                 bgm.play().catch(err => console.log("Lỗi phát nhạc:", err));
             }
 
-            // Mờ dần bảng chọn ngôn ngữ khi ấn nút
+            // 1. Mờ dần và tắt bảng chọn ngôn ngữ
             const gateModal = document.getElementById('langGateModal');
             if (gateModal) gateModal.classList.add('hidden');
 
-            // Chuyển ảnh nền sang ảnh đăng nhập mượt mà không chớp
-            const bgImg = document.getElementById('bgImageElement');
-            if (bgImg) {
-                bgImg.style.opacity = 0;
-                setTimeout(() => {
-                    bgImg.src = preloadedLoginBg.src;
-                    bgImg.style.opacity = 1;
-                }, 300);
-            }
-
-            // Chờ nền load xong mới hiện khung đăng nhập
+            // 2. Hiện câu chào mừng trên nền lưới (sau 0.5s cho bảng ngôn ngữ bay mất hẳn)
+            const welcomeMsg = document.getElementById('cinematic-welcome');
             setTimeout(() => {
-                const loginPanel = document.getElementById('loginPanelContainer');
-                if (loginPanel) loginPanel.classList.add('show-login');
-            }, 600);
+                welcomeMsg.classList.add('show');
+                
+                // 3. Giữ câu chào mừng 2.5 giây, sau đó làm mờ đi
+                setTimeout(() => {
+                    welcomeMsg.classList.remove('show');
+                    
+                    // 4. Đổi cảnh: Xóa nền lưới chuyển sang nền viễn tưởng
+                    setTimeout(() => {
+                        const bgImg = document.getElementById('bgImageElement');
+                        if (bgImg) {
+                            bgImg.style.opacity = 0; // mờ nền cũ
+                            setTimeout(() => {
+                                bgImg.src = preloadedLoginBg.src; // nạp nền mới
+                                bgImg.style.opacity = 1; // sáng nền mới lên
+                            }, 400); 
+                        }
+
+                        // 5. Hiện khung đăng nhập Login lên
+                        setTimeout(() => {
+                            const loginPanel = document.getElementById('loginPanelContainer');
+                            if (loginPanel) loginPanel.classList.add('show-login');
+                        }, 1000); 
+                        
+                    }, 800); // Đợi câu chào mờ hẳn
+                }, 2500); // Thời gian hiển thị câu chào
+            }, 500); 
         }
 
         function closeLangModal() { confirmLanguage(); }
