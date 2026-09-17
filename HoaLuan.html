@@ -340,28 +340,31 @@
         }
         @keyframes startPulse { 0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 255, 102, 0.3); } 100% { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 255, 102, 0.8); border-color: #fff; color: #fff; } }
 
+        /* -------------------------------------------------------------
+           THANH HUD CHUYÊN NGHIỆP TRÊN CÙNG ĐỂ CHỐNG CHẠM NHẦM THÔNG BÁO
+           ------------------------------------------------------------- */
         #ingame-hud {
-            position: fixed; inset: 0; width: 100%; height: 100%;
-            z-index: 10000; pointer-events: none; transition: opacity 0.3s;
+            position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+            background: rgba(12, 6, 18, 0.85); border-bottom: 2px solid #00ffcc;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 15px; z-index: 10000; pointer-events: auto;
+            backdrop-filter: blur(5px); transition: opacity 0.3s;
         }
         #ingame-hud.hidden { opacity: 0; pointer-events: none !important; }
         
-        .hud-lives-top-left {
-            position: absolute; top: 40px; left: 20px;
-            background: rgba(12, 6, 18, 0.65); padding: 8px 15px; border-radius: 12px; 
-            border: 1px solid rgba(255, 51, 102, 0.5); backdrop-filter: blur(4px);
-            pointer-events: auto; display: flex; align-items: center; justify-content: center;
-        }
+        .hud-left { flex: 1; display: flex; justify-content: flex-start; }
+        .hud-center { flex: 1; display: flex; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #fff; text-shadow: 0 0 5px #00ffcc; font-weight: bold; white-space: nowrap; }
+        .hud-right { flex: 1; display: flex; justify-content: flex-end; gap: 10px; }
         
-        .hud-pause-btn {
-            position: absolute; bottom: 25px; right: 20px;
-            width: 45px; height: 45px; border-radius: 50%;
+        .hud-btn {
+            width: 38px; height: 38px; border-radius: 8px;
             background: rgba(0, 0, 0, 0.7); border: 2px solid #00ffcc;
             color: #00ffcc; display: flex; justify-content: center; align-items: center;
-            font-size: 18px; cursor: pointer; pointer-events: auto;
-            box-shadow: 0 0 15px rgba(0,255,204,0.4); transition: 0.2s;
+            font-size: 16px; cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,255,204,0.4); transition: 0.2s;
         }
-        .hud-pause-btn:active { transform: scale(0.9); background: rgba(0, 255, 204, 0.3); }
+        .hud-btn.exit-btn { border-color: #ff007f; color: #ff007f; box-shadow: 0 0 10px rgba(255,0,127,0.4); }
+        .hud-btn:active { transform: scale(0.9); }
 
         #pause-menu-overlay { 
             position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 999999; 
@@ -612,7 +615,7 @@
         .flashbang { position: fixed; inset: 0; background: #fff; z-index: 999999; pointer-events: none; animation: flash 1s forwards; }
         @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
 
-        /* HIỆU ỨNG CHỮ NỔI (FLOATING TEXT) KHI CHẠM HẠT */
+        /* HIỆU ỨNG CHỮ NỔI KHI CHẠM HẠT ĐỂ THẤY MILI-GIÂY */
         .floating-ms {
             position: absolute;
             font-family: 'Share Tech Mono', monospace;
@@ -634,7 +637,7 @@
             100% { opacity: 0; transform: translate(-50%, -100%) scale(1); }
         }
 
-        /* HIỆU ỨNG CHỮ NỔI KẾT QUẢ CPS SAU KHI BẠO PHÁT */
+        /* HIỆU ỨNG CHỮ NỔI KẾT QUẢ TỐC ĐỘ (CPS) KHI XONG BẠO PHÁT */
         .floating-cps {
             position: absolute;
             top: 30%;
@@ -813,7 +816,6 @@
         </div>
     </div>
 
-    <!-- NÚT THOÁT TOÀN CỤC -->
     <button id="global-exit-btn" class="btn-corner-left" onclick="handleGlobalExit()" title="Thoát / Trở về">THOÁT</button>
 
     <div id="task-arena">
@@ -824,17 +826,22 @@
                 <div class="replay-icon-btn replay-icon-close" onclick="stopReplayPrematurely()" title="Đóng Replay">✕</div>
             </div>
 
-            <!-- GIAO DIỆN IN-GAME MỚI: CHỈ LƯU LẠI SỐ MẠNG Ở GÓC TRÊN TRÁI -->
+            <!-- THANH ĐIỀU KHIỂN TRUNG TÂM (TOP HUD BAR) CHỐNG CHẠM NHẦM NOTIFICATION -->
             <div id="ingame-hud" class="hidden">
-                <div class="hud-lives-top-left">
-                    <b id="boo-lives" style="color:#ff3333; font-size: 20px; text-shadow: 0 0 10px rgba(255,0,0,0.8);">❤️❤️❤️❤️❤️</b>
+                <div class="hud-left">
+                    <b id="boo-lives" style="color:#ff3333; font-size: 22px; text-shadow: 0 0 10px rgba(255,0,0,0.8);">❤️❤️❤️❤️❤️</b>
                 </div>
-                <div class="hud-pause-btn" onclick="pauseGame()" title="Tạm Dừng">⏸</div>
+                <div class="hud-center">
+                    DANH VỌNG: <b id="boo-points" style="color:#00ffcc; margin-left: 5px; font-size: 16px;">0</b>
+                </div>
+                <div class="hud-right">
+                    <div class="hud-btn" onclick="pauseGame()" title="Tạm Dừng">⏸</div>
+                    <div class="hud-btn exit-btn" onclick="closeArena()" title="Thoát">🚪</div>
+                </div>
             </div>
 
-            <!-- ĐIỂM VÀ TỐC ĐỘ ẨN VÀO NỀN KHÔNG HIỆN LÊN LÀM VƯỚNG MẮT -->
+            <!-- Ẩn bớt các tag không cần thiết -->
             <div style="display: none;">
-                <b id="boo-points">0</b>
                 <b id="multiplier-tag">X1</b>
             </div>
 
@@ -1007,9 +1014,11 @@
         let bestCps = 0;
         let g3SpawnCounter = 0; 
 
+        // Tốc độ Ải 1 & 2
         const g1Lifespans = [0, 900, 750, 600, 500, 420, 360, 300, 250, 200, 170, 140, 120];
         const g1SpawnDelays = [0, 800, 700, 600, 500, 450, 400, 350, 300, 250, 200, 150, 120];
         
+        // Tốc độ riêng biệt cho Ải 3 (Đi từ cực chậm đến nhanh)
         const g3Speeds = [0, 0.4, 0.6, 0.8, 1.1, 1.4, 1.8, 2.2, 2.7, 3.2, 3.8, 4.5, 5.5];
         const g3Lifespans = [0, 3000, 2500, 2000, 1600, 1300, 1000, 800, 650, 550, 450, 350, 300];
         const g3SpawnDelays = [0, 2500, 2000, 1600, 1300, 1000, 800, 650, 500, 400, 300, 250, 200];
@@ -1119,7 +1128,6 @@
             return '#ffffff';
         }
 
-        /* TÍNH NĂNG CHỮ NỔI HIỂN THỊ MILI-GIÂY KHI CHẠM HẠT */
         function showFloatingMs(x, y, ms, type) {
             let el = document.createElement('div');
             el.className = 'floating-ms';
@@ -1350,10 +1358,6 @@
                 core.style.left = '50%'; core.style.top = '50%'; playArea.appendChild(core);
             }
 
-            let mTag = document.getElementById('multiplier-tag');
-            mTag.innerText = `X${currentMultiplier}`;
-            mTag.style.color = getTierColor(currentMultiplier);
-
             document.getElementById('briefing-title').innerText = bTitle;
             document.getElementById('briefing-target').innerHTML = bTarget;
 
@@ -1484,9 +1488,6 @@
 
         function updateScoreUI() { 
             document.getElementById('boo-points').innerText = Math.round(aScore); 
-            let tag = document.getElementById('multiplier-tag');
-            tag.innerText = `X${currentMultiplier}`;
-            tag.style.color = getTierColor(currentMultiplier);
         }
 
         function updateHpDisplay() {
@@ -1514,12 +1515,21 @@
             if(stabilityHP <= 0) { finishGame(); }
         }
 
+        // BẢO VỆ VÙNG AN TOÀN TRÁNH TRÀN VÀO THANH HUD (Chiều cao HUD khoảng 60px)
+        function getSafeSpawns(playArea) {
+            let maxX = playArea.clientWidth - 60;
+            let maxY = playArea.clientHeight - 60;
+            let minY = 75; // Tránh hoàn toàn thanh HUD 60px + margin
+            let px = 10 + Math.random() * Math.max(0, maxX - 10);
+            let py = minY + Math.random() * Math.max(0, maxY - minY);
+            return { px, py };
+        }
+
         function runG1() { spawnG1(); }
         function spawnG1() {
             if(!isPlaying || isPausedForStart) return; 
             let playArea = document.getElementById('play-area'); 
-            let maxX = playArea.clientWidth - 60, maxY = playArea.clientHeight - 60;
-            let px = Math.max(10, Math.random() * maxX), py = Math.max(10, Math.random() * maxY);
+            let { px, py } = getSafeSpawns(playArea);
             let spawnTimestamp = Date.now();
             
             let spData = { t: spawnTimestamp - matchStartTime, x: px, y: py, type: 'fire', deathTime: Infinity };
@@ -1565,8 +1575,7 @@
             if(!isPlaying || isPausedForStart) return;
 
             let playArea = document.getElementById('play-area');
-            let maxX = playArea.clientWidth - 45, maxY = playArea.clientHeight - 45;
-            let px = Math.max(10, Math.random() * maxX), py = Math.max(10, Math.random() * maxY);
+            let { px, py } = getSafeSpawns(playArea);
 
             let spData = { t: Date.now() - matchStartTime, x: px, y: py, type: 'pink', deathTime: Infinity };
             currentReplayData.spawns.push(spData);
@@ -1587,7 +1596,13 @@
                 
                 playSound('coin', 2.2);
                 el.remove();
-                triggerGreatBurst();
+                
+                // Xóa rác và ĐÓNG BĂNG 1.5 GIÂY TRƯỚC BẠO PHÁT
+                playArea.querySelectorAll('.orb-fire, .orb-ice, .orb-purple, .orb-green, .orb-blue, .projectile, .child-projectile').forEach(o => o.remove()); 
+                isPausedForStart = true;
+                clearTimeout(spawnTimer);
+                
+                setTimeout(() => { triggerGreatBurst(); }, 1500);
             };
 
             playArea.appendChild(el);
@@ -1602,11 +1617,7 @@
         }
 
         function triggerGreatBurst() {
-            isPausedForStart = true; 
-
             let playArea = document.getElementById('play-area');
-            playArea.querySelectorAll('.orb-fire, .orb-ice, .orb-purple, .orb-green, .orb-blue, .projectile').forEach(o => o.remove()); 
-
             let blackout = document.createElement('div');
             blackout.className = 'blackout-bg';
             
@@ -1831,7 +1842,6 @@
             beam.className = `beam beam-t${tier}`;
             playArea.appendChild(beam);
 
-            // TẠO CHỮ NỔI HIỂN THỊ KẾT QUẢ TỐC ĐỘ BẠO PHÁT TẠI ĐÂY
             let cpsEl = document.createElement('div');
             cpsEl.className = 'floating-cps';
             cpsEl.innerHTML = `🔥 TỐC ĐỘ: ${normalizedCps} LẦN/S 🔥`;
@@ -1883,15 +1893,20 @@
                 setTimeout(() => {
                     blackoutBg.classList.remove('active');
                     setTimeout(() => blackoutBg.remove(), 300);
-                    isPausedForStart = false; 
-                    if (isPlaying) { 
-                        if(cGame === '1') spawnG1();
-                        else if(cGame === '2') spawnG2();
-                        else if(cGame === '3') {
-                            spawnG3Single();
-                            if(!g3LoopId) g3LoopId = requestAnimationFrame(loopG3);
+                    
+                    // NGƯNG ĐỌNG 1.5 GIÂY SAU BẠO PHÁT TRƯỚC KHI TIẾP TỤC
+                    setTimeout(() => {
+                        isPausedForStart = false; 
+                        if (isPlaying) { 
+                            if(cGame === '1') spawnG1();
+                            else if(cGame === '2') spawnG2();
+                            else if(cGame === '3') {
+                                spawnG3Parent();
+                                if(!g3LoopId) g3LoopId = requestAnimationFrame(loopG3);
+                            }
                         }
-                    }
+                    }, 1500);
+
                 }, 1000);
             }, beamTime);
         }
@@ -1900,7 +1915,7 @@
         function spawnG2() {
             if(!isPlaying || isPausedForStart) return; 
             let playArea = document.getElementById('play-area'); 
-            let maxX = playArea.clientWidth - 60, maxY = playArea.clientHeight - 60;
+            let { px, py } = getSafeSpawns(playArea);
             
             let rand = Math.random();
             let orbType = '';
@@ -1912,7 +1927,6 @@
             
             let isTarget = (orbType === 'fire');
             
-            let px = Math.max(10, Math.random() * maxX), py = Math.max(10, Math.random() * maxY);
             let spawnTimestamp = Date.now();
             
             let spData = { t: spawnTimestamp - matchStartTime, x: px, y: py, type: orbType, deathTime: Infinity };
@@ -1967,8 +1981,7 @@
         function spawnG3Parent() {
             if(!isPlaying || isPausedForStart) return; 
             let playArea = document.getElementById('play-area'); 
-            let maxX = playArea.clientWidth - 60, maxY = playArea.clientHeight - 60;
-            let px = Math.max(10, Math.random() * maxX), py = Math.max(10, Math.random() * maxY);
+            let { px, py } = getSafeSpawns(playArea);
             let spawnTimestamp = Date.now();
             
             let spData = { t: spawnTimestamp - matchStartTime, x: px, y: py, type: 'parent_yellow', deathTime: Infinity };
