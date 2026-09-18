@@ -10,39 +10,78 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { 
+            margin: 0; padding: 0; box-sizing: border-box; 
+            touch-action: none; user-select: none; 
+            -webkit-tap-highlight-color: transparent; 
+            outline: none; 
+        }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: #040814; font-family: 'Space Grotesk', sans-serif; }
 
-        #sanctum-bg { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; background: radial-gradient(circle at 50% 30%, #0a1128 0%, #040814 80%); }
+        #sanctum-bg { 
+            position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; 
+            background: radial-gradient(circle at 50% 30%, #0a1128 0%, #040814 80%);
+        }
+        
         #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
         .dust-particle { position: absolute; border-radius: 50%; opacity: 0.6; animation: floatDust linear infinite; }
         .dust-small { width: 1.5px; height: 1.5px; background: #00ffcc; box-shadow: 0 0 4px #00ffcc; }
         @keyframes floatDust { 0% { transform: translateY(100vh); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.4; } 100% { transform: translateY(-20vh); opacity: 0; } }
 
-        .touch-ripple { position: fixed; border: 2px solid #00ffcc; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); z-index: 999999; box-shadow: 0 0 15px #ff007f; animation: rippleAnim 0.35s ease-out forwards; }
+        .touch-ripple {
+            position: fixed; border: 2px solid #00ffcc; border-radius: 50%; pointer-events: none; 
+            transform: translate(-50%, -50%); z-index: 999999; box-shadow: 0 0 15px #ff007f;
+            animation: rippleAnim 0.35s ease-out forwards;
+        }
         @keyframes rippleAnim { 0% { width: 0; height: 0; opacity: 1; border-width: 4px; } 100% { width: 70px; height: 70px; opacity: 0; border-width: 1px; } }
 
-        #task-arena { position: fixed; inset: 0; background: transparent; z-index: 120; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
-        .play-area { width: 100%; max-width: 360px; height: 100vh; height: 100dvh; background: transparent; border: none; border-radius: 0; position: relative; overflow: hidden; margin: 0 auto; transition: all 0.4s ease; }
-        .play-area.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important; max-width: none !important; margin: 0 !important; border: none !important; border-radius: 0 !important; background: transparent !important; z-index: 9990 !important; }
+        /* KHU VỰC CHƠI CHÍNH */
+        #task-arena { 
+            position: fixed; inset: 0; background: transparent; z-index: 120; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+        }
+        
+        .play-area { 
+            width: 100%; max-width: 360px; height: 100vh; height: 100dvh; background: transparent; 
+            border: none; border-radius: 0; 
+            position: relative; overflow: hidden; margin: 0 auto; transition: all 0.4s ease; 
+        }
+
+        .play-area.fullscreen-mode {
+            position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important; max-width: none !important;
+            margin: 0 !important; border: none !important; border-radius: 0 !important; background: transparent !important; z-index: 9990 !important;
+        }
 
         .laser-beam-horizontal { position: fixed; top: 50%; left: 0; width: 100vw; height: 2px; background: #fff; box-shadow: 0 0 20px #00ffcc, 0 0 40px #ff007f; z-index: 99999; transform: scaleX(0); transform-origin: center; animation: laserShoot 0.3s forwards ease-out; pointer-events: none; }
         @keyframes laserShoot { 100% { transform: scaleX(1); height: 5px; } }
         .laser-beam-horizontal.expand { animation: laserExpand 0.5s forwards cubic-bezier(0.7, 0, 1, 1); }
         @keyframes laserExpand { 100% { height: 100vh; top: 0; opacity: 0; } }
 
-        /* SẢNH CHỜ */
-        #start-prompt-overlay { position: absolute; inset: 0; background: transparent; z-index: 110; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px 50px 15px; gap: 10px; transition: opacity 0.3s ease; }
+        /* SẢNH CHỜ: CÂN ĐỐI, GỌN GÀNG, SÁT KHÍT */
+        #start-prompt-overlay {
+            position: absolute; inset: 0; background: transparent; z-index: 110; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            padding: 20px 15px 50px 15px; gap: 10px; transition: opacity 0.3s ease;
+        }
         #start-prompt-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none !important; display: none; }
 
         .records-container { width: 100%; max-width: 330px; display: flex; flex-direction: column; }
-        .record-row { background: rgba(10, 15, 30, 0.95); border-radius: 8px 8px 0 0; padding: 10px 14px; border: 1.5px solid #00ffcc; border-bottom: none; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 0 15px rgba(0, 255, 204, 0.15); }
+        /* ĐÃ FIX: Khép kín 4 cạnh viền cho hộp kỷ lục ở trên */
+        .record-row { 
+            background: rgba(10, 15, 30, 0.95); border-radius: 8px; padding: 12px 14px; 
+            border: 1.5px solid #00ffcc; display: flex; flex-direction: column; gap: 8px; 
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.15);
+        }
         .record-data-group { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .pearl-white-text { font-family: 'Share Tech Mono', monospace; font-size: 11.5px; font-weight: bold; color: #ffffff !important; letter-spacing: 0.5px; }
         .record-btn { display: flex; align-items: center; justify-content: center; width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 11.5px; font-weight: 900; cursor: pointer; padding: 7px; border-radius: 4px; border: 1.5px solid #00ffcc; background: rgba(0, 255, 204, 0.15); color: #00ffcc; text-transform: uppercase; letter-spacing: 1px; }
         .record-btn:active { background: #00ffcc; color: #000; transform: scale(0.98); }
         
-        .briefing-panel { background: rgba(15, 10, 25, 0.95); border: 2px solid #ff007f; border-radius: 0 0 8px 8px; padding: 16px 18px; width: 100%; max-width: 330px; text-align: left; box-shadow: 0 0 20px rgba(255, 0, 127, 0.2); margin-bottom: 4px; }
+        .briefing-panel { 
+            background: rgba(15, 10, 25, 0.95); border: 2px solid #ff007f; border-radius: 8px; 
+            padding: 16px 18px; width: 100%; max-width: 330px; text-align: left; 
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.2); margin-top: 4px; margin-bottom: 4px; 
+        }
         .briefing-title { color: #ff66cc !important; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(255, 102, 204, 0.3); padding-bottom: 6px; letter-spacing: 1.5px; }
         .briefing-target { color: #b8b8dc; font-family: 'Space Grotesk', sans-serif; font-size: 12.5px; line-height: 1.4; }
         .briefing-target b { color: #ff3333; font-weight: bold; }
@@ -50,6 +89,7 @@
         .action-group { width: 100%; max-width: 330px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
         .start-action-box { width: 100%; background: rgba(0, 255, 204, 0.2); border: 2px solid #00ffcc; padding: 12px; border-radius: 8px; color: #00ffcc; font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 20px rgba(0, 255, 102, 0.3); animation: startPulse 1.2s infinite alternate ease-in-out; text-align: center; }
         @keyframes startPulse { 0% { transform: scale(1); } 100% { transform: scale(1.03); } }
+        
         .btn-guide-inline { width: 100%; background: rgba(255, 183, 0, 0.1); border: 1.5px solid #ffb700; padding: 9px; border-radius: 6px; color: #ffb700; font-family: 'Share Tech Mono', monospace; font-size: 11.5px; font-weight: bold; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; text-align: center; text-shadow: 0 0 5px rgba(255, 183, 0, 0.4); }
         .btn-guide-inline:active { background: #ffb700; color: #000; }
 
@@ -62,7 +102,7 @@
         .hud-btn { width: 32px; height: 32px; border-radius: 4px; background: rgba(0, 255, 204, 0.1); border: 1px solid rgba(0, 255, 204, 0.5); color: #00ffcc; display: flex; justify-content: center; align-items: center; font-size: 14px; cursor: pointer; }
         .hud-btn.exit-btn { background: rgba(255, 0, 127, 0.1); border-color: #ff007f; color: #ff007f; }
 
-        /* THANH TERMINAL */
+        /* THANH TERMINAL Ở VỊ TRÍ TRUNG TRUNG CÂN ĐỐI */
         #terminal-bar { position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 360px; background: rgba(12, 6, 18, 0.95); border: 1px solid rgba(0, 255, 204, 0.5); border-radius: 6px; padding: 7px 0; z-index: 99999; overflow: hidden; display: flex; align-items: center; pointer-events: none; }
         #terminal-bar.hidden { display: none !important; }
         .terminal-track { display: inline-flex; white-space: nowrap; animation: ledScroll 15s linear infinite; }
@@ -81,7 +121,7 @@
         #freeze-overlay.active { display: flex; }
         .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #ff007f; text-shadow: 0 0 20px #ff007f; letter-spacing: 5px; text-transform: uppercase; }
 
-        /* BẢNG ĐIỂM TỪNG BÀI - TINH GỌN HOÀN TOÀN */
+        /* BẢNG ĐIỂM TỪNG BÀI */
         #result-overlay { position: absolute; inset: 0; background: rgba(4, 8, 20, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 8px; border-radius: 12px; padding: 12px; }
         #result-overlay.active { display: flex; }
         .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #00ffcc; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 15px rgba(0,255,204,0.5); }
@@ -96,14 +136,12 @@
         .prestige-total-num { font-size: 26px; color: #00ffcc; font-weight: 900; text-shadow: 0 0 12px rgba(0,255,102,0.8); line-height: 1; }
 
         .bio-metrics-box { width: 92%; max-width: 310px; background: rgba(10, 15, 30, 0.9); border: 1px solid rgba(0, 255, 204, 0.4); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
-        .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(0,255,204,0.2); padding-bottom: 8px; margin-bottom: 4px; }
-        .metric-info { display: flex; flex-direction: column; gap: 4px; }
-        .metric-top-line { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #ffb700; font-weight: bold; }
-        .metric-bot-line { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #00ffcc; font-weight: bold; text-shadow: 0 0 5px rgba(0, 255, 204, 0.5); }
-        
-        /* ICON CẤP ĐỘ TRỰC QUAN GỌN GÀNG */
-        .rank-badge { display: flex; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: bold; color: #fff; }
-        .rank-icon-img { width: 22px; height: 22px; margin-right: 6px; }
+        .metric-card-row { display: flex; flex-direction: column; gap: 4px; border-bottom: 1px dashed rgba(0,255,204,0.2); padding-bottom: 8px; margin-bottom: 4px;}
+        .metric-top-line { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #ffb700; font-weight: bold; }
+        .metric-bot-line { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #b8b8dc; }
+        .star-container { color: #ffb700; font-size: 12px; letter-spacing: 1px; text-shadow: 0 0 5px rgba(255,183,0,0.6); }
+
+        .rank-icon-img { width: 24px; height: 24px; vertical-align: middle; margin-right: 4px; filter: drop-shadow(0 0 4px #ffb700); }
 
         .result-btn-row { display: flex; gap: 10px; width: 88%; max-width: 280px; margin-top: 10px; }
         .result-action-btn { flex: 1; padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; text-align: center; }
@@ -118,7 +156,7 @@
         #final-summary-overlay.active { display: flex; }
         .final-header { font-family: 'Share Tech Mono', monospace; font-size: 28px; color: #fff; font-weight: 900; text-align: center; text-shadow: 0 0 15px #00ffcc; letter-spacing: 2px; }
         .stat-box { width: 100%; max-width: 340px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,204,0.3); padding: 15px; border-radius: 8px; }
-        .stat-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #fff; }
+        .stat-line { display: flex; justify-content: space-between; margin-bottom: 10px; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #fff; }
         .stat-line:last-child { margin-bottom: 0; }
         .stat-val { color: #ffb700; font-weight: bold; font-size: 16px; }
         
@@ -132,13 +170,13 @@
         }
         .final-btn-exit:hover { background: #ff007f; color: #fff; box-shadow: 0 0 15px #ff007f; }
 
-        /* ASSETS MÀN HÌNH CHƠI GAME */
+        /* ASSETS */
         .orb { position: absolute; border-radius: 50%; cursor: crosshair; display: flex; justify-content: center; align-items: center; }
         .orb-fire { width: 56px; height: 56px; background: radial-gradient(circle, #ffb700, #ff3333); box-shadow: 0 0 15px #ff3333; }
         .orb-ice { width: 56px; height: 56px; background: radial-gradient(circle, #ffffff, #00ffcc); box-shadow: 0 0 20px #00ffcc; }
         .orb-purple { width: 56px; height: 56px; background: radial-gradient(circle, #ff66cc, #8a2be2); box-shadow: 0 0 20px #8a2be2; }
         .orb-green { width: 56px; height: 56px; background: radial-gradient(circle, #bfff00, #00ff00); box-shadow: 0 0 20px #00ff00; }
-        .orb-blue { width: 56px; height: 56px; background: radial-gradient(circle, #33ccff, #0066cc); box-shadow: 0 0 20px #00ffcc; }
+        .orb-blue { width: 56px; height: 56px; background: radial-gradient(circle, #33ccff, #0066cc); box-shadow: 0 0 20px #0066cc; }
         .orb-pink { width: 32px; height: 32px; background: radial-gradient(circle, #ff66cc, #ff007f); box-shadow: 0 0 15px #ff007f; z-index: 15; }
         
         .core-reactor { position: absolute; width: 20px; height: 20px; background: radial-gradient(circle, #ff9999, #cc0000); border-radius: 50%; box-shadow: 0 0 15px #ff0000; z-index: 5; transform: translate(-50%, -50%); }
@@ -273,7 +311,7 @@
                 <b id="multiplier-tag">X1</b>
             </div>
 
-            <!-- SẢNH CHỜ: THUẦN TIẾNG VIỆT, KHÔNG ICON MẶC ĐỊNH, DÙNG ICON CẤP ĐỘ GỌN GÀNG -->
+            <!-- SẢNH CHỜ: CÂN ĐỐI TỪ TRÊN XUỐNG DƯỚI -->
             <div id="start-prompt-overlay" class="hidden">
                 <div class="records-container">
                     <div class="record-row">
@@ -311,28 +349,16 @@
                 
                 <div class="bio-metrics-box">
                     <div class="metric-card-row">
-                        <div class="metric-info">
-                            <span class="metric-top-line">Độ nhạy trí não</span>
-                            <span class="metric-bot-line" id="bio-avg-val">0 mili-giây</span>
-                        </div>
-                        <div class="rank-badge" id="bio-rank-badge-1">
-                            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%201%20(1).png?raw=true" class="rank-icon-img" alt="Rank"> CẤP I
-                        </div>
+                        <div class="metric-top-line"><span style="color:#b8b8dc;">Độ nhạy trí não</span><span id="bio-avg-val" style="color:#00ffcc; font-size:13px;">0 mili-giây</span></div>
+                        <div class="metric-bot-line"><span id="bio-rank-badge-1" style="color:#ffb700; font-weight:bold;">Cấp: Thực Tập</span><div class="star-container" id="reflex-stars">★☆☆☆☆</div></div>
                     </div>
                     <div class="metric-card-row">
-                        <div class="metric-info">
-                            <span class="metric-top-line">Uy lực bạo phát (7s)</span>
-                            <span class="metric-bot-line" id="bio-cps-val">0 lần / giây</span>
-                        </div>
-                        <div class="rank-badge" id="bio-rank-badge-2">
-                            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%201%20(1).png?raw=true" class="rank-icon-img" alt="Rank"> CẤP I
-                        </div>
+                        <div class="metric-top-line"><span style="color:#b8b8dc;">Uy lực bạo phát (7s)</span><span id="bio-cps-val" style="color:#ffb700;">0 lần / giây</span></div>
+                        <div class="metric-bot-line"><span id="bio-rank-badge-2" style="color:#ffb700; font-weight:bold;">Cấp: Thực Tập</span><div class="star-container" id="burst-stars">★☆☆☆☆</div></div>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center; padding-top:2px;">
-                        <span style="font-family:'Share Tech Mono', monospace; font-size:11px; color:#b8b8dc; font-weight:bold;">Đánh giá chung:</span>
-                        <div class="rank-badge" id="bio-rank-badge-final">
-                            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%201%20(1).png?raw=true" class="rank-icon-img" alt="Rank"> CẤP I
-                        </div>
+                        <span style="font-family:'Share Tech Mono', monospace; font-size:11px; color:#00ffcc; font-weight:bold;" id="bio-rank-badge-final">Cấp: Thực Tập</span>
+                        <div style="display:flex; align-items:center; gap:6px;"><span style="font-family:'Share Tech Mono', monospace; font-size:10px; color:#b8b8dc;">Đánh giá chung:</span><div class="star-container" id="total-stars" style="font-size:13px;">★☆☆☆☆</div></div>
                     </div>
                 </div>
 
@@ -348,11 +374,8 @@
                 <div class="stat-box" style="background: rgba(0,255,204,0.1);">
                     <div class="stat-line"><span>Tốc độ trung bình:</span> <span class="stat-val" id="final-ms" style="color:#00ffcc;">0 ms</span></div>
                     <div class="stat-line"><span>Max Bạo phát:</span> <span class="stat-val" id="final-cps" style="color:#ffb700;">0 lần/s</span></div>
-                    <div class="stat-line" style="margin-top:10px; padding-top:10px; border-top:1px dashed #00ffcc; align-items:center;">
-                        <span>ĐÁNH GIÁ CHUNG:</span> 
-                        <span class="stat-val rank-badge" id="final-rank" style="color:#fff;">
-                            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%201%20(1).png?raw=true" class="rank-icon-img" alt="Rank"> CẤP I
-                        </span>
+                    <div class="stat-line" style="margin-top:10px; padding-top:10px; border-top:1px dashed #00ffcc;">
+                        <span>ĐÁNH GIÁ CHUNG:</span> <span class="stat-val" id="final-rank" style="color:#fff;">XUẤT SẮC</span>
                     </div>
                 </div>
 
@@ -367,7 +390,7 @@
         </div>
     </div>
 
-    <!-- TERMINAL BAR Ở VỊ TRÍ TRUNG TRUNG CÂN ĐỐI -->
+    <!-- TERMINAL BAR Ở VỊ TRÍ HOÀN HẢO (GIỮA HỘP VÀ ĐÁY MÀN HÌNH) -->
     <div id="terminal-bar">
         <div class="terminal-track"><span class="terminal-text">HỆ THỐNG K-DRIVE - ĐO LƯỜNG PHẢN XẠ THÔNG MINH - HỆ THỐNG QUÉT LƯỢNG TỬ</span></div>
     </div>
@@ -381,15 +404,14 @@
         </div>
     </div>
 
-    <!-- BẢNG PHÂN CẤP TÍCH HỢP ICON -->
     <div id="tier-guide-overlay" onclick="closeTierGuide()">
         <div class="tier-guide-box" onclick="event.stopPropagation()">
             <div class="tier-guide-header">PHÂN CẤP ĐẶC VỤ</div>
-            <div class="tier-row-item"><div class="tier-line-top"><span><span style="color:#00ffcc;">X1 - X3</span> <span style="color:#00ffcc; font-size:11px; opacity:0.8;">(> 450ms)</span></span><span class="rank-badge"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%201%20(1).png?raw=true" class="rank-icon-img"> CẤP I</span></div><div class="tier-line-bot">Mức cơ bản của người bình thường, thao tác tay và nhận thức còn chậm.</div></div>
-            <div class="tier-row-item"><div class="tier-line-top"><span><span style="color:#00e5ff;">X4 - X6</span> <span style="color:#00e5ff; font-size:11px; opacity:0.8;">(351 - 450ms)</span></span><span class="rank-badge"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%202%20(1).png?raw=true" class="rank-icon-img"> CẤP II</span></div><div class="tier-line-bot">Đã vượt mức trung bình. Thần kinh bắt đầu quen với phản xạ có điều kiện.</div></div>
-            <div class="tier-row-item"><div class="tier-line-top"><span><span style="color:#ffb700;">X7 - X8</span> <span style="color:#ffb700; font-size:11px; opacity:0.8;">(241 - 350ms)</span></span><span class="rank-badge"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%203%20(1).png?raw=true" class="rank-icon-img"> CẤP III</span></div><div class="tier-line-bot">Top 10% tổ chức. Tốc độ xử lý thông tin đã vắt kiệt sự tập trung thông thường.</div></div>
-            <div class="tier-row-item"><div class="tier-line-top"><span><span style="color:#ff007f;">X9 - X10</span> <span style="color:#ff007f; font-size:11px; opacity:0.8;">(161 - 240ms)</span></span><span class="rank-badge"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%204%20(1).png?raw=true" class="rank-icon-img"> CẤP IV</span></div><div class="tier-line-bot">Ngưỡng của Vận động viên thể thao và game thủ chuyên nghiệp.</div></div>
-            <div class="tier-row-item"><div class="tier-line-top"><span><span style="color:#ffffff;">X11 - X12</span> <span style="color:#ffffff; font-size:11px; opacity:0.8;">(≤ 160ms)</span></span><span class="rank-badge" style="text-shadow:0 0 10px #fff;"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%205%20(1).png?raw=true" class="rank-icon-img"> CẤP V</span></div><div class="tier-line-bot">Giới hạn vật lý của con người, phản xạ tay mắt hoàn toàn trong vô thức.</div></div>
+            <div class="tier-row-item"><div class="tier-line-top"><span><span style="color:#00ffcc;">X1 - X3</span> <span style="color:#00ffcc; font-size:11px; opacity:0.8;">(> 450ms)</span></span><span style="color:#b8b8dc;">HẠNG C (Thực Tập)</span></div><div class="tier-line-bot">Mức cơ bản của người bình thường, thao tác tay và nhận thức còn chậm.</div></div>
+            <div class="tier-row-item"><div class="tier-line-top"><span><span style="color:#00e5ff;">X4 - X6</span> <span style="color:#00e5ff; font-size:11px; opacity:0.8;">(351 - 450ms)</span></span><span style="color:#b8b8dc;">HẠNG B (Đặc Vụ)</span></div><div class="tier-line-bot">Đã vượt mức trung bình. Thần kinh bắt đầu quen với phản xạ có điều kiện.</div></div>
+            <div class="tier-row-item"><div class="tier-line-top"><span><span style="color:#ffb700;">X7 - X8</span> <span style="color:#ffb700; font-size:11px; opacity:0.8;">(241 - 350ms)</span></span><span style="color:#ffb700;">HẠNG A (Tinh Anh)</span></div><div class="tier-line-bot">Top 10% tổ chức. Tốc độ xử lý thông tin đã vắt kiệt sự tập trung thông thường.</div></div>
+            <div class="tier-row-item"><div class="tier-line-top"><span><span style="color:#ff007f;">X9 - X10</span> <span style="color:#ff007f; font-size:11px; opacity:0.8;">(161 - 240ms)</span></span><span style="color:#ff007f;">HẠNG S (Chuyên Gia)</span></div><div class="tier-line-bot">Ngưỡng của Vận động viên thể thao và game thủ chuyên nghiệp.</div></div>
+            <div class="tier-row-item"><div class="tier-line-top"><span><span style="color:#ffffff;">X11 - X12</span> <span style="color:#ffffff; font-size:11px; opacity:0.8;">(≤ 160ms)</span></span><span style="color:#ffffff; text-shadow:0 0 10px #fff;">HẠNG S+ (Huyền Thoại)</span></div><div class="tier-line-bot">Giới hạn vật lý của con người, phản xạ tay mắt hoàn toàn trong vô thức.</div></div>
             <div class="btn-alert-row" style="margin-top:20px;"><button class="btn-alert" onclick="closeTierGuide()">ĐÃ HIỂU</button></div>
         </div>
     </div>
@@ -403,20 +425,25 @@
     </div>
 
     <script>
-        // CÁC ICON CẤP ĐỘ ĐƯỢC CHÈN TRỰC TIẾP
         const RANK_ICONS = {
-            1: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%201%20(1).png?raw=true',
-            2: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%202%20(1).png?raw=true',
-            3: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%203%20(1).png?raw=true',
-            4: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%204%20(1).png?raw=true',
-            5: 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%205%20(1).png?raw=true'
+            'Thực Tập': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%201%20(1).png?raw=true',
+            'Đặc Vụ': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%202%20(1).png?raw=true',
+            'Tinh Anh': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%203%20(1).png?raw=true',
+            'Chuyên Gia': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%204%20(1).png?raw=true',
+            'Huyền Thoại': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%205%20(1).png?raw=true'
         };
 
-        function getRankHTML(stars) {
-            let s = Math.max(1, Math.min(5, stars));
-            let iconUrl = RANK_ICONS[s];
-            let roman = ["", "I", "II", "III", "IV", "V"][s];
-            return `<img src="${iconUrl}" class="rank-icon-img" alt="Rank"> CẤP ${roman}`;
+        function getRankNameByStars(stars) {
+            if (stars === 5) return "Huyền Thoại";
+            if (stars === 4) return "Chuyên Gia";
+            if (stars === 3) return "Tinh Anh";
+            if (stars === 2) return "Đặc Vụ";
+            return "Thực Tập";
+        }
+
+        function getRankHTML(rankName) {
+            let iconUrl = RANK_ICONS[rankName] || RANK_ICONS['Thực Tập'];
+            return `<img src="${iconUrl}" class="rank-icon-img" alt="Rank"> ${rankName}`;
         }
 
         let cGame = '1'; let aScore = 0; let reflexScore = 0; let burstScore = 0; let currentMultiplier = 1; let successfulHitsCount = 0; 
@@ -492,15 +519,15 @@
             
             let bTitle = "", bTarget = "";
             if (id === '1') {
-                currentMultiplier = 1; bTitle = "BÀI KIỂM TRA I"; bTarget = "ĐO LƯỜNG PHẢN XẠ NHÃN KHOA<br><br>Chạm để triệt tiêu mọi tụ điểm năng lượng xuất hiện.<br><span style='color:#ff3333; font-weight:bold;'>MỤC TIÊU:</span> Không bỏ lỡ hạt nào!";
+                currentMultiplier = 1; bTitle = "BÀI KIỂM TRA I"; bTarget = "ĐO LƯỜNG PHẢN XẠ<br><br>Chạm để triệt tiêu mọi tụ điểm năng lượng xuất hiện.<br><span style='color:#ff3333; font-weight:bold;'>MỤC TIÊU:</span> Không bỏ lỡ hạt nào!";
             } else if (id === '2') {
                 currentMultiplier = 1; bTitle = "BÀI KIỂM TRA II"; bTarget = "PHẢN XẠ CÓ ĐIỀU KIỆN<br><br>Chỉ bấm hạt Đỏ/Cam. Tuyệt đối né hạt Trắng, Xanh, Tím.<br><span style='color:#ff3333; font-weight:bold;'>MỤC TIÊU:</span> Không được bấm nhầm!";
             } else if (id === '3') {
                 let avg = 450; if (dailyData.ms1 > 0) avg = dailyData.ms1;
-                let startTier = 1; let rankStar = 1;
-                if (avg <= 160 && avg > 0) { startTier = 9; rankStar = 5; } else if (avg <= 240 && avg > 0) { startTier = 7; rankStar = 4; } else if (avg <= 350 && avg > 0) { startTier = 5; rankStar = 3; } else if (avg <= 450 && avg > 0) { startTier = 3; rankStar = 2; }
+                let startTier = 1; let rankStr = "Thực Tập";
+                if (avg <= 160 && avg > 0) { startTier = 9; rankStr = "Huyền Thoại"; } else if (avg <= 240 && avg > 0) { startTier = 7; rankStr = "Chuyên Gia"; } else if (avg <= 350 && avg > 0) { startTier = 5; rankStr = "Tinh Anh"; } else if (avg <= 450 && avg > 0) { startTier = 3; rankStr = "Đặc Vụ"; }
                 currentMultiplier = startTier; bTitle = "BÀI KIỂM TRA III";
-                bTarget = `THỦ TRẬN TỔNG HỢP<br><span style="color:#00ffcc; font-size:11px;">[AI ĐÃ RÀ SOÁT DỮ LIỆU THẦN KINH]</span><br>- Phản xạ: ${avg}ms<br>- Định vị năng lực: ${getRankHTML(rankStar)}<br>- Tốc độ xuất phát: <b style="color:#ffb700;">X${startTier}</b><br><br><span style='color:#ff3333; font-weight:bold;'>MỤC TIÊU:</span> Phá Hạt nhân, diệt hạt Vàng.`;
+                bTarget = `THỦ TRẬN TỔNG HỢP<br><span style="color:#00ffcc; font-size:11px;">[AI ĐÃ RÀ SOÁT DỮ LIỆU THẦN KINH]</span><br>- Phản xạ: ${avg}ms<br>- Định vị năng lực: <b style="color:#ff007f;">${rankStr}</b><br>- Tốc độ xuất phát: <b style="color:#ffb700;">X${startTier}</b><br><br><span style='color:#ff3333; font-weight:bold;'>MỤC TIÊU:</span> Phá Hạt nhân, diệt hạt Vàng.`;
                 let core = document.createElement('div'); core.className = 'core-reactor'; core.style.left = '50%'; core.style.top = '50%'; playArea.appendChild(core);
             }
 
@@ -772,11 +799,18 @@
                     let reflexStars = 1; if (avgMs === 0) reflexStars = 1; else if (avgMs <= 160) reflexStars = 5; else if (avgMs <= 240) reflexStars = 4; else if (avgMs <= 350) reflexStars = 3; else if (avgMs <= 450) reflexStars = 2; else reflexStars = 1;
                     let burstStars = 1; if (bestCps === 0) burstStars = 1; else if (bestCps >= 14) burstStars = 5; else if (bestCps >= 11) burstStars = 4; else if (bestCps >= 8) burstStars = 3; else if (bestCps >= 5) burstStars = 2; else burstStars = 1;
 
+                    let reflexRankName = getRankNameByStars(reflexStars);
+                    let burstRankName = getRankNameByStars(burstStars);
                     let totalStars = Math.max(1, Math.min(5, Math.round((reflexStars + burstStars) / 2)));
+                    let totalRankName = getRankNameByStars(totalStars);
 
-                    document.getElementById('bio-rank-badge-1').innerHTML = getRankHTML(reflexStars);
-                    document.getElementById('bio-rank-badge-2').innerHTML = getRankHTML(burstStars);
-                    document.getElementById('bio-rank-badge-final').innerHTML = getRankHTML(totalStars);
+                    document.getElementById('reflex-stars').innerText = generateStarString(reflexStars);
+                    document.getElementById('burst-stars').innerText = generateStarString(burstStars);
+                    document.getElementById('total-stars').innerText = generateStarString(totalStars);
+
+                    document.getElementById('bio-rank-badge-1').innerHTML = "Cấp: " + getRankHTML(reflexRankName);
+                    document.getElementById('bio-rank-badge-2').innerHTML = "Cấp: " + getRankHTML(burstRankName);
+                    document.getElementById('bio-rank-badge-final').innerHTML = "Cấp: " + getRankHTML(totalRankName);
 
                     let btnNext = document.getElementById('btn-next');
                     if (cGame === '1') { btnNext.innerText = "BÀI 2"; btnNext.onclick = proceedNextStage; } 
@@ -792,15 +826,9 @@
         function retryCurrentStage() { playSound('katana'); document.getElementById('result-overlay').classList.remove('active'); openArena(cGame); }
 
         function proceedNextStage() {
-            playSound('coin'); 
-            document.getElementById('result-overlay').classList.remove('active'); 
-            document.getElementById('task-arena').classList.remove('active');
-            
-            if (cGame === '1') { 
-                setTimeout(() => { openArena('2'); }, 200); 
-            } else if (cGame === '2') { 
-                setTimeout(() => { openArena('3'); }, 200); 
-            }
+            playSound('coin'); document.getElementById('result-overlay').classList.remove('active'); document.getElementById('task-arena').classList.remove('active');
+            if (cGame === '1') { setTimeout(() => { openArena('2'); }, 300); } 
+            else if (cGame === '2') { setTimeout(() => { openArena('3'); }, 300); } 
         }
 
         function showFinalSummary() {
@@ -810,13 +838,13 @@
             let finalMs = validMs.length > 0 ? Math.round(validMs.reduce((a,b)=>a+b,0)/validMs.length) : 0;
             let finalCps = Math.max(sessionStats.cps1, sessionStats.cps2, sessionStats.cps3);
 
-            let rankStars = 1;
+            let rankName = "Thực Tập";
             if (finalMs > 0) {
-                if(finalMs <= 160) rankStars = 5; else if(finalMs <= 240) rankStars = 4; else if(finalMs <= 350) rankStars = 3; else if(finalMs <= 450) rankStars = 2;
+                if(finalMs <= 160) rankName = "Huyền Thoại"; else if(finalMs <= 240) rankName = "Chuyên Gia"; else if(finalMs <= 350) rankName = "Tinh Anh"; else if(finalMs <= 450) rankName = "Đặc Vụ";
             }
             document.getElementById('final-ms').innerText = finalMs > 0 ? finalMs + ' ms' : '-- ms';
             document.getElementById('final-cps').innerText = finalCps > 0 ? finalCps + ' lần/s' : '--';
-            document.getElementById('final-rank').innerHTML = getRankHTML(rankStars);
+            document.getElementById('final-rank').innerHTML = getRankHTML(rankName);
 
             document.getElementById('final-summary-overlay').classList.add('active');
             setTimeout(() => { drawReflexChart7Days(); }, 100);
