@@ -73,7 +73,7 @@
         #freeze-overlay.active { display: flex; }
         .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #00e5ff; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px #00e5ff; }
 
-        /* BẢNG ĐIỂM TỪNG BÀI */
+        /* BẢNG ĐIỂM TỪNG BÀI - ĐỒNG BỘ BỐ CỤC ĐẨY PHẢI + FEEDBACK */
         #result-overlay { position: absolute; inset: 0; background: rgba(2, 10, 20, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 8px; border-radius: 12px; padding: 12px; }
         #result-overlay.active { display: flex; }
         .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #00e5ff; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.5); }
@@ -235,7 +235,7 @@
                 <div class="input-area" id="input-area-3"></div>
             </div>
 
-            <!-- BẢNG ĐIỂM TỪNG BÀI - ĐỒNG BỘ BỐ CỤC ĐẨY PHẢI + FEEDBACK -->
+            <!-- BẢNG ĐIỂM TỪNG BÀI -->
             <div id="result-overlay">
                 <div class="stage-badge-header" id="stage-badge-title">KẾT QUẢ BÀI 1</div>
                 <div class="prestige-panel">
@@ -260,13 +260,13 @@
                             <span id="bio-avg-val" style="color:#00e5ff; font-size:13px; font-weight:bold;">0 ms/ký tự</span>
                         </div>
                         <div class="metric-bot-line">
-                            <span id="bio-rank-badge-final">TÂN BINH</span>
+                            <span id="bio-rank-badge-1">TÂN BINH</span>
                         </div>
                     </div>
                     
                     <div class="final-eval-row">
                         <span class="final-eval-label">ĐÁNH GIÁ CHUNG:</span>
-                        <span style="font-family:'Share Tech Mono', monospace; font-size:12px; color:#fff; font-weight:bold;" id="bio-rank-badge-label"></span>
+                        <span style="font-family:'Share Tech Mono', monospace; font-size:12px; color:#fff; font-weight:bold;" id="bio-rank-badge-final"></span>
                     </div>
                     <div class="master-feedback" id="master-feedback-text"></div>
                 </div>
@@ -395,10 +395,10 @@
             setTimeout(() => { laser.remove(); isPausedForStart = false; document.getElementById('ingame-hud').classList.remove('hidden'); document.getElementById(`game-${cGame}-container`).classList.add('active'); startArena(); }, 800);
         }
 
-        function startArena() { isPlaying = true; if(cGame === '1') runG1(); else if(cGame === '2') runG2(); else if(cGame === '3') runG3(); }
+        function startArena() { isPlaying = true; if(cGame === '1') runGame1(); else if(cGame === '2') runGame2(); else if(cGame === '3') runGame3(); }
 
         function pauseGame() { if(!isPlaying || isPausedForStart) return; playSound('error'); isPausedForStart = true; clearTimeout(gameLogicTimer); if(burstTimer) clearTimeout(burstTimer); document.getElementById('pause-menu-overlay').classList.add('active'); }
-        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; if(cGame === '1') runG1(); else if(cGame === '2') runG2(); }
+        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; if(cGame === '1') runGame1(); else if(cGame === '2') runGame2(); else if(cGame === '3') runGame3(); }
         
         function confirmExitToLobby() {
             playSound('error');
@@ -419,13 +419,13 @@
         function failSequence() { 
             if(!isPlaying || isPausedForStart) return; tempSequenceScore = 0; canClick = false; stabilityHP -= 2; updateHpDisplay(); 
             let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 400);
-            if(stabilityHP <= 0) { finishGame(); } else { currentLevel = Math.max(1, currentLevel - 1); clearTimeout(gameLogicTimer); setTimeout(() => { if (cGame === '1') runG1(); else if (cGame === '2') runG2(); else if (cGame === '3') runG3(); }, 800); }
+            if(stabilityHP <= 0) { finishGame(); } else { currentLevel = Math.max(1, currentLevel - 1); clearTimeout(gameLogicTimer); setTimeout(() => { if (cGame === '1') runGame1(); else if (cGame === '2') runGame2(); else if (cGame === '3') runGame3(); }, 800); }
         }
 
         function processCorrectTap(comboIndex) { totalReactionMs += (Date.now() - inputStartTimestamp); totalCharactersTyped++; inputStartTimestamp = Date.now(); playSound('coin', 1); addTempScore(comboIndex); }
-        function checkLevelUp() { if (patternSeq.length > maxComboLength) maxComboLength = patternSeq.length; commitSequenceScore(); currentLevel++; setTimeout(() => { if (cGame === '1') runG1(); else if (cGame === '2') runG2(); else if (cGame === '3') runG3(); }, 600); }
+        function checkLevelUp() { if (patternSeq.length > maxComboLength) maxComboLength = patternSeq.length; commitSequenceScore(); currentLevel++; setTimeout(() => { if (cGame === '1') runGame1(); else if (cGame === '2') runGame2(); else if (cGame === '3') runGame3(); }, 600); }
 
-        function runG1() {
+        function runGame1() {
             if(!isPlaying || isPausedForStart) return; buildDynamicGrid('1'); patternSeq = []; userSeq = []; canClick = false; tempSequenceScore = 0;
             let config = getGridConfigByLevel(currentLevel); let count = Math.min(3 + currentLevel - 1, Math.floor(config.total * 0.6));
             while(patternSeq.length < count) { let r = Math.floor(Math.random() * config.total); if(!patternSeq.includes(r)) patternSeq.push(r); }
@@ -440,7 +440,7 @@
             if (patternSeq.includes(idx)) { cellEl.classList.add('correct'); processCorrectTap(userSeq.length - 1); if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); } } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
         }
 
-        async function runG2() {
+        async function runGame2() {
             if(!isPlaying || isPausedForStart) return; buildDynamicGrid('2'); patternSeq = []; userSeq = []; canClick = false; tempSequenceScore = 0;
             let config = getGridConfigByLevel(currentLevel); let len = Math.min(3 + currentLevel, Math.floor(config.total * 0.7));
             for(let i=0; i<len; i++) patternSeq.push(Math.floor(Math.random() * config.total));
@@ -457,7 +457,7 @@
             if(idx === patternSeq[userSeq.length]) { cellEl.classList.add('correct'); userSeq.push(idx); setTimeout(() => { if(cellEl) cellEl.classList.remove('correct'); }, 200); processCorrectTap(userSeq.length - 1); if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); } } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
         }
 
-        function runG3() {
+        function runGame3() {
             if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; tempSequenceScore = 0;
             let count = Math.min(3 + currentLevel, 15); for(let i=0; i<count; i++) patternSeq.push(G3_SYMBOLS[Math.floor(Math.random() * G3_SYMBOLS.length)]);
             let area = document.getElementById('seq-area'); area.innerHTML = patternSeq.map(sym => `<div class="quantum-char">${sym}</div>`).join('');
@@ -590,7 +590,8 @@
         }
 
         function finishGame() {
-            isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
+            isPlaying = false; isPausedForStart = true;
+            clearTimeout(gameLogicTimer);
             
             let avgMs = totalCharactersTyped > 0 ? Math.round(totalReactionMs / totalCharactersTyped) : 0;
             if(cGame === '1') { sessionStats.avgMs1 = avgMs; sessionStats.combo1 = maxComboLength; sessionScoreG1 = Math.round(aScore); }
