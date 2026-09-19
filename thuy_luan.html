@@ -73,7 +73,7 @@
         #freeze-overlay.active { display: flex; }
         .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #00e5ff; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px #00e5ff; }
 
-        /* BẢNG ĐIỂM TỪNG BÀI - ĐỒNG BỘ BỐ CỤC ĐẨY PHẢI + FEEDBACK */
+        /* BẢNG ĐIỂM TỪNG BÀI */
         #result-overlay { position: absolute; inset: 0; background: rgba(2, 10, 20, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 8px; border-radius: 12px; padding: 12px; }
         #result-overlay.active { display: flex; }
         .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #00e5ff; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.5); }
@@ -260,13 +260,13 @@
                             <span id="bio-avg-val" style="color:#00e5ff; font-size:13px; font-weight:bold;">0 ms/ký tự</span>
                         </div>
                         <div class="metric-bot-line">
-                            <span id="bio-rank-badge-1">TÂN BINH</span>
+                            <span id="bio-rank-badge-final">TÂN BINH</span>
                         </div>
                     </div>
                     
                     <div class="final-eval-row">
                         <span class="final-eval-label">ĐÁNH GIÁ CHUNG:</span>
-                        <span style="font-family:'Share Tech Mono', monospace; font-size:12px; color:#fff; font-weight:bold;" id="bio-rank-badge-final"></span>
+                        <span style="font-family:'Share Tech Mono', monospace; font-size:12px; color:#fff; font-weight:bold;" id="bio-rank-badge-label"></span>
                     </div>
                     <div class="master-feedback" id="master-feedback-text"></div>
                 </div>
@@ -333,338 +333,162 @@
         let gameLogicTimer;
         const G3_SYMBOLS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
+        let fxCtx = null;
+        function initAudio() { 
+            try {
+                if (!fxCtx) { const AudioContext = window.AudioContext || window.webkitAudioContext; fxCtx = new AudioContext(); }
+                if (fxCtx && fxCtx.state === 'suspended') { fxCtx.resume(); }
+            } catch(e) {}
+        }
+        ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => { window.addEventListener(evt, initAudio, { passive: true }); });
+
+        function playSound(type, pitchMultiplier = 1) {
+            try { 
+                if (fxCtx && fxCtx.state === 'suspended') fxCtx.resume();
+                if (!fxCtx) return;
+                const ctx = fxCtx; const osc = ctx.createOscillator(); const gain = ctx.createGain(); 
+                osc.connect(gain); gain.connect(ctx.destination);
+                
+                if(type === 'katana') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(1200 * pitchMultiplier, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.3); gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3); osc.start(); osc.stop(ctx.currentTime + 0.3); } 
+                else if(type === 'error') { osc.type = 'square'; osc.frequency.setValueAtTime(100, ctx.currentTime); gain.gain.setValueAtTime(0.4, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4); osc.start(); osc.stop(ctx.currentTime + 0.4); } 
+                else if(type === 'coin') { osc.type = 'sine'; osc.frequency.setValueAtTime(1500 * pitchMultiplier, ctx.currentTime); osc.frequency.setValueAtTime(2000 * pitchMultiplier, ctx.currentTime + 0.1); gain.gain.setValueAtTime(0.2, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2); osc.start(); osc.stop(ctx.currentTime + 0.2); } 
+                else if(type === 'boom') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(50, ctx.currentTime); gain.gain.setValueAtTime(0.6, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5); osc.start(); osc.stop(ctx.currentTime + 0.5); }
+            } catch (e) {}
+        }
+        function triggerVibration(pattern) { try { if (navigator.vibrate) { navigator.vibrate(pattern); } } catch(e) {} }
+
         window.onload = () => { openArena('1'); };
 
-        function updateHpDisplay() {
-            let fullBlocks = Math.ceil(stabilityHP / 2);
-            let emptyBlocks = 5 - fullBlocks;
-            let hpStr = "<span style='color:#00e5ff; text-shadow: 0 0 8px #00e5ff;'>" + "▰".repeat(Math.max(0, fullBlocks)) + "</span>" +
-                        "<span style='color:#333;'>" + "▱".repeat(Math.max(0, emptyBlocks)) + "</span>";
-            document.getElementById('boo-lives').innerHTML = hpStr;
-        }
-
-        function getGridConfigByLevel(level) {
-            if (level >= 5) return { size: 5, total: 25, css: 'repeat(5, 1fr)', dim: '270px' };
-            if (level >= 3) return { size: 4, total: 16, css: 'repeat(4, 1fr)', dim: '260px' };
-            return { size: 3, total: 9,  css: 'repeat(3, 1fr)', dim: '240px' };
-        }
-
-        function buildDynamicGrid(gameId) {
-            let container = document.getElementById(`grid-${gameId}`);
-            let config = getGridConfigByLevel(currentLevel);
-            container.innerHTML = '';
-            container.style.gridTemplateColumns = config.css;
-            container.style.gridTemplateRows = config.css; 
-            container.style.width = config.dim;
-            container.style.height = config.dim;
-            for(let i = 0; i < config.total; i++) {
-                let cell = document.createElement('div');
-                cell.className = 'grid-cell';
-                if(gameId === '1') cell.onclick = () => handleGame1Click(i, cell);
-                if(gameId === '2') cell.onclick = () => handleGame2Click(i, cell);
-                container.appendChild(cell);
-            }
-        }
-
-        function buildG3Keyboard() {
-            let area = document.getElementById('input-area-3');
-            area.innerHTML = '';
-            G3_SYMBOLS.forEach(sym => {
-                let btn = document.createElement('button');
-                btn.className = 'btn-symbol';
-                btn.innerText = sym;
-                btn.onclick = () => addToUserSeq(sym);
-                area.appendChild(btn);
-            });
-        }
-
         function openArena(id) {
-            cGame = id; 
-            aScore = 0; 
-            stabilityHP = 10; 
-            isPlaying = false; 
-            isPausedForStart = true;
-            totalReactionMs = 0;
-            totalCharactersTyped = 0;
-            maxComboLength = 0;
-            currentLevel = 1;
-            canBurst = true;
-            burstActive = false;
-            currentMultiplier = 1; 
-            successfulHitsCount = 0;
-            tempSequenceScore = 0;
+            cGame = id; aScore = 0; stabilityHP = 10; isPlaying = false; isPausedForStart = true;
+            totalReactionMs = 0; totalCharactersTyped = 0; maxComboLength = 0; currentLevel = 1;
+            canBurst = true; burstActive = false; currentMultiplier = 1; successfulHitsCount = 0; tempSequenceScore = 0;
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
             document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
 
-            updateHpDisplay(); 
-            document.getElementById('boo-points').innerText = "0";
+            updateHpDisplay(); document.getElementById('boo-points').innerText = "0";
             document.getElementById('result-overlay').classList.remove('active');
             document.getElementById('pause-menu-overlay').classList.remove('active');
             
             let bTitle = "", bTarget = "";
             if (id === '1') {
-                bTitle = "BÀI KIỂM TRA I: TĨNH KHÍ"; 
-                bTarget = "GHI NHỚ VỊ TRÍ<br><br>Hệ thống sẽ làm sáng một cụm các điểm ảnh trong chớp mắt.<br><br><span style='color:#00ffcc; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và bấm lại chính xác các vị trí đó. Bấm sai sẽ bị trừ máu.";
+                bTitle = "BÀI KIỂM TRA I: TĨNH KHÍ"; bTarget = "GHI NHỚ VỊ TRÍ<br><br>Hệ thống sẽ làm sáng một cụm các điểm ảnh trong chớp mắt.<br><br><span style='color:#00ffcc; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và bấm lại chính xác các vị trí đó. Bấm sai sẽ bị trừ máu.";
             } else if (id === '2') {
-                bTitle = "BÀI KIỂM TRA II: LƯU THỦY"; 
-                bTarget = "GHI NHỚ QUỸ ĐẠO<br><br>Một luồng dữ liệu sẽ di chuyển theo quỹ đạo ngẫu nhiên.<br><br><span style='color:#00ffcc; font-weight:bold;'>MỤC TIÊU:</span> Bấm lại chính xác thứ tự các điểm ảnh trên quỹ đạo đó.";
+                bTitle = "BÀI KIỂM TRA II: LƯU THỦY"; bTarget = "GHI NHỚ QUỸ ĐẠO<br><br>Một luồng dữ liệu sẽ di chuyển theo quỹ đạo ngẫu nhiên.<br><br><span style='color:#00ffcc; font-weight:bold;'>MỤC TIÊU:</span> Bấm lại chính xác thứ tự các điểm ảnh trên quỹ đạo đó.";
             } else if (id === '3') {
-                bTitle = "BÀI KIỂM TRA III: TÂM TRẬN";
-                bTarget = "GIẢI MÃ LƯỢNG TỬ<br><br>Hệ thống xuất ra một chuỗi các ký tự lượng tử.<br><br><span style='color:#00ffcc; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và gõ lại đúng thứ tự chuỗi ký hiệu.";
+                bTitle = "BÀI KIỂM TRA III: TÂM TRẬN"; bTarget = "GIẢI MÃ LƯỢNG TỬ<br><br>Hệ thống xuất ra một chuỗi các ký tự lượng tử.<br><br><span style='color:#00ffcc; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và gõ lại đúng thứ tự chuỗi ký hiệu.";
             }
 
-            document.getElementById('briefing-title').innerText = bTitle; 
-            document.getElementById('briefing-target').innerHTML = bTarget;
-
+            document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
             document.getElementById('terminal-bar').classList.remove('hidden');
             document.getElementById('start-prompt-overlay').classList.remove('hidden');
-            
             if (id === '3') buildG3Keyboard();
         }
 
         function triggerStartGame() {
-            document.getElementById('start-prompt-overlay').classList.add('hidden');
-            document.getElementById('terminal-bar').classList.add('hidden');
-
-            let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
-            
-            setTimeout(() => {
-                let playArea = document.getElementById('play-area');
-                playArea.classList.add('fullscreen-mode'); laser.classList.add('expand');
-            }, 300);
-
-            setTimeout(() => {
-                laser.remove(); 
-                isPausedForStart = false;
-                document.getElementById('ingame-hud').classList.remove('hidden');
-                document.getElementById(`game-${cGame}-container`).classList.add('active');
-                startArena();
-            }, 800);
+            initAudio(); playSound('coin');
+            document.getElementById('start-prompt-overlay').classList.add('hidden'); document.getElementById('terminal-bar').classList.add('hidden');
+            playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
+            setTimeout(() => { let playArea = document.getElementById('play-area'); playArea.classList.add('fullscreen-mode'); laser.classList.add('expand'); }, 300);
+            setTimeout(() => { laser.remove(); isPausedForStart = false; document.getElementById('ingame-hud').classList.remove('hidden'); document.getElementById(`game-${cGame}-container`).classList.add('active'); startArena(); }, 800);
         }
 
-        function startArena() { 
-            isPlaying = true; 
-            if(cGame === '1') runGame1(); 
-            else if(cGame === '2') runGame2(); 
-            else if(cGame === '3') runGame3(); 
-        }
+        function startArena() { isPlaying = true; if(cGame === '1') runG1(); else if(cGame === '2') runG2(); else if(cGame === '3') runG3(); }
 
         function pauseGame() { if(!isPlaying || isPausedForStart) return; playSound('error'); isPausedForStart = true; clearTimeout(gameLogicTimer); if(burstTimer) clearTimeout(burstTimer); document.getElementById('pause-menu-overlay').classList.add('active'); }
-        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; if(cGame === '1') runGame1(); else if(cGame === '2') runGame2(); else if(cGame === '3') { /* Tiếp tục bài 3 */ } }
+        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; if(cGame === '1') runG1(); else if(cGame === '2') runG2(); }
         
         function confirmExitToLobby() {
             playSound('error');
             window.location.href = 'LucChien.html'; // Thoát thẳng về sảnh chính Lực Chiến
         }
 
-        function addTempScore(comboIndex) {
-            let pointsToAdd = 10 + (comboIndex * 5); 
-            tempSequenceScore += pointsToAdd;
-        }
+        function addTempScore(comboIndex) { tempSequenceScore += (10 + (comboIndex * 5)); }
 
         function commitSequenceScore() {
-            let finalEarned = tempSequenceScore * currentMultiplier;
-            aScore += finalEarned;
-            tempSequenceScore = 0; 
+            let finalEarned = tempSequenceScore * currentMultiplier; aScore += finalEarned; tempSequenceScore = 0; 
             document.getElementById('boo-points').innerText = Math.round(aScore);
-            
             let floatScore = document.createElement('div'); floatScore.className = 'float-score'; floatScore.innerText = `+${finalEarned}`; floatScore.style.left = '50%'; floatScore.style.top = '25%'; document.getElementById('play-area').appendChild(floatScore); setTimeout(() => floatScore.remove(), 1000);
-
             successfulHitsCount++; 
-            if (successfulHitsCount % 5 === 0 && currentMultiplier < 12) { 
-                currentMultiplier++; 
-                let popup = document.getElementById('speed-popup'); popup.innerText = `X${currentMultiplier}`; popup.classList.add('show'); playSound('coin', 1.8); setTimeout(() => popup.classList.remove('show'), 1400); 
-            }
-
+            if (successfulHitsCount % 5 === 0 && currentMultiplier < 12) { currentMultiplier++; let popup = document.getElementById('speed-popup'); popup.innerText = `X${currentMultiplier}`; popup.classList.add('show'); playSound('coin', 1.8); setTimeout(() => popup.classList.remove('show'), 1400); }
             if (canBurst && Math.random() < 0.04) { forceBurstMode(); }
         }
 
         function failSequence() { 
-            if(!isPlaying || isPausedForStart) return;
-            tempSequenceScore = 0; 
-            canClick = false;
-            stabilityHP -= 2; 
-            updateHpDisplay(); 
-            
+            if(!isPlaying || isPausedForStart) return; tempSequenceScore = 0; canClick = false; stabilityHP -= 2; updateHpDisplay(); 
             let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 400);
-
-            if(stabilityHP <= 0) {
-                finishGame();
-            } else {
-                currentLevel = Math.max(1, currentLevel - 1);
-                clearTimeout(gameLogicTimer);
-                setTimeout(() => {
-                    if (cGame === '1') runGame1();
-                    else if (cGame === '2') runGame2();
-                    else if (cGame === '3') runGame3();
-                }, 800);
-            }
+            if(stabilityHP <= 0) { finishGame(); } else { currentLevel = Math.max(1, currentLevel - 1); clearTimeout(gameLogicTimer); setTimeout(() => { if (cGame === '1') runG1(); else if (cGame === '2') runG2(); else if (cGame === '3') runG3(); }, 800); }
         }
 
-        function processCorrectTap(comboIndex) {
-            totalReactionMs += (Date.now() - inputStartTimestamp);
-            totalCharactersTyped++;
-            inputStartTimestamp = Date.now(); 
-            playSound('coin', 1);
-            addTempScore(comboIndex);
-        }
-
-        function checkLevelUp() {
-            if (patternSeq.length > maxComboLength) maxComboLength = patternSeq.length;
-            commitSequenceScore(); 
-            currentLevel++;
-            setTimeout(() => {
-                if (cGame === '1') runGame1();
-                else if (cGame === '2') runGame2();
-                else if (cGame === '3') runGame3();
-            }, 600);
-        }
+        function processCorrectTap(comboIndex) { totalReactionMs += (Date.now() - inputStartTimestamp); totalCharactersTyped++; inputStartTimestamp = Date.now(); playSound('coin', 1); addTempScore(comboIndex); }
+        function checkLevelUp() { if (patternSeq.length > maxComboLength) maxComboLength = patternSeq.length; commitSequenceScore(); currentLevel++; setTimeout(() => { if (cGame === '1') runG1(); else if (cGame === '2') runG2(); else if (cGame === '3') runG3(); }, 600); }
 
         function runG1() {
-            if(!isPlaying || isPausedForStart) return;
-            buildDynamicGrid('1');
-            patternSeq = []; userSeq = []; canClick = false; tempSequenceScore = 0;
-            
-            let config = getGridConfigByLevel(currentLevel);
-            let count = Math.min(3 + currentLevel - 1, Math.floor(config.total * 0.6));
-            
-            while(patternSeq.length < count) {
-                let r = Math.floor(Math.random() * config.total);
-                if(!patternSeq.includes(r)) patternSeq.push(r);
-            }
-            
-            let cells = document.getElementById('grid-1').children;
-            patternSeq.forEach(idx => { if(cells[idx]) cells[idx].classList.add('active-glow'); });
-            
+            if(!isPlaying || isPausedForStart) return; buildDynamicGrid('1'); patternSeq = []; userSeq = []; canClick = false; tempSequenceScore = 0;
+            let config = getGridConfigByLevel(currentLevel); let count = Math.min(3 + currentLevel - 1, Math.floor(config.total * 0.6));
+            while(patternSeq.length < count) { let r = Math.floor(Math.random() * config.total); if(!patternSeq.includes(r)) patternSeq.push(r); }
+            let cells = document.getElementById('grid-1').children; patternSeq.forEach(idx => { if(cells[idx]) cells[idx].classList.add('active-glow'); });
             gameLogicTimer = setTimeout(() => {
-                if(!isPlaying || isPausedForStart) return;
-                patternSeq.forEach(idx => { if(cells[idx]) cells[idx].classList.remove('active-glow'); });
-                canClick = true;
-                inputStartTimestamp = Date.now();
+                if(!isPlaying || isPausedForStart) return; patternSeq.forEach(idx => { if(cells[idx]) cells[idx].classList.remove('active-glow'); }); canClick = true; inputStartTimestamp = Date.now();
             }, Math.max(300, 1000 - (currentLevel * 80)));
         }
 
         function handleGame1Click(idx, cellEl) {
-            if(!canClick || !isPlaying || isPausedForStart || userSeq.includes(idx)) return;
-            userSeq.push(idx); 
-            
-            if (patternSeq.includes(idx)) {
-                cellEl.classList.add('correct');
-                processCorrectTap(userSeq.length - 1);
-                if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); }
-            } else {
-                cellEl.classList.add('wrong'); playSound('wrong'); failSequence();
-            }
+            if(!canClick || !isPlaying || isPausedForStart || userSeq.includes(idx)) return; userSeq.push(idx); 
+            if (patternSeq.includes(idx)) { cellEl.classList.add('correct'); processCorrectTap(userSeq.length - 1); if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); } } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
         }
 
         async function runG2() {
-            if(!isPlaying || isPausedForStart) return;
-            buildDynamicGrid('2');
-            patternSeq = []; userSeq = []; canClick = false; tempSequenceScore = 0;
-            
-            let config = getGridConfigByLevel(currentLevel);
-            let len = Math.min(3 + currentLevel, Math.floor(config.total * 0.7));
+            if(!isPlaying || isPausedForStart) return; buildDynamicGrid('2'); patternSeq = []; userSeq = []; canClick = false; tempSequenceScore = 0;
+            let config = getGridConfigByLevel(currentLevel); let len = Math.min(3 + currentLevel, Math.floor(config.total * 0.7));
             for(let i=0; i<len; i++) patternSeq.push(Math.floor(Math.random() * config.total));
-            
-            let cells = document.getElementById('grid-2').children;
-            let speed = Math.max(150, 400 - (currentLevel * 40));
-            
+            let cells = document.getElementById('grid-2').children; let speed = Math.max(150, 400 - (currentLevel * 40));
             for(let id of patternSeq) {
-                if(!isPlaying || isPausedForStart) return; 
-                if(cells[id]) cells[id].classList.add('active-glow');
-                await new Promise(r => setTimeout(r, speed));
-                if(!isPlaying || isPausedForStart) return;
-                if(cells[id]) cells[id].classList.remove('active-glow');
-                await new Promise(r => setTimeout(r, 50));
+                if(!isPlaying || isPausedForStart) return; if(cells[id]) cells[id].classList.add('active-glow'); await new Promise(r => setTimeout(r, speed));
+                if(!isPlaying || isPausedForStart) return; if(cells[id]) cells[id].classList.remove('active-glow'); await new Promise(r => setTimeout(r, 50));
             }
-            if(isPlaying && !isPausedForStart) {
-                canClick = true; inputStartTimestamp = Date.now();
-            }
+            if(isPlaying && !isPausedForStart) { canClick = true; inputStartTimestamp = Date.now(); }
         }
 
         function handleGame2Click(idx, cellEl) {
             if(!canClick || !isPlaying || isPausedForStart) return;
-            
-            if(idx === patternSeq[userSeq.length]) {
-                cellEl.classList.add('correct'); userSeq.push(idx); 
-                setTimeout(() => { if(cellEl) cellEl.classList.remove('correct'); }, 200);
-                processCorrectTap(userSeq.length - 1);
-                if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); }
-            } else { 
-                cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); 
-            }
+            if(idx === patternSeq[userSeq.length]) { cellEl.classList.add('correct'); userSeq.push(idx); setTimeout(() => { if(cellEl) cellEl.classList.remove('correct'); }, 200); processCorrectTap(userSeq.length - 1); if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); } } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
         }
 
         function runG3() {
-            if(!isPlaying || isPausedForStart) return;
-            patternSeq = []; userSeq = []; canClick = false; tempSequenceScore = 0;
-            
-            let count = Math.min(3 + currentLevel, 15);
-            for(let i=0; i<count; i++) patternSeq.push(G3_SYMBOLS[Math.floor(Math.random() * G3_SYMBOLS.length)]);
-            
-            let area = document.getElementById('seq-area');
-            area.innerHTML = patternSeq.map(sym => `<div class="quantum-char">${sym}</div>`).join('');
-            
+            if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; tempSequenceScore = 0;
+            let count = Math.min(3 + currentLevel, 15); for(let i=0; i<count; i++) patternSeq.push(G3_SYMBOLS[Math.floor(Math.random() * G3_SYMBOLS.length)]);
+            let area = document.getElementById('seq-area'); area.innerHTML = patternSeq.map(sym => `<div class="quantum-char">${sym}</div>`).join('');
             gameLogicTimer = setTimeout(() => {
-                if(!isPlaying || isPausedForStart) return;
-                area.innerHTML = `<div class="hidden-box">?</div>`.repeat(patternSeq.length);
-                canClick = true;
-                inputStartTimestamp = Date.now();
+                if(!isPlaying || isPausedForStart) return; area.innerHTML = `<div class="hidden-box">?</div>`.repeat(patternSeq.length); canClick = true; inputStartTimestamp = Date.now();
             }, Math.max(500, 1500 - (currentLevel * 100)));
         }
         
         function addToUserSeq(sym) {
             if(!canClick || !isPlaying || isPausedForStart) return;
-            
             if(sym === patternSeq[userSeq.length]) {
-                userSeq.push(sym); 
-                let html = userSeq.map(s => `<div class="quantum-char">${s}</div>`).join('');
-                html += `<div class="hidden-box">?</div>`.repeat(patternSeq.length - userSeq.length);
-                document.getElementById('seq-area').innerHTML = html;
-                
-                processCorrectTap(userSeq.length - 1);
-                if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); }
-            } else { 
-                playSound('wrong'); failSequence(); 
-            }
+                userSeq.push(sym); let html = userSeq.map(s => `<div class="quantum-char">${s}</div>`).join(''); html += `<div class="hidden-box">?</div>`.repeat(patternSeq.length - userSeq.length); document.getElementById('seq-area').innerHTML = html;
+                processCorrectTap(userSeq.length - 1); if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); }
+            } else { playSound('wrong'); failSequence(); }
         }
 
         function forceBurstMode() {
-            if(!isPlaying || isPausedForStart) return;
-            isPausedForStart = true;
-            canBurst = false;
-            clearTimeout(gameLogicTimer);
-            
-            let playArea = document.getElementById('play-area');
-            document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
-            
-            playSound('error', 1.5);
-            triggerVibration([100, 50, 100]);
-
-            let warn = document.createElement('div');
-            warn.className = 'freeze-text';
-            warn.style.position = 'absolute'; warn.style.top = '40%'; warn.style.left = '50%'; warn.style.transform = 'translate(-50%,-50%)';
-            warn.innerHTML = "BẠO PHÁT<br>TRÍ NHỚ!";
-            warn.style.textAlign = 'center'; warn.style.color = '#00ffcc'; warn.style.textShadow = '0 0 20px #00ffcc';
-            playArea.appendChild(warn);
-
+            if(!isPlaying || isPausedForStart) return; isPausedForStart = true; canBurst = false; clearTimeout(gameLogicTimer);
+            let playArea = document.getElementById('play-area'); document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
+            playSound('error', 1.5); triggerVibration([100, 50, 100]);
+            let warn = document.createElement('div'); warn.className = 'freeze-text'; warn.style.position = 'absolute'; warn.style.top = '40%'; warn.style.left = '50%'; warn.style.transform = 'translate(-50%,-50%)'; warn.innerHTML = "BẠO PHÁT<br>TRÍ NHỚ!"; warn.style.textAlign = 'center'; warn.style.color = '#00ffcc'; warn.style.textShadow = '0 0 20px #00ffcc'; playArea.appendChild(warn);
             setTimeout(() => { warn.remove(); triggerGreatBurst(); }, 1200);
         }
 
         function triggerGreatBurst() {
-            burstActive = true;
-            let playArea = document.getElementById('play-area'); 
-            let blackout = document.createElement('div'); blackout.className = 'blackout-bg active'; playArea.appendChild(blackout);
-            
+            burstActive = true; let playArea = document.getElementById('play-area'); let blackout = document.createElement('div'); blackout.className = 'blackout-bg active'; playArea.appendChild(blackout);
             let burstContainer = document.createElement('div'); burstContainer.className = 'burst-container'; 
             let burstHeader = document.createElement('div'); burstHeader.className = 'burst-header-text'; burstContainer.appendChild(burstHeader);
             let bGrid = document.createElement('div'); bGrid.className = 'dynamic-grid'; burstContainer.appendChild(bGrid);
-            let bTimerBar = document.createElement('div'); bTimerBar.className = 'burst-timer-bar';
-            let bTimerFill = document.createElement('div'); bTimerFill.className = 'burst-timer-fill';
-            bTimerBar.appendChild(bTimerFill); burstContainer.appendChild(bTimerBar);
-            playArea.appendChild(burstContainer);
+            let bTimerBar = document.createElement('div'); bTimerBar.className = 'burst-timer-bar'; let bTimerFill = document.createElement('div'); bTimerFill.className = 'burst-timer-fill';
+            bTimerBar.appendChild(bTimerFill); burstContainer.appendChild(bTimerBar); playArea.appendChild(burstContainer);
 
             let burstClicks = 0; let duration = 7000; let burstType = Math.floor(Math.random() * 3) + 1;
             setTimeout(() => { bTimerFill.style.width = '0%'; bTimerFill.style.transition = `width ${duration}ms linear`; }, 50);
@@ -672,22 +496,16 @@
             if (burstType === 1) {
                 burstHeader.innerHTML = "KÝ ỨC CHỚP NHOÁNG<br><span style='font-size:12px; color:#fff;'>BẤM CÁC Ô VỪA SÁNG!</span>";
                 function setupB1() {
-                    if(!burstActive) return;
-                    bGrid.innerHTML = ''; bGrid.style.gridTemplateColumns = 'repeat(5, 1fr)'; bGrid.style.width = '280px'; bGrid.style.height = '280px';
+                    if(!burstActive) return; bGrid.innerHTML = ''; bGrid.style.gridTemplateColumns = 'repeat(5, 1fr)'; bGrid.style.width = '280px'; bGrid.style.height = '280px';
                     let cells = []; for(let i=0; i<25; i++) { let c = document.createElement('div'); c.className = 'grid-cell'; bGrid.appendChild(c); cells.push(c); }
                     let activeIdxs = []; while(activeIdxs.length < 10) { let r = Math.floor(Math.random()*25); if(!activeIdxs.includes(r)) activeIdxs.push(r); }
                     activeIdxs.forEach(i => cells[i].classList.add('active-glow'));
                     setTimeout(() => {
-                        if(!burstActive) return;
-                        activeIdxs.forEach(i => cells[i].classList.remove('active-glow'));
+                        if(!burstActive) return; activeIdxs.forEach(i => cells[i].classList.remove('active-glow'));
                         cells.forEach((c, i) => {
                             c.onclick = () => {
                                 if(!burstActive) return;
-                                if(activeIdxs.includes(i)) {
-                                    c.classList.add('correct'); burstClicks++; playSound('coin', 1.5); triggerVibration(30);
-                                    let idx = activeIdxs.indexOf(i); if(idx > -1) activeIdxs.splice(idx, 1);
-                                    if(activeIdxs.length === 0) setTimeout(setupB1, 200);
-                                }
+                                if(activeIdxs.includes(i)) { c.classList.add('correct'); burstClicks++; playSound('coin', 1.5); triggerVibration(30); let idx = activeIdxs.indexOf(i); if(idx > -1) activeIdxs.splice(idx, 1); if(activeIdxs.length === 0) setTimeout(setupB1, 200); }
                             };
                         });
                     }, 500);
@@ -696,8 +514,7 @@
             } else if (burstType === 2) {
                 burstHeader.innerHTML = "DÒNG CHẢY CẤP TỐC<br><span style='font-size:12px; color:#fff;'>BẤM ĐÚNG QUỸ ĐẠO!</span>";
                 function setupB2() {
-                    if(!burstActive) return;
-                    bGrid.innerHTML = ''; bGrid.style.gridTemplateColumns = 'repeat(4, 1fr)'; bGrid.style.width = '260px'; bGrid.style.height = '260px';
+                    if(!burstActive) return; bGrid.innerHTML = ''; bGrid.style.gridTemplateColumns = 'repeat(4, 1fr)'; bGrid.style.width = '260px'; bGrid.style.height = '260px';
                     let cells = []; for(let i=0; i<16; i++) { let c = document.createElement('div'); c.className = 'grid-cell'; bGrid.appendChild(c); cells.push(c); }
                     let path = []; while(path.length < 5) { let r = Math.floor(Math.random()*16); if(!path.includes(r)) path.push(r); }
                     let step = 0;
@@ -710,10 +527,7 @@
                             cells.forEach((c, i) => {
                                 c.onclick = () => {
                                     if(!burstActive) return;
-                                    if(i === path[userStep]) {
-                                        c.classList.add('correct'); burstClicks++; playSound('coin', 1.5); triggerVibration(30);
-                                        userStep++; if(userStep === path.length) setTimeout(setupB2, 200);
-                                    }
+                                    if(i === path[userStep]) { c.classList.add('correct'); burstClicks++; playSound('coin', 1.5); triggerVibration(30); userStep++; if(userStep === path.length) setTimeout(setupB2, 200); }
                                 };
                             });
                         }
@@ -722,8 +536,7 @@
                 setupB2();
             } else if (burstType === 3) {
                 function setupB3() {
-                    if(!burstActive) return;
-                    bGrid.innerHTML = ''; bGrid.style.gridTemplateColumns = 'repeat(4, 1fr)'; bGrid.style.width = '260px'; bGrid.style.height = '260px';
+                    if(!burstActive) return; bGrid.innerHTML = ''; bGrid.style.gridTemplateColumns = 'repeat(4, 1fr)'; bGrid.style.width = '260px'; bGrid.style.height = '260px';
                     let targetSym = G3_SYMBOLS[Math.floor(Math.random()*G3_SYMBOLS.length)];
                     burstHeader.innerHTML = `LỌC TÀN ẢNH<br><span style='font-size:14px; color:#00ffcc;'>TÌM TẤT CẢ KÝ HIỆU: [ ${targetSym} ]</span>`;
                     let cellsData = []; for(let i=0; i<5; i++) cellsData.push(targetSym);
@@ -737,10 +550,7 @@
                             c.innerHTML = '?';
                             c.onclick = () => {
                                 if(!burstActive) return;
-                                if(cellsData[i] === targetSym) {
-                                    c.innerHTML = targetSym; c.classList.add('correct'); burstClicks++; playSound('coin', 1.5); triggerVibration(30);
-                                    targetsRemaining--; if(targetsRemaining === 0) setTimeout(setupB3, 200);
-                                }
+                                if(cellsData[i] === targetSym) { c.innerHTML = targetSym; c.classList.add('correct'); burstClicks++; playSound('coin', 1.5); triggerVibration(30); targetsRemaining--; if(targetsRemaining === 0) setTimeout(setupB3, 200); }
                             };
                         });
                     }, 800);
@@ -780,8 +590,7 @@
         }
 
         function finishGame() {
-            isPlaying = false; isPausedForStart = true;
-            clearTimeout(gameLogicTimer);
+            isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
             
             let avgMs = totalCharactersTyped > 0 ? Math.round(totalReactionMs / totalCharactersTyped) : 0;
             if(cGame === '1') { sessionStats.avgMs1 = avgMs; sessionStats.combo1 = maxComboLength; sessionScoreG1 = Math.round(aScore); }
