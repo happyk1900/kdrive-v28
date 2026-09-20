@@ -68,7 +68,6 @@
         #freeze-overlay.active { display: flex; }
         .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #00e5ff; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px #00e5ff; }
 
-        /* BẢNG ĐIỂM TỪNG BÀI */
         #result-overlay { position: absolute; inset: 0; background: rgba(2, 10, 20, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 8px; border-radius: 12px; padding: 12px; }
         #result-overlay.active { display: flex; }
         .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #00e5ff; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.5); }
@@ -199,7 +198,7 @@
         .screen-shake-light { animation: shakeLight 0.1s infinite; } .screen-shake-heavy { animation: shakeHeavy 0.1s infinite; } .screen-shake-ultra { animation: shakeUltra 0.08s infinite; }
         @keyframes shakeLight { 0% { transform: translate(1px, 1px) rotate(0deg); } 50% { transform: translate(-1px, -2px) rotate(-1deg); } 100% { transform: translate(-2px, 1px) rotate(1deg); } } @keyframes shakeHeavy { 0% { transform: translate(3px, 3px) rotate(0deg); } 50% { transform: translate(-3px, -4px) rotate(-2deg); } 100% { transform: translate(-4px, 3px) rotate(2deg); } } @keyframes shakeUltra { 0% { transform: translate(6px, 6px) rotate(1deg); } 50% { transform: translate(-6px, -7px) rotate(-2deg); } 100% { transform: translate(-7px, 6px) rotate(2deg); } }
 
-        /* MÀU SẮC CHỈ SỐ MILI-GIÂY ĐỘNG (XANH KHI NHANH <500MS, ĐỎ KHI CHẬM) */
+        /* MÀU SẮC CHỈ SỐ MILI-GIÂY ĐỘNG (XANH KHI NHANH <300MS, ĐỎ KHI CHẬM) */
         .floating-ms { position: absolute; font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: 900; pointer-events: none; z-index: 100000; transform: translate(-50%, -50%); animation: floatUpMs 0.8s ease-out forwards; }
         .ms-fast { color: #00ffcc; text-shadow: 0 0 12px #00ffcc; } 
         .ms-slow { color: #ff3333; text-shadow: 0 0 12px #ff3333; } 
@@ -314,7 +313,7 @@
                 </div>
             </div>
 
-            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG (CÓ KÈM BỘ LỌC BÀN TAY SẮT & FIX LỖI CHỮ ĐEN) -->
+            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG -->
             <div id="final-summary-overlay">
                 <div class="final-header">TỔNG KẾT THỦY LUÂN</div>
                 <div class="stat-box">
@@ -364,7 +363,6 @@
     </div>
 
     <script>
-        // ================= XỬ LÝ AUDIO CONTEXT GẮT GAY ĐỂ CHỐNG MẤT TIẾNG =================
         let fxCtx = null;
         function initAudio() { 
             try {
@@ -397,7 +395,6 @@
         }
         function triggerVibration(pattern) { try { if (navigator.vibrate) { navigator.vibrate(pattern); } } catch(e) {} }
 
-        // ================= DỮ LIỆU & BIẾN CƠ BẢN =================
         const RANK_ICONS = {
             'Tân Binh': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%201%20(1).png?raw=true',
             'Chiến Binh': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%202%20(1).png?raw=true',
@@ -452,10 +449,9 @@
             ctx.stroke(); ctx.shadowBlur = 0; points.forEach(p => { ctx.beginPath(); ctx.fillStyle = '#00ffcc'; ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill(); });
         }
 
-        // ================== MỞ RỘNG MA TRẬN LÊN 6x6 ==================
         function getGridConfigByLevel(level) {
-            if (level >= 7) return { size: 6, total: 36, css: 'repeat(6, 1fr)', dim: '300px' }; // Cảnh giới ác mộng 36 ô
-            if (level >= 5) return { size: 5, total: 25, css: 'repeat(5, 1fr)', dim: '280px' }; // Khó 25 ô
+            if (level >= 7) return { size: 6, total: 36, css: 'repeat(6, 1fr)', dim: '300px' }; 
+            if (level >= 5) return { size: 5, total: 25, css: 'repeat(5, 1fr)', dim: '280px' }; 
             if (level >= 3) return { size: 4, total: 16, css: 'repeat(4, 1fr)', dim: '260px' };
             return { size: 3, total: 9,  css: 'repeat(3, 1fr)', dim: '240px' };
         }
@@ -484,7 +480,7 @@
         function openArena(id) {
             cGame = id; aScore = 0; stabilityHP = 10; isPlaying = false; isPausedForStart = true;
             totalReactionMs = 0; totalCharactersTyped = 0; maxComboLength = 0; currentLevel = 1;
-            canBurst = true; burstActive = false; currentMultiplier = 1; successfulHitsCount = 0;
+            canBurst = true; burstActive = false; currentMultiplier = 1; successfulHitsCount = 0; 
             reactionTimes = []; bestCps = 0;
 
             let playArea = document.getElementById('play-area');
@@ -542,13 +538,12 @@
             if(stabilityHP <= 0) { finishGame(); } else { currentLevel = Math.max(1, currentLevel - 1); clearTimeout(gameLogicTimer); setTimeout(() => { if (cGame === '1') runGame1(); else if (cGame === '2') runGame2(); else if (cGame === '3') runGame3(); }, 800); }
         }
 
-        // ĐÃ KHÔI PHỤC CỘNG ĐIỂM NGAY LẬP TỨC CHO THỦY LUÂN
         function processCorrectTap(comboIndex, exactReaction, px, py, playArea) { 
             totalReactionMs += (Date.now() - inputStartTimestamp); totalCharactersTyped++; inputStartTimestamp = Date.now(); 
             reactionTimes.push(exactReaction);
             
-            // Xanh khi < 500ms, Đỏ khi >= 500ms
-            let msClass = exactReaction < 500 ? 'ms-fast' : 'ms-slow';
+            // Xanh khi < 300ms, Đỏ khi >= 300ms
+            let msClass = exactReaction < 300 ? 'ms-fast' : 'ms-slow';
             let fel = document.createElement('div'); fel.className = `floating-ms ${msClass}`; fel.innerHTML = `${exactReaction}ms`; 
             fel.style.left = px+'px'; fel.style.top = py+'px'; playArea.appendChild(fel); setTimeout(() => fel.remove(), 800);
 
@@ -568,12 +563,15 @@
             if (canBurst && Math.random() < 0.04) { forceBurstMode(); }
         }
 
-        function checkLevelUp() { if (patternSeq.length > maxComboLength) maxComboLength = patternSeq.length; currentLevel++; setTimeout(() => { if (cGame === '1') runGame1(); else if (cGame === '2') runGame2(); else if (cGame === '3') runGame3(); }, 600); }
+        function checkLevelUp() { 
+            if (patternSeq.length > maxComboLength) maxComboLength = patternSeq.length; 
+            currentLevel++; 
+            setTimeout(() => { if (cGame === '1') runGame1(); else if (cGame === '2') runGame2(); else if (cGame === '3') runGame3(); }, 600); 
+        }
 
         function runGame1() {
             if(!isPlaying || isPausedForStart) return; buildDynamicGrid('1'); patternSeq = []; userSeq = []; canClick = false; 
             let config = getGridConfigByLevel(currentLevel); 
-            // ÉP SỐ LƯỢNG Ô LÊN RẤT CAO CHO ĐỦ ĐỘ KHÓ
             let count = Math.min(3 + currentLevel, Math.floor(config.total * 0.7)); 
             
             while(patternSeq.length < count) { let r = Math.floor(Math.random() * config.total); if(!patternSeq.includes(r)) patternSeq.push(r); }
@@ -598,7 +596,7 @@
         async function runGame2() {
             if(!isPlaying || isPausedForStart) return; buildDynamicGrid('2'); patternSeq = []; userSeq = []; canClick = false; 
             let config = getGridConfigByLevel(currentLevel); 
-            let len = Math.min(3 + currentLevel * 2, Math.floor(config.total * 0.8)); // Càng cấp cao càng dài
+            let len = Math.min(3 + currentLevel * 2, Math.floor(config.total * 0.8)); 
             for(let i=0; i<len; i++) patternSeq.push(Math.floor(Math.random() * config.total));
             let cells = document.getElementById('grid-2').children; let speed = Math.max(150, 400 - (currentLevel * 40)); 
             
@@ -743,8 +741,6 @@
             earnedScore = Math.round(clicks * 4.2 * ((tier===5)?35:(tier===4)?26:(tier===3)?17:(tier===2)?9:3)); 
             if (earnedScore < 100) earnedScore = 100;
 
-            if (normalizedCps > bestCps) bestCps = normalizedCps;
-
             let beam = document.createElement('div'); beam.className = `beam beam-t${tier}`; playArea.appendChild(beam);
             let cpsEl = document.createElement('div'); cpsEl.className = 'floating-cps'; cpsEl.innerHTML = `${normalizedCps} LẦN/S (TƯƠNG ĐƯƠNG)`; playArea.appendChild(cpsEl); setTimeout(() => cpsEl.remove(), 1500);
 
@@ -771,7 +767,6 @@
             
             let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
             
-            // BÀN TAY SẮT THỦY LUÂN: ĐIỂM SỐ TỪNG ẢI PHẢI ĐẠT >= 3000 MỚI ĐƯỢC TÍNH DỮ LIỆU CHUẨN
             let currentHits = (cGame === '1') ? hitsCountG1 : (cGame === '2') ? hitsCountG2 : hitsCountG3;
             if (aScore < 3000 || currentHits < 15) {
                 aScore = 0;
@@ -802,10 +797,10 @@
 
                 let reflexStars = 1; 
                 if (aScore === 0 || avgMs === 0) { reflexStars = 1; } 
-                else if (maxComboLength >= 20 && avgMs <= 300) { reflexStars = 5; } // Huyền Thoại
-                else if (maxComboLength >= 14 && avgMs <= 500) { reflexStars = 4; } // Đặc Vụ
-                else if (maxComboLength >= 9  && avgMs <= 800) { reflexStars = 3; } // Tinh Anh
-                else if (maxComboLength >= 5  && avgMs <= 1200) { reflexStars = 2; } // Chiến Binh
+                else if (maxComboLength >= 20 && avgMs <= 300) { reflexStars = 5; } 
+                else if (maxComboLength >= 14 && avgMs <= 500) { reflexStars = 4; } 
+                else if (maxComboLength >= 9  && avgMs <= 800) { reflexStars = 3; } 
+                else if (maxComboLength >= 5  && avgMs <= 1200) { reflexStars = 2; } 
                 else { reflexStars = 1; }
 
                 let rankName = getRankNameByStars(reflexStars);
