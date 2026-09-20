@@ -68,6 +68,7 @@
         #freeze-overlay.active { display: flex; }
         .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #00e5ff; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px #00e5ff; }
 
+        /* BẢNG ĐIỂM TỪNG BÀI */
         #result-overlay { position: absolute; inset: 0; background: rgba(2, 10, 20, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 8px; border-radius: 12px; padding: 12px; }
         #result-overlay.active { display: flex; }
         .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #00e5ff; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.5); }
@@ -363,6 +364,14 @@
     </div>
 
     <script>
+        function getRankNameByStars(stars) {
+            if (stars === 5) return "Huyền Thoại";
+            if (stars === 4) return "Đặc Vụ";
+            if (stars === 3) return "Tinh Anh";
+            if (stars === 2) return "Chiến Binh";
+            return "Tân Binh";
+        }
+
         let fxCtx = null;
         function initAudio() { 
             try {
@@ -551,7 +560,7 @@
 
             playSound('coin', 1); 
             
-            // CỘNG ĐIỂM VÀ HIỂN THỊ LUÔN (KHÔNG CHỜ HẾT CHUỖI NỮA)
+            // CỘNG ĐIỂM NGAY LẬP TỨC 
             let pointsToAdd = (10 + (comboIndex * 5)) * currentMultiplier; 
             aScore += pointsToAdd;
             document.getElementById('boo-points').innerText = Math.round(aScore);
@@ -559,13 +568,20 @@
             let floatScore = document.createElement('div'); floatScore.className = 'float-score'; floatScore.innerText = `+${pointsToAdd}`; floatScore.style.left = '50%'; floatScore.style.top = '25%'; playArea.appendChild(floatScore); setTimeout(() => floatScore.remove(), 1000);
             
             successfulHitsCount++; 
-            if (successfulHitsCount % 5 === 0 && currentMultiplier < 12) { currentMultiplier++; let popup = document.getElementById('speed-popup'); popup.innerText = `X${currentMultiplier}`; popup.classList.add('show'); playSound('coin', 1.8); setTimeout(() => popup.classList.remove('show'), 1400); }
             if (canBurst && Math.random() < 0.04) { forceBurstMode(); }
         }
 
         function checkLevelUp() { 
             if (patternSeq.length > maxComboLength) maxComboLength = patternSeq.length; 
+            
+            let oldMultiplier = currentMultiplier;
             currentLevel++; 
+            currentMultiplier = Math.min(12, 1 + Math.floor((currentLevel - 1) / 2));
+            
+            if (currentMultiplier > oldMultiplier) {
+                let popup = document.getElementById('speed-popup'); popup.innerText = `X${currentMultiplier}`; popup.classList.add('show'); playSound('coin', 1.8); setTimeout(() => popup.classList.remove('show'), 1400); 
+            }
+
             setTimeout(() => { if (cGame === '1') runGame1(); else if (cGame === '2') runGame2(); else if (cGame === '3') runGame3(); }, 600); 
         }
 
@@ -577,10 +593,10 @@
             while(patternSeq.length < count) { let r = Math.floor(Math.random() * config.total); if(!patternSeq.includes(r)) patternSeq.push(r); }
             let cells = document.getElementById('grid-1').children; patternSeq.forEach(idx => { if(cells[idx]) cells[idx].classList.add('active-glow'); });
             
-            // TRẢ VỀ NHỊP ĐỘ HIỂN THỊ CŨ ĐỂ NÃO KỊP QUÉT
+            // TRẢ VỀ NHỊP ĐỘ HIỂN THỊ CHUẨN ĐỂ NÃO KỊP QUÉT
             gameLogicTimer = setTimeout(() => {
                 if(!isPlaying || isPausedForStart) return; patternSeq.forEach(idx => { if(cells[idx]) cells[idx].classList.remove('active-glow'); }); canClick = true; inputStartTimestamp = Date.now();
-            }, Math.max(400, 1500 - (currentLevel * 100)));
+            }, Math.max(500, 1500 - (currentLevel * 100)));
         }
 
         function handleGame1Click(idx, cellEl) {
@@ -598,11 +614,11 @@
             let config = getGridConfigByLevel(currentLevel); 
             let len = Math.min(3 + currentLevel * 2, Math.floor(config.total * 0.8)); 
             for(let i=0; i<len; i++) patternSeq.push(Math.floor(Math.random() * config.total));
-            let cells = document.getElementById('grid-2').children; let speed = Math.max(150, 400 - (currentLevel * 40)); 
+            let cells = document.getElementById('grid-2').children; let speed = Math.max(200, 450 - (currentLevel * 30)); 
             
             for(let id of patternSeq) {
                 if(!isPlaying || isPausedForStart) return; if(cells[id]) cells[id].classList.add('active-glow'); await new Promise(r => setTimeout(r, speed));
-                if(!isPlaying || isPausedForStart) return; if(cells[id]) cells[id].classList.remove('active-glow'); await new Promise(r => setTimeout(r, 40));
+                if(!isPlaying || isPausedForStart) return; if(cells[id]) cells[id].classList.remove('active-glow'); await new Promise(r => setTimeout(r, 60));
             }
             if(isPlaying && !isPausedForStart) { canClick = true; inputStartTimestamp = Date.now(); }
         }
@@ -659,8 +675,6 @@
             bTimerBar.appendChild(bTimerFill); burstContainer.appendChild(bTimerBar); playArea.appendChild(burstContainer);
 
             let burstClicks = 0; let duration = 7000; 
-            
-            // CỐ ĐỊNH BẠO PHÁT THEO TỪNG ẢI
             let burstType = parseInt(cGame);
 
             setTimeout(() => { bTimerFill.style.width = '0%'; bTimerFill.style.transition = `width ${duration}ms linear`; }, 50);
@@ -740,6 +754,8 @@
             if (clicks >= 25) { tier = 5; beamTime = 1000; } else if (clicks >= 19) { tier = 4; beamTime = 1200; } else if (clicks >= 13) { tier = 3; beamTime = 1500; } else if (clicks >= 7) { tier = 2; beamTime = 1800; } 
             earnedScore = Math.round(clicks * 4.2 * ((tier===5)?35:(tier===4)?26:(tier===3)?17:(tier===2)?9:3)); 
             if (earnedScore < 100) earnedScore = 100;
+
+            if (normalizedCps > bestCps) bestCps = normalizedCps;
 
             let beam = document.createElement('div'); beam.className = `beam beam-t${tier}`; playArea.appendChild(beam);
             let cpsEl = document.createElement('div'); cpsEl.className = 'floating-cps'; cpsEl.innerHTML = `${normalizedCps} LẦN/S (TƯƠNG ĐƯƠNG)`; playArea.appendChild(cpsEl); setTimeout(() => cpsEl.remove(), 1500);
