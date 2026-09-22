@@ -254,12 +254,13 @@
 
         const SYMBOL_KEYS = ['lightning', 'circle', 'triangle', 'square'];
 
-        function getRankByStructure(maxLevel, score) {
-            if (score < 500) return { name: "Kém", feedback: "« Chưa đạt ngưỡng tối thiểu (500 Data). Phạt rớt hạng Kém! »" };
-            if (maxLevel >= 4) return { name: "Thần Đồng", feedback: "« Cảnh giới đỉnh cao! Chinh phục cấu trúc cực hạn full màn hình. »" };
-            if (maxLevel === 3) return { name: "Xuất Sắc", feedback: "« Khả năng truy xuất cấu trúc phức hợp vô cùng nhạy bén. »" };
-            if (maxLevel === 2) return { name: "Giỏi", feedback: "« Nền tảng trí nhớ vững chắc, xử lý tốt các cấu trúc mở rộng. »" };
-            if (maxLevel === 1) return { name: "Trung Bình", feedback: "« Đã làm chủ được cấu trúc cơ bản của hệ thống. »" };
+        // HỆ THỐNG ĐÁNH GIÁ ĐÚNG CẤP ĐỘ THỰC TẾ (CHỈ TÍNH KHI HOÀN THÀNH THỰC SỰ)
+        function getRankByStructure(completedLevel, score) {
+            if (score < 500 || completedLevel <= 1) return { name: "Kém", feedback: "« Hoàn thành mức 3x3 / 4 hình. Xếp loại Kém. »" };
+            if (completedLevel === 2) return { name: "Trung Bình", feedback: "« Hoàn thành mức 5x5 / 6 hình. Xếp loại Trung Bình. »" };
+            if (completedLevel === 3) return { name: "Giỏi", feedback: "« Hoàn thành mức 7x7 / 9 hình. Xếp loại Giỏi. »" };
+            if (completedLevel === 4) return { name: "Xuất Sắc", feedback: "« Chinh phục các cấp độ tổng thể phức hợp. Xếp loại Xuất Sắc. »" };
+            if (completedLevel >= 5) return { name: "Thần Đồng", feedback: "« Cảnh giới đỉnh cao! Chinh phục cấu trúc cực hạn full màn hình (12x12 / 18 hình). »" };
             return { name: "Kém", feedback: "« Cần rèn luyện thêm để vượt qua các mốc cấu trúc cơ bản. »" };
         }
 
@@ -345,8 +346,8 @@
         let sessionScoreG1 = 0, sessionScoreG2 = 0;
         let hitsCountG1 = 0, hitsCountG2 = 0; 
 
-        let currentLevel = 1; 
-        let maxLevelAchieved = 1;
+        let currentLevel = 1; // 1: Kém (3x3 / 4 hình), 2: Trung Bình (5x5 / 6 hình), 3: Giỏi (7x7 / 9 hình), 4: Xuất Sắc, 5: Thần Đồng (12x12 / 18 hình)
+        let highestCompletedLevel = 1; // CHỈ GHI NHẬN KHI HOÀN THÀNH THỰC SỰ
         let winsInCurrentLevel = 0; 
         let canClick = false;
         let patternSeq = [];
@@ -358,17 +359,19 @@
         };
 
         function getGridConfigByLevel(level) {
-            if (level >= 4) return { size: 12, total: 144, css: 'repeat(12, 1fr)', dim: '350px' }; 
-            if (level === 3) return { size: 7, total: 49, css: 'repeat(7, 1fr)', dim: '320px' };   
-            if (level === 2) return { size: 5, total: 25, css: 'repeat(5, 1fr)', dim: '280px' };   
-            return { size: 3, total: 9,  css: 'repeat(3, 1fr)', dim: '240px' };                    
+            if (level >= 5) return { size: 12, total: 144, css: 'repeat(12, 1fr)', dim: '350px' }; // Thần Đồng: 12x12 Full màn hình
+            if (level === 4) return { size: 9, total: 81, css: 'repeat(9, 1fr)', dim: '330px' };   // Xuất Sắc
+            if (level === 3) return { size: 7, total: 49, css: 'repeat(7, 1fr)', dim: '320px' };   // Giỏi: 7x7
+            if (level === 2) return { size: 5, total: 25, css: 'repeat(5, 1fr)', dim: '280px' };   // Trung Bình: 5x5
+            return { size: 3, total: 9,  css: 'repeat(3, 1fr)', dim: '240px' };                    // Kém: 3x3
         }
 
         function getG2SymbolCount(level) {
-            if (level >= 4) return 18; 
-            if (level === 3) return 9;  
-            if (level === 2) return 6;  
-            return 4;                   
+            if (level >= 5) return 18; // Thần Đồng: 18 hình
+            if (level === 4) return 12; // Xuất Sắc: 12 hình
+            if (level === 3) return 9;  // Giỏi: 9 hình
+            if (level === 2) return 6;  // Trung Bình: 6 hình
+            return 4;                   // Kém: 4 hình
         }
 
         function buildDynamicGrid() {
@@ -395,7 +398,7 @@
 
         function openArena(id) {
             cGame = id; aScore = 0; stabilityHP = 10; isPlaying = false; isPausedForStart = true;
-            currentLevel = 1; maxLevelAchieved = 1; winsInCurrentLevel = 0;
+            currentLevel = 1; highestCompletedLevel = 1; winsInCurrentLevel = 0;
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
@@ -443,19 +446,14 @@
         function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
         function closeArena() { window.location.href = 'LucChien.html'; }
 
-        // TÍNH NĂNG HIỂN THỊ MỜ ĐÁP ÁN ĐÚNG KHI TRẢ LỜI SAI
         function revealCorrectAnswersForGame1() {
             let cells = document.getElementById('grid-1').children;
             patternSeq.forEach(idx => {
-                if(cells[idx]) {
-                    cells[idx].classList.add('reveal-hint');
-                }
+                if(cells[idx]) { cells[idx].classList.add('reveal-hint'); }
             });
             setTimeout(() => {
                 patternSeq.forEach(idx => {
-                    if(cells[idx]) {
-                        cells[idx].classList.remove('reveal-hint');
-                    }
+                    if(cells[idx]) { cells[idx].classList.remove('reveal-hint'); }
                 });
             }, 900);
         }
@@ -469,17 +467,15 @@
             if(!isPlaying || isPausedForStart) return; canClick = false; stabilityHP -= 2; updateHpDisplay(); 
             winsInCurrentLevel = 0; 
             
-            if (cGame === '1') {
-                revealCorrectAnswersForGame1();
-            } else {
-                revealCorrectAnswersForGame2();
-            }
+            if (cGame === '1') { revealCorrectAnswersForGame1(); } 
+            else { revealCorrectAnswersForGame2(); }
 
             let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 400);
             
             if(stabilityHP <= 0) { 
                 setTimeout(finishGame, 1000); 
             } else { 
+                // Khi sai, rớt về cấp thấp hơn nhưng giữ nguyên mức đã hoàn thành thực sự (highestCompletedLevel)
                 currentLevel = Math.max(1, currentLevel - 1); 
                 clearTimeout(gameLogicTimer); 
                 let delay = 1000;
@@ -500,8 +496,13 @@
             winsInCurrentLevel++;
             if (winsInCurrentLevel >= 3) { 
                 winsInCurrentLevel = 0;
+                
+                // HOÀN THÀNH THỰC SỰ 3 LẦN Ở CẤP NÀY -> GHI NHẬN LÀ MỨC ĐÃ HOÀN THÀNH
+                if (currentLevel > highestCompletedLevel) {
+                    highestCompletedLevel = currentLevel;
+                }
+
                 currentLevel++;
-                if (currentLevel > maxLevelAchieved) maxLevelAchieved = currentLevel;
 
                 let alertBox = document.createElement('div');
                 alertBox.className = 'matrix-expand-alert';
@@ -605,7 +606,7 @@
             let currentHits = (cGame === '1') ? hitsCountG1 : hitsCountG2;
             if (aScore < 500 || currentHits < 5) {
                 aScore = 0;
-                maxLevelAchieved = 1;
+                highestCompletedLevel = 1;
             }
 
             if(cGame === '1') { sessionScoreG1 = Math.round(aScore); }
@@ -624,9 +625,9 @@
                 document.getElementById('stage-badge-title').innerText = romanName;
                 document.getElementById('final-score-display').innerText = Math.floor(aScore);
 
-                let rankObj = getRankByStructure(maxLevelAchieved, Math.floor(aScore));
+                let rankObj = getRankByStructure(highestCompletedLevel, Math.floor(aScore));
                 document.getElementById('bio-rank-badge').innerHTML = getRankHTML(rankObj.name);
-                document.getElementById('master-feedback-text').innerText = (aScore === 0) ? "« Chưa đạt ngưỡng tối thiểu (500 Data). Phạt rớt hạng Kém! »" : rankObj.feedback;
+                document.getElementById('master-feedback-text').innerText = (aScore === 0) ? "« Chưa đạt ngưỡng tối thiểu (500 Data). Xếp loại Kém! »" : rankObj.feedback;
 
                 let btnNext = document.getElementById('btn-next');
                 if (cGame === '1') { 
@@ -655,7 +656,7 @@
             document.getElementById('sum-score-total').innerText = totalSessionScore;
             
             let highestScore = Math.max(sessionScoreG1, sessionScoreG2);
-            let finalRankObj = getRankByStructure(maxLevelAchieved, highestScore);
+            let finalRankObj = getRankByStructure(highestCompletedLevel, highestScore);
             document.getElementById('final-rank').innerHTML = getRankHTML(finalRankObj.name);
 
             document.getElementById('final-summary-overlay').classList.add('active');
