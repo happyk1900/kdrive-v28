@@ -120,7 +120,7 @@
         .grid-cell.correct { background: rgba(0, 255, 102, 0.8); box-shadow: 0 0 15px #00ff66; border-color: #fff; color: #fff;}
         .grid-cell.wrong { background: rgba(255, 51, 102, 0.8); box-shadow: 0 0 15px #ff3366; border-color: #fff; color: #fff;}
 
-        /* BÀI 2: DÙNG HÌNH VẼ SVG CHUẨN KÍCH THƯỚC */
+        /* BÀI 2 */
         .sequence-display { height: 60px; display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 20px; width: 95%; max-width: 340px; background: rgba(0,0,0,0.6); border-radius: 10px; border: 2px solid transparent; padding: 0 10px; overflow-x: auto; white-space: nowrap;}
         .input-area { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 95%; max-width: 340px;}
         .btn-symbol { padding: 14px 0; display: flex; justify-content: center; align-items: center; background: rgba(0,229,255,0.1); border: 1.5px solid rgba(0,229,255,0.5); border-radius: 8px; cursor: pointer; transition: 0.15s; }
@@ -167,13 +167,12 @@
                 </div>
             </div>
 
-            <!-- SẢNH CHỜ (CHUẨN TỐI GIẢN GIỐNG PHONG LUÂN) -->
+            <!-- SẢNH CHỜ -->
             <div id="start-prompt-overlay" class="hidden">
                 <div id="briefing-panel" class="briefing-panel">
                     <div class="briefing-title" id="briefing-title"></div>
                     <div class="briefing-target" id="briefing-target"></div>
                 </div>
-
                 <div class="action-group">
                     <div class="start-action-box" onclick="triggerStartGame()">BẮT ĐẦU</div>
                 </div>
@@ -203,7 +202,7 @@
                 <div class="input-area" id="input-area-2"></div>
             </div>
 
-            <!-- BẢNG ĐIỂM TỪNG BÀI (ĐÃ DỌN SẠCH Ô THỪA) -->
+            <!-- BẢNG ĐIỂM TỪNG BÀI -->
             <div id="result-overlay">
                 <div class="stage-badge-header" id="stage-badge-title">KẾT QUẢ BÀI 1</div>
                 <div class="prestige-panel">
@@ -252,7 +251,6 @@
     </div>
 
     <script>
-        // HỆ THỐNG VẼ HÌNH HỌC BẰNG SVG (ĐẢM BẢO KÍCH THƯỚC CHUẨN XÁC 100%)
         const SVG_SHAPES = {
             'lightning': '<svg class="shape-svg" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
             'circle': '<svg class="shape-svg" viewBox="0 0 24 24" fill="#00e5ff" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="8"/></svg>',
@@ -368,6 +366,7 @@
         let reactionTimes = [];
 
         let currentLevel = 1;
+        let winsInCurrentLevel = 0; // ĐIỀU KIỆN 3 LẦN THẮNG MỚI TĂNG CẤP
         let canClick = false;
         let patternSeq = [];
         let userSeq = [];
@@ -396,7 +395,6 @@
             }
         }
 
-        // TẠO BÀN PHÍM BÀI 2 VỚI 4 HÌNH SVG CỐ ĐỊNH 2x2
         function buildG2Keyboard() {
             let area = document.getElementById('input-area-2'); area.innerHTML = '';
             SYMBOL_KEYS.forEach(key => {
@@ -410,7 +408,7 @@
         function openArena(id) {
             cGame = id; aScore = 0; stabilityHP = 10; isPlaying = false; isPausedForStart = true;
             totalReactionMs = 0; totalCharactersTyped = 0; maxComboLength = 0; currentLevel = 1;
-            currentMultiplier = 1; reactionTimes = [];
+            currentMultiplier = 1; winsInCurrentLevel = 0; reactionTimes = [];
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
@@ -460,6 +458,7 @@
 
         function failSequence() { 
             if(!isPlaying || isPausedForStart) return; canClick = false; stabilityHP -= 2; updateHpDisplay(); 
+            winsInCurrentLevel = 0; // Reset chuỗi thắng khi bấm sai
             let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 400);
             if(stabilityHP <= 0) { finishGame(); } else { 
                 let oldConfig = getGridConfigByLevel(currentLevel);
@@ -528,7 +527,20 @@
                 setTimeout(() => alertBox.remove(), 1200);
                 setTimeout(() => { if (cGame === '1') runGame1(); else if (cGame === '2') runGame2(); }, 1200);
             } else {
-                setTimeout(() => { if (cGame === '1') runGame1(); else if (cGame === '2') runGame2(); }, 600); 
+                // THÔNG BÁO CHUẨN BỊ LÊN CẤP CHO BÀI 2
+                if (cGame === '2') {
+                    let playArea = document.getElementById('play-area');
+                    let alertBox = document.createElement('div');
+                    alertBox.className = 'matrix-expand-alert';
+                    alertBox.innerHTML = `ĐỘ KHÓ<br>TĂNG LÊN`;
+                    alertBox.style.fontSize = '32px';
+                    playArea.appendChild(alertBox);
+                    playSound('ready');
+                    setTimeout(() => alertBox.remove(), 1000);
+                    setTimeout(() => { runGame2(); }, 1000);
+                } else {
+                    setTimeout(() => { runGame1(); }, 600); 
+                }
             }
         }
 
@@ -590,7 +602,28 @@
                 document.getElementById('seq-area').innerHTML = html;
                 
                 processCorrectTap(userSeq.length - 1, Date.now() - inputStartTimestamp, document.getElementById('play-area')); 
-                if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); }
+                if(userSeq.length === patternSeq.length) { 
+                    canClick = false; 
+                    winsInCurrentLevel++; // ĐÚNG 1 LẦN THẮNG TRONG CHUỖI
+                    
+                    if(winsInCurrentLevel >= 3) {
+                        winsInCurrentLevel = 0; // Tích lũy đủ 3 lần thắng -> Tăng độ khó
+                        checkLevelUp();
+                    } else {
+                        // Hiện thông báo số lần thắng (1/3, 2/3)
+                        let playArea = document.getElementById('play-area');
+                        let comboMsg = document.createElement('div'); 
+                        comboMsg.className = 'float-score'; 
+                        comboMsg.style.color = '#00ffcc';
+                        comboMsg.style.fontSize = '24px';
+                        comboMsg.innerText = `${winsInCurrentLevel}/3 LẦN`; 
+                        playArea.appendChild(comboMsg); 
+                        setTimeout(() => comboMsg.remove(), 1000);
+
+                        // Tiếp tục vòng lặp ở độ khó hiện tại
+                        setTimeout(() => { runGame2(); }, 600);
+                    }
+                }
             } else { playSound('wrong'); failSequence(); }
         }
 
