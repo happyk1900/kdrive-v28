@@ -76,6 +76,7 @@
         #btn-next { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         #btn-next:active { background: #fff; color: #000; }
 
+        /* BÁO CÁO TỔNG HỢP CUỐI CÙNG */
         #final-summary-overlay { position: absolute; inset: 0; background: #010a15; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 12px; }
         #final-summary-overlay.active { display: flex; }
         .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #00ff66; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px #00ff66; }
@@ -105,15 +106,13 @@
         #game-play-zone { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; overflow: hidden; z-index: 10; display: none;}
         #game-play-zone.active { display: block;}
         
-        .wind-target { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: transform 0.1s ease; } 
+        .wind-target { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: transform 0.1s ease, opacity 0.15s ease; } 
         
         .t-track-mode { background: #ffffff; border: 2px solid #e0f7fa; box-shadow: 0 0 15px #ffffff, 0 0 30px rgba(0, 229, 255, 0.8); }
         .t-track-mode.hovered { border-color: #00ff66; box-shadow: 0 0 25px #00ff66, 0 0 50px #00ff66; background: #ffffff; transform: translate(-50%, -50%) scale(1.15); }
         
-        .style-track { background: rgba(255,255,255,0.3); border: 2.5px dashed #fff; box-shadow: 0 0 15px rgba(255,255,255,0.6); }
         .style-slash { background: #fff; border: 2.5px solid #fff; box-shadow: 0 0 25px #fff, 0 0 45px rgba(255,255,255,0.9); animation: flarePulse 0.4s infinite alternate; }
         @keyframes flarePulse { 0% { transform: scale(0.92); opacity: 0.85; } 100% { transform: scale(1.08); opacity: 1; } }
-        .style-tap { background: rgba(255,255,255,0.2); border: 3px solid #fff; box-shadow: 0 0 30px #fff; }
 
         #custom-cursor { position: absolute; width: 20px; height: 20px; border: 2px solid #00ff66; border-radius: 50%; pointer-events: none; z-index: 100; display: none; box-shadow: 0 0 10px #00ff66; transform: translate(-50%, -50%); }
 
@@ -137,7 +136,7 @@
     <div id="task-arena">
         <div class="play-area" id="play-area">
 
-            <!-- THANH HUD TRONG GAME -->
+            <!-- THANH HUD -->
             <div id="ingame-hud" class="hidden">
                 <div class="hud-left"><span id="boo-lives" style="font-size: 16px; letter-spacing: 2px;"></span></div>
                 <div class="hud-center">SCORE: <b id="boo-points" style="color:#00ff66; margin-left: 5px; font-size: 18px;">0</b></div>
@@ -147,7 +146,7 @@
                 </div>
             </div>
 
-            <!-- SẢNH CHỜ -->
+            <!-- SẢNH CHỜ (CHỈ CÒN 2 ẢI) -->
             <div id="start-prompt-overlay" class="hidden">
                 <div id="briefing-panel" class="briefing-panel">
                     <div class="briefing-title" id="briefing-title"></div>
@@ -203,13 +202,12 @@
                 </div>
             </div>
 
-            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG -->
+            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG (CHỈ CÒN 2 ẢI) -->
             <div id="final-summary-overlay">
                 <div class="final-header">TỔNG KẾT PHONG LUÂN</div>
                 <div class="stat-box">
                     <div class="stat-line"><span>BÀI 1 (BÁM ĐUỔI):</span> <span class="stat-val" id="sum-score-1" style="color:#00ff66;">0</span></div>
                     <div class="stat-line"><span>BÀI 2 (TIÊN PHONG):</span> <span class="stat-val" id="sum-score-2" style="color:#00ff66;">0</span></div>
-                    <div class="stat-line"><span>BÀI 3 (BIẾN ẢO):</span> <span class="stat-val" id="sum-score-3" style="color:#00ff66;">0</span></div>
                     <div class="stat-line" style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.3);">
                         <span style="font-weight: 900; color: #fff;">TỔNG ĐIỂM CHIẾN TÍCH:</span> <span class="stat-val" id="sum-score-total" style="font-weight:900; color:#00ff66; font-size:16px;">0</span>
                     </div>
@@ -252,19 +250,12 @@
         let fxCtx = null;
         function initAudio() { 
             try {
-                if (!fxCtx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    fxCtx = new AudioContext();
-                }
-                if (fxCtx && fxCtx.state === 'suspended') {
-                    fxCtx.resume();
-                }
+                if (!fxCtx) { fxCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+                if (fxCtx && fxCtx.state === 'suspended') { fxCtx.resume(); }
             } catch(e) {}
         }
         
-        ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => {
-            window.addEventListener(evt, initAudio, { passive: true });
-        });
+        ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => { window.addEventListener(evt, initAudio, { passive: true }); });
 
         function playSound(type, pitchMultiplier = 1) {
             try { 
@@ -305,7 +296,7 @@
         let isPlaying = false; 
         let isPausedForStart = true;
         
-        let sessionScoreG1 = 0, sessionScoreG2 = 0, sessionScoreG3 = 0;
+        let sessionScoreG1 = 0, sessionScoreG2 = 0; // ĐÃ XÓA sessionScoreG3
         
         let loopRaf;
         let gTimeouts = [];
@@ -315,20 +306,20 @@
         let maxX = window.innerWidth > 380 ? 380 : window.innerWidth;
         let maxY = window.innerHeight;
         
-        let baseSpeed = 1.5; 
         let tx = maxX / 2, ty = maxY / 2;
-        let tAngle = 0, tRotSpeed = 0;
+        let tAngle = 0;
         let tEl = document.getElementById('game-target');
         let mx = maxX / 2, my = maxY / 2;
 
-        let isGhost = false;
-        let g3Mode = 'TRACK'; 
-        let g1MissFrames = 0;
+        // Biến điều khiển vật lý chung
+        let gFrameCount = 0;
+        let gNextTurnFrame = 0;
+        let gDashFrames = 0;
+        let gDashMultiplier = 1;
+        let gMissFrames = 0;
 
-        let g1FrameCount = 0;
-        let g1NextTurnFrame = 0;
-        let g1DashFrames = 0;
-        let g1DashMultiplier = 1;
+        // Biến riêng cho Bài 2 (Tàng hình)
+        let isGhost = false;
 
         window.onload = () => {
             openArena('1');
@@ -351,12 +342,10 @@
             
             let bTitle = "", bTarget = "";
             if (id === '1') {
-                bTitle = "BÀI KIỂM TRA I: BÁM ĐUỔI"; bTarget = "GIỮ VỮNG QUỸ ĐẠO<br><br>Hệ thống thả một luồng gió tàng hình.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Rê và giữ ngón tay/chuột bám sát theo điểm sáng. Tuột mục tiêu quá lâu sẽ mất mạng.";
+                bTitle = "BÀI KIỂM TRA I: BÁM ĐUỔI"; bTarget = "GIỮ VỮNG QUỸ ĐẠO<br><br>Hệ thống thả một luồng gió.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Rê ngón tay/chuột bám sát theo điểm sáng. Tuột mục tiêu quá lâu sẽ mất mạng.";
             } else if (id === '2') {
-                bTitle = "BÀI KIỂM TRA II: TIÊN PHONG"; bTarget = "PHẢN XẠ CHỚP NHOÁNG<br><br>Mục tiêu liên tục ẩn hiện thất thường.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Bấm (chém) trúng mục tiêu ngay khi nó hiện ra. Chậm trễ sẽ bị trừ mạng.";
-            } else if (id === '3') {
-                bTitle = "BÀI KIỂM TRA III: BIẾN ẢO"; bTarget = "XỬ LÝ ĐA NHIỆM<br><br>Mục tiêu thay đổi 3 trạng thái liên tục.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span><br>1. Viền mờ: Bám theo.<br>2. Sáng rực: Bấm nhanh.<br>3. Khung trắng: Bấm nhẹ.";
-            }
+                bTitle = "BÀI KIỂM TRA II: TIÊN PHONG"; bTarget = "PHÁN ĐOÁN TÀNG HÌNH<br><br>Mục tiêu di chuyển và tàng hình ngẫu nhiên.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Phán đoán quỹ đạo và bấm (chém) trúng mục tiêu ngay khi nó vừa hiện ra.";
+            } 
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
             document.getElementById('terminal-bar').classList.remove('hidden');
@@ -408,14 +397,13 @@
 
             if(cGame === '1') initG1();
             else if(cGame === '2') initG2();
-            else if(cGame === '3') initG3();
             
             loopRaf = requestAnimationFrame(gameLoop);
         }
 
         function pauseGame() { if(!isPlaying || isPausedForStart) return; playSound('error'); isPausedForStart = true; clearAllTimeouts(); cancelAnimationFrame(loopRaf); document.getElementById('pause-menu-overlay').classList.add('active'); }
         function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; 
-            if(cGame === '2') initG2(); else if(cGame === '3') initG3();
+            if(cGame === '2') scheduleGhostToggle(); 
             loopRaf = requestAnimationFrame(gameLoop);
         }
         function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
@@ -444,23 +432,27 @@
             e.stopPropagation();
 
             if(cGame === '2') {
-                if(!isGhost) {
-                    addScore(15);
+                if(!isGhost) { // Chỉ ăn điểm khi nó hiện hình
+                    // Điểm cộng tăng dần theo tốc độ
+                    let pointsToAdd = 15;
+                    if(aScore >= 3000) pointsToAdd = 30;
+                    else if(aScore >= 1000) pointsToAdd = 20;
+
+                    addScore(pointsToAdd);
                     playSound('katana'); 
                     showBooMsg("CHÉM CHUẨN!");
                     resetActionTimer(); 
-                    tx = 60 + Math.random() * (maxX - 120); ty = 60 + Math.random() * (maxY - 120);
+                    
+                    // Giật nó sang một chỗ ngẫu nhiên khác để không bị spam click
+                    tx = 60 + Math.random() * (maxX - 120); 
+                    ty = 60 + Math.random() * (maxY - 120);
+                    
+                    // Lập tức cho tàng hình luôn để tăng độ khó
+                    isGhost = true;
+                    tEl.style.opacity = '0'; 
+                    tEl.style.pointerEvents = 'none';
                 }
             } 
-            else if(cGame === '3') {
-                if(g3Mode === 'SLASH' || g3Mode === 'TAP') {
-                    addScore(25);
-                    playSound('katana'); 
-                    showBooMsg(g3Mode === 'SLASH' ? "CHÉM CHUẨN!" : "BẤM CHUẨN!");
-                    resetActionTimer();
-                    tx = 60 + Math.random() * (maxX - 120); ty = 60 + Math.random() * (maxY - 120);
-                }
-            }
         }
 
         function addScore(points) {
@@ -475,13 +467,14 @@
             
             let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 400);
 
-            if(stabilityHP <= 0) finishGame(false);
+            if(stabilityHP <= 0) finishGame();
         }
 
         function resetActionTimer() {
             if(actionTimer) clearTimeout(actionTimer);
             if(!isPlaying || isPausedForStart) return;
 
+            // Ở Bài 2, nếu sau 2.5s không chém được sẽ mất mạng
             actionTimer = setTimeout(() => {
                 if(!isPlaying || isPausedForStart) return;
                 loseLife();
@@ -495,194 +488,150 @@
             tEl.className = 'wind-target t-track-mode';
             document.getElementById('custom-cursor').style.display = 'block';
             document.getElementById('warning-bar-container').style.display = 'block';
-            g1MissFrames = 0;
-            
-            g1FrameCount = 0;
-            g1DashFrames = 0;
-            g1DashMultiplier = 1;
-            g1NextTurnFrame = Math.floor(Math.random() * 60) + 30; 
+            gMissFrames = 0;
+            gFrameCount = 0;
+            gDashFrames = 0;
+            gDashMultiplier = 1;
+            gNextTurnFrame = Math.floor(Math.random() * 60) + 30; 
             tAngle = Math.random() * Math.PI * 2;
         }
 
         function initG2() {
             tEl.className = 'wind-target style-slash'; 
             document.getElementById('custom-cursor').style.display = 'none';
-            baseSpeed = 2.5;
+            document.getElementById('warning-bar-container').style.display = 'none'; // Bài 2 không dùng thanh trượt
             isGhost = false;
             
-            resetActionTimer();
+            gFrameCount = 0;
+            gDashFrames = 0;
+            gDashMultiplier = 1;
+            gNextTurnFrame = Math.floor(Math.random() * 60) + 30; 
+            tAngle = Math.random() * Math.PI * 2;
 
-            let tm = setInterval(() => {
-                if(!isPlaying || isPausedForStart) return;
-                isGhost = !isGhost;
-                if(isGhost) { 
-                    tEl.style.opacity = '0'; 
-                    tEl.style.pointerEvents = 'none';
-                } else { 
-                    tEl.style.opacity = '1'; 
-                    tEl.style.pointerEvents = 'auto';
-                }
-            }, 1800);
-            gTimeouts.push(tm);
+            resetActionTimer();
+            scheduleGhostToggle();
         }
 
-        function initG3() {
-            tEl.className = 'wind-target style-track';
-            document.getElementById('custom-cursor').style.display = 'none';
-            baseSpeed = 2.2;
+        // HÀM TÀNG HÌNH NGẪU NHIÊN CHO BÀI 2
+        function scheduleGhostToggle() {
+            if(!isPlaying || isPausedForStart || cGame !== '2') return;
             
-            resetActionTimer();
+            isGhost = !isGhost;
+            tEl.style.opacity = isGhost ? '0' : '1';
+            tEl.style.pointerEvents = isGhost ? 'none' : 'auto';
 
-            let tm = setInterval(() => {
-                if(!isPlaying || isPausedForStart) return;
-                const modes = ['TRACK', 'SLASH', 'TAP'];
-                g3Mode = modes[Math.floor(Math.random() * modes.length)];
-                
-                tEl.classList.remove('style-track', 'style-slash', 'style-tap');
-                if(g3Mode === 'TRACK') { tEl.classList.add('style-track'); }
-                else if(g3Mode === 'SLASH') { tEl.classList.add('style-slash'); }
-                else if(g3Mode === 'TAP') { tEl.classList.add('style-tap'); }
+            // Random thời gian: Tàng hình ngắn (0.4-1.2s), Hiện hình dài hơn tí (0.6-1.6s)
+            let nextTime = isGhost 
+                ? Math.floor(Math.random() * 800) + 400 
+                : Math.floor(Math.random() * 1000) + 600;
 
-                resetActionTimer();
-            }, 2600);
+            // Ép tốc độ chớp tắt nhanh hơn khi điểm cao
+            let speedFactor = Math.max(0.5, 1 - (aScore / 5000));
+            nextTime *= speedFactor;
+
+            let tm = setTimeout(scheduleGhostToggle, nextTime);
             gTimeouts.push(tm);
         }
 
         function gameLoop() {
             if(!isPlaying || isPausedForStart) return;
 
-            if (cGame === '1') {
-                g1FrameCount++;
-                
-                // --- THUẬT TOÁN TỐC ĐỘ TỊNH TIẾN MƯỢT MÀ ---
-                // Khởi đầu ở 3.5. Mỗi điểm tăng 0.0015 tốc độ. 
-                // Tại 1000 điểm: Tốc độ 5.0
-                // Tại 2000 điểm: Tốc độ 6.5
-                // Tại 5000 điểm: Tốc độ 11.0 (Rất gắt)
-                let currentTargetSpeed = 3.5 + (aScore * 0.0015);
-                
-                // Khóa tốc độ tối đa để không văng khỏi giới hạn mắt người
-                if (currentTargetSpeed > 12.0) currentTargetSpeed = 12.0;
+            gFrameCount++;
+            
+            // CHUNG LOGIC VẬT LÝ VÀ TỐC ĐỘ CHO CẢ ẢI 1 & ẢI 2
+            let currentTargetSpeed = 3.5 + (aScore * 0.0015);
+            if (currentTargetSpeed > 12.0) currentTargetSpeed = 12.0;
 
-                // Các biến thưởng điểm và tần suất bẻ lái giữ nguyên phân cấp
-                let pointsToAdd = 0.5;
-                let turnFreqOffset = 0; 
+            let pointsToAdd = 0.5;
+            let turnFreqOffset = 0; 
 
-                if (aScore < 1000) {
-                    pointsToAdd = 0.5; turnFreqOffset = 0;
-                } else if (aScore < 2000) {
-                    pointsToAdd = 1.0; turnFreqOffset = 5;
-                } else if (aScore < 3000) {
-                    pointsToAdd = 2.0; turnFreqOffset = 10;
-                } else if (aScore < 5000) {
-                    pointsToAdd = 4.0; turnFreqOffset = 15;
-                } else {
-                    pointsToAdd = 8.0; turnFreqOffset = 20;
-                }
-
-                // Cơ chế lướt (Dash)
-                if (g1DashFrames > 0) {
-                    g1DashFrames--;
-                } else {
-                    g1DashMultiplier = 1;
-                    if (Math.random() < 0.015) { 
-                        // Giảm hệ số lướt từ 2.0 xuống 1.5 để mượt hơn khi tốc độ nền đã cao
-                        g1DashMultiplier = 1.5; 
-                        g1DashFrames = Math.floor(Math.random() * 10) + 5; 
-                    }
-                }
-
-                if (g1FrameCount >= g1NextTurnFrame) {
-                    let turnAngle = (Math.PI / 4) + Math.random() * (Math.PI * 0.58); 
-                    if (Math.random() < 0.5) turnAngle = -turnAngle;
-                    tAngle += turnAngle;
-                    
-                    g1FrameCount = 0;
-                    g1NextTurnFrame = Math.max(15, Math.floor(Math.random() * 50) + 20 - turnFreqOffset);
-                }
-
-                let finalSpeed = currentTargetSpeed * g1DashMultiplier;
-                tx += Math.cos(tAngle) * finalSpeed;
-                ty += Math.sin(tAngle) * finalSpeed;
-
-                let margin = 35;
-                let hitWall = false;
-                if (tx < margin) { tx = margin; hitWall = true; tAngle = Math.PI - tAngle; }
-                else if (tx > maxX - margin) { tx = maxX - margin; hitWall = true; tAngle = Math.PI - tAngle; }
-                
-                if (ty < margin) { ty = margin; hitWall = true; tAngle = -tAngle; }
-                else if (ty > maxY - margin) { ty = maxY - margin; hitWall = true; tAngle = -tAngle; }
-
-                if (hitWall) {
-                    tAngle += (Math.random() - 0.5) * 0.5; 
-                }
-
-                let dist = Math.hypot(mx - tx, my - ty);
-                let hitRadius = 60;
-                const G1_MAX_MISS_FRAMES = 120; 
-                
-                if(dist < hitRadius) {
-                    addScore(pointsToAdd);
-                    tEl.classList.add('hovered');
-                    g1MissFrames = 0;
-                    document.getElementById('warning-progress').style.width = '0%';
-                } else {
-                    tEl.classList.remove('hovered');
-                    g1MissFrames++;
-                    
-                    let pct = (g1MissFrames / G1_MAX_MISS_FRAMES) * 100; 
-                    document.getElementById('warning-progress').style.width = Math.min(100, pct) + '%';
-
-                    if(g1MissFrames > G1_MAX_MISS_FRAMES) { 
-                        loseLife();
-                        showBooMsg("MẤT DẤU!");
-                        g1MissFrames = 0;
-                    }
-                }
-
+            if (aScore < 1000) {
+                pointsToAdd = 0.5; turnFreqOffset = 0;
+            } else if (aScore < 2000) {
+                pointsToAdd = 1.0; turnFreqOffset = 5;
+            } else if (aScore < 3000) {
+                pointsToAdd = 2.0; turnFreqOffset = 10;
+            } else if (aScore < 5000) {
+                pointsToAdd = 4.0; turnFreqOffset = 15;
             } else {
-                let targetSpeed = baseSpeed + (aScore * 0.003); 
-                if(Math.random() < 0.01) tAngle += (Math.random() - 0.5) * Math.PI; 
-                
-                tRotSpeed += (Math.random() - 0.5) * 0.08;
-                tAngle += tRotSpeed;
+                pointsToAdd = 8.0; turnFreqOffset = 20;
+            }
 
-                tx += Math.cos(tAngle) * targetSpeed;
-                ty += Math.sin(tAngle) * targetSpeed;
-
-                let margin = 40;
-                if (tx < margin || tx > maxX - margin || ty < margin || ty > maxY - margin) {
-                    let angleToCenter = Math.atan2((maxY/2) - ty, (maxX/2) - tx);
-                    tAngle = angleToCenter;
-                    tx = Math.max(margin, Math.min(maxX - margin, tx));
-                    ty = Math.max(margin, Math.min(maxY - margin, ty));
-                }
-
-                let dist = Math.hypot(mx - tx, my - ty);
-                let hitRadius = 60;
-                
-                if(cGame === '3' && g3Mode === 'TRACK') {
-                    if(dist < hitRadius) { 
-                        addScore(0.5); 
-                        resetActionTimer(); 
-                    }
+            // Cơ chế lướt (Dash)
+            if (gDashFrames > 0) {
+                gDashFrames--;
+            } else {
+                gDashMultiplier = 1;
+                if (Math.random() < 0.015) { 
+                    gDashMultiplier = 1.5; 
+                    gDashFrames = Math.floor(Math.random() * 10) + 5; 
                 }
             }
+
+            // Bẻ lái ngẫu nhiên
+            if (gFrameCount >= gNextTurnFrame) {
+                let turnAngle = (Math.PI / 4) + Math.random() * (Math.PI * 0.58); 
+                if (Math.random() < 0.5) turnAngle = -turnAngle;
+                tAngle += turnAngle;
+                
+                gFrameCount = 0;
+                gNextTurnFrame = Math.max(15, Math.floor(Math.random() * 50) + 20 - turnFreqOffset);
+            }
+
+            let finalSpeed = currentTargetSpeed * gDashMultiplier;
+            tx += Math.cos(tAngle) * finalSpeed;
+            ty += Math.sin(tAngle) * finalSpeed;
+
+            // Đập tường nảy
+            let margin = 35;
+            let hitWall = false;
+            if (tx < margin) { tx = margin; hitWall = true; tAngle = Math.PI - tAngle; }
+            else if (tx > maxX - margin) { tx = maxX - margin; hitWall = true; tAngle = Math.PI - tAngle; }
+            
+            if (ty < margin) { ty = margin; hitWall = true; tAngle = -tAngle; }
+            else if (ty > maxY - margin) { ty = maxY - margin; hitWall = true; tAngle = -tAngle; }
+
+            if (hitWall) { tAngle += (Math.random() - 0.5) * 0.5; }
 
             tEl.style.left = tx + 'px';
             tEl.style.top = ty + 'px';
             tEl.style.transform = `translate(-50%, -50%)`;
 
+            // XỬ LÝ RIÊNG THEO TỪNG BÀI
+            if (cGame === '1') {
+                let dist = Math.hypot(mx - tx, my - ty);
+                let hitRadius = 60;
+                const G1_MAX_MISS_FRAMES = 120; // Khóa cứng 2 giây trượt tay
+                
+                if(dist < hitRadius) {
+                    addScore(pointsToAdd);
+                    tEl.classList.add('hovered');
+                    gMissFrames = 0;
+                    document.getElementById('warning-progress').style.width = '0%';
+                } else {
+                    tEl.classList.remove('hovered');
+                    gMissFrames++;
+                    let pct = (gMissFrames / G1_MAX_MISS_FRAMES) * 100; 
+                    document.getElementById('warning-progress').style.width = Math.min(100, pct) + '%';
+
+                    if(gMissFrames > G1_MAX_MISS_FRAMES) { 
+                        loseLife();
+                        showBooMsg("MẤT DẤU!");
+                        gMissFrames = 0;
+                    }
+                }
+            } 
+            // Bài 2 không dùng logic bám đuôi, chỉ dùng onclick để chém (đã xử lý ở handleTargetClick)
+
             loopRaf = requestAnimationFrame(gameLoop);
         }
 
-        function finishGame(isWin) {
+        function finishGame() {
             isPlaying = false; isPausedForStart = true;
             clearAllTimeouts(); cancelAnimationFrame(loopRaf);
 
             if(cGame === '1') { sessionScoreG1 = Math.floor(aScore); }
             if(cGame === '2') { sessionScoreG2 = Math.floor(aScore); }
-            if(cGame === '3') { sessionScoreG3 = Math.floor(aScore); }
 
             document.getElementById('ingame-hud').classList.add('hidden');
             let playAreaWrap = document.getElementById('play-area'); playAreaWrap.classList.remove('fullscreen-mode');
@@ -697,19 +646,23 @@
             setTimeout(() => {
                 document.getElementById('freeze-overlay').classList.remove('active');
                 
-                let romanName = (cGame === '1') ? 'KẾT QUẢ BÀI 1' : (cGame === '2') ? 'KẾT QUẢ BÀI 2' : 'KẾT QUẢ BÀI 3';
+                let romanName = (cGame === '1') ? 'KẾT QUẢ BÀI 1' : 'KẾT QUẢ BÀI 2';
                 document.getElementById('stage-badge-title').innerText = romanName;
                 document.getElementById('final-score-display').innerText = Math.floor(aScore);
 
-                // TÍNH TOÁN XẾP HẠNG CHO BÀI HIỆN TẠI
                 let rankObj = getRankByPhongLuanScore(Math.floor(aScore));
                 document.getElementById('bio-rank-badge').innerHTML = getRankHTML(rankObj.name);
                 document.getElementById('master-feedback-text').innerText = rankObj.feedback;
 
                 let btnNext = document.getElementById('btn-next');
-                if (cGame === '1') { btnNext.innerText = "BÀI 2"; btnNext.onclick = proceedNextStage; } 
-                else if (cGame === '2') { btnNext.innerText = "BÀI 3"; btnNext.onclick = proceedNextStage; } 
-                else { btnNext.innerText = "TỔNG KẾT"; btnNext.onclick = showFinalSummary; }
+                if (cGame === '1') { 
+                    btnNext.innerText = "BÀI 2"; 
+                    btnNext.onclick = proceedNextStage; 
+                    btnNext.style.display = "block";
+                } else { 
+                    btnNext.innerText = "TỔNG KẾT"; 
+                    btnNext.onclick = showFinalSummary; 
+                }
 
                 document.getElementById('result-overlay').classList.add('active');
                 playSound('coin');
@@ -717,19 +670,17 @@
         }
 
         function retryCurrentStage() { playSound('katana'); document.getElementById('result-overlay').classList.remove('active'); openArena(cGame); }
-        function proceedNextStage() { playSound('coin'); document.getElementById('result-overlay').classList.remove('active'); let nextId = (parseInt(cGame) + 1).toString(); setTimeout(() => { openArena(nextId); }, 300); }
+        function proceedNextStage() { playSound('coin'); document.getElementById('result-overlay').classList.remove('active'); openArena('2'); }
 
         function showFinalSummary() {
             playSound('coin'); document.getElementById('result-overlay').classList.remove('active');
-            let totalSessionScore = sessionScoreG1 + sessionScoreG2 + sessionScoreG3;
+            let totalSessionScore = sessionScoreG1 + sessionScoreG2;
 
             document.getElementById('sum-score-1').innerText = sessionScoreG1;
             document.getElementById('sum-score-2').innerText = sessionScoreG2;
-            document.getElementById('sum-score-3').innerText = sessionScoreG3;
             document.getElementById('sum-score-total').innerText = totalSessionScore;
             
-            // XẾP HẠNG DỰA TRÊN ĐIỂM CAO NHẤT ĐẠT ĐƯỢC TRONG 3 BÀI
-            let highestScore = Math.max(sessionScoreG1, sessionScoreG2, sessionScoreG3);
+            let highestScore = Math.max(sessionScoreG1, sessionScoreG2);
             let finalRankObj = getRankByPhongLuanScore(highestScore);
             document.getElementById('final-rank').innerHTML = getRankHTML(finalRankObj.name);
 
