@@ -54,7 +54,6 @@
         #freeze-overlay.active { display: flex; }
         .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #00ff66; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px #00ff66; }
 
-        /* BẢNG ĐIỂM TỪNG BÀI KÈM XẾP HẠNG */
         #result-overlay { position: absolute; inset: 0; background: rgba(2, 10, 20, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 8px; border-radius: 12px; padding: 12px; }
         #result-overlay.active { display: flex; }
         .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #00ff66; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,255,102,0.5); }
@@ -77,7 +76,6 @@
         #btn-next { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         #btn-next:active { background: #fff; color: #000; }
 
-        /* BÁO CÁO TỔNG HỢP CUỐI CÙNG */
         #final-summary-overlay { position: absolute; inset: 0; background: #010a15; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 12px; }
         #final-summary-overlay.active { display: flex; }
         .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #00ff66; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px #00ff66; }
@@ -90,7 +88,6 @@
         .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: rgba(0, 255, 102, 0.2); border: 1.5px solid #00ff66; border-radius: 8px; color: #00ff66; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; }
         .final-btn-exit:hover { background: #00ff66; color: #000; }
 
-        /* MÀN TẠM DỪNG */
         #pause-menu-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; backdrop-filter: blur(5px); }
         #pause-menu-overlay.active { opacity: 1; pointer-events: auto; }
         .pause-box { width: 85%; max-width: 300px; background: rgba(5, 15, 25, 0.95); border: 1px solid rgba(0,255,102,0.5); border-radius: 12px; padding: 25px 20px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
@@ -99,7 +96,6 @@
         .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         .pause-btn.exit { background: rgba(255, 0, 127, 0.2); border: 1px solid #ff007f; color: #ff007f; margin-bottom: 0; }
 
-        /* TERMINAL BAR */
         #terminal-bar { position: fixed; bottom: 0; left: 0; width: 100vw; background: rgba(5, 12, 20, 0.95); border-top: 1px solid rgba(0, 255, 102, 0.5); padding: 8px 0; z-index: 99999; overflow: hidden; display: flex; align-items: center; pointer-events: none; }
         #terminal-bar.hidden { display: none !important; }
         .terminal-track { display: inline-flex; white-space: nowrap; animation: ledScroll 15s linear infinite; }
@@ -207,7 +203,7 @@
                 </div>
             </div>
 
-            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG KÈM XẾP HẠNG -->
+            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG -->
             <div id="final-summary-overlay">
                 <div class="final-header">TỔNG KẾT PHONG LUÂN</div>
                 <div class="stat-box">
@@ -470,7 +466,6 @@
         function addScore(points) {
             aScore += points;
             document.getElementById('boo-points').innerText = Math.floor(aScore);
-            // KHÔNG CÓ GIỚI HẠN ĐIỂM, ĐÁNH ĐẾN KHI HẾT 5 MẠNG THÌ THÔI
         }
 
         function loseLife() {
@@ -559,38 +554,40 @@
             if (cGame === '1') {
                 g1FrameCount++;
                 
-                let currentTargetSpeed = 3.5;
+                // --- THUẬT TOÁN TỐC ĐỘ TỊNH TIẾN MƯỢT MÀ ---
+                // Khởi đầu ở 3.5. Mỗi điểm tăng 0.0015 tốc độ. 
+                // Tại 1000 điểm: Tốc độ 5.0
+                // Tại 2000 điểm: Tốc độ 6.5
+                // Tại 5000 điểm: Tốc độ 11.0 (Rất gắt)
+                let currentTargetSpeed = 3.5 + (aScore * 0.0015);
+                
+                // Khóa tốc độ tối đa để không văng khỏi giới hạn mắt người
+                if (currentTargetSpeed > 12.0) currentTargetSpeed = 12.0;
+
+                // Các biến thưởng điểm và tần suất bẻ lái giữ nguyên phân cấp
                 let pointsToAdd = 0.5;
                 let turnFreqOffset = 0; 
 
                 if (aScore < 1000) {
-                    currentTargetSpeed = 3.5;
-                    pointsToAdd = 0.5;
-                    turnFreqOffset = 0;
+                    pointsToAdd = 0.5; turnFreqOffset = 0;
                 } else if (aScore < 2000) {
-                    currentTargetSpeed = 7.0; 
-                    pointsToAdd = 1.0;
-                    turnFreqOffset = 5;
+                    pointsToAdd = 1.0; turnFreqOffset = 5;
                 } else if (aScore < 3000) {
-                    currentTargetSpeed = 10.5; 
-                    pointsToAdd = 2.0;
-                    turnFreqOffset = 10;
+                    pointsToAdd = 2.0; turnFreqOffset = 10;
                 } else if (aScore < 5000) {
-                    currentTargetSpeed = 14.0; 
-                    pointsToAdd = 4.0;
-                    turnFreqOffset = 15;
+                    pointsToAdd = 4.0; turnFreqOffset = 15;
                 } else {
-                    currentTargetSpeed = 17.5; 
-                    pointsToAdd = 8.0;        
-                    turnFreqOffset = 20;
+                    pointsToAdd = 8.0; turnFreqOffset = 20;
                 }
 
+                // Cơ chế lướt (Dash)
                 if (g1DashFrames > 0) {
                     g1DashFrames--;
                 } else {
                     g1DashMultiplier = 1;
                     if (Math.random() < 0.015) { 
-                        g1DashMultiplier = 2.0; 
+                        // Giảm hệ số lướt từ 2.0 xuống 1.5 để mượt hơn khi tốc độ nền đã cao
+                        g1DashMultiplier = 1.5; 
                         g1DashFrames = Math.floor(Math.random() * 10) + 5; 
                     }
                 }
