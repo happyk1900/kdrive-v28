@@ -42,11 +42,15 @@
 
         #ingame-hud { position: absolute; top: 0; left: 0; width: 100%; height: 60px; background: rgba(2, 8, 15, 0.95); border-bottom: 1px solid rgba(56, 239, 125, 0.3); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 10000; pointer-events: auto; backdrop-filter: blur(5px); transition: opacity 0.3s; }
         #ingame-hud.hidden { opacity: 0; pointer-events: none !important; }
-        .hud-left { flex: 1; display: flex; justify-content: flex-start; }
+        .hud-left { flex: 1; display: flex; justify-content: flex-start; align-items: center; gap: 8px; }
         .hud-center { flex: 1; display: flex; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #fff; font-weight: bold; white-space: nowrap; }
-        .hud-right { flex: 1; display: flex; justify-content: flex-end; gap: 10px; }
+        .hud-right { flex: 1; display: flex; justify-content: flex-end; gap: 8px; }
         .hud-btn { width: 32px; height: 32px; border-radius: 4px; background: rgba(56, 239, 125, 0.1); border: 1px solid rgba(56, 239, 125, 0.5); color: #38ef7d; display: flex; justify-content: center; align-items: center; font-size: 14px; cursor: pointer; transition: 0.2s; }
         .hud-btn.exit-btn { background: rgba(255, 0, 127, 0.1); border-color: #ff007f; color: #ff007f; }
+        
+        /* NÚT GIẢ LẬP TRẢ LỜI ĐÚNG (DEV CHEAT / FAST-WIN) */
+        .dev-skip-btn { background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; color: #ffd700; font-family: 'Share Tech Mono', monospace; font-size: 10px; font-weight: bold; padding: 0 6px; height: 32px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; letter-spacing: 0.5px; transition: 0.2s; }
+        .dev-skip-btn:active { background: #ffd700; color: #000; }
 
         #terminal-bar { position: fixed; bottom: 0; left: 0; width: 100vw; background: rgba(2, 8, 15, 0.95); border-top: 1px solid rgba(56, 239, 125, 0.4); padding: 8px 0; z-index: 99999; overflow: hidden; display: flex; align-items: center; pointer-events: none; }
         #terminal-bar.hidden { display: none !important; }
@@ -118,7 +122,6 @@
         .grid-cell.wrong { background: rgba(255, 51, 102, 0.85); box-shadow: 0 0 15px #ff3366; border-color: #fff; color: #fff;}
         .grid-cell.reveal-hint { background: rgba(255, 215, 0, 0.6) !important; box-shadow: 0 0 15px #ffd700 !important; border-color: #fff !important; }
 
-        /* CĂN GIỮA TUYỆT ĐỐI KHUNG CHỨA CHUỖI HÌNH BÀI 2 */
         .sequence-display { height: 90px; display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 25px; width: 95%; max-width: 350px; background: rgba(2, 8, 15, 0.9); border-radius: 12px; border: 1.5px solid rgba(56,239,125,0.4); padding: 0 15px; overflow-x: auto; white-space: nowrap; scroll-behavior: smooth; }
         .sequence-display::-webkit-scrollbar { height: 4px; }
         .sequence-display::-webkit-scrollbar-thumb { background: #38ef7d; border-radius: 2px; }
@@ -149,9 +152,13 @@
 
             <!-- THANH HUD TRONG GAME -->
             <div id="ingame-hud" class="hidden">
-                <div class="hud-left"><span id="boo-lives" style="font-size: 14px; letter-spacing: 2px;"></span></div>
+                <div class="hud-left">
+                    <span id="boo-lives" style="font-size: 14px; letter-spacing: 2px;"></span>
+                </div>
                 <div class="hud-center">DATA: <b id="boo-points" style="color:#38ef7d; margin-left: 5px; font-size: 18px;">0</b></div>
                 <div class="hud-right">
+                    <!-- NÚT GIẢ LẬP TRẢ LỜI ĐÚNG ĐỂ TEST NHANH -->
+                    <button class="dev-skip-btn" onclick="devFastWin()">⚡ QUA</button>
                     <div class="hud-btn" onclick="pauseGame()">⏸</div>
                     <div class="hud-btn exit-btn" onclick="confirmExitToLobby()">✕</div>
                 </div>
@@ -259,7 +266,7 @@
             if (score < 500 || completedLevel <= 1) return { name: "Kém", feedback: "« Hoàn thành mức 3x3 / 4 hình. Xếp loại Kém. »" };
             if (completedLevel === 2) return { name: "Trung Bình", feedback: "« Hoàn thành mức 5x5 / 6 hình. Xếp loại Trung Bình. »" };
             if (completedLevel === 3) return { name: "Giỏi", feedback: "« Hoàn thành mức 7x7 / 9 hình. Xếp loại Giỏi. »" };
-            if (completedLevel === 4) return { name: "Xuất Sắc", feedback: "« Chinh phục các cấp độ tổng thể phức hợp. Xếp loại Xuất Sắc. »" };
+            if (completedLevel === 4) return { name: "Xuất Sắc", feedback: "« Hoàn thành mức 9x9 / 12 hình. Xếp loại Xuất Sắc. »" };
             if (completedLevel >= 5) return { name: "Thần Đồng", feedback: "« Cảnh giới đỉnh cao! Chinh phục cấu trúc cực hạn full màn hình (12x12 / 18 hình). »" };
             return { name: "Kém", feedback: "« Cần rèn luyện thêm để vượt qua các mốc cấu trúc cơ bản. »" };
         }
@@ -358,20 +365,22 @@
             openArena('1');
         };
 
+        // BÀI 1: CẤU TRÚC 3x3 -> 5x5 -> 7x7 -> 9x9 -> 12x12
         function getGridConfigByLevel(level) {
-            if (level >= 5) return { size: 12, total: 144, css: 'repeat(12, 1fr)', dim: '350px' }; 
-            if (level === 4) return { size: 9, total: 81, css: 'repeat(9, 1fr)', dim: '330px' };   
-            if (level === 3) return { size: 7, total: 49, css: 'repeat(7, 1fr)', dim: '320px' };   
-            if (level === 2) return { size: 5, total: 25, css: 'repeat(5, 1fr)', dim: '280px' };   
-            return { size: 3, total: 9,  css: 'repeat(3, 1fr)', dim: '240px' };                    
+            if (level >= 5) return { size: 12, total: 144, css: 'repeat(12, 1fr)', dim: '350px' }; // Thần Đồng: 12x12 Full màn hình
+            if (level === 4) return { size: 9, total: 81, css: 'repeat(9, 1fr)', dim: '330px' };   // Xuất Sắc: 9x9
+            if (level === 3) return { size: 7, total: 49, css: 'repeat(7, 1fr)', dim: '320px' };   // Giỏi: 7x7
+            if (level === 2) return { size: 5, total: 25, css: 'repeat(5, 1fr)', dim: '280px' };   // Trung Bình: 5x5
+            return { size: 3, total: 9,  css: 'repeat(3, 1fr)', dim: '240px' };                    // Kém: 3x3
         }
 
+        // BÀI 2: SỐ LƯỢNG HÌNH 4 -> 5 -> 7 -> 10 -> 18
         function getG2SymbolCount(level) {
-            if (level >= 5) return 18; 
-            if (level === 4) return 12; 
-            if (level === 3) return 9;  
-            if (level === 2) return 6;  
-            return 4;                   
+            if (level >= 5) return 18; // Thần Đồng: 18 hình
+            if (level === 4) return 10; // Xuất Sắc: 10 hình
+            if (level === 3) return 7;  // Giỏi: 7 hình
+            if (level === 2) return 5;  // Trung Bình: 5 hình
+            return 4;                   // Kém: 4 hình
         }
 
         function buildDynamicGrid() {
@@ -446,6 +455,14 @@
         function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
         function closeArena() { window.location.href = 'LucChien.html'; }
 
+        // NÚT DEV CHEAT: BẤM LÀ QUA MÀN / TÍNH THẮNG NGAY LẬP TỨC ĐỂ TEST NHANH
+        function devFastWin() {
+            if(!isPlaying || isPausedForStart) return;
+            clearTimeout(gameLogicTimer);
+            processCorrectTap(10);
+            checkLevelUp();
+        }
+
         function revealCorrectAnswersForGame1() {
             let cells = document.getElementById('grid-1').children;
             patternSeq.forEach(idx => {
@@ -466,7 +483,6 @@
         function failSequence() { 
             if(!isPlaying || isPausedForStart) return; canClick = false; stabilityHP -= 2; updateHpDisplay(); 
             
-            // KHI SAI: CHỈ RỚT XUỐNG CẤP DƯỚI 1 LẦN DUY NHẤT, VÀ CHỈ CẦN THẮNG 1 LẦN LÀ LÊN LẠI NGAY
             winsInCurrentLevel = 0;
             currentLevel = Math.max(1, currentLevel - 1); 
             
@@ -495,8 +511,7 @@
 
         function checkLevelUp() { 
             winsInCurrentLevel++;
-            // CHỈ CẦN THẮNG ĐÚNG 1 LẦN LÀ LÊN CẤP NGAY LẬP TỨC (KHÔNG BỊ BẮT LÀM 3 LẦN NỮA)
-            if (winsInCurrentLevel >= 1) { 
+            if (winsInCurrentLevel >= 3) { 
                 winsInCurrentLevel = 0;
                 currentLevel++;
                 if (currentLevel > highestCompletedLevel) {
