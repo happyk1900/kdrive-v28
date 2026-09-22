@@ -131,13 +131,11 @@
         .shape-svg { width: 38px; height: 38px; display: block; filter: drop-shadow(0 0 6px currentColor); }
         .shape-svg-small { width: 34px; height: 34px; display: block; filter: drop-shadow(0 0 5px currentColor); }
 
-        .float-score { position: absolute; left: 50%; top: 15%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 32px; font-weight: 900; color: #fff; text-shadow: 0 0 20px #38ef7d; z-index: 110; animation: floatUpScore 1s forwards; pointer-events: none; }
-        @keyframes floatUpScore { 0% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1.5); } }
+        /* THÔNG BÁO TRẠNG THÁI GỌN GÀNG PHÍA TRÊN (DƯỚI HUD) */
+        .status-notification { position: absolute; top: 75px; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: 900; color: #38ef7d; text-align: center; text-shadow: 0 0 12px #38ef7d; z-index: 100000; pointer-events: none; white-space: nowrap; background: rgba(2, 8, 15, 0.85); padding: 6px 16px; border-radius: 6px; border: 1px solid rgba(56,239,125,0.4); animation: popStatus 1s ease-out forwards; }
+        @keyframes popStatus { 0% { opacity: 0; transform: translate(-50%, -10px) scale(0.9); } 20% { opacity: 1; transform: translate(-50%, 0) scale(1.05); } 80% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -10px) scale(0.95); } }
 
-        .flashbang-red { position: fixed; inset: 0; background: rgba(255, 51, 102, 0.4); z-index: 999999; pointer-events: none; animation: flashRed 0.4s forwards; }
-        @keyframes flashRed { 0% { opacity: 1; } 100% { opacity: 0; } }
-
-        .matrix-expand-alert { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #38ef7d; text-align: center; text-shadow: 0 0 20px #38ef7d; z-index: 100000; animation: popAlert 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: none; white-space: nowrap; }
+        .matrix-expand-alert { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-family: 'Share Tech Mono', monospace; font-size: 36px; font-weight: 900; color: #38ef7d; text-align: center; text-shadow: 0 0 20px #38ef7d; z-index: 100000; animation: popAlert 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: none; white-space: nowrap; }
         @keyframes popAlert { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
 
         #speed-popup { position: absolute; top: 18%; left: 50%; transform: translate(-50%, -50%) scale(0.4); color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 60px; font-weight: 900; z-index: 95; opacity: 0; pointer-events: none; transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0 30px #38ef7d; text-align: center; text-transform: uppercase; width: 100%; }
@@ -246,6 +244,8 @@
     </div>
 
     <script>
+        const MAX_SEQUENCE_LENGTH = 8;
+
         const SVG_SHAPES = {
             'lightning': '<svg class="shape-svg" style="color: #ffd700;" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
             'circle': '<svg class="shape-svg" style="color: #00e5ff;" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>',
@@ -262,7 +262,6 @@
 
         const SYMBOL_KEYS = ['lightning', 'circle', 'triangle', 'square'];
 
-        // ĐỒNG BỘ THANG ĐIỂM CHUẨN VỚI PHONG LUÂN (1000, 2000, 3000, 5000)
         function getRankByThuyLuanScore(score) {
             if (score < 1000) return { name: "Tân Binh", feedback: "« Chưa đạt ngưỡng tối thiểu (1000 Data). Phạt rớt hạng Tân Binh! »" };
             if (score >= 5000) return { name: "Huyền Thoại", feedback: "« Cảnh giới viễn tưởng! Bộ nhớ lượng tử đạt đỉnh cao nhân loại. »" };
@@ -470,16 +469,13 @@
             }
         }
 
-        function processCorrectTap(comboIndex, playArea) { 
+        function processCorrectTap(comboIndex) { 
             if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
 
             playSound('coin', 1); 
             let pointsToAdd = Math.round((10 + (comboIndex * 2)) * currentMultiplier); 
             aScore += pointsToAdd;
             document.getElementById('boo-points').innerText = Math.round(aScore);
-            
-            let floatScore = document.createElement('div'); floatScore.className = 'float-score'; floatScore.innerText = `+${pointsToAdd}`; 
-            playArea.appendChild(floatScore); setTimeout(() => floatScore.remove(), 1000);
         }
 
         function checkLevelUp() { 
@@ -547,14 +543,14 @@
             if(!canClick || !isPlaying || isPausedForStart || userSeq.includes(idx)) return; userSeq.push(idx); 
             if (patternSeq.includes(idx)) { 
                 cellEl.classList.add('correct'); 
-                processCorrectTap(userSeq.length - 1, document.getElementById('play-area')); 
+                processCorrectTap(userSeq.length - 1); 
                 if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); } 
             } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
         }
 
         function runGame2() {
             if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; 
-            let count = Math.min(3 + Math.floor(currentLevel / 2), 8); 
+            let count = Math.min(3 + Math.floor(currentLevel / 2), MAX_SEQUENCE_LENGTH); 
             for(let i=0; i<count; i++) patternSeq.push(SYMBOL_KEYS[Math.floor(Math.random() * SYMBOL_KEYS.length)]);
             
             let area = document.getElementById('seq-area'); 
@@ -579,7 +575,7 @@
                 area.innerHTML = html;
                 area.scrollLeft = area.scrollWidth;
                 
-                processCorrectTap(userSeq.length - 1, document.getElementById('play-area')); 
+                processCorrectTap(userSeq.length - 1); 
                 if(userSeq.length === patternSeq.length) { 
                     canClick = false; 
                     winsInCurrentLevel++;
@@ -588,14 +584,13 @@
                         winsInCurrentLevel = 0; 
                         checkLevelUp();
                     } else {
+                        // HIỆN THÔNG BÁO SỐ LẦN THẮNG GỌN GÀNG PHÍA TRÊN
                         let playArea = document.getElementById('play-area');
-                        let comboMsg = document.createElement('div'); 
-                        comboMsg.className = 'float-score'; 
-                        comboMsg.style.color = '#38ef7d';
-                        comboMsg.style.fontSize = '24px';
-                        comboMsg.innerText = `${winsInCurrentLevel}/3 LẦN`; 
-                        playArea.appendChild(comboMsg); 
-                        setTimeout(() => comboMsg.remove(), 1000);
+                        let statusMsg = document.createElement('div'); 
+                        statusMsg.className = 'status-notification'; 
+                        statusMsg.innerText = `${winsInCurrentLevel}/3 LẦN`; 
+                        playArea.appendChild(statusMsg); 
+                        setTimeout(() => statusMsg.remove(), 1000);
 
                         setTimeout(() => { runGame2(); }, 600);
                     }
