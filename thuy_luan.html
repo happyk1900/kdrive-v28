@@ -458,8 +458,9 @@
         let canBurst = true;
         let burstActive = false;
         let burstTimer;
-        let burstCount = 0; // Biến giới hạn 3 lần Bạo Phát
-        let lastGame2Len = 0; // Biến lưu số trạm cũ để cảnh báo
+        let burstCount = 0; 
+        let lastGame2Len = 0; 
+        let winsInCurrentLevel = 0; // ĐIỀU KIỆN 3 THẮNG = 1 LÊN CẤP CHO BÀI 2
         
         let inputStartTimestamp = 0;
         let totalReactionMs = 0;
@@ -525,7 +526,7 @@
             cGame = id; aScore = 0; stabilityHP = 10; isPlaying = false; isPausedForStart = true;
             totalReactionMs = 0; totalCharactersTyped = 0; maxComboLength = 0; currentLevel = 1;
             canBurst = true; burstActive = false; currentMultiplier = 1; successfulHitsCount = 0; 
-            burstCount = 0; lastGame2Len = 0; 
+            burstCount = 0; lastGame2Len = 0; winsInCurrentLevel = 0;
             reactionTimes = []; bestCps = 0;
 
             let playArea = document.getElementById('play-area');
@@ -581,6 +582,8 @@
 
         function failSequence() { 
             if(!isPlaying || isPausedForStart) return; canClick = false; stabilityHP -= 2; updateHpDisplay(); 
+            winsInCurrentLevel = 0; // Reset số chuỗi thắng nếu bấm sai
+            
             let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 400);
             if(stabilityHP <= 0) { finishGame(); } else { 
                 let oldConfig = getGridConfigByLevel(currentLevel);
@@ -730,7 +733,29 @@
             if(idx === patternSeq[userSeq.length]) { 
                 cellEl.classList.add('correct'); userSeq.push(idx); setTimeout(() => { if(cellEl) cellEl.classList.remove('correct'); }, 200); 
                 processCorrectTap(userSeq.length - 1, Date.now() - inputStartTimestamp, document.getElementById('play-area')); 
-                if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); } 
+                
+                if(userSeq.length === patternSeq.length) { 
+                    canClick = false; 
+                    winsInCurrentLevel++; // TĂNG CHUỖI THẮNG
+                    
+                    if(winsInCurrentLevel >= 3) {
+                        winsInCurrentLevel = 0; // Đủ 3 lần -> Reset và Lên cấp
+                        checkLevelUp();
+                    } else {
+                        // Hiện thông báo chuỗi (ví dụ: 1/3, 2/3)
+                        let playArea = document.getElementById('play-area');
+                        let comboMsg = document.createElement('div'); 
+                        comboMsg.className = 'float-score'; 
+                        comboMsg.style.color = '#00ffcc';
+                        comboMsg.style.fontSize = '24px';
+                        comboMsg.innerText = `${winsInCurrentLevel}/3`; 
+                        playArea.appendChild(comboMsg); 
+                        setTimeout(() => comboMsg.remove(), 1000);
+                        
+                        // Chơi tiếp ở cấp hiện tại
+                        setTimeout(() => { runGame2(); }, 600);
+                    }
+                } 
             } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
         }
 
@@ -829,7 +854,7 @@
                         cells.push(c); 
                     }
                     
-                    let pathLen = 9; // <--- TĂNG LÊN THÀNH 9 TRẠM DÀI HƠN
+                    let pathLen = 9; // GIỮ NGUYÊN BẠO PHÁT ẢI 2 = 9 NÚT
                     let path = []; 
                     let curr = Math.floor(Math.random() * 16); 
                     path.push(curr);
@@ -851,7 +876,6 @@
                     }
 
                     let step = 0;
-                    // KÉO TỐC ĐỘ XUỐNG 220MS NHANH HƠN NHƯNG KHÔNG BỊ LOẠN MẮT
                     let showInterval = setInterval(() => {
                         if(!burstActive) { clearInterval(showInterval); return; }
                         cells.forEach(c => c.classList.remove('active-glow'));
@@ -919,7 +943,6 @@
                                 
                                 setTimeout(()=> {
                                     burstContainer.remove();
-                                    // SỬA LỖI BUG "blackoutBg" THÀNH "blackout"
                                     fireBeam(burstClicks * 4.5, blackout); 
                                 }, 300);
                             } else {
