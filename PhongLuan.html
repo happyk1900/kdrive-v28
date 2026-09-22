@@ -76,7 +76,6 @@
         #btn-next { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         #btn-next:active { background: #fff; color: #000; }
 
-        /* BÁO CÁO TỔNG HỢP CUỐI CÙNG */
         #final-summary-overlay { position: absolute; inset: 0; background: #010a15; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 12px; }
         #final-summary-overlay.active { display: flex; }
         .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #00ff66; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px #00ff66; }
@@ -146,7 +145,7 @@
                 </div>
             </div>
 
-            <!-- SẢNH CHỜ (CHỈ CÒN 2 ẢI) -->
+            <!-- SẢNH CHỜ -->
             <div id="start-prompt-overlay" class="hidden">
                 <div id="briefing-panel" class="briefing-panel">
                     <div class="briefing-title" id="briefing-title"></div>
@@ -177,7 +176,7 @@
                 <div id="float-boo" class="floating-boo-txt"></div>
             </div>
 
-            <!-- BẢNG ĐIỂM TỪNG BÀI KÈM ĐÁNH GIÁ -->
+            <!-- BẢNG ĐIỂM TỪNG BÀI -->
             <div id="result-overlay">
                 <div class="stage-badge-header" id="stage-badge-title">KẾT QUẢ BÀI 1</div>
                 
@@ -202,7 +201,7 @@
                 </div>
             </div>
 
-            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG (CHỈ CÒN 2 ẢI) -->
+            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG -->
             <div id="final-summary-overlay">
                 <div class="final-header">TỔNG KẾT PHONG LUÂN</div>
                 <div class="stat-box">
@@ -296,7 +295,7 @@
         let isPlaying = false; 
         let isPausedForStart = true;
         
-        let sessionScoreG1 = 0, sessionScoreG2 = 0; // ĐÃ XÓA sessionScoreG3
+        let sessionScoreG1 = 0, sessionScoreG2 = 0;
         
         let loopRaf;
         let gTimeouts = [];
@@ -311,14 +310,12 @@
         let tEl = document.getElementById('game-target');
         let mx = maxX / 2, my = maxY / 2;
 
-        // Biến điều khiển vật lý chung
         let gFrameCount = 0;
         let gNextTurnFrame = 0;
         let gDashFrames = 0;
         let gDashMultiplier = 1;
         let gMissFrames = 0;
 
-        // Biến riêng cho Bài 2 (Tàng hình)
         let isGhost = false;
 
         window.onload = () => {
@@ -432,8 +429,7 @@
             e.stopPropagation();
 
             if(cGame === '2') {
-                if(!isGhost) { // Chỉ ăn điểm khi nó hiện hình
-                    // Điểm cộng tăng dần theo tốc độ
+                if(!isGhost) { 
                     let pointsToAdd = 15;
                     if(aScore >= 3000) pointsToAdd = 30;
                     else if(aScore >= 1000) pointsToAdd = 20;
@@ -443,11 +439,9 @@
                     showBooMsg("CHÉM CHUẨN!");
                     resetActionTimer(); 
                     
-                    // Giật nó sang một chỗ ngẫu nhiên khác để không bị spam click
                     tx = 60 + Math.random() * (maxX - 120); 
                     ty = 60 + Math.random() * (maxY - 120);
                     
-                    // Lập tức cho tàng hình luôn để tăng độ khó
                     isGhost = true;
                     tEl.style.opacity = '0'; 
                     tEl.style.pointerEvents = 'none';
@@ -474,7 +468,6 @@
             if(actionTimer) clearTimeout(actionTimer);
             if(!isPlaying || isPausedForStart) return;
 
-            // Ở Bài 2, nếu sau 2.5s không chém được sẽ mất mạng
             actionTimer = setTimeout(() => {
                 if(!isPlaying || isPausedForStart) return;
                 loseLife();
@@ -499,7 +492,7 @@
         function initG2() {
             tEl.className = 'wind-target style-slash'; 
             document.getElementById('custom-cursor').style.display = 'none';
-            document.getElementById('warning-bar-container').style.display = 'none'; // Bài 2 không dùng thanh trượt
+            document.getElementById('warning-bar-container').style.display = 'none'; 
             isGhost = false;
             
             gFrameCount = 0;
@@ -512,7 +505,6 @@
             scheduleGhostToggle();
         }
 
-        // HÀM TÀNG HÌNH NGẪU NHIÊN CHO BÀI 2
         function scheduleGhostToggle() {
             if(!isPlaying || isPausedForStart || cGame !== '2') return;
             
@@ -520,12 +512,10 @@
             tEl.style.opacity = isGhost ? '0' : '1';
             tEl.style.pointerEvents = isGhost ? 'none' : 'auto';
 
-            // Random thời gian: Tàng hình ngắn (0.4-1.2s), Hiện hình dài hơn tí (0.6-1.6s)
             let nextTime = isGhost 
                 ? Math.floor(Math.random() * 800) + 400 
                 : Math.floor(Math.random() * 1000) + 600;
 
-            // Ép tốc độ chớp tắt nhanh hơn khi điểm cao
             let speedFactor = Math.max(0.5, 1 - (aScore / 5000));
             nextTime *= speedFactor;
 
@@ -538,51 +528,42 @@
 
             gFrameCount++;
             
-            // CHUNG LOGIC VẬT LÝ VÀ TỐC ĐỘ CHO CẢ ẢI 1 & ẢI 2
-            let currentTargetSpeed = 3.5 + (aScore * 0.0015);
-            if (currentTargetSpeed > 12.0) currentTargetSpeed = 12.0;
+            // ÉP TỐC ĐỘ: Khởi điểm nhanh hơn (4.0), Tịnh tiến dốc hơn (0.0025), Trần cực đại vọt lên (15.0)
+            let currentTargetSpeed = 4.0 + (aScore * 0.0025);
+            if (currentTargetSpeed > 15.0) currentTargetSpeed = 15.0; 
 
-            let pointsToAdd = 0.5;
             let turnFreqOffset = 0; 
+            if (aScore < 1000) turnFreqOffset = 0;
+            else if (aScore < 2000) turnFreqOffset = 5;
+            else if (aScore < 3000) turnFreqOffset = 10;
+            else if (aScore < 5000) turnFreqOffset = 15;
+            else turnFreqOffset = 20;
 
-            if (aScore < 1000) {
-                pointsToAdd = 0.5; turnFreqOffset = 0;
-            } else if (aScore < 2000) {
-                pointsToAdd = 1.0; turnFreqOffset = 5;
-            } else if (aScore < 3000) {
-                pointsToAdd = 2.0; turnFreqOffset = 10;
-            } else if (aScore < 5000) {
-                pointsToAdd = 4.0; turnFreqOffset = 15;
-            } else {
-                pointsToAdd = 8.0; turnFreqOffset = 20;
-            }
-
-            // Cơ chế lướt (Dash)
             if (gDashFrames > 0) {
                 gDashFrames--;
             } else {
                 gDashMultiplier = 1;
                 if (Math.random() < 0.015) { 
-                    gDashMultiplier = 1.5; 
+                    gDashMultiplier = 1.6; 
                     gDashFrames = Math.floor(Math.random() * 10) + 5; 
                 }
             }
 
-            // Bẻ lái ngẫu nhiên
+            // BẺ LÁI ÁP DỤNG CHUNG CHO CẢ ẢI 1 & 2
             if (gFrameCount >= gNextTurnFrame) {
                 let turnAngle = (Math.PI / 4) + Math.random() * (Math.PI * 0.58); 
                 if (Math.random() < 0.5) turnAngle = -turnAngle;
                 tAngle += turnAngle;
                 
                 gFrameCount = 0;
-                gNextTurnFrame = Math.max(15, Math.floor(Math.random() * 50) + 20 - turnFreqOffset);
+                gNextTurnFrame = Math.max(15, Math.floor(Math.random() * 40) + 20 - turnFreqOffset);
             }
 
             let finalSpeed = currentTargetSpeed * gDashMultiplier;
             tx += Math.cos(tAngle) * finalSpeed;
             ty += Math.sin(tAngle) * finalSpeed;
 
-            // Đập tường nảy
+            // ĐẬP TƯỜNG (BẬT CHUNG CHO CẢ ẢI 1 & 2, CHẤM DỨT LỖI QUỸ ĐẠO XOÁY TRÒN)
             let margin = 35;
             let hitWall = false;
             if (tx < margin) { tx = margin; hitWall = true; tAngle = Math.PI - tAngle; }
@@ -597,11 +578,17 @@
             tEl.style.top = ty + 'px';
             tEl.style.transform = `translate(-50%, -50%)`;
 
-            // XỬ LÝ RIÊNG THEO TỪNG BÀI
+            // TÍNH ĐIỂM RIÊNG CỦA ẢI 1
             if (cGame === '1') {
+                let pointsToAdd = 0.5;
+                if (aScore >= 1000 && aScore < 2000) pointsToAdd = 1.0;
+                else if (aScore >= 2000 && aScore < 3000) pointsToAdd = 2.0;
+                else if (aScore >= 3000 && aScore < 5000) pointsToAdd = 4.0;
+                else if (aScore >= 5000) pointsToAdd = 8.0;
+
                 let dist = Math.hypot(mx - tx, my - ty);
                 let hitRadius = 60;
-                const G1_MAX_MISS_FRAMES = 120; // Khóa cứng 2 giây trượt tay
+                const G1_MAX_MISS_FRAMES = 120; 
                 
                 if(dist < hitRadius) {
                     addScore(pointsToAdd);
@@ -621,7 +608,7 @@
                     }
                 }
             } 
-            // Bài 2 không dùng logic bám đuôi, chỉ dùng onclick để chém (đã xử lý ở handleTargetClick)
+            // Ải 2 tính điểm nhờ lệnh onclick ở handleTargetClick
 
             loopRaf = requestAnimationFrame(gameLoop);
         }
