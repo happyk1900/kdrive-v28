@@ -776,8 +776,10 @@
             let bTimerBar = document.createElement('div'); bTimerBar.className = 'burst-timer-bar'; let bTimerFill = document.createElement('div'); bTimerFill.className = 'burst-timer-fill';
             bTimerBar.appendChild(bTimerFill); burstContainer.appendChild(bTimerBar); playArea.appendChild(burstContainer);
 
-            let burstClicks = 0; let duration = 7000; 
+            let burstClicks = 0; 
             let burstType = parseInt(cGame);
+            // TĂNG TỔNG THỜI GIAN CHO BẠO PHÁT ẢI 2 (8.5 giây thay vì 7 giây)
+            let duration = (burstType === 2) ? 8500 : 7000; 
 
             setTimeout(() => { bTimerFill.style.width = '0%'; bTimerFill.style.transition = `width ${duration}ms linear`; }, 50);
 
@@ -812,7 +814,6 @@
                 setupB1();
             } 
             else if (burstType === 2) {
-                // LOGIC MỚI: VUỐT LƯU THỦY (SWIPE TO DRAW)
                 burstHeader.innerHTML = "VẼ LẠI QUỸ ĐẠO<br><span style='font-size:12px; color:#00ffcc;'>VUỐT NỐI LIỀN CÁC ĐIỂM SÁNG!</span>";
                 function setupB2() {
                     if(!burstActive) return; 
@@ -829,7 +830,6 @@
                         cells.push(c); 
                     }
                     
-                    // Tạo quỹ đạo liền kề ngẫu nhiên
                     let pathLen = 6; 
                     let path = []; 
                     let curr = Math.floor(Math.random() * 16); 
@@ -846,13 +846,13 @@
                             }
                         }
                         neighbors = neighbors.filter(n => !path.includes(n));
-                        if(neighbors.length === 0) break; // Kẹt đường thì dừng
+                        if(neighbors.length === 0) break;
                         curr = neighbors[Math.floor(Math.random() * neighbors.length)];
                         path.push(curr);
                     }
 
-                    // Chạy tia sáng dọc theo quỹ đạo
                     let step = 0;
+                    // GIẢM TỐC ĐỘ HẠT SÁNG XUỐNG CÒN 400MS MỖI NHỊP CHỚP
                     let showInterval = setInterval(() => {
                         if(!burstActive) { clearInterval(showInterval); return; }
                         cells.forEach(c => c.classList.remove('active-glow'));
@@ -863,11 +863,10 @@
                         } else {
                             clearInterval(showInterval); 
                             triggerReadyCue(bGrid);
-                            enableSwiping(); // Bật cơ chế vuốt chạm
+                            enableSwiping();
                         }
-                    }, 150);
+                    }, 400); // <--- TỐC ĐỘ ĐÃ ĐƯỢC KÉO CHẬM LẠI GẤP GẦN 3 LẦN
 
-                    // Cơ chế bắt sự kiện vuốt trên màn hình
                     function enableSwiping() {
                         let isDrawing = false;
                         let userPath = [];
@@ -905,7 +904,6 @@
                             if(!isDrawing || !burstActive) return;
                             isDrawing = false;
                             
-                            // Kiểm tra quỹ đạo
                             let isCorrect = (userPath.length === path.length) && userPath.every((val, index) => val === path[index]);
                             if(isCorrect) {
                                 userPath.forEach(idx => cells[idx].classList.add('correct'));
@@ -914,7 +912,6 @@
                                 clearTimeout(burstTimer);
                                 burstActive = false;
                                 
-                                // Gỡ bỏ Event Listeners
                                 bGrid.removeEventListener('touchstart', handleStart);
                                 bGrid.removeEventListener('touchmove', handleMove);
                                 bGrid.removeEventListener('touchend', handleEnd);
@@ -923,7 +920,7 @@
                                 
                                 setTimeout(()=> {
                                     burstContainer.remove();
-                                    fireBeam(burstClicks * 4.5, blackoutBg); // Hệ số thưởng lớn cho việc vuốt
+                                    fireBeam(burstClicks * 4.5, blackoutBg); 
                                 }, 300);
                             } else {
                                 userPath.forEach(idx => cells[idx].classList.add('wrong'));
@@ -933,7 +930,7 @@
                                         cells.forEach(c => { c.classList.remove('wrong'); c.classList.remove('user-pick'); });
                                         userPath = [];
                                     }
-                                }, 400); // Cho phép vuốt lại nếu còn thời gian
+                                }, 400); 
                             }
                         }
 
