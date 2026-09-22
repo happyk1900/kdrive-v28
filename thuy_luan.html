@@ -132,7 +132,7 @@
         /* LƯỚI MA TRẬN GAME */
         .game-container { display: none; width: 100%; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .game-container.active { display: flex; }
-        .dynamic-grid { display: grid; gap: 10px; margin: 0 auto; transition: all 0.3s ease; justify-content: center; align-content: center; border-radius: 12px; padding: 10px; border: 2px solid transparent; }
+        .dynamic-grid { display: grid; gap: 10px; margin: 0 auto; transition: all 0.3s ease; justify-content: center; align-content: center; border-radius: 12px; padding: 10px; border: 2px solid transparent; touch-action: none; }
         
         .grid-ready-glow { animation: readyPulse 0.4s ease-out forwards; }
         @keyframes readyPulse {
@@ -143,7 +143,7 @@
 
         .grid-cell { aspect-ratio: 1; background: rgba(0, 229, 255, 0.1); border: 1.5px solid rgba(0, 229, 255, 0.4); border-radius: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.1s ease; backdrop-filter: blur(6px); }
         .grid-cell.active-glow { background: rgba(0, 229, 255, 0.8); box-shadow: 0 0 20px #00e5ff; border-color: #fff; }
-        .grid-cell.user-pick { background: rgba(0, 229, 255, 0.5); border-color: #00e5ff; }
+        .grid-cell.user-pick { background: rgba(0, 229, 255, 0.5); border-color: #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
         .grid-cell.correct { background: rgba(0, 255, 102, 0.8); box-shadow: 0 0 15px #00ff66; border-color: #fff; color: #fff;}
         .grid-cell.wrong { background: rgba(255, 51, 102, 0.8); box-shadow: 0 0 15px #ff3366; border-color: #fff; color: #fff;}
 
@@ -178,7 +178,7 @@
         /* BẠO PHÁT */
         .blackout-bg { position: fixed; inset: 0; width: 100vw; height: 100dvh; background-color: rgba(1, 10, 21, 0.98); z-index: 99999; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .blackout-bg.active { opacity: 1; pointer-events: auto; }
-        .burst-container { position: fixed; width: 100vw; height: 100dvh; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 100001; pointer-events: auto; flex-direction: column; background: rgba(1, 10, 21, 0.95); }
+        .burst-container { position: fixed; width: 100vw; height: 100dvh; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 100001; pointer-events: auto; flex-direction: column; background: rgba(1, 10, 21, 0.95); touch-action: none; }
         .burst-header-text { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #00e5ff; font-weight: bold; margin-bottom: 20px; text-align: center; text-shadow: 0 0 15px #00e5ff; letter-spacing: 2px; }
         .burst-timer-bar { position: absolute; top: 90px; width: 80%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
         .burst-timer-fill { width: 100%; height: 100%; background: #00e5ff; box-shadow: 0 0 10px #00e5ff; transition: width 0.1s linear; }
@@ -525,8 +525,7 @@
             cGame = id; aScore = 0; stabilityHP = 10; isPlaying = false; isPausedForStart = true;
             totalReactionMs = 0; totalCharactersTyped = 0; maxComboLength = 0; currentLevel = 1;
             canBurst = true; burstActive = false; currentMultiplier = 1; successfulHitsCount = 0; 
-            burstCount = 0; // Reset số lần bạo phát về 0 khi sang màn mới
-            lastGame2Len = 0; // Reset cảnh báo trạm
+            burstCount = 0; lastGame2Len = 0; 
             reactionTimes = []; bestCps = 0;
 
             let playArea = document.getElementById('play-area');
@@ -626,7 +625,6 @@
             playArea.appendChild(floatScore); setTimeout(() => floatScore.remove(), 1000);
             
             successfulHitsCount++; 
-            // KHÓA BẠO PHÁT TỐI ĐA 3 LẦN MỖI MÀN
             if (canBurst && burstCount < 3 && Math.random() < 0.04) { 
                 burstCount++;
                 forceBurstMode(); 
@@ -671,7 +669,6 @@
         function runGame1() {
             if(!isPlaying || isPausedForStart) return; buildDynamicGrid('1'); patternSeq = []; userSeq = []; canClick = false; 
             let config = getGridConfigByLevel(currentLevel); 
-            // Tăng 1 ô mỗi cấp
             let count = Math.min(3 + currentLevel, Math.floor(config.total * 0.7)); 
             
             while(patternSeq.length < count) { let r = Math.floor(Math.random() * config.total); if(!patternSeq.includes(r)) patternSeq.push(r); }
@@ -698,10 +695,8 @@
         async function runGame2() {
             if(!isPlaying || isPausedForStart) return; buildDynamicGrid('2'); patternSeq = []; userSeq = []; canClick = false; 
             let config = getGridConfigByLevel(currentLevel); 
-            // Đã làm mượt: Lên 1 trạm mỗi cấp thay vì 2
             let len = Math.min(3 + currentLevel, Math.floor(config.total * 0.8)); 
 
-            // HỆ THỐNG CẢNH BÁO TĂNG/GIẢM TRẠM CHO BÀI 2
             if (lastGame2Len !== 0 && lastGame2Len !== len) {
                 let playArea = document.getElementById('play-area');
                 let alertBox = document.createElement('div');
@@ -741,7 +736,6 @@
 
         function runGame3() {
             if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; 
-            // Đã làm mượt: Tăng 1 ký tự mỗi cấp
             let count = Math.min(3 + currentLevel, 25); 
             for(let i=0; i<count; i++) patternSeq.push(G3_SYMBOLS[Math.floor(Math.random() * G3_SYMBOLS.length)]);
             let area = document.getElementById('seq-area'); area.innerHTML = patternSeq.map(sym => `<div class="quantum-char">${sym}</div>`).join('');
@@ -816,36 +810,145 @@
                     }, 500);
                 }
                 setupB1();
-            } else if (burstType === 2) {
-                burstHeader.innerHTML = "DÒNG CHẢY CẤP TỐC<br><span style='font-size:12px; color:#fff;'>BẤM ĐÚNG QUỸ ĐẠO!</span>";
+            } 
+            else if (burstType === 2) {
+                // LOGIC MỚI: VUỐT LƯU THỦY (SWIPE TO DRAW)
+                burstHeader.innerHTML = "VẼ LẠI QUỸ ĐẠO<br><span style='font-size:12px; color:#00ffcc;'>VUỐT NỐI LIỀN CÁC ĐIỂM SÁNG!</span>";
                 function setupB2() {
-                    if(!burstActive) return; bGrid.innerHTML = ''; bGrid.style.gridTemplateColumns = 'repeat(4, 1fr)'; bGrid.style.width = '260px'; bGrid.style.height = '260px';
-                    let cells = []; for(let i=0; i<16; i++) { let c = document.createElement('div'); c.className = 'grid-cell'; bGrid.appendChild(c); cells.push(c); }
-                    let path = []; while(path.length < 5) { let r = Math.floor(Math.random()*16); if(!path.includes(r)) path.push(r); }
+                    if(!burstActive) return; 
+                    bGrid.innerHTML = ''; 
+                    bGrid.style.gridTemplateColumns = 'repeat(4, 1fr)'; 
+                    bGrid.style.width = '280px'; bGrid.style.height = '280px'; 
+                    
+                    let cells = []; 
+                    for(let i=0; i<16; i++) { 
+                        let c = document.createElement('div'); 
+                        c.className = 'grid-cell'; 
+                        c.dataset.index = i; 
+                        bGrid.appendChild(c); 
+                        cells.push(c); 
+                    }
+                    
+                    // Tạo quỹ đạo liền kề ngẫu nhiên
+                    let pathLen = 6; 
+                    let path = []; 
+                    let curr = Math.floor(Math.random() * 16); 
+                    path.push(curr);
+                    
+                    for(let i=1; i<pathLen; i++) {
+                        let neighbors = [];
+                        let c = curr % 4; let r = Math.floor(curr / 4);
+                        for(let dr=-1; dr<=1; dr++){
+                            for(let dc=-1; dc<=1; dc++){
+                                if(dr===0 && dc===0) continue;
+                                let nr = r + dr, nc = c + dc;
+                                if(nr>=0 && nr<4 && nc>=0 && nc<4) neighbors.push(nr*4 + nc);
+                            }
+                        }
+                        neighbors = neighbors.filter(n => !path.includes(n));
+                        if(neighbors.length === 0) break; // Kẹt đường thì dừng
+                        curr = neighbors[Math.floor(Math.random() * neighbors.length)];
+                        path.push(curr);
+                    }
+
+                    // Chạy tia sáng dọc theo quỹ đạo
                     let step = 0;
                     let showInterval = setInterval(() => {
                         if(!burstActive) { clearInterval(showInterval); return; }
                         cells.forEach(c => c.classList.remove('active-glow'));
-                        if(step < path.length) { cells[path[step]].classList.add('active-glow'); playSound('coin', 1.0 + step*0.1); step++; } 
-                        else {
-                            clearInterval(showInterval); let userStep = 0;
+                        if(step < path.length) { 
+                            cells[path[step]].classList.add('active-glow'); 
+                            playSound('coin', 1.0 + step*0.1); 
+                            step++; 
+                        } else {
+                            clearInterval(showInterval); 
                             triggerReadyCue(bGrid);
-                            cells.forEach((c, i) => {
-                                c.onclick = () => {
-                                    if(!burstActive) return;
-                                    if(i === path[userStep]) { 
-                                        c.classList.add('correct'); burstClicks++; playSound('coin', 1); 
-                                        userStep++; if(userStep === path.length) setTimeout(setupB2, 200); 
-                                    } else {
-                                        if(!c.classList.contains('correct') && !c.classList.contains('wrong')) { c.classList.add('wrong'); playSound('wrong'); }
-                                    }
-                                };
-                            });
+                            enableSwiping(); // Bật cơ chế vuốt chạm
                         }
-                    }, 120);
+                    }, 150);
+
+                    // Cơ chế bắt sự kiện vuốt trên màn hình
+                    function enableSwiping() {
+                        let isDrawing = false;
+                        let userPath = [];
+
+                        function handleStart(e) {
+                            if(!burstActive) return;
+                            e.preventDefault();
+                            let touch = e.touches ? e.touches[0] : e;
+                            let target = document.elementFromPoint(touch.clientX, touch.clientY);
+                            if(target && target.classList.contains('grid-cell')) {
+                                isDrawing = true;
+                                let idx = parseInt(target.dataset.index);
+                                userPath.push(idx);
+                                target.classList.add('user-pick');
+                                playSound('coin', 1.0);
+                            }
+                        }
+
+                        function handleMove(e) {
+                            if(!isDrawing || !burstActive) return;
+                            e.preventDefault();
+                            let touch = e.touches ? e.touches[0] : e;
+                            let target = document.elementFromPoint(touch.clientX, touch.clientY);
+                            if(target && target.classList.contains('grid-cell')) {
+                                let idx = parseInt(target.dataset.index);
+                                if(userPath[userPath.length-1] !== idx && !userPath.includes(idx)) {
+                                    userPath.push(idx);
+                                    target.classList.add('user-pick');
+                                    playSound('coin', 1.0 + userPath.length*0.1);
+                                }
+                            }
+                        }
+
+                        function handleEnd(e) {
+                            if(!isDrawing || !burstActive) return;
+                            isDrawing = false;
+                            
+                            // Kiểm tra quỹ đạo
+                            let isCorrect = (userPath.length === path.length) && userPath.every((val, index) => val === path[index]);
+                            if(isCorrect) {
+                                userPath.forEach(idx => cells[idx].classList.add('correct'));
+                                playSound('coin', 2.0);
+                                burstClicks += path.length; 
+                                clearTimeout(burstTimer);
+                                burstActive = false;
+                                
+                                // Gỡ bỏ Event Listeners
+                                bGrid.removeEventListener('touchstart', handleStart);
+                                bGrid.removeEventListener('touchmove', handleMove);
+                                bGrid.removeEventListener('touchend', handleEnd);
+                                document.removeEventListener('mousemove', handleMove);
+                                document.removeEventListener('mouseup', handleEnd);
+                                
+                                setTimeout(()=> {
+                                    burstContainer.remove();
+                                    fireBeam(burstClicks * 4.5, blackoutBg); // Hệ số thưởng lớn cho việc vuốt
+                                }, 300);
+                            } else {
+                                userPath.forEach(idx => cells[idx].classList.add('wrong'));
+                                playSound('wrong');
+                                setTimeout(() => {
+                                    if(burstActive) {
+                                        cells.forEach(c => { c.classList.remove('wrong'); c.classList.remove('user-pick'); });
+                                        userPath = [];
+                                    }
+                                }, 400); // Cho phép vuốt lại nếu còn thời gian
+                            }
+                        }
+
+                        bGrid.addEventListener('touchstart', handleStart, {passive: false});
+                        bGrid.addEventListener('touchmove', handleMove, {passive: false});
+                        bGrid.addEventListener('touchend', handleEnd, {passive: false});
+                        
+                        bGrid.addEventListener('mousedown', handleStart);
+                        document.addEventListener('mousemove', handleMove);
+                        document.addEventListener('mouseup', handleEnd);
+                    }
                 }
                 setupB2();
-            } else if (burstType === 3) {
+            } 
+            else if (burstType === 3) {
                 function setupB3() {
                     if(!burstActive) return; bGrid.innerHTML = ''; bGrid.style.gridTemplateColumns = 'repeat(4, 1fr)'; bGrid.style.width = '260px'; bGrid.style.height = '260px';
                     let targetSym = G3_SYMBOLS[Math.floor(Math.random()*G3_SYMBOLS.length)];
