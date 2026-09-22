@@ -117,7 +117,6 @@
         .grid-cell.correct { background: rgba(0, 255, 102, 0.85); box-shadow: 0 0 15px #00ff66; border-color: #fff; color: #fff;}
         .grid-cell.wrong { background: rgba(255, 51, 102, 0.85); box-shadow: 0 0 15px #ff3366; border-color: #fff; color: #fff;}
 
-        /* BÀI 2: CANH CHỈNH KHUNG CHUỖI CÂN ĐỐI TÂM TUYỆT ĐỐI */
         .sequence-display { height: 90px; display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 25px; width: 95%; max-width: 350px; background: rgba(2, 8, 15, 0.9); border-radius: 12px; border: 1.5px solid rgba(56,239,125,0.4); padding: 0 15px; overflow-x: auto; white-space: nowrap; scroll-behavior: smooth; }
         .sequence-display::-webkit-scrollbar { height: 4px; }
         .sequence-display::-webkit-scrollbar-thumb { background: #38ef7d; border-radius: 2px; }
@@ -132,15 +131,11 @@
         .shape-svg { width: 38px; height: 38px; display: block; filter: drop-shadow(0 0 6px currentColor); }
         .shape-svg-small { width: 34px; height: 34px; display: block; filter: drop-shadow(0 0 5px currentColor); }
 
-        /* THÔNG BÁO "ĐỘ KHÓ TĂNG LÊN" GỌN GÀNG PHÍA TRÊN */
         .status-notification { position: absolute; top: 75px; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: 900; color: #38ef7d; text-align: center; text-shadow: 0 0 12px #38ef7d; z-index: 100000; pointer-events: none; white-space: nowrap; background: rgba(2, 8, 15, 0.85); padding: 6px 16px; border-radius: 6px; border: 1px solid rgba(56,239,125,0.4); animation: popStatus 1s ease-out forwards; }
         @keyframes popStatus { 0% { opacity: 0; transform: translate(-50%, -10px) scale(0.9); } 20% { opacity: 1; transform: translate(-50%, 0) scale(1.05); } 80% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -10px) scale(0.95); } }
 
         .matrix-expand-alert { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-family: 'Share Tech Mono', monospace; font-size: 36px; font-weight: 900; color: #38ef7d; text-align: center; text-shadow: 0 0 20px #38ef7d; z-index: 100000; animation: popAlert 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: none; white-space: nowrap; }
         @keyframes popAlert { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
-
-        #speed-popup { position: absolute; top: 18%; left: 50%; transform: translate(-50%, -50%) scale(0.4); color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 60px; font-weight: 900; z-index: 95; opacity: 0; pointer-events: none; transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0 30px #38ef7d; text-align: center; text-transform: uppercase; width: 100%; }
-        #speed-popup.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
 <body>
@@ -171,8 +166,6 @@
                     <div class="start-action-box" onclick="triggerStartGame()">BẮT ĐẦU</div>
                 </div>
             </div>
-
-            <div id="speed-popup">X1</div>
 
             <!-- MÀN TẠM DỪNG -->
             <div id="pause-menu-overlay">
@@ -352,7 +345,6 @@
         
         let sessionScoreG1 = 0, sessionScoreG2 = 0;
         let hitsCountG1 = 0, hitsCountG2 = 0; 
-        let currentMultiplier = 1; 
 
         let currentLevel = 1;
         let winsInCurrentLevel = 0;
@@ -396,7 +388,7 @@
 
         function openArena(id) {
             cGame = id; aScore = 0; stabilityHP = 10; isPlaying = false; isPausedForStart = true;
-            currentLevel = 1; currentMultiplier = 1; winsInCurrentLevel = 0;
+            currentLevel = 1; winsInCurrentLevel = 0;
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
@@ -470,25 +462,19 @@
             }
         }
 
-        function processCorrectTap(comboIndex) { 
+        // TÍNH ĐIỂM CỐ ĐỊNH, TUYẾN TÍNH KHÔNG NHÂN HỆ SỐ ẢO
+        function processCorrectTap() { 
             if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
 
             playSound('coin', 1); 
-            let pointsToAdd = Math.round((10 + (comboIndex * 2)) * currentMultiplier); 
+            let pointsToAdd = 10; 
             aScore += pointsToAdd;
             document.getElementById('boo-points').innerText = Math.round(aScore);
         }
 
         function checkLevelUp() { 
             let oldConfig = getGridConfigByLevel(currentLevel);
-            let oldMultiplier = currentMultiplier;
-            
             currentLevel++; 
-            currentMultiplier = Math.min(12, 1 + Math.floor((currentLevel - 1) / 2)); 
-            
-            if (currentMultiplier > oldMultiplier) {
-                let popup = document.getElementById('speed-popup'); popup.innerText = `X${currentMultiplier}`; popup.classList.add('show'); playSound('coin', 1.8); setTimeout(() => popup.classList.remove('show'), 1400); 
-            }
 
             let newConfig = getGridConfigByLevel(currentLevel);
             if (cGame === '1' && oldConfig.total !== newConfig.total) {
@@ -504,9 +490,8 @@
                 if (cGame === '2') {
                     let playArea = document.getElementById('play-area');
                     let alertBox = document.createElement('div');
-                    alertBox.className = 'matrix-expand-alert';
-                    alertBox.innerHTML = `ĐỘ KHÓ<br>TĂNG LÊN`;
-                    alertBox.style.fontSize = '32px';
+                    alertBox.className = 'status-notification';
+                    alertBox.innerText = "ĐỘ KHÓ TĂNG LÊN";
                     playArea.appendChild(alertBox);
                     playSound('ready');
                     setTimeout(() => alertBox.remove(), 1000);
@@ -544,14 +529,13 @@
             if(!canClick || !isPlaying || isPausedForStart || userSeq.includes(idx)) return; userSeq.push(idx); 
             if (patternSeq.includes(idx)) { 
                 cellEl.classList.add('correct'); 
-                processCorrectTap(userSeq.length - 1); 
+                processCorrectTap(); 
                 if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); } 
             } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
         }
 
         function runGame2() {
             if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; 
-            // XUẤT PHÁT ĐIỂM TỪ 4 HÌNH Ở CẤP ĐỘ ĐẦU TIÊN
             let count = Math.min(4 + Math.floor((currentLevel - 1) / 2), MAX_SEQUENCE_LENGTH); 
             for(let i=0; i<count; i++) patternSeq.push(SYMBOL_KEYS[Math.floor(Math.random() * SYMBOL_KEYS.length)]);
             
@@ -577,7 +561,7 @@
                 area.innerHTML = html;
                 area.scrollLeft = area.scrollWidth;
                 
-                processCorrectTap(userSeq.length - 1); 
+                processCorrectTap(); 
                 if(userSeq.length === patternSeq.length) { 
                     canClick = false; 
                     winsInCurrentLevel++;
@@ -586,14 +570,6 @@
                         winsInCurrentLevel = 0; 
                         checkLevelUp();
                     } else {
-                        // CHỈ HIỆN THỊ THÔNG BÁO "ĐỘ KHÓ TĂNG LÊN" GỌN GÀNG TẠI VỊ TRÍ NÀY
-                        let playArea = document.getElementById('play-area');
-                        let statusMsg = document.createElement('div'); 
-                        statusMsg.className = 'status-notification'; 
-                        statusMsg.innerText = "ĐỘ KHÓ TĂNG LÊN"; 
-                        playArea.appendChild(statusMsg); 
-                        setTimeout(() => statusMsg.remove(), 1000);
-
                         setTimeout(() => { runGame2(); }, 600);
                     }
                 }
