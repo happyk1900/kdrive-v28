@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
-    <title data-i18n="page_title">K-Drive - Đạo Trường Phong Luân</title>
+    <meta name="theme-color" content="#020406">
+    <title>K-Drive - Phong Luân</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: #020406; font-family: 'Space Grotesk', sans-serif; }
 
         #sanctum-bg { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; background-image: url('https://github.com/happyk1900/new-abum-17-track/blob/main/PHONG%20LUAN%20AI.png?raw=true'); background-size: cover; background-position: center; opacity: 1; filter: grayscale(20%) contrast(1.2); }
@@ -21,872 +21,271 @@
         .dust-large { width: 3px; height: 3px; background: #a0c0d0; box-shadow: 0 0 8px #a0c0d0; }
         @keyframes floatDust { 0% { transform: translateY(100vh); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.3; } 100% { transform: translateY(-20vh); opacity: 0; } }
 
-        .title-hologram { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: clamp(20px, 6vw, 28px); letter-spacing: 3px; padding: 4px 10px; z-index: 50; pointer-events: none; font-weight: 900; white-space: nowrap; text-shadow: 0 0 15px rgba(160,192,208,0.8); animation: windSway 4s ease-in-out infinite alternate; }
+        #task-arena { position: fixed; inset: 0; background: transparent; z-index: 120; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+        .play-area { width: 100%; max-width: 380px; height: 100vh; height: 100dvh; background: transparent; position: relative; overflow: hidden; margin: 0 auto; transition: all 0.4s ease; }
+        .play-area.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important; max-width: none !important; margin: 0 !important; z-index: 9990 !important; background-color: rgba(2,4,6,0.8); backdrop-filter: blur(5px);}
 
-        @keyframes windSway {
-            0% { transform: translateX(-50%) translateY(0px) skewX(0deg); text-shadow: 0 0 12px rgba(160,192,208,0.6); color: #ffffff; }
-            50% { transform: translateX(-50%) translateY(-3px) skewX(-4deg); text-shadow: -4px 2px 15px rgba(0,255,102,0.5); color: #e0f7fa; }
-            100% { transform: translateX(-50%) translateY(2px) skewX(4deg); text-shadow: 4px -2px 15px rgba(0,229,255,0.5); color: #ffffff; }
-        }
+        .laser-beam-horizontal { position: fixed; top: 50%; left: 0; width: 100vw; height: 2px; background: #00ff66; box-shadow: 0 0 20px #00ff66, 0 0 40px #a0c0d0; z-index: 99999; transform: scaleX(0); transform-origin: center; animation: laserShoot 0.3s forwards ease-out; pointer-events: none; }
+        @keyframes laserShoot { 100% { transform: scaleX(1); height: 4px; } }
+        .laser-beam-horizontal.expand { animation: laserExpand 0.5s forwards cubic-bezier(0.7, 0, 1, 1); }
+        @keyframes laserExpand { 100% { height: 100vh; top: 0; opacity: 0; } }
 
-        /* =========================================
-           TRẠM CỬA NGÕ (GATEWAY) PHONG LUÂN
-           ========================================= */
-        #gateway-void-overlay {
-            position: fixed; inset: 0; background-color: #020406; z-index: 99999;
-            display: flex; align-items: center; justify-content: center; flex-direction: column;
-            transition: opacity 0.5s ease, visibility 0.5s;
-            background-image: 
-                linear-gradient(rgba(0, 229, 255, 0.12) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 229, 255, 0.12) 1px, transparent 1px);
-            background-size: 40px 40px; background-position: center bottom;
-        }
-        #gateway-void-overlay::after {
-            content: ''; position: absolute; inset: 0;
-            background: radial-gradient(circle at center, transparent 20%, #020406 85%);
-            pointer-events: none; z-index: 1;
-        }
+        /* SẢNH CHỜ - BẢNG BRIEFING Y HỆT THỦY LUÂN */
+        #start-prompt-overlay { position: absolute; inset: 0; background: transparent; z-index: 110; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px 40px 15px; gap: 14px; transition: opacity 0.3s ease; }
+        #start-prompt-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none !important; display: none; }
 
-        .gateway-box {
-            width: 88%; max-width: 360px;
-            background: rgba(5, 15, 25, 0.95);
-            border: 1.5px solid #a0c0d0; border-radius: 12px;
-            box-shadow: 0 0 40px rgba(160, 192, 208, 0.25), inset 0 0 15px rgba(160, 192, 208, 0.1);
-            position: relative; z-index: 10; padding: 30px 20px 20px 20px;
-        }
-        .gateway-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
-        .gateway-title { color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: 900; margin-bottom: 8px; text-shadow: 0 0 10px rgba(160,192,208,0.8); letter-spacing: 3px; text-align: center; text-transform: uppercase; }
-        .gateway-desc { color: #a0c0d0; font-size: 11.5px; margin-bottom: 25px; font-family: 'Space Grotesk', sans-serif; text-align: center; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; }
+        .briefing-panel { background: rgba(5, 12, 25, 0.95); border: 2px solid #00ff66; border-radius: 8px; padding: 16px 18px; width: 100%; max-width: 330px; text-align: left; box-shadow: 0 0 20px rgba(0, 255, 102, 0.2); }
+        .briefing-title { color: #00ff66 !important; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(255, 255, 255, 0.2); padding-bottom: 8px; letter-spacing: 1.5px; text-shadow: 0 0 8px rgba(0, 255, 102, 0.5); }
+        .briefing-target { color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; line-height: 1.6; font-weight: 500; }
+        .briefing-target b { color: #00ff66; font-weight: bold; }
 
-        .mode-selector-container { display: flex; gap: 14px; width: 100%; margin-bottom: 25px; }
-        .mode-btn {
-            flex: 1; padding: 15px 5px; background: rgba(0, 0, 0, 0.6); border: 1.5px solid rgba(160, 192, 208, 0.5);
-            color: #a0c0d0; font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: bold;
-            text-align: center; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .mode-btn.active {
-            background: rgba(0, 255, 102, 0.15); border-color: #00ff66; color: #00ff66;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.3), inset 0 0 10px rgba(0, 255, 102, 0.15);
-            text-shadow: 0 0 8px rgba(0, 255, 102, 0.8); transform: translateY(-2px);
-        }
-
-        .main-start-btn {
-            width: 100%; background: rgba(160, 192, 208, 0.2); border: 1.5px solid #fff;
-            border-radius: 8px; color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 17px;
-            font-weight: 900; letter-spacing: 4px; text-transform: uppercase; cursor: pointer;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.2);
-            text-shadow: 0 0 8px #fff; transition: all 0.4s ease;
-            opacity: 0; height: 0; pointer-events: none; overflow: hidden; padding: 0; margin-bottom: 0;
-        }
-        .main-start-btn.ready {
-            opacity: 1; height: 50px; pointer-events: auto; padding: 0; margin-bottom: 20px;
-            animation: mainBtnGlow 1.5s infinite alternate ease-in-out;
-        }
-        @keyframes mainBtnGlow {
-            0% { box-shadow: 0 0 15px rgba(160, 192, 208, 0.4); text-shadow: 0 0 8px #fff; }
-            100% { box-shadow: 0 0 30px rgba(0, 255, 102, 0.7); text-shadow: 0 0 15px #00ff66; }
-        }
-
-        .gateway-exit { 
-            color: #ff3366; font-size: 12px; cursor: pointer; text-decoration: none; 
-            font-family: 'Share Tech Mono', monospace; letter-spacing: 2px; font-weight: bold; 
-            transition: all 0.3s; padding: 10px 20px; text-transform: uppercase; opacity: 0.8;
-        }
-        .gateway-exit:hover { opacity: 1; text-shadow: 0 0 10px rgba(255, 51, 102, 0.8); background: rgba(255, 51, 102, 0.1); border-radius: 6px; }
-
-        /* =========================================
-           BẢNG TỔNG KẾT LUỒNG TỰ ĐỘNG & ĐIỀU HƯỚNG LIÊN HOÀN
-           ========================================= */
-        #auto-master-summary {
-            position: fixed; inset: 0; background: rgba(2, 4, 8, 0.92); z-index: 9999;
-            display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px);
-        }
-        #auto-master-summary.active { display: flex; animation: fadeInSum 0.4s ease; }
-        @keyframes fadeInSum { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-
-        .summary-box {
-            width: 90%; max-width: 350px; background: rgba(5, 10, 15, 0.98);
-            border: 2px solid #a0c0d0; border-radius: 14px; padding: 25px 20px;
-            text-align: center; box-shadow: 0 0 40px rgba(160, 192, 208, 0.4), inset 0 0 20px rgba(160, 192, 208, 0.2);
-            position: relative;
-        }
-        .summary-title { font-family: 'Share Tech Mono', monospace; font-size: 18px; color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 12px; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,255,255,0.8); }
-        .summary-score { font-family: 'Share Tech Mono', monospace; font-size: 34px; color: #00ff66; font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 12px rgba(0,255,102,0.6); }
+        .action-group { width: 100%; max-width: 330px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .start-action-box { width: 100%; background: rgba(255, 255, 255, 0.1); border: 2px solid #ffffff; padding: 14px; border-radius: 8px; color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 15px rgba(255, 255, 255, 0.15); text-align: center; transition: 0.2s; }
+        .start-action-box:active { background: #fff; color: #000; transform: scale(0.98); }
         
-        .btn-master-save {
-            width: 100%; padding: 14px; background: rgba(0, 255, 102, 0.2); border: 1.5px solid #00ff66;
-            color: #00ff66; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: bold;
-            border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4); margin-bottom: 25px; transition: 0.2s;
-            animation: pulseSaveBtn 1.2s infinite alternate ease-in-out;
-        }
-        @keyframes pulseSaveBtn {
-            0% { box-shadow: 0 0 15px rgba(0, 255, 102, 0.3); border-color: #00ff66; }
-            100% { box-shadow: 0 0 30px rgba(0, 255, 102, 0.8); border-color: #fff; color: #fff; background: rgba(0, 255, 102, 0.4); }
-        }
-        .btn-master-save.saved { background: rgba(160, 192, 208, 0.3); border-color: #a0c0d0; color: #fff; animation: none; pointer-events: none; }
+        /* THANH HUD TRONG GAME Ở TRÊN CÙNG */
+        #ingame-hud { position: absolute; top: 0; left: 0; width: 100%; height: 60px; background: rgba(2, 10, 20, 0.95); border-bottom: 1px solid rgba(0, 255, 102, 0.3); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 10000; pointer-events: auto; backdrop-filter: blur(5px); transition: opacity 0.3s; }
+        #ingame-hud.hidden { opacity: 0; pointer-events: none !important; }
+        .hud-left { flex: 1; display: flex; justify-content: flex-start; }
+        .hud-center { flex: 1; display: flex; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #fff; font-weight: bold; white-space: nowrap; }
+        .hud-right { flex: 1; display: flex; justify-content: flex-end; gap: 10px; }
+        .hud-btn { width: 32px; height: 32px; border-radius: 4px; background: rgba(0, 255, 102, 0.1); border: 1px solid rgba(0, 255, 102, 0.5); color: #00ff66; display: flex; justify-content: center; align-items: center; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .hud-btn.exit-btn { background: rgba(255, 0, 127, 0.1); border-color: #ff007f; color: #ff007f; }
 
-        .navigation-wings { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; }
-        .wing-btn {
-            flex: 1; padding: 12px 6px; background: rgba(160, 192, 208, 0.15); border: 1.5px solid #a0c0d0;
-            color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold;
-            border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
-            transition: 0.3s; text-align: center; box-shadow: 0 0 15px rgba(160, 192, 208, 0.3);
-            animation: pulseWings 1.5s infinite alternate ease-in-out;
-        }
-        .wing-btn:hover { background: rgba(160, 192, 208, 0.4); color: #fff; border-color: #fff; transform: translateY(-2px); }
-        @keyframes pulseWings {
-            0% { box-shadow: 0 0 10px rgba(160, 192, 208, 0.2); }
-            100% { box-shadow: 0 0 22px rgba(255, 255, 255, 0.7); }
-        }
+        /* MÀN HÌNH CHỚP KẾT THÚC Y HỆT THỦY LUÂN */
+        #freeze-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 200000; display: none; align-items: center; justify-content: center; }
+        #freeze-overlay.active { display: flex; }
+        .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #00ff66; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px #00ff66; }
 
-        /* ========================================= */
-
-        #task-container { position: fixed; top: 25.5%; left: 50%; transform: translate(-50%, -50%); display: flex; gap: 12px; z-index: 10; align-items: center; justify-content: center; width: 100%; max-width: 380px; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        #task-container.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+        /* BẢNG ĐIỂM TỪNG BÀI */
+        #result-overlay { position: absolute; inset: 0; background: rgba(2, 10, 20, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 8px; border-radius: 12px; padding: 12px; }
+        #result-overlay.active { display: flex; }
+        .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #00ff66; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,255,102,0.5); }
         
-        .holo-card { 
-            width: 105px; height: 110px; 
-            background: rgba(5, 15, 25, 0.8) url('https://github.com/happyk1900/-m-thanh-app/blob/main/PHONG%20AI%201.png?raw=true') center/cover no-repeat;
-            border: 1.5px solid #a0c0d0; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 6px 4px; box-shadow: inset 0 0 15px rgba(160, 192, 208, 0.4), 0 0 12px rgba(160, 192, 208, 0.3); cursor: pointer; border-radius: 8px; transition: all 0.3s ease; position: relative; overflow: hidden; 
-        }
-        .holo-card::before { content: ''; position: absolute; inset: 0; background: rgba(5, 10, 15, 0.4); z-index: 1; transition: background 0.3s; }
-        .holo-card > * { position: relative; z-index: 2; }
-        .holo-card:hover::before { background: rgba(5, 10, 15, 0.1); }
-        .holo-card:hover { box-shadow: inset 0 0 25px rgba(255, 255, 255, 0.9), 0 0 20px rgba(255, 255, 255, 0.8); border-color: #fff; transform: translateY(-3px); }
+        .prestige-panel { width: 92%; max-width: 310px; background: rgba(5, 15, 25, 0.95); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+        .prestige-row { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; width: 100%; }
+        .prestige-label { color: #ffffff; letter-spacing: 1px; flex: 1; text-align: left; text-transform: uppercase; font-weight: bold;}
+        .prestige-val-gold { color: #a0c0d0; font-weight: bold; font-size: 13px; text-align: right; min-width: 80px; }
+        .prestige-total-box { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; padding-top: 2px; width: 100%; border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 2px; }
+        .prestige-total-label { color: #fff; font-size: 12px; font-weight: 900; letter-spacing: 1px; flex: 1; text-align: left; }
+        .prestige-total-num { font-size: 26px; color: #00ff66; font-weight: 900; line-height: 1; text-align: right; min-width: 80px; }
+
+        .result-btn-row { display: flex; gap: 10px; width: 88%; max-width: 280px; margin-top: 10px; }
+        .result-action-btn { flex: 1; padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; }
+        #btn-replay { background: transparent; border: 1px solid #ff3366; color: #ff3366; }
+        #btn-replay:active { background: #ff3366; color: #fff; }
+        #btn-next { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
+        #btn-next:active { background: #fff; color: #000; }
+
+        /* BÁO CÁO TỔNG HỢP CUỐI CÙNG */
+        #final-summary-overlay { position: absolute; inset: 0; background: #010a15; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 12px; }
+        #final-summary-overlay.active { display: flex; }
+        .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #00ff66; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px #00ff66; }
         
-        .live-dot { position: absolute; top: 5px; right: 5px; width: 5px; height: 5px; background-color: #00ff66; border-radius: 50%; box-shadow: 0 0 6px #00ff66; animation: neonBlink 1.2s infinite alternate ease-in-out; }
-        @keyframes neonBlink { 0% { opacity: 0.3; box-shadow: 0 0 2px #00ff66; } 100% { opacity: 1; box-shadow: 0 0 8px #00ff66; } }
+        .stat-box { width: 92%; max-width: 310px; background: rgba(5, 15, 25, 0.95); border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 14px; border-radius: 8px; }
+        .stat-line { display: flex; justify-content: space-between; margin-bottom: 6px; font-family: 'Share Tech Mono', monospace; font-size: 13px; color: #ffffff; width: 100%; font-weight: bold; }
+        .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
+        .stat-line span:last-child { text-align: right; min-width: 100px; color: #00ff66; }
 
-        .float-1 { animation: floatA 4s ease-in-out infinite; }
-        .float-2 { animation: floatB 5s ease-in-out infinite 0.5s; margin-top: -15px; }
-        .float-3 { animation: floatC 4.5s ease-in-out infinite 1s; }
-        @keyframes floatA { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-        @keyframes floatB { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-        @keyframes floatC { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-        
-        .card-sci-tag { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #00ff66; letter-spacing: 0.5px; text-shadow: 0 0 5px rgba(0,255,102,0.6); background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(0, 255, 102, 0.4); padding: 2px 4px; border-radius: 3px; font-weight: bold; }
-        .card-body-content { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; flex-grow: 1; }
-        .card-icon { font-family: 'Share Tech Mono', monospace; font-size: 16px; color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.9); font-weight: bold; margin-bottom: 2px; }
-        .card-title { font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; color: #ffffff; text-align: center; line-height: 1.2; letter-spacing: 0.5px; text-shadow: 1px 1px 4px #000; }
-        .card-status { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #00ff66; letter-spacing: 0.5px; font-weight: bold; text-transform: uppercase; text-shadow: 0 0 4px rgba(0,0,0,0.9); }
+        .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: rgba(0, 255, 102, 0.2); border: 1.5px solid #00ff66; border-radius: 8px; color: #00ff66; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; }
+        .final-btn-exit:hover { background: #00ff66; color: #000; }
 
-        #dual-metrics-box { position: fixed; top: 38.5%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 360px; display: flex; gap: 12px; z-index: 38; }
-        .metric-card { 
-            flex: 1; background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/PHONG%20SCI.png?raw=true');
-            background-size: cover; background-position: center; border: 1.5px solid rgba(160, 192, 208, 0.6); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.7), inset 0 0 12px rgba(160, 192, 208, 0.2); 
-        }
-        .metric-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #a0c0d0; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; font-weight: bold; text-shadow: 0 0 4px #000; cursor: pointer; user-select: none; }
-        .metric-val { font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: bold; color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,0.8); }
+        /* MÀN TẠM DỪNG */
+        #pause-menu-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; backdrop-filter: blur(5px); }
+        #pause-menu-overlay.active { opacity: 1; pointer-events: auto; }
+        .pause-box { width: 85%; max-width: 300px; background: rgba(5, 15, 25, 0.95); border: 1px solid rgba(0,255,102,0.5); border-radius: 12px; padding: 25px 20px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        .pause-title { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #00ff66; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
+        .pause-btn { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
+        .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
+        .pause-btn.exit { background: rgba(255, 0, 127, 0.2); border: 1px solid #ff007f; color: #ff007f; margin-bottom: 0; }
 
-        #hologram-stats-box {
-            position: fixed; top: 48%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 360px;
-            background: rgba(5, 10, 15, 0.92); border: 1.5px solid rgba(160, 192, 208, 0.6);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 0 20px rgba(160, 192, 208, 0.2);
-            border-radius: 10px; padding: 10px 14px; z-index: 40; backdrop-filter: blur(5px);
-            display: flex; flex-direction: column; gap: 8px;
-        }
-
-        .holo-box-header { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #a0c0d0; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid rgba(160,192,208,0.4); padding-bottom: 6px; display: flex; justify-content: space-between; font-weight: bold; }
-        .holo-row { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #ddd; padding: 3px 0; border-bottom: 1px dashed rgba(160,192,208,0.15); font-weight: 500; }
-        .holo-row:last-child { border-bottom: none; }
-        .holo-label { color: #a0c0d0; font-weight: bold; width: 35px; text-shadow: 0 0 5px rgba(160,192,208,0.5); }
-        .holo-tries { display: flex; gap: 8px; color: #aaa; font-size: 10px; }
-        .holo-tries span { width: 26px; text-align: center; background: rgba(160,192,208,0.15); border-radius: 3px; font-weight: bold; color: #fff; }
-        .holo-best { color: #00ff66; font-weight: bold; width: 50px; text-align: right; text-shadow: 0 0 6px rgba(0,255,102,0.6); }
-
-        .chart-container { width: 100%; height: 42px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; border-top: 1px solid rgba(160,192,208,0.3); padding-top: 6px; margin-top: 2px; }
-        #wave-canvas { width: 100%; height: 32px; display: block; cursor: pointer; }
-        .chart-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #a0c0d0; text-align: center; margin-top: 4px; font-weight: bold; }
-
-        #terminal-bar { position: fixed; bottom: 145px; left: 0; width: 100vw; background: rgba(5, 10, 15, 0.95); border-top: 1.5px solid rgba(0, 255, 102, 0.6); border-bottom: 1.5px solid rgba(0, 255, 102, 0.6); padding: 8px 0; text-align: center; z-index: 45; overflow: hidden; display: flex; align-items: center; }
+        #terminal-bar { position: fixed; bottom: 0; left: 0; width: 100vw; background: rgba(5, 12, 20, 0.95); border-top: 1px solid rgba(0, 255, 102, 0.5); padding: 8px 0; z-index: 99999; overflow: hidden; display: flex; align-items: center; pointer-events: none; }
+        #terminal-bar.hidden { display: none !important; }
         .terminal-track { display: inline-flex; white-space: nowrap; animation: ledScroll 15s linear infinite; }
         @keyframes ledScroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-        .terminal-text { color: #00ff66; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(0,255,102,0.8); }
+        .terminal-text { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; opacity: 0.9; }
+
+        /* GAMEPLAY CHUẨN CỦA PHONG LUÂN CŨ */
+        #game-play-zone { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; overflow: hidden; z-index: 10; display: none;}
+        #game-play-zone.active { display: block;}
         
-        #action-panel { position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 50; pointer-events: auto; width: 90%; max-width: 360px; justify-content: center; align-items: center; }
-        .img-action-btn {
-            flex: 1; height: 42px; background-size: cover; background-position: center; border: 1.5px solid rgba(160, 192, 208, 0.6); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.7), inset 0 0 12px rgba(160, 192, 208, 0.2); display: flex; align-items: center; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase;
-        }
-        .img-action-btn:hover { border-color: #00ff66; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,255,102,0.5), inset 0 0 18px rgba(0,255,102,0.4); }
-        .img-action-btn:active { transform: scale(0.96); }
-
-        #btn-core { background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/PHONG%20LOI.png?raw=true'); color: #fff; text-shadow: 0 0 8px #000, 0 0 12px #000, 0 0 15px #a0c0d0; }
-        #btn-save { background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/PHONG%20LUU%20DIEM.png?raw=true'); color: #00ff66; text-shadow: 0 0 8px #000, 0 0 12px #000, 0 0 15px #00ff66; animation: glowPulseImgBtn 1.8s infinite alternate ease-in-out; }
-
-        @keyframes glowPulseImgBtn {
-            0% { border-color: rgba(0, 255, 102, 0.5); box-shadow: 0 5px 15px rgba(0,0,0,0.7), inset 0 0 12px rgba(0,255,102,0.2); }
-            50% { border-color: #fff; box-shadow: 0 8px 20px rgba(255,255,255,0.7), inset 0 0 18px rgba(255,255,255,0.4); }
-            100% { border-color: rgba(0, 255, 102, 0.5); box-shadow: 0 5px 15px rgba(0,0,0,0.7), inset 0 0 12px rgba(0,255,102,0.2); }
-        }
-
-        #task-arena { position: fixed; inset: 0; background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/PHONG%20L%20GAME.png?raw=true'); background-size: cover; background-position: center; z-index: 120; opacity: 0; pointer-events: none; transition: opacity 0.4s; overflow: hidden; }
-        #task-arena.active { opacity: 1; pointer-events: auto; }
-        
-        #play-area { position: absolute; inset: 0; width: 100vw; height: 100vh; cursor: crosshair; overflow: hidden; z-index: 10; }
-
-        .arena-ui-panel { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); z-index: 130; width: 90%; max-width: 350px; background: rgba(5, 10, 15, 0.7); border: 1.5px solid rgba(160, 192, 208, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 15px rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px; backdrop-filter: blur(6px); }
-        .arena-title { font-family: 'Share Tech Mono', monospace; font-size: 16px; color: #fff; letter-spacing: 2px; font-weight: bold; text-shadow: 0 0 8px rgba(255,255,255,0.8); text-align: center; }
-        
-        #arena-final-score { display: none; font-size: 32px; font-family: 'Share Tech Mono', monospace; font-weight: bold; color: #00ff66; text-align: center; text-shadow: 0 0 15px #00ff66; margin: 5px 0; }
-        .arena-rules-desc { font-family: 'Space Grotesk', sans-serif; font-size: 11.5px; color: #fff; line-height: 1.5; text-align: left; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; border-left: 3px solid #a0c0d0; text-shadow: 0 0 4px #000; }
-
-        .arena-btn-group { display: flex; gap: 10px; width: 100%; justify-content: center; margin-top: 5px; pointer-events: auto; }
-        .arena-btn { background: rgba(160, 192, 208, 0.2); border: 1.5px solid #a0c0d0; color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: bold; letter-spacing: 1.5px; padding: 12px 18px; cursor: pointer; transition: all 0.2s; border-radius: 8px; text-transform: uppercase; flex: 1; box-shadow: 0 0 10px rgba(160,192,208,0.3); backdrop-filter: blur(6px); }
-        .arena-btn:hover { background: rgba(160, 192, 208, 0.4); box-shadow: 0 0 15px rgba(255,255,255,0.5); border-color: #fff; }
-        .btn-red { border-color: #ff3366 !important; color: #ff3366 !important; background: rgba(255,51,102,0.15) !important; box-shadow: 0 0 10px rgba(255,51,102,0.3) !important; }
-        .btn-red:hover { background: rgba(255, 51, 102, 0.3) !important; box-shadow: 0 0 15px rgba(255,51,102,0.7) !important; color: #fff !important;}
-
-        .in-game-hud { position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); border: 1.5px solid rgba(160, 192, 208, 0.5); border-radius: 20px; padding: 6px 16px; font-family: 'Share Tech Mono', monospace; font-size: 11.5px; color: #fff; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; white-space: nowrap; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 130; }
-        .in-game-hud.active { opacity: 1; }
-        .highlight-score { color: #00ff66; font-weight: bold; font-size: 14px; text-shadow: 0 0 8px rgba(0,255,102,0.8); }
-        .inline-boo-msg { color: #a0c0d0; font-style: italic; font-size: 10px; margin-left: 3px; font-weight: bold; text-shadow: 0 0 4px #000; }
-
         .wind-target { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: transform 0.1s ease; } 
-        
         .t-track-mode { background: rgba(0, 0, 0, 0.85); border: 2px solid rgba(255, 255, 255, 0.4); box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
         .t-track-mode.hovered { border-color: #fff; box-shadow: 0 0 25px #fff; background: rgba(255, 255, 255, 0.2); transform: translate(-50%, -50%) scale(1.1); }
-
         .style-track { background: #000; border: 2.5px solid #fff; box-shadow: 0 0 15px rgba(255,255,255,0.6); }
         .style-slash { background: #fff; border: 2.5px solid #fff; box-shadow: 0 0 25px #fff, 0 0 45px rgba(255,255,255,0.9); animation: flarePulse 0.4s infinite alternate; }
         @keyframes flarePulse { 0% { transform: scale(0.92); opacity: 0.85; } 100% { transform: scale(1.08); opacity: 1; } }
         .style-tap { background: rgba(255,255,255,0.2); border: 3px solid #fff; box-shadow: 0 0 30px #fff; }
 
-        .hit-flash { animation: flashRed 0.3s ease-out; }
-        @keyframes flashRed { 0% { background-color: rgba(255,51,102,0.6); } 100% { background-color: transparent; } }
-        
         #custom-cursor { position: absolute; width: 20px; height: 20px; border: 2px solid #00ff66; border-radius: 50%; pointer-events: none; z-index: 100; display: none; box-shadow: 0 0 10px #00ff66; transform: translate(-50%, -50%); }
 
-        #warning-bar-container { position: absolute; bottom: 105px; left: 50%; transform: translateX(-50%); width: 200px; height: 4px; background: rgba(255, 255, 255, 0.2); border-radius: 2px; overflow: hidden; display: none; z-index: 130;}
+        /* THANH CẢNH BÁO BÁM ĐUỔI G1 */
+        #warning-bar-container { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); width: 200px; height: 4px; background: rgba(255, 255, 255, 0.2); border-radius: 2px; overflow: hidden; display: none; z-index: 130;}
         #warning-progress { width: 0%; height: 100%; background: #ff3366; transition: width 0.1s linear; }
 
-        #combo-popup {
-            position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%) scale(0.1) skewX(-10deg);
-            font-family: 'Share Tech Mono', monospace; font-size: 70px; font-weight: 900; font-style: italic;
-            color: #fff; text-shadow: 0 0 20px #00e5ff, 0 0 40px #00ff66, 0 0 60px #00ff66;
-            z-index: 100; pointer-events: none; opacity: 0; white-space: nowrap;
-        }
-        #combo-popup.show { animation: comboExplode 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes comboExplode {
-            0% { transform: translate(-50%, -50%) scale(0.1) skewX(-10deg); opacity: 0; }
-            40% { transform: translate(-50%, -50%) scale(1.4) skewX(-15deg); opacity: 1; text-shadow: 0 0 40px #00e5ff, 0 0 80px #00ff66; }
-            60% { transform: translate(-50%, -50%) scale(1.1) skewX(-5deg); }
-            80% { transform: translate(-50%, -50%) scale(1.2) skewX(-10deg); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1) skewX(-10deg); opacity: 0; }
-        }
+        /* BÁO CÁO NHANH KHI BẤM CHUẨN */
+        .floating-boo-txt { position: absolute; left: 50%; top: 25%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: 900; color: #a0c0d0; text-shadow: 0 0 10px #000; z-index: 110; pointer-events: none; opacity:0; transition: opacity 0.3s;}
+        .floating-boo-txt.show { opacity:1; animation: floatUpScore 0.8s forwards; }
+        @keyframes floatUpScore { 0% { transform: translate(-50%, 0) scale(1); } 100% { transform: translate(-50%, -20px) scale(1.2); } }
 
-        #custom-alert-overlay { position: fixed; inset: 0; background: rgba(0, 5, 10, 0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(8px); }
-        #custom-alert-overlay.active { opacity: 1; pointer-events: auto; }
-        .custom-alert-box { width: 85%; max-width: 320px; background: rgba(5, 10, 15, 0.95); border: 2px solid #ff3366; border-radius: 12px; padding: 25px 20px; text-align: center; box-shadow: 0 0 30px rgba(255, 51, 102, 0.5), inset 0 0 15px rgba(255, 51, 102, 0.3); position: relative; overflow: hidden; }
-        .alert-title { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #ff3366; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; display: inline-block; }
-        .alert-text { font-family: 'Space Grotesk', sans-serif; font-size: 15px; color: #fff; line-height: 1.6; margin-bottom: 22px; text-shadow: 0 0 5px rgba(255,255,255,0.6); }
-        .btn-alert { background: rgba(255, 51, 102, 0.15); border: 1.5px solid #ff3366; color: #ff3366; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: bold; letter-spacing: 2px; padding: 12px 35px; cursor: pointer; transition: all 0.2s; border-radius: 6px; box-shadow: 0 0 12px rgba(255,51,102,0.4); }
-        .btn-alert:hover { background: rgba(255, 51, 102, 0.3); box-shadow: 0 0 25px rgba(255, 51, 102, 0.8); color: #fff; }
+        .flashbang-red { position: fixed; inset: 0; background: rgba(255, 51, 102, 0.4); z-index: 999999; pointer-events: none; animation: flashRed 0.4s forwards; }
+        @keyframes flashRed { 0% { opacity: 1; } 100% { opacity: 0; } }
 
-        .glitch-anim { animation: electricGlitch 0.2s infinite; }
-        @keyframes electricGlitch {
-            0%, 100% { transform: translate(0,0); text-shadow: 0 0 12px rgba(255, 51, 102, 0.9); }
-            20% { transform: translate(-2px, 1px); text-shadow: -3px 0px #a0c0d0, 3px 0px #ff3366; }
-            40% { transform: translate(2px, -1px); text-shadow: 3px 0px #a0c0d0, -3px 0px #ff3366; }
-            60% { transform: translate(-1px, -2px); text-shadow: -3px 0px #00ff66, 3px 0px #ff3366; }
-            80% { transform: translate(1px, 2px); text-shadow: 3px 0px #a0c0d0, -3px 0px #ff3366; }
-        }
-
-        #chart-modal-overlay { position: fixed; inset: 0; background: rgba(2, 4, 8, 0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; backdrop-filter: blur(8px); }
-        #chart-modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .chart-modal-box { width: 88%; max-width: 330px; background: rgba(5, 10, 15, 0.96); border: 2px solid #a0c0d0; border-radius: 12px; padding: 24px 20px; text-align: center; box-shadow: 0 0 30px rgba(160, 192, 208, 0.4), inset 0 0 15px rgba(160, 192, 208, 0.2); }
-        .chart-modal-title { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: #fff; font-weight: bold; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); }
-        .chart-modal-text { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #ddd; line-height: 1.6; margin-bottom: 20px; letter-spacing: 0.5px; }
-        .btn-chart-modal { background: rgba(160, 192, 208, 0.2); border: 1.5px solid #a0c0d0; color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; letter-spacing: 2px; padding: 10px 35px; cursor: pointer; transition: all 0.2s ease; border-radius: 6px; box-shadow: 0 0 12px rgba(160, 192, 208, 0.3); text-transform: uppercase; }
-        .btn-chart-modal:hover { background: rgba(160, 192, 208, 0.4); color: #fff; border-color: #fff; box-shadow: 0 0 20px rgba(255, 255, 255, 0.7); }
     </style>
 </head>
 <body>
 
     <div id="sanctum-bg"></div>
     <div id="dust-container"></div>
-    
-    <!-- TRẠM CỬA NGÕ (GATEWAY) PHONG LUÂN -->
-    <div id="gateway-void-overlay">
-        <div class="gateway-box">
-            <div class="gateway-content">
-                <div class="gateway-title" data-i18n="gateway_title">ĐẠO TRƯỜNG PHONG LUÂN</div>
-                <div class="gateway-desc" data-i18n="gateway_desc">Chọn phương thức xuất trận</div>
-                
-                <div class="mode-selector-container">
-                    <div class="mode-btn" id="mode-manual" onclick="selectMode('manual')" data-i18n="mode_manual">TỰ CHỌN ẢI</div>
-                    <div class="mode-btn" id="mode-auto" onclick="selectMode('auto')" data-i18n="mode_auto">LUỒNG TỰ ĐỘNG</div>
-                </div>
-                
-                <button class="main-start-btn" id="main-action-btn" onclick="executeStart()" data-i18n="btn_main_start">KHAI TRẬN</button>
-                
-                <div class="gateway-exit" onclick="navToCore()" data-i18n="gateway_exit">TRỞ VỀ LÕI</div>
-            </div>
-        </div>
-    </div>
 
-    <!-- BẢNG TỔNG KẾT LUỒNG TỰ ĐỘNG & ĐIỀU HƯỚNG LIÊN HOÀN -->
-    <div id="auto-master-summary">
-        <div class="summary-box">
-            <div class="summary-title" data-i18n="sum_title">HOÀN TẤT PHONG LUÂN</div>
-            <div style="font-family:'Share Tech Mono'; font-size:12px; color:#aaa; margin-bottom:5px;" data-i18n="sum_score_lbl">TỔNG ĐIỂM CHIẾN TÍCH</div>
-            <div class="summary-score" id="master-total-score">0</div>
+    <div id="task-arena">
+        <div class="play-area" id="play-area">
+
+            <!-- THANH HUD TRONG GAME Ở TRÊN -->
+            <div id="ingame-hud" class="hidden">
+                <div class="hud-left"><span id="boo-lives" style="font-size: 16px; letter-spacing: 2px;"></span></div>
+                <div class="hud-center">SCORE: <b id="boo-points" style="color:#00ff66; margin-left: 5px; font-size: 18px;">0</b></div>
+                <div class="hud-right">
+                    <div class="hud-btn" onclick="pauseGame()">⏸</div>
+                    <div class="hud-btn exit-btn" onclick="confirmExitToLobby()">✕</div>
+                </div>
+            </div>
+
+            <!-- SẢNH CHỜ -->
+            <div id="start-prompt-overlay" class="hidden">
+                <div id="briefing-panel" class="briefing-panel">
+                    <div class="briefing-title" id="briefing-title"></div>
+                    <div class="briefing-target" id="briefing-target"></div>
+                </div>
+
+                <div class="action-group">
+                    <div class="start-action-box" onclick="triggerStartGame()">BẮT ĐẦU</div>
+                </div>
+            </div>
+
+            <!-- MÀN TẠM DỪNG -->
+            <div id="pause-menu-overlay">
+                <div class="pause-box">
+                    <div class="pause-title">TẠM DỪNG</div>
+                    <button class="pause-btn resume" onclick="resumeGame()">TIẾP TỤC</button>
+                    <button class="pause-btn exit" onclick="confirmExitToLobby()">VỀ SẢNH CHỜ</button>
+                </div>
+            </div>
+
+            <!-- CHỚP KẾT THÚC -->
+            <div id="freeze-overlay"><div class="freeze-text">KẾT THÚC</div></div>
+
+            <!-- KHU VỰC CHỨA GAME PLAY -->
+            <div id="game-play-zone">
+                <div id="custom-cursor"></div>
+                <div id="game-target" class="wind-target" onmousedown="handleTargetClick(event)" ontouchstart="handleTargetClick(event)"></div>
+                <div id="warning-bar-container"><div id="warning-progress"></div></div>
+                <div id="float-boo" class="floating-boo-txt"></div>
+            </div>
+
+            <!-- BẢNG ĐIỂM TỪNG BÀI -->
+            <div id="result-overlay">
+                <div class="stage-badge-header" id="stage-badge-title">KẾT QUẢ BÀI 1</div>
+                <div class="prestige-panel">
+                    <div class="prestige-total-box" style="border-top:none; margin-top:0; padding-top:0;">
+                        <span class="prestige-total-label" style="font-size:14px;">TỔNG ĐIỂM BÀI NÀY:</span>
+                        <span class="prestige-total-num" id="final-score-display">0</span>
+                    </div>
+                </div>
+                <div class="result-btn-row">
+                    <button class="result-action-btn" id="btn-replay" onclick="retryCurrentStage()">TẬP LẠI</button>
+                    <button class="result-action-btn" id="btn-next" onclick="proceedNextStage()">BÀI 2</button>
+                </div>
+            </div>
+
+            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG -->
+            <div id="final-summary-overlay">
+                <div class="final-header">TỔNG KẾT PHONG LUÂN</div>
+                <div class="stat-box">
+                    <div class="stat-line"><span>BÀI 1 (BÁM ĐUỔI):</span> <span class="stat-val" id="sum-score-1" style="color:#00ff66;">0</span></div>
+                    <div class="stat-line"><span>BÀI 2 (TIÊN PHONG):</span> <span class="stat-val" id="sum-score-2" style="color:#00ff66;">0</span></div>
+                    <div class="stat-line"><span>BÀI 3 (BIẾN ẢO):</span> <span class="stat-val" id="sum-score-3" style="color:#00ff66;">0</span></div>
+                    <div class="stat-line" style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.3);">
+                        <span style="font-weight: 900; color: #fff;">TỔNG ĐIỂM CHIẾN TÍCH:</span> <span class="stat-val" id="sum-score-total" style="font-weight:900; color:#00ff66; font-size:16px;">0</span>
+                    </div>
+                </div>
+                <button class="final-btn-exit" onclick="closeArena()">VỀ SẢNH CHÍNH</button>
+            </div>
             
-            <button class="btn-master-save" id="btn-master-save" onclick="saveMasterScore()" data-i18n="btn_master_save">LƯU ĐIỂM TỔNG</button>
-            
-            <div class="navigation-wings">
-                <button class="wing-btn" onclick="navToDomain('1HỎA_2.html')">« HỎA LUÂN</button>
-                <button class="wing-btn" onclick="navToDomain('thuy_luan.html')">THỦY LUÂN »</button>
-            </div>
-        </div>
-    </div>
-
-    <audio id="bg-music" loop src="https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20(1).mp3"></audio>
-
-    <div class="title-hologram" data-i18n="phong_title">ĐẠO TRƯỜNG PHONG LUÂN</div>
-
-    <div id="task-container">
-        <div class="card-wrapper" id="wrapper-1">
-            <div class="holo-card float-1" id="card-1" onclick="openArena('1')">
-                <div class="live-dot"></div>
-                <div class="card-sci-tag" id="sci-max-1">MAX: 0</div>
-                <div class="card-body-content">
-                    <div class="card-icon">I</div>
-                    <div class="card-title" data-i18n="card_1_title">BÁM ĐUỔI</div>
-                </div>
-                <div class="card-status" id="status-1" data-i18n="tries_left">3 LƯỢT HÔM NAY</div>
-            </div>
-        </div>
-        <div class="card-wrapper" id="wrapper-2">
-            <div class="holo-card float-2" id="card-2" onclick="openArena('2')"> 
-                <div class="live-dot"></div>
-                <div class="card-sci-tag" id="sci-max-2">MAX: 0</div>
-                <div class="card-body-content">
-                    <div class="card-icon">II</div>
-                    <div class="card-title" data-i18n="card_2_title">TIÊN PHONG</div>
-                </div>
-                <div class="card-status" id="status-2" data-i18n="tries_left">3 LƯỢT HÔM NAY</div>
-            </div>
-        </div>
-        <div class="card-wrapper" id="wrapper-3">
-            <div class="holo-card float-3" id="card-3" onclick="openArena('3')">
-                <div class="live-dot"></div>
-                <div class="card-sci-tag" id="sci-max-3">MAX: 0</div>
-                <div class="card-body-content">
-                    <div class="card-icon">III</div>
-                    <div class="card-title" data-i18n="card_3_title">BIẾN ẢO</div>
-                </div>
-                <div class="card-status" id="status-3" data-i18n="tries_left">3 LƯỢT HÔM NAY</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="dual-metrics-box">
-        <div class="metric-card">
-            <span class="metric-label" id="secret-test-trigger">SCI (AVG)</span>
-            <span class="metric-val" id="sci-avg-val">0.0%</span>
-        </div>
-        <div class="metric-card">
-            <span class="metric-label" data-i18n="fame">DANH VỌNG</span>
-            <span class="metric-val" id="max-total-val">0</span>
-        </div>
-    </div>
-
-    <div id="hologram-stats-box">
-        <div class="holo-box-header">
-            <span data-i18n="combat_log">NHẬT KÝ CHIẾN TÍCH & PHÁN ĐOÁN</span>
-            <span id="date-label" data-i18n="today">HÔM NAY</span>
-        </div>
-        
-        <div class="holo-row">
-            <span class="holo-label">I:</span>
-            <div class="holo-tries"><span id="a1-t1">-</span><span id="a1-t2">-</span><span id="a1-t3">-</span></div>
-            <span class="holo-best" id="a1-best">MAX: 0</span>
-        </div>
-        <div class="holo-row">
-            <span class="holo-label">II:</span>
-            <div class="holo-tries"><span id="a2-t1">-</span><span id="a2-t2">-</span><span id="a2-t3">-</span></div>
-            <span class="holo-best" id="a2-best">MAX: 0</span>
-        </div>
-        <div class="holo-row">
-            <span class="holo-label">III:</span>
-            <div class="holo-tries"><span id="a3-t1">-</span><span id="a3-t2">-</span><span id="a3-t3">-</span></div>
-            <span class="holo-best" id="a3-best">MAX: 0</span>
-        </div>
-
-        <div class="chart-container">
-            <canvas id="wave-canvas" onclick="handleChartClick(event)"></canvas>
-            <div class="chart-label" data-i18n="click_chart">CHẠM VÀO ĐIỂM ĐỂ XEM CHI TIẾT DANH VỌNG</div>
         </div>
     </div>
 
     <div id="terminal-bar">
-        <div class="terminal-track">
-            <span class="terminal-text" id="sys-msg-led" data-i18n="led_msg">⚡ [HỆ THỐNG GIỚI HẠN 3 LƯỢT/NGÀY]: HÃY HOÀN THÀNH ẢI VÀ BẤM LƯU ĐIỂM NGAY! ⚡ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⚡ [ĐẠO TRƯỜNG PHONG LUÂN]: LINH HOẠT - NHẠY BÉN - THẦN TỐC! ⚡</span>
-        </div>
-    </div>
-
-    <div id="action-panel">
-        <div class="img-action-btn" id="btn-core" onclick="navToCore()" data-i18n="btn_core">TRỞ VỀ LÕI</div>
-        <div class="img-action-btn" id="btn-save" onclick="saveScore()" data-i18n="btn_save">LƯU ĐIỂM</div>
-    </div>
-
-    <div id="task-arena">
-        <div id="play-area">
-            <div id="combo-popup">X2</div>
-            <div id="custom-cursor"></div>
-            <div id="game-target" class="wind-target" onmousedown="handleTargetClick(event)" ontouchstart="handleTargetClick(event)"></div>
-        </div>
-        
-        <div class="arena-ui-panel" id="arena-menu-panel">
-            <div class="arena-title" id="arena-title">TÊN ẢI</div>
-            <div id="arena-final-score">0</div>
-            <div class="arena-rules-desc" id="arena-rules-desc">Luật chơi sẽ hiển thị ở đây...</div>
-
-            <div class="arena-btn-group">
-                <button class="arena-btn btn-red" id="close-arena-btn" onclick="closeTaskArena()" data-i18n="btn_exit">THOÁT</button>
-                <button class="arena-btn" id="arena-btn" onclick="startArenaRound()" data-i18n="btn_start">KHAI TRẬN</button>
-            </div>
-        </div>
-
-        <div id="in-game-hud" class="in-game-hud">
-            <span id="arena-lives" style="color:#ff3333;">❤️❤️❤️</span> | 
-            <span style="color:#fff;"><span data-i18n="score_label">ĐIỂM:</span> <span class="highlight-score" id="arena-score">0</span></span>
-            <span id="boo-msg" class="inline-boo-msg"></span>
-        </div>
-
-        <div id="warning-bar-container"><div id="warning-progress"></div></div>
-    </div>
-
-    <div id="custom-alert-overlay">
-        <div class="custom-alert-box">
-            <div class="alert-title glitch-anim" id="alert-box-title">⚠️ GIỚI HẠN KỶ LUẬT</div>
-            <div class="alert-text" id="alert-box-msg">Nhiệm vụ hôm nay đã hoàn tất (3/3).<br><br>Hẹn gặp lại vào 00:00 ngày mai!</div>
-            <button class="btn-alert" onclick="closeCustomAlert()" data-i18n="btn_confirm">RÕ</button>
-        </div>
-    </div>
-
-    <div id="chart-modal-overlay">
-        <div class="chart-modal-box">
-            <div class="chart-modal-title" id="chart-modal-title">CHI TIẾT LƯỢT</div>
-            <div class="chart-modal-text" id="chart-modal-text">Nội dung chi tiết...</div>
-            <button class="btn-chart-modal" onclick="closeChartModal()" data-i18n="btn_confirm">RÕ</button>
-        </div>
+        <div class="terminal-track"><span class="terminal-text">HỆ THỐNG K-DRIVE - ĐẠO TRƯỜNG PHONG LUÂN - KIỂM THỬ TỐC ĐỘ PHẢN XẠ</span></div>
     </div>
 
     <script>
-        const translations = {
-            vi: {
-                page_title: "K-Drive - Đạo Trường Phong Luân", phong_title: "ĐẠO TRƯỜNG PHONG LUÂN", card_1_title: "BÁM ĐUỔI", card_2_title: "TIÊN PHONG", card_3_title: "BIẾN ẢO",
-                tries_left: "LƯỢT", exhausted_label: "HẾT LƯỢT", fame: "DANH VỌNG", combat_log: "NHẬT KÝ CHIẾN TÍCH", today: "HÔM NAY",
-                click_chart: "CHẠM VÀO ĐIỂM ĐỂ XEM CHI TIẾT", led_msg: "⚡ [HỆ THỐNG]: HOÀN THÀNH ẢI VÀ BẤM LƯU ĐIỂM NGAY! ⚡",
-                btn_core: "TRỞ VỀ LÕI", btn_save: "LƯU ĐIỂM", btn_start: "KHAI TRẬN", test_finish: "KẾT THÚC BÀI TEST", score_label: "ĐIỂM:", btn_confirm: "XÁC NHẬN", btn_exit: "THOÁT",
-                mode_manual: "TỰ CHỌN ẢI", mode_auto: "LUỒNG TỰ ĐỘNG", btn_main_start: "KHAI TRẬN",
-                gateway_title: "ĐẠO TRƯỜNG PHONG LUÂN", gateway_desc: "Chọn phương thức xuất trận", gateway_exit: "TRỞ VỀ LÕI",
-                sum_title: "HOÀN TẤT PHONG LUÂN", sum_score_lbl: "TỔNG ĐIỂM CHIẾN TÍCH", btn_master_save: "LƯU ĐIỂM TỔNG",
-                alert_limit_title: "GIỚI HẠN KỶ LUẬT", alert_unlock_title: "BẺ KHÓA THÀNH CÔNG",
-                chart_detail_title: "CHI TIẾT LƯỢT", fame_achieved: "Tổng Danh Vọng:", status_label: "Trạng thái:", chart_desc: "Dữ liệu được lưu từ tổng điểm Phong Luân.",
-                eval_high: "🌪️ VÔ CỰC TUYỆT ĐỈNH", eval_mid: "💨 PHONG THẦN THỨC TỈNH", eval_low: "🌱 TÍCH LŨY CƠ BẢN",
-                sys_msg_test: "⚡ [HỆ THỐNG]: CHẾ ĐỘ TEST ĐÃ KÍCH HOẠT! ⚡", sys_msg_saved: "⚡ ĐÃ LƯU ĐIỂM & ĐỒNG BỘ THÀNH CÔNG! ⚡",
-                rule_1: "<b>ẢI 1 - BÁM ĐUỔI:</b><br>• Viền trắng mờ, trong tối.<br>• Rê bám theo. Mất dấu sẽ mất mạng.",
-                rule_2: "<b>ẢI 2 - TIÊN PHONG:</b><br>• Hạt trắng lấp loè xuất hiện.<br>• Click chém ngay trước khi hết giờ.",
-                rule_3: "<b>ẢI 3 - BIẾN ẢO (3 DẠNG):</b><br>• <i>Viền trắng trong đen:</i> Rê bám.<br>• <i>Trắng lấp loè:</i> Click chém.<br>• <i>Trắng trong mờ:</i> Click bấm.",
-                msg_g1_start: "Bám sát tâm luồng gió!", msg_g2_start: "Chém hạt trắng lấp loè!", msg_g2_ghost: "ĐANG ẨN...", msg_g2_visible: "HIỆN HỮU - CHÉM NGAY!", msg_g3_track: "Trạng thái Bám theo", msg_g3_slash: "Trạng thái Chém", msg_g3_tap: "Trạng thái Click", hit_g2: "CHÉM CHUẨN (+10)!", hit_g3_track: "BÁM TỐT (+15)!", hit_g3_slash: "CHÉM ĐẸP (+20)!", hit_g3_tap: "BẤM CHUẨN (+25)!", lose_time: "QUÁ HẠN - MẤT 1 MẠNG!"
-            },
-            en: {
-                page_title: "K-Drive - Wind Arena", phong_title: "WIND ARENA", card_1_title: "PURSUIT", card_2_title: "VANGUARD", card_3_title: "ILLUSION",
-                tries_left: "TURNS", exhausted_label: "NO TURNS", fame: "PRESTIGE", combat_log: "LOG", today: "TODAY",
-                click_chart: "TAP POINTS", led_msg: "⚡ [WIND ARENA] ⚡",
-                btn_core: "CORE", btn_save: "SAVE", btn_start: "START", test_finish: "DONE", score_label: "SCORE:", btn_confirm: "OK", btn_exit: "EXIT",
-                mode_manual: "MANUAL", mode_auto: "AUTO-ROUTE", btn_main_start: "START BATTLE",
-                gateway_title: "WIND ARENA", gateway_desc: "Select deployment mode", gateway_exit: "RETURN TO CORE",
-                sum_title: "WIND ARENA COMPLETED", sum_score_lbl: "TOTAL PRESTIGE SCORE", btn_master_save: "SAVE TOTAL SCORE",
-                alert_limit_title: "LIMIT", alert_unlock_title: "UNLOCKED",
-                chart_detail_title: "DETAILS", fame_achieved: "Prestige:", status_label: "Status:", chart_desc: "Data recorded.",
-                eval_high: "🌪️ PEAK", eval_mid: "💨 AWAKENED", eval_low: "🌱 BASIC",
-                sys_msg_test: "⚡ TEST MODE ⚡", sys_msg_saved: "⚡ SAVED! ⚡",
-                rule_1: "<b>PURSUIT:</b> Track core.", rule_2: "<b>VANGUARD:</b> Tap appearing target.", rule_3: "<b>ILLUSION:</b> 3 white-black states.",
-                msg_g1_start: "Follow wind!", msg_g2_start: "Slash target!", msg_g2_ghost: "WAITING", msg_g2_visible: "SLASH!", msg_g3_track: "Track", msg_g3_slash: "Slash", msg_g3_tap: "Tap", hit_g2: "HIT!", hit_g3_track: "TRACKED!", hit_g3_slash: "STRUCK!", hit_g3_tap: "TAPPED!", lose_time: "TOO LATE!"
-            }
-        };
-
-        function applyLanguage(lang) {
-            const t = translations[lang] || translations['vi'];
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (t[key]) el.innerHTML = t[key];
-            });
-            window.currentLangDict = t; 
-            updateHologramUI();
+        let fxCtx = null;
+        function initAudio() { 
+            try {
+                if (!fxCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    fxCtx = new AudioContext();
+                }
+                if (fxCtx && fxCtx.state === 'suspended') {
+                    fxCtx.resume();
+                }
+            } catch(e) {}
         }
-
-        window.addEventListener('kdriveLangChanged', (e) => { applyLanguage(e.detail.lang); });
-
-        let isTestMode = false;
-        let secretClicks = 0;
-        let chartPointsCoords = [];
-        let selectedMode = null;
-
-        document.getElementById('secret-test-trigger').addEventListener('click', () => {
-            secretClicks++;
-            if (secretClicks === 5) {
-                isTestMode = true;
-                playSound('coin');
-                const t = window.currentLangDict || translations['vi'];
-                document.getElementById('sys-msg-led').innerHTML = t.sys_msg_test;
-                updateHologramUI();
-                showCustomAlertBox(t.alert_unlock_title, t.alert_unlock_msg);
-            }
+        
+        ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => {
+            window.addEventListener(evt, initAudio, { passive: true });
         });
 
-        let fxCtx = null;
-        function initAudio() {
-            if (!fxCtx) fxCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (fxCtx.state === 'suspended') fxCtx.resume();
-        }
-        window.addEventListener('touchstart', initAudio, { passive: true });
-        window.addEventListener('click', initAudio, { passive: true });
-
-        const bgMusic = document.getElementById('bg-music');
         function playSound(type, pitchMultiplier = 1) {
             try { 
-                if (!fxCtx) initAudio();
-                const ctx = fxCtx; 
-                const osc = ctx.createOscillator(); 
-                const gain = ctx.createGain(); 
+                if (fxCtx && fxCtx.state === 'suspended') fxCtx.resume();
+                if (!fxCtx) return;
+                const ctx = fxCtx; const osc = ctx.createOscillator(); const gain = ctx.createGain(); 
                 osc.connect(gain); gain.connect(ctx.destination);
                 
                 if(type === 'katana') { 
-                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(2200 * pitchMultiplier, ctx.currentTime); 
-                    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.15); 
-                    gain.gain.setValueAtTime(0.35, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15); 
-                    osc.start(); osc.stop(ctx.currentTime + 0.15); 
-                } else if(type === 'error') {
-                    osc.type = 'square'; osc.frequency.setValueAtTime(150, ctx.currentTime); 
-                    gain.gain.setValueAtTime(0.4, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-                    osc.start(); osc.stop(ctx.currentTime + 0.3);
-                } else if(type === 'coin') {
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(1500 * pitchMultiplier, ctx.currentTime); 
-                    osc.frequency.setValueAtTime(2200 * pitchMultiplier, ctx.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.2, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-                    osc.start(); osc.stop(ctx.currentTime + 0.2);
-                }
+                    osc.type = 'sawtooth'; 
+                    osc.frequency.setValueAtTime(1200 * pitchMultiplier, ctx.currentTime); 
+                    osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.3); 
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime); 
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3); 
+                    osc.start(); osc.stop(ctx.currentTime + 0.3); 
+                } 
+                else if(type === 'error') { 
+                    osc.type = 'square'; 
+                    osc.frequency.setValueAtTime(100, ctx.currentTime); 
+                    gain.gain.setValueAtTime(0.4, ctx.currentTime); 
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4); 
+                    osc.start(); osc.stop(ctx.currentTime + 0.4); 
+                } 
+                else if(type === 'coin') { 
+                    osc.type = 'sine'; 
+                    osc.frequency.setValueAtTime(1500 * pitchMultiplier, ctx.currentTime); 
+                    osc.frequency.setValueAtTime(2000 * pitchMultiplier, ctx.currentTime + 0.1); 
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime); 
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2); 
+                    osc.start(); osc.stop(ctx.currentTime + 0.2); 
+                } 
             } catch (e) {}
         }
 
-        function showCustomAlertBox(title, msg) {
-            playSound('error');
-            document.getElementById('alert-box-title').innerHTML = `⚠️ ${title}`;
-            document.getElementById('alert-box-msg').innerHTML = msg;
-            document.getElementById('custom-alert-overlay').classList.add('active');
-        }
-        function closeCustomAlert() {
-            playSound('katana');
-            document.getElementById('custom-alert-overlay').classList.remove('active');
-        }
-
-        function showChartModal(title, text) {
-            playSound('coin');
-            document.getElementById('chart-modal-title').innerText = title;
-            document.getElementById('chart-modal-text').innerHTML = text;
-            document.getElementById('chart-modal-overlay').classList.add('active');
-        }
-        function closeChartModal() {
-            playSound('katana');
-            document.getElementById('chart-modal-overlay').classList.remove('active');
-        }
-
-        let gameRuns = { '1': [null, null, null], '2': [null, null, null], '3': [null, null, null] };
-        const todayDateKey = 'phongluan_runs_' + new Date().toISOString().slice(0,10);
-        const savedScoreKey = 'phongluan_saved_score_' + new Date().toISOString().slice(0,10);
-        const sciHistoryKey = 'phongluan_sci_history';
-        const prestigeHistoryKey = 'phongluan_prestige_history'; 
-
-        window.onload = () => {
-            const savedLang = localStorage.getItem('kdrive_lang') || 'vi';
-            applyLanguage(savedLang);
-
-            try {
-                let savedRuns = localStorage.getItem(todayDateKey);
-                if(savedRuns) gameRuns = JSON.parse(savedRuns);
-            } catch(e) {}
-            
-            updateHologramUI();
-            drawWaveChart();
-
-            if(localStorage.getItem('bg_music_muted') !== 'true') { bgMusic.play().catch(e => {}); }
-        };
-
-        function drawWaveChart() {
-            let canvas = document.getElementById('wave-canvas');
-            if(!canvas) return;
-            let ctx = canvas.getContext('2d');
-            
-            let history = [];
-            try { history = JSON.parse(localStorage.getItem(prestigeHistoryKey)) || []; } catch(e){}
-            if(history.length === 0) history = [50, 120, 90, 180, 240];
-
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = 40;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            let maxVal = Math.max(...history, 300); 
-            let stepX = canvas.width / (history.length - 1 || 1);
-            chartPointsCoords = [];
-            let points = [];
-
-            for(let i = 0; i < history.length; i++) {
-                let val = history[i];
-                let x = i === 0 && history.length === 1 ? canvas.width / 2 : i * stepX;
-                let y = canvas.height - (val / maxVal) * (canvas.height - 12) - 6;
-                points.push({x: x, y: y});
-                chartPointsCoords.push({ x: x, y: y, score: val, index: i + 1 });
-            }
-
-            let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, "rgba(0, 255, 102, 1)"); 
-            gradient.addColorStop(1, "rgba(0, 255, 102, 0.2)"); 
-
-            ctx.beginPath();
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = 2.5;
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = '#00ff66';
-
-            if(points.length > 0) {
-                ctx.moveTo(points[0].x, points[0].y);
-                for(let i = 0; i < points.length - 1; i++) {
-                    let xc = (points[i].x + points[i+1].x) / 2;
-                    let yc = (points[i].y + points[i+1].y) / 2;
-                    ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
-                }
-                if(points.length > 1) {
-                    ctx.lineTo(points[points.length-1].x, points[points.length-1].y);
-                }
-            }
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-
-            points.forEach(p => {
-                ctx.beginPath();
-                ctx.fillStyle = '#fff';
-                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-                ctx.fill();
-            });
-        }
-
-        function handleChartClick(event) {
-            let canvas = document.getElementById('wave-canvas');
-            let rect = canvas.getBoundingClientRect();
-            let clickX = event.clientX - rect.left;
-            let clickY = event.clientY - rect.top;
-
-            let closest = null;
-            let minDist = 25;
-
-            chartPointsCoords.forEach(pt => {
-                let dist = Math.hypot(pt.x - clickX, pt.y - clickY);
-                if(dist < minDist) { minDist = dist; closest = pt; }
-            });
-
-            if(closest) {
-                const t = window.currentLangDict || translations['vi'];
-                let evaluation = closest.score >= 200 ? t.eval_high : (closest.score >= 100 ? t.eval_mid : t.eval_low);
-                showChartModal(t.chart_detail_title + ` #${closest.index}`, 
-                    `${t.fame_achieved} <b style="color:#00ff66; font-size:18px;">${closest.score}</b><br>` +
-                    `${t.status_label} <span style="color:#a0c0d0;">${evaluation}</span><br><br>` +
-                    `<span style="font-size:12px; color:#aaa;">${t.chart_desc}</span>`
-                );
-            }
-        }
-
-        function selectMode(mode) {
-            playSound('coin');
-            selectedMode = mode;
-            document.getElementById('mode-manual').classList.remove('active');
-            document.getElementById('mode-auto').classList.remove('active');
-            document.getElementById(`mode-${mode}`).classList.add('active');
-            const startBtn = document.getElementById('main-action-btn');
-            startBtn.classList.add('ready');
-        }
-
-        function executeStart() {
-            if (!selectedMode) return;
-            playSound('katana');
-            let overlay = document.getElementById('gateway-void-overlay');
-            overlay.style.opacity = '0';
-            setTimeout(() => { overlay.style.display = 'none'; }, 500);
-
-            if (selectedMode === 'auto') {
-                triggerAutoRoute();
-            } else {
-                let tc = document.getElementById('task-container');
-                tc.classList.add('active');
-            }
-        }
-
-        function getNextAvailableStage() {
-            for(let id of ['1', '2', '3']) {
-                let validRuns = gameRuns[id].filter(v => v !== null);
-                if(validRuns.length < 3 || isTestMode) return id;
-            }
-            return null; 
-        }
-
-        function triggerAutoRoute() {
-            let nextId = getNextAvailableStage();
-            if(!nextId) {
-                showAutoMasterSummary();
-                return;
-            }
-            openArena(nextId);
-        }
-
-        function showAutoMasterSummary() {
-            let totalMaxSum = parseInt(document.getElementById('max-total-val').innerText) || 0;
-            document.getElementById('master-total-score').innerText = totalMaxSum;
-            document.getElementById('auto-master-summary').classList.add('active');
-            playSound('coin');
-        }
-
-        function saveMasterScore() {
-            saveScore();
-            document.getElementById('btn-master-save').classList.add('saved');
-            document.getElementById('btn-master-save').innerText = "ĐÃ LƯU ĐIỂM TỔNG ✓";
-            playSound('coin', 1.5);
-        }
-
-        function navToDomain(url) {
-            playSound('katana');
-            document.body.style.opacity = '0';
-            setTimeout(() => { window.location.href = url; }, 800);
-        }
-
-        function updateHologramUI() {
-            let totalMaxSum = 0;
-            let activeLevelsCount = 0;
-            const t = window.currentLangDict || translations['vi'];
-
-            ['1', '2', '3'].forEach(id => {
-                let runs = gameRuns[id];
-                let validScores = runs.filter(v => v !== null);
-                let maxVal = validScores.length > 0 ? Math.max(...validScores) : 0;
-                
-                totalMaxSum += maxVal;
-                if(validScores.length > 0) activeLevelsCount++;
-
-                let playedCount = validScores.length;
-                let remainingTurns = Math.max(0, 3 - playedCount);
-
-                let statusEl = document.getElementById(`status-${id}`);
-                if(statusEl) {
-                    if (isTestMode) {
-                        statusEl.innerText = `TEST (∞)`;
-                        statusEl.style.color = '#00ff66';
-                    } else if (remainingTurns > 0) {
-                        statusEl.innerText = `${remainingTurns} ${t.tries_left}`;
-                        statusEl.style.color = '#fff';
-                    } else {
-                        statusEl.innerText = t.exhausted_label;
-                        statusEl.style.color = '#ff3366';
-                    }
-                }
-
-                for(let i = 0; i < 3; i++) {
-                    let cell = document.getElementById(`a${id}-t${i+1}`);
-                    if(cell) cell.innerText = runs[i] !== null ? Math.floor(runs[i]) : '-';
-                }
-                
-                let bestEl = document.getElementById(`a${id}-best`);
-                if(bestEl) bestEl.innerText = `MAX: ${Math.floor(maxVal)}`;
-                
-                let tagEl = document.getElementById(`sci-max-${id}`);
-                if(tagEl) tagEl.innerText = `MAX: ${Math.floor(maxVal)}`;
-            });
-
-            let currentDaySCI = (activeLevelsCount / 3) * 100;
-            let sciHistory = [];
-            try { sciHistory = JSON.parse(localStorage.getItem(sciHistoryKey)) || []; } catch(e){}
-            let todaySaved = localStorage.getItem(savedScoreKey);
-            let displaySCI = currentDaySCI;
-
-            if(sciHistory.length > 0) {
-                let sumHistory = sciHistory.reduce((a, b) => a + b, 0);
-                if(todaySaved) displaySCI = (sumHistory - sciHistory[sciHistory.length - 1] + currentDaySCI) / sciHistory.length;
-                else displaySCI = (sumHistory + currentDaySCI) / (sciHistory.length + 1);
-            }
-
-            let sciAvgEl = document.getElementById('sci-avg-val');
-            if(sciAvgEl) sciAvgEl.innerText = displaySCI.toFixed(1) + '%';
-            
-            let maxTotalEl = document.getElementById('max-total-val');
-            if(maxTotalEl) maxTotalEl.innerText = Math.floor(totalMaxSum);
-        }
-
-        function saveScore() {
-            playSound('coin');
-            const t = window.currentLangDict || translations['vi'];
-            if (isTestMode) {
-                document.getElementById('sys-msg-led').innerHTML = t.sys_msg_test;
-                return;
-            }
-
-            localStorage.setItem(savedScoreKey, 'true');
-            
-            let totalMaxSum = parseInt(document.getElementById('max-total-val').innerText) || 0;
-            let activeLevelsCount = 0;
-            ['1', '2', '3'].forEach(id => { 
-                let runs = gameRuns[id];
-                if(runs.filter(v => v !== null).length > 0) activeLevelsCount++;
-            });
-            
-            let todaySCI = (activeLevelsCount / 3) * 100;
-            let sciHistory = []; let prestigeHistory = [];
-            try { sciHistory = JSON.parse(localStorage.getItem(sciHistoryKey)) || []; } catch(e){}
-            try { prestigeHistory = JSON.parse(localStorage.getItem(prestigeHistoryKey)) || []; } catch(e){}
-            
-            let alreadySavedToday = localStorage.getItem('last_saved_date_phongluan') === new Date().toISOString().slice(0,10);
-            
-            if(alreadySavedToday) {
-                if(sciHistory.length > 0) sciHistory[sciHistory.length - 1] = todaySCI;
-                else sciHistory.push(todaySCI);
-
-                if(prestigeHistory.length > 0) prestigeHistory[prestigeHistory.length - 1] = totalMaxSum;
-                else prestigeHistory.push(totalMaxSum);
-            } else {
-                sciHistory.push(todaySCI);
-                if(sciHistory.length > 7) sciHistory.shift();
-                
-                prestigeHistory.push(totalMaxSum); 
-                if(prestigeHistory.length > 10) prestigeHistory.shift();
-
-                localStorage.setItem('last_saved_date_phongluan', new Date().toISOString().slice(0,10));
-            }
-
-            localStorage.setItem(sciHistoryKey, JSON.stringify(sciHistory));
-            localStorage.setItem(prestigeHistoryKey, JSON.stringify(prestigeHistory));
-            document.getElementById('sys-msg-led').innerHTML = t.sys_msg_saved;
-            
-            updateHologramUI();
-            drawWaveChart();
-        }
-
-        let currentGame = '1';
-        let arenaScore = 0;
-        let currentMultiplier = 1;
-        let isPlaying = false;
-        let stability = 3; 
+        let cGame = '1'; 
+        let aScore = 0; 
+        let stabilityHP = 5; 
+        let isPlaying = false; 
+        let isPausedForStart = true;
+        
+        let sessionScoreG1 = 0, sessionScoreG2 = 0, sessionScoreG3 = 0;
         
         let loopRaf;
         let gTimeouts = [];
         let actionTimer = null;
 
         let playArea = document.getElementById('play-area');
-        let maxX = window.innerWidth;
+        let maxX = window.innerWidth > 380 ? 380 : window.innerWidth;
         let maxY = window.innerHeight;
-        window.addEventListener('resize', () => { maxX = window.innerWidth; maxY = window.innerHeight; });
-
+        
         let baseSpeed = 1.5; 
         let tx = maxX / 2, ty = maxY / 2;
         let tAngle = 0, tRotSpeed = 0;
@@ -897,7 +296,50 @@
         let g3Mode = 'TRACK'; 
         let g1MissFrames = 0;
 
-        function booMsg(text) { document.getElementById('boo-msg').innerText = text; }
+        window.onload = () => {
+            openArena('1');
+        };
+
+        function openArena(id) {
+            cGame = id; aScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
+            
+            cancelAnimationFrame(loopRaf);
+            clearAllTimeouts();
+
+            let playAreaWrap = document.getElementById('play-area');
+            playAreaWrap.classList.remove('fullscreen-mode');
+
+            updateHpDisplay(); document.getElementById('boo-points').innerText = "0";
+            document.getElementById('result-overlay').classList.remove('active');
+            document.getElementById('pause-menu-overlay').classList.remove('active');
+            document.getElementById('final-summary-overlay').classList.remove('active');
+            document.getElementById('game-play-zone').classList.remove('active');
+            
+            let bTitle = "", bTarget = "";
+            if (id === '1') {
+                bTitle = "BÀI KIỂM TRA I: BÁM ĐUỔI"; bTarget = "GIỮ VỮNG QUỸ ĐẠO<br><br>Hệ thống thả một luồng gió tàng hình.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Rê và giữ ngón tay/chuột bám sát theo điểm sáng. Tuột mục tiêu quá lâu sẽ mất mạng.";
+            } else if (id === '2') {
+                bTitle = "BÀI KIỂM TRA II: TIÊN PHONG"; bTarget = "PHẢN XẠ CHỚP NHOÁNG<br><br>Mục tiêu liên tục ẩn hiện thất thường.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Bấm (chém) trúng mục tiêu ngay khi nó hiện ra. Chậm trễ sẽ bị trừ mạng.";
+            } else if (id === '3') {
+                bTitle = "BÀI KIỂM TRA III: BIẾN ẢO"; bTarget = "XỬ LÝ ĐA NHIỆM<br><br>Mục tiêu thay đổi 3 trạng thái liên tục.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span><br>1. Viền mờ: Bám theo.<br>2. Sáng rực: Bấm nhanh.<br>3. Khung trắng: Bấm nhẹ.";
+            }
+
+            document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
+            document.getElementById('terminal-bar').classList.remove('hidden');
+            document.getElementById('start-prompt-overlay').classList.remove('hidden');
+        }
+
+        function updateHpDisplay() {
+            document.getElementById('boo-lives').innerHTML = "<span style='color:#ff3366; text-shadow: 0 0 8px #ff3366;'>" + "❤️".repeat(Math.max(0, stabilityHP)) + "</span>";
+        }
+
+        function triggerStartGame() {
+            initAudio(); playSound('coin');
+            document.getElementById('start-prompt-overlay').classList.add('hidden'); document.getElementById('terminal-bar').classList.add('hidden');
+            playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
+            setTimeout(() => { let playAreaWrap = document.getElementById('play-area'); playAreaWrap.classList.add('fullscreen-mode'); laser.classList.add('expand'); }, 300);
+            setTimeout(() => { laser.remove(); isPausedForStart = false; document.getElementById('ingame-hud').classList.remove('hidden'); document.getElementById('game-play-zone').classList.add('active'); startArena(); }, 800);
+        }
 
         function clearAllTimeouts() {
             gTimeouts.forEach(t => clearTimeout(t));
@@ -905,229 +347,164 @@
             if(actionTimer) { clearTimeout(actionTimer); actionTimer = null; }
         }
 
-        function openArena(id) {
-            let validRuns = gameRuns[id].filter(v => v !== null);
-            const t = window.currentLangDict || translations['vi'];
-
-            if(validRuns.length >= 3 && !isTestMode) {
-                showCustomAlertBox(t.alert_limit_title, t.alert_limit_msg);
-                return;
-            }
-
-            playSound('katana');
-            currentGame = id; arenaScore = 0; currentMultiplier = 1; isPlaying = false; stability = 3;
-            
-            cancelAnimationFrame(loopRaf);
-            clearAllTimeouts();
-
-            document.getElementById('task-container').style.pointerEvents = 'none';
-            document.getElementById('arena-menu-panel').style.display = 'flex';
-            document.getElementById('in-game-hud').classList.remove('active');
-            document.getElementById('warning-bar-container').style.display = 'none';
-            document.getElementById('arena-final-score').style.display = 'none';
-
-            let titlePrefix = id === '1' ? 'I. ' : (id === '2' ? 'II. ' : 'III. ');
-            let titleKey = `card_${id}_title`;
-            document.getElementById('arena-title').innerText = titlePrefix + t[titleKey];
-            document.getElementById('arena-rules-desc').innerHTML = t[`rule_${id}`];
-
-            document.getElementById('arena-btn').innerText = t.btn_start;
-            document.getElementById('close-arena-btn').innerText = t.btn_exit;
-            
-            tEl.className = 'wind-target'; 
-            tEl.style.display = 'none';
-            document.getElementById('custom-cursor').style.display = 'none';
-            
-            document.getElementById('task-arena').classList.add('active');
+        function showBooMsg(text) {
+            let bEl = document.getElementById('float-boo');
+            bEl.innerText = text;
+            bEl.classList.remove('show');
+            void bEl.offsetWidth;
+            bEl.classList.add('show');
         }
 
-        function closeTaskArena() {
-            playSound('error');
-            isPlaying = false;
+        function startArena() {
+            aScore = 0;
+            stabilityHP = 5;
             cancelAnimationFrame(loopRaf);
             clearAllTimeouts();
-            document.getElementById('task-arena').classList.remove('active');
-            document.getElementById('task-container').style.pointerEvents = 'auto';
-        }
-
-        function startArenaRound() {
-            arenaScore = 0;
-            stability = 3;
-            currentMultiplier = 1;
-            cancelAnimationFrame(loopRaf);
-            clearAllTimeouts();
-
-            document.getElementById('arena-menu-panel').style.display = 'none';
-            document.getElementById('in-game-hud').classList.add('active');
-            document.getElementById('combo-popup').classList.remove('show');
 
             isPlaying = true; 
             playSound('katana');
             
-            document.getElementById('arena-score').innerText = '0';
-            document.getElementById('arena-lives').innerText = "❤️❤️❤️";
+            document.getElementById('boo-points').innerText = '0';
+            updateHpDisplay();
 
+            maxX = document.getElementById('play-area').clientWidth;
+            maxY = document.getElementById('play-area').clientHeight;
             tx = maxX / 2; ty = maxY / 2; tAngle = Math.random() * Math.PI * 2;
             tEl.style.display = 'flex';
 
-            if(currentGame === '1') initG1();
-            else if(currentGame === '2') initG2();
-            else if(currentGame === '3') initG3();
+            if(cGame === '1') initG1();
+            else if(cGame === '2') initG2();
+            else if(cGame === '3') initG3();
             
             loopRaf = requestAnimationFrame(gameLoop);
         }
 
+        function pauseGame() { if(!isPlaying || isPausedForStart) return; playSound('error'); isPausedForStart = true; clearAllTimeouts(); cancelAnimationFrame(loopRaf); document.getElementById('pause-menu-overlay').classList.add('active'); }
+        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; 
+            if(cGame === '2') initG2(); else if(cGame === '3') initG3();
+            loopRaf = requestAnimationFrame(gameLoop);
+        }
+        function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
+        function closeArena() { window.location.href = 'LucChien.html'; }
+
         function updateMousePos(e) {
+            if(!isPlaying || isPausedForStart) return;
             if (e.touches && e.touches.length > 0) {
-                mx = e.touches[0].clientX; my = e.touches[0].clientY;
+                let rect = playArea.getBoundingClientRect();
+                mx = e.touches[0].clientX - rect.left; my = e.touches[0].clientY - rect.top;
             } else {
-                mx = e.clientX; my = e.clientY;
+                let rect = playArea.getBoundingClientRect();
+                mx = e.clientX - rect.left; my = e.clientY - rect.top;
             }
-            if(currentGame === '1') {
+            if(cGame === '1') {
                 let cursor = document.getElementById('custom-cursor');
                 cursor.style.left = mx + 'px';
                 cursor.style.top = my + 'px';
             }
         }
-        playArea.addEventListener('mousemove', updateMousePos);
-        playArea.addEventListener('touchmove', (e) => { e.preventDefault(); updateMousePos(e); }, {passive: false});
+        document.getElementById('game-play-zone').addEventListener('mousemove', updateMousePos);
+        document.getElementById('game-play-zone').addEventListener('touchmove', (e) => { e.preventDefault(); updateMousePos(e); }, {passive: false});
 
         function handleTargetClick(e) {
-            if(!isPlaying) return;
+            if(!isPlaying || isPausedForStart) return;
             e.stopPropagation();
-            const t = window.currentLangDict || translations['vi'];
 
-            if(currentGame === '2') {
+            if(cGame === '2') {
                 if(!isGhost) {
-                    addScoreAndCheckMultiplier(10);
+                    addScore(15);
                     playSound('katana'); 
-                    booMsg(t.hit_g2);
+                    showBooMsg("CHÉM CHUẨN!");
                     resetActionTimer(); 
-                    tx = 60 + Math.random() * (maxX - 120); 
-                    ty = 60 + Math.random() * (maxY - 120);
+                    tx = 60 + Math.random() * (maxX - 120); ty = 60 + Math.random() * (maxY - 120);
                 }
             } 
-            else if(currentGame === '3') {
+            else if(cGame === '3') {
                 if(g3Mode === 'SLASH' || g3Mode === 'TAP') {
-                    addScoreAndCheckMultiplier(g3Mode === 'SLASH' ? 20 : 25);
+                    addScore(25);
                     playSound('katana'); 
-                    booMsg(g3Mode === 'SLASH' ? t.hit_g3_slash : t.hit_g3_tap);
+                    showBooMsg(g3Mode === 'SLASH' ? "CHÉM CHUẨN!" : "BẤM CHUẨN!");
                     resetActionTimer();
-                    tx = 60 + Math.random() * (maxX - 120); 
-                    ty = 60 + Math.random() * (maxY - 120);
+                    tx = 60 + Math.random() * (maxX - 120); ty = 60 + Math.random() * (maxY - 120);
                 }
             }
         }
 
-        function addScoreAndCheckMultiplier(basePoints) {
-            let oldMultiplier = currentMultiplier;
-            if (arenaScore >= 200) currentMultiplier = 5;
-            else if (arenaScore >= 100) currentMultiplier = 3;
-            else if (arenaScore >= 50) currentMultiplier = 2;
-            else currentMultiplier = 1;
-
-            arenaScore += basePoints * currentMultiplier;
-            document.getElementById('arena-score').innerText = Math.floor(arenaScore);
-
-            if (currentMultiplier > oldMultiplier) {
-                let popup = document.getElementById('combo-popup');
-                popup.innerText = `X${currentMultiplier}`;
-                popup.classList.remove('show');
-                void popup.offsetWidth;
-                popup.classList.add('show');
-                playSound('coin', currentMultiplier * 0.5);
-            }
+        function addScore(points) {
+            aScore += points;
+            document.getElementById('boo-points').innerText = Math.floor(aScore);
+            // THẮNG NẾU ĐỦ 2000 ĐIỂM MỖI BÀI
+            if(aScore >= 1000) { finishGame(true); }
         }
 
-        function loseLife(reason = "") {
-            stability--;
-            currentMultiplier = 1;
-            document.getElementById('arena-lives').innerText = "❤️".repeat(Math.max(0, stability));
+        function loseLife() {
+            stabilityHP--;
+            updateHpDisplay();
             playSound('error');
             
-            let arena = document.getElementById('task-arena');
-            arena.classList.add('hit-flash');
-            setTimeout(() => arena.classList.remove('hit-flash'), 300);
+            let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 400);
 
-            if(stability <= 0) finishGame(reason);
+            if(stabilityHP <= 0) finishGame(false);
         }
 
         function resetActionTimer() {
             if(actionTimer) clearTimeout(actionTimer);
-            if(!isPlaying) return;
+            if(!isPlaying || isPausedForStart) return;
 
-            const t = window.currentLangDict || translations['vi'];
             actionTimer = setTimeout(() => {
-                if(!isPlaying) return;
-                loseLife(t.lose_time);
-                tx = 60 + Math.random() * (maxX - 120); 
-                ty = 60 + Math.random() * (maxY - 120);
+                if(!isPlaying || isPausedForStart) return;
+                loseLife();
+                showBooMsg("QUÁ HẠN!");
+                tx = 60 + Math.random() * (maxX - 120); ty = 60 + Math.random() * (maxY - 120);
                 resetActionTimer();
-            }, 3000); 
+            }, 2500); 
         }
 
         function initG1() {
-            const t = window.currentLangDict || translations['vi'];
             tEl.className = 'wind-target t-track-mode';
             document.getElementById('custom-cursor').style.display = 'block';
             document.getElementById('warning-bar-container').style.display = 'block';
             g1MissFrames = 0;
-            baseSpeed = 1.5; 
-            booMsg(t.msg_g1_start);
+            baseSpeed = 2.0; 
         }
 
         function initG2() {
-            const t = window.currentLangDict || translations['vi'];
             tEl.className = 'wind-target style-slash'; 
             document.getElementById('custom-cursor').style.display = 'none';
-            baseSpeed = 1.6;
+            baseSpeed = 2.5;
             isGhost = false;
-            booMsg(t.msg_g2_start);
             
             resetActionTimer();
 
             let tm = setInterval(() => {
-                if(!isPlaying) return;
+                if(!isPlaying || isPausedForStart) return;
                 isGhost = !isGhost;
                 if(isGhost) { 
                     tEl.style.opacity = '0'; 
                     tEl.style.pointerEvents = 'none';
-                    booMsg(t.msg_g2_ghost); 
                 } else { 
                     tEl.style.opacity = '1'; 
                     tEl.style.pointerEvents = 'auto';
-                    booMsg(t.msg_g2_visible); 
                 }
             }, 1800);
             gTimeouts.push(tm);
         }
 
         function initG3() {
-            const t = window.currentLangDict || translations['vi'];
             tEl.className = 'wind-target style-track';
             document.getElementById('custom-cursor').style.display = 'none';
-            baseSpeed = 1.5;
+            baseSpeed = 2.2;
             
             resetActionTimer();
 
             let tm = setInterval(() => {
-                if(!isPlaying) return;
+                if(!isPlaying || isPausedForStart) return;
                 const modes = ['TRACK', 'SLASH', 'TAP'];
                 g3Mode = modes[Math.floor(Math.random() * modes.length)];
                 
                 tEl.classList.remove('style-track', 'style-slash', 'style-tap');
-                if(g3Mode === 'TRACK') { 
-                    tEl.classList.add('style-track'); 
-                    booMsg(t.msg_g3_track); 
-                }
-                else if(g3Mode === 'SLASH') { 
-                    tEl.classList.add('style-slash'); 
-                    booMsg(t.msg_g3_slash); 
-                }
-                else if(g3Mode === 'TAP') { 
-                    tEl.classList.add('style-tap');   
-                    booMsg(t.msg_g3_tap); 
-                }
+                if(g3Mode === 'TRACK') { tEl.classList.add('style-track'); }
+                else if(g3Mode === 'SLASH') { tEl.classList.add('style-slash'); }
+                else if(g3Mode === 'TAP') { tEl.classList.add('style-tap'); }
 
                 resetActionTimer();
             }, 2600);
@@ -1135,18 +512,18 @@
         }
 
         function gameLoop() {
-            if(!isPlaying) return;
+            if(!isPlaying || isPausedForStart) return;
 
-            let targetSpeed = baseSpeed + (arenaScore * 0.015);
-            if(Math.random() < 0.008) tAngle += (Math.random() - 0.5) * Math.PI; 
+            let targetSpeed = baseSpeed + (aScore * 0.002);
+            if(Math.random() < 0.01) tAngle += (Math.random() - 0.5) * Math.PI; 
             
-            tRotSpeed += (Math.random() - 0.5) * 0.06;
+            tRotSpeed += (Math.random() - 0.5) * 0.08;
             tAngle += tRotSpeed;
 
             tx += Math.cos(tAngle) * targetSpeed;
             ty += Math.sin(tAngle) * targetSpeed;
 
-            let margin = 50;
+            let margin = 40;
             if (tx < margin || tx > maxX - margin || ty < margin || ty > maxY - margin) {
                 let angleToCenter = Math.atan2((maxY/2) - ty, (maxX/2) - tx);
                 tAngle = angleToCenter;
@@ -1155,11 +532,11 @@
             }
 
             let dist = Math.hypot(mx - tx, my - ty);
-            let hitRadius = 70;
+            let hitRadius = 60;
             
-            if(currentGame === '1') {
+            if(cGame === '1') {
                 if(dist < hitRadius) {
-                    addScoreAndCheckMultiplier(0.2);
+                    addScore(0.5);
                     tEl.classList.add('hovered');
                     g1MissFrames = 0;
                     document.getElementById('warning-progress').style.width = '0%';
@@ -1167,19 +544,19 @@
                     tEl.classList.remove('hovered');
                     g1MissFrames++;
                     
-                    let pct = (g1MissFrames / 100) * 100;
+                    let pct = (g1MissFrames / 60) * 100;
                     document.getElementById('warning-progress').style.width = Math.min(100, pct) + '%';
 
-                    if(g1MissFrames > 100) {
-                        const t = window.currentLangDict || translations['vi'];
-                        loseLife(t.lose_time);
+                    if(g1MissFrames > 60) {
+                        loseLife();
+                        showBooMsg("MẤT DẤU!");
                         g1MissFrames = 0;
                     }
                 }
             } 
-            else if(currentGame === '3' && g3Mode === 'TRACK') {
+            else if(cGame === '3' && g3Mode === 'TRACK') {
                 if(dist < hitRadius) { 
-                    addScoreAndCheckMultiplier(0.25); 
+                    addScore(0.5); 
                     resetActionTimer(); 
                 }
             }
@@ -1191,56 +568,57 @@
             loopRaf = requestAnimationFrame(gameLoop);
         }
 
-        function finishGame(reason = "") {
-            isPlaying = false; 
+        function finishGame(isWin) {
+            isPlaying = false; isPausedForStart = true;
             clearAllTimeouts(); cancelAnimationFrame(loopRaf);
+            
+            if(!isWin) aScore = 0;
+
+            if(cGame === '1') { sessionScoreG1 = Math.floor(aScore); }
+            if(cGame === '2') { sessionScoreG2 = Math.floor(aScore); }
+            if(cGame === '3') { sessionScoreG3 = Math.floor(aScore); }
+
+            document.getElementById('ingame-hud').classList.add('hidden');
+            let playAreaWrap = document.getElementById('play-area'); playAreaWrap.classList.remove('fullscreen-mode');
+            document.getElementById('game-play-zone').classList.remove('active');
             
             tEl.style.display = 'none';
             document.getElementById('custom-cursor').style.display = 'none';
-            document.getElementById('in-game-hud').classList.remove('active');
             document.getElementById('warning-bar-container').style.display = 'none';
-            
-            let finalScore = Math.floor(arenaScore);
-            const t = window.currentLangDict || translations['vi'];
 
-            document.getElementById('arena-menu-panel').style.display = 'flex';
-            document.getElementById('arena-final-score').style.display = 'block';
-            document.getElementById('arena-final-score').innerText = finalScore;
-            
-            document.getElementById('arena-rules-desc').innerHTML = `<b>${t.test_finish}</b><br>${t.score_label} <span style="color:#00ff66;">${finalScore}</span> pts`;
-            document.getElementById('arena-btn').innerText = t.btn_start;
+            playSound('error'); document.getElementById('freeze-overlay').classList.add('active');
 
-            if (isTestMode) return;
+            setTimeout(() => {
+                document.getElementById('freeze-overlay').classList.remove('active');
+                
+                let romanName = (cGame === '1') ? 'KẾT QUẢ BÀI 1' : (cGame === '2') ? 'KẾT QUẢ BÀI 2' : 'KẾT QUẢ BÀI 3';
+                document.getElementById('stage-badge-title').innerText = romanName;
+                document.getElementById('final-score-display').innerText = Math.floor(aScore);
 
-            let runs = gameRuns[currentGame];
-            for (let i = 0; i < 3; i++) {
-                if (runs[i] === null) { runs[i] = finalScore; break; }
-            }
-            if(runs.filter(v => v !== null).length > 3) { runs.shift(); runs.push(finalScore); }
-            
-            localStorage.setItem(todayDateKey, JSON.stringify(gameRuns));
-            updateHologramUI();
-            
-            // Nếu chạy chế độ Tự động -> Kiểm tra xem đã hết lượt tất cả ải chưa để bật Command Hub liên hoàn
-            if (selectedMode === 'auto') {
-                setTimeout(() => {
-                    let nextId = getNextAvailableStage();
-                    if (!nextId) {
-                        showAutoMasterSummary();
-                    } else {
-                        openArena(nextId);
-                    }
-                }, 800);
-            }
+                let btnNext = document.getElementById('btn-next');
+                if (cGame === '1') { btnNext.innerText = "BÀI 2"; btnNext.onclick = proceedNextStage; } 
+                else if (cGame === '2') { btnNext.innerText = "BÀI 3"; btnNext.onclick = proceedNextStage; } 
+                else { btnNext.innerText = "TỔNG KẾT"; btnNext.onclick = showFinalSummary; }
+
+                document.getElementById('result-overlay').classList.add('active');
+                playSound('coin');
+            }, 1200);
         }
 
-        function navToCore() {
-            playSound('error');
-            document.body.style.opacity = '0';
-            setTimeout(() => { window.location.href = 'core.html'; }, 800); 
+        function retryCurrentStage() { playSound('katana'); document.getElementById('result-overlay').classList.remove('active'); openArena(cGame); }
+        function proceedNextStage() { playSound('coin'); document.getElementById('result-overlay').classList.remove('active'); let nextId = (parseInt(cGame) + 1).toString(); setTimeout(() => { openArena(nextId); }, 300); }
+
+        function showFinalSummary() {
+            playSound('coin'); document.getElementById('result-overlay').classList.remove('active');
+            let totalSessionScore = sessionScoreG1 + sessionScoreG2 + sessionScoreG3;
+
+            document.getElementById('sum-score-1').innerText = sessionScoreG1;
+            document.getElementById('sum-score-2').innerText = sessionScoreG2;
+            document.getElementById('sum-score-3').innerText = sessionScoreG3;
+            document.getElementById('sum-score-total').innerText = totalSessionScore;
+            
+            document.getElementById('final-summary-overlay').classList.add('active');
         }
     </script>
-    <script src="boo-player.js"></script>
-    <script src="hud-ticker.js"></script>
 </body>
 </html>
