@@ -131,11 +131,11 @@
         .shape-svg { width: 38px; height: 38px; display: block; filter: drop-shadow(0 0 6px currentColor); }
         .shape-svg-small { width: 34px; height: 34px; display: block; filter: drop-shadow(0 0 5px currentColor); }
 
-        .status-notification { position: absolute; top: 75px; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: 900; color: #38ef7d; text-align: center; text-shadow: 0 0 12px #38ef7d; z-index: 100000; pointer-events: none; white-space: nowrap; background: rgba(2, 8, 15, 0.85); padding: 6px 16px; border-radius: 6px; border: 1px solid rgba(56,239,125,0.4); animation: popStatus 1s ease-out forwards; }
-        @keyframes popStatus { 0% { opacity: 0; transform: translate(-50%, -10px) scale(0.9); } 20% { opacity: 1; transform: translate(-50%, 0) scale(1.05); } 80% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -10px) scale(0.95); } }
+        /* VÙNG THÔNG BÁO CỐ ĐỊNH Ở PHÍA TRÊN, TUYỆT ĐỐI KHÔNG CHE KHUẤT KHUNG CHƠI */
+        .status-notification { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; color: #38ef7d; text-align: center; text-shadow: 0 0 10px #38ef7d; z-index: 999999; pointer-events: none; white-space: nowrap; background: rgba(2, 8, 15, 0.95); padding: 6px 16px; border-radius: 6px; border: 1px solid rgba(56,239,125,0.5); animation: topAlertAnim 1.2s ease-out forwards; }
+        @keyframes topAlertAnim { 0% { opacity: 0; transform: translate(-50%, -15px); } 20% { opacity: 1; transform: translate(-50%, 0); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -15px); } }
 
-        .matrix-expand-alert { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-family: 'Share Tech Mono', monospace; font-size: 36px; font-weight: 900; color: #38ef7d; text-align: center; text-shadow: 0 0 20px #38ef7d; z-index: 100000; animation: popAlert 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: none; white-space: nowrap; }
-        @keyframes popAlert { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
+        .matrix-expand-alert { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: 900; color: #38ef7d; text-align: center; text-shadow: 0 0 10px #38ef7d; z-index: 999999; pointer-events: none; white-space: nowrap; background: rgba(2, 8, 15, 0.95); padding: 6px 16px; border-radius: 6px; border: 1px solid rgba(56,239,125,0.5); animation: topAlertAnim 1.2s ease-out forwards; }
     </style>
 </head>
 <body>
@@ -448,12 +448,11 @@
                 
                 let delay = 800;
                 if(cGame === '1' && oldConfig.total !== newConfig.total) {
-                    let playArea = document.getElementById('play-area');
                     let alertBox = document.createElement('div');
                     alertBox.className = 'matrix-expand-alert';
-                    alertBox.innerHTML = `MA TRẬN<br>${newConfig.size}X${newConfig.size}`;
+                    alertBox.innerHTML = `MA TRẬN ${newConfig.size}X${newConfig.size}`;
                     alertBox.style.color = '#ff3366'; 
-                    playArea.appendChild(alertBox);
+                    document.body.appendChild(alertBox);
                     delay = 1200;
                     setTimeout(() => alertBox.remove(), 1200);
                 }
@@ -462,7 +461,6 @@
             }
         }
 
-        // TÍNH ĐIỂM CỐ ĐỊNH, TUYẾN TÍNH KHÔNG NHÂN HỆ SỐ ẢO
         function processCorrectTap() { 
             if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
 
@@ -478,21 +476,19 @@
 
             let newConfig = getGridConfigByLevel(currentLevel);
             if (cGame === '1' && oldConfig.total !== newConfig.total) {
-                let playArea = document.getElementById('play-area');
                 let alertBox = document.createElement('div');
                 alertBox.className = 'matrix-expand-alert';
-                alertBox.innerHTML = `MA TRẬN<br>${newConfig.size}X${newConfig.size}`;
-                playArea.appendChild(alertBox);
+                alertBox.innerHTML = `MA TRẬN ${newConfig.size}X${newConfig.size}`;
+                document.body.appendChild(alertBox);
                 playSound('ready');
                 setTimeout(() => alertBox.remove(), 1200);
                 setTimeout(() => { runGame1(); }, 1200);
             } else {
                 if (cGame === '2') {
-                    let playArea = document.getElementById('play-area');
                     let alertBox = document.createElement('div');
                     alertBox.className = 'status-notification';
                     alertBox.innerText = "ĐỘ KHÓ TĂNG LÊN";
-                    playArea.appendChild(alertBox);
+                    document.body.appendChild(alertBox);
                     playSound('ready');
                     setTimeout(() => alertBox.remove(), 1000);
                     setTimeout(() => { runGame2(); }, 1000);
@@ -536,6 +532,7 @@
 
         function runGame2() {
             if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; 
+            // TĂNG ĐỘ KHÓ: TĂNG CHIỀU DÀI CHUỖI KÝ HIỆU THEO CẤP ĐỘ THỰC TẾ
             let count = Math.min(4 + Math.floor((currentLevel - 1) / 2), MAX_SEQUENCE_LENGTH); 
             for(let i=0; i<count; i++) patternSeq.push(SYMBOL_KEYS[Math.floor(Math.random() * SYMBOL_KEYS.length)]);
             
