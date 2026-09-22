@@ -167,8 +167,8 @@
         .flashbang-red { position: fixed; inset: 0; background: rgba(255, 51, 102, 0.4); z-index: 999999; pointer-events: none; animation: flashRed 0.4s forwards; }
         @keyframes flashRed { 0% { opacity: 1; } 100% { opacity: 0; } }
 
-        /* BÁO ĐỘNG MA TRẬN MỚI */
-        .matrix-expand-alert { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #00e5ff; text-align: center; text-shadow: 0 0 20px #00e5ff; z-index: 100000; animation: popAlert 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: none; }
+        /* BÁO ĐỘNG TĂNG/GIẢM TRẠM HOẶC MA TRẬN MỚI */
+        .matrix-expand-alert { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #00e5ff; text-align: center; text-shadow: 0 0 20px #00e5ff; z-index: 100000; animation: popAlert 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: none; white-space: nowrap; }
         @keyframes popAlert { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
 
         /* POPUP X SPEED DỜI LÊN */
@@ -459,6 +459,7 @@
         let burstActive = false;
         let burstTimer;
         let burstCount = 0; // Biến giới hạn 3 lần Bạo Phát
+        let lastGame2Len = 0; // Biến lưu số trạm cũ để cảnh báo
         
         let inputStartTimestamp = 0;
         let totalReactionMs = 0;
@@ -525,6 +526,7 @@
             totalReactionMs = 0; totalCharactersTyped = 0; maxComboLength = 0; currentLevel = 1;
             canBurst = true; burstActive = false; currentMultiplier = 1; successfulHitsCount = 0; 
             burstCount = 0; // Reset số lần bạo phát về 0 khi sang màn mới
+            lastGame2Len = 0; // Reset cảnh báo trạm
             reactionTimes = []; bestCps = 0;
 
             let playArea = document.getElementById('play-area');
@@ -669,6 +671,7 @@
         function runGame1() {
             if(!isPlaying || isPausedForStart) return; buildDynamicGrid('1'); patternSeq = []; userSeq = []; canClick = false; 
             let config = getGridConfigByLevel(currentLevel); 
+            // Tăng 1 ô mỗi cấp
             let count = Math.min(3 + currentLevel, Math.floor(config.total * 0.7)); 
             
             while(patternSeq.length < count) { let r = Math.floor(Math.random() * config.total); if(!patternSeq.includes(r)) patternSeq.push(r); }
@@ -695,7 +698,25 @@
         async function runGame2() {
             if(!isPlaying || isPausedForStart) return; buildDynamicGrid('2'); patternSeq = []; userSeq = []; canClick = false; 
             let config = getGridConfigByLevel(currentLevel); 
-            let len = Math.min(3 + currentLevel * 2, Math.floor(config.total * 0.8)); 
+            // Đã làm mượt: Lên 1 trạm mỗi cấp thay vì 2
+            let len = Math.min(3 + currentLevel, Math.floor(config.total * 0.8)); 
+
+            // HỆ THỐNG CẢNH BÁO TĂNG/GIẢM TRẠM CHO BÀI 2
+            if (lastGame2Len !== 0 && lastGame2Len !== len) {
+                let playArea = document.getElementById('play-area');
+                let alertBox = document.createElement('div');
+                alertBox.className = 'matrix-expand-alert';
+                alertBox.style.fontSize = '32px';
+                alertBox.style.color = len > lastGame2Len ? '#00e5ff' : '#ff3366';
+                alertBox.style.textShadow = len > lastGame2Len ? '0 0 20px #00e5ff' : '0 0 20px #ff3366';
+                alertBox.innerHTML = len > lastGame2Len ? `TĂNG LÊN<br>${len} TRẠM` : `GIẢM XUỐNG<br>${len} TRẠM`;
+                playArea.appendChild(alertBox);
+                playSound('ready');
+                await new Promise(r => setTimeout(r, 1200));
+                if(alertBox) alertBox.remove();
+            }
+            lastGame2Len = len;
+            
             for(let i=0; i<len; i++) patternSeq.push(Math.floor(Math.random() * config.total));
             let cells = document.getElementById('grid-2').children; let speed = Math.max(200, 450 - (currentLevel * 30)); 
             
@@ -720,7 +741,8 @@
 
         function runGame3() {
             if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; 
-            let count = Math.min(3 + currentLevel * 2, 25); 
+            // Đã làm mượt: Tăng 1 ký tự mỗi cấp
+            let count = Math.min(3 + currentLevel, 25); 
             for(let i=0; i<count; i++) patternSeq.push(G3_SYMBOLS[Math.floor(Math.random() * G3_SYMBOLS.length)]);
             let area = document.getElementById('seq-area'); area.innerHTML = patternSeq.map(sym => `<div class="quantum-char">${sym}</div>`).join('');
             
