@@ -131,7 +131,6 @@
         .shape-svg { width: 38px; height: 38px; display: block; filter: drop-shadow(0 0 6px currentColor); }
         .shape-svg-small { width: 34px; height: 34px; display: block; filter: drop-shadow(0 0 5px currentColor); }
 
-        /* VÙNG THÔNG BÁO CỐ ĐỊNH Ở PHÍA TRÊN, TUYỆT ĐỐI KHÔNG CHE KHUẤT KHUNG CHƠI */
         .status-notification { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; color: #38ef7d; text-align: center; text-shadow: 0 0 10px #38ef7d; z-index: 999999; pointer-events: none; white-space: nowrap; background: rgba(2, 8, 15, 0.95); padding: 6px 16px; border-radius: 6px; border: 1px solid rgba(56,239,125,0.5); animation: topAlertAnim 1.2s ease-out forwards; }
         @keyframes topAlertAnim { 0% { opacity: 0; transform: translate(-50%, -15px); } 20% { opacity: 1; transform: translate(-50%, 0); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -15px); } }
 
@@ -256,12 +255,13 @@
 
         const SYMBOL_KEYS = ['lightning', 'circle', 'triangle', 'square'];
 
+        // HẠ NGƯỠNG ĐẠT CHUẨN XUỐNG 500 DATA
         function getRankByThuyLuanScore(score) {
-            if (score < 1000) return { name: "Tân Binh", feedback: "« Chưa đạt ngưỡng tối thiểu (1000 Data). Phạt rớt hạng Tân Binh! »" };
-            if (score >= 5000) return { name: "Huyền Thoại", feedback: "« Cảnh giới viễn tưởng! Bộ nhớ lượng tử đạt đỉnh cao nhân loại. »" };
-            if (score >= 3000) return { name: "Đặc Vụ", feedback: "« Trí nhớ sắc bén, truy xuất dữ liệu tuyệt đối. »" };
-            if (score >= 2000) return { name: "Tinh Anh", feedback: "« Giới hạn đỉnh cao của người bình thường. Khả năng ghi nhớ tốt. »" };
-            return { name: "Chiến Binh", feedback: "« Nền tảng trí nhớ tốt, cần rèn luyện thêm để tăng tốc độ. »" };
+            if (score < 500) return { name: "Tân Binh", feedback: "« Chưa đạt ngưỡng tối thiểu (500 Data). Phạt rớt hạng Tân Binh! »" };
+            if (score >= 4000) return { name: "Huyền Thoại", feedback: "« Cảnh giới viễn tưởng! Bộ nhớ lượng tử đạt đỉnh cao nhân loại. »" };
+            if (score >= 2500) return { name: "Đặc Vụ", feedback: "« Trí nhớ sắc bén, truy xuất dữ liệu tuyệt đối. »" };
+            if (score >= 1500) return { name: "Tinh Anh", feedback: "« Giới hạn đỉnh cao của người bình thường. Khả năng ghi nhớ tốt. »" };
+            return { name: "Chiến Binh", feedback: "« Nền tảng trí nhớ tốt, vượt qua mốc chuẩn 500 Data. »" };
         }
 
         function getRankHTML(rankName) {
@@ -347,7 +347,7 @@
         let hitsCountG1 = 0, hitsCountG2 = 0; 
 
         let currentLevel = 1;
-        let winsInCurrentLevel = 0;
+        let winsInCurrentLevel = 0; // CỨ ĐÚNG 3 LẦN THÌ MỚI TĂNG ĐỘ KHÓ
         let canClick = false;
         let patternSeq = [];
         let userSeq = [];
@@ -461,11 +461,12 @@
             }
         }
 
-        function processCorrectTap() { 
+        // TĂNG ĐIỂM THƯỞNG DỰA TRÊN ĐỘ DÀI CHUỖI (CÀNG DÀI ĐIỂM CÀNG CAO)
+        function processCorrectTap(currentSeqLength) { 
             if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
 
             playSound('coin', 1); 
-            let pointsToAdd = 10; 
+            let pointsToAdd = 10 + (currentSeqLength * 2); // Thưởng thêm điểm theo độ dài chuỗi
             aScore += pointsToAdd;
             document.getElementById('boo-points').innerText = Math.round(aScore);
         }
@@ -525,15 +526,25 @@
             if(!canClick || !isPlaying || isPausedForStart || userSeq.includes(idx)) return; userSeq.push(idx); 
             if (patternSeq.includes(idx)) { 
                 cellEl.classList.add('correct'); 
-                processCorrectTap(); 
-                if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); } 
+                processCorrectTap(userSeq.length); 
+                if(userSeq.length === patternSeq.length) { 
+                    canClick = false; 
+                    winsInCurrentLevel++;
+                    if(winsInCurrentLevel >= 3) {
+                        winsInCurrentLevel = 0;
+                        checkLevelUp();
+                    } else {
+                        setTimeout(() => { runGame1(); }, 600);
+                    }
+                } 
             } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
         }
 
         function runGame2() {
             if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; 
-            // TĂNG ĐỘ KHÓ: TĂNG CHIỀU DÀI CHUỖI KÝ HIỆU THEO CẤP ĐỘ THỰC TẾ
-            let count = Math.min(4 + Math.floor((currentLevel - 1) / 2), MAX_SEQUENCE_LENGTH); 
+            // XUẤT PHÁT TỪ 4 KÝ TỰ, CỨ VƯỢT QUA 3 LẦN THÌ MỚI TĂNG THÊM 1 KÝ TỰ
+            let levelAdd = Math.floor((currentLevel - 1) / 3);
+            let count = Math.min(4 + levelAdd, MAX_SEQUENCE_LENGTH); 
             for(let i=0; i<count; i++) patternSeq.push(SYMBOL_KEYS[Math.floor(Math.random() * SYMBOL_KEYS.length)]);
             
             let area = document.getElementById('seq-area'); 
@@ -558,7 +569,7 @@
                 area.innerHTML = html;
                 area.scrollLeft = area.scrollWidth;
                 
-                processCorrectTap(); 
+                processCorrectTap(patternSeq.length); 
                 if(userSeq.length === patternSeq.length) { 
                     canClick = false; 
                     winsInCurrentLevel++;
@@ -578,7 +589,8 @@
             clearTimeout(gameLogicTimer);
             
             let currentHits = (cGame === '1') ? hitsCountG1 : hitsCountG2;
-            if (aScore < 1000 || currentHits < 8) {
+            // HẠ NGƯỠNG ĐẠT CHUẨN XUỐNG 500 DATA
+            if (aScore < 500 || currentHits < 5) {
                 aScore = 0;
             }
 
@@ -600,7 +612,7 @@
 
                 let rankObj = getRankByThuyLuanScore(Math.floor(aScore));
                 document.getElementById('bio-rank-badge').innerHTML = getRankHTML(rankObj.name);
-                document.getElementById('master-feedback-text').innerText = (aScore === 0) ? "« Chưa đạt ngưỡng tối thiểu (1000 Data). Phạt rớt hạng Tân Binh! »" : rankObj.feedback;
+                document.getElementById('master-feedback-text').innerText = (aScore === 0) ? "« Chưa đạt ngưỡng tối thiểu (500 Data). Phạt rớt hạng Tân Binh! »" : rankObj.feedback;
 
                 let btnNext = document.getElementById('btn-next');
                 if (cGame === '1') { 
