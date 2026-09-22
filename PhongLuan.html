@@ -13,7 +13,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: #010a15; font-family: 'Space Grotesk', sans-serif; }
 
-        /* ĐÃ XÓA HÌNH NỀN, CHUYỂN VỀ NỀN TRƠN TỐI GIẢN */
+        /* NỀN TRƠN TỐI GIẢN - TẬP TRUNG THỊ GIÁC */
         #sanctum-bg { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; background: radial-gradient(circle at 50% 30%, #02162b 0%, #010811 80%); }
         
         #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
@@ -459,11 +459,10 @@
             document.getElementById('warning-bar-container').style.display = 'block';
             g1MissFrames = 0;
             
-            // Khởi tạo biến vật lý G1
             g1FrameCount = 0;
             g1DashFrames = 0;
             g1DashMultiplier = 1;
-            g1NextTurnFrame = Math.floor(Math.random() * 60) + 30; // 0.5s đến 1s bẻ góc 1 lần
+            g1NextTurnFrame = Math.floor(Math.random() * 60) + 30; 
             tAngle = Math.random() * Math.PI * 2;
         }
 
@@ -515,41 +514,58 @@
             if(!isPlaying || isPausedForStart) return;
 
             if (cGame === '1') {
-                // HỆ VẬT LÝ MỚI: GIÓ GIẬT & ĐẬP TƯỜNG NẢY RA
                 g1FrameCount++;
-                let diffFactor = aScore / 100;
                 
-                // Gia tốc tốc độ nền cực mạnh
-                let currentTargetSpeed = 4.0 + (diffFactor * 2.0); 
-                if (aScore > 300) currentTargetSpeed += (aScore - 300) * 0.03;
-                if (aScore > 600) currentTargetSpeed += (aScore - 600) * 0.06;
+                // PHÂN CẤP TỐC ĐỘ VÀ ĐIỂM THƯỞNG THEO 4 MỐC
+                let currentTargetSpeed = 3.5;
+                let pointsToAdd = 0.5;
+                let turnFreqOffset = 0; // Thay đổi độ gắt của nhịp bẻ lái
 
-                // Cơ chế Lướt (Dash)
+                if (aScore < 200) {
+                    currentTargetSpeed = 3.5;
+                    pointsToAdd = 0.5;
+                    turnFreqOffset = 0;
+                } else if (aScore < 500) {
+                    currentTargetSpeed = 5.5; 
+                    pointsToAdd = 1.0;
+                    turnFreqOffset = 5;
+                } else if (aScore < 800) {
+                    currentTargetSpeed = 7.5; 
+                    pointsToAdd = 2.5;
+                    turnFreqOffset = 10;
+                } else {
+                    currentTargetSpeed = 9.5; // Nhanh như chớp
+                    pointsToAdd = 5.0;        // Cày điểm x10
+                    turnFreqOffset = 15;
+                }
+
+                // Cơ chế Lướt (Dash) giữ nguyên, cộng hưởng theo tốc độ
                 if (g1DashFrames > 0) {
                     g1DashFrames--;
                 } else {
                     g1DashMultiplier = 1;
-                    if (Math.random() < 0.015 + (diffFactor * 0.005)) { // Chớp cơ hội lướt
-                        g1DashMultiplier = 2.5; // Tăng gấp 2.5 lần tốc độ
-                        g1DashFrames = Math.floor(Math.random() * 12) + 8; // Lướt trong khoảnh khắc
+                    if (Math.random() < 0.015) { 
+                        g1DashMultiplier = 2.0; 
+                        g1DashFrames = Math.floor(Math.random() * 10) + 5; 
                     }
                 }
 
                 // Cơ chế Bẻ lái gắt (Sharp Turn)
                 if (g1FrameCount >= g1NextTurnFrame) {
-                    let turnAngle = (Math.PI / 4) + Math.random() * (Math.PI * 0.58); // Bẻ từ 45 đến ~150 độ
+                    let turnAngle = (Math.PI / 4) + Math.random() * (Math.PI * 0.58); 
                     if (Math.random() < 0.5) turnAngle = -turnAngle;
                     tAngle += turnAngle;
                     
                     g1FrameCount = 0;
-                    g1NextTurnFrame = Math.max(15, Math.floor(Math.random() * 50) + 20 - Math.floor(diffFactor * 3));
+                    // Điểm càng cao, bẻ lái càng liên tục
+                    g1NextTurnFrame = Math.max(15, Math.floor(Math.random() * 50) + 20 - turnFreqOffset);
                 }
 
                 let finalSpeed = currentTargetSpeed * g1DashMultiplier;
                 tx += Math.cos(tAngle) * finalSpeed;
                 ty += Math.sin(tAngle) * finalSpeed;
 
-                // Cơ chế Đập tường (Tránh bẫy quỹ đạo xoáy)
+                // Cơ chế đập tường tĩnh
                 let margin = 35;
                 let hitWall = false;
                 if (tx < margin) { tx = margin; hitWall = true; tAngle = Math.PI - tAngle; }
@@ -559,15 +575,15 @@
                 else if (ty > maxY - margin) { ty = maxY - margin; hitWall = true; tAngle = -tAngle; }
 
                 if (hitWall) {
-                    tAngle += (Math.random() - 0.5) * 0.5; // Nảy góc ngẫu nhiên khi đập tường
+                    tAngle += (Math.random() - 0.5) * 0.5; 
                 }
 
-                // Tính điểm và trừ máu nếu trượt tay
+                // Chấm điểm và xử lý trượt
                 let dist = Math.hypot(mx - tx, my - ty);
                 let hitRadius = 60;
                 
                 if(dist < hitRadius) {
-                    addScore(0.5); // Cộng điểm liên tục khi bám sát
+                    addScore(pointsToAdd); // Dùng điểm theo cấp độ
                     tEl.classList.add('hovered');
                     g1MissFrames = 0;
                     document.getElementById('warning-progress').style.width = '0%';
@@ -575,10 +591,10 @@
                     tEl.classList.remove('hovered');
                     g1MissFrames++;
                     
-                    let pct = (g1MissFrames / 45) * 100; // Siết thời gian cho phép trượt ngắn lại
+                    let pct = (g1MissFrames / 45) * 100; 
                     document.getElementById('warning-progress').style.width = Math.min(100, pct) + '%';
 
-                    if(g1MissFrames > 45) { // Quá ~0.75 giây mà không bám lại là mất mạng
+                    if(g1MissFrames > 45) { 
                         loseLife();
                         showBooMsg("MẤT DẤU!");
                         g1MissFrames = 0;
@@ -586,7 +602,7 @@
                 }
 
             } else {
-                // VẬT LÝ CŨ CỦA ẢI 2 & 3 (Giữ nguyên)
+                // VẬT LÝ CŨ CỦA ẢI 2 & 3
                 let targetSpeed = baseSpeed + (aScore * 0.002);
                 if(Math.random() < 0.01) tAngle += (Math.random() - 0.5) * Math.PI; 
                 
