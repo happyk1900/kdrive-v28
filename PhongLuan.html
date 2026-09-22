@@ -131,7 +131,7 @@
     <div id="task-arena">
         <div class="play-area" id="play-area">
 
-            <!-- THANH HUD: DÙNG VẠCH NĂNG LƯỢNG THAY CHO TRÁI TIM -->
+            <!-- THANH HUD: DÙNG VẠCH NĂNG LƯỢNG -->
             <div id="ingame-hud" class="hidden">
                 <div class="hud-left"><span id="boo-lives" style="font-size: 14px; letter-spacing: 2px;"></span></div>
                 <div class="hud-center">DATA: <b id="boo-points" style="color:#00ff66; margin-left: 5px; font-size: 18px;">0</b></div>
@@ -141,7 +141,7 @@
                 </div>
             </div>
 
-            <!-- SẢNH CHỜ: TÊN GỌN GÀNG BÀI 1 / BÀI 2 -->
+            <!-- SẢNH CHỜ -->
             <div id="start-prompt-overlay" class="hidden">
                 <div id="briefing-panel" class="briefing-panel">
                     <div class="briefing-title" id="briefing-title"></div>
@@ -164,7 +164,7 @@
             <!-- CHỚP KẾT THÚC -->
             <div id="freeze-overlay"><div class="freeze-text">KẾT THÚC</div></div>
 
-            <!-- KHU VỰC CHỨA GAME PLAY (ĐÃ TẮT BỎ HOÀN TOÀN CHỮ NỔI GIỮA MÀN HÌNH) -->
+            <!-- KHU VỰC CHỨA GAME PLAY -->
             <div id="game-play-zone">
                 <div id="custom-cursor"></div>
                 <div id="game-target" class="wind-target" onmousedown="handleTargetClick(event)" ontouchstart="handleTargetClick(event)"></div>
@@ -196,7 +196,7 @@
                 </div>
             </div>
 
-            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG (2 BÀI) -->
+            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG -->
             <div id="final-summary-overlay">
                 <div class="final-header">TỔNG KẾT PHONG LUÂN</div>
                 <div class="stat-box">
@@ -229,11 +229,11 @@
         };
 
         function getRankByPhongLuanScore(score) {
+            if (score < 1000) return { name: "Tân Binh", feedback: "« Chưa đạt ngưỡng tối thiểu (1000 Data). Phạt rớt hạng Tân Binh! »" };
             if (score >= 5000) return { name: "Huyền Thoại", feedback: "« Cảnh giới viễn tưởng! Phản xạ thần kinh vượt ngưỡng nhân loại. »" };
             if (score >= 3000) return { name: "Đặc Vụ", feedback: "« Phản xạ sắc bén, kiểm soát không gian tuyệt đối. »" };
             if (score >= 2000) return { name: "Tinh Anh", feedback: "« Giới hạn đỉnh cao của người bình thường. Tốc độ đáng gờm. »" };
-            if (score >= 1000) return { name: "Chiến Binh", feedback: "« Cảm giác không gian tốt, cần đẩy cao tốc độ hơn nữa. »" };
-            return { name: "Tân Binh", feedback: "« Vừa bước vào vùng nhiễu động. Cần rèn luyện phản xạ thêm. »" };
+            return { name: "Chiến Binh", feedback: "« Cảm giác không gian tốt, cần đẩy cao tốc độ hơn nữa. »" };
         }
 
         function getRankHTML(rankName) {
@@ -286,7 +286,7 @@
 
         let cGame = '1'; 
         let aScore = 0; 
-        let stabilityHP = 5; 
+        let stabilityHP = 10; 
         let isPlaying = false; 
         let isPausedForStart = true;
         
@@ -318,7 +318,7 @@
         };
 
         function openArena(id) {
-            cGame = id; aScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
+            cGame = id; aScore = 0; stabilityHP = 10; isPlaying = false; isPausedForStart = true;
             
             cancelAnimationFrame(loopRaf);
             clearAllTimeouts();
@@ -336,7 +336,7 @@
             if (id === '1') {
                 bTitle = "BÀI 1"; bTarget = "GIỮ VỮNG QUỸ ĐẠO<br><br>Hệ thống thả một luồng gió.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Rê ngón tay/chuột bám sát theo điểm sáng. Tuột mục tiêu quá lâu sẽ mất năng lượng.";
             } else if (id === '2') {
-                bTitle = "BÀI 2"; bTarget = "PHÁN ĐOÁN TÀNG HÌNH<br><br>Mục tiêu di chuyển và tàng hình ngẫu nhiên.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Phán đoán quỹ đạo và bấm (chém) trúng mục tiêu ngay khi nó vừa hiện ra.";
+                bTitle = "BÀI 2"; bTarget = "PHÁN ĐOÁN TÀNG HÌNH<br><br>Mục tiêu di chuyển và tàng hình ngẫu nhiên.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Phán đoán quỹ đạo và bấm (chém) trúng mục tiêu ngay khi nó vừa hiện ra trước khi hết thời gian.";
             } 
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
@@ -344,11 +344,10 @@
             document.getElementById('start-prompt-overlay').classList.remove('hidden');
         }
 
-        // HÀM CẬP NHẬT THANH NĂNG LƯỢNG GIỐNG THỦY LUÂN
         function updateHpDisplay() {
-            let fullBlocks = Math.max(0, stabilityHP); 
+            let fullBlocks = Math.ceil(stabilityHP / 2); 
             let emptyBlocks = 5 - fullBlocks;
-            document.getElementById('boo-lives').innerHTML = "<span style='color:#00ff66; text-shadow: 0 0 8px #00ff66;'>" + "▰".repeat(fullBlocks) + "</span><span style='color:#333;'>" + "▱".repeat(emptyBlocks) + "</span>";
+            document.getElementById('boo-lives').innerHTML = "<span style='color:#00ff66; text-shadow: 0 0 8px #00ff66;'>" + "▰".repeat(Math.max(0, fullBlocks)) + "</span><span style='color:#333;'>" + "▱".repeat(Math.max(0, emptyBlocks)) + "</span>";
         }
 
         function triggerStartGame() {
@@ -367,7 +366,7 @@
 
         function startArena() {
             aScore = 0;
-            stabilityHP = 5;
+            stabilityHP = 10;
             cancelAnimationFrame(loopRaf);
             clearAllTimeouts();
 
@@ -426,7 +425,7 @@
 
                     addScore(pointsToAdd);
                     playSound('katana'); 
-                    resetActionTimer(); 
+                    resetActionTimer(); // Reset thanh thời gian sinh tồn khi chém trúng
                     
                     tx = 60 + Math.random() * (maxX - 120); 
                     ty = 60 + Math.random() * (maxY - 120);
@@ -444,7 +443,7 @@
         }
 
         function loseLife() {
-            stabilityHP--;
+            stabilityHP -= 2; // Trừ 2 vạch năng lượng mỗi lần hụt
             updateHpDisplay();
             playSound('error');
             
@@ -457,12 +456,24 @@
             if(actionTimer) clearTimeout(actionTimer);
             if(!isPlaying || isPausedForStart) return;
 
-            actionTimer = setTimeout(() => {
+            let startTime = Date.now();
+            let duration = 2500; // 2.5 giây thời gian sinh tồn cho mỗi hành động
+
+            function updateBar() {
                 if(!isPlaying || isPausedForStart) return;
-                loseLife();
-                tx = 60 + Math.random() * (maxX - 120); ty = 60 + Math.random() * (maxY - 120);
-                resetActionTimer();
-            }, 2500); 
+                let elapsed = Date.now() - startTime;
+                let pct = Math.min(100, (elapsed / duration) * 100);
+                document.getElementById('warning-progress').style.width = pct + '%';
+
+                if (elapsed < duration) {
+                    actionTimer = setTimeout(updateBar, 50);
+                } else {
+                    loseLife();
+                    tx = 60 + Math.random() * (maxX - 120); ty = 60 + Math.random() * (maxY - 120);
+                    resetActionTimer();
+                }
+            }
+            updateBar();
         }
 
         function initG1() {
@@ -480,7 +491,7 @@
         function initG2() {
             tEl.className = 'wind-target style-slash'; 
             document.getElementById('custom-cursor').style.display = 'none';
-            document.getElementById('warning-bar-container').style.display = 'none'; 
+            document.getElementById('warning-bar-container').style.display = 'block'; // KÍCH HOẠT THANH THỜI GIAN CHO BÀI 2
             isGhost = false;
             
             gFrameCount = 0;
