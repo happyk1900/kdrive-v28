@@ -101,9 +101,12 @@
         #game-play-zone.active { display: block;}
         
         .wind-target { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: transform 0.1s ease; } 
-        .t-track-mode { background: rgba(0, 0, 0, 0.85); border: 2px solid rgba(255, 255, 255, 0.4); box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
-        .t-track-mode.hovered { border-color: #fff; box-shadow: 0 0 25px #fff; background: rgba(255, 255, 255, 0.2); transform: translate(-50%, -50%) scale(1.1); }
-        .style-track { background: #000; border: 2.5px solid #fff; box-shadow: 0 0 15px rgba(255,255,255,0.6); }
+        
+        /* CẬP NHẬT MÀU HẠT SÁNG THÀNH TRẮNG TINH KHIẾT CHÓI LÓA */
+        .t-track-mode { background: #ffffff; border: 2px solid #e0f7fa; box-shadow: 0 0 15px #ffffff, 0 0 30px rgba(0, 229, 255, 0.8); }
+        .t-track-mode.hovered { border-color: #00ff66; box-shadow: 0 0 25px #00ff66, 0 0 50px #00ff66; background: #ffffff; transform: translate(-50%, -50%) scale(1.15); }
+        
+        .style-track { background: rgba(255,255,255,0.3); border: 2.5px dashed #fff; box-shadow: 0 0 15px rgba(255,255,255,0.6); }
         .style-slash { background: #fff; border: 2.5px solid #fff; box-shadow: 0 0 25px #fff, 0 0 45px rgba(255,255,255,0.9); animation: flarePulse 0.4s infinite alternate; }
         @keyframes flarePulse { 0% { transform: scale(0.92); opacity: 0.85; } 100% { transform: scale(1.08); opacity: 1; } }
         .style-tap { background: rgba(255,255,255,0.2); border: 3px solid #fff; box-shadow: 0 0 30px #fff; }
@@ -130,6 +133,7 @@
     <div id="task-arena">
         <div class="play-area" id="play-area">
 
+            <!-- THANH HUD TRONG GAME -->
             <div id="ingame-hud" class="hidden">
                 <div class="hud-left"><span id="boo-lives" style="font-size: 16px; letter-spacing: 2px;"></span></div>
                 <div class="hud-center">SCORE: <b id="boo-points" style="color:#00ff66; margin-left: 5px; font-size: 18px;">0</b></div>
@@ -139,6 +143,7 @@
                 </div>
             </div>
 
+            <!-- SẢNH CHỜ -->
             <div id="start-prompt-overlay" class="hidden">
                 <div id="briefing-panel" class="briefing-panel">
                     <div class="briefing-title" id="briefing-title"></div>
@@ -149,6 +154,7 @@
                 </div>
             </div>
 
+            <!-- MÀN TẠM DỪNG -->
             <div id="pause-menu-overlay">
                 <div class="pause-box">
                     <div class="pause-title">TẠM DỪNG</div>
@@ -157,8 +163,10 @@
                 </div>
             </div>
 
+            <!-- CHỚP KẾT THÚC -->
             <div id="freeze-overlay"><div class="freeze-text">KẾT THÚC</div></div>
 
+            <!-- KHU VỰC CHỨA GAME PLAY -->
             <div id="game-play-zone">
                 <div id="custom-cursor"></div>
                 <div id="game-target" class="wind-target" onmousedown="handleTargetClick(event)" ontouchstart="handleTargetClick(event)"></div>
@@ -166,6 +174,7 @@
                 <div id="float-boo" class="floating-boo-txt"></div>
             </div>
 
+            <!-- BẢNG ĐIỂM TỪNG BÀI -->
             <div id="result-overlay">
                 <div class="stage-badge-header" id="stage-badge-title">KẾT QUẢ BÀI 1</div>
                 <div class="prestige-panel">
@@ -180,6 +189,7 @@
                 </div>
             </div>
 
+            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG -->
             <div id="final-summary-overlay">
                 <div class="final-header">TỔNG KẾT PHONG LUÂN</div>
                 <div class="stat-box">
@@ -418,8 +428,7 @@
         function addScore(points) {
             aScore += points;
             document.getElementById('boo-points').innerText = Math.floor(aScore);
-            // THẮNG NẾU ĐỦ 1000 ĐIỂM MỖI BÀI
-            if(aScore >= 1000) { finishGame(true); }
+            // HỆ THỐNG ENDLESS SURVIVAL: KHÔNG GIỚI HẠN ĐIỂM, ĐÁNH ĐẾN KHI MẤT HẾT 5 MẠNG THÌ THÔI
         }
 
         function loseLife() {
@@ -508,27 +517,36 @@
             if (cGame === '1') {
                 g1FrameCount++;
                 
-                // PHÂN CẤP TỐC ĐỘ VÀ ĐIỂM THƯỞNG THEO 4 MỐC
+                // PHÂN CẤP TỐC ĐỘ VÀ ĐIỂM THƯỞNG THEO 5 MỐC SINH TỒN
                 let currentTargetSpeed = 3.5;
                 let pointsToAdd = 0.5;
                 let turnFreqOffset = 0; 
 
-                if (aScore < 200) {
+                if (aScore < 1000) {
+                    // TÂN BINH
                     currentTargetSpeed = 3.5;
                     pointsToAdd = 0.5;
                     turnFreqOffset = 0;
-                } else if (aScore < 500) {
-                    currentTargetSpeed = 5.5; 
+                } else if (aScore < 2000) {
+                    // CHIẾN BINH
+                    currentTargetSpeed = 7.0; 
                     pointsToAdd = 1.0;
                     turnFreqOffset = 5;
-                } else if (aScore < 800) {
-                    currentTargetSpeed = 7.5; 
-                    pointsToAdd = 2.5;
+                } else if (aScore < 3000) {
+                    // TINH ANH
+                    currentTargetSpeed = 10.5; 
+                    pointsToAdd = 2.0;
                     turnFreqOffset = 10;
-                } else {
-                    currentTargetSpeed = 9.5; 
-                    pointsToAdd = 5.0;        
+                } else if (aScore < 5000) {
+                    // ĐẶC VỤ
+                    currentTargetSpeed = 14.0; 
+                    pointsToAdd = 4.0;
                     turnFreqOffset = 15;
+                } else {
+                    // HUYỀN THOẠI (5000+)
+                    currentTargetSpeed = 17.5; 
+                    pointsToAdd = 8.0;        
+                    turnFreqOffset = 20;
                 }
 
                 if (g1DashFrames > 0) {
@@ -592,7 +610,7 @@
 
             } else {
                 // VẬT LÝ CŨ CỦA ẢI 2 & 3
-                let targetSpeed = baseSpeed + (aScore * 0.002);
+                let targetSpeed = baseSpeed + (aScore * 0.003); // Tinh chỉnh tịnh tiến trơn mượt cho endless
                 if(Math.random() < 0.01) tAngle += (Math.random() - 0.5) * Math.PI; 
                 
                 tRotSpeed += (Math.random() - 0.5) * 0.08;
@@ -630,8 +648,6 @@
         function finishGame(isWin) {
             isPlaying = false; isPausedForStart = true;
             clearAllTimeouts(); cancelAnimationFrame(loopRaf);
-            
-            if(!isWin) aScore = 0;
 
             if(cGame === '1') { sessionScoreG1 = Math.floor(aScore); }
             if(cGame === '2') { sessionScoreG2 = Math.floor(aScore); }
