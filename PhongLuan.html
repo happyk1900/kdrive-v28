@@ -130,7 +130,6 @@
     <div id="task-arena">
         <div class="play-area" id="play-area">
 
-            <!-- THANH HUD TRONG GAME -->
             <div id="ingame-hud" class="hidden">
                 <div class="hud-left"><span id="boo-lives" style="font-size: 16px; letter-spacing: 2px;"></span></div>
                 <div class="hud-center">SCORE: <b id="boo-points" style="color:#00ff66; margin-left: 5px; font-size: 18px;">0</b></div>
@@ -140,7 +139,6 @@
                 </div>
             </div>
 
-            <!-- SẢNH CHỜ -->
             <div id="start-prompt-overlay" class="hidden">
                 <div id="briefing-panel" class="briefing-panel">
                     <div class="briefing-title" id="briefing-title"></div>
@@ -151,7 +149,6 @@
                 </div>
             </div>
 
-            <!-- MÀN TẠM DỪNG -->
             <div id="pause-menu-overlay">
                 <div class="pause-box">
                     <div class="pause-title">TẠM DỪNG</div>
@@ -160,10 +157,8 @@
                 </div>
             </div>
 
-            <!-- CHỚP KẾT THÚC -->
             <div id="freeze-overlay"><div class="freeze-text">KẾT THÚC</div></div>
 
-            <!-- KHU VỰC CHỨA GAME PLAY -->
             <div id="game-play-zone">
                 <div id="custom-cursor"></div>
                 <div id="game-target" class="wind-target" onmousedown="handleTargetClick(event)" ontouchstart="handleTargetClick(event)"></div>
@@ -171,7 +166,6 @@
                 <div id="float-boo" class="floating-boo-txt"></div>
             </div>
 
-            <!-- BẢNG ĐIỂM TỪNG BÀI -->
             <div id="result-overlay">
                 <div class="stage-badge-header" id="stage-badge-title">KẾT QUẢ BÀI 1</div>
                 <div class="prestige-panel">
@@ -186,7 +180,6 @@
                 </div>
             </div>
 
-            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG -->
             <div id="final-summary-overlay">
                 <div class="final-header">TỔNG KẾT PHONG LUÂN</div>
                 <div class="stat-box">
@@ -284,7 +277,6 @@
         let g3Mode = 'TRACK'; 
         let g1MissFrames = 0;
 
-        // Biến điều khiển vật lý G1
         let g1FrameCount = 0;
         let g1NextTurnFrame = 0;
         let g1DashFrames = 0;
@@ -519,7 +511,7 @@
                 // PHÂN CẤP TỐC ĐỘ VÀ ĐIỂM THƯỞNG THEO 4 MỐC
                 let currentTargetSpeed = 3.5;
                 let pointsToAdd = 0.5;
-                let turnFreqOffset = 0; // Thay đổi độ gắt của nhịp bẻ lái
+                let turnFreqOffset = 0; 
 
                 if (aScore < 200) {
                     currentTargetSpeed = 3.5;
@@ -534,12 +526,11 @@
                     pointsToAdd = 2.5;
                     turnFreqOffset = 10;
                 } else {
-                    currentTargetSpeed = 9.5; // Nhanh như chớp
-                    pointsToAdd = 5.0;        // Cày điểm x10
+                    currentTargetSpeed = 9.5; 
+                    pointsToAdd = 5.0;        
                     turnFreqOffset = 15;
                 }
 
-                // Cơ chế Lướt (Dash) giữ nguyên, cộng hưởng theo tốc độ
                 if (g1DashFrames > 0) {
                     g1DashFrames--;
                 } else {
@@ -550,14 +541,12 @@
                     }
                 }
 
-                // Cơ chế Bẻ lái gắt (Sharp Turn)
                 if (g1FrameCount >= g1NextTurnFrame) {
                     let turnAngle = (Math.PI / 4) + Math.random() * (Math.PI * 0.58); 
                     if (Math.random() < 0.5) turnAngle = -turnAngle;
                     tAngle += turnAngle;
                     
                     g1FrameCount = 0;
-                    // Điểm càng cao, bẻ lái càng liên tục
                     g1NextTurnFrame = Math.max(15, Math.floor(Math.random() * 50) + 20 - turnFreqOffset);
                 }
 
@@ -565,7 +554,6 @@
                 tx += Math.cos(tAngle) * finalSpeed;
                 ty += Math.sin(tAngle) * finalSpeed;
 
-                // Cơ chế đập tường tĩnh
                 let margin = 35;
                 let hitWall = false;
                 if (tx < margin) { tx = margin; hitWall = true; tAngle = Math.PI - tAngle; }
@@ -578,12 +566,13 @@
                     tAngle += (Math.random() - 0.5) * 0.5; 
                 }
 
-                // Chấm điểm và xử lý trượt
+                // CHỐT CỨNG THỜI GIAN TRƯỢT TAY LÀ 2 GIÂY (120 FRAMES)
                 let dist = Math.hypot(mx - tx, my - ty);
                 let hitRadius = 60;
+                const G1_MAX_MISS_FRAMES = 120; // Khóa cứng 2 giây
                 
                 if(dist < hitRadius) {
-                    addScore(pointsToAdd); // Dùng điểm theo cấp độ
+                    addScore(pointsToAdd);
                     tEl.classList.add('hovered');
                     g1MissFrames = 0;
                     document.getElementById('warning-progress').style.width = '0%';
@@ -591,10 +580,10 @@
                     tEl.classList.remove('hovered');
                     g1MissFrames++;
                     
-                    let pct = (g1MissFrames / 45) * 100; 
+                    let pct = (g1MissFrames / G1_MAX_MISS_FRAMES) * 100; 
                     document.getElementById('warning-progress').style.width = Math.min(100, pct) + '%';
 
-                    if(g1MissFrames > 45) { 
+                    if(g1MissFrames > G1_MAX_MISS_FRAMES) { 
                         loseLife();
                         showBooMsg("MẤT DẤU!");
                         g1MissFrames = 0;
