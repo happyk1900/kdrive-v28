@@ -116,6 +116,7 @@
         .grid-cell.active-glow { background: rgba(56, 239, 125, 0.85); box-shadow: 0 0 20px #38ef7d; border-color: #fff; }
         .grid-cell.correct { background: rgba(0, 255, 102, 0.85); box-shadow: 0 0 15px #00ff66; border-color: #fff; color: #fff;}
         .grid-cell.wrong { background: rgba(255, 51, 102, 0.85); box-shadow: 0 0 15px #ff3366; border-color: #fff; color: #fff;}
+        .grid-cell.reveal-hint { background: rgba(255, 215, 0, 0.6) !important; box-shadow: 0 0 15px #ffd700 !important; border-color: #fff !important; }
 
         .sequence-display { height: 90px; display: flex; justify-content: flex-start; align-items: center; gap: 8px; margin-bottom: 25px; width: 95%; max-width: 350px; background: rgba(2, 8, 15, 0.9); border-radius: 12px; border: 1.5px solid rgba(56,239,125,0.4); padding: 0 15px; overflow-x: auto; white-space: nowrap; scroll-behavior: smooth; }
         .sequence-display::-webkit-scrollbar { height: 4px; }
@@ -253,7 +254,6 @@
 
         const SYMBOL_KEYS = ['lightning', 'circle', 'triangle', 'square'];
 
-        // HỆ THỐNG ĐÁNH GIÁ 5 CẤP CHUẨN XÁC
         function getRankByStructure(maxLevel, score) {
             if (score < 500) return { name: "Kém", feedback: "« Chưa đạt ngưỡng tối thiểu (500 Data). Phạt rớt hạng Kém! »" };
             if (maxLevel >= 4) return { name: "Thần Đồng", feedback: "« Cảnh giới đỉnh cao! Chinh phục cấu trúc cực hạn full màn hình. »" };
@@ -345,9 +345,9 @@
         let sessionScoreG1 = 0, sessionScoreG2 = 0;
         let hitsCountG1 = 0, hitsCountG2 = 0; 
 
-        let currentLevel = 1; // 1: Kém/Trung Bình (3x3 / 4 hình), 2: Giỏi (5x5 / 6 hình), 3: Xuất Sắc (7x7 / 9 hình), 4: Thần Đồng (12x12 / 18 hình)
+        let currentLevel = 1; 
         let maxLevelAchieved = 1;
-        let winsInCurrentLevel = 0; // Cần đúng 3 lần ở mỗi cấp để lên cấp tiếp theo
+        let winsInCurrentLevel = 0; 
         let canClick = false;
         let patternSeq = [];
         let userSeq = [];
@@ -357,20 +357,18 @@
             openArena('1');
         };
 
-        // BÀI 1: ÁNH XẠ MA TRẬN KHÔNG GIAN
         function getGridConfigByLevel(level) {
-            if (level >= 4) return { size: 12, total: 144, css: 'repeat(12, 1fr)', dim: '350px' }; // Thần Đồng: 12x12 Full màn hình
-            if (level === 3) return { size: 7, total: 49, css: 'repeat(7, 1fr)', dim: '320px' };   // Xuất Sắc: 7x7
-            if (level === 2) return { size: 5, total: 25, css: 'repeat(5, 1fr)', dim: '280px' };   // Giỏi: 5x5
-            return { size: 3, total: 9,  css: 'repeat(3, 1fr)', dim: '240px' };                    // Trung Bình: 3x3 (Khởi đầu Kém)
+            if (level >= 4) return { size: 12, total: 144, css: 'repeat(12, 1fr)', dim: '350px' }; 
+            if (level === 3) return { size: 7, total: 49, css: 'repeat(7, 1fr)', dim: '320px' };   
+            if (level === 2) return { size: 5, total: 25, css: 'repeat(5, 1fr)', dim: '280px' };   
+            return { size: 3, total: 9,  css: 'repeat(3, 1fr)', dim: '240px' };                    
         }
 
-        // BÀI 2: ÁNH XẠ SỐ LƯỢNG HÌNH CHUỖI LƯỢNG TỬ
         function getG2SymbolCount(level) {
-            if (level >= 4) return 18; // Thần Đồng: 18 hình
-            if (level === 3) return 9;  // Xuất Sắc: 9 hình
-            if (level === 2) return 6;  // Giỏi: 6 hình
-            return 4;                   // Trung Bình: 4 hình (Khởi đầu Kém)
+            if (level >= 4) return 18; 
+            if (level === 3) return 9;  
+            if (level === 2) return 6;  
+            return 4;                   
         }
 
         function buildDynamicGrid() {
@@ -410,9 +408,9 @@
             
             let bTitle = "", bTarget = "";
             if (id === '1') {
-                bTitle = "BÀI 1"; bTarget = "GHI NHỚ VỊ TRÍ<br><br>Hệ thống sẽ làm sáng một cụm các điểm ảnh trong chớp mắt.<br><br><span style='color:#38ef7d; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và bấm lại chính xác các vị trí đó. Bấm sai sẽ bị trừ năng lượng.";
+                bTitle = "BÀI 1"; bTarget = "GHI NHỚ VỊ TRÍ<br><br>Hệ thống sẽ làm sáng một cụm các điểm ảnh trong chớp mắt.<br><br><span style='color:#38ef7d; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và bấm lại chính xác các vị trí đó. Bấm sai sẽ hiển thị gợi ý vị trí đúng.";
             } else if (id === '2') {
-                bTitle = "BÀI 2"; bTarget = "GIẢI MÃ LƯỢNG TỬ<br><br>Hệ thống xuất ra một chuỗi ký hiệu hình học ngẫu nhiên từ 4 hình gốc.<br><br><span style='color:#38ef7d; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và gõ lại đúng thứ tự chuỗi ký hiệu.";
+                bTitle = "BÀI 2"; bTarget = "GIẢI MÃ LƯỢNG TỬ<br><br>Hệ thống xuất ra một chuỗi ký hiệu hình học ngẫu nhiên từ 4 hình gốc.<br><br><span style='color:#38ef7d; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và gõ lại đúng thứ tự chuỗi ký hiệu. Bấm sai sẽ hiển thị chuỗi đúng.";
             }
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
@@ -445,14 +443,46 @@
         function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
         function closeArena() { window.location.href = 'LucChien.html'; }
 
+        // TÍNH NĂNG HIỂN THỊ MỜ ĐÁP ÁN ĐÚNG KHI TRẢ LỜI SAI
+        function revealCorrectAnswersForGame1() {
+            let cells = document.getElementById('grid-1').children;
+            patternSeq.forEach(idx => {
+                if(cells[idx]) {
+                    cells[idx].classList.add('reveal-hint');
+                }
+            });
+            setTimeout(() => {
+                patternSeq.forEach(idx => {
+                    if(cells[idx]) {
+                        cells[idx].classList.remove('reveal-hint');
+                    }
+                });
+            }, 900);
+        }
+
+        function revealCorrectAnswersForGame2() {
+            let area = document.getElementById('seq-area');
+            area.innerHTML = patternSeq.map(key => `<div class="quantum-char" style="opacity:0.7;">${SVG_SHAPES_SMALL[key]}</div>`).join('');
+        }
+
         function failSequence() { 
             if(!isPlaying || isPausedForStart) return; canClick = false; stabilityHP -= 2; updateHpDisplay(); 
             winsInCurrentLevel = 0; 
+            
+            if (cGame === '1') {
+                revealCorrectAnswersForGame1();
+            } else {
+                revealCorrectAnswersForGame2();
+            }
+
             let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 400);
-            if(stabilityHP <= 0) { finishGame(); } else { 
+            
+            if(stabilityHP <= 0) { 
+                setTimeout(finishGame, 1000); 
+            } else { 
                 currentLevel = Math.max(1, currentLevel - 1); 
                 clearTimeout(gameLogicTimer); 
-                let delay = 800;
+                let delay = 1000;
                 setTimeout(() => { if (cGame === '1') runGame1(); else if (cGame === '2') runGame2(); }, delay); 
             }
         }
@@ -468,7 +498,7 @@
 
         function checkLevelUp() { 
             winsInCurrentLevel++;
-            if (winsInCurrentLevel >= 3) { // Thắng đúng 3 lần ở cấp hiện tại thì lên cấp kế tiếp
+            if (winsInCurrentLevel >= 3) { 
                 winsInCurrentLevel = 0;
                 currentLevel++;
                 if (currentLevel > maxLevelAchieved) maxLevelAchieved = currentLevel;
