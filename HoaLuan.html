@@ -98,7 +98,6 @@
         #btn-next { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         #btn-next:active { background: #fff; color: #000; }
 
-        /* BÁO CÁO TỔNG HỢP CUỐI CÙNG */
         #final-summary-overlay { position: absolute; inset: 0; background: #0d0202; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 12px; }
         #final-summary-overlay.active { display: flex; }
         .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #ff3333; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px #ff3333; }
@@ -309,17 +308,24 @@
             return `<img src="${iconUrl}" class="rank-icon-img" alt="Rank"> <span style="vertical-align: middle;">${rankName.toUpperCase()}</span>`;
         }
 
-        let cGame = '1'; let aScore = 0; let reflexScore = 0; let burstScore = 0; let currentMultiplier = 1; let successfulHitsCount = 0; 
+        let cGame = '1'; let aScore = 0; let reflexScore = 0; let burstScore = 0; successfulHitsCount = 0; 
         let sessionScoreG1 = 0, sessionScoreG3 = 0;
         let hitsCountG1 = 0, hitsCountG3 = 0; 
         let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, g3LoopId, stabilityHP = 10;
-        let bestCps = 0; let reactionTimes = []; let matchStartTime = 0; 
+        let bestCps = 0; let reactionTimes = []; 
 
-        const g1Lifespans = [0, 1100, 950, 850, 750, 650, 580, 520, 460, 400, 350, 300, 260];
-        const g1SpawnDelays = [0, 700, 600, 500, 450, 400, 350, 320, 280, 250, 220, 180, 150];
-        const g3Speeds = [0, 0.4, 0.6, 0.8, 1.1, 1.4, 1.8, 2.2, 2.7, 3.2, 3.8, 4.5, 5.5];
-        const g3Lifespans = [0, 2800, 2400, 2000, 1700, 1400, 1200, 1000, 850, 700, 600, 500, 450];
-        const g3SpawnDelays = [0, 2200, 1800, 1500, 1200, 1000, 850, 700, 600, 500, 420, 350, 300];
+        // 5 MỐC TỐC ĐỘ / CẤP ĐỘ MỚI (CHUẨN HÓA TỪ 12 CẤP CŨ)
+        // Cấp 1 (Kém): Mốc 1 | Cấp 2 (Trung Bình): Mốc 3 | Cấp 3 (Giỏi): Mốc 6 | Cấp 4 (Xuất Sắc): Mốc 9 | Cấp 5 (Thần Đồng): Mốc 12
+        const speedTiers = [
+            { level: 1, name: "Kém", pointsPerHit: 10, lifespan: 1100, delay: 700, g3Speed: 0.4, g3Life: 2800, g3Delay: 2200 },
+            { level: 2, name: "Trung Bình", pointsPerHit: 10, lifespan: 850, delay: 500, g3Speed: 0.8, g3Life: 2000, g3Delay: 1500 },
+            { level: 3, name: "Giỏi", pointsPerHit: 15, lifespan: 650, delay: 400, g3Speed: 1.4, g3Life: 1400, g3Delay: 1000 },
+            { level: 4, name: "Xuất Sắc", pointsPerHit: 20, lifespan: 520, delay: 320, g3Speed: 2.2, g3Life: 1000, g3Delay: 700 },
+            { level: 5, name: "Thần Đồng", pointsPerHit: 30, lifespan: 350, delay: 220, g3Speed: 3.8, g3Life: 600, g3Delay: 420 }
+        ];
+
+        let currentTierIndex = 0; // 0 đến 4
+        let lastBurstMilestone = 0; // Theo dõi các mốc bạo phát: 500, 1500, 2500, 3500, 4500
 
         let fxCtx = null;
         function initAudio() { 
@@ -348,8 +354,8 @@
         window.onload = () => { openArena('1'); };
 
         function openArena(id) {
-            cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; currentMultiplier = 1; successfulHitsCount = 0; isPlaying = false; stabilityHP = 10;
-            isPausedForStart = true; bestCps = 0; stage3Projectiles = []; reactionTimes = [];
+            cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; currentTierIndex = 0; successfulHitsCount = 0; isPlaying = false; stabilityHP = 10;
+            isPausedForStart = true; bestCps = 0; stage3Projectiles = []; reactionTimes = []; lastBurstMilestone = 0;
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
@@ -362,9 +368,9 @@
             
             let bTitle = "", bTarget = "";
             if (id === '1') {
-                currentMultiplier = 1; bTitle = "BÀI 1"; bTarget = "ĐO LƯỜNG PHẢN XẠ<br><br>Chạm để triệt tiêu mọi tụ điểm năng lượng xuất hiện.<br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Không bỏ lỡ hạt nào!";
+                bTitle = "BÀI 1"; bTarget = "ĐO LƯỜNG PHẢN XẠ<br><br>Chạm để triệt tiêu mọi tụ điểm năng lượng xuất hiện.<br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Không bỏ lỡ hạt nào!";
             } else if (id === '3') {
-                currentMultiplier = 1; bTitle = "BÀI 3"; bTarget = "THỦ TRẬN TỔNG HỢP<br><br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Phá Hạt nhân, diệt hạt Vàng. Né hạt Trắng.";
+                bTitle = "BÀI 3"; bTarget = "THỦ TRẬN TỔNG HỢP<br><br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Phá Hạt nhân, diệt hạt Vàng. Né hạt Trắng.";
                 let core = document.createElement('div'); core.className = 'core-reactor'; core.style.left = '50%'; core.style.top = '50%'; playArea.appendChild(core);
             }
 
@@ -393,23 +399,56 @@
         function closeArena() { window.location.href = 'LucChien.html'; }
 
         function startArena() { 
-            isPlaying = true; playSound('boom'); matchStartTime = Date.now(); reactionTimes = []; 
+            isPlaying = true; playSound('boom'); reactionTimes = []; 
             if(cGame === '1') { hitsCountG1 = 0; runG1(); } 
             else if(cGame === '3') { hitsCountG3 = 0; runG3(); } 
         }
 
+        // CẬP NHẬT TẦNG TỐC ĐỘ DỰA TRÊN ĐIỂM SỐ HIỆN TẠI (5 CẤP ĐỘ)
+        function updateTierByScore() {
+            let oldTier = currentTierIndex;
+            if (aScore >= 4000) currentTierIndex = 4; // Thần Đồng
+            else if (aScore >= 3000) currentTierIndex = 3; // Xuất Sắc
+            else if (aScore >= 2000) currentTierIndex = 2; // Giỏi
+            else if (aScore >= 1000) currentTierIndex = 1; // Trung Bình
+            else currentTierIndex = 0; // Kém
+
+            if (currentTierIndex !== oldTier) {
+                let tierObj = speedTiers[currentTierIndex];
+                let popup = document.getElementById('speed-popup'); 
+                popup.innerText = tierObj.name.toUpperCase(); 
+                popup.classList.add('show'); 
+                playSound('coin', 1.8); 
+                setTimeout(() => popup.classList.remove('show'), 1400);
+            }
+        }
+
+        // KIỂM TRA MỐC BẠO PHÁT: 500, 1500, 2500, 3500, 4500
+        function checkBurstMilestones() {
+            let nextMilestone = lastBurstMilestone + 1000;
+            let targetCheck = lastBurstMilestone === 0 ? 500 : nextMilestone;
+            
+            if (aScore >= targetCheck && lastBurstMilestone < 4500) {
+                lastBurstMilestone = targetCheck === 500 ? 500 : nextMilestone;
+                forceBurstMode();
+            }
+        }
+
         function addScoreAndCheckMultiplier(pointsToAdd = 1) {
             if(isPausedForStart) return;
-            let finalAdd = Math.round(pointsToAdd * currentMultiplier * 10) / 10;
-            aScore = Math.round((aScore + finalAdd) * 10) / 10; reflexScore = Math.round((reflexScore + finalAdd) * 10) / 10; 
-            successfulHitsCount++; 
+            let tierObj = speedTiers[currentTierIndex];
+            let actualPoints = tierObj.pointsPerHit * pointsToAdd;
+
+            aScore = Math.round((aScore + actualPoints) * 10) / 10; 
+            reflexScore = Math.round((reflexScore + actualPoints) * 10) / 10; 
+            
             if (cGame === '1') hitsCountG1++; else if (cGame === '3') hitsCountG3++;
 
-            if (successfulHitsCount % 20 === 0 && currentMultiplier < 12) { 
-                currentMultiplier++; let popup = document.getElementById('speed-popup'); popup.innerText = `X${currentMultiplier}`; popup.classList.add('show'); playSound('coin', 1.8); setTimeout(() => popup.classList.remove('show'), 1400); 
-            }
-            document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 1);
-            if (!document.querySelector('.burst-container') && Math.random() < 0.04) { forceBurstMode(); }
+            updateTierByScore();
+            checkBurstMilestones();
+
+            document.getElementById('boo-points').innerText = Math.round(aScore); 
+            playSound('coin', 1);
         }
 
         function loseHalfLife() { if(isPausedForStart) return; stabilityHP -= 1; updateHpDisplay(); playSound('boom'); triggerVibration([100, 50, 100]); if(stabilityHP <= 0) finishGame(); }
@@ -420,6 +459,8 @@
         function runG1() { spawnG1(); }
         function spawnG1() {
             if(!isPlaying || isPausedForStart) return; let playArea = document.getElementById('play-area'); let { px, py } = getSafeSpawns(playArea); let spawnTimestamp = Date.now();
+            let tierObj = speedTiers[currentTierIndex];
+
             let el = document.createElement('div'); el.className = 'orb orb-fire'; el.style.left = px + 'px'; el.style.top = py + 'px';
             let clicked = false; 
             
@@ -433,17 +474,23 @@
                 addScoreAndCheckMultiplier(1); el.remove(); 
                 
                 clearTimeout(spawnTimer);
-                let overlapCount = currentMultiplier >= 8 ? 2 : 1;
-                if (document.querySelectorAll('.orb-fire').length < overlapCount) { spawnTimer = setTimeout(spawnG1, 60); } else { spawnTimer = setTimeout(spawnG1, g1SpawnDelays[currentMultiplier]); }
+                let currentTier = speedTiers[currentTierIndex];
+                if (document.querySelectorAll('.orb-fire').length < (currentTierIndex >= 3 ? 2 : 1)) { 
+                    spawnTimer = setTimeout(spawnG1, 60); 
+                } else { 
+                    spawnTimer = setTimeout(spawnG1, currentTier.delay); 
+                }
             };
             playArea.appendChild(el); 
-            setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, g1Lifespans[currentMultiplier]);
-            clearTimeout(spawnTimer); if(isPlaying && !isPausedForStart) spawnTimer = setTimeout(spawnG1, g1SpawnDelays[currentMultiplier]);
+            setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, tierObj.lifespan);
+            clearTimeout(spawnTimer); if(isPlaying && !isPausedForStart) spawnTimer = setTimeout(spawnG1, tierObj.delay);
         }
 
         function runG3() { stage3Projectiles = []; spawnG3Parent(); if(!g3LoopId) g3LoopId = requestAnimationFrame(loopG3); }
         function spawnG3Parent() {
             if(!isPlaying || isPausedForStart) return; let playArea = document.getElementById('play-area'); let { px, py } = getSafeSpawns(playArea); let spawnTimestamp = Date.now();
+            let tierObj = speedTiers[currentTierIndex];
+
             let el = document.createElement('div'); el.className = 'orb orb-fire'; el.style.left = px + 'px'; el.style.top = py + 'px';
             let clicked = false; 
             
@@ -452,7 +499,7 @@
                 let exactReaction = Date.now() - spawnTimestamp; reactionTimes.push(exactReaction); 
                 let msClass = exactReaction < 300 ? 'ms-fast' : 'ms-slow';
                 let fel = document.createElement('div'); fel.className = `floating-ms ${msClass}`; fel.innerHTML = `${exactReaction}ms`; fel.style.left = px+28+'px'; fel.style.top = py+28+'px'; playArea.appendChild(fel); setTimeout(() => fel.remove(), 800);
-                addScoreAndCheckMultiplier(3); el.remove(); 
+                addScoreAndCheckMultiplier(1); el.remove(); 
                 ['yellow', 'white'].forEach((col, idx) => {
                     let cEl = document.createElement('div'); cEl.className = col === 'yellow' ? 'child-projectile child-yellow' : 'child-projectile child-white';
                     cEl.style.left = (px + (idx===0?-15:15)) + 'px'; cEl.style.top = py + 'px';
@@ -464,24 +511,25 @@
                 });
 
                 clearTimeout(spawnTimer);
-                if (document.querySelectorAll('.orb-fire').length < 1) { spawnTimer = setTimeout(spawnG3Parent, 150); } else { spawnTimer = setTimeout(spawnG3Parent, g3SpawnDelays[currentMultiplier]); }
+                if (document.querySelectorAll('.orb-fire').length < 1) { spawnTimer = setTimeout(spawnG3Parent, 150); } else { spawnTimer = setTimeout(spawnG3Parent, tierObj.g3Delay); }
             };
             playArea.appendChild(el); 
-            setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, g3Lifespans[currentMultiplier]);
-            clearTimeout(spawnTimer); if(isPlaying && !isPausedForStart) spawnTimer = setTimeout(spawnG3Parent, g3SpawnDelays[currentMultiplier]);
+            setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, tierObj.g3Life);
+            clearTimeout(spawnTimer); if(isPlaying && !isPausedForStart) spawnTimer = setTimeout(spawnG3Parent, tierObj.g3Delay);
         }
 
         function loopG3() {
             if(!isPlaying) { g3LoopId = null; return; }
             if(!isPausedForStart) {
                 let playArea = document.getElementById('play-area'); let centerX = playArea.clientWidth / 2; let centerY = playArea.clientHeight / 2; let now = Date.now();
+                let tierObj = speedTiers[currentTierIndex];
                 for(let i = stage3Projectiles.length - 1; i >= 0; i--) {
                     let p = stage3Projectiles[i]; let elapsed = now - p.stateTimer;
                     if (p.state === 'waiting' && elapsed >= 3000) { p.state = 'shaking'; p.stateTimer = now; p.el.classList.add('shaking'); playSound('error', 1.5); }
-                    else if (p.state === 'shaking' && elapsed >= 500) { p.state = 'flying'; p.el.classList.remove('shaking'); let angle = Math.atan2(centerY - p.y, centerX - p.x); let speed = g3Speeds[currentMultiplier]; p.vx = Math.cos(angle) * speed; p.vy = Math.sin(angle) * speed; }
+                    else if (p.state === 'shaking' && elapsed >= 500) { p.state = 'flying'; p.el.classList.remove('shaking'); let angle = Math.atan2(centerY - p.y, centerX - p.x); let speed = tierObj.g3Speed; p.vx = Math.cos(angle) * speed; p.vy = Math.sin(angle) * speed; }
                     else if (p.state === 'flying') {
                         p.x += p.vx; p.y += p.vy; p.el.style.left = p.x + 'px'; p.el.style.top = p.y + 'px';
-                        if (Math.hypot(p.x - centerX, p.y - centerY) < 14) { p.el.remove(); stage3Projectiles.splice(i, 1); if (p.color === 'yellow') loseHalfLife(); else { aScore = Math.round((aScore + 0.5) * 10) / 10; document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 0.5); } }
+                        if (Math.hypot(p.x - centerX, p.y - centerY) < 14) { p.el.remove(); stage3Projectiles.splice(i, 1); if (p.color === 'yellow') loseHalfLife(); else { aScore = Math.round((aScore + 1) * 10) / 10; document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 0.5); } }
                     }
                 }
             }
@@ -524,25 +572,28 @@
             }, duration);
         }
 
+        // BẠO PHÁT: MỖI CLICK TÍNH 3 ĐIỂM QUY ĐỔI UY LỰC
         function fireBeam(clicks, blackoutBg) {
             let playArea = document.getElementById('play-area');
             let normalizedCps = Math.round((clicks / 7) * 10) / 10;
-            let earnedScore = 0; let tier = 1; let beamTime = 2200;
+            let earnedScore = clicks * 3; // Mỗi click bạo phát tính chính xác 3 điểm như yêu cầu
+            let tier = 1; let beamTime = 2200;
 
-            if (cGame === '1') {
-                if (clicks >= 65) { tier = 5; beamTime = 1000; } else if (clicks >= 50) { tier = 4; beamTime = 1200; } else if (clicks >= 35) { tier = 3; beamTime = 1500; } else if (clicks >= 18) { tier = 2; beamTime = 1800; } 
-                earnedScore = Math.round(clicks * 1.4 * ((tier===5)?40:(tier===4)?28:(tier===3)?18:(tier===2)?10:4)); 
-            } else if (cGame === '3') {
-                let equivalentEffort = clicks * 3.5; normalizedCps = Math.round((equivalentEffort / 7) * 10) / 10;
-                if (clicks >= 25) { tier = 5; beamTime = 1000; } else if (clicks >= 19) { tier = 4; beamTime = 1200; } else if (clicks >= 13) { tier = 3; beamTime = 1500; } else if (clicks >= 7) { tier = 2; beamTime = 1800; } 
-                earnedScore = Math.round(clicks * 4.2 * ((tier===5)?35:(tier===4)?26:(tier===3)?17:(tier===2)?9:3)); 
-            }
+            if (clicks >= 65) { tier = 5; beamTime = 1000; } 
+            else if (clicks >= 50) { tier = 4; beamTime = 1200; } 
+            else if (clicks >= 35) { tier = 3; beamTime = 1500; } 
+            else if (clicks >= 18) { tier = 2; beamTime = 1800; }
 
-            if (normalizedCps > bestCps) bestCps = normalizedCps; if (earnedScore < 100) earnedScore = 100;
+            if (normalizedCps > bestCps) bestCps = normalizedCps; 
+            if (earnedScore < 50) earnedScore = 50;
+
             let beam = document.createElement('div'); beam.className = `beam beam-t${tier}`; playArea.appendChild(beam);
             let cpsEl = document.createElement('div'); cpsEl.className = 'floating-cps'; cpsEl.innerHTML = `${normalizedCps} LẦN / GIÂY`; playArea.appendChild(cpsEl); setTimeout(() => cpsEl.remove(), 1500);
 
-            if (tier === 3) { playArea.classList.add('screen-shake-light'); triggerVibration([100, 100]); } if (tier === 4) { document.body.classList.add('screen-shake-heavy'); triggerVibration([200, 100, 200]); } if (tier === 5) { document.body.classList.add('screen-shake-ultra'); triggerVibration([300, 150, 300, 150, 500]); }
+            if (tier === 3) { playArea.classList.add('screen-shake-light'); triggerVibration([100, 100]); } 
+            if (tier === 4) { document.body.classList.add('screen-shake-heavy'); triggerVibration([200, 100, 200]); } 
+            if (tier === 5) { document.body.classList.add('screen-shake-ultra'); triggerVibration([300, 150, 300, 150, 500]); }
+            
             playSound('katana', 0.5);
 
             setTimeout(() => {
@@ -550,8 +601,14 @@
                 let explosion = document.createElement('div'); explosion.className = `explosion exp-t${tier}`; playArea.appendChild(explosion);
                 if (tier >= 4) { let flash = document.createElement('div'); flash.className = 'flashbang'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 1000); }
 
-                aScore = Math.round((aScore + earnedScore) * 10) / 10; burstScore = Math.round((burstScore + earnedScore) * 10) / 10; 
-                document.getElementById('boo-points').innerText = Math.round(aScore); playSound('boom', 0.5);
+                aScore = Math.round((aScore + earnedScore) * 10) / 10; 
+                burstScore = Math.round((burstScore + earnedScore) * 10) / 10; 
+                
+                updateTierByScore();
+                checkBurstMilestones();
+
+                document.getElementById('boo-points').innerText = Math.round(aScore); 
+                playSound('boom', 0.5);
 
                 let floatScore = document.createElement('div'); floatScore.className = 'float-score'; floatScore.innerText = `+${earnedScore}`; floatScore.style.left = '50%'; floatScore.style.top = '10%'; playArea.appendChild(floatScore); setTimeout(() => floatScore.remove(), 1000);
 
@@ -567,6 +624,7 @@
             
             let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
             let currentHits = (cGame === '1') ? hitsCountG1 : hitsCountG3;
+            
             if (aScore < 1000 || currentHits < 10) {
                 aScore = 0;
                 avgMs = 1500; 
