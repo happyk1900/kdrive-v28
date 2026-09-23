@@ -160,7 +160,7 @@
         .float-score { position: absolute; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 32px; font-weight: 900; color: #ffb700; text-shadow: 0 0 20px #ff3333; z-index: 110; animation: floatUpScore 1s forwards; pointer-events: none; }
         @keyframes floatUpScore { 0% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50px) scale(1.5); } }
 
-        #speed-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.4); color: #ffb700; font-family: 'Share Tech Mono', monospace; font-size: 80px; font-weight: 900; z-index: 95; opacity: 0; pointer-events: none; transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0 30px #ff3333; text-align: center; text-transform: uppercase; width: 100%; }
+        #speed-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.4); color: #ffb700; font-family: 'Share Tech Mono', monospace; font-size: 60px; font-weight: 900; z-index: 95; opacity: 0; pointer-events: none; transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0 30px #ff3333; text-align: center; text-transform: uppercase; width: 100%; }
         #speed-popup.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
@@ -193,7 +193,7 @@
                 </div>
             </div>
 
-            <div id="speed-popup">X1</div>
+            <div id="speed-popup">KÉM</div>
             <div id="freeze-overlay"><div class="freeze-text">KẾT THÚC</div></div>
 
             <!-- MÀN TẠM DỪNG -->
@@ -296,6 +296,14 @@
             'Thần Đồng': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%205%20(1).png?raw=true'
         };
 
+        const TIER_NAMES = {
+            1: "Kém",
+            2: "Trung Bình",
+            3: "Giỏi",
+            4: "Xuất Sắc",
+            5: "Thần Đồng"
+        };
+
         function getRankNameByScore(score) {
             if (score >= 4000) return "Thần Đồng";
             if (score >= 3000) return "Xuất Sắc";
@@ -331,18 +339,19 @@
         let hitsCountG1 = 0, hitsCountG3 = 0; 
         let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, g3LoopId, stabilityHP = 10;
         let bestCps = 0; let reactionTimes = []; 
-        let nextBurstMilestone = 500; // BẠO PHÁT XUẤT HIỆN Ở 500, 1500, 2500...
+        let nextBurstMilestone = 500; // BẠO PHÁT TẠI 500, 1500, 2500...
+        let lastAnnouncedTier = 1;
 
-        // ÁNH XẠ CHUẨN 5 CẤP ĐỘ TỐC ĐỘ DỰA TRÊN 12 CẤP CŨ (CẤP 1, 3, 7, 9, 12)
+        // 5 CẤP ĐỘ ÁNH XẠ CHUẨN TỪ CODE CŨ (CẤP 1, 3, 7, 9, 12)
         const speedTiersMapping = {
-            1: { lifespan: 1100, delay: 700, g3Life: 2800, g3Delay: 2200, g3Speed: 0.4 }, // Cấp 1 (Kém - Cấp 1 cũ)
-            2: { lifespan: 850,  delay: 500, g3Life: 2000, g3Delay: 1500, g3Speed: 0.8 }, // Cấp 2 (Trung Bình - Cấp 3 cũ)
-            3: { lifespan: 580,  delay: 350, g3Life: 1200, g3Delay: 850,  g3Speed: 1.8 }, // Cấp 3 (Giỏi - Cấp 7 cũ)
-            4: { lifespan: 460,  delay: 280, g3Life: 850,  g3Delay: 600,  g3Speed: 2.7 }, // Cấp 4 (Xuất Sắc - Cấp 9 cũ)
-            5: { lifespan: 260,  delay: 150, g3Life: 450,  g3Delay: 300,  g3Speed: 5.5 }  // Cấp 5 (Thần Đồng - Cấp 12 cũ)
+            1: { lifespan: 1100, delay: 0,   g3Life: 2800, g3Delay: 0,    g3Speed: 0.4 }, // Cấp 1 (Kém - Cấp 1 cũ)
+            2: { lifespan: 850,  delay: 0,   g3Life: 2000, g3Delay: 0,    g3Speed: 0.8 }, // Cấp 2 (Trung Bình - Cấp 3 cũ)
+            3: { lifespan: 580,  delay: 0,   g3Life: 1200, g3Delay: 0,    g3Speed: 1.8 }, // Cấp 3 (Giỏi - Cấp 7 cũ)
+            4: { lifespan: 460,  delay: 0,   g3Life: 850,  g3Delay: 0,    g3Speed: 2.7 }, // Cấp 4 (Xuất Sắc - Cấp 9 cũ)
+            5: { lifespan: 260,  delay: 0,   g3Life: 450,  g3Delay: 0,    g3Speed: 5.5 }  // Cấp 5 (Thần Đồng - Cấp 12 cũ)
         };
 
-        // TĂNG TỐC ĐỘ THEO MỐC 1000, 2000, 3000, 4000 ĐIỂM DATA
+        // TĂNG TỐC TẠI CÁC MỐC 1000, 2000, 3000, 4000 ĐIỂM DATA
         function getCurrentSpeedTier() {
             if (aScore >= 4000) return 5;
             if (aScore >= 3000) return 4;
@@ -380,7 +389,7 @@
         function openArena(id) {
             cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; successfulHitsCount = 0; isPlaying = false; stabilityHP = 10;
             isPausedForStart = true; bestCps = 0; stage3Projectiles = []; reactionTimes = [];
-            nextBurstMilestone = 500;
+            nextBurstMilestone = 500; lastAnnouncedTier = 1;
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
@@ -429,7 +438,7 @@
             else if(cGame === '3') { hitsCountG3 = 0; runG3(); } 
         }
 
-        // TÍNH ĐIỂM CHUẨN 10 ĐIỂM MỖI LẦN ẤN THƯỜNG
+        // KIỂM TRA TĂNG TỐC VÀ BẠO PHÁT ĐỘC LẬP
         function addScoreAndCheckMultiplier(pointsToAdd = 10) {
             if(isPausedForStart) return;
             aScore += pointsToAdd; reflexScore += pointsToAdd; 
@@ -438,9 +447,21 @@
 
             document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 1);
 
-            // KIỂM TRA MỐC BẠO PHÁT (500, 1500, 2500, 3500...)
+            // KIỂM TRA THÔNG BÁO TĂNG TỐC KHI ĐẠT MỐC 1000, 2000, 3000, 4000
+            let currentTier = getCurrentSpeedTier();
+            if (currentTier > lastAnnouncedTier) {
+                lastAnnouncedTier = currentTier;
+                let tierName = TIER_NAMES[currentTier];
+                let popup = document.getElementById('speed-popup');
+                popup.innerText = tierName.toUpperCase();
+                popup.classList.add('show');
+                playSound('ready', 1.5);
+                setTimeout(() => popup.classList.remove('show'), 1200);
+            }
+
+            // KIỂM TRA MỐC BẠO PHÁT (500, 1500, 2500...)
             if (aScore >= nextBurstMilestone && !document.querySelector('.burst-container')) {
-                nextBurstMilestone += 1000; // Mốc tiếp theo cách 1000 điểm (500 -> 1500 -> 2500...)
+                nextBurstMilestone += 1000;
                 forceBurstMode();
             }
         }
@@ -450,6 +471,7 @@
 
         function getSafeSpawns(playArea) { let maxX = playArea.clientWidth - 60; let maxY = playArea.clientHeight - 60; let minY = 75; return { px: 10 + Math.random() * Math.max(0, maxX - 10), py: minY + Math.random() * Math.max(0, maxY - minY) }; }
 
+        // BÀI 1: XUẤT HIỆN NGAY LẬP TỨC KHÔNG ĐỘ TRỄ KHI ẤN
         function runG1() { spawnG1(); }
         function spawnG1() {
             if(!isPlaying || isPausedForStart) return; 
@@ -469,19 +491,14 @@
                 addScoreAndCheckMultiplier(10); el.remove(); 
                 
                 clearTimeout(spawnTimer);
-                let nextCfg = speedTiersMapping[getCurrentSpeedTier()];
-                spawnTimer = setTimeout(spawnG1, nextCfg.delay);
+                spawnG1(); // HIỆN NGAY LẬP TỨC HẠT TIẾP THEO KHÔNG CHỜ ĐỢI
             };
             playArea.appendChild(el); 
 
             setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, cfg.lifespan);
-            
-            clearTimeout(spawnTimer); 
-            if(isPlaying && !isPausedForStart) {
-                spawnTimer = setTimeout(spawnG1, cfg.delay);
-            }
         }
 
+        // BÀI 3: XUẤT HIỆN NGAY LẬP TỨC KHÔNG ĐỘ TRỄ KHI ẤN
         function runG3() { stage3Projectiles = []; spawnG3Parent(); if(!g3LoopId) g3LoopId = requestAnimationFrame(loopG3); }
         function spawnG3Parent() {
             if(!isPlaying || isPausedForStart) return; 
@@ -508,17 +525,11 @@
                 });
 
                 clearTimeout(spawnTimer);
-                let nextCfg = speedTiersMapping[getCurrentSpeedTier()];
-                spawnTimer = setTimeout(spawnG3Parent, nextCfg.g3Delay);
+                spawnG3Parent(); // HIỆN NGAY LẬP TỨC HẠT TIẾP THEO KHÔNG CHỜ ĐỢI
             };
             playArea.appendChild(el); 
 
             setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, cfg.g3Life);
-            
-            clearTimeout(spawnTimer); 
-            if(isPlaying && !isPausedForStart) {
-                spawnTimer = setTimeout(spawnG3Parent, cfg.g3Delay);
-            }
         }
 
         function loopG3() {
@@ -530,8 +541,8 @@
 
                 for(let i = stage3Projectiles.length - 1; i >= 0; i--) {
                     let p = stage3Projectiles[i]; let elapsed = now - p.stateTimer;
-                    if (p.state === 'waiting' && elapsed >= Math.max(1000, 2800 - (tier - 1) * 400)) { p.state = 'shaking'; p.stateTimer = now; p.el.classList.add('shaking'); playSound('error', 1.5); }
-                    else if (p.state === 'shaking' && elapsed >= 400) { p.state = 'flying'; p.el.classList.remove('shaking'); let angle = Math.atan2(centerY - p.y, centerX - p.x); p.vx = Math.cos(angle) * cfg.g3Speed; p.vy = Math.sin(angle) * cfg.g3Speed; }
+                    if (p.state === 'waiting' && elapsed >= Math.max(800, 2500 - (tier - 1) * 400)) { p.state = 'shaking'; p.stateTimer = now; p.el.classList.add('shaking'); playSound('error', 1.5); }
+                    else if (p.state === 'shaking' && elapsed >= 300) { p.state = 'flying'; p.el.classList.remove('shaking'); let angle = Math.atan2(centerY - p.y, centerX - p.x); p.vx = Math.cos(angle) * cfg.g3Speed; p.vy = Math.sin(angle) * cfg.g3Speed; }
                     else if (p.state === 'flying') {
                         p.x += p.vx; p.y += p.vy; p.el.style.left = p.x + 'px'; p.el.style.top = p.y + 'px';
                         if (Math.hypot(p.x - centerX, p.y - centerY) < 14) { p.el.remove(); stage3Projectiles.splice(i, 1); if (p.color === 'yellow') loseHalfLife(); else { aScore += 10; document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 0.5); } }
