@@ -124,6 +124,7 @@
         
         .stage1-energy-core { width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle, #ffffff 0%, #ffdf70 30%, #ff3333 70%, #cc0000 100%); box-shadow: 0 0 35px #ff3333, 0 0 70px #ffb700; cursor: pointer; pointer-events: auto; position: relative; z-index: 100005; outline: none; display: flex; align-items: center; justify-content: center; text-align: center; }
         
+        /* CHỮ HƯỚNG DẪN GỌN GÀNG, TĨNH LẶNG, KHÔNG PHÓNG TO THU NHỎ */
         .burst-instruction-text { font-family: 'Share Tech Mono', monospace; font-size: 9.5px; font-weight: bold; color: #0d0202; text-align: center; line-height: 1.25; text-transform: uppercase; pointer-events: none; width: 84px; }
 
         .burst-tap-shockwave { position: absolute; width: 92px; height: 92px; border-radius: 50%; border: 3px solid #ffb700; box-shadow: 0 0 25px #ff3333; pointer-events: none; transform: translate(-50%, -50%) scale(1); animation: tapShock 0.25s ease-out forwards; z-index: 100004; }
@@ -581,14 +582,10 @@
         function fireBeam(clicks, blackoutBg) {
             let playArea = document.getElementById('play-area');
             let normalizedCps = Math.round((clicks / 7) * 10) / 10;
-            let currentTier = getCurrentSpeedTier();
-            let burstMultiplier = currentTier === 5 ? 8 : currentTier === 4 ? 4 : currentTier === 3 ? 2 : 1;
-            let earnedScore = clicks * 3 * burstMultiplier; 
             let tier = clicks > 50 ? 5 : clicks > 35 ? 4 : clicks > 20 ? 3 : clicks > 10 ? 2 : 1;
             let beamTime = 2000;
 
             if (normalizedCps > bestCps) bestCps = normalizedCps; 
-            if (earnedScore < 30) earnedScore = 30;
 
             let beam = document.createElement('div'); beam.className = `beam beam-t${tier}`; playArea.appendChild(beam);
             let cpsEl = document.createElement('div'); cpsEl.className = 'floating-cps'; cpsEl.innerHTML = `${normalizedCps} LẦN / GIÂY`; playArea.appendChild(cpsEl); setTimeout(() => cpsEl.remove(), 1500);
@@ -599,21 +596,23 @@
                 beam.remove();
                 let explosion = document.createElement('div'); explosion.className = `explosion exp-t${tier}`; playArea.appendChild(explosion);
 
-                aScore += earnedScore; burstScore += earnedScore; 
-                document.getElementById('boo-points').innerText = Math.round(aScore); playSound('boom', 0.5);
+                // BẠO PHÁT TUYỆT ĐỐI KHÔNG CỘNG ĐIỂM DATA TỔNG, CHỈ GHI NHẬN CPS ĐỂ XẾP HẠNG VÀ THƯỞNG NĂNG LƯỢNG
+                let currentBurstScore = clicks * 3;
+                burstScore += currentBurstScore;
+                playSound('boom', 0.5);
 
+                // NẾU ĐẠT TỪ 11 LẦN/GIÂY TRỞ LÊN THÌ THƯỞNG NGAY +1 NĂNG LƯỢNG (HỒI MẠNG) VỚI DÒNG CHỮ GỌN GÀNG
                 if (normalizedCps >= 11) {
                     stabilityHP = Math.min(10, stabilityHP + 2);
                     updateHpDisplay();
                     let hpMsg = document.createElement('div');
                     hpMsg.className = 'floating-cps';
+                    hpMsg.style.fontSize = '18px';
                     hpMsg.style.color = '#00ffcc';
-                    hpMsg.innerHTML = `+1 NĂNG LƯỢNG HỒI PHỤC!`;
+                    hpMsg.innerHTML = `+1 năng lượng`;
                     playArea.appendChild(hpMsg);
-                    setTimeout(() => hpMsg.remove(), 1800);
+                    setTimeout(() => hpMsg.remove(), 1500);
                 }
-
-                let floatScore = document.createElement('div'); floatScore.className = 'float-score'; floatScore.innerText = `+${earnedScore}`; floatScore.style.left = '50%'; floatScore.style.top = '10%'; playArea.appendChild(floatScore); setTimeout(() => floatScore.remove(), 1000);
 
                 setTimeout(() => {
                     blackoutBg.classList.remove('active'); setTimeout(() => blackoutBg.remove(), 300);
