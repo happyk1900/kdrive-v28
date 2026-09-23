@@ -80,16 +80,14 @@
         .prestige-total-label { color: #fff; font-size: 12px; font-weight: 900; letter-spacing: 1px; flex: 1; text-align: left; }
         .prestige-total-num { font-size: 26px; color: #ffb700; font-weight: 900; line-height: 1; text-align: right; min-width: 80px; }
 
-        .bio-metrics-box { width: 92%; max-width: 310px; background: rgba(30, 8, 8, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+        .bio-metrics-box { width: 92%; max-width: 310px; background: rgba(30, 8, 8, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
         .metric-card-row { display: flex; flex-direction: column; gap: 4px; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 8px; margin-bottom: 4px; width: 100%; }
         .metric-top-line { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; width: 100%; }
         .metric-top-line span:first-child { color: #ffffff; text-align: left; flex: 1; font-weight: bold; }
         .metric-top-line span:last-child { color: #ffb700; text-align: right; min-width: 100px; font-weight: bold; }
         .metric-bot-line { display: flex; justify-content: flex-start; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; color: #ffb700; width: 100%; }
 
-        .final-eval-row { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 4px; }
-        .final-eval-label { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #ffffff; font-weight: 900; letter-spacing: 1px; }
-        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 11.5px; color: #ffdf70; font-style: italic; text-align: left; margin-top: 8px; line-height: 1.4; border-top: 1px dashed rgba(255,51,51,0.3); padding-top: 8px; font-weight: 500; }
+        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 11.5px; color: #ffdf70; font-style: italic; text-align: left; margin-top: 4px; line-height: 1.4; border-top: 1px dashed rgba(255,51,51,0.3); padding-top: 6px; font-weight: 500; }
 
         .rank-icon-img { width: 22px; height: 22px; vertical-align: middle; margin-right: 6px; filter: drop-shadow(0 0 3px rgba(255,255,255,0.3)); }
 
@@ -204,7 +202,7 @@
                 </div>
             </div>
 
-            <!-- BẢNG ĐIỂM TỪNG BÀI -->
+            <!-- BẢNG ĐIỂM TỪNG BÀI (ĐÃ BỎ ĐÁNH GIÁ CHUNG) -->
             <div id="result-overlay">
                 <div class="stage-badge-header" id="stage-badge-title">KẾT QUẢ BÀI 1</div>
                 <div class="prestige-panel">
@@ -242,11 +240,6 @@
                             <span id="bio-rank-badge-2">KÉM</span>
                         </div>
                     </div>
-                    
-                    <div class="final-eval-row">
-                        <span class="final-eval-label">ĐÁNH GIÁ CHUNG:</span>
-                        <span style="font-family:'Share Tech Mono', monospace; font-size:12px; color:#fff; font-weight:bold;" id="bio-rank-badge-final"></span>
-                    </div>
                     <div class="master-feedback" id="master-feedback-text"></div>
                 </div>
 
@@ -270,10 +263,6 @@
                 <div class="stat-box">
                     <div class="stat-line"><span>Tốc độ trung bình:</span> <span class="stat-val" id="final-ms">0 ms</span></div>
                     <div class="stat-line"><span>Max Bạo phát:</span> <span class="stat-val" id="final-cps">0 lần / giây</span></div>
-                    <div class="stat-line" style="margin-top:4px; padding-top:4px; border-top:1px dashed rgba(255,255,255,0.2);">
-                        <span>ĐÁNH GIÁ CHUNG:</span> <span class="stat-val" id="final-rank">KÉM</span>
-                    </div>
-                    <div class="master-feedback" id="final-master-feedback" style="margin-top: 4px;"></div>
                 </div>
 
                 <button class="final-btn-exit" onclick="closeArena()">VỀ SẢNH CHÍNH</button>
@@ -302,15 +291,6 @@
             4: 40, 
             5: 80  
         };
-
-        function getRankNameByScore(score) {
-            if (score >= 5000) return "Thần Đồng";
-            if (score >= 4000) return "Xuất Sắc";
-            if (score >= 3000) return "Giỏi";
-            if (score >= 2000) return "Trung Bình";
-            if (score >= 1000) return "Kém";
-            return "Kém";
-        }
 
         function getReflexRankByMs(ms) {
             if (ms <= 0 || ms > 1500) return "Kém";
@@ -506,11 +486,7 @@
             setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, cfg.lifespan);
         }
 
-        // BÀI 2: XUẤT HIỆN TUẦN TỰ NGẪU NHIÊN, TỐI ĐA 3-4 HẠT TRÊN SÂN, KHÔNG BỊ TRÀN MÀN HÌNH
-        function runG2() { 
-            spawnG2(); 
-        }
-
+        function runG2() { spawnG2(); }
         function spawnG2() {
             if(!isPlaying || isPausedForStart) return; 
             let playArea = document.getElementById('play-area');
@@ -518,11 +494,9 @@
             let cfg = speedTiersMapping[tier];
             let currentOrbs = playArea.querySelectorAll('.orb').length;
 
-            // TUYỆT ĐỐI KHÔNG QUÁ 3-4 HẠT CÙNG LÚC TRÊN MÀN HÌNH
             if (currentOrbs < cfg.maxOrbs) {
                 let { px, py } = getSafeSpawns(playArea);
                 let rand = Math.random(); 
-                // 50% cơ hội ra hạt mục tiêu (fire), 50% ra hạt bẫy ngẫu nhiên
                 let orbType = (rand < 0.5) ? 'fire' : (rand < 0.65 ? 'ice' : (rand < 0.8 ? 'purple' : 'green'));
                 let isTarget = (orbType === 'fire'); 
                 let spawnTimestamp = Date.now();
@@ -544,7 +518,6 @@
                         loseFullLife(); 
                     } 
                     el.remove(); 
-                    // BẤM XONG LÀ CÓ HẠT MỚI GỌN GÀNG HIỆN LÊN
                     spawnG2();
                 };
                 playArea.appendChild(el); 
@@ -664,15 +637,13 @@
 
                 let reflexRankName = getReflexRankByMs(avgMs);
                 let burstRankName = getBurstRankByCps(bestCps);
-                let totalRankName = getRankNameByScore(aScore);
 
                 document.getElementById('bio-rank-badge-1').innerHTML = getRankHTML(reflexRankName);
                 document.getElementById('bio-rank-badge-2').innerHTML = getRankHTML(burstRankName);
-                document.getElementById('bio-rank-badge-final').innerHTML = getRankHTML(totalRankName);
 
                 let feedbackStr = "";
                 if (aScore === 0) { 
-                    feedbackStr = "« Bác bỏ kết quả: Điểm tích lũy chưa đạt ngưỡng tối thiểu (1000 Data). Phạt rớt hạng Kém! »"; 
+                    feedbackStr = "« Bác bỏ kết quả: Điểm tích lũy chưa đạt ngưỡng tối thiểu (1000 Data). »"; 
                 } else if (aScore >= 5000) { 
                     feedbackStr = "« Tuyệt hảo! Đạt cảnh giới Thần Đồng tối thượng. »"; 
                 } else { 
@@ -691,24 +662,19 @@
         }
 
         function retryCurrentStage() { playSound('katana'); document.getElementById('result-overlay').classList.remove('active'); openArena(cGame); }
-        function proceedNextStage() { playSound('coin'); document.getElementById('result-overlay').classList.remove('active'); setTimeout(() => { openArena('2'); }, 300); }
+        function proceedNextStage() { playSound('coin'); document.getElementById('result-overlay'].classList.remove('active'); setTimeout(() => { openArena('2'); }, 300); }
 
         function showFinalSummary() {
             playSound('coin'); document.getElementById('result-overlay').classList.remove('active');
             let totalSessionScore = sessionScoreG1 + sessionScoreG2;
             let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
             
-            let finalRankName = getRankNameByScore(totalSessionScore);
-            let finalFeedback = totalSessionScore >= 5000 ? "« Hoàn thành toàn trình Hỏa Luân với cảnh giới Thần Đồng đỉnh cao! »" : "« Hoàn thành toàn trình Hỏa Luân! Ý chí tôi luyện qua lửa đỏ. »";
-
             document.getElementById('sum-score-1').innerText = sessionScoreG1;
             document.getElementById('sum-score-2').innerText = sessionScoreG2;
             document.getElementById('sum-score-total').innerText = totalSessionScore;
             
             document.getElementById('final-ms').innerText = avgMs > 0 ? avgMs + ' ms' : 'Không đạt';
             document.getElementById('final-cps').innerText = (bestCps > 0 ? bestCps : 0) + ' lần / giây';
-            document.getElementById('final-rank').innerHTML = getRankHTML(finalRankName);
-            document.getElementById('final-master-feedback').innerText = finalFeedback;
 
             document.getElementById('final-summary-overlay').classList.add('active');
         }
