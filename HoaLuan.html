@@ -42,11 +42,13 @@
 
         #ingame-hud { position: absolute; top: 0; left: 0; width: 100%; height: 60px; background: rgba(20, 4, 4, 0.95); border-bottom: 1px solid rgba(255, 51, 51, 0.3); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 10000; pointer-events: auto; backdrop-filter: blur(5px); transition: opacity 0.3s; }
         #ingame-hud.hidden { opacity: 0; pointer-events: none !important; }
-        .hud-left { flex: 1; display: flex; justify-content: flex-start; }
+        .hud-left { flex: 1; display: flex; justify-content: flex-start; align-items: center; gap: 8px; }
         .hud-center { flex: 1; display: flex; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #fff; font-weight: bold; white-space: nowrap; }
         .hud-right { flex: 1; display: flex; justify-content: flex-end; gap: 10px; }
         .hud-btn { width: 32px; height: 32px; border-radius: 4px; background: rgba(255, 51, 51, 0.1); border: 1px solid rgba(255, 51, 51, 0.5); color: #ff3333; display: flex; justify-content: center; align-items: center; font-size: 14px; cursor: pointer; transition: 0.2s; }
         .hud-btn.exit-btn { background: rgba(255, 183, 0, 0.1); border-color: #ffb700; color: #ffb700; }
+        
+        .tier-badge { font-family: 'Share Tech Mono', monospace; font-size: 11px; background: rgba(255, 183, 0, 0.15); border: 1px solid #ffb700; color: #ffb700; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
 
         #terminal-bar { position: fixed; bottom: 0; left: 0; width: 100vw; background: rgba(20, 4, 4, 0.95); border-top: 1px solid rgba(255, 51, 51, 0.5); padding: 8px 0; z-index: 99999; overflow: hidden; display: flex; align-items: center; pointer-events: none; }
         #terminal-bar.hidden { display: none !important; }
@@ -159,9 +161,6 @@
 
         .float-score { position: absolute; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 32px; font-weight: 900; color: #ffb700; text-shadow: 0 0 20px #ff3333; z-index: 110; animation: floatUpScore 1s forwards; pointer-events: none; }
         @keyframes floatUpScore { 0% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50px) scale(1.5); } }
-
-        #speed-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.4); color: #ffb700; font-family: 'Share Tech Mono', monospace; font-size: 60px; font-weight: 900; z-index: 95; opacity: 0; pointer-events: none; transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0 30px #ff3333; text-align: center; text-transform: uppercase; width: 100%; }
-        #speed-popup.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
 <body>
@@ -173,9 +172,12 @@
         <div class="play-area" id="play-area">
             
             <div id="ingame-hud" class="hidden">
-                <div class="hud-left"><span id="boo-lives" style="font-size: 16px; letter-spacing: 2px;"></span></div>
+                <div class="hud-left">
+                    <span id="boo-lives" style="font-size: 16px; letter-spacing: 2px;"></span>
+                </div>
                 <div class="hud-center">DATA: <b id="boo-points" style="color:#ffb700; margin-left: 5px; font-size: 18px;">0</b></div>
                 <div class="hud-right">
+                    <div class="tier-badge" id="hud-tier-badge">X1</div>
                     <div class="hud-btn" onclick="pauseGame()">⏸</div>
                     <div class="hud-btn exit-btn" onclick="confirmExitToLobby()">✕</div>
                 </div>
@@ -193,7 +195,6 @@
                 </div>
             </div>
 
-            <div id="speed-popup">KÉM</div>
             <div id="freeze-overlay"><div class="freeze-text">KẾT THÚC</div></div>
 
             <!-- MÀN TẠM DỪNG -->
@@ -296,21 +297,13 @@
             'Thần Đồng': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%205%20(1).png?raw=true'
         };
 
-        const TIER_NAMES = {
-            1: "Kém",
-            2: "Trung Bình",
-            3: "Giỏi",
-            4: "Xuất Sắc",
-            5: "Thần Đồng"
-        };
-
-        // ĐIỂM THƯỞNG MỖI LẦN ẤN THƯỜNG THEO CẤP ĐỘ
+        // ĐIỂM THƯỞNG ẤN THƯỜNG: 10, 10, 20, 40, 80
         const TIER_POINTS = {
-            1: 10, // Kém: +10đ
-            2: 10, // Trung Bình: +10đ
-            3: 20, // Giỏi: +20đ
-            4: 40, // Xuất Sắc: +40đ
-            5: 80  // Thần Đồng: +80đ
+            1: 10,
+            2: 10,
+            3: 20,
+            4: 40,
+            5: 80
         };
 
         function getRankNameByScore(score) {
@@ -353,14 +346,13 @@
 
         // 5 CẤP ĐỘ ÁNH XẠ CHUẨN TỪ CODE CŨ (CẤP 1, 3, 7, 9, 12)
         const speedTiersMapping = {
-            1: { lifespan: 1100, g3Life: 2800, g3Speed: 0.4 }, // Cấp 1 (Kém - Cấp 1 cũ)
-            2: { lifespan: 850,  g3Life: 2000, g3Speed: 0.8 }, // Cấp 2 (Trung Bình - Cấp 3 cũ)
-            3: { lifespan: 580,  g3Life: 1200, g3Speed: 1.8 }, // Cấp 3 (Giỏi - Cấp 7 cũ)
-            4: { lifespan: 460,  g3Life: 850,  g3Speed: 2.7 }, // Cấp 4 (Xuất Sắc - Cấp 9 cũ)
-            5: { lifespan: 260,  g3Life: 450,  g3Speed: 5.5 }  // Cấp 5 (Thần Đồng - Cấp 12 cũ)
+            1: { lifespan: 1100, g3Life: 2800, g3Speed: 0.4 }, 
+            2: { lifespan: 850,  g3Life: 2000, g3Speed: 0.8 }, 
+            3: { lifespan: 580,  g3Life: 1200, g3Speed: 1.8 }, 
+            4: { lifespan: 460,  g3Life: 850,  g3Speed: 2.7 }, 
+            5: { lifespan: 260,  g3Life: 450,  g3Speed: 5.5 }  
         };
 
-        // TĂNG TỐC TẠI CÁC MỐC 1000, 2000, 3000, 4000 ĐIỂM DATA
         function getCurrentSpeedTier() {
             if (aScore >= 4000) return 5;
             if (aScore >= 3000) return 4;
@@ -405,6 +397,7 @@
             playArea.querySelectorAll('.orb, .child-projectile, .core-reactor, .blackout-bg, .beam, .explosion, .floating-ms, .floating-cps').forEach(o => o.remove());
 
             updateHpDisplay(); document.getElementById('boo-points').innerText = "0";
+            document.getElementById('hud-tier-badge').innerText = "X1";
             document.getElementById('result-overlay').classList.remove('active');
             document.getElementById('pause-menu-overlay').classList.remove('active');
             document.getElementById('final-summary-overlay').classList.remove('active');
@@ -447,7 +440,6 @@
             else if(cGame === '3') { hitsCountG3 = 0; runG3(); } 
         }
 
-        // TÍNH ĐIỂM THƯỞNG THEO CẤP ĐỘ (10, 10, 20, 40, 80 ĐIỂM)
         function addScoreAndCheckMultiplier() {
             if(isPausedForStart) return;
             let currentTier = getCurrentSpeedTier();
@@ -459,15 +451,11 @@
 
             document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 1);
 
-            // HIỆN POPUP THÔNG BÁO KHI LÊN CẤP TỐC ĐỘ MỚI (1000, 2000, 3000, 4000)
+            // CẬP NHẬT HỆ SỐ X TRÊN HUD KHI THĂNG CẤP
             if (currentTier > lastAnnouncedTier) {
                 lastAnnouncedTier = currentTier;
-                let tierName = TIER_NAMES[currentTier];
-                let popup = document.getElementById('speed-popup');
-                popup.innerText = tierName.toUpperCase();
-                popup.classList.add('show');
+                document.getElementById('hud-tier-badge').innerText = `X${currentTier}`;
                 playSound('ready', 1.5);
-                setTimeout(() => popup.classList.remove('show'), 1200);
             }
 
             // KIỂM TRA MỐC BẠO PHÁT (500, 1500, 2500...)
@@ -482,7 +470,6 @@
 
         function getSafeSpawns(playArea) { let maxX = playArea.clientWidth - 60; let maxY = playArea.clientHeight - 60; let minY = 75; return { px: 10 + Math.random() * Math.max(0, maxX - 10), py: minY + Math.random() * Math.max(0, maxY - minY) }; }
 
-        // BÀI 1: XUẤT HIỆN NGAY LẬP TỨC KHÔNG ĐỘ TRỄ KHI ẤN
         function runG1() { spawnG1(); }
         function spawnG1() {
             if(!isPlaying || isPausedForStart) return; 
@@ -502,14 +489,13 @@
                 addScoreAndCheckMultiplier(); el.remove(); 
                 
                 clearTimeout(spawnTimer);
-                spawnG1(); // HIỆN NGAY LẬP TỨC KHÔNG CHỜ ĐỢI
+                spawnG1(); 
             };
             playArea.appendChild(el); 
 
             setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, cfg.lifespan);
         }
 
-        // BÀI 3: XUẤT HIỆN NGAY LẬP TỨC KHÔNG ĐỘ TRỄ KHI ẤN
         function runG3() { stage3Projectiles = []; spawnG3Parent(); if(!g3LoopId) g3LoopId = requestAnimationFrame(loopG3); }
         function spawnG3Parent() {
             if(!isPlaying || isPausedForStart) return; 
@@ -536,7 +522,7 @@
                 });
 
                 clearTimeout(spawnTimer);
-                spawnG3Parent(); // HIỆN NGAY LẬP TỨC KHÔNG CHỜ ĐỢI
+                spawnG3Parent(); 
             };
             playArea.appendChild(el); 
 
@@ -599,13 +585,13 @@
             }, duration);
         }
 
-        // BẠO PHÁT TÍNH THEO HỆ SỐ CẤP ĐỘ (NHÂN VỚI ĐIỂM THƯỞNG CẤP ĐỘ TƯƠNG TỨNG)
+        // BẠO PHÁT NHÂN HỆ SỐ THEO CẤP ĐỘ (X1, X1, X2, X4, X8)
         function fireBeam(clicks, blackoutBg) {
             let playArea = document.getElementById('play-area');
             let normalizedCps = Math.round((clicks / 7) * 10) / 10;
             let currentTier = getCurrentSpeedTier();
-            let multiplier = currentTier === 5 ? 8 : currentTier === 4 ? 4 : currentTier === 3 ? 2 : 1;
-            let earnedScore = clicks * 3 * multiplier; 
+            let burstMultiplier = currentTier === 5 ? 8 : currentTier === 4 ? 4 : currentTier === 3 ? 2 : 1;
+            let earnedScore = clicks * 3 * burstMultiplier; 
             let tier = clicks > 50 ? 5 : clicks > 35 ? 4 : clicks > 20 ? 3 : clicks > 10 ? 2 : 1;
             let beamTime = 2000;
 
