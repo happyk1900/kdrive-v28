@@ -129,7 +129,6 @@
         .burst-tap-shockwave { position: absolute; width: 88px; height: 88px; border-radius: 50%; border: 3px solid #ffb700; box-shadow: 0 0 25px #ff3333; pointer-events: none; transform: translate(-50%, -50%) scale(1); animation: tapShock 0.25s ease-out forwards; z-index: 100004; }
         @keyframes tapShock { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; } }
 
-        /* BẠO PHÁT BÀI 2 XẾP CHÉO / GÓC ĐỐI XỨNG (TRÊN-TRÁI & DƯỚI-PHẢI) */
         .burst-btn-diagonal { position: absolute; width: 75px; height: 75px; border-radius: 50%; background: radial-gradient(circle, #ffffff 0%, #ffdf70 35%, #ff3333 75%, #cc0000 100%); box-shadow: 0 0 30px #ff3333, 0 0 50px #ffb700, inset 0 0 20px #ffffff; z-index: 100002; cursor: pointer; pointer-events: auto; animation: coreBreath 0.35s infinite alternate ease-in-out; outline: none; display: flex; align-items: center; justify-content: center; }
         #diag-btn-1 { left: 20%; top: 30%; transform: translate(-50%, -50%); }
         #diag-btn-2 { right: 20%; bottom: 30%; transform: translate(50%, 50%); }
@@ -297,11 +296,11 @@
         };
 
         const TIER_POINTS = {
-            1: 10, // Kém (<1000đ): +10đ
-            2: 10, // Trung Bình (1000 - 1999đ): +10đ
-            3: 20, // Giỏi (2000 - 2999đ): +20đ
-            4: 40, // Xuất Sắc (3000 - 3999đ): +40đ
-            5: 80  // Thần Đồng (>= 4000đ): +80đ
+            1: 10, 
+            2: 10, 
+            3: 20, 
+            4: 40, 
+            5: 80  
         };
 
         function getRankNameByScore(score) {
@@ -344,11 +343,11 @@
         let lastAnnouncedTier = 1;
 
         const speedTiersMapping = {
-            1: { lifespan: 1200, delay: 500 }, 
-            2: { lifespan: 950,  delay: 380 }, 
-            3: { lifespan: 700,  delay: 260 }, 
-            4: { lifespan: 520,  delay: 180 }, 
-            5: { lifespan: 320,  delay: 120 }  
+            1: { lifespan: 1300, delay: 650, maxOrbs: 3 }, 
+            2: { lifespan: 1000, delay: 500, maxOrbs: 3 }, 
+            3: { lifespan: 750,  delay: 380, maxOrbs: 4 }, 
+            4: { lifespan: 550,  delay: 280, maxOrbs: 4 }, 
+            5: { lifespan: 350,  delay: 180, maxOrbs: 4 }  
         };
 
         function getCurrentSpeedTier() {
@@ -404,7 +403,7 @@
             if (id === '1') {
                 bTitle = "BÀI 1"; bTarget = "ĐO LƯỜNG PHẢN XẠ<br><br>Chạm để triệt tiêu mọi tụ điểm năng lượng xuất hiện.<br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Không bỏ lỡ hạt nào!";
             } else if (id === '2') {
-                bTitle = "BÀI 2"; bTarget = "BÃI MÌN ĐỘNG<br><br>Nhận diện Hạt Đỏ/Cam (Vàng Lửa) giữa ma trận bẫy.<br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Bão hạt xuất hiện liên tục. Bấm diệt Hạt Đỏ/Cam ngay khi lóe lên. Né hạt màu khác!";
+                bTitle = "BÀI 2"; bTarget = "BÃI MÌN ĐỘNG<br><br>Nhận diện Hạt Vàng/Đỏ giữa ma trận bẫy.<br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Xuất hiện ngẫu nhiên tuần tự, tối đa 3-4 hạt trên sân. Bấm diệt Hạt Vàng/Đỏ. Né hạt khác!";
             }
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
@@ -426,7 +425,7 @@
         }
 
         function pauseGame() { if(!isPlaying || isPausedForStart) return; playSound('error'); isPausedForStart = true; clearTimeout(spawnTimer); if(burstTimer) clearTimeout(burstTimer); document.getElementById('pause-menu-overlay').classList.add('active'); }
-        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; if(cGame === '1') spawnG1(); else if(cGame === '2') spawnWaveG2(); }
+        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; if(cGame === '1') spawnG1(); else if(cGame === '2') spawnG2(); }
         
         function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
         function closeArena() { window.location.href = 'LucChien.html'; }
@@ -474,14 +473,13 @@
                 clearTimeout(spawnTimer);
                 if(isPlaying && !isPausedForStart) {
                     if(cGame === '1') spawnG1();
-                    else if(cGame === '2') spawnSingleG2(true);
+                    else if(cGame === '2') spawnG2();
                 }
             }
         }
 
         function getSafeSpawns(playArea) { let maxX = playArea.clientWidth - 60; let maxY = playArea.clientHeight - 60; let minY = 75; return { px: 10 + Math.random() * Math.max(0, maxX - 10), py: minY + Math.random() * Math.max(0, maxY - minY) }; }
 
-        // BÀI 1: PHẢN XẠ ĐƠN LẺ POP LIÊN TỤC
         function runG1() { spawnG1(); }
         function spawnG1() {
             if(!isPlaying || isPausedForStart) return; 
@@ -499,6 +497,7 @@
                 let fel = document.createElement('div'); fel.className = `floating-ms ${msClass}`; fel.innerHTML = `${exactReaction}ms`; fel.style.left = px+28+'px'; fel.style.top = py+28+'px'; playArea.appendChild(fel); setTimeout(() => fel.remove(), 800);
                 
                 addScoreAndCheckMultiplier(); el.remove(); 
+                
                 clearTimeout(spawnTimer);
                 spawnG1(); 
             };
@@ -507,108 +506,58 @@
             setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, cfg.lifespan);
         }
 
-        // BÀI 2: BÃI MÌN BÃO HẠT - XUẤT HIỆN ĐỒNG THỜI 3-4 HẠT MỤC TIÊU VÀ NỔ LIÊN THANH
+        // BÀI 2: XUẤT HIỆN TUẦN TỰ NGẪU NHIÊN, TỐI ĐA 3-4 HẠT TRÊN SÂN, KHÔNG BỊ TRÀN MÀN HÌNH
         function runG2() { 
-            // Khởi động đợt bão đầu tiên: rải ngay 3-4 hạt vàng/đỏ mục tiêu + hạt bẫy
-            spawnWaveG2(); 
+            spawnG2(); 
         }
 
-        function spawnWaveG2() {
-            if(!isPlaying || isPausedForStart) return;
+        function spawnG2() {
+            if(!isPlaying || isPausedForStart) return; 
             let playArea = document.getElementById('play-area');
-            let currentTargets = playArea.querySelectorAll('.orb-fire').length;
+            let tier = getCurrentSpeedTier();
+            let cfg = speedTiersMapping[tier];
+            let currentOrbs = playArea.querySelectorAll('.orb').length;
 
-            // Đảm bảo luôn duy trì từ 3 đến 4 hạt mục tiêu (Đỏ/Cam) trên màn hình
-            let needTargets = Math.max(0, 4 - currentTargets);
-            for(let i = 0; i < needTargets; i++) {
-                setTimeout(() => spawnSingleG2(true), i * 60);
-            }
+            // TUYỆT ĐỐI KHÔNG QUÁ 3-4 HẠT CÙNG LÚC TRÊN MÀN HÌNH
+            if (currentOrbs < cfg.maxOrbs) {
+                let { px, py } = getSafeSpawns(playArea);
+                let rand = Math.random(); 
+                // 50% cơ hội ra hạt mục tiêu (fire), 50% ra hạt bẫy ngẫu nhiên
+                let orbType = (rand < 0.5) ? 'fire' : (rand < 0.65 ? 'ice' : (rand < 0.8 ? 'purple' : 'green'));
+                let isTarget = (orbType === 'fire'); 
+                let spawnTimestamp = Date.now();
+                
+                let el = document.createElement('div'); 
+                el.className = 'orb orb-' + orbType; 
+                el.style.left = px + 'px'; 
+                el.style.top = py + 'px';
+                let handled = false; 
+                
+                el.onmousedown = el.ontouchstart = (e) => { 
+                    e.preventDefault(); e.stopPropagation(); if(!isPlaying || isPausedForStart || handled) return; handled = true; 
+                    if(isTarget) { 
+                        let exactReaction = Date.now() - spawnTimestamp; reactionTimes.push(exactReaction); 
+                        let msClass = exactReaction < 300 ? 'ms-fast' : 'ms-slow';
+                        let fel = document.createElement('div'); fel.className = `floating-ms ${msClass}`; fel.innerHTML = `${exactReaction}ms`; fel.style.left = px+28+'px'; fel.style.top = py+28+'px'; playArea.appendChild(fel); setTimeout(() => fel.remove(), 800); 
+                        addScoreAndCheckMultiplier(); 
+                    } else { 
+                        loseFullLife(); 
+                    } 
+                    el.remove(); 
+                    // BẤM XONG LÀ CÓ HẠT MỚI GỌN GÀNG HIỆN LÊN
+                    spawnG2();
+                };
+                playArea.appendChild(el); 
 
-            // Kèm thêm 1-2 hạt bẫy nhiễu xung quanh
-            if (playArea.querySelectorAll('.orb').length < 16) {
-                spawnSingleG2(false);
-                if (Math.random() < 0.6) spawnSingleG2(false);
+                let lifespan = isTarget ? cfg.lifespan : cfg.lifespan + 400;
+
+                setTimeout(() => { if(el.parentElement && !handled) { el.remove(); if(isTarget && isPlaying && !isPausedForStart) loseFullLife(); } }, lifespan);
             }
 
             clearTimeout(spawnTimer);
-            let tier = getCurrentSpeedTier();
-            let cfg = speedTiersMapping[tier];
-            spawnTimer = setTimeout(spawnWaveG2, cfg.delay);
-        }
-
-        function spawnSingleG2(forceTarget = false) {
-            if(!isPlaying || isPausedForStart) return;
-            let playArea = document.getElementById('play-area');
-            if (playArea.querySelectorAll('.orb').length >= 18) return;
-
-            let { px, py } = getSafeSpawns(playArea);
-            let isTarget = forceTarget;
-            let orbType = 'fire';
-
-            if (!forceTarget) {
-                let rand = Math.random();
-                if (rand < 0.4) {
-                    isTarget = true;
-                    orbType = 'fire';
-                } else if (rand < 0.6) {
-                    orbType = 'ice';
-                } else if (rand < 0.75) {
-                    orbType = 'purple';
-                } else if (rand < 0.9) {
-                    orbType = 'green';
-                } else {
-                    orbType = 'blue';
-                }
+            if(isPlaying && !isPausedForStart) {
+                spawnTimer = setTimeout(spawnG2, cfg.delay);
             }
-
-            let spawnTimestamp = Date.now();
-            let el = document.createElement('div'); 
-            el.className = 'orb orb-' + orbType; 
-            el.style.left = px + 'px'; 
-            el.style.top = py + 'px';
-            let handled = false; 
-
-            el.onmousedown = el.ontouchstart = (e) => { 
-                e.preventDefault(); e.stopPropagation(); 
-                if(!isPlaying || isPausedForStart || handled) return; 
-                handled = true; 
-
-                if(isTarget) { 
-                    let exactReaction = Date.now() - spawnTimestamp; 
-                    reactionTimes.push(exactReaction); 
-
-                    let msClass = exactReaction < 300 ? 'ms-fast' : 'ms-slow';
-                    let fel = document.createElement('div'); 
-                    fel.className = `floating-ms ${msClass}`; 
-                    fel.innerHTML = `${exactReaction}ms`; 
-                    fel.style.left = px+28+'px'; 
-                    fel.style.top = py+28+'px'; 
-                    playArea.appendChild(fel); 
-                    setTimeout(() => fel.remove(), 800); 
-
-                    addScoreAndCheckMultiplier(); 
-                    el.remove();
-                    // BÙ NGAY HẠT MỤC TIÊU MỚI TỨC THÌ ĐỂ POP TIẾP KHÔNG NGỪNG TAY
-                    spawnSingleG2(true);
-                } else { 
-                    el.remove();
-                    loseFullLife(); 
-                } 
-            };
-            playArea.appendChild(el); 
-
-            let tier = getCurrentSpeedTier();
-            let cfg = speedTiersMapping[tier];
-            let lifespan = isTarget ? cfg.lifespan : cfg.lifespan + 350;
-
-            setTimeout(() => { 
-                if(el.parentElement && !handled) { 
-                    el.remove(); 
-                    if(isTarget && isPlaying && !isPausedForStart) {
-                        loseFullLife(); 
-                    }
-                } 
-            }, lifespan);
         }
 
         function forceBurstMode() {
@@ -674,7 +623,7 @@
                         isPausedForStart = false; 
                         if (isPlaying) { 
                             if(cGame === '1') spawnG1(); 
-                            else if(cGame === '2') spawnWaveG2(); 
+                            else if(cGame === '2') spawnG2(); 
                         } 
                     }, 1500);
                 }, 1000);
