@@ -297,21 +297,23 @@
             'Thần Đồng': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%205%20(1).png?raw=true'
         };
 
-        // ĐIỂM THƯỞNG MỖI LẦN ẤN THƯỜNG: 10, 10, 20, 40, 80 ĐIỂM
+        // ĐIỂM THƯỞNG ẤN THƯỜNG THEO ĐÚNG CẤP ĐỘ
         const TIER_POINTS = {
-            1: 10, // Kém
-            2: 10, // Trung Bình
-            3: 20, // Giỏi
-            4: 40, // Xuất Sắc
-            5: 80  // Thần Đồng
+            1: 10, // Kém (<1000đ): +10đ
+            2: 10, // Trung Bình (1000 - 1999đ): +10đ
+            3: 20, // Giỏi (2000 - 2999đ): +20đ
+            4: 40, // Xuất Sắc (3000 - 3999đ): +40đ
+            5: 80  // Thần Đồng (>= 4000đ): +80đ
         };
 
+        // ĐỊNH NGHĨA CHUẨN MỐC XẾP HẠNG TỔNG ĐIỂM DATA
         function getRankNameByScore(score) {
-            if (score >= 4000) return "Thần Đồng";
-            if (score >= 3000) return "Xuất Sắc";
-            if (score >= 2000) return "Giỏi";
-            if (score >= 1000) return "Trung Bình";
-            return "Kém";
+            if (score >= 5000) return "Thần Đồng";
+            if (score >= 4000) return "Xuất Sắc";
+            if (score >= 3000) return "Giỏi";
+            if (score >= 2000) return "Trung Bình";
+            if (score >= 1000) return "Kém";
+            return "Kém"; // Dưới 1000 điểm coi như chưa đủ Data
         }
 
         function getReflexRankByMs(ms) {
@@ -341,7 +343,7 @@
         let hitsCountG1 = 0, hitsCountG3 = 0; 
         let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, g3LoopId, stabilityHP = 10;
         let bestCps = 0; let reactionTimes = []; 
-        let nextBurstMilestone = 500; // MỐC BẠO PHÁT: 500, 1500, 2500...
+        let nextBurstMilestone = 500; // BẠO PHÁT TẠI 500, 1500, 2500...
         let lastAnnouncedTier = 1;
 
         // 5 CẤP ĐỘ ÁNH XẠ TỐC ĐỘ (CẤP 1, 3, 7, 9, 12 CŨ)
@@ -353,6 +355,7 @@
             5: { lifespan: 260,  g3Life: 450,  g3Speed: 5.5 }  
         };
 
+        // MỐC TĂNG TỐC ĐỘ TỪNG 1000 ĐIỂM DATA
         function getCurrentSpeedTier() {
             if (aScore >= 4000) return 5;
             if (aScore >= 3000) return 4;
@@ -451,14 +454,12 @@
 
             document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 1);
 
-            // CẬP NHẬT HỆ SỐ X TRÊN HUD KHÔNG GÂY TREO MÀN HÌNH
             if (currentTier > lastAnnouncedTier) {
                 lastAnnouncedTier = currentTier;
                 document.getElementById('hud-tier-badge').innerText = `X${currentTier}`;
                 playSound('ready', 1.5);
             }
 
-            // KIỂM TRA MỐC BẠO PHÁT (500, 1500, 2500...)
             if (aScore >= nextBurstMilestone && !document.querySelector('.burst-container')) {
                 nextBurstMilestone += 1000;
                 forceBurstMode();
@@ -467,7 +468,6 @@
 
         function loseHalfLife() { if(isPausedForStart) return; stabilityHP -= 1; updateHpDisplay(); playSound('boom'); triggerVibration([100, 50, 100]); if(stabilityHP <= 0) finishGame(); }
         
-        // SỬA LỖI TREO KHI MISS HẠT: AN TOÀN TÁI TẠO VÒNG LẶP SPAWN
         function loseFullLife() { 
             if(isPausedForStart) return; 
             stabilityHP -= 2; 
@@ -477,7 +477,6 @@
             if(stabilityHP <= 0) { 
                 finishGame(); 
             } else {
-                // Tiếp tục duy trì mạch game không bị đứt quãng
                 clearTimeout(spawnTimer);
                 if(isPlaying && !isPausedForStart) {
                     if(cGame === '1') spawnG1();
@@ -639,7 +638,6 @@
         function finishGame() {
             isPlaying = false; isPausedForStart = true; clearTimeout(spawnTimer); if(burstTimer) clearTimeout(burstTimer); if(g3LoopId) { cancelAnimationFrame(g3LoopId); g3LoopId = null; }
             
-            // TÍNH TOÁN MILI-GIÂY TRUNG BÌNH CHUẨN XÁC Ở BẢNG TỔNG KẾT
             let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
             if (aScore < 1000) {
                 aScore = 0;
@@ -666,7 +664,6 @@
                 document.getElementById('res-pink-display').innerText = Math.round(burstScore);
                 document.getElementById('final-score-display').innerText = Math.round(aScore);
                 
-                // HIỂN THỊ CHỈ SỐ MILI-GIÂY VÀ XẾP HẠNG TRÍ NÃO CHUẨN XÁC
                 document.getElementById('bio-avg-val').innerText = (aScore > 0 && avgMs > 0) ? avgMs + " mili-giây" : "Chưa đủ Data";
                 document.getElementById('bio-cps-val').innerText = (aScore > 0 && bestCps > 0) ? bestCps + " lần / giây" : "Chưa đủ Data";
 
@@ -681,10 +678,10 @@
                 let feedbackStr = "";
                 if (aScore === 0) { 
                     feedbackStr = "« Bác bỏ kết quả: Điểm tích lũy chưa đạt ngưỡng tối thiểu (1000 Data). Phạt rớt hạng Kém! »"; 
-                } else if (aScore >= 4000) { 
-                    feedbackStr = "« Tuyệt hảo! Phản xạ như thiểm điện, bạo phát tựa cuồng phong. »"; 
+                } else if (aScore >= 5000) { 
+                    feedbackStr = "« Tuyệt hảo! Đạt cảnh giới Thần Đồng tối thượng. »"; 
                 } else { 
-                    feedbackStr = "« Phong độ khá ổn định. Phối hợp nhịp nhàng giữa tốc độ và khả năng bung sức. »"; 
+                    feedbackStr = "« Phong độ ổn định. Phối hợp nhịp nhàng giữa tốc độ và khả năng bung sức. »"; 
                 }
                 
                 document.getElementById('master-feedback-text').innerText = feedbackStr;
@@ -707,7 +704,7 @@
             let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
             
             let finalRankName = getRankNameByScore(totalSessionScore);
-            let finalFeedback = totalSessionScore >= 4000 ? "« Hoàn thành toàn trình Hỏa Luân với cảnh giới đỉnh cao! »" : "« Hoàn thành toàn trình Hỏa Luân! Ý chí tôi luyện qua lửa đỏ. »";
+            let finalFeedback = totalSessionScore >= 5000 ? "« Hoàn thành toàn trình Hỏa Luân với cảnh giới Thần Đồng đỉnh cao! »" : "« Hoàn thành toàn trình Hỏa Luân! Ý chí tôi luyện qua lửa đỏ. »";
 
             document.getElementById('sum-score-1').innerText = sessionScoreG1;
             document.getElementById('sum-score-3').innerText = sessionScoreG3;
