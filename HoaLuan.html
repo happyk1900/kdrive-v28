@@ -297,13 +297,13 @@
             'Thần Đồng': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%205%20(1).png?raw=true'
         };
 
-        // ĐIỂM THƯỞNG ẤN THƯỜNG: 10, 10, 20, 40, 80
+        // ĐIỂM THƯỞNG MỖI LẦN ẤN THƯỜNG: 10, 10, 20, 40, 80 ĐIỂM
         const TIER_POINTS = {
-            1: 10,
-            2: 10,
-            3: 20,
-            4: 40,
-            5: 80
+            1: 10, // Kém
+            2: 10, // Trung Bình
+            3: 20, // Giỏi
+            4: 40, // Xuất Sắc
+            5: 80  // Thần Đồng
         };
 
         function getRankNameByScore(score) {
@@ -341,10 +341,10 @@
         let hitsCountG1 = 0, hitsCountG3 = 0; 
         let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, g3LoopId, stabilityHP = 10;
         let bestCps = 0; let reactionTimes = []; 
-        let nextBurstMilestone = 500; // BẠO PHÁT TẠI 500, 1500, 2500...
+        let nextBurstMilestone = 500; // MỐC BẠO PHÁT: 500, 1500, 2500...
         let lastAnnouncedTier = 1;
 
-        // 5 CẤP ĐỘ ÁNH XẠ CHUẨN TỪ CODE CŨ (CẤP 1, 3, 7, 9, 12)
+        // 5 CẤP ĐỘ ÁNH XẠ TỐC ĐỘ (CẤP 1, 3, 7, 9, 12 CŨ)
         const speedTiersMapping = {
             1: { lifespan: 1100, g3Life: 2800, g3Speed: 0.4 }, 
             2: { lifespan: 850,  g3Life: 2000, g3Speed: 0.8 }, 
@@ -451,7 +451,7 @@
 
             document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 1);
 
-            // CẬP NHẬT HỆ SỐ X TRÊN HUD KHI THĂNG CẤP
+            // CẬP NHẬT HỆ SỐ X TRÊN HUD KHÔNG GÂY TREO MÀN HÌNH
             if (currentTier > lastAnnouncedTier) {
                 lastAnnouncedTier = currentTier;
                 document.getElementById('hud-tier-badge').innerText = `X${currentTier}`;
@@ -466,7 +466,25 @@
         }
 
         function loseHalfLife() { if(isPausedForStart) return; stabilityHP -= 1; updateHpDisplay(); playSound('boom'); triggerVibration([100, 50, 100]); if(stabilityHP <= 0) finishGame(); }
-        function loseFullLife() { if(isPausedForStart) return; stabilityHP -= 2; updateHpDisplay(); playSound('boom'); triggerVibration([150, 50, 150]); if(stabilityHP <= 0) finishGame(); }
+        
+        // SỬA LỖI TREO KHI MISS HẠT: AN TOÀN TÁI TẠO VÒNG LẶP SPAWN
+        function loseFullLife() { 
+            if(isPausedForStart) return; 
+            stabilityHP -= 2; 
+            updateHpDisplay(); 
+            playSound('boom'); 
+            triggerVibration([150, 50, 150]); 
+            if(stabilityHP <= 0) { 
+                finishGame(); 
+            } else {
+                // Tiếp tục duy trì mạch game không bị đứt quãng
+                clearTimeout(spawnTimer);
+                if(isPlaying && !isPausedForStart) {
+                    if(cGame === '1') spawnG1();
+                    else if(cGame === '3') spawnG3Parent();
+                }
+            }
+        }
 
         function getSafeSpawns(playArea) { let maxX = playArea.clientWidth - 60; let maxY = playArea.clientHeight - 60; let minY = 75; return { px: 10 + Math.random() * Math.max(0, maxX - 10), py: minY + Math.random() * Math.max(0, maxY - minY) }; }
 
@@ -585,7 +603,6 @@
             }, duration);
         }
 
-        // BẠO PHÁT NHÂN HỆ SỐ THEO CẤP ĐỘ (X1, X1, X2, X4, X8)
         function fireBeam(clicks, blackoutBg) {
             let playArea = document.getElementById('play-area');
             let normalizedCps = Math.round((clicks / 7) * 10) / 10;
@@ -622,6 +639,7 @@
         function finishGame() {
             isPlaying = false; isPausedForStart = true; clearTimeout(spawnTimer); if(burstTimer) clearTimeout(burstTimer); if(g3LoopId) { cancelAnimationFrame(g3LoopId); g3LoopId = null; }
             
+            // TÍNH TOÁN MILI-GIÂY TRUNG BÌNH CHUẨN XÁC Ở BẢNG TỔNG KẾT
             let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
             if (aScore < 1000) {
                 aScore = 0;
@@ -648,6 +666,7 @@
                 document.getElementById('res-pink-display').innerText = Math.round(burstScore);
                 document.getElementById('final-score-display').innerText = Math.round(aScore);
                 
+                // HIỂN THỊ CHỈ SỐ MILI-GIÂY VÀ XẾP HẠNG TRÍ NÃO CHUẨN XÁC
                 document.getElementById('bio-avg-val').innerText = (aScore > 0 && avgMs > 0) ? avgMs + " mili-giây" : "Chưa đủ Data";
                 document.getElementById('bio-cps-val').innerText = (aScore > 0 && bestCps > 0) ? bestCps + " lần / giây" : "Chưa đủ Data";
 
