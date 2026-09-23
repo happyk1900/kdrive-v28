@@ -331,17 +331,18 @@
         let hitsCountG1 = 0, hitsCountG3 = 0; 
         let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, g3LoopId, stabilityHP = 10;
         let bestCps = 0; let reactionTimes = []; 
-        let lastBurstTriggerScore = 0;
+        let nextBurstMilestone = 500; // BẠO PHÁT XUẤT HIỆN Ở 500, 1500, 2500...
 
-        // ÁNH XẠ CHUẨN 5 CẤP ĐỘ TỐC DỰA TRÊN 12 CẤP CŨ (CẤP 1, 3, 7, 9, 12)
+        // ÁNH XẠ CHUẨN 5 CẤP ĐỘ TỐC ĐỘ DỰA TRÊN 12 CẤP CŨ (CẤP 1, 3, 7, 9, 12)
         const speedTiersMapping = {
-            1: { lifespan: 1100, delay: 700, g3Life: 2800, g3Delay: 2200, g3Speed: 0.4 }, // Cấp 1 (Kém)
-            2: { lifespan: 850,  delay: 500, g3Life: 2000, g3Delay: 1500, g3Speed: 0.8 }, // Cấp 2 (Trung Bình - tương đương cấp 3 cũ)
-            3: { lifespan: 580,  delay: 350, g3Life: 1200, g3Delay: 850,  g3Speed: 1.8 }, // Cấp 3 (Giỏi - tương đương cấp 7 cũ)
-            4: { lifespan: 460,  delay: 280, g3Life: 850,  g3Delay: 600,  g3Speed: 2.7 }, // Cấp 4 (Xuất Sắc - tương đương cấp 9 cũ)
-            5: { lifespan: 260,  delay: 150, g3Life: 450,  g3Delay: 300,  g3Speed: 5.5 }  // Cấp 5 (Thần Đồng - tương đương cấp 12 cũ)
+            1: { lifespan: 1100, delay: 700, g3Life: 2800, g3Delay: 2200, g3Speed: 0.4 }, // Cấp 1 (Kém - Cấp 1 cũ)
+            2: { lifespan: 850,  delay: 500, g3Life: 2000, g3Delay: 1500, g3Speed: 0.8 }, // Cấp 2 (Trung Bình - Cấp 3 cũ)
+            3: { lifespan: 580,  delay: 350, g3Life: 1200, g3Delay: 850,  g3Speed: 1.8 }, // Cấp 3 (Giỏi - Cấp 7 cũ)
+            4: { lifespan: 460,  delay: 280, g3Life: 850,  g3Delay: 600,  g3Speed: 2.7 }, // Cấp 4 (Xuất Sắc - Cấp 9 cũ)
+            5: { lifespan: 260,  delay: 150, g3Life: 450,  g3Delay: 300,  g3Speed: 5.5 }  // Cấp 5 (Thần Đồng - Cấp 12 cũ)
         };
 
+        // TĂNG TỐC ĐỘ THEO MỐC 1000, 2000, 3000, 4000 ĐIỂM DATA
         function getCurrentSpeedTier() {
             if (aScore >= 4000) return 5;
             if (aScore >= 3000) return 4;
@@ -379,7 +380,7 @@
         function openArena(id) {
             cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; successfulHitsCount = 0; isPlaying = false; stabilityHP = 10;
             isPausedForStart = true; bestCps = 0; stage3Projectiles = []; reactionTimes = [];
-            lastBurstTriggerScore = 0;
+            nextBurstMilestone = 500;
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
@@ -428,6 +429,7 @@
             else if(cGame === '3') { hitsCountG3 = 0; runG3(); } 
         }
 
+        // TÍNH ĐIỂM CHUẨN 10 ĐIỂM MỖI LẦN ẤN THƯỜNG
         function addScoreAndCheckMultiplier(pointsToAdd = 10) {
             if(isPausedForStart) return;
             aScore += pointsToAdd; reflexScore += pointsToAdd; 
@@ -436,9 +438,9 @@
 
             document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 1);
 
-            // KÍCH HOẠT BẠO PHÁT TẠI CÁC MỐC 500, 1500, 2500...
-            if (aScore - lastBurstTriggerScore >= 500 && !document.querySelector('.burst-container')) {
-                lastBurstTriggerScore = Math.floor(aScore / 500) * 500;
+            // KIỂM TRA MỐC BẠO PHÁT (500, 1500, 2500, 3500...)
+            if (aScore >= nextBurstMilestone && !document.querySelector('.burst-container')) {
+                nextBurstMilestone += 1000; // Mốc tiếp theo cách 1000 điểm (500 -> 1500 -> 2500...)
                 forceBurstMode();
             }
         }
