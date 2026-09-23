@@ -290,11 +290,12 @@
             5: 80  
         };
 
+        // BẢNG CHUẨN ĐO LƯỜNG MILI-GIÂY (MS) THỰC CHIẾN CẤP CAO
         function getReflexRankByMs(ms) {
             if (ms <= 0 || ms > 1500) return "Kém";
-            if (ms <= 220) return "Thần Đồng";
-            if (ms <= 300) return "Xuất Sắc";
-            if (ms <= 400) return "Giỏi";
+            if (ms <= 260) return "Thần Đồng";
+            if (ms <= 340) return "Xuất Sắc";
+            if (ms <= 430) return "Giỏi";
             if (ms <= 550) return "Trung Bình";
             return "Kém";
         }
@@ -318,6 +319,7 @@
         let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, stabilityHP = 10;
         let bestCps = 0; let reactionTimes = []; 
         let nextBurstMilestone = 500; 
+        let successfulHitsForBurst = 0; 
         let lastAnnouncedTier = 1;
 
         const speedTiersMapping = {
@@ -365,7 +367,7 @@
         function openArena(id) {
             cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; successfulHitsCount = 0; isPlaying = false; stabilityHP = 10;
             isPausedForStart = true; bestCps = 0; reactionTimes = [];
-            nextBurstMilestone = 500; lastAnnouncedTier = 1;
+            nextBurstMilestone = 500; successfulHitsForBurst = 0; lastAnnouncedTier = 1;
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
@@ -414,6 +416,7 @@
             else if(cGame === '2') { hitsCountG2 = 0; runG2(); } 
         }
 
+        // TÍNH ĐIỂM CHUẨN VÀ ĐẾM SỐ LẦN ẤN TRÚNG ĐỂ KÍCH HOẠT BẠO PHÁT THEO MỐC 500, 1500, 2500...
         function addScoreAndCheckMultiplier() {
             if(isPausedForStart) return;
             let currentTier = getCurrentSpeedTier();
@@ -421,6 +424,7 @@
 
             aScore += pointsToAdd; reflexScore += pointsToAdd; 
             successfulHitsCount++; 
+            successfulHitsForBurst++; 
             if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
 
             document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 1);
@@ -431,8 +435,10 @@
                 playSound('ready', 1.5);
             }
 
-            if (aScore >= nextBurstMilestone && !document.querySelector('.burst-container')) {
+            // KÍCH HOẠT BẠO PHÁT CHUẨN XÁC THEO MỐC ĐIỂM DATA (500, 1500, 2500...) HOẶC SAU KHI ĐẠT ĐỦ 35 LẦN ẤN TRÚNG
+            if ((aScore >= nextBurstMilestone || successfulHitsForBurst >= 35) && !document.querySelector('.burst-container')) {
                 nextBurstMilestone += 1000;
+                successfulHitsForBurst = 0;
                 forceBurstMode();
             }
         }
@@ -586,6 +592,19 @@
                 aScore += earnedScore; burstScore += earnedScore; 
                 document.getElementById('boo-points').innerText = Math.round(aScore); playSound('boom', 0.5);
 
+                // KIỂM TRA PHẦN THƯỞNG NĂNG LƯỢNG (HP): NẾU ĐẠT CẤP ĐẶC VỤ (CPS >= 11) TRỞ LÊN THÌ ĐƯỢC HỒI +1 MẠNG
+                let burstRank = getBurstRankByCps(normalizedCps);
+                if (burstRank === "Xuất Sắc" || burstRank === "Thần Đồng") {
+                    stabilityHP = Math.min(10, stabilityHP + 2); // Hồi 1 mạng đầy (2 vạch HP)
+                    updateHpDisplay();
+                    let hpMsg = document.createElement('div');
+                    hpMsg.className = 'floating-cps';
+                    hpMsg.style.color = '#00ffcc';
+                    hpMsg.innerHTML = `+1 NĂNG LƯỢNG HỒI PHỤC!`;
+                    playArea.appendChild(hpMsg);
+                    setTimeout(() => hpMsg.remove(), 1800);
+                }
+
                 let floatScore = document.createElement('div'); floatScore.className = 'float-score'; floatScore.innerText = `+${earnedScore}`; floatScore.style.left = '50%'; floatScore.style.top = '10%'; playArea.appendChild(floatScore); setTimeout(() => floatScore.remove(), 1000);
 
                 setTimeout(() => {
@@ -620,7 +639,6 @@
 
             playSound('error'); 
 
-            // HIỆN NGAY BẢNG KẾT QUẢ AN TOÀN KHÔNG BỊ TREO
             let romanName = (cGame === '1') ? 'KẾT QUẢ BÀI 1' : 'KẾT QUẢ BÀI 2';
             document.getElementById('stage-badge-title').innerText = romanName;
 
