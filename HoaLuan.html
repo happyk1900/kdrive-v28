@@ -46,7 +46,6 @@
         .hud-center { flex: 1; display: flex; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #fff; font-weight: bold; white-space: nowrap; }
         .hud-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
         
-        /* CÂN CHỈNH NÚT ✕ TO VÀ NẰM CHÍNH GIỮA TUYỆT ĐỐI */
         .hud-btn { width: 32px; height: 32px; border-radius: 4px; background: rgba(255, 51, 51, 0.1); border: 1px solid rgba(255, 51, 51, 0.5); color: #ff3333; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 900; cursor: pointer; transition: 0.2s; line-height: 1; text-align: center; }
         .hud-btn.exit-btn { background: rgba(255, 183, 0, 0.1); border-color: #ffb700; color: #ffb700; font-size: 18px; font-weight: 900; }
         
@@ -70,7 +69,7 @@
         #freeze-overlay.active { display: flex; }
         .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #ff3333; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px #ff3333; }
 
-        #result-overlay { position: absolute; inset: 0; background: rgba(20, 4, 4, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 8px; border-radius: 12px; padding: 12px; }
+        #result-overlay { position: absolute; inset: 0; background: rgba(20, 4, 4, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999999; gap: 8px; border-radius: 12px; padding: 12px; }
         #result-overlay.active { display: flex; }
         .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #ff3333; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,51,51,0.5); }
         .prestige-panel { width: 92%; max-width: 310px; background: rgba(30, 8, 8, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
@@ -99,7 +98,7 @@
         #btn-next:active { background: #fff; color: #000; }
 
         /* BÁO CÁO TỔNG HỢP CUỐI CÙNG */
-        #final-summary-overlay { position: absolute; inset: 0; background: #0d0202; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 12px; }
+        #final-summary-overlay { position: absolute; inset: 0; background: #0d0202; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999999; gap: 10px; padding: 12px; }
         #final-summary-overlay.active { display: flex; }
         .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #ff3333; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px #ff3333; }
         
@@ -619,63 +618,55 @@
             let playArea = document.getElementById('play-area'); playArea.classList.remove('fullscreen-mode');
             playArea.querySelectorAll('.orb, .child-projectile, .core-reactor, .blackout-bg, .beam, .explosion, .floating-ms, .floating-cps, .float-score, .burst-btn-diagonal').forEach(o => o.remove());
 
-            playSound('error'); document.getElementById('freeze-overlay').classList.add('active');
+            playSound('error'); 
 
-            setTimeout(() => {
-                document.getElementById('freeze-overlay').classList.remove('active');
-                
-                let romanName = (cGame === '1') ? 'KẾT QUẢ BÀI 1' : 'KẾT QUẢ BÀI 2';
-                document.getElementById('stage-badge-title').innerText = romanName;
+            // HIỆN NGAY BẢNG KẾT QUẢ AN TOÀN KHÔNG BỊ TREO
+            let romanName = (cGame === '1') ? 'KẾT QUẢ BÀI 1' : 'KẾT QUẢ BÀI 2';
+            document.getElementById('stage-badge-title').innerText = romanName;
 
-                document.getElementById('res-gold-display').innerText = Math.round(reflexScore);
-                document.getElementById('res-pink-display').innerText = Math.round(burstScore);
-                document.getElementById('final-score-display').innerText = Math.round(aScore);
-                
-                document.getElementById('bio-avg-val').innerText = (aScore > 0 && avgMs > 0) ? avgMs + " mili-giây" : "Chưa đủ Data";
-                document.getElementById('bio-cps-val').innerText = (aScore > 0 && bestCps > 0) ? bestCps + " lần / giây" : "Chưa đủ Data";
+            document.getElementById('res-gold-display').innerText = Math.round(reflexScore);
+            document.getElementById('res-pink-display').innerText = Math.round(burstScore);
+            document.getElementById('final-score-display').innerText = Math.round(aScore);
+            
+            document.getElementById('bio-avg-val').innerText = (aScore > 0 && avgMs > 0) ? avgMs + " mili-giây" : "Chưa đủ Data";
+            document.getElementById('bio-cps-val').innerText = (aScore > 0 && bestCps > 0) ? bestCps + " lần / giây" : "Chưa đủ Data";
 
-                let reflexRankName = getReflexRankByMs(avgMs);
-                let burstRankName = getBurstRankByCps(bestCps);
+            let reflexRankName = getReflexRankByMs(avgMs);
+            let burstRankName = getBurstRankByCps(bestCps);
 
-                document.getElementById('bio-rank-badge-1').innerHTML = getRankHTML(reflexRankName);
-                document.getElementById('bio-rank-badge-2').innerHTML = getRankHTML(burstRankName);
+            document.getElementById('bio-rank-badge-1').innerHTML = getRankHTML(reflexRankName);
+            document.getElementById('bio-rank-badge-2').innerHTML = getRankHTML(burstRankName);
 
-                let feedbackStr = "";
-                if (aScore === 0) { 
-                    feedbackStr = "« Bác bỏ kết quả: Điểm tích lũy chưa đạt ngưỡng tối thiểu (1000 Data). »"; 
-                } else if (aScore >= 5000) { 
-                    feedbackStr = "« Tuyệt hảo! Đạt cảnh giới Thần Đồng tối thượng. »"; 
-                } else { 
-                    feedbackStr = "« Phong độ ổn định. Phối hợp nhịp nhàng giữa tốc độ và khả năng bung sức. »"; 
-                }
-                
-                document.getElementById('master-feedback-text').innerText = feedbackStr;
+            let btnNext = document.getElementById('btn-next');
+            if (cGame === '1') { 
+                btnNext.innerText = "BÀI 2"; 
+                btnNext.onclick = proceedNextStage; 
+            } else { 
+                btnNext.innerText = "TỔNG KẾT"; 
+                btnNext.onclick = showFinalSummary; 
+            }
 
-                let btnNext = document.getElementById('btn-next');
-                if (cGame === '1') { btnNext.innerText = "BÀI 2"; btnNext.onclick = proceedNextStage; } 
-                else { btnNext.innerText = "TỔNG KẾT"; btnNext.onclick = showFinalSummary; }
-
-                document.getElementById('result-overlay').classList.add('active');
-                playSound('coin');
-            }, 1200);
+            document.getElementById('result-overlay').classList.add('active');
+            playSound('coin');
         }
 
-        function retryCurrentStage() { playSound('katana'); document.getElementById('result-overlay').classList.remove('active'); openArena(cGame); }
+        function retryCurrentStage() { 
+            playSound('katana'); 
+            document.getElementById('result-overlay').classList.remove('active'); 
+            openArena(cGame); 
+        }
         
-        // SỬA LỖI TREO BẰNG CÁCH DỌN DẸP DẤU NGOẶC KÉP DƯ THỪA TRONG CLASSLIST
         function proceedNextStage() { 
             playSound('coin'); 
-            let resOverlay = document.getElementById('result-overlay');
-            resOverlay.classList.remove('active'); 
+            document.getElementById('result-overlay').classList.remove('active'); 
             setTimeout(() => { 
                 openArena('2'); 
-            }, 300); 
+            }, 200); 
         }
 
         function showFinalSummary() {
             playSound('coin'); 
-            let resOverlay = document.getElementById('result-overlay');
-            resOverlay.classList.remove('active');
+            document.getElementById('result-overlay').classList.remove('active');
             let totalSessionScore = sessionScoreG1 + sessionScoreG2;
             let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
             
