@@ -121,14 +121,18 @@
         .blackout-bg.active { opacity: 1; pointer-events: auto; }
 
         .burst-container { position: fixed; width: 100vw; height: 100dvh; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 100001; pointer-events: none; }
-        .stage1-energy-core { width: 88px; height: 88px; border-radius: 50%; background: radial-gradient(circle, #ffffff 0%, #ffdf70 30%, #ff3333 70%, #cc0000 100%); box-shadow: 0 0 35px #ff3333, 0 0 70px #ffb700, inset 0 0 25px #ffffff; cursor: pointer; pointer-events: auto; animation: coreBreath 0.35s infinite alternate ease-in-out; position: relative; z-index: 100005; outline: none; }
-        @keyframes coreBreath { 0% { transform: scale(0.95); filter: drop-shadow(0 0 15px #ff3333); } 100% { transform: scale(1.06); filter: drop-shadow(0 0 35px #ffb700); } }
-        .burst-tap-shockwave { position: absolute; width: 88px; height: 88px; border-radius: 50%; border: 3px solid #ffb700; box-shadow: 0 0 25px #ff3333; pointer-events: none; transform: translate(-50%, -50%) scale(1); animation: tapShock 0.25s ease-out forwards; z-index: 100004; }
+        
+        /* HẠT BẠO PHÁT TĨNH LẶNG, RÕ RÀNG NGĂN NẮP, KHÔNG ZOOM RƯỜM RÀ */
+        .stage1-energy-core { width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle, #ffffff 0%, #ffdf70 30%, #ff3333 70%, #cc0000 100%); box-shadow: 0 0 35px #ff3333, 0 0 70px #ffb700; cursor: pointer; pointer-events: auto; position: relative; z-index: 100005; outline: none; display: flex; align-items: center; justify-content: center; text-align: center; }
+        
+        .burst-instruction-text { font-family: 'Share Tech Mono', monospace; font-size: 9.5px; font-weight: bold; color: #0d0202; text-align: center; line-height: 1.25; text-transform: uppercase; pointer-events: none; width: 84px; }
+
+        .burst-tap-shockwave { position: absolute; width: 92px; height: 92px; border-radius: 50%; border: 3px solid #ffb700; box-shadow: 0 0 25px #ff3333; pointer-events: none; transform: translate(-50%, -50%) scale(1); animation: tapShock 0.25s ease-out forwards; z-index: 100004; }
         @keyframes tapShock { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; } }
 
-        .burst-btn-diagonal { position: absolute; width: 75px; height: 75px; border-radius: 50%; background: radial-gradient(circle, #ffffff 0%, #ffdf70 35%, #ff3333 75%, #cc0000 100%); box-shadow: 0 0 30px #ff3333, 0 0 50px #ffb700, inset 0 0 20px #ffffff; z-index: 100002; cursor: pointer; pointer-events: auto; animation: coreBreath 0.35s infinite alternate ease-in-out; outline: none; display: flex; align-items: center; justify-content: center; }
-        #diag-btn-1 { left: 20%; top: 30%; transform: translate(-50%, -50%); }
-        #diag-btn-2 { right: 20%; bottom: 30%; transform: translate(50%, 50%); }
+        .burst-btn-diagonal { position: absolute; width: 82px; height: 82px; border-radius: 50%; background: radial-gradient(circle, #ffffff 0%, #ffdf70 35%, #ff3333 75%, #cc0000 100%); box-shadow: 0 0 30px #ff3333, 0 0 50px #ffb700; z-index: 100002; cursor: pointer; pointer-events: auto; outline: none; display: flex; align-items: center; justify-content: center; text-align: center; }
+        #diag-btn-1 { left: 25%; top: 32%; transform: translate(-50%, -50%); }
+        #diag-btn-2 { right: 25%; bottom: 32%; transform: translate(50%, 50%); }
 
         .beam { position: absolute; bottom: 50%; left: 50%; transform: translateX(-50%); z-index: 100001; transform-origin: bottom center; pointer-events: none; }
         .beam-t1 { width: 6px; background: rgba(255,51,51,0.7); animation: beamGrow1 2.2s forwards linear; }
@@ -290,7 +294,6 @@
             5: 80  
         };
 
-        // BẢNG CHUẨN ĐO LƯỜNG MILI-GIÂY (MS) THỰC CHIẾN CẤP CAO
         function getReflexRankByMs(ms) {
             if (ms <= 0 || ms > 1500) return "Kém";
             if (ms <= 260) return "Thần Đồng";
@@ -318,8 +321,7 @@
         let hitsCountG1 = 0, hitsCountG2 = 0; 
         let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, stabilityHP = 10;
         let bestCps = 0; let reactionTimes = []; 
-        let nextBurstMilestone = 500; 
-        let successfulHitsForBurst = 0; 
+        let nextBurstMilestone = 500; // MỐC BẠO PHÁT: 500, 1500, 2500... (ĐÚNG 1 LẦN MỖI 1000 ĐIỂM)
         let lastAnnouncedTier = 1;
 
         const speedTiersMapping = {
@@ -367,7 +369,7 @@
         function openArena(id) {
             cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; successfulHitsCount = 0; isPlaying = false; stabilityHP = 10;
             isPausedForStart = true; bestCps = 0; reactionTimes = [];
-            nextBurstMilestone = 500; successfulHitsForBurst = 0; lastAnnouncedTier = 1;
+            nextBurstMilestone = 500; lastAnnouncedTier = 1;
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
@@ -416,7 +418,6 @@
             else if(cGame === '2') { hitsCountG2 = 0; runG2(); } 
         }
 
-        // TÍNH ĐIỂM CHUẨN VÀ ĐẾM SỐ LẦN ẤN TRÚNG ĐỂ KÍCH HOẠT BẠO PHÁT THEO MỐC 500, 1500, 2500...
         function addScoreAndCheckMultiplier() {
             if(isPausedForStart) return;
             let currentTier = getCurrentSpeedTier();
@@ -424,7 +425,6 @@
 
             aScore += pointsToAdd; reflexScore += pointsToAdd; 
             successfulHitsCount++; 
-            successfulHitsForBurst++; 
             if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
 
             document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 1);
@@ -435,10 +435,9 @@
                 playSound('ready', 1.5);
             }
 
-            // KÍCH HOẠT BẠO PHÁT CHUẨN XÁC THEO MỐC ĐIỂM DATA (500, 1500, 2500...) HOẶC SAU KHI ĐẠT ĐỦ 35 LẦN ẤN TRÚNG
-            if ((aScore >= nextBurstMilestone || successfulHitsForBurst >= 35) && !document.querySelector('.burst-container')) {
+            // KÍCH HOẠT BẠO PHÁT ĐÚNG CÁC MỐC 500, 1500, 2500... (ĐÚNG 1 LẦN MỖI 1000 ĐIỂM)
+            if (aScore >= nextBurstMilestone && !document.querySelector('.burst-container')) {
                 nextBurstMilestone += 1000;
-                successfulHitsForBurst = 0;
                 forceBurstMode();
             }
         }
@@ -550,12 +549,26 @@
 
             if (cGame === '1') {
                 let orbWrap = document.createElement('div'); orbWrap.className = 'burst-orb-wrapper';
-                let core = document.createElement('div'); core.className = 'stage1-energy-core'; orbWrap.appendChild(core); burstContainer.appendChild(orbWrap);
+                let core = document.createElement('div'); core.className = 'stage1-energy-core';
+                
+                // HIỂN THỊ DÒNG CHỮ RÕ RÀNG NGĂN NẮP THEO ĐÚNG Ý ANH KAI
+                let txt = document.createElement('div');
+                txt.className = 'burst-instruction-text';
+                txt.innerHTML = 'Đạt 11 lần/giây<br>+1 năng lượng';
+                core.appendChild(txt);
+
+                orbWrap.appendChild(core); 
+                burstContainer.appendChild(orbWrap);
+
                 core.onpointerdown = (e) => { e.stopPropagation(); burstClicks++; playSound('boom', 1.4); triggerVibration(45); let shock = document.createElement('div'); shock.className = 'burst-tap-shockwave'; shock.style.left = '50%'; shock.style.top = '50%'; orbWrap.appendChild(shock); setTimeout(() => shock.remove(), 250); };
             } 
             else if (cGame === '2') {
-                let b1 = document.createElement('div'); b1.className = 'burst-btn-diagonal'; b1.id = 'diag-btn-1'; 
-                let b2 = document.createElement('div'); b2.className = 'burst-btn-diagonal'; b2.id = 'diag-btn-2'; 
+                let b1 = document.createElement('div'); b1.className = 'burst-btn-diagonal'; b1.id = 'diag-btn-1';
+                let txt1 = document.createElement('div'); txt1.className = 'burst-instruction-text'; txt1.innerHTML = 'Đạt 11 lần/giây<br>+1 năng lượng'; b1.appendChild(txt1);
+
+                let b2 = document.createElement('div'); b2.className = 'burst-btn-diagonal'; b2.id = 'diag-btn-2';
+                let txt2 = document.createElement('div'); txt2.className = 'burst-instruction-text'; txt2.innerHTML = 'Đạt 11 lần/giây<br>+1 năng lượng'; b2.appendChild(txt2);
+
                 burstContainer.appendChild(b1); burstContainer.appendChild(b2);
                 let handleDual = (e) => { e.stopPropagation(); burstClicks++; playSound('boom', 1.5); triggerVibration(40); }; 
                 b1.onpointerdown = b2.onpointerdown = handleDual;
@@ -592,10 +605,9 @@
                 aScore += earnedScore; burstScore += earnedScore; 
                 document.getElementById('boo-points').innerText = Math.round(aScore); playSound('boom', 0.5);
 
-                // KIỂM TRA PHẦN THƯỞNG NĂNG LƯỢNG (HP): NẾU ĐẠT CẤP ĐẶC VỤ (CPS >= 11) TRỞ LÊN THÌ ĐƯỢC HỒI +1 MẠNG
-                let burstRank = getBurstRankByCps(normalizedCps);
-                if (burstRank === "Xuất Sắc" || burstRank === "Thần Đồng") {
-                    stabilityHP = Math.min(10, stabilityHP + 2); // Hồi 1 mạng đầy (2 vạch HP)
+                // NẾU ĐẠT TỪ 11 LẦN/GIÂY TRỞ LÊN THÌ THƯỞNG NGAY +1 NĂNG LƯỢNG (HỒI MẠNG)
+                if (normalizedCps >= 11) {
+                    stabilityHP = Math.min(10, stabilityHP + 2); // Hồi đầy 1 mạng (2 vạch HP)
                     updateHpDisplay();
                     let hpMsg = document.createElement('div');
                     hpMsg.className = 'floating-cps';
@@ -676,7 +688,7 @@
         
         function proceedNextStage() { 
             playSound('coin'); 
-            document.getElementById('result-overlay').classList.remove('active'); 
+            document.getElementById('result-overlay'].classList.remove('active'); 
             setTimeout(() => { 
                 openArena('2'); 
             }, 200); 
@@ -684,7 +696,7 @@
 
         function showFinalSummary() {
             playSound('coin'); 
-            document.getElementById('result-overlay').classList.remove('active');
+            document.getElementById('result-overlay'].classList.remove('active');
             let totalSessionScore = sessionScoreG1 + sessionScoreG2;
             let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
             
