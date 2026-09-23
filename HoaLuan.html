@@ -124,8 +124,9 @@
         
         .stage1-energy-core { width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle, #ffffff 0%, #ffdf70 30%, #ff3333 70%, #cc0000 100%); box-shadow: 0 0 35px #ff3333, 0 0 70px #ffb700; cursor: pointer; pointer-events: auto; position: relative; z-index: 100005; outline: none; display: flex; align-items: center; justify-content: center; text-align: center; }
         
-        /* CHỮ HƯỚNG DẪN GỌN GÀNG, TĨNH LẶNG, KHÔNG PHÓNG TO THU NHỎ */
-        .burst-instruction-text { font-family: 'Share Tech Mono', monospace; font-size: 9.5px; font-weight: bold; color: #0d0202; text-align: center; line-height: 1.25; text-transform: uppercase; pointer-events: none; width: 84px; }
+        /* ĐẶT CHỮ LÊN PHÍA TRÊN, TO RÕ, VIẾT HOA HẾT, KHÔNG CHE KHUẤT TÂM BẤM */
+        .burst-instruction-wrapper { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); width: 180px; text-align: center; pointer-events: none; z-index: 100006; }
+        .burst-instruction-text { font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: 900; color: #ffb700; text-shadow: 0 0 8px rgba(255,183,0,0.8); line-height: 1.3; text-transform: uppercase; white-space: nowrap; }
 
         .burst-tap-shockwave { position: absolute; width: 92px; height: 92px; border-radius: 50%; border: 3px solid #ffb700; box-shadow: 0 0 25px #ff3333; pointer-events: none; transform: translate(-50%, -50%) scale(1); animation: tapShock 0.25s ease-out forwards; z-index: 100004; }
         @keyframes tapShock { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; } }
@@ -304,10 +305,10 @@
         }
 
         function getBurstRankByCps(cps) {
-            if (cps >= 14) return "Thần Đồng";
-            if (cps >= 11) return "Xuất Sắc";
-            if (cps >= 8) return "Giỏi";
-            if (cps >= 5) return "Trung Bình";
+            if (cps >= 12) return "Thần Đồng";
+            if (cps >= 9) return "Xuất Sắc";
+            if (cps >= 6) return "Giỏi";
+            if (cps >= 3) return "Trung Bình";
             return "Kém";
         }
 
@@ -548,13 +549,14 @@
 
             if (cGame === '1') {
                 let orbWrap = document.createElement('div'); orbWrap.className = 'burst-orb-wrapper';
-                let core = document.createElement('div'); core.className = 'stage1-energy-core';
                 
-                let txt = document.createElement('div');
-                txt.className = 'burst-instruction-text';
-                txt.innerHTML = 'Đạt 11 lần/giây<br>+1 năng lượng';
-                core.appendChild(txt);
+                // ĐẶT CHỮ LÊN PHÍA TRÊN, TO RÕ, VIẾT HOA HẾT, KHÔNG CHE TÂM BẤM
+                let wrap = document.createElement('div');
+                wrap.className = 'burst-instruction-wrapper';
+                wrap.innerHTML = '<div class="burst-instruction-text">ĐẠT 9 LẦN/GIÂY<br>+1 NĂNG LƯỢNG</div>';
+                orbWrap.appendChild(wrap);
 
+                let core = document.createElement('div'); core.className = 'stage1-energy-core';
                 orbWrap.appendChild(core); 
                 burstContainer.appendChild(orbWrap);
 
@@ -562,10 +564,10 @@
             } 
             else if (cGame === '2') {
                 let b1 = document.createElement('div'); b1.className = 'burst-btn-diagonal'; b1.id = 'diag-btn-1';
-                let txt1 = document.createElement('div'); txt1.className = 'burst-instruction-text'; txt1.innerHTML = 'Đạt 11 lần/giây<br>+1 năng lượng'; b1.appendChild(txt1);
+                let wrap1 = document.createElement('div'); wrap1.className = 'burst-instruction-wrapper'; wrap1.innerHTML = '<div class="burst-instruction-text">ĐẠT 9 LẦN/GIÂY<br>+1 NĂNG LƯỢNG</div>'; b1.appendChild(wrap1);
 
                 let b2 = document.createElement('div'); b2.className = 'burst-btn-diagonal'; b2.id = 'diag-btn-2';
-                let txt2 = document.createElement('div'); txt2.className = 'burst-instruction-text'; txt2.innerHTML = 'Đạt 11 lần/giây<br>+1 năng lượng'; b2.appendChild(txt2);
+                let wrap2 = document.createElement('div'); wrap2.className = 'burst-instruction-wrapper'; wrap2.innerHTML = '<div class="burst-instruction-text">ĐẠT 9 LẦN/GIÂY<br>+1 NĂNG LƯỢNG</div>'; b2.appendChild(wrap2);
 
                 burstContainer.appendChild(b1); burstContainer.appendChild(b2);
                 let handleDual = (e) => { e.stopPropagation(); burstClicks++; playSound('boom', 1.5); triggerVibration(40); }; 
@@ -596,20 +598,20 @@
                 beam.remove();
                 let explosion = document.createElement('div'); explosion.className = `explosion exp-t${tier}`; playArea.appendChild(explosion);
 
-                // BẠO PHÁT TUYỆT ĐỐI KHÔNG CỘNG ĐIỂM DATA TỔNG, CHỈ GHI NHẬN CPS ĐỂ XẾP HẠNG VÀ THƯỞNG NĂNG LƯỢNG
+                // BẠO PHÁT TUYỆT ĐỐI KHÔNG CỘNG ĐIỂM DATA TỔNG
                 let currentBurstScore = clicks * 3;
                 burstScore += currentBurstScore;
                 playSound('boom', 0.5);
 
-                // NẾU ĐẠT TỪ 11 LẦN/GIÂY TRỞ LÊN THÌ THƯỞNG NGAY +1 NĂNG LƯỢNG (HỒI MẠNG) VỚI DÒNG CHỮ GỌN GÀNG
-                if (normalizedCps >= 11) {
+                // HẠ NGƯỠNG XUỐNG 9 LẦN/GIÂY ĐỂ THƯỞNG +1 NĂNG LƯỢNG
+                if (normalizedCps >= 9) {
                     stabilityHP = Math.min(10, stabilityHP + 2);
                     updateHpDisplay();
                     let hpMsg = document.createElement('div');
                     hpMsg.className = 'floating-cps';
                     hpMsg.style.fontSize = '18px';
                     hpMsg.style.color = '#00ffcc';
-                    hpMsg.innerHTML = `+1 năng lượng`;
+                    hpMsg.innerHTML = `+1 NĂNG LƯỢNG`;
                     playArea.appendChild(hpMsg);
                     setTimeout(() => hpMsg.remove(), 1500);
                 }
@@ -683,7 +685,7 @@
         
         function proceedNextStage() { 
             playSound('coin'); 
-            document.getElementById('result-overlay').classList.remove('active'); 
+            document.getElementById('result-overlay'].classList.remove('active'); 
             setTimeout(() => { 
                 openArena('2'); 
             }, 200); 
@@ -691,7 +693,7 @@
 
         function showFinalSummary() {
             playSound('coin'); 
-            document.getElementById('result-overlay').classList.remove('active');
+            document.getElementById('result-overlay'].classList.remove('active');
             let totalSessionScore = sessionScoreG1 + sessionScoreG2;
             let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
             
