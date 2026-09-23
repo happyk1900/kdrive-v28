@@ -331,6 +331,24 @@
         let hitsCountG1 = 0, hitsCountG3 = 0; 
         let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, g3LoopId, stabilityHP = 10;
         let bestCps = 0; let reactionTimes = []; 
+        let lastBurstTriggerScore = 0;
+
+        // ÁNH XẠ CHUẨN 5 CẤP ĐỘ TỐC DỰA TRÊN 12 CẤP CŨ (CẤP 1, 3, 7, 9, 12)
+        const speedTiersMapping = {
+            1: { lifespan: 1100, delay: 700, g3Life: 2800, g3Delay: 2200, g3Speed: 0.4 }, // Cấp 1 (Kém)
+            2: { lifespan: 850,  delay: 500, g3Life: 2000, g3Delay: 1500, g3Speed: 0.8 }, // Cấp 2 (Trung Bình - tương đương cấp 3 cũ)
+            3: { lifespan: 580,  delay: 350, g3Life: 1200, g3Delay: 850,  g3Speed: 1.8 }, // Cấp 3 (Giỏi - tương đương cấp 7 cũ)
+            4: { lifespan: 460,  delay: 280, g3Life: 850,  g3Delay: 600,  g3Speed: 2.7 }, // Cấp 4 (Xuất Sắc - tương đương cấp 9 cũ)
+            5: { lifespan: 260,  delay: 150, g3Life: 450,  g3Delay: 300,  g3Speed: 5.5 }  // Cấp 5 (Thần Đồng - tương đương cấp 12 cũ)
+        };
+
+        function getCurrentSpeedTier() {
+            if (aScore >= 4000) return 5;
+            if (aScore >= 3000) return 4;
+            if (aScore >= 2000) return 3;
+            if (aScore >= 1000) return 2;
+            return 1;
+        }
 
         let fxCtx = null;
         function initAudio() { 
@@ -361,6 +379,7 @@
         function openArena(id) {
             cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; successfulHitsCount = 0; isPlaying = false; stabilityHP = 10;
             isPausedForStart = true; bestCps = 0; stage3Projectiles = []; reactionTimes = [];
+            lastBurstTriggerScore = 0;
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
@@ -409,7 +428,6 @@
             else if(cGame === '3') { hitsCountG3 = 0; runG3(); } 
         }
 
-        // TÍNH ĐIỂM CHUẨN 10 ĐIỂM MỖI THƯỜNG / 3 ĐIỂM MỖI BẠO PHÁT
         function addScoreAndCheckMultiplier(pointsToAdd = 10) {
             if(isPausedForStart) return;
             aScore += pointsToAdd; reflexScore += pointsToAdd; 
@@ -417,7 +435,12 @@
             if (cGame === '1') hitsCountG1++; else if (cGame === '3') hitsCountG3++;
 
             document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 1);
-            if (!document.querySelector('.burst-container') && Math.random() < 0.04) { forceBurstMode(); }
+
+            // KÍCH HOẠT BẠO PHÁT TẠI CÁC MỐC 500, 1500, 2500...
+            if (aScore - lastBurstTriggerScore >= 500 && !document.querySelector('.burst-container')) {
+                lastBurstTriggerScore = Math.floor(aScore / 500) * 500;
+                forceBurstMode();
+            }
         }
 
         function loseHalfLife() { if(isPausedForStart) return; stabilityHP -= 1; updateHpDisplay(); playSound('boom'); triggerVibration([100, 50, 100]); if(stabilityHP <= 0) finishGame(); }
@@ -425,19 +448,11 @@
 
         function getSafeSpawns(playArea) { let maxX = playArea.clientWidth - 60; let maxY = playArea.clientHeight - 60; let minY = 75; return { px: 10 + Math.random() * Math.max(0, maxX - 10), py: minY + Math.random() * Math.max(0, maxY - minY) }; }
 
-        // TÍNH TOÁN ĐỘ KHÓ / TỐC ĐỘ TỰ ĐỘNG TĂNG THEO MỐC ĐIỂM DATA (CỨ 1000 ĐIỂM TĂNG TỐC 1 NẤC)
-        function getCurrentSpeedTier() {
-            if (aScore >= 4000) return 5;
-            if (aScore >= 3000) return 4;
-            if (aScore >= 2000) return 3;
-            if (aScore >= 1000) return 2;
-            return 1;
-        }
-
         function runG1() { spawnG1(); }
         function spawnG1() {
             if(!isPlaying || isPausedForStart) return; 
             let tier = getCurrentSpeedTier();
+            let cfg = speedTiersMapping[tier];
             let playArea = document.getElementById('play-area'); let { px, py } = getSafeSpawns(playArea); let spawnTimestamp = Date.now();
             let el = document.createElement('div'); el.className = 'orb orb-fire'; el.style.left = px + 'px'; el.style.top = py + 'px';
             let clicked = false; 
@@ -452,19 +467,16 @@
                 addScoreAndCheckMultiplier(10); el.remove(); 
                 
                 clearTimeout(spawnTimer);
-                let currentTier = getCurrentSpeedTier();
-                let nextDelay = Math.max(250, 700 - (currentTier - 1) * 100);
-                spawnTimer = setTimeout(spawnG1, nextDelay);
+                let nextCfg = speedTiersMapping[getCurrentSpeedTier()];
+                spawnTimer = setTimeout(spawnG1, nextCfg.delay);
             };
             playArea.appendChild(el); 
 
-            let currentLifespan = Math.max(450, 1100 - (tier - 1) * 150);
-            setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, currentLifespan);
+            setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, cfg.lifespan);
             
             clearTimeout(spawnTimer); 
             if(isPlaying && !isPausedForStart) {
-                let nextDelay = Math.max(250, 700 - (tier - 1) * 100);
-                spawnTimer = setTimeout(spawnG1, nextDelay);
+                spawnTimer = setTimeout(spawnG1, cfg.delay);
             }
         }
 
@@ -472,6 +484,7 @@
         function spawnG3Parent() {
             if(!isPlaying || isPausedForStart) return; 
             let tier = getCurrentSpeedTier();
+            let cfg = speedTiersMapping[tier];
             let playArea = document.getElementById('play-area'); let { px, py } = getSafeSpawns(playArea); let spawnTimestamp = Date.now();
             let el = document.createElement('div'); el.className = 'orb orb-fire'; el.style.left = px + 'px'; el.style.top = py + 'px';
             let clicked = false; 
@@ -493,19 +506,16 @@
                 });
 
                 clearTimeout(spawnTimer);
-                let currentTier = getCurrentSpeedTier();
-                let nextDelay = Math.max(600, 1800 - (currentTier - 1) * 250);
-                spawnTimer = setTimeout(spawnG3Parent, nextDelay);
+                let nextCfg = speedTiersMapping[getCurrentSpeedTier()];
+                spawnTimer = setTimeout(spawnG3Parent, nextCfg.g3Delay);
             };
             playArea.appendChild(el); 
 
-            let currentLifespan = Math.max(1000, 2800 - (tier - 1) * 400);
-            setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, currentLifespan);
+            setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, cfg.g3Life);
             
             clearTimeout(spawnTimer); 
             if(isPlaying && !isPausedForStart) {
-                let nextDelay = Math.max(600, 1800 - (tier - 1) * 250);
-                spawnTimer = setTimeout(spawnG3Parent, nextDelay);
+                spawnTimer = setTimeout(spawnG3Parent, cfg.g3Delay);
             }
         }
 
@@ -513,13 +523,13 @@
             if(!isPlaying) { g3LoopId = null; return; }
             if(!isPausedForStart) {
                 let tier = getCurrentSpeedTier();
+                let cfg = speedTiersMapping[tier];
                 let playArea = document.getElementById('play-area'); let centerX = playArea.clientWidth / 2; let centerY = playArea.clientHeight / 2; let now = Date.now();
-                let flySpeed = 0.6 + (tier - 1) * 0.35;
 
                 for(let i = stage3Projectiles.length - 1; i >= 0; i--) {
                     let p = stage3Projectiles[i]; let elapsed = now - p.stateTimer;
-                    if (p.state === 'waiting' && elapsed >= Math.max(1200, 3000 - (tier - 1) * 400)) { p.state = 'shaking'; p.stateTimer = now; p.el.classList.add('shaking'); playSound('error', 1.5); }
-                    else if (p.state === 'shaking' && elapsed >= Math.max(200, 500 - (tier - 1) * 60)) { p.state = 'flying'; p.el.classList.remove('shaking'); let angle = Math.atan2(centerY - p.y, centerX - p.x); p.vx = Math.cos(angle) * flySpeed; p.vy = Math.sin(angle) * flySpeed; }
+                    if (p.state === 'waiting' && elapsed >= Math.max(1000, 2800 - (tier - 1) * 400)) { p.state = 'shaking'; p.stateTimer = now; p.el.classList.add('shaking'); playSound('error', 1.5); }
+                    else if (p.state === 'shaking' && elapsed >= 400) { p.state = 'flying'; p.el.classList.remove('shaking'); let angle = Math.atan2(centerY - p.y, centerX - p.x); p.vx = Math.cos(angle) * cfg.g3Speed; p.vy = Math.sin(angle) * cfg.g3Speed; }
                     else if (p.state === 'flying') {
                         p.x += p.vx; p.y += p.vy; p.el.style.left = p.x + 'px'; p.el.style.top = p.y + 'px';
                         if (Math.hypot(p.x - centerX, p.y - centerY) < 14) { p.el.remove(); stage3Projectiles.splice(i, 1); if (p.color === 'yellow') loseHalfLife(); else { aScore += 10; document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 0.5); } }
@@ -565,7 +575,7 @@
             }, duration);
         }
 
-        // MỖI LẦN CLICK BẠO PHÁT TÍNH ĐÚNG 3 ĐIỂM
+        // BẠO PHÁT TÍNH CHUẨN 3 ĐIỂM MỖI LẦN CLICK
         function fireBeam(clicks, blackoutBg) {
             let playArea = document.getElementById('play-area');
             let normalizedCps = Math.round((clicks / 7) * 10) / 10;
