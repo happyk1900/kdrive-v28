@@ -114,7 +114,7 @@
         .final-btn-exit:hover { background: #ff3366; color: #fff; }
 
         .orb { position: absolute; border-radius: 50%; cursor: crosshair; display: flex; justify-content: center; align-items: center; }
-        .orb-fire { width: 56px; height: 56px; background: radial-gradient(circle, #ffb700, #ff3333); box-shadow: 0 0 15px #ff3333; z-index: 10; }
+        .orb-fire { width: 56px; height: 56px; background: radial-gradient(circle, #ffdf70 10%, #ffb700 40%, #ff3333 80%); box-shadow: 0 0 18px #ff3333; z-index: 10; }
         .orb-ice { width: 56px; height: 56px; background: radial-gradient(circle, #ffffff, #00e5ff); box-shadow: 0 0 20px #00e5ff; z-index: 5; }
         .orb-purple { width: 56px; height: 56px; background: radial-gradient(circle, #ff66cc, #8a2be2); box-shadow: 0 0 20px #8a2be2; z-index: 5; }
         .orb-green { width: 56px; height: 56px; background: radial-gradient(circle, #bfff00, #00ff00); box-shadow: 0 0 20px #00ff00; z-index: 5; }
@@ -296,7 +296,6 @@
             'Thần Đồng': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%205%20(1).png?raw=true'
         };
 
-        // ĐIỂM THƯỞNG ẤN THƯỜNG THEO CẤP ĐỘ MỚI
         const TIER_POINTS = {
             1: 10, // Kém (<1000đ): +10đ
             2: 10, // Trung Bình (1000 - 1999đ): +10đ
@@ -305,7 +304,6 @@
             5: 80  // Thần Đồng (>= 4000đ): +80đ
         };
 
-        // THANG ĐIỂM CHUẨN KHẮT KHE MỚI
         function getRankNameByScore(score) {
             if (score >= 5000) return "Thần Đồng";
             if (score >= 4000) return "Xuất Sắc";
@@ -342,15 +340,15 @@
         let hitsCountG1 = 0, hitsCountG2 = 0; 
         let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, stabilityHP = 10;
         let bestCps = 0; let reactionTimes = []; 
-        let nextBurstMilestone = 500; // BẠO PHÁT TẠI 500, 1500, 2500...
+        let nextBurstMilestone = 500; 
         let lastAnnouncedTier = 1;
 
         const speedTiersMapping = {
-            1: { lifespan: 1100, delay: 700 }, 
-            2: { lifespan: 850,  delay: 500 }, 
-            3: { lifespan: 580,  delay: 350 }, 
-            4: { lifespan: 460,  delay: 280 }, 
-            5: { lifespan: 260,  delay: 150 }  
+            1: { lifespan: 1200, delay: 500 }, 
+            2: { lifespan: 950,  delay: 380 }, 
+            3: { lifespan: 700,  delay: 260 }, 
+            4: { lifespan: 520,  delay: 180 }, 
+            5: { lifespan: 320,  delay: 120 }  
         };
 
         function getCurrentSpeedTier() {
@@ -406,7 +404,7 @@
             if (id === '1') {
                 bTitle = "BÀI 1"; bTarget = "ĐO LƯỜNG PHẢN XẠ<br><br>Chạm để triệt tiêu mọi tụ điểm năng lượng xuất hiện.<br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Không bỏ lỡ hạt nào!";
             } else if (id === '2') {
-                bTitle = "BÀI 2"; bTarget = "BÃI MÌN ĐỘNG<br><br>Nhận diện Hạt Đỏ/Cam giữa ma trận bẫy nhiễu.<br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Quét mắt như radar, bấm diệt Hạt Đỏ ngay khi lóe lên. Tuyệt đối né hạt khác!";
+                bTitle = "BÀI 2"; bTarget = "BÃI MÌN ĐỘNG<br><br>Nhận diện Hạt Đỏ/Cam (Vàng Lửa) giữa ma trận bẫy.<br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Bão hạt xuất hiện liên tục. Bấm diệt Hạt Đỏ/Cam ngay khi lóe lên. Né hạt màu khác!";
             }
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
@@ -428,7 +426,7 @@
         }
 
         function pauseGame() { if(!isPlaying || isPausedForStart) return; playSound('error'); isPausedForStart = true; clearTimeout(spawnTimer); if(burstTimer) clearTimeout(burstTimer); document.getElementById('pause-menu-overlay').classList.add('active'); }
-        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; if(cGame === '1') spawnG1(); else if(cGame === '2') spawnG2(); }
+        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; if(cGame === '1') spawnG1(); else if(cGame === '2') spawnWaveG2(); }
         
         function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
         function closeArena() { window.location.href = 'LucChien.html'; }
@@ -476,13 +474,14 @@
                 clearTimeout(spawnTimer);
                 if(isPlaying && !isPausedForStart) {
                     if(cGame === '1') spawnG1();
-                    else if(cGame === '2') spawnG2();
+                    else if(cGame === '2') spawnSingleG2(true);
                 }
             }
         }
 
         function getSafeSpawns(playArea) { let maxX = playArea.clientWidth - 60; let maxY = playArea.clientHeight - 60; let minY = 75; return { px: 10 + Math.random() * Math.max(0, maxX - 10), py: minY + Math.random() * Math.max(0, maxY - minY) }; }
 
+        // BÀI 1: PHẢN XẠ ĐƠN LẺ POP LIÊN TỤC
         function runG1() { spawnG1(); }
         function spawnG1() {
             if(!isPlaying || isPausedForStart) return; 
@@ -500,7 +499,6 @@
                 let fel = document.createElement('div'); fel.className = `floating-ms ${msClass}`; fel.innerHTML = `${exactReaction}ms`; fel.style.left = px+28+'px'; fel.style.top = py+28+'px'; playArea.appendChild(fel); setTimeout(() => fel.remove(), 800);
                 
                 addScoreAndCheckMultiplier(); el.remove(); 
-                
                 clearTimeout(spawnTimer);
                 spawnG1(); 
             };
@@ -509,44 +507,108 @@
             setTimeout(() => { if(el.parentElement && !clicked) { el.remove(); if(isPlaying && !isPausedForStart) loseFullLife(); } }, cfg.lifespan);
         }
 
-        function runG2() { spawnG2(); }
-        function spawnG2() {
-            if(!isPlaying || isPausedForStart) return; 
+        // BÀI 2: BÃI MÌN BÃO HẠT - XUẤT HIỆN ĐỒNG THỜI 3-4 HẠT MỤC TIÊU VÀ NỔ LIÊN THANH
+        function runG2() { 
+            // Khởi động đợt bão đầu tiên: rải ngay 3-4 hạt vàng/đỏ mục tiêu + hạt bẫy
+            spawnWaveG2(); 
+        }
+
+        function spawnWaveG2() {
+            if(!isPlaying || isPausedForStart) return;
+            let playArea = document.getElementById('play-area');
+            let currentTargets = playArea.querySelectorAll('.orb-fire').length;
+
+            // Đảm bảo luôn duy trì từ 3 đến 4 hạt mục tiêu (Đỏ/Cam) trên màn hình
+            let needTargets = Math.max(0, 4 - currentTargets);
+            for(let i = 0; i < needTargets; i++) {
+                setTimeout(() => spawnSingleG2(true), i * 60);
+            }
+
+            // Kèm thêm 1-2 hạt bẫy nhiễu xung quanh
+            if (playArea.querySelectorAll('.orb').length < 16) {
+                spawnSingleG2(false);
+                if (Math.random() < 0.6) spawnSingleG2(false);
+            }
+
+            clearTimeout(spawnTimer);
             let tier = getCurrentSpeedTier();
             let cfg = speedTiersMapping[tier];
+            spawnTimer = setTimeout(spawnWaveG2, cfg.delay);
+        }
+
+        function spawnSingleG2(forceTarget = false) {
+            if(!isPlaying || isPausedForStart) return;
             let playArea = document.getElementById('play-area');
-            if (playArea.querySelectorAll('.orb').length > 12) { spawnTimer = setTimeout(spawnG2, 100); return; }
+            if (playArea.querySelectorAll('.orb').length >= 18) return;
 
             let { px, py } = getSafeSpawns(playArea);
-            let rand = Math.random(); 
-            let orbType = rand < 0.45 ? 'fire' : (rand < 0.6 ? 'ice' : (rand < 0.75 ? 'purple' : (rand < 0.9 ? 'green' : 'blue')));
-            let isTarget = (orbType === 'fire'); 
+            let isTarget = forceTarget;
+            let orbType = 'fire';
+
+            if (!forceTarget) {
+                let rand = Math.random();
+                if (rand < 0.4) {
+                    isTarget = true;
+                    orbType = 'fire';
+                } else if (rand < 0.6) {
+                    orbType = 'ice';
+                } else if (rand < 0.75) {
+                    orbType = 'purple';
+                } else if (rand < 0.9) {
+                    orbType = 'green';
+                } else {
+                    orbType = 'blue';
+                }
+            }
+
             let spawnTimestamp = Date.now();
-            
-            let el = document.createElement('div'); el.className = 'orb orb-' + orbType; el.style.left = px + 'px'; el.style.top = py + 'px';
+            let el = document.createElement('div'); 
+            el.className = 'orb orb-' + orbType; 
+            el.style.left = px + 'px'; 
+            el.style.top = py + 'px';
             let handled = false; 
-            
+
             el.onmousedown = el.ontouchstart = (e) => { 
-                e.preventDefault(); e.stopPropagation(); if(!isPlaying || isPausedForStart || handled) return; handled = true; 
+                e.preventDefault(); e.stopPropagation(); 
+                if(!isPlaying || isPausedForStart || handled) return; 
+                handled = true; 
+
                 if(isTarget) { 
-                    let exactReaction = Date.now() - spawnTimestamp; reactionTimes.push(exactReaction); 
+                    let exactReaction = Date.now() - spawnTimestamp; 
+                    reactionTimes.push(exactReaction); 
+
                     let msClass = exactReaction < 300 ? 'ms-fast' : 'ms-slow';
-                    let fel = document.createElement('div'); fel.className = `floating-ms ${msClass}`; fel.innerHTML = `${exactReaction}ms`; fel.style.left = px+28+'px'; fel.style.top = py+28+'px'; playArea.appendChild(fel); setTimeout(() => fel.remove(), 800); 
+                    let fel = document.createElement('div'); 
+                    fel.className = `floating-ms ${msClass}`; 
+                    fel.innerHTML = `${exactReaction}ms`; 
+                    fel.style.left = px+28+'px'; 
+                    fel.style.top = py+28+'px'; 
+                    playArea.appendChild(fel); 
+                    setTimeout(() => fel.remove(), 800); 
+
                     addScoreAndCheckMultiplier(); 
-                } else { loseFullLife(); } 
-                el.remove(); 
+                    el.remove();
+                    // BÙ NGAY HẠT MỤC TIÊU MỚI TỨC THÌ ĐỂ POP TIẾP KHÔNG NGỪNG TAY
+                    spawnSingleG2(true);
+                } else { 
+                    el.remove();
+                    loseFullLife(); 
+                } 
             };
             playArea.appendChild(el); 
 
-            let lifespan = cfg.lifespan;
-            if (!isTarget) lifespan += 400;
+            let tier = getCurrentSpeedTier();
+            let cfg = speedTiersMapping[tier];
+            let lifespan = isTarget ? cfg.lifespan : cfg.lifespan + 350;
 
-            setTimeout(() => { if(el.parentElement && !handled) { el.remove(); if(isTarget && isPlaying && !isPausedForStart) loseFullLife(); } }, lifespan);
-            
-            clearTimeout(spawnTimer);
-            if(isPlaying && !isPausedForStart) {
-                spawnTimer = setTimeout(spawnG2, cfg.delay);
-            }
+            setTimeout(() => { 
+                if(el.parentElement && !handled) { 
+                    el.remove(); 
+                    if(isTarget && isPlaying && !isPausedForStart) {
+                        loseFullLife(); 
+                    }
+                } 
+            }, lifespan);
         }
 
         function forceBurstMode() {
@@ -608,7 +670,13 @@
 
                 setTimeout(() => {
                     blackoutBg.classList.remove('active'); setTimeout(() => blackoutBg.remove(), 300);
-                    setTimeout(() => { isPausedForStart = false; if (isPlaying) { if(cGame === '1') spawnG1(); else if(cGame === '2') spawnG2(); } }, 1500);
+                    setTimeout(() => { 
+                        isPausedForStart = false; 
+                        if (isPlaying) { 
+                            if(cGame === '1') spawnG1(); 
+                            else if(cGame === '2') spawnWaveG2(); 
+                        } 
+                    }, 1500);
                 }, 1000);
             }, beamTime);
         }
