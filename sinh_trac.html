@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#050608">
     <title>Spades Node - Event Horizon Core</title>
-    <!-- Phông chữ chuẩn The Legend & Phông chữ Kanji Sắc Lẹm mới -->
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Noto+Serif+JP:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Yuji+Boku&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -13,11 +14,7 @@
             --amber: #ffaa00; --violet: #b026ff; --crimson: #ff2a2a;
             --neon-pink: #ff00ff; --lime: #39ff14;
             --font-display: 'Space Grotesk', sans-serif; 
-            --font-ui: 'Space Grotesk', sans-serif; 
-            --font-terminal: 'Space Grotesk', monospace;
-            --font-content: 'EB Garamond', serif; 
-            --font-jp: 'Yuji Boku', serif;
-            --font-sign: 'Great Vibes', cursive;
+            --font-terminal: 'Share Tech Mono', monospace;
             --vh: 1vh; 
         }
 
@@ -25,220 +22,52 @@
 
         body {
             background-color: var(--bg-obsidian); color: white;
-            font-family: var(--font-ui); overflow: hidden;
+            font-family: var(--font-display); overflow: hidden;
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); 
             display: flex; justify-content: center; align-items: center;
         }
 
-        /* LỒNG GIAM BOO & WIDGET (ĐƯA RA NGOÀI ĐỂ HIỂN THỊ TỪ TRẠM 0) */
-        #boo-cage { position: fixed; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; z-index: 999999; pointer-events: none; overflow: hidden; }
-        
-        /* HIỆU ỨNG HEO THAM LAM ALL-IN-ONE */
-        .floating-boo { 
-            position: absolute; top: 15%; right: 15px; width: 52px; height: 52px; 
-            background: rgba(10, 15, 25, 0.6); backdrop-filter: blur(8px); 
-            border-radius: 50%; display: flex; justify-content: center; align-items: center; 
-            cursor: pointer; animation: levitate 3s ease-in-out infinite; 
-            touch-action: none; pointer-events: auto;
-            /* Biến CSS động cho màu sắc và tiến trình */
-            --boo-ring-color: var(--neon-pink);
-            --idle-progress: 0%;
-            box-shadow: 0 0 15px var(--boo-ring-color); 
-            border: 1px solid var(--boo-ring-color);
-            transition: all 0.3s;
-        }
-        
-        /* Vòng đếm ngược (Conic Gradient) */
-        .floating-boo::before {
-            content: ''; position: absolute; inset: -4px; border-radius: 50%;
-            background: conic-gradient(var(--boo-ring-color) var(--idle-progress), transparent 0);
-            -webkit-mask: radial-gradient(closest-side, transparent 86%, black 88%);
-            transition: background 1s linear;
-            pointer-events: none;
-        }
-
-        /* Vòng Sóng Âm J.A.R.V.I.S đập thình thịch khi chửi */
-        .floating-boo.reading { 
-            animation: boo-pulse-wave 0.25s infinite alternate !important; 
-        }
-        @keyframes boo-pulse-wave {
-            0% { transform: scale(1); box-shadow: 0 0 10px var(--boo-ring-color); border-width: 1px; }
-            100% { transform: scale(1.15); box-shadow: 0 0 35px var(--boo-ring-color); border-width: 3px; }
-        }
-
-        /* Chế độ Ngủ đông: Viền xanh xám, nét đứt, nhịp thở, ẩn đếm ngược */
-        .floating-boo.sleeping {
-            --boo-ring-color: #3b82f6 !important; 
-            border-style: dashed;
-            animation: boo-breathe 2.5s ease-in-out infinite alternate !important;
-        }
-        .floating-boo.sleeping::before { display: none; }
-        @keyframes boo-breathe {
-            0% { transform: scale(0.95); opacity: 0.7; box-shadow: 0 0 5px var(--boo-ring-color); }
-            100% { transform: scale(1.02); opacity: 1; box-shadow: 0 0 20px var(--boo-ring-color); }
-        }
-
-        .boo-icon-inner { font-size: 22px; filter: drop-shadow(0 0 5px rgba(255, 0, 255, 0.8)); display: inline-block; }
-        .floating-boo.reading .boo-icon-inner { animation: pig-speak 0.15s infinite alternate; filter: drop-shadow(0 0 15px var(--boo-ring-color)) brightness(1.5); }
-        
-        /* Hiệu ứng bay Zzz trên đầu mũi heo */
-        .boo-zzz { 
-            position: absolute; top: -16px; right: 2px; 
-            font-family: var(--font-display); font-size: 14px; 
-            color: #3b82f6; font-weight: bold; text-shadow: 0 0 5px rgba(59, 130, 246, 0.8);
-            opacity: 0; pointer-events: none; transition: opacity 0.3s; 
-        }
-        .floating-boo.sleeping .boo-zzz { 
-            opacity: 1; animation: zzz-float 2s infinite ease-in-out; 
-        }
-
-        @keyframes levitate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        @keyframes pig-speak { 0% { transform: scale(1.1) rotate(-15deg); } 100% { transform: scale(1.3) rotate(15deg); } }
-        @keyframes zzz-float {
-            0% { transform: translateY(0) scale(0.8); opacity: 0.3; }
-            50% { transform: translateY(-8px) scale(1.1); opacity: 1; }
-            100% { transform: translateY(-16px) scale(1.2); opacity: 0; }
-        }
-
-        /* LỚP INTRO TRẠM 0 (ĐỊA LUÂN) */
-        #intro-layer { position: fixed; inset: 0; z-index: 100000; background: url('https://github.com/happyk1900/-m-thanh-app/blob/main/BOO%20DIA%20LUAN%20OK.png?raw=true') center/cover no-repeat; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 15%; transition: opacity 0.5s ease; overflow: hidden; background-position: center bottom; }
-        #intro-layer::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 10%, rgba(0,0,0,0.85) 100%); pointer-events: none; }
-        
-        /* NÚT BẤM KÍCH HOẠT */
-        .gatekeeper-wrapper { position: relative; z-index: 50; width: 100%; display: flex; justify-content: center; }
-        .gatekeeper-btn { 
-            background: linear-gradient(135deg, rgba(40, 20, 10, 0.9), rgba(15, 5, 0, 0.9)); 
-            color: var(--amber); padding: 18px 35px; font-family: var(--font-display); font-size: 15px; letter-spacing: 4px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; 
-            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); 
-            border: 1px solid rgba(255, 170, 0, 0.4); border-bottom: 3px solid rgba(255, 170, 0, 0.6);
-            box-shadow: inset 0 0 20px rgba(255, 170, 0, 0.1), 0 15px 30px rgba(0,0,0,0.9); 
-            text-align: center; text-shadow: 0 0 10px rgba(255, 170, 0, 0.6);
-        }
-        .gatekeeper-btn:active { transform: scale(0.95); box-shadow: inset 0 0 30px rgba(255, 170, 0, 0.3), 0 5px 10px rgba(0,0,0,0.9); border-color: var(--amber); color: #fff; }
-
-        /* NGHI THỨC KHỞI ĐỘNG VIDEO */
-        #ritual-layer { position: fixed; inset: 0; background: #000; z-index: 90000; display: none; }
-        #ritual-video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-        .btn-skip-ritual { position: absolute; bottom: 30px; right: 30px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); font-family: var(--font-display); font-size: 11px; letter-spacing: 2px; padding: 10px 15px; cursor: pointer; transition: all 0.3s; z-index: 90001; clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
-        .btn-skip-ritual:active { color: #fff; background: rgba(255,255,255,0.1); }
-
-        /* FULLSCREEN BACKGROUNDS (MAIN APP) */
+        /* BACKGROUNDS */
         .tactical-grid-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-obsidian); z-index: 1; perspective: 600px; overflow: hidden; }
         .grid-plane { position: absolute; width: 200vw; height: 200vh; left: -50vw; top: 0%; background-image: linear-gradient(rgba(0, 229, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.1) 1px, transparent 1px); background-size: 40px 40px; transform: rotateX(75deg); animation: grid-scroll 10s linear infinite; }
         .vignette { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; background: radial-gradient(circle at center, transparent 30%, #050608 90%); }
         @keyframes grid-scroll { 0% { background-position: 0 0; } 100% { background-position: 0 40px; } }
+        
         .particle-matrix { position: fixed; top: 50%; left: 50%; z-index: 3; width: 0; height: 0; }
         .particle-wrap { position: absolute; width: 2px; height: 250px; transform-origin: top center; top: 0; left: 0; }
         .particle { position: absolute; bottom: 100%; left: -1px; width: 3px; height: 3px; border-radius: 50%; opacity: 0; }
         @keyframes particle-inward { 0% { transform: translateY(200px); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.6; } 100% { transform: translateY(20px); opacity: 0; } }
+        
         .edge-lighting { position: fixed; inset: 0; z-index: 999; pointer-events: none; transition: box-shadow 1s ease, border 1s ease; box-shadow: inset 0 0 0px transparent; border: 0px solid transparent; }
         body.tier-shiro .edge-lighting { box-shadow: inset 0 0 50px rgba(255, 42, 42, 0.4); border: 2px solid rgba(255, 42, 42, 0.2); }
         body.tier-chairo .edge-lighting { box-shadow: inset 0 0 50px rgba(0, 229, 255, 0.3); border: 2px solid rgba(0, 229, 255, 0.2); }
         body.tier-kuro .edge-lighting { box-shadow: inset 0 0 70px rgba(255, 0, 255, 0.3); border: 2px solid rgba(255, 0, 255, 0.2); animation: edge-breathe 1.5s infinite alternate; }
         @keyframes edge-breathe { 0% { opacity: 0.7; } 100% { opacity: 1; box-shadow: inset 0 0 90px rgba(255, 0, 255, 0.5); border-width: 2px; } }
 
-        /* CONTAINER CHÍNH & ÉP HARDWARE ACCELERATION CHỐNG LỖI REPAINT */
-        .pwa-container, .data-panel, .live-radar-bar, .terminal-panel, .core-wrapper {
-            will-change: opacity, transform;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-        }
-        .pwa-container { margin: 0 auto; width: 100%; max-width: 420px; height: 100%; max-height: 900px; position: relative; background: transparent; display: flex; flex-direction: column; z-index: 10; display: none; opacity: 0; transition: opacity 0.5s ease; }
-        .top-row { position: relative; z-index: 100; padding: 15px 15px 10px; display: flex; justify-content: space-between; align-items: flex-start; }
-        .left-controls { display: flex; flex-direction: column; gap: 10px; }
-        .btn-exit, .btn-audio, .btn-chip { background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0,229,255,0.3); color: var(--cyan); transition: all 0.3s ease; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
-        .btn-exit { text-decoration: none; font-family: var(--font-display); font-size: 11px; font-weight: 500; letter-spacing: 1px; padding: 6px 14px; width: fit-content; }
-        .btn-audio, .btn-chip { padding: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; }
-        .btn-audio svg, .btn-chip svg { width: 18px; height: 18px; fill: currentColor; }
-        .btn-chip { display: none; color: var(--amber); border-color: var(--amber); background: rgba(255, 170, 0, 0.15); }
+        /* FORM KHỞI TẠO TỌA ĐỘ LÕI */
+        #onboarding-popup { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200000; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(12px); opacity: 0; transition: opacity 0.5s ease; }
+        #onboarding-popup.active { display: flex; opacity: 1; }
+        .cyber-led-wrapper { position: relative; padding: 1px; overflow: hidden; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
+        .cyber-led-wrapper::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, transparent, transparent, rgba(255,255,255,0.3)); animation: spin-led 4s linear infinite; }
+        @keyframes spin-led { 100% { transform: rotate(360deg); } }
+        .ob-box { width: 90vw; max-width: 360px; background: rgba(10, 15, 25, 0.95); padding: 30px 25px; text-align: center; position: relative; z-index: 1; min-height: 380px; display: flex; flex-direction: column; justify-content: center; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
+        .ob-title { font-family: var(--font-display); color: #fff; font-size: 16px; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase;}
+        .ob-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255,255,255,0.03); padding: 8px 15px; border: 1px solid rgba(255,255,255,0.05); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+        .ob-label { font-family: var(--font-terminal); color: rgba(255,255,255,0.6); font-size: 11px; text-transform: uppercase;}
+        .cyber-select { background: transparent; border: none; color: #fff; font-family: var(--font-display); font-size: 18px; text-align: right; width: 100px; outline: none; appearance: none; }
+        .cyber-select option { background: var(--bg-obsidian); color: #fff; }
+        .ob-btn { margin-top: auto; padding: 14px; font-family: var(--font-display); font-size: 12px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); text-transform: uppercase;}
+        .ob-btn:active { background: rgba(255,255,255,0.2); }
+        .fusion-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 25px; }
+        .fusion-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px 5px; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+        .fb-lbl { font-family: var(--font-terminal); font-size: 9px; color: rgba(255,255,255,0.5); text-transform: uppercase;}
+        .fb-val { font-family: var(--font-display); font-size: 20px; color: #fff; }
+
+        /* DASHBOARD LÕI */
+        .pwa-container { margin: 0 auto; width: 100%; max-width: 420px; height: 100%; position: relative; background: transparent; display: flex; flex-direction: column; z-index: 10; display: none; opacity: 0; transition: opacity 0.5s ease; }
         
-        .sys-info { text-align: right; font-size: 11px; font-weight: 400; letter-spacing: 1px; color: rgba(255,255,255,0.5); line-height: 1.4; }
-        .sys-info span { color: var(--cyan); font-weight: 600; }
-        .ctrl-group { display: flex; flex-direction: column; align-items: flex-end; margin-top: 10px; gap: 6px; }
-        
-        /* NÂNG CẤP Ô MUSHIN 1000 */
-        .streak-box { 
-            position: relative; overflow: hidden; 
-            border: 1px solid rgba(255, 255, 255, 0.3); 
-            background: rgba(10, 15, 25, 0.5); backdrop-filter: blur(5px);
-            color: #fff; padding: 4px 14px; 
-            font-family: var(--font-content); font-style: italic;
-            font-size: 13px; font-weight: 500; letter-spacing: 1px; 
-            cursor: pointer; 
-            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); 
-            transition: all 0.3s ease; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); text-align: center;
-            z-index: 1;
-        }
-        .streak-box::before {
-            content: ''; position: absolute; inset: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.25"/></svg>');
-            mix-blend-mode: overlay; pointer-events: none; z-index: -1;
-        }
-        .streak-box::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-            transform: skewX(-20deg); animation: sweep-light 3s infinite; z-index: -1; pointer-events: none;
-        }
-        @keyframes sweep-light { 0% { left: -100%; } 20%, 100% { left: 200%; } }
-
-        .streak-cleansing { 
-            border-color: rgba(255,255,255,0.8) !important; color: #ffffff !important; 
-            text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff; 
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.2) !important; 
-            background: rgba(255, 255, 255, 0.1) !important; 
-            animation: pulse-white 2s infinite alternate; 
-        }
-        @keyframes pulse-white { 
-            0% { box-shadow: 0 0 8px rgba(255, 255, 255, 0.3), inset 0 0 5px rgba(255, 255, 255, 0.1); } 
-            100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3); } 
-        }
-
-        .streak-mushin { 
-            border-color: rgba(176, 38, 255, 0.8) !important; color: #eed4ff !important; 
-            text-shadow: 0 0 5px var(--violet), 0 0 10px var(--violet); 
-            box-shadow: 0 0 15px rgba(176, 38, 255, 0.6), inset 0 0 10px rgba(176, 38, 255, 0.3) !important; 
-            background: rgba(176, 38, 255, 0.15) !important; 
-            animation: pulse-purple 2s infinite alternate; 
-        }
-        @keyframes pulse-purple { 
-            0% { box-shadow: 0 0 8px rgba(176, 38, 255, 0.4), inset 0 0 5px rgba(176, 38, 255, 0.2); } 
-            100% { box-shadow: 0 0 25px rgba(176, 38, 255, 0.9), inset 0 0 15px rgba(176, 38, 255, 0.5); } 
-        }
-
-        .alert-unsigned { animation: flash-unsigned 1.2s infinite ease-in-out !important; border: 1px solid var(--amber) !important; }
-        @keyframes flash-unsigned { 0%, 100% { background: rgba(255, 170, 0, 0.15); box-shadow: 0 0 12px rgba(255, 170, 0, 0.3); transform: scale(1); } 50% { background: rgba(255, 170, 0, 0.5); box-shadow: 0 0 25px var(--amber); transform: scale(1.05); color: #fff; } }
-
-        /* DANH XƯNG TIER LƠ LỬNG PHONG CÁCH "THE LEGEND" */
-        .banner-wrapper { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        
-        .status-banner { 
-            font-family: var(--font-content) !important; font-size: 24px !important; font-weight: 500 !important; font-style: italic !important;
-            letter-spacing: 1.5px !important; padding: 0 20px 5px !important; text-align: center !important; 
-            background: transparent !important; border: none !important; clip-path: none !important; 
-            transition: all 0.5s ease;
-            color: rgba(255,255,255,0.5); text-shadow: 0 0 8px rgba(255,255,255,0.2);
-        }
-        body.tier-shiro .status-banner { color: var(--crimson); text-shadow: 0 0 10px var(--crimson), 0 0 20px rgba(255,42,42,0.6); }
-        body.tier-chairo .status-banner { color: var(--cyan); text-shadow: 0 0 10px var(--cyan), 0 0 20px rgba(0,229,255,0.6); }
-        body.tier-kuro .status-banner { color: #eed4ff; text-shadow: 0 0 10px var(--violet), 0 0 25px var(--violet); }
-
-        .combat-marquee-box { display: flex; align-items: center; width: 92%; max-width: 360px; border: 1px solid var(--amber); background: rgba(255, 170, 0, 0.05); padding: 5px 12px; margin-top: 2px; cursor: pointer; text-decoration: none; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); transition: all 0.5s ease; box-sizing: border-box; }
-        .mq-icon-fixed { font-size: 15px; margin-right: 12px; flex-shrink: 0; animation: icon-heartbeat 0.8s infinite alternate; }
-        .mq-text-container { flex-grow: 1; overflow: hidden; white-space: nowrap; position: relative; -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); }
-        
-        .marquee-text { 
-            display: inline-block; padding-left: 100%; animation: marquee 20s linear infinite; 
-            font-family: var(--font-display); font-size: 11px; font-weight: 500; letter-spacing: 1.5px; 
-            color: #ffffff !important; 
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 255, 255, 0.5) !important;
-        }
-
-        @keyframes icon-heartbeat { 0% { transform: scale(0.9); } 100% { transform: scale(1.35); } }
-        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
-
-        /* KHU VỰC TÁC VỤ SCI */
-        .core-wrapper { position: relative; flex: 1; width: 100%; display: block; z-index: 10; min-height: 0; perspective: 1000px; }
+        .core-wrapper { position: relative; flex: 1; width: 100%; display: block; z-index: 10; perspective: 1000px; }
         .arc-reactor { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 340px; height: 340px; display: flex; justify-content: center; align-items: center; transform-style: preserve-3d; transition: opacity 1.5s ease; }
         .ring-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; z-index: 5; transition: all 1.5s ease; }
         .orb-group { transform-origin: 170px 170px; transition: all 1s ease; }
@@ -258,20 +87,22 @@
 
         /* VÂN TAY FLEX-CENTER */
         .fingerprint-wrapper { width: 50px; height: 50px; display: none; justify-content: center; align-items: center; z-index: 20; position: relative; }
-        .fingerprint-wrapper svg { width: 100%; height: 100%; stroke: var(--violet); filter: drop-shadow(0 0 8px var(--violet)); }
+        .fingerprint-wrapper svg { width: 100%; height: 100%; stroke: var(--cyan); filter: drop-shadow(0 0 8px var(--cyan)); }
         .fp-scanner-line { position: absolute; width: 120%; height: 3px; background: var(--mint); box-shadow: 0 0 15px 3px var(--mint); left: -10%; border-radius: 50%; display: none; }
         
         .sci-val { font-family: var(--font-display); font-size: 34px; font-weight: 600; color: var(--violet); text-shadow: 0 0 15px rgba(176,38,255,0.5); letter-spacing: 2px; z-index: 2; }
-        .sci-lbl { font-size: 10px; font-weight: 300; color: #fff; letter-spacing: 1px; opacity: 0.6; position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); }
+        .sci-lbl { font-family: var(--font-terminal); font-size: 10px; font-weight: 300; color: #fff; letter-spacing: 1px; opacity: 0.6; position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); }
 
         body.tier-shiro .ring { stroke-dasharray: 2 30 !important; stroke: var(--crimson) !important; filter: drop-shadow(0 0 3px var(--crimson)); }
         body.tier-shiro .sci-val { color: var(--crimson); text-shadow: 0 0 10px var(--crimson); }
         body.tier-shiro .orb-cw { animation: spin-cw 30s linear infinite; } body.tier-shiro .orb-ccw { animation: spin-ccw 35s linear infinite; }
+        
         body.tier-chairo .ring { stroke-dasharray: 2000 !important; stroke: var(--cyan) !important; filter: drop-shadow(0 0 3px var(--cyan)); }
         body.tier-chairo .ring-phys, body.tier-chairo .ring-rec { stroke: var(--mint) !important; filter: drop-shadow(0 0 3px var(--mint)); }
         body.tier-chairo .plasma-node { opacity: 1; fill: #fff; filter: drop-shadow(0 0 6px #fff); } 
         body.tier-chairo .sci-val { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
         body.tier-chairo .orb-cw { animation: spin-cw 10s linear infinite; } body.tier-chairo .orb-ccw { animation: spin-ccw 12s linear infinite; }
+        
         body.tier-kuro .ring { stroke-dasharray: 2000 !important; stroke: var(--neon-pink) !important; filter: drop-shadow(0 0 8px var(--neon-pink)); stroke-width: 2; }
         body.tier-kuro .ring-phys, body.tier-kuro .ring-rec { stroke: var(--violet) !important; filter: drop-shadow(0 0 8px var(--violet)); }
         body.tier-kuro .plasma-node { opacity: 1; fill: #fff; filter: drop-shadow(0 0 12px #fff); r: 5.5; }
@@ -280,51 +111,12 @@
         @keyframes kuro-pulse { 0% { box-shadow: inset 0 0 20px rgba(255, 0, 255, 0.3); } 100% { box-shadow: inset 0 0 40px rgba(255, 0, 255, 0.6); } }
         body.tier-kuro .orb-cw { animation: spin-cw 3s linear infinite; } body.tier-kuro .orb-ccw { animation: spin-ccw 4s linear infinite; }
 
-        body.pre-scan-locked .sci-lbl, body.pre-scan-locked .fingerprint-wrapper, body.pre-scan-locked #val-sci, body.pre-scan-locked .banner-wrapper { opacity: 0 !important; pointer-events: none !important; }
-        body.pre-scan-locked .sci-nexus { pointer-events: none !important; }
-        body.uncommitted .safety-hud-box { display: none !important; }
-
-        .safety-hud-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); height: fit-content; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5, 6, 8, 0.7); border: 1px solid rgba(255, 170, 0, 0.3); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); padding: 20px 15px; backdrop-filter: blur(12px); clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); transition: all 0.5s ease; width: 90%; max-width: 340px; }
-        .safety-hud-box.unlocked { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(1.1); display: none !important; }
-        .hud-cond { font-family: var(--font-terminal); font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 12px; text-align: left; width: 100%; display: flex; gap: 8px; font-weight: 300; }
-        .hud-cond span.prefix { color: var(--amber); font-weight: 500; }
-        .safety-lock-btn { margin-top: 5px; border: 1px solid rgba(57, 255, 20, 0.5); background: rgba(57, 255, 20, 0.05); color: var(--lime); font-family: var(--font-display); font-size: 12px; font-weight: 500; padding: 10px; cursor: pointer; text-align: center; width: 100%; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
-
-        /* 6 CHỈ SỐ CSS */
-        .data-panel { position: absolute; z-index: 15; padding: 8px 15px; cursor: pointer; transition: transform 0.2s, opacity 1.5s ease; background: linear-gradient(90deg, rgba(8, 9, 13, 0.7), transparent); border-left: 2px solid; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px; min-width: 80px; }
-        .data-panel:active { transform: scale(0.95); }
-        .dp-right { border-left: none; border-right: 2px solid; text-align: right; background: linear-gradient(270deg, rgba(8, 9, 13, 0.7), transparent); align-items: flex-end; }
-        .dp-val { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1; }
-        .dp-lbl { font-size: 9px; font-weight: 400; color: rgba(255,255,255,0.6); letter-spacing: 1.5px; text-transform: uppercase; }
-        
-        .pos-hr { top: 22%; left: 5%; border-color: var(--crimson); } .pos-hr .dp-val { color: var(--crimson); text-shadow: 0 0 5px rgba(255,42,42,0.5); }
-        .pos-phys1 { top: 50%; left: 5%; transform: translateY(-50%); border-color: var(--mint); } .pos-phys1 .dp-val { color: var(--mint); text-shadow: 0 0 5px rgba(0,255,157,0.5); }
-        .pos-rec1 { top: 78%; left: 5%; transform: translateY(-100%); border-color: var(--cyan); } .pos-rec1 .dp-val { color: var(--cyan); text-shadow: 0 0 5px rgba(0,229,255,0.5); }
-        .pos-phys2 { top: 22%; right: 5%; border-color: var(--mint); } .pos-phys2 .dp-val { color: var(--mint); text-shadow: 0 0 5px rgba(0,255,157,0.5); }
-        .pos-rec2 { top: 50%; right: 5%; transform: translateY(-50%); border-color: var(--cyan); } .pos-rec2 .dp-val { color: var(--cyan); text-shadow: 0 0 5px rgba(0,229,255,0.5); }
-        .pos-move { top: 78%; right: 5%; transform: translateY(-100%); border-color: var(--amber); } .pos-move .dp-val { color: var(--amber); text-shadow: 0 0 5px rgba(255,170,0,0.5); }
-        
-        /* THANH ALERT ĐỔI TÊN LOẠI BỎ DẤU (-) */
-        .live-radar-bar { position: relative; z-index: 10; margin: 0 10px 5px; padding: 6px 12px; background: rgba(57, 255, 20, 0.05); border: 1px solid rgba(57, 255, 20, 0.2); border-left: 3px solid var(--lime); font-family: var(--font-terminal); font-size: 11px; display: flex; align-items: center; opacity: 0; display: none; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
-        .live-radar-bar.active { opacity: 1; display: flex; }
-        .live-pulse { color: var(--lime); animation: pulse-lime 1.2s infinite alternate; margin-right: 12px; font-weight: 500; text-transform: uppercase; }
-        .live-metrics { color: rgba(255,255,255,0.8); display: flex; gap: 8px; flex-wrap: wrap; font-size: 10px; font-weight: 300; }
-        .metric-item { display: inline-flex; align-items: center; background: rgba(0,0,0,0.3); padding: 2px 6px; border: 1px solid rgba(255,255,255,0.1); }
-        @keyframes pulse-lime { 0% { opacity: 0.6; } 100% { opacity: 1; text-shadow: 0 0 8px var(--lime); } }
-
-        /* TERMINAL CHỮ TRẮNG ÁNH KIM - ĐỘ TƯƠNG PHẢN CAO */
-        .terminal-panel { position: relative; z-index: 10; margin: 0 10px 20px; padding: 25px 15px 12px; background: rgba(0, 229, 255, 0.03); border: 1px solid rgba(0, 229, 255, 0.15); border-bottom: 3px solid var(--cyan); backdrop-filter: blur(5px); min-height: 125px; clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%); }
-        .terminal-header { position: absolute; top: 0; left: 0; width: 100%; font-size: 10px; color: rgba(255,255,255,0.8); background: rgba(0, 229, 255, 0.1); padding: 6px 15px; font-weight: 500; border-bottom: 1px solid rgba(0, 229, 255, 0.2); clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%); cursor: pointer;}
-        
-        .typewriter { font-family: var(--font-terminal); font-weight: 400; font-size: 11.5px; line-height: 1.6; color: #ffffff; text-shadow: 0 0 4px rgba(255,255,255,0.5); display: inline; }
-        .term-prompt { color: rgba(255,255,255,0.7); } 
-        .term-tag { color: var(--cyan); text-shadow: 0 0 5px var(--cyan); }
-        .cursor { display: inline-block; width: 6px; height: 12px; background-color: rgba(255,255,255,0.5); animation: blink 1s step-end infinite; margin-left: 4px; }
-
-        body.standby-mode .data-panel, body.standby-mode .live-radar-bar { opacity: 0.05; pointer-events: none; filter: grayscale(1); }
+        /* CÁC CHẾ ĐỘ HIỂN THỊ CỦA LÕI */
+        body.standby-mode .data-panel, body.standby-mode .live-radar-bar { opacity: 0.1; pointer-events: none; filter: grayscale(1); }
         body.standby-mode .ring-svg { opacity: 0.15; }
         body.standby-mode .plasma-node { opacity: 0; }
         body.standby-mode #val-sci { display: none; }
+        body.standby-mode .sci-lbl { display: none; }
         body.standby-mode .fingerprint-wrapper { display: flex; animation: pulse-fp 2s infinite alternate; }
         @keyframes pulse-fp { 0% { opacity: 0.3; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1.05); } }
 
@@ -339,317 +131,65 @@
 
         @keyframes spin-cw { 100% { transform: rotate(360deg); } }
         @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* BÍ LỤC VÀ HOLOGRAMS */
-        .holo-popup { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 60; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-        .holo-popup.active { opacity: 1; pointer-events: auto; }
-        .holo-box { width: 92%; max-width: 400px; background: rgba(10, 15, 25, 0.85); padding: 25px 20px; border: 1px solid rgba(255,255,255,0.1); text-align: center; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
-        .holo-title { font-family: var(--font-display); font-size: 16px; font-weight: 500; margin-bottom: 12px; }
-        .holo-desc { font-family: var(--font-content); font-size: 16px; font-weight: 400; color: #d1d5db; margin-bottom: 15px; line-height: 1.6; text-align: left; }
-        .btn-close-holo { width: 100%; padding: 12px; font-family: var(--font-display); font-size: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); text-transform: uppercase; }
-
-        /* NÂNG CẤP BÍ LỤC */
-        .rank-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 8, 15, 0.85); backdrop-filter: blur(15px); z-index: 50; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s; padding-bottom: 80px; align-items: center; }
-        .rank-overlay.active { transform: translateY(0); }
-        .rank-header { width: 100%; max-width: 420px; padding: 25px 20px 15px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .rank-header h2 { font-family: var(--font-display); color: rgba(255,255,255,0.9); font-size: 16px; letter-spacing: 3px; text-transform: uppercase; }
-        .tier-list { width: 100%; max-width: 420px; flex-grow: 1; overflow-y: auto; padding: 20px; scrollbar-width: none; }
-        .tier-item { position: relative; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 14px; background: rgba(20, 25, 40, 0.4); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+        /* 6 CHỈ SỐ CSS */
+        .data-panel { position: absolute; z-index: 15; padding: 8px 15px; transition: transform 0.2s, opacity 1.5s ease; background: linear-gradient(90deg, rgba(8, 9, 13, 0.7), transparent); border-left: 2px solid; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px; min-width: 80px; }
+        .dp-right { border-left: none; border-right: 2px solid; text-align: right; background: linear-gradient(270deg, rgba(8, 9, 13, 0.7), transparent); align-items: flex-end; }
+        .dp-val { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1; }
+        .dp-lbl { font-size: 9px; font-weight: 400; color: rgba(255,255,255,0.6); letter-spacing: 1.5px; font-family: var(--font-terminal); text-transform: uppercase; }
         
-        .tier-btn { width: 100%; background: transparent; padding: 18px 15px; text-align: left; font-family: var(--font-content); font-size: 18px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #e2e8f0; border: none; outline: none; }
-        .tier-prefix { color: rgba(255,255,255,0.5); font-style: italic; margin-right: 6px; text-transform: uppercase;}
-        .tier-name { color: #fff; font-weight: 500; letter-spacing: 1px; }
-
-        .tier-core { border-left: 2px solid rgba(255,255,255,0.4); }
-        .tier-shiro { border-left: 2px solid rgba(255, 42, 42, 0.5); }
-        .tier-chairo { border-left: 2px solid rgba(255, 170, 0, 0.5); }
-        .tier-kuro { border-left: 2px solid rgba(176, 38, 255, 0.5); }
-        .tier-void { border-left: 2px solid rgba(0, 229, 255, 0.5); }
-        .tier-dao { border-left: 2px solid rgba(0, 255, 157, 0.5); }
-
-        .tier-content { padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; font-family: var(--font-content); font-size: 16px; font-weight: 300; color: #d1d5db; line-height: 1.8; opacity: 0; }
-        .tier-content.open { max-height: 1200px; padding-bottom: 20px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px; opacity: 1; }
-        .tier-content p { margin-bottom: 14px; text-align: justify; } 
-        .tier-content strong { color: #fff; font-weight: 500; font-style: italic; }
-        .directive-line { font-family: var(--font-content); font-size: 15px; font-style: italic; padding-bottom: 6px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); text-transform: uppercase; }
-
-        .btn-play-lore { background: transparent; border: none; font-size: 18px; cursor: pointer; filter: drop-shadow(0 0 5px rgba(255, 0, 255, 0.6)); }
-
-        .rank-footer { position: absolute; bottom: 0; left: 0; width: 100vw; padding: 15px 20px calc(20px + env(safe-area-bottom)); background: rgba(5,6,8,0.95); display: flex; justify-content: center; z-index: 55;}
-        .hold-btn { width: 100%; max-width: 420px; padding: 16px; font-family: var(--font-display); font-size: 12px; font-weight: 500; letter-spacing: 2px; position: relative; cursor: pointer; touch-action: none; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
-        .hold-btn.state-sign { border: 1px solid rgba(255,255,255,0.3); color: #fff; background: rgba(255,255,255,0.05); }
-        .hold-btn.state-abort { border: 1px solid rgba(255, 42, 42, 0.4); color: rgba(255, 42, 42, 0.9); background: rgba(255, 42, 42, 0.05); }
-        .hold-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; z-index: -1; background: rgba(255,255,255,0.2); transition: background 0.3s; }
-
-        /* =======================================================
-           BÍ LỤC: CỤM TITLE VÀ HIỆU ỨNG RỈ MÁU CHUẨN XÁC
-           ======================================================= */
-        .bushido-signature { text-align: center; margin: 30px auto 10px; padding: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+        .pos-hr { top: 22%; left: 5%; border-color: var(--crimson); } .pos-hr .dp-val { color: var(--crimson); text-shadow: 0 0 5px rgba(255,42,42,0.5); }
+        .pos-phys1 { top: 50%; left: 5%; transform: translateY(-50%); border-color: var(--mint); } .pos-phys1 .dp-val { color: var(--mint); text-shadow: 0 0 5px rgba(0,255,157,0.5); }
+        .pos-rec1 { top: 78%; left: 5%; transform: translateY(-100%); border-color: var(--cyan); } .pos-rec1 .dp-val { color: var(--cyan); text-shadow: 0 0 5px rgba(0,229,255,0.5); }
+        .pos-phys2 { top: 22%; right: 5%; border-color: var(--mint); } .pos-phys2 .dp-val { color: var(--mint); text-shadow: 0 0 5px rgba(0,255,157,0.5); }
+        .pos-rec2 { top: 50%; right: 5%; transform: translateY(-50%); border-color: var(--cyan); } .pos-rec2 .dp-val { color: var(--cyan); text-shadow: 0 0 5px rgba(0,229,255,0.5); }
+        .pos-move { top: 78%; right: 5%; transform: translateY(-100%); border-color: var(--amber); } .pos-move .dp-val { color: var(--amber); text-shadow: 0 0 5px rgba(255,170,0,0.5); }
         
-        /* Chữ Kanji đen bóng mờ, xẹt ánh sáng trắng cực sắc */
-        .kanji-shine { 
-            font-family: 'Noto Serif JP', serif; 
-            font-size: 44px; 
-            font-weight: 900; 
-            letter-spacing: 16px; margin-right: -16px; 
-            color: transparent; 
-            background: linear-gradient(110deg, #111 35%, #ffffff 50%, #111 65%); 
-            background-size: 200% auto; 
-            -webkit-background-clip: text; 
-            animation: katana-slash 3.5s cubic-bezier(0.8, 0, 0.2, 1) infinite; 
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.8)); 
-        }
-        @keyframes katana-slash { 
-            0% { background-position: 200% center; } 
-            20% { background-position: -50% center; } 
-            100% { background-position: -50% center; } 
-        }
+        /* THANH ALERT */
+        .live-radar-bar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; width: 90%; max-width: 380px; padding: 10px 15px; background: rgba(57, 255, 20, 0.05); border: 1px solid rgba(57, 255, 20, 0.2); border-left: 3px solid var(--lime); font-family: var(--font-terminal); display: flex; align-items: flex-start; flex-direction: column; gap: 6px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); transition: all 0.5s ease;}
+        .radar-header { font-size: 13px; font-weight: bold; display: flex; align-items: center; width: 100%; color: var(--lime); animation: pulse-lime 1.2s infinite alternate; text-transform: uppercase; }
+        .live-metrics { color: rgba(255,255,255,0.8); display: flex; gap: 8px; flex-wrap: wrap; font-size: 11px; font-weight: 300; width: 100%;}
+        .metric-item { display: inline-flex; align-items: center; background: rgba(0,0,0,0.5); padding: 4px 8px; border: 1px solid rgba(255,255,255,0.1); }
+        @keyframes pulse-lime { 0% { opacity: 0.6; } 100% { opacity: 1; text-shadow: 0 0 8px var(--lime); } }
 
-        /* Chữ BUSHIDO cách đều, 1 giọt máu chảy xuống từ chữ H (Giữ nguyên theo yêu cầu) */
-        .eng-sub { 
-            display: flex; justify-content: center; gap: 12px;
-            font-size: 13px; color: #b30000; margin-top: 12px; 
-            font-family: var(--font-display); font-weight: 700; 
-            text-shadow: 0 0 8px rgba(255, 0, 0, 0.5); 
-        }
-        .drip-target { position: relative; color: #ff2a2a; text-shadow: 0 0 12px rgba(255,42,42,0.8); }
-        .drip-target::after {
-            content: ''; position: absolute;
-            width: 1.5px; background: linear-gradient(to bottom, #800000, #ff1a1a);
-            left: 50%; top: 85%; transform: translateX(-50%);
-            border-radius: 1px;
-            animation: true-blood-drop 3s ease-in infinite;
-        }
-        @keyframes true-blood-drop {
-            0% { height: 0px; transform: translate(-50%, 0); opacity: 1; }
-            15% { height: 14px; transform: translate(-50%, 0); opacity: 1; }
-            40% { height: 4px; transform: translate(-50%, 18px); opacity: 0; }
-            100% { height: 0px; transform: translate(-50%, 18px); opacity: 0; }
-        }
-
-        /* =======================================================
-           BUSHIDO FULLSCREEN OVERLAY
-           ======================================================= */
-        .bushido-fs-overlay { position: fixed; inset: 0; background: #000; z-index: 999999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 1s ease; overflow: hidden; }
-        .bushido-fs-overlay.active { opacity: 1; pointer-events: auto; }
-        
-        /* Hiệu ứng 3 nền slide chớp chéo */
-        .bushido-bg-slider { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-        .bg-slide { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; filter: brightness(0.3) grayscale(0.5); transition: opacity 2s ease; }
-        .bg-slide-1 { background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/Bushido%201.png?raw=true'); opacity: 1; }
-        .bg-slide-2 { background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/Bushido%202.png?raw=true'); }
-        .bg-slide-3 { background-image: url('https://github.com/happyk1900/-m-thanh-app/blob/main/Bushido%203.png?raw=true'); }
-
-        .bushido-fs-overlay.awakened .bg-slide-1 { animation: slideFade1 36s infinite; }
-        .bushido-fs-overlay.awakened .bg-slide-2 { animation: slideFade2 36s infinite; }
-        .bushido-fs-overlay.awakened .bg-slide-3 { animation: slideFade3 36s infinite; }
-
-        @keyframes slideFade1 { 0%, 26% { opacity: 1; } 33%, 93% { opacity: 0; } 100% { opacity: 1; } }
-        @keyframes slideFade2 { 0%, 26%, 100% { opacity: 0; } 33%, 60% { opacity: 1; } 66% { opacity: 0; } }
-        @keyframes slideFade3 { 0%, 60% { opacity: 0; } 66%, 93% { opacity: 1; } 100% { opacity: 0; } }
-
-        .slogan-container-fs { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 4; transition: opacity 0.5s; }
-        .slogan-vi-fs { font-family: var(--font-content); font-size: 22px; font-style: italic; color: rgba(255,255,255,0.8); letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,255,255,0.3); white-space: nowrap; }
-
-        /* Lớp sương mù mờ dần ở 2/3 trên */
-        .fade-mask-fs { 
-            position: absolute; inset: 0; 
-            -webkit-mask-image: linear-gradient(to bottom, transparent 10%, black 25%, black 75%, transparent 95%); 
-            z-index: 5; opacity: 0; pointer-events: none; overflow: hidden; display: block; 
-        }
-        
-        /* Trục trôi của chữ: Xuất phát từ tàng hình tận đáy 100vh và trôi biến mất hoàn toàn */
-        .scrolling-wrapper { 
-            position: absolute; width: 90%; max-width: 500px; left: 50%; 
-            top: 100vh; /* Bắt đầu từ tận đáy */
-            transform: translateX(-50%);
-        }
-        .scroll-track { display: flex; flex-direction: column; }
-        .scroll-block { display: flex; flex-direction: column; gap: 50px; }
-        
-        .bushido-fs-overlay.awakened .scrolling-wrapper { 
-            animation: scrollUpBloodFs 50s linear infinite; 
-        }
-        @keyframes scrollUpBloodFs { 
-            0% { transform: translateX(-50%) translateY(0); } 
-            100% { transform: translateX(-50%) translateY(calc(-100vh - 100%)); } 
-        }
-
-        /* Chữ Bushido Ánh Kim Sang Trọng (Font Great Vibes) */
-        .blood-title-fs { 
-            text-align: center; font-family: var(--font-sign); font-size: 64px; 
-            color: transparent; 
-            background: linear-gradient(120deg, #b0bec5 0%, #ffffff 40%, #e0e0e0 50%, #ffffff 60%, #b0bec5 100%);
-            background-size: 200% auto; -webkit-background-clip: text;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.1); 
-            text-transform: capitalize; animation: katana-shine 3s linear infinite;
-        }
-        @keyframes katana-shine { to { background-position: 200% center; } }
-
-        /* Tiêu đề phần giãn cách không rớt dòng */
-        .blood-stanza-fs { text-align: center; }
-        .zen-title { 
-            font-family: var(--font-content); font-size: 16px; font-style: italic; 
-            letter-spacing: 3px; color: rgba(255,42,42,0.9); margin-bottom: 12px; 
-            text-shadow: 0 0 5px rgba(255,42,42,0.4); 
-            white-space: nowrap; text-align: center; text-transform: uppercase; 
-        }
-        .blood-stanza-fs .vi { font-family: var(--font-content); font-size: 16px; color: rgba(255,255,255,0.8); line-height: 1.7; text-align: justify; padding: 0 20px; }
-        .btn-exit-fs { position: absolute; top: 25px; right: 25px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); padding: 10px 18px; font-family: var(--font-display); font-size: 11px; z-index: 10; cursor: pointer; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); text-transform: uppercase;}
-
-        /* KHUNG XEM ẢNH FULLSCREEN */
-        .img-viewer { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); z-index: 9999999; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .img-viewer.active { display: flex; }
-        .img-viewer img { max-width: 90vw; max-height: 70vh; border: 2px solid var(--cyan); box-shadow: 0 0 30px rgba(0, 229, 255, 0.3); border-radius: 8px; object-fit: contain; }
-        .btn-close-img { margin-bottom: 20px; padding: 12px 24px; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--cyan); color: var(--cyan); font-family: var(--font-display); font-size: 14px; font-weight: bold; letter-spacing: 2px; cursor: pointer; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); transition: all 0.3s ease; text-transform: uppercase;}
-        .btn-close-img:active { transform: scale(0.95); background: var(--cyan); color: #000; }
-
-        /* FORM NHẬP DỮ LIỆU SINH TRẮC LÕI */
-        #onboarding-popup { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200000; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; backdrop-filter: blur(12px); }
-        #onboarding-popup.active { opacity: 1; pointer-events: auto; }
-        .cyber-led-wrapper { position: relative; padding: 1px; overflow: hidden; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
-        .cyber-led-wrapper::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, transparent, transparent, rgba(255,255,255,0.3)); animation: spin-led 4s linear infinite; }
-        @keyframes spin-led { 100% { transform: rotate(360deg); } }
-        .ob-box { width: 90vw; max-width: 360px; background: rgba(10, 15, 25, 0.95); padding: 30px 25px; text-align: center; position: relative; z-index: 1; min-height: 380px; display: flex; flex-direction: column; justify-content: center; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
-        .ob-title { font-family: var(--font-display); color: #fff; font-size: 16px; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase;}
-        .ob-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255,255,255,0.03); padding: 8px 15px; border: 1px solid rgba(255,255,255,0.05); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
-        .ob-label { font-family: var(--font-terminal); color: rgba(255,255,255,0.6); font-size: 11px; text-transform: uppercase;}
-        .cyber-select { background: transparent; border: none; color: #fff; font-family: var(--font-display); font-size: 18px; text-align: right; width: 100px; outline: none; appearance: none; }
-        .cyber-select option { background: var(--bg-obsidian); color: #fff; }
-        .ob-btn { margin-top: auto; padding: 14px; font-family: var(--font-display); font-size: 12px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); text-transform: uppercase;}
-        .fusion-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 25px; }
-        .fusion-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px 5px; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
-        .fb-lbl { font-family: var(--font-terminal); font-size: 9px; color: rgba(255,255,255,0.5); text-transform: uppercase;}
-        .fb-val { font-family: var(--font-display); font-size: 20px; color: #fff; }
-        
-        /* =======================================================
-           HỘP THẺ CHIẾN ĐẤU (CARD VAULT) & MÃ ẤN QUYẾT (J.A.R.V.I.S x Miyamoto)
-           ======================================================= */
-        
-        /* POPUP MÃ ẤN QUYẾT THE LEGEND */
-        .passcode-container { width: 85%; max-width: 320px; background: rgba(5, 8, 15, 0.6); padding: 40px 25px; border: 1px solid rgba(255,170,0,0.2); border-radius: 12px; text-align: center; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.8); backdrop-filter: blur(15px); }
-        .passcode-title { font-family: var(--font-content); font-size: 28px; font-style: italic; color: var(--amber); text-shadow: 0 0 15px rgba(255,170,0,0.6); margin-bottom: 25px; font-weight: 500; letter-spacing: 2px; }
-        .cyber-input { background: transparent; border: none; border-bottom: 2px solid rgba(255,170,0,0.5); color: var(--amber); font-family: var(--font-terminal); font-size: 32px; text-align: center; width: 160px; padding: 5px; margin: 0 auto 20px; display: block; letter-spacing: 15px; outline: none; transition: border-color 0.3s, text-shadow 0.3s; }
-        .cyber-input:focus { border-bottom-color: var(--amber); text-shadow: 0 0 10px var(--amber); }
-        .cyber-input::placeholder { color: rgba(255,170,0,0.2); letter-spacing: 15px; }
-        .passcode-warning { font-family: var(--font-terminal); font-size: 11px; color: rgba(255,255,255,0.6); letter-spacing: 1px; transition: color 0.3s; }
-
-        /* KHO THẺ CHIẾN ĐẤU */
-        .vault-container { width: 92%; max-width: 400px; background: rgba(10, 15, 25, 0.95); padding: 25px 20px; border: 1px solid rgba(255,170,0,0.3); border-radius: 8px; box-shadow: 0 15px 40px rgba(0,0,0,0.8); display: flex; flex-direction: column; gap: 15px; position: relative; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
-        .vault-header { font-family: var(--font-display); font-size: 16px; color: var(--amber); text-align: center; letter-spacing: 3px; border-bottom: 1px solid rgba(255,170,0,0.2); padding-bottom: 10px; text-transform: uppercase;}
-        
-        .vault-card { position: relative; display: flex; align-items: center; padding: 12px 15px; border-radius: 6px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; cursor: pointer; transition: transform 0.2s; user-select: none; }
-        .vault-card:active:not(.locked) { transform: scale(0.98); }
-        
-        /* Thẻ Gold (Vô Địch Thế Giới) */
-        .gold-card { flex-direction: column; text-align: center; padding: 20px; border-color: rgba(255, 215, 0, 0.6); background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.15)); margin-bottom: 10px; }
-        .gold-card:not(.locked) { animation: pulse-gold 2s infinite alternate; }
-        @keyframes pulse-gold { 0% { box-shadow: 0 0 10px rgba(255,215,0,0.2), inset 0 0 15px rgba(255,215,0,0.1); } 100% { box-shadow: 0 0 25px rgba(255,215,0,0.6), inset 0 0 20px rgba(255,215,0,0.3); } }
-        .gold-card .card-icon { font-size: 36px; filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)); margin-bottom: 5px; }
-        .gold-card .card-title { font-family: var(--font-content); font-style: italic; font-size: 22px; color: #ffd700; font-weight: 600; letter-spacing: 2px; }
-        .gold-card .card-desc { font-family: var(--font-display); font-size: 9px; color: rgba(255,255,255,0.7); letter-spacing: 2px; text-transform: uppercase; margin-top: 5px; }
-        
-        /* Kho Thực chiến */
-        .vault-arsenal { display: flex; flex-direction: column; gap: 10px; }
-        .card-icon { font-size: 20px; margin-right: 15px; z-index: 2;}
-        .card-info { flex-grow: 1; z-index: 2;}
-        .card-name { font-family: var(--font-display); font-size: 12px; color: #fff; letter-spacing: 1px; font-weight: 500;}
-        .card-count { font-family: var(--font-terminal); font-size: 9px; color: rgba(255,255,255,0.5); margin-top: 3px; }
-        
-        /* Hiệu ứng Glow cho Thẻ Đạt Yêu Cầu */
-        .s-card { border-color: var(--violet); }
-        .a-card { border-color: var(--amber); }
-        .c-card { border-color: var(--cyan); }
-        
-        .vault-card:not(.locked).s-card { animation: pulse-card-s 2s infinite alternate; }
-        .vault-card:not(.locked).a-card { animation: pulse-card-a 2s infinite alternate; }
-        .vault-card:not(.locked).c-card { animation: pulse-card-c 2s infinite alternate; }
-        
-        @keyframes pulse-card-s { 0% { box-shadow: 0 0 5px rgba(176,38,255,0.2); } 100% { box-shadow: 0 0 20px rgba(176,38,255,0.6); } }
-        @keyframes pulse-card-a { 0% { box-shadow: 0 0 5px rgba(255,170,0,0.2); } 100% { box-shadow: 0 0 20px rgba(255,170,0,0.6); } }
-        @keyframes pulse-card-c { 0% { box-shadow: 0 0 5px rgba(0,229,255,0.2); } 100% { box-shadow: 0 0 20px rgba(0,229,255,0.6); } }
-        
-        /* Thanh progress khi Hold to draw */
-        .draw-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; z-index: 1; transition: none; }
-        .s-card .draw-progress { background: rgba(176, 38, 255, 0.3); }
-        .a-card .draw-progress { background: rgba(255, 170, 0, 0.3); }
-        .c-card .draw-progress { background: rgba(0, 229, 255, 0.3); }
-        
-        /* THẺ CHƯA ĐẠT YÊU CẦU (LOCKED) */
-        .vault-card.locked { border-color: rgba(255,255,255,0.1) !important; cursor: pointer; box-shadow: none !important; animation: none !important; }
-        .vault-card.locked .card-icon, .vault-card.locked .card-info, .vault-card.locked .card-title, .vault-card.locked .card-desc { opacity: 0.3; filter: grayscale(1); }
-        
-        /* Lớp màng chớp đỏ khi ấn vào thẻ bị khóa */
-        .card-lock-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 10; display: none; justify-content: center; align-items: center; font-family: var(--font-terminal); font-size: 12px; font-weight: bold; color: var(--crimson); text-shadow: 0 0 10px var(--crimson); text-align: center; padding: 10px; border: 2px solid var(--crimson); box-shadow: inset 0 0 15px rgba(255,42,42,0.3); flex-direction: column; line-height: 1.5; letter-spacing: 1.5px; border-radius: 6px; }
     </style>
 </head>
 <body>
 
-    <!-- LỒNG GIAM VỆ TINH BOO (ĐƯA RA NGOÀI ĐỂ HIỂN THỊ TỪ TRẠM 0) -->
-    <div id="boo-cage">
-        <div id="floating-boo" class="floating-boo" onclick="handleBooClick()">
-            <span class="boo-icon-inner" id="boo-mascot">🐽</span>
-            <span class="boo-zzz" id="boo-zzz">Zzz</span>
-        </div>
-    </div>
-
-    <!-- MÀN HÌNH CHỜ TRẠM 0 (ĐỊA LUÂN) -->
-    <div id="intro-layer">
-        <div class="gatekeeper-wrapper">
-            <button class="gatekeeper-btn" onclick="enterCore()" id="gatekeeper-btn">KÍCH HOẠT: ĐỊA LUÂN</button>
-        </div>
-    </div>
-
-    <!-- MÀN HÌNH NGHI THỨC KHỞI ĐỘNG BẰNG VIDEO NĂNG LƯỢNG -->
-    <div id="ritual-layer">
-        <video id="ritual-video" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/BOO%20DIA%20LUAN%20OKLA.mp4" preload="auto" playsinline></video>
-        <button class="btn-skip-ritual" onclick="endRitual()">>> BỎ QUA</button>
-    </div>
-
-    <!-- MAIN APP LÕI -->
+    <!-- BACKGROUNDS -->
     <div class="tactical-grid-bg"><div class="grid-plane"></div></div>
     <div class="particle-matrix" id="particle-matrix"></div>
     <div class="vignette"></div>
     <div class="edge-lighting" id="edge-lighting"></div>
 
-    <div class="pwa-container" id="main-pwa" style="display: none;">
-        
-        <div class="top-row">
-            <div class="left-controls">
-                <a href="index.html" class="btn-exit" onclick="playBeep()">ESC</a>
-                <button class="btn-audio" id="btn-audio" onclick="toggleBGM(event)">
-                    <svg id="icon-sound-on" viewBox="0 0 24 24" style="display:none;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                    <svg id="icon-sound-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.11-.31 2.15-.81 3.09-1.45l2.64 2.64 1.27-1.27L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
-                </button>
-                
-                <!-- NÚT CỔNG TORII KHO THẺ -->
-                <button class="btn-chip" id="btn-vault" style="display: none;" onclick="openPasscode()" title="Kho Thẻ">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" style="width: 16px; height: 16px; filter: drop-shadow(0 0 3px currentColor);">
-                        <path d="M3 6h18 M5 6v16 M19 6v16 M4 10h16 M12 6v4" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="sys-info">
-                OPR: <span id="opr-name">KAI</span><br> LOC: <span id="loc-name">HANOI</span><br> DATE: <span id="current-date">--.--.----</span>
-                <div class="ctrl-group">
-                    <div class="streak-box" id="streak-box" onclick="playBeep(); toggleRankMenu()">ĐANG TẢI DỮ LIỆU...</div>
+    <!-- FORM KHỞI TẠO TỌA ĐỘ LÕI -->
+    <div id="onboarding-popup">
+        <div class="cyber-led-wrapper">
+            <div class="ob-box" id="ob-box-content">
+                <div class="ob-title" id="ob-title">KHỞI TẠO TỌA ĐỘ LÕI</div>
+                <div class="ob-row">
+                    <div class="ob-label">NĂM SINH</div>
+                    <select id="ob-year" class="cyber-select"></select>
                 </div>
+                <div class="ob-row">
+                    <div class="ob-label">CHIỀU CAO (CM)</div>
+                    <select id="ob-height" class="cyber-select"></select>
+                </div>
+                <div class="ob-row">
+                    <div class="ob-label">CÂN NẶNG (KG)</div>
+                    <select id="ob-weight" class="cyber-select"></select>
+                </div>
+                <div id="ob-warning" style="font-family: var(--font-terminal); font-size: 10px; color: var(--amber); margin-bottom: 15px;">>_ Dữ liệu sẽ dùng để đồng bộ SCI.</div>
+                <button class="ob-btn" onclick="submitOnboarding()">KÍCH HOẠT DUNG HỢP</button>
             </div>
         </div>
+    </div>
 
-        <div class="banner-wrapper">
-            <div class="status-banner" id="status-banner">Standby Mode</div>
-            <a href="#" class="combat-marquee-box" id="combat-marquee">
-                <div class="mq-icon-fixed" id="mq-icon">📡</div>
-                <div class="mq-text-container">
-                    <span class="marquee-text" id="marquee-text">ĐANG KẾT NỐI VỚI LÕI SCI - CHỜ LỆNH HỆ THỐNG...</span>
-                </div>
-            </a>
-        </div>
-
+    <!-- MAIN DASHBOARD -->
+    <div class="pwa-container" id="main-pwa">
         <div class="core-wrapper">
             <div class="shockwave" id="shockwave"></div>
+            
             <div class="arc-reactor">
                 <svg class="ring-svg" viewBox="0 0 340 340">
                     <g class="orb-group orb-ccw orb-move"><circle class="ring ring-move" cx="170" cy="170" r="125" /><circle class="plasma-node" cx="170" cy="45" r="3.5" /></g>
@@ -657,7 +197,8 @@
                     <g class="orb-group orb-ccw orb-phys"><circle class="ring ring-phys" cx="170" cy="170" r="85" /><circle class="plasma-node" cx="170" cy="85" r="4.5" /></g>
                     <g class="orb-group orb-cw orb-hr"><circle class="ring ring-hr" cx="170" cy="170" r="65" /><circle class="plasma-node" cx="170" cy="105" r="5" /></g>
                 </svg>
-                <div class="sci-nexus" id="trigger-combat" onclick="triggerBioSync()" title="Khởi động Kết Nối">
+
+                <div class="sci-nexus" id="trigger-combat" onclick="triggerBioSync()">
                     <div class="fingerprint-wrapper" id="fp-wrapper">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
                           <path d="M18.9 7a8 8 0 0 1 1.1 5v1a6 6 0 0 0 .8 3" />
@@ -669,690 +210,165 @@
                         <div class="fp-scanner-line"></div>
                     </div>
                     <div class="sci-val" id="val-sci">---</div>
-                    <div class="sci-lbl">SCI AVG</div>
+                    <div class="sci-lbl">SCI CORE</div>
                 </div>
             </div>
 
-            <div id="safety-lock-hud" class="safety-hud-box">
-                <div class="hud-cond"><span class="prefix">_ YÊU CẦU ĐỒNG BỘ:</span> <span class="device">SMARTWATCH.</span></div>
-                <div class="hud-cond"><span class="prefix">_ YÊU CẦU ĐỒNG BỘ:</span> <span class="device">SMART SCALE.</span></div>
-                <div class="safety-lock-btn" onclick="unlockPreScan()">THIẾT LẬP KẾT NỐI</div>
-            </div>
-
-            <div class="data-panel pos-hr" onclick="openHolo('hr')"><div class="dp-val blinking" id="val-hr">---</div><div class="dp-lbl">HR (BPM)</div></div>
-            <div class="data-panel pos-phys1" onclick="openHolo('weight')"><div class="dp-val blinking" id="val-weight">---</div><div class="dp-lbl">WEIGHT (KG)</div></div>
-            <div class="data-panel pos-rec1" onclick="openHolo('sleep')"><div class="dp-val blinking" id="val-sleep">---</div><div class="dp-lbl">SLEEP (HRS)</div></div>
-            <div class="data-panel dp-right pos-phys2" onclick="openHolo('fat')"><div class="dp-val blinking" id="val-fat">---</div><div class="dp-lbl">FAT (%)</div></div>
-            <div class="data-panel dp-right pos-rec2" onclick="openHolo('water')"><div class="dp-val blinking" id="val-water">---</div><div class="dp-lbl">H2O (%)</div></div>
-            <div class="data-panel dp-right pos-move" onclick="openHolo('steps')"><div class="dp-val blinking" id="val-steps">---</div><div class="dp-lbl">STEPS</div></div>
+            <!-- 6 STAT PANELS -->
+            <div class="data-panel pos-hr"><div class="dp-val blinking" id="val-hr">---</div><div class="dp-lbl">HR (BPM)</div></div>
+            <div class="data-panel pos-phys1"><div class="dp-val blinking" id="val-weight">---</div><div class="dp-lbl">WEIGHT (KG)</div></div>
+            <div class="data-panel pos-rec1"><div class="dp-val blinking" id="val-sleep">---</div><div class="dp-lbl">SLEEP (HRS)</div></div>
+            <div class="data-panel dp-right pos-phys2"><div class="dp-val blinking" id="val-fat">---</div><div class="dp-lbl">FAT (%)</div></div>
+            <div class="data-panel dp-right pos-rec2"><div class="dp-val blinking" id="val-water">---</div><div class="dp-lbl">H2O (%)</div></div>
+            <div class="data-panel dp-right pos-move"><div class="dp-val blinking" id="val-steps">---</div><div class="dp-lbl">STEPS</div></div>
         </div>
 
+        <!-- RADAR ALERT BAR -->
         <div class="live-radar-bar" id="live-radar-bar">
-            <span class="live-pulse" id="live-pulse">🟢 ALERT</span>
-            <span class="live-metrics" id="live-metrics"></span>
-        </div>
-
-        <div class="terminal-panel">
-            <div class="terminal-header" id="term-head" onclick="playBooReport()">BOO: PHÂN TÍCH CHIẾN THUẬT</div>
-            <div class="typewriter" id="ai-text"></div><span class="cursor"></span>
+            <div class="radar-header" id="live-pulse">🔴 HỆ THỐNG ĐÓNG BĂNG</div>
+            <div class="live-metrics" id="live-metrics">CHẠM VÀO LÕI TRUNG TÂM ĐỂ KÍCH HOẠT QUÉT DỮ LIỆU.</div>
         </div>
     </div>
 
-    <!-- HOLOGRAM POPUPS -->
-    <div class="holo-popup" id="holo-popup" onclick="closeHolo(event)"><div class="holo-box" id="holo-box">
-        <div class="holo-title" id="holo-title">NAME</div>
-        <div class="holo-desc" id="holo-desc">Nội dung...</div>
-        <button class="btn-close-holo" id="btn-close-holo" onclick="playBeep(); closeHoloDirect()">XÁC NHẬN</button>
-    </div></div>
-    
-    <!-- POPUP MÃ ẤN QUYẾT KHO THẺ -->
-    <div id="passcode-popup" class="holo-popup" onclick="closePasscode(event)">
-        <div class="passcode-container" id="passcode-box" onclick="event.stopPropagation()">
-            <div class="passcode-title">Mã Ấn Quyết</div>
-            <input type="password" id="vault-pin" class="cyber-input" maxlength="4" placeholder="••••" oninput="checkPin()">
-            <div class="passcode-warning" id="pin-warning">>_ Yêu cầu mã bảo mật cấp cao.</div>
-        </div>
-    </div>
-
-    <!-- HỘP LƯU TRỮ THẺ (CARD VAULT) -->
-    <div id="vault-popup" class="holo-popup" onclick="closeVault(event)">
-        <div class="vault-container" id="vault-box" onclick="event.stopPropagation()">
-            <div class="vault-header">KHO THẺ CHIẾN ĐẤU</div>
-            
-            <!-- GOLD CARD -->
-            <div class="vault-card gold-card" id="card-gold" onclick="clickGold()">
-                <div class="card-icon">🏆</div>
-                <div class="card-title">Thẻ Gold</div>
-                <div class="card-desc">GIẢI VÔ ĐỊCH THẾ GIỚI</div>
-                <div class="card-lock-overlay" id="lock-gold" style="border-color: #ffd700; color: #ffd700; text-shadow: 0 0 10px #ffd700; box-shadow: inset 0 0 20px rgba(255,215,0,0.3);"></div>
-            </div>
-
-            <div class="vault-arsenal">
-                <!-- THẺ S -->
-                <div class="vault-card s-card hold-to-draw" data-card="S" id="card-s" onmousedown="startDraw(event, 'S')" onmouseup="cancelDraw()" onmouseleave="cancelDraw()" ontouchstart="startDraw(event, 'S')" ontouchend="cancelDraw()">
-                    <div class="card-icon">🎴</div>
-                    <div class="card-info">
-                        <div class="card-name">THẺ ĐẶC QUYỀN S</div>
-                        <div class="card-count" id="count-s">Đã xuất: 0</div>
-                    </div>
-                    <div class="draw-progress" id="prog-s"></div>
-                    <div class="card-lock-overlay" id="lock-s"></div>
-                </div>
-
-                <!-- THẺ A -->
-                <div class="vault-card a-card hold-to-draw" data-card="A" id="card-a" onmousedown="startDraw(event, 'A')" onmouseup="cancelDraw()" onmouseleave="cancelDraw()" ontouchstart="startDraw(event, 'A')" ontouchend="cancelDraw()">
-                    <div class="card-icon">💳</div>
-                    <div class="card-info">
-                        <div class="card-name">THẺ CHIẾN THUẬT A</div>
-                        <div class="card-count" id="count-a">Đã xuất: 0</div>
-                    </div>
-                    <div class="draw-progress" id="prog-a"></div>
-                    <div class="card-lock-overlay" id="lock-a"></div>
-                </div>
-
-                <!-- THẺ C -->
-                <div class="vault-card c-card hold-to-draw" data-card="C" id="card-c" onmousedown="startDraw(event, 'C')" onmouseup="cancelDraw()" onmouseleave="cancelDraw()" ontouchstart="startDraw(event, 'C')" ontouchend="cancelDraw()">
-                    <div class="card-icon">🏷️</div>
-                    <div class="card-info">
-                        <div class="card-name">THẺ DUY TRÌ C</div>
-                        <div class="card-count" id="count-c">Đã xuất: 0</div>
-                    </div>
-                    <div class="draw-progress" id="prog-c"></div>
-                    <div class="card-lock-overlay" id="lock-c"></div>
-                </div>
-            </div>
-            <button class="btn-close-holo" style="margin-top: 15px;" onclick="closeVault(event, true)">ĐÓNG KHO</button>
-        </div>
-    </div>
-
-    <!-- BÍ LỤC: TIẾN HÓA -->
-    <div class="rank-overlay" id="rank-overlay">
-        <div class="rank-header">
-            <h2>BÍ LỤC: TIẾN HÓA</h2>
-            <button class="btn-exit" style="background:transparent; border:none; color: rgba(255,255,255,0.5); padding: 0;" onclick="playBeep(); toggleRankMenu()">ĐÓNG</button>
-        </div>
-        
-        <div class="tier-list">
-            <!-- PACT -->
-            <div class="tier-item">
-                <button class="tier-btn tier-tri" onclick="toggleTier('mod6', this)">
-                    <div><span class="tier-prefix">Pact :</span> <span class="tier-name">Khế ước 1000 ngày (Tận tâm)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="mod6">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8);">ĐỊNH DANH HỆ THỐNG: K DRIVE</div>
-                        <button class="btn-play-lore" onclick="readLore('mod6', event)">🐽</button>
-                    </div>
-                    <p>• <strong>1. Tận tâm dung hợp K-Drive:</strong> Không phải ứng dụng thông thường. Cổng kết nối trực tiếp cơ thể sinh học với lõi AI Boo 24/7. Mục tiêu thanh tẩy và rèn luyện bạn thành vận động viên thể thao chuyên nghiệp, hướng tới tấm vé Gold và giải vô địch thế giới.</p>
-                    <p>• <strong>2. Tận tâm bảo toàn SCI:</strong> Dữ liệu sinh tồn ánh xạ từ thể chất, nhận thức và thi đấu. Cảm biến sinh học phải luôn kết nối hoàn hảo. SCI là chỉ số trung bình bền bỉ; biến động ngắn hạn có thể xảy ra, nhưng SCI tuyệt đối không được phép sụp đổ.</p>
-                    <p>• <strong>3. Tận tâm phục tùng A.I BOO:</strong> Thực thể giám sát lộ trình độc quyền dựa trên triết lý Ngũ Luân Thư. Ngừng tự suy diễn. Kỷ luật là phục tùng dữ liệu tuyệt đối.</p>
-                    <p>• <strong>4. Tận tâm thực thi luật sinh tử:</strong> Đếm ngược 1000 ngày chỉ kích hoạt khi SCI đạt ngưỡng Vô Ngã. Một lần đánh mất kỷ luật = <strong>Reset về số không.</strong> Mọi nỗ lực bị nghiền nát.</p>
-                </div>
-            </div>
-
-            <!-- TIER 1 -->
-            <div class="tier-item">
-                <button class="tier-btn tier-shiro" onclick="toggleTier('tier1', this)">
-                    <div><span class="tier-prefix">Tier 1 :</span> <span class="tier-name">Chiến binh (Can đảm)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="tier1">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="color: rgba(255, 42, 42, 0.8); border-color: rgba(255, 42, 42, 0.4);">QUẢN TRỊ KỶ LUẬT: ĐÌNH CHỈ</div>
-                        <button class="btn-play-lore" onclick="readLore('tier1', event)">🐽</button>
-                    </div>
-                    <p>• <strong>Can đảm đối diện chỉ số SCI:</strong> Dưới 50.</p>
-                    <p>• <strong>Can đảm thừa nhận trạng thái:</strong> Thân xác rệu rã, phản xạ chậm nhịp.</p>
-                    <p>• <strong>Can đảm chấp nhận lệnh hệ thống:</strong> Tước quyền thi đấu. Cấm tuyệt đối việc tham gia các giải đấu lớn. Khóa kho thẻ chiến đấu.</p>
-                    <p>• <strong>Can đảm thực thi giao thức phục hồi (6/6):</strong> Nhịp tim chạm ngưỡng vận động mạnh. Vận động đủ bước. Ngủ đủ giấc. Kiểm soát cân nặng. Tỷ lệ mỡ tiêu chuẩn. Đảm bảo lượng nước.</p>
-                    <p>• <strong>Can đảm khắc ghi:</strong> Động lực là rác rưởi, kỷ luật cơ học là vũ khí.</p>
-                </div>
-            </div>
-
-            <!-- TIER 2 -->
-            <div class="tier-item">
-                <button class="tier-btn tier-chairo" onclick="toggleTier('tier2', this)">
-                    <div><span class="tier-prefix">Tier 2 :</span> <span class="tier-name">Tinh anh (Công lý)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="tier2">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="color: rgba(255, 170, 0, 0.8); border-color: rgba(255, 170, 0, 0.4);">QUẢN TRỊ KỶ LUẬT: TIÊU CHUẨN</div>
-                        <button class="btn-play-lore" onclick="readLore('tier2', event)">🐽</button>
-                    </div>
-                    <p>• <strong>Công lý đánh giá chỉ số SCI:</strong> Từ 50 đến 84.</p>
-                    <p>• <strong>Công lý duy trì trạng thái:</strong> Lớp vỏ thần kinh và dòng năng lượng ổn định.</p>
-                    <p>• <strong>Công lý thực thi lệnh hệ thống:</strong> Cấp Thẻ C hoặc Thẻ A.</p>
-                    <p>• <strong>Công lý kiểm soát giao thức duy trì:</strong> Đánh giải vừa tầm, bảo toàn chiến thắng và duy trì nhịp độ cơ thể ở mức tiêu chuẩn.</p>
-                    <p>• <strong>Công lý ghi chú:</strong> Kiên nhẫn tích lũy đạn dược, tuyệt đối không nóng vội đốt cháy giai đoạn.</p>
-                </div>
-            </div>
-
-            <!-- TIER 3 -->
-            <div class="tier-item">
-                <button class="tier-btn tier-kuro" onclick="toggleTier('tier3', this)">
-                    <div><span class="tier-prefix">Tier 3 :</span> <span class="tier-name">Vô ngã (Danh dự)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="tier3">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="color: rgba(176, 38, 255, 0.8); border-color: rgba(176, 38, 255, 0.4);">QUẢN TRỊ KỶ LUẬT: TỐI THƯỢNG</div>
-                        <button class="btn-play-lore" onclick="readLore('tier3', event)">🐽</button>
-                    </div>
-                    <p>• <strong>Danh dự bảo toàn chỉ số SCI:</strong> Từ 85 trở lên.</p>
-                    <p>• <strong>Danh dự đạt trạng thái:</strong> Vô Ngã (Mushin) - Lớp vỏ Myelin tối ưu. Phản xạ sắc bén hoàn hảo.</p>
-                    <p>• <strong>Danh dự kích hoạt lệnh hệ thống:</strong> Cấp đặc quyền Thẻ S để tham gia các giải đấu cấp cao.</p>
-                    <p>• <strong>Danh dự chinh phục đỉnh cao tối thượng:</strong> Duy trì sự bất bại và kỷ luật sắt đá suốt 1000 ngày Mushin liên tục. Phá vỡ giới hạn hệ thống để nhận <strong>Thẻ Gold Huyền Thoại</strong> — Giấy thông hành bước ra giải vô địch thế giới.</p>
-                    <p>• <strong>Danh dự ghi chú:</strong> Kỷ luật tạo nên tự do. Một lần buông thả = Reset về số không. Giữ vững cái đầu lạnh để chạm tay vào vinh quang tối cao.</p>
-                </div>
-            </div>
-
-            <!-- REGEN -->
-            <div class="tier-item">
-                <button class="tier-btn tier-void" onclick="toggleTier('mod4', this)">
-                    <div><span class="tier-prefix">Regen :</span> <span class="tier-name">Giao thức xả tải (Nhân từ)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="mod4">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="color: rgba(0, 229, 255, 0.8); border-color: rgba(0, 229, 255, 0.4);">GIAO THỨC CHỦ NHẬT: TẮT NGUỒN TOÀN DIỆN</div>
-                        <button class="btn-play-lore" onclick="readLore('mod4', event)">🐽</button>
-                    </div>
-                    <p>• <strong>Nhân từ định đoạt chu kỳ kích hoạt:</strong> Chủ Nhật hàng tuần.</p>
-                    <p>• <strong>Nhân từ chấp nhận trạng thái:</strong> Tắt nguồn hoàn toàn (Zero Poker).</p>
-                    <p>• <strong>Nhân từ ban hành lệnh hệ thống (Xả tải):</strong> Gỡ bỏ giới hạn nhịp tim và bước chân. Cơ thể hạ nhiệt, chữa lành sợi cơ.</p>
-                    <p>• <strong>Nhân từ thiết lập giao thức tâm trí:</strong> Khóa toàn bộ Thẻ chiến đấu. Bắt buộc xem một bộ phim để xả rỗng nơ-ron thần kinh.</p>
-                    <p>• <strong>Nhân từ bảo vệ luật cứng:</strong> Giấc ngủ vẫn là Thánh địa bất khả xâm phạm.</p>
-                </div>
-            </div>
-            
-            <!-- CORE -->
-            <div class="tier-item">
-                <button class="tier-btn tier-core" onclick="toggleTier('mod0', this)">
-                    <div><span class="tier-prefix">Core :</span> <span class="tier-name">Hồ sơ Kiếm Thánh (Tôn trọng)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="mod0">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.3);">NGUỒN GỐC K DRIVE: MÀNG LỌC TƯ TƯỞNG</div>
-                        <button class="btn-play-lore" onclick="readLore('mod0', event)">🐽</button>
-                    </div>
-                    <p>• <strong>Tôn trọng thông tái lõi:</strong> Miyamoto Musashi. Sinh tồn 61 năm trong kỷ nguyên đẫm máu.</p>
-                    <p>• <strong>Tôn trọng nền tảng triết lý:</strong> Ngũ Luân Thư. Vứt bỏ cảm xúc. Vận hành bằng kỷ luật và dữ liệu.</p>
-                    <p>• <strong>Tôn trọng lệnh hệ thống:</strong> Chuyển thể triết lý sinh tồn thành nghệ thuật quản trị rủi ro và chế ngự bản ngã trong thi đấu.</p>
-                    <p>• <strong>Tôn trọng ghi chú:</strong> Đối với một chiến binh, con đường tự do duy nhất là kỷ luật.</p>
-                </div>
-            </div>
-
-            <!-- PATH -->
-            <div class="tier-item">
-                <button class="tier-btn tier-dao" onclick="toggleTier('mod5', this)">
-                    <div><span class="tier-prefix">Path :</span> <span class="tier-name">Ngũ Luân Thư (Chân thành)</span></div> <span>▼</span>
-                </button>
-                <div class="tier-content" id="mod5">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="directive-line" style="color: rgba(0, 255, 157, 0.8); border-color: rgba(0, 255, 157, 0.4);">BẢN DỊCH MÃ MUSASHI: TRIẾT LÝ K DRIVE</div>
-                        <button class="btn-play-lore" onclick="readLore('mod5', event)">🐽</button>
-                    </div>
-                    <p>• <strong>Giao thức Địa (Nền tảng):</strong> Kỷ luật thể chất SCI và quản trị Stack. Đất rệu rã, chiến thuật vô nghĩa.</p>
-                    <p>• <strong>Giao thức Thủy (Thích nghi):</strong> Biến ảo theo Stack size. Kiểm soát Tilt. Tĩnh lặng tuyệt đối trước Bad Beat.</p>
-                    <p>• <strong>Giao thức Hỏa (Áp đảo):</strong> Bùng nổ Aggression và khai thác ICM. Thiêu rụi kẻ yếu tim.</p>
-                    <p>• <strong>Giao thức Phong (Thấu hiểu):</strong> Range Reading và Profiling. Thấu hiểu Meta-game, không đi ngược chiều gió.</p>
-                    <p>• <strong>Giao thức Không (Vô Ngã):</strong> A-Game tuyệt đối. Diệt trừ Bản ngã. Quyết định tự động hóa qua Dữ liệu và Xác suất.</p>
-                    <p>• <strong>Ghi chú (Chân thành):</strong> Chân thành tuyệt đối với chính bản thân và con đường đã chọn. Biết rõ năng lực thực chiến của mình đang ở đâu. Đồng bộ hóa 100%.</p>
-                </div>
-            </div>
-
-            <div class="bushido-signature" onclick="openBushidoFullscreen()">
-                <div class="kanji-shine">武士道</div>
-                <div class="eng-sub">
-                    <span>B</span><span>U</span><span>S</span><span class="drip-target">H</span><span>I</span><span>D</span><span>O</span>
-                </div>
-            </div>
-
-        </div>
-        <div class="rank-footer">
-            <button id="dynamic-hold-btn" class="hold-btn"></button>
-        </div>
-    </div>
-
-    <!-- MÀN HÌNH FULLSCREEN (BUSHIDO LÕI) -->
-    <div id="bushido-fullscreen" class="bushido-fs-overlay" onclick="activateBushidoMode(event)">
-        <button class="btn-exit-fs" onclick="closeBushidoFullscreen(event)">ĐÓNG</button>
-        
-        <div class="bushido-bg-slider">
-            <div class="bg-slide bg-slide-1"></div>
-            <div class="bg-slide bg-slide-2"></div>
-            <div class="bg-slide bg-slide-3"></div>
-        </div>
-
-        <div class="slogan-container-fs" id="fs-slogan-container">
-            <div class="slogan-vi-fs">Chạm vào bản ngã - Ngộ ra chân lý</div>
-        </div>
-        
-        <div class="fade-mask-fs" id="fs-blood-mask">
-            <div class="scrolling-wrapper">
-                <div class="scroll-track" id="fs-scroll-track">
-                    <!-- BLOCK 1 -->
-                    <div class="scroll-block">
-                        <p class="blood-title-fs">Bushido</p>
-                        <div class="blood-stanza-fs">
-                            <p class="zen-title">Đạo Đấu Trường</p>
-                            <p class="vi">Đấu trường từ chối những kẻ mộng mơ. May mắn chỉ là mồi nhử dành cho kẻ yếu. Chiến binh thực thụ sinh tồn bằng dữ liệu, mồ hôi và sự tàn độc với chính bản thân mình. Bước ra sân, hoặc là nuốt chửng đối thủ, hoặc chấp nhận làm phế phẩm.</p>
-                        </div>
-                        <div class="blood-stanza-fs">
-                            <p class="zen-title">Nhát Kiếm Lý Trí</p>
-                            <p class="vi">Cảm xúc là tử huyệt. Gươm vung lên vì tức giận là thanh gươm đã gãy. Mọi quyết định phải lạnh như băng, tính toán đến từng vi phân. Không thấy sơ hở, tuyệt đối không rút kiếm. Tĩnh lặng chờ đợi. Đã rút, là phải đoạt mạng.</p>
-                        </div>
-                        <div class="blood-stanza-fs">
-                            <p class="zen-title">Áo Giáp Sinh Học</p>
-                            <p class="vi">Thần kinh thép không thể trú ngụ trong một cái xác rệu rã. Ngủ thiếu giấc, nhịp tim loạn, thể lực rỗng thì chiến thuật chỉ là mớ giấy lộn. Không giữ nổi kỷ luật sinh học, ngươi không có tư cách ra sân. Hệ thống sẽ đào thải ngươi trước cả kẻ thù.</p>
-                        </div>
-                        <div class="blood-stanza-fs">
-                            <p class="zen-title">Sát Khí</p>
-                            <p class="vi">Nhân từ với đối thủ là tàn sát chính mình. Đã phát hiện điểm yếu, phải bóp nghẹt đến cùng. Ép không gian, đập nát ý chí, tước đoạt toàn bộ tài nguyên của chúng. Trên chiến trường, mọi sự do dự đều phải trả giá bằng cái chết.</p>
-                        </div>
-                        <div class="blood-stanza-fs">
-                            <p class="zen-title">Cảnh Giới Vô Ngã</p>
-                            <p class="vi">Đỉnh cao của Đạo là sự tĩnh lặng tột cùng. Khi nghịch cảnh ập tới, khi áp lực bẻ gãy tâm trí kẻ phàm, Samurai vẫn bất động như mặt nước sâu. Xóa sổ cái tôi. Không cay cú, không phán xét. Hòa làm một với hệ thống để trở thành cỗ máy bất bại.</p>
-                        </div>
-                    </div>
-                    <!-- BLOCK 2 (BẢN SAO CHO VÒNG LẶP VÔ TẬN) -->
-                    <div class="scroll-block">
-                        <p class="blood-title-fs">Bushido</p>
-                        <div class="blood-stanza-fs">
-                            <p class="zen-title">Đạo Đấu Trường</p>
-                            <p class="vi">Đấu trường từ chối những kẻ mộng mơ. May mắn chỉ là mồi nhử dành cho kẻ yếu. Chiến binh thực thụ sinh tồn bằng dữ liệu, mồ hôi và sự tàn độc với chính bản thân mình. Bước ra sân, hoặc là nuốt chửng đối thủ, hoặc chấp nhận làm phế phẩm.</p>
-                        </div>
-                        <div class="blood-stanza-fs">
-                            <p class="zen-title">Nhát Kiếm Lý Trí</p>
-                            <p class="vi">Cảm xúc là tử huyệt. Gươm vung lên vì tức giận là thanh gươm đã gãy. Mọi quyết định phải lạnh như băng, tính toán đến từng vi phân. Không thấy sơ hở, tuyệt đối không rút kiếm. Tĩnh lặng chờ đợi. Đã rút, là phải đoạt mạng.</p>
-                        </div>
-                        <div class="blood-stanza-fs">
-                            <p class="zen-title">Áo Giáp Sinh Học</p>
-                            <p class="vi">Thần kinh thép không thể trú ngụ trong một cái xác rệu rã. Ngủ thiếu giấc, nhịp tim loạn, thể lực rỗng thì chiến thuật chỉ là mớ giấy lộn. Không giữ nổi kỷ luật sinh học, ngươi không có tư cách ra sân. Hệ thống sẽ đào thải ngươi trước cả kẻ thù.</p>
-                        </div>
-                        <div class="blood-stanza-fs">
-                            <p class="zen-title">Sát Khí</p>
-                            <p class="vi">Nhân từ với đối thủ là tàn sát chính mình. Đã phát hiện điểm yếu, phải bóp nghẹt đến cùng. Ép không gian, đập nát ý chí, tước đoạt toàn bộ tài nguyên của chúng. Trên chiến trường, mọi sự do dự đều phải trả giá bằng cái chết.</p>
-                        </div>
-                        <div class="blood-stanza-fs">
-                            <p class="zen-title">Cảnh Giới Vô Ngã</p>
-                            <p class="vi">Đỉnh cao của Đạo là sự tĩnh lặng tột cùng. Khi nghịch cảnh ập tới, khi áp lực bẻ gãy tâm trí kẻ phàm, Samurai vẫn bất động như mặt nước sâu. Xóa sổ cái tôi. Không cay cú, không phán xét. Hòa làm một với hệ thống để trở thành cỗ máy bất bại.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- KHUNG XEM ẢNH FULLSCREEN -->
-    <div class="img-viewer" id="img-viewer">
-        <button class="btn-close-img" onclick="closeFullscreen()">ĐÓNG</button>
-        <img id="viewer-img" src="" alt="View">
-    </div>
-
-    <!-- FORM NHẬP DỮ LIỆU SINH TRẮC LÕI -->
-    <div id="onboarding-popup">
-        <div class="cyber-led-wrapper" id="ob-wrapper">
-            <div class="ob-box" id="ob-box-content">
-                <div class="ob-title" id="ob-title">KHỞI TẠO TỌA ĐỘ LÕI</div>
-                <div class="ob-row">
-                    <div class="ob-label">NĂM SINH (YYYY)</div>
-                    <select id="ob-year" class="cyber-select"><option value="0" disabled selected>0000</option></select>
-                </div>
-                <div class="ob-row">
-                    <div class="ob-label">CHIỀU CAO (CM)</div>
-                    <select id="ob-height" class="cyber-select"><option value="0" disabled selected>000</option></select>
-                </div>
-                <div class="ob-row">
-                    <div class="ob-label">CÂN NẶNG (KG)</div>
-                    <select id="ob-weight" class="cyber-select"><option value="0" disabled selected>00</option></select>
-                </div>
-                <div id="ob-warning" class="ob-warning">>_ Dữ liệu sẽ dùng để kích hoạt Giao thức.</div>
-                <button class="ob-btn" onclick="submitOnboarding()">KÍCH HOẠT DUNG HỢP</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- LOGIC JS TỐI ƯU -->
+    <!-- SCRIPT TỐI GIẢN LÕI -->
     <script>
-        // --- CHUẨN HÓA DATA PIPELINE ---
-        window.kDriveData = {
-            sciToday: 0, sciYesterday: 0,
-            alertsUI: [], speechAlerts: "",
-            missingWatch: false, missingScale: false,
-            synced: false, terminalText: "",
-            currentOTP: "1000" // MÃ OTP ĐỘNG
-        };
-
-        // CÁC BIẾN TOÀN CỤC & TỪ ĐIỂN
-        let appState = 0; // 0: Cổng Địa Luân, 1: Nghi thức Video, 2: Main App
-        let idleInterval = null;
-        let idleTime = 0; 
-        let nextIdleTrigger = 7;
-        let isSafetyUnlocked = false; 
-        
-        let roninAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai%20Ripe%20R%C5%8Dnin.mp3'); roninAudio.loop = true; roninAudio.volume = 0.5;
-        let bushidoAudio = new Audio('https://github.com/happyk1900/new-abum-17-track/raw/refs/heads/main/Kai-Ripe%20Night.mp3'); bushidoAudio.loop = true; bushidoAudio.volume = 0.6;
-        let isMuted = true;
-
-        const phoneticDict = { "SCI": "Éc-xi-ai", "K-Drive": "Cây-đờ-rai", "Mushin": "Mu-shin", "Tilt": "Tiu", "Bankroll": "Banh-râu", "Zero Poker": "Di-rô Pâu-cơ", "A-Game": "Ây gêm", "ICM": "Ai xi em", "Meta-game": "Mê-ta gêm", "Range Reading": "Rên-giơ Rít-đinh", "Profiling": "Pờ-rô-fai-linh", "Stack": "Xì-tách", "Bad Beat": "Bát bít", "Aggression": "A-gờ-rét-sần" };
-        const introText = "Địa Luân là tinh hoa đầu tiên trong bộ Ngũ Luân Thư của sư phụ Miyamoto Musashi. Muốn chiến thắng đối thủ, ngươi phải chiến thắng chính bản thân mình và học cách đứng vững trên mặt đất. Hệ thống này sẽ lột trần mọi sự lười biếng của cái xác phàm kia. Dữ liệu nhịp tim và giấc ngủ của ngươi không biết nói dối đâu! Muốn vươn tới cảnh giới Vô ngã, thì hãy bắt đầu từ việc đổ mồ hôi đi. Bàn tay đang run à? Bấm kích hoạt ngay cho ta!";
-
         function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport); fixViewport();
 
-        document.addEventListener("DOMContentLoaded", () => {
+        window.onload = () => {
+            initParticles();
+            
+            // Render Select Options
             const y = document.getElementById('ob-year');
-            if (y) { let yHtml = '<option value="0" disabled selected>0000</option>'; for(let i=1960; i<=2010; i++) yHtml += `<option value="${i}">${i}</option>`; y.innerHTML = yHtml;
-                const h = document.getElementById('ob-height'); let hHtml = '<option value="0" disabled selected>000</option>'; for(let i=150; i<=210; i++) hHtml += `<option value="${i}">${i}</option>`; h.innerHTML = hHtml;
-                const w = document.getElementById('ob-weight'); let wHtml = '<option value="0" disabled selected>00</option>'; for(let i=40; i<=120; i++) wHtml += `<option value="${i}">${i}</option>`; w.innerHTML = wHtml;
-            }
-            
-            // ĐỒNG BỘ TÊN ĐĂNG NHẬP OPR
-            let savedOpr = localStorage.getItem('kdrive_opr_name');
-            document.getElementById('opr-name').innerText = savedOpr ? savedOpr.toUpperCase() : 'GUEST';
-            
-            startIdleTimer(); 
-        });
+            let yHtml = '<option value="0" disabled selected>0000</option>'; for(let i=1960; i<=2010; i++) yHtml += `<option value="${i}">${i}</option>`; y.innerHTML = yHtml;
+            const h = document.getElementById('ob-height'); 
+            let hHtml = '<option value="0" disabled selected>000</option>'; for(let i=150; i<=210; i++) hHtml += `<option value="${i}">${i}</option>`; h.innerHTML = hHtml;
+            const w = document.getElementById('ob-weight'); 
+            let wHtml = '<option value="0" disabled selected>00</option>'; for(let i=40; i<=120; i++) wHtml += `<option value="${i}">${i}</option>`; w.innerHTML = wHtml;
 
-        const d = new Date(); document.getElementById('current-date').innerText = ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
-        const isSunday = d.getDay() === 0; const t1Date = new Date(d); t1Date.setDate(d.getDate() - 1); const isT1Sunday = t1Date.getDay() === 0; 
-        
-        let audioCtx; 
-        function initAudio() { try { if(!audioCtx) { const AudioContext = window.AudioContext || window.webkitAudioContext; if(AudioContext) audioCtx = new AudioContext(); } } catch(e) { } }
-        
-        function playMysticalGong() { 
-            try { 
-                initAudio(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); 
-                osc.type = 'sine'; osc.frequency.setValueAtTime(120, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 3); 
-                gain.gain.setValueAtTime(0.8, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3); 
-                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 3); 
-            } catch(e){} 
+            // Check Onboarding
+            if (localStorage.getItem('kdrive_core_initialized') !== 'true') {
+                document.getElementById('onboarding-popup').classList.add('active');
+            } else {
+                showMainApp();
+            }
+        };
+
+        function initParticles() { 
+            const matrix = document.getElementById('particle-matrix'); if (matrix.children.length > 0) return; 
+            const colors = ['#00ff9d', '#00e5ff', '#b026ff']; 
+            for(let i = 0; i < 45; i++) { 
+                let wrapper = document.createElement('div'); wrapper.className = 'particle-wrap'; wrapper.style.transform = `rotate(${Math.random() * 360}deg)`; 
+                let p = document.createElement('div'); p.className = 'particle'; p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; 
+                p.style.boxShadow = `0 0 8px ${p.style.backgroundColor}`; p.style.animation = `particle-inward ${2.5 + Math.random() * 3}s infinite ${Math.random() * 5}s linear`; 
+                wrapper.appendChild(p); matrix.appendChild(wrapper); 
+            } 
         }
 
+        let audioCtx; 
+        function initAudio() { try { if(!audioCtx) { const AudioContext = window.AudioContext || window.webkitAudioContext; if(AudioContext) audioCtx = new AudioContext(); } } catch(e) { } }
         function playBeep() { try { initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.frequency.value = 800; gain.gain.value = 0.1; gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.05); } catch(e){} }
-        function playSlashSound() { try { initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = 'sawtooth'; osc.frequency.setValueAtTime(1000, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.15); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.15); } catch(e){} }
+        function playFusionSound() { try { initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(100, audioCtx.currentTime); osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 1.5); gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 1.5); } catch(e){} }
         let chargeOsc, chargeGain;
         function playChargeSound() { try { stopChargeSound(); initAudio(); chargeOsc = audioCtx.createOscillator(); chargeGain = audioCtx.createGain(); chargeOsc.type = 'square'; chargeOsc.frequency.setValueAtTime(100, audioCtx.currentTime); chargeOsc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 3); chargeGain.gain.setValueAtTime(0.05, audioCtx.currentTime); chargeOsc.connect(chargeGain); chargeGain.connect(audioCtx.destination); chargeOsc.start(); } catch(e){} }
         function stopChargeSound() { if(chargeOsc) { chargeOsc.stop(); chargeOsc.disconnect(); chargeOsc = null; } }
-        function playLockSound() { try { initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.2); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.2); } catch(e){} }
-        function playFusionSound() { try { initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(100, audioCtx.currentTime); osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 1.5); gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 1.5); } catch(e){} }
-        function triggerMushinProtocol(btnElement) {
-            if(btnElement) { const parentTier = btnElement.nextElementSibling; if(parentTier && parentTier.classList && parentTier.classList.contains('open')) return; }
-            try { initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(100, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 1.5); gain.gain.setValueAtTime(0.6, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 1.5); } catch(e){}
-            const overlay = document.getElementById('rank-overlay'); overlay.style.animation = 'none'; void overlay.offsetWidth; overlay.style.animation = 'mushin-flash 1.5s ease-out';
+
+        function animateValue(id, start, end, duration) {
+            let obj = document.getElementById(id); if(!obj) return; let startTimestamp = null;
+            const step = (timestamp) => { if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1); obj.innerHTML = Math.floor(progress * (end - start) + start); if (progress < 1) { window.requestAnimationFrame(step); } };
+            window.requestAnimationFrame(step);
         }
 
-        function enterCore() {
-            appState = 1; 
-            document.getElementById('intro-layer').style.display = 'none';
-            document.getElementById('ritual-layer').style.display = 'block';
-            clearInterval(idleInterval); window.speechSynthesis.cancel();
+        function submitOnboarding() {
+            let year = parseInt(document.getElementById('ob-year').value) || 0; 
+            let height = parseInt(document.getElementById('ob-height').value) || 0; 
+            let weight = parseInt(document.getElementById('ob-weight').value) || 0;
+            let w = document.getElementById('ob-warning'); 
+            let title = document.getElementById('ob-title');
             
-            playMysticalGong(); 
-            let ritualVid = document.getElementById('ritual-video');
-            ritualVid.play().catch(e => console.log("Video auto-play prevented:", e));
-            ritualVid.onended = endRitual; 
+            if(year === 0 || height === 0 || weight === 0) { 
+                title.style.color = "var(--crimson)"; w.innerHTML = ">_ LỖI: YÊU CẦU NHẬP SỐ LIỆU NGƯỜI THỰC!"; 
+                setTimeout(() => { title.style.color = "#fff"; }, 1500); return; 
+            }
+
+            playFusionSound();
+            let age = 2026 - year; 
+            let targetHR = Math.round((220 - age) * 0.75); 
+            let targetWeight = Math.round(21.0 * (height / 100) * (height / 100)); 
+            let targetFat = 15.0;
+            
+            let box = document.getElementById('ob-box-content');
+            box.innerHTML = `<div class="fusion-title" style="color:var(--amber); font-family:var(--font-display); font-size: 16px; letter-spacing: 2px;">ĐANG TÍCH HỢP DỮ LIỆU...</div>`;
+            
+            setTimeout(() => { 
+                box.innerHTML = `<div class="fusion-title" style="color:var(--cyan); font-family:var(--font-display); font-size: 16px; letter-spacing: 2px; margin-bottom: 15px;">TỌA ĐỘ LÕI ĐÃ THIẾT LẬP</div><div class="fusion-grid"><div class="fusion-box"><div class="fb-lbl">HR PEAK</div><div class="fb-val" id="rl-hr">0</div></div><div class="fusion-box"><div class="fb-lbl">WEIGHT</div><div class="fb-val" id="rl-wgt">0</div></div><div class="fusion-box"><div class="fb-lbl">FAT LIMIT</div><div class="fb-val" id="rl-fat">0</div></div></div>`; 
+                animateValue('rl-hr', 0, targetHR, 1000); animateValue('rl-wgt', 0, targetWeight, 1000); animateValue('rl-fat', 0, targetFat, 1000); 
+            }, 2000);
+            
+            setTimeout(() => { 
+                localStorage.setItem('kdrive_target_hr', targetHR); 
+                localStorage.setItem('kdrive_target_weight', targetWeight); 
+                localStorage.setItem('kdrive_target_fat', targetFat); 
+                localStorage.setItem('kdrive_core_initialized', 'true'); 
+                document.getElementById('onboarding-popup').classList.remove('active'); 
+                showMainApp(); 
+            }, 4000);
         }
 
-        function endRitual() {
-            if (appState !== 1) return;
-            let ritualVid = document.getElementById('ritual-video');
-            ritualVid.pause(); ritualVid.currentTime = 0;
-            
-            document.getElementById('ritual-layer').style.display = 'none';
+        function showMainApp() {
             document.getElementById('main-pwa').style.display = 'flex';
             setTimeout(() => { document.getElementById('main-pwa').style.opacity = '1'; }, 50);
-            
-            appState = 2; 
-            initializeSystem();
-            startIdleTimer(); 
+            document.body.classList.add('standby-mode');
         }
 
-        function toggleBGM(e) { 
-            e.stopPropagation(); initAudio();
-            if(roninAudio.paused) { roninAudio.play(); isMuted = false; document.getElementById('icon-sound-on').style.display='block'; document.getElementById('icon-sound-off').style.display='none'; } 
-            else { roninAudio.pause(); isMuted = true; document.getElementById('icon-sound-on').style.display='none'; document.getElementById('icon-sound-off').style.display='block'; } 
-        }
-
-        /* XỬ LÝ ÂM THANH A.I BOO */
-        function triggerBooSpeech(text, isIdle = false) {
-            const pig = document.getElementById('boo-mascot'); const widget = document.getElementById('floating-boo');
-            if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); if (pig) pig.classList.remove('reading'); if (widget) widget.classList.remove('reading'); return; }
-            if (!isIdle) playBeep();
-            
-            let cleanText = text;
-            for (let word in phoneticDict) { cleanText = cleanText.replace(new RegExp(word, 'gi'), phoneticDict[word]); }
-
-            let u = new SpeechSynthesisUtterance(cleanText); u.lang = 'vi-VN'; u.pitch = 1.0; u.rate = 1.15;
-            let viVoices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('vi') || v.lang.includes('VN'));
-            let femaleVoice = viVoices.find(v => v.name.toLowerCase().includes('female') || v.name.includes('Linh') || v.name.includes('HoaiMy') || v.name.includes('Google'));
-            if (femaleVoice) u.voice = femaleVoice; else if (viVoices.length > 0) u.voice = viVoices[0]; 
-
-            u.onstart = function() { if (pig) pig.classList.add('reading'); if (widget) widget.classList.add('reading'); };
-            u.onend = function() { if (pig) pig.classList.remove('reading'); if (widget) widget.classList.remove('reading'); };
-            u.onerror = function() { if (pig) pig.classList.remove('reading'); if (widget) widget.classList.remove('reading'); };
-            window.speechSynthesis.speak(u);
-        }
-
-        /* HÀM KÍCH HOẠT ĐỌC BÍ LỤC (NÚT MŨI HEO) */
-        function readLore(modId, e) {
-            e.stopPropagation();
-            playBeep();
-            if (window.isBooSleeping) {
-                triggerBooSpeech("Đang ngủ, đọc cái gì, cút!", false);
-                return;
-            }
-            let txt = "";
-            if(modId === 'mod6') txt = "Khế ước 1000 ngày duy trì trạng thái Vô ngã không phải là trò đùa! Chỉ cần 1 lần lơi lỏng để phong độ rớt xuống mức Tinh anh, ta sẽ đá ngươi về vạch xuất phát. Nhưng đó là chuyện tương lai. Còn bây giờ, cắm đầu rèn luyện 6 chỉ số để chạm tới Vô ngã đi đã. Đến lúc đó, đồng hồ đếm ngược mới chính thức bắt đầu!";
-            else if(modId === 'tier1') txt = "Nhìn cái điểm số thảm hại kìa! Thể lực rệu rã thế này thì xách xác ra đấu trường chỉ làm bao cát cho thiên hạ vùi dập. Lệnh hệ thống: Đình chỉ thi đấu! Ở nhà, đóng cửa, đẩy tạ và đổ mồ hôi ngay cho ta!";
-            else if(modId === 'tier2') txt = "Điểm SCI tạm chấp nhận được, nhưng chưa đủ tuổi để kiêu ngạo đâu! Giữ cái đầu lạnh, chọn trận vừa sức mà đánh để bảo toàn thể lực. Nóng vội đốt cháy giai đoạn là tự sát, nghe rõ chưa?";
-            else if(modId === 'tier3') txt = "Trạng thái Vô Ngã đã kích hoạt. Dữ liệu sinh học hoàn hảo. Giữ vững kỷ luật này liên tục một nghìn ngày để chạm tay vào giấy thông hành bước ra giải vô địch thế giới! Không khoan nhượng, không cảm xúc. Bước ra ngoài và nghiền nát đối thủ!";
-            else if(modId === 'mod4') txt = "Giao thức xả tải! Cơ bắp và thần kinh của ngươi đang kêu gào rồi đấy. Tắt ngay mọi thiết bị thi đấu, nằm xuống xả rỗng não bộ cho ta! Nghỉ ngơi cũng là một loại kỷ luật sắt đá, cấm làm trái lệnh!";
-            else if(modId === 'mod0') txt = "Đừng mở miệng ra nói về Kiếm Thánh nếu ngươi vẫn thi đấu bằng cảm xúc! Tôn chỉ của sư phụ Musashi là vứt bỏ bản ngã, hành động bằng dữ liệu và quản trị rủi ro. Kỷ luật là con đường sống sót duy nhất, nhớ lấy!";
-            else if(modId === 'mod5') txt = "Ngũ Luân Thư không phải sách để ngắm! Đất phải vững, Nước phải êm, Lửa phải bùng nổ, Gió phải thấu hiểu, và Không là vô ngã. Thuộc lòng 5 chân lý này và áp dụng vào từng nhịp thở trên bàn đấu. Nếu không, tốt nhất đừng bước ra khỏi nhà!";
-            
-            triggerBooSpeech(txt, false);
-        }
-
-        // BỘ ĐẾM THỜI GIAN NHẮC NHỞ LỀ MỀ (IDLE TIMER) CẬP NHẬT GIAO THỨC NGỦ
-        let booHoldTimer = null;
-        window.isBooSleeping = false;
-
-        function startIdleTimer() {
-            clearInterval(idleInterval);
-            idleTime = 0;
-            nextIdleTrigger = 7;
-            document.getElementById('floating-boo').style.setProperty('--idle-progress', `0%`);
-            
-            idleInterval = setInterval(() => {
-                if (window.isBooSleeping) return; // Bỏ qua nếu BOO đang ngủ đông
-
-                idleTime++;
-                let progress = Math.min((idleTime / nextIdleTrigger) * 100, 100);
-                document.getElementById('floating-boo').style.setProperty('--idle-progress', `${progress}%`);
-
-                if (idleTime >= nextIdleTrigger) {
-                    if (!window.speechSynthesis.speaking) triggerIdleBoo();
-                    idleTime = 0; 
-                    nextIdleTrigger = 45; 
-                }
-            }, 1000);
-        }
-
-        function triggerIdleBoo() {
-            if (appState === 0) {
-                triggerBooSpeech(introText, true);
-            } else if (appState === 2) {
-                let isCommitted = localStorage.getItem('combat_committed') === 'true';
-                if (!isCommitted) {
-                    let msgs = [
-                        "Đứng ngây ra nhìn màn hình tối thui làm gì? Mở Bí lục lên đọc khế ước và huyết thệ nhập môn đi!",
-                        "Mở Bí lục lên, huyết thệ vào khế ước, ngươi mới chính thức nhập môn học đạo!"
-                    ];
-                    triggerBooSpeech(msgs[Math.floor(Math.random() * msgs.length)], true);
-                }
-                else if (!isSafetyUnlocked) {
-                    triggerBooSpeech("Tường lửa đang khóa chặt kìa! Thiết bị kết nối của ngươi ổn định chưa? Nếu rồi thì bấm xác nhận!", true);
-                }
-                else if (!window.kDriveData.synced && !window.isScanning) {
-                    triggerBooSpeech("Mọi thứ đã sẵn sàng rồi, còn chần chừ gì nữa? Dí thẳng ngón tay vào lõi trung tâm để quét sinh trắc ngay!", true);
-                }
-            }
-        }
-
-        ['touchstart', 'mousemove', 'keydown', 'scroll', 'click'].forEach(evt => document.addEventListener(evt, () => {
-            if(appState !== 1 && !window.isBooSleeping) { idleTime = 0; nextIdleTrigger = 7; } 
-        }, {passive: true}));
-
-        /* KHÔI PHỤC KÉO THẢ BOO TRONG LỒNG 420px VÀ KẾT HỢP LONG PRESS ĐỂ NGỦ */
-        const booWidget = document.getElementById('floating-boo'); 
-        const booCage = document.getElementById('boo-cage');
-        let isDragging = false; let dragStartX, dragStartY; let widgetStartX, widgetStartY;
-        
-        if (booWidget && booCage) {
-            booWidget.addEventListener('touchstart', dragStart, {passive: false}); 
-            booWidget.addEventListener('mousedown', dragStart);
-        }
-        
-        function dragStart(e) { 
-            if (e.type === 'touchstart') { dragStartX = e.touches[0].clientX; dragStartY = e.touches[0].clientY; } 
-            else { dragStartX = e.clientX; dragStartY = e.clientY; } 
-            
-            widgetStartX = booWidget.offsetLeft; widgetStartY = booWidget.offsetTop; 
-            booWidget.style.right = 'auto'; booWidget.style.left = widgetStartX + 'px';
-            isDragging = false; 
-
-            // Cài đặt Long Press 3s cho BOO ngủ đông
-            booHoldTimer = setTimeout(() => {
-                if(!isDragging) {
-                    window.isBooSleeping = true;
-                    document.getElementById('floating-boo').classList.add('sleeping');
-                    document.getElementById('floating-boo').style.setProperty('--idle-progress', `0%`);
-                    idleTime = 0;
-                    window.speechSynthesis.cancel();
-                    triggerBooSpeech("Biết rồi, tắt đài đây! Cứ lề mề đi rồi hệ thống nó đào thải, đừng có kêu!", false);
-                }
-            }, 3000);
-
-            document.addEventListener('touchmove', dragMove, {passive: false}); 
-            document.addEventListener('touchend', dragEnd); 
-            document.addEventListener('mousemove', dragMove); 
-            document.addEventListener('mouseup', dragEnd); 
-        }
-        
-        function dragMove(e) { 
-            let clientX, clientY; 
-            if (e.type === 'touchmove') { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; } 
-            else { clientX = e.clientX; clientY = e.clientY; } 
-            
-            let dx = clientX - dragStartX; let dy = clientY - dragStartY; 
-            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) { 
-                isDragging = true; 
-                clearTimeout(booHoldTimer); // Nếu di chuyển thì hủy lệnh đi ngủ
-                e.preventDefault(); 
-            } 
-            
-            if (isDragging) { 
-                let maxW = booCage.offsetWidth; let maxH = window.innerHeight;
-                let minX = 10; let maxX = maxW - booWidget.offsetWidth - 10;
-                let minY = 10; let maxY = maxH - booWidget.offsetHeight - 10;
-                let newX = Math.max(minX, Math.min(maxX, widgetStartX + dx)); 
-                let newY = Math.max(minY, Math.min(maxY, widgetStartY + dy)); 
-                booWidget.style.left = newX + 'px'; booWidget.style.top = newY + 'px'; 
-            } 
-        }
-        
-        function dragEnd(e) { 
-            clearTimeout(booHoldTimer); // Nhả tay ra thì hủy đếm giờ ngủ
-            document.removeEventListener('touchmove', dragMove); document.removeEventListener('touchend', dragEnd); document.removeEventListener('mousemove', dragMove); document.removeEventListener('mouseup', dragEnd); 
-            if (isDragging) { 
-                let maxW = booCage.offsetWidth; let currentX = booWidget.offsetLeft; let midPoint = maxW / 2;
-                booWidget.style.transition = 'left 0.3s ease-out, right 0.3s ease-out'; 
-                if (currentX > midPoint) { booWidget.style.left = 'auto'; booWidget.style.right = '10px'; } 
-                else { booWidget.style.left = '10px'; booWidget.style.right = 'auto'; } 
-                setTimeout(() => { booWidget.style.transition = ''; }, 300); 
-            } 
-        }
-
-        /* KIỂM TRA ĐỒNG BỘ */
-        function unlockPreScan() { if(isSafetyUnlocked || localStorage.getItem('combat_committed') !== 'true') return; playLockSound(); isSafetyUnlocked = true; document.getElementById('safety-lock-hud').classList.add('unlocked'); document.body.classList.remove('pre-scan-locked'); document.getElementById('live-radar-bar').classList.add('active'); typeTextSafe([">_ HỆ THỐNG: CẤP QUYỀN KẾT NỐI.", ">_ CHỈ THỊ: MỜI CHẠM LÕI SCI BÊN TRÊN ĐỂ ĐỒNG BỘ."]); }
-        
-        // HÀM QUÉT VỆ TINH
-        function fetchLocation() {
-            const locSpan = document.getElementById('loc-name');
-            locSpan.innerText = 'SCANNING...';
-            
-            if (!navigator.geolocation) { locSpan.innerText = 'OFFLINE'; return; }
-            
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                try {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`);
-                    const data = await response.json();
-                    let city = data.city || data.locality || data.principalSubdivision || 'UNKNOWN';
-                    city = city.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace("THANH PHO ", "").replace("TINH ", "").trim();
-                    locSpan.innerText = city;
-                } catch (err) {
-                    locSpan.innerText = 'OFFLINE';
-                }
-            }, (err) => {
-                locSpan.innerText = 'OFFLINE';
-            }, { timeout: 5000 });
-        }
+        window.isScanning = false;
 
         async function triggerBioSync() {
-            if(localStorage.getItem('combat_committed') !== 'true') { playBeep(); return; }
-            if(window.isScanning) return; window.isScanning = true;
-            document.body.classList.remove('standby-mode'); document.body.classList.add('scanning-mode');
-            updateMarquee('scanning'); playChargeSound(); if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
+            if(window.isScanning) return; 
+            window.isScanning = true;
             
-            fetchLocation(); // Kích hoạt quét vệ tinh
+            document.body.classList.remove('standby-mode', 'sync-complete', 'tier-shiro', 'tier-chairo', 'tier-kuro'); 
+            document.body.classList.add('scanning-mode');
+            
+            const radarBar = document.getElementById('live-radar-bar');
+            const radarPulse = document.getElementById('live-pulse'); 
+            const radarMetrics = document.getElementById('live-metrics');
+            
+            radarBar.style.background = 'rgba(0, 229, 255, 0.05)';
+            radarBar.style.borderColor = 'rgba(0, 229, 255, 0.2)';
+            radarBar.style.borderLeftColor = 'var(--cyan)';
+            radarPulse.style.color = 'var(--cyan)';
+            radarPulse.innerText = '⚡ SCANNING...';
+            radarMetrics.innerHTML = 'ĐANG ĐỒNG BỘ DỮ LIỆU TỪ VỆ TINH LÕI...';
 
-            await fetchBioDataReal();
-        }
+            playChargeSound(); 
+            if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
 
-        // TỪ ĐIỂN CÁ MẬP CẮN CÁP
-        const sharkExcuses = [
-            "Á đù, cá mập lại cắn cáp quang biển rồi! Tín hiệu bốc hơi, dí tay vào lõi quét lại ngay cho ta!",
-            "Đường truyền nghẽn mất rồi! Lỗi mạng chứ không phải tại ta đâu nhé, chạm vân tay quét lại mau lên!",
-            "Tín hiệu vệ tinh đi lạc đâu rồi ấy! Chắc rớt mạng, mau quét lại đi chứ đứng nhìn gì!"
-        ];
-
-        // --- HẠCH TOÁN DỮ LIỆU ĐỘC LẬP TỪ GOOGLE SHEET ---
-        async function fetchBioDataReal() {
             try {
                 const API_URL = "https://script.google.com/macros/s/AKfycbxLBcp8F1-mMMk4V78jMrqjEtrSXQ97fKBe84zzuVB73dfztZ5VOP-jByVpebTdqcsQZA/exec?action=hud";
                 const response = await fetch(API_URL);
                 const resData = await response.json();
                 
-                stopChargeSound(); document.body.classList.remove('scanning-mode');
+                stopChargeSound(); 
+                document.body.classList.remove('scanning-mode');
 
                 if (resData.status === 'success') {
-                    document.body.classList.add('sync-complete'); window.kDriveData.synced = true; 
-                    playSlashSound(); if(navigator.vibrate) navigator.vibrate(200);
+                    document.body.classList.add('sync-complete'); 
+                    playBeep(); if(navigator.vibrate) navigator.vibrate(200);
 
-                    // 1. CHUẨN BỊ MỐC MỤC TIÊU VÀ DỮ LIỆU THỰC TẾ
-                    let centerSci = resData.sci_ma30 !== undefined ? resData.sci_ma30 : resData.sci;
-                    let sciScore = parseFloat(centerSci) || 0;
-
-                    // Đổi màu viền con BOO theo SCI
-                    let ringColor = 'var(--neon-pink)';
-                    if (sciScore < 50) ringColor = 'var(--crimson)';
-                    else if (sciScore < 85) ringColor = 'var(--cyan)';
-                    else ringColor = 'var(--violet)';
-                    document.getElementById('floating-boo').style.setProperty('--boo-ring-color', ringColor);
+                    // Xử lý dữ liệu
+                    let sciScore = parseFloat(resData.sci_ma30 !== undefined ? resData.sci_ma30 : resData.sci) || 0;
                     
-                    let savedDate = localStorage.getItem('sci_date');
-                    let todayDate = new Date().toDateString();
-                    if (savedDate !== todayDate) {
-                        let oldSci = localStorage.getItem('sci_today');
-                        if (oldSci) localStorage.setItem('sci_yesterday', oldSci);
-                        localStorage.setItem('sci_date', todayDate);
-                    }
-                    localStorage.setItem('sci_today', sciScore);
-                    
-                    window.kDriveData.sciToday = sciScore;
-                    window.kDriveData.sciYesterday = parseFloat(localStorage.getItem('sci_yesterday')) || 0;
+                    document.getElementById('val-sci').innerText = sciScore || '---'; 
+                    document.getElementById('val-hr').innerText = resData.hr || '---'; 
+                    document.getElementById('val-weight').innerText = resData.weight || '---'; 
+                    document.getElementById('val-sleep').innerText = resData.sleep || '---'; 
+                    document.getElementById('val-fat').innerText = resData.fat || '---'; 
+                    document.getElementById('val-water').innerText = resData.water || '---'; 
+                    document.getElementById('val-steps').innerText = resData.steps || '---';
 
+                    // Tính toán mục tiêu
+                    const d = new Date(); const isSunday = d.getDay() === 0;
                     let t_hr = parseInt(localStorage.getItem('kdrive_target_hr')) || 140; 
                     let t_weight = parseInt(localStorage.getItem('kdrive_target_weight')) || 65; 
                     let t_fat = parseFloat(localStorage.getItem('kdrive_target_fat')) || 15.0;
@@ -1366,595 +382,56 @@
                     let liveWeight = parseFloat(resData.weight_live) || 0; 
                     let liveFat = parseFloat(resData.fat_live) || 0;
 
-                    // IN LÊN 6 Ô CHỈ SỐ GIAO DIỆN (Của ngày hôm qua)
-                    document.getElementById('val-sci').innerText = centerSci || '---'; 
-                    document.getElementById('val-hr').innerText = resData.hr || '---'; 
-                    document.getElementById('val-weight').innerText = resData.weight || '---'; 
-                    document.getElementById('val-sleep').innerText = resData.sleep || '---'; 
-                    document.getElementById('val-fat').innerText = resData.fat || '---'; 
-                    document.getElementById('val-water').innerText = resData.water || '---'; 
-                    document.getElementById('val-steps').innerText = resData.steps || '---';
-
-                    updateStreakBoxUI(sciScore); 
-
-                    // 2. PHÂN TÍCH KHUYẾT THIẾU DỮ LIỆU (MẮT THẦN BOO)
                     let missingWatch = (liveSleep === 0 && liveSteps === 0 && liveHR === 0);
                     let missingScale = (liveWeight === 0 && liveFat === 0 && liveWater === 0);
-                    window.kDriveData.missingWatch = missingWatch;
-                    window.kDriveData.missingScale = missingScale;
-
-                    // 3. TÍNH TOÁN ALERT HÔM NAY (ĐÒI NỢ)
                     let alertsUI = [];
-                    let speechAlerts = "";
 
-                    // Cảnh báo nước
-                    if (liveWater < targetWater) {
-                        alertsUI.push('H2O: UỐNG 2.5L');
-                        speechAlerts += "Thiếu nước, đi nạp ngay 2 phẩy 5 lít vào. ";
-                    }
-                    // Cảnh báo Nhịp tim
-                    if (!isSunday && liveHR > 0 && liveHR < t_hr) {
-                        alertsUI.push(`HR: ${liveHR} BPM`);
-                        speechAlerts += `Nhịp tim mới có ${liveHR}, chưa chạm mốc ép xung. `;
-                    }
-                    // Cảnh báo Bước chân
-                    let defSteps = targetSteps - liveSteps;
-                    if (defSteps > 0 && !isSunday) {
-                        alertsUI.push(`STP: NỢ ${defSteps}`);
-                        speechAlerts += `Nợ đầm đìa ${defSteps} bước chân. `;
-                    }
-                    // Cảnh báo Giấc ngủ
-                    if (liveSleep > 0 && liveSleep < 7.0) {
-                        let defSleep = (7.0 - liveSleep).toFixed(1);
-                        alertsUI.push(`SLP: NỢ ${defSleep}H`);
-                        speechAlerts += `Ngủ thiếu ${defSleep} giờ. `;
-                    }
-                    // Cảnh báo Cân nặng
-                    if (liveWeight > 0) {
-                        let wDiff = Math.abs(liveWeight - t_weight).toFixed(1);
-                        if (liveWeight > t_weight + 0.5) {
-                            alertsUI.push(`WGT: GIẢM ${wDiff}KG`);
-                            speechAlerts += `Dư mỡ, cần giảm ${wDiff} kí. `;
-                        } else if (liveWeight < t_weight - 0.5) {
-                            alertsUI.push(`WGT: TĂNG ${wDiff}KG`);
-                            speechAlerts += `Cân nặng hụt mất ${wDiff} kí. `;
-                        }
-                    }
-                    // Cảnh báo Mỡ
-                    if (liveFat > 0 && liveFat > t_fat) {
-                        let fDiff = (liveFat - t_fat).toFixed(1);
-                        alertsUI.push(`FAT: GIẢM ${fDiff}%`);
-                        speechAlerts += `Cần giảm ${fDiff} phần trăm mỡ. `;
-                    }
+                    if (liveWater < targetWater) alertsUI.push(`H2O: CẦN UỐNG NƯỚC`);
+                    if (!isSunday && liveHR > 0 && liveHR < t_hr) alertsUI.push(`HR: ${liveHR} BPM (CHƯA ĐẠT)`);
+                    if (!isSunday && (targetSteps - liveSteps) > 0) alertsUI.push(`STP: NỢ ${targetSteps - liveSteps}`);
+                    if (liveSleep > 0 && liveSleep < 7.0) alertsUI.push(`SLP: NỢ ${(7.0 - liveSleep).toFixed(1)}H`);
+                    if (liveWeight > 0 && liveWeight > t_weight + 0.5) alertsUI.push(`WGT: GIẢM ${Math.abs(liveWeight - t_weight).toFixed(1)}KG`);
+                    if (liveFat > 0 && liveFat > t_fat) alertsUI.push(`FAT: GIẢM ${(liveFat - t_fat).toFixed(1)}%`);
 
-                    window.kDriveData.alertsUI = alertsUI;
-                    window.kDriveData.speechAlerts = speechAlerts;
-
-                    // SINH MÃ OTP NGẪU NHIÊN 4 SỐ
-                    let otp = Math.floor(1000 + Math.random() * 9000).toString();
-                    window.kDriveData.currentOTP = otp;
-
-                    // 4. HIỂN THỊ TERMINAL & BẢNG ALERT
-                    document.body.classList.remove('tier-shiro', 'tier-chairo', 'tier-kuro');
-                    const statusBanner = document.getElementById('status-banner');
-                    const radarBar = document.getElementById('live-radar-bar'); 
-                    const radarPulse = document.getElementById('live-pulse'); 
-                    const radarMetrics = document.getElementById('live-metrics');
-                    let terminalLines = [">_ HỆ THỐNG: ĐỒNG BỘ HOÀN TẤT."];
-
+                    // Giao diện Radar Alert và màu nền
                     if (missingWatch && missingScale) {
-                        document.body.classList.add('tier-shiro'); 
-                        statusBanner.innerText = "System Offline"; 
-                        updateMarquee('error'); playLockSound(); radarBar.style.display = 'none';
-                        terminalLines.push(">_ LỖI: TÍN HIỆU ĐẦU VÀO TRỐNG.");
-                        terminalLines.push(">_ CHỈ THỊ: KIỂM TRA ĐỒNG HỒ & LÊN CÂN NGAY LẬP TỨC.");
-                        document.getElementById('btn-vault').style.display = 'none';
+                        document.body.classList.add('tier-shiro');
+                        radarBar.style.background = 'rgba(255, 42, 42, 0.05)'; radarBar.style.borderColor = 'rgba(255, 42, 42, 0.2)'; radarBar.style.borderLeftColor = 'var(--crimson)';
+                        radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 ERROR';
+                        radarMetrics.innerHTML = 'TÍN HIỆU ĐẦU VÀO TRỐNG. HÃY ĐEO ĐỒNG HỒ VÀ BƯỚC LÊN CÂN NGAY.';
+                    } else if (missingWatch || missingScale) {
+                        document.body.classList.add('tier-chairo');
+                        radarBar.style.background = 'rgba(255, 170, 0, 0.05)'; radarBar.style.borderColor = 'rgba(255, 170, 0, 0.2)'; radarBar.style.borderLeftColor = 'var(--amber)';
+                        radarPulse.style.color = 'var(--amber)'; radarPulse.innerText = '🟡 WARNING';
+                        radarMetrics.innerHTML = missingWatch ? 'KHÔNG ĐỌC ĐƯỢC WATCH (SLEEP/HR/STEPS).' : 'KHÔNG ĐỌC ĐƯỢC SCALE (WGT/FAT/H2O).';
                     } else {
-                        if (missingWatch) {
-                            terminalLines.push(">_ LỖI KẾT NỐI: KHÔNG ĐỌC ĐƯỢC WATCH (SLEEP/HR/STEPS).");
-                            terminalLines.push(">_ CHỈ THỊ: KIỂM TRA LẠI ĐỒNG HỒ.");
-                        }
-                        if (missingScale) {
-                            terminalLines.push(">_ LỖI KẾT NỐI: KHÔNG ĐỌC ĐƯỢC SCALE (WGT/FAT/H2O).");
-                            terminalLines.push(">_ CHỈ THỊ: BƯỚC LÊN CÂN NGAY.");
-                        }
+                        if (sciScore < 50) document.body.classList.add('tier-shiro');
+                        else if (sciScore < 85) document.body.classList.add('tier-chairo');
+                        else document.body.classList.add('tier-kuro');
 
-                        setTimeout(() => { radarBar.style.display = 'flex'; radarBar.classList.add('active'); }, 100);
-                        if (alertsUI.length === 0 && !missingWatch && !missingScale) { 
-                            radarPulse.innerText = '🟢 ALERT'; 
-                            radarMetrics.innerHTML = 'H2O: OK | SLP: OK | WGT: OK - KHÔNG CÒN NỢ SINH HỌC'; 
+                        if (alertsUI.length === 0) { 
+                            radarBar.style.background = 'rgba(57, 255, 20, 0.05)'; radarBar.style.borderColor = 'rgba(57, 255, 20, 0.2)'; radarBar.style.borderLeftColor = 'var(--lime)';
+                            radarPulse.style.color = 'var(--lime)'; radarPulse.innerText = '🟢 TỐI ƯU'; 
+                            radarMetrics.innerHTML = 'HỆ THỐNG SẠCH. KHÔNG CÒN NỢ SINH HỌC.'; 
                         } else { 
-                            radarPulse.innerText = '🔴 ALERT'; 
+                            radarBar.style.background = 'rgba(255, 170, 0, 0.05)'; radarBar.style.borderColor = 'rgba(255, 170, 0, 0.2)'; radarBar.style.borderLeftColor = 'var(--amber)';
+                            radarPulse.style.color = 'var(--amber)'; radarPulse.innerText = '🔴 CẢNH BÁO NỢ'; 
                             radarMetrics.innerHTML = alertsUI.map(a => `<span class="metric-item">${a}</span>`).join(''); 
                         }
-
-                        // PHÂN CẤP TIER VÀ QUYỀN TRUY CẬP KHO THẺ
-                        if (sciScore < 50) { 
-                            document.body.classList.add('tier-shiro'); 
-                            statusBanner.innerText = "Tier 1: Shiro"; 
-                            updateMarquee('shiro'); playLockSound(); 
-                            terminalLines.push(">_ CẢNH BÁO: SCI DƯỚI 50. ĐÌNH CHỈ THI ĐẤU. KHÓA KHO THẺ."); 
-                            document.getElementById('btn-vault').style.display = 'none';
-                        } 
-                        else if (sciScore >= 50 && sciScore < 70) { 
-                            document.body.classList.add('tier-chairo'); 
-                            statusBanner.innerText = "Tier 2: Chairo"; 
-                            updateMarquee('chairo_c'); 
-                            terminalLines.push(">_ PHÂN TÍCH: SCI ĐẠT CƠ BẢN. MỞ KHÓA THẺ C."); 
-                            terminalLines.push(`>_ CẤP QUYỀN KHO THẺ. MÃ ẤN QUYẾT: ${otp}.`);
-                            document.getElementById('btn-vault').style.display = 'flex';
-                        } 
-                        else if (sciScore >= 70 && sciScore < 85) { 
-                            document.body.classList.add('tier-chairo'); 
-                            statusBanner.innerText = "Tier 2: Chairo"; 
-                            updateMarquee('chairo_a'); 
-                            terminalLines.push(">_ PHÂN TÍCH: SCI TIÊU CHUẨN. MỞ KHÓA THẺ C VÀ THẺ A."); 
-                            terminalLines.push(`>_ CẤP QUYỀN KHO THẺ. MÃ ẤN QUYẾT: ${otp}.`);
-                            document.getElementById('btn-vault').style.display = 'flex';
-                        } 
-                        else if (sciScore >= 85) { 
-                            document.body.classList.add('tier-kuro'); 
-                            statusBanner.innerText = "Tier 3: Kuro"; 
-                            updateMarquee('kuro'); triggerMushinProtocol(); 
-                            terminalLines.push(">_ PHÂN TÍCH: SCI >= 85. OVERDRIVE. TRẠNG THÁI VÔ NGÃ.");
-                            terminalLines.push(`>_ CẤP QUYỀN KHO THẺ. MÃ ẤN QUYẾT: ${otp}.`);
-                            document.getElementById('btn-vault').style.display = 'flex';
-                            if (roninAudio.paused && isMuted) {
-                                roninAudio.play(); isMuted = false;
-                                document.getElementById('icon-sound-on').style.display='block'; document.getElementById('icon-sound-off').style.display='none';
-                            }
-                        }
                     }
-                    
-                    // Khóa kho thẻ vào Chủ Nhật
-                    if (isSunday) {
-                        document.getElementById('btn-vault').style.display = 'none';
-                    }
-                    
-                    window.kDriveData.terminalText = terminalLines.join(" ");
-                    typeTextSafe(terminalLines);
 
-                    // GỌI A.I TỰ ĐỘNG BÁO CÁO KHI QUÉT XONG
-                    setTimeout(() => { if (!window.isBooSleeping) handleBooClick(); }, 1500);
-
-                } else if (resData.status === 'empty') { 
-                    typeTextSafe([">_ LỖI: TỪ CHỐI TRUY CẬP.", ">_ CẢNH BÁO: CHƯA CÓ DỮ LIỆU SINH TRẮC.", ">_ HƯỚNG DẪN: YÊU CẦU ĐỒNG BỘ HEALTH CONNECT."]); updateMarquee('standby'); document.body.classList.add('standby-mode');
-                    if (!window.isBooSleeping) triggerBooSpeech(sharkExcuses[Math.floor(Math.random() * sharkExcuses.length)], false);
-                } else {
-                    typeTextSafe([">_ LỖI HỆ THỐNG: " + (resData.message || "TRUY XUẤT THẤT BẠI.")]); updateMarquee('standby'); document.body.classList.add('standby-mode');
-                    if (!window.isBooSleeping) triggerBooSpeech(sharkExcuses[Math.floor(Math.random() * sharkExcuses.length)], false);
+                } else { 
+                    document.body.classList.add('standby-mode');
+                    radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 ERROR';
+                    radarMetrics.innerHTML = "TỪ CHỐI TRUY CẬP. LỖI KẾT NỐI API.";
                 }
             } catch (error) {
-                stopChargeSound(); updateMarquee('standby'); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
-                typeTextSafe([">_ CẢNH BÁO ĐỎ: MẤT KẾT NỐI VỚI VỆ TINH."]);
-                if (!window.isBooSleeping) triggerBooSpeech(sharkExcuses[Math.floor(Math.random() * sharkExcuses.length)], false);
+                stopChargeSound(); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
+                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 OFFLINE';
+                radarMetrics.innerHTML = "MẤT KẾT NỐI VỚI VỆ TINH LÕI.";
             }
             window.isScanning = false;
         }
-
-        /* HỆ THỐNG CƠ BẢN VÀ TERMINAL TYPEWRITER */
-        const textElement = document.getElementById('ai-text');
-        async function typeTextSafe(lines) {
-            let el = textElement; el.innerHTML = '';
-            for(let i = 0; i < lines.length; i++) {
-                let lineDiv = document.createElement('div'); el.appendChild(lineDiv);
-                let match = lines[i].match(/^(>_)\s*([^:]+:)?(.*)$/);
-                let parts = [];
-                if(match) { 
-                    if(match[1]) parts.push({ text: match[1] + " ", class: "prompt" }); 
-                    if(match[2]) parts.push({ text: match[2], class: "highlight" }); 
-                    if(match[3]) parts.push({ text: match[3], class: "" }); 
-                } 
-                else { parts.push({ text: lines[i], class: "" }); }
-                
-                for(let part of parts) { 
-                    let span = document.createElement('span'); span.className = part.class; lineDiv.appendChild(span); 
-                    for(let j = 0; j < part.text.length; j++) { 
-                        span.innerHTML += part.text.charAt(j); 
-                        await new Promise(r => setTimeout(r, 25)); 
-                    } 
-                }
-                await new Promise(r => setTimeout(r, 150));
-            }
-        }
-
-        /* GỌI A.I BOO PHÂN TÍCH VÀ CƠ CHẾ ĐÁNH THỨC 3 CHẠM */
-        let sleepTapCount = 0;
-        let sleepTapTimer = null;
-
-        function handleBooClick() {
-            if (isDragging) return;
-
-            if (window.isBooSleeping) {
-                sleepTapCount++;
-                clearTimeout(sleepTapTimer);
-
-                if (sleepTapCount === 1) {
-                    triggerBooSpeech("Đang ngủ, cút!", false);
-                    sleepTapTimer = setTimeout(() => { sleepTapCount = 0; }, 500); 
-                } else if (sleepTapCount === 2) {
-                    triggerBooSpeech("Muốn chết à, biến!", false);
-                    sleepTapTimer = setTimeout(() => { sleepTapCount = 0; }, 500);
-                } else if (sleepTapCount >= 3) {
-                    window.isBooSleeping = false;
-                    document.getElementById('floating-boo').classList.remove('sleeping');
-                    sleepTapCount = 0;
-                    idleTime = 0; 
-                    triggerBooSpeech("Bực mình thật đấy, dậy rồi đây!", false);
-                }
-                return;
-            }
-
-            idleTime = 0; nextIdleTrigger = 7; // Reset Idle Timer khi tương tác thủ công
-            
-            if (appState === 0) {
-                triggerBooSpeech(introText, false);
-            } else if (appState === 2) {
-                let isCommitted = localStorage.getItem('combat_committed') === 'true';
-                if (!isCommitted) {
-                    let msgs = [
-                        "Đứng ngây ra nhìn màn hình tối thui làm gì? Mở Bí lục lên đọc khế ước và huyết thệ nhập môn đi!",
-                        "Mở Bí lục lên, huyết thệ vào khế ước, ngươi mới chính thức nhập môn học đạo!"
-                    ];
-                    return triggerBooSpeech(msgs[Math.floor(Math.random() * msgs.length)], false);
-                }
-                if (!isSafetyUnlocked) return triggerBooSpeech("Tường lửa đang khóa chặt kìa! Thiết bị kết nối của ngươi ổn định chưa? Nếu rồi thì bấm xác nhận!", false);
-                if (!window.kDriveData.synced && !window.isScanning) return triggerBooSpeech("Mọi thứ đã sẵn sàng rồi, còn chần chừ gì nữa? Dí thẳng ngón tay vào lõi trung tâm để quét sinh trắc ngay!", false);
-                
-                let data = window.kDriveData;
-                if (!data || !data.synced) return;
-                
-                let finalSpeech = "";
-
-                // Bước 1: Đọc SCI & So sánh
-                let sciT = data.sciToday; let sciY = data.sciYesterday;
-                if (sciY > 0) {
-                    let diff = Math.abs(sciT - sciY).toFixed(1);
-                    if (sciT < sciY) finalSpeech += `Éc xi ai hôm nay là ${sciT} điểm, tụt ${diff} điểm so với hôm qua. Kỷ luật bệ rạc quá đấy! `;
-                    else if (sciT > sciY) finalSpeech += `Éc xi ai hôm nay ${sciT} điểm, tăng ${diff} điểm so với hôm qua. Rất tốt, tiếp tục duy trì! `;
-                    else finalSpeech += `Éc xi ai ${sciT} điểm, y xì đúc hôm qua. Đừng có giậm chân tại chỗ! `;
-                } else {
-                    finalSpeech += `Éc xi ai hôm nay thiết lập mốc ${sciT} điểm. `;
-                }
-
-                // Bước 2: Nhận diện khuyết thiếu & Giao nhiệm vụ
-                if (data.missingWatch && data.missingScale) {
-                    finalSpeech += "Cảnh báo đỏ! Mất kết nối toàn bộ hệ thống. Kiểm tra đồng hồ và cân ngay lập tức! ";
-                } else {
-                    if (data.missingWatch) finalSpeech += "Không đọc được dữ liệu giấc ngủ, bước chân, nhịp tim. Kiểm tra lại đồng hồ ngay! ";
-                    if (data.missingScale) finalSpeech += "Chưa lên cân, thiếu chỉ số cân nặng và mỡ. Bước lên cân ngay lập tức! ";
-
-                    if (data.alertsUI.length === 0 && !data.missingWatch && !data.missingScale) {
-                        finalSpeech += "Hôm nay sạch nợ sinh lý, hệ thống đạt chuẩn. ";
-                    } else {
-                        finalSpeech += data.speechAlerts;
-                    }
-                }
-
-                // Bước 3: Phân tích chiến thuật (Tier)
-                let otp = data.currentOTP;
-                if (!data.missingWatch && !data.missingScale) {
-                    if (sciT < 50) finalSpeech += "Lệnh hệ thống: Điểm dưới 50, đình chỉ thi đấu, khóa kho thẻ. Ở nhà thanh tẩy đi!";
-                    else if (sciT < 70) finalSpeech += `Lệnh hệ thống: Điểm đạt mức cơ bản. Mở khóa Thẻ C. Mã ấn quyết kho thẻ là ${otp}, nhập cho cẩn thận vào!`;
-                    else if (sciT < 85) finalSpeech += `Lệnh hệ thống: Điểm đạt mức tiêu chuẩn. Mở khóa Thẻ C và Thẻ A. Mã ấn quyết kho thẻ là ${otp}, nhập cho cẩn thận vào!`;
-                    else finalSpeech += `Lệnh hệ thống: Trạng thái Vô Ngã kích hoạt. Cấp Thẻ S, xách bản lĩnh đi càn quét các giải đấu cấp cao thôi! Mã ấn quyết kho thẻ là ${otp}, gõ nhanh lên!`;
-                }
-
-                triggerBooSpeech(finalSpeech, false);
-            }
-        }
-        function playBooReport() { handleBooClick(); }
-
-        function updateMarquee(state) {
-            const mqText = document.getElementById('marquee-text'); const box = document.getElementById('combat-marquee'); const icon = document.getElementById('mq-icon');
-            if (state === 'standby') { box.style.background = 'rgba(255, 170, 0, 0.05)'; icon.innerHTML = '📡'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `ĐANG KẾT NỐI VỚI LÕI SCI - CHỜ LỆNH HỆ THỐNG...`; } 
-            else if (state === 'scanning') { box.style.background = 'rgba(0, 229, 255, 0.05)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `GIAO THỨC ĐỒNG BỘ ĐANG KÍCH HOẠT...`; } 
-            else if (state === 'error') { box.style.background = 'rgba(255, 170, 0, 0.1)'; icon.innerHTML = '⚠️'; icon.style.color = 'var(--amber)'; mqText.innerHTML = `MẤT TÍN HIỆU ĐẦU VÀO - CHỜ KẾT NỐI LẠI THIẾT BỊ`; } 
-            else if (state === 'shiro') { box.style.background = 'rgba(255, 42, 42, 0.1)'; icon.innerHTML = '🛑'; icon.style.color = 'var(--crimson)'; mqText.innerHTML = `ĐÌNH CHỈ THI ĐẤU - KHÓA TOÀN BỘ KHO THẺ`; } 
-            else if (state === 'chairo_c') { box.style.background = 'rgba(0, 229, 255, 0.05)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `CẤP THẺ C - DUY TRÌ NHỊP ĐỘ CƠ BẢN`; } 
-            else if (state === 'chairo_a') { box.style.background = 'rgba(0, 229, 255, 0.05)'; icon.innerHTML = '⚡'; icon.style.color = 'var(--cyan)'; mqText.innerHTML = `CẤP THẺ C VÀ THẺ A - DUY TRÌ NHỊP ĐỘ TIÊU CHUẨN`; } 
-            else if (state === 'kuro') { box.style.background = 'rgba(255, 0, 255, 0.05)'; icon.innerHTML = '🥷'; icon.style.color = 'var(--neon-pink)'; mqText.innerHTML = `CẤP ĐẶC QUYỀN THẺ S - TRẠNG THÁI OVERDRIVE`; }
-        }
-
-        function initializeSystem() {
-            initParticles(); document.body.classList.add('standby-mode'); updateButtonState(); updateMarquee('standby');
-            document.body.classList.add('pre-scan-locked'); updateStreakBoxUI();
-            if (localStorage.getItem('combat_committed')==='true') { typeTextSafe([">_ SYS.FIREWALL: ONLINE", ">_ MỤC TIÊU: BẢO VỆ TÂM TRÍ. QUẢN TRỊ RỦI RO."]); } else { document.body.classList.add('uncommitted'); typeTextSafe([">_ HỆ THỐNG ĐÓNG BĂNG"]); }
-        }
-
-        function initParticles() { const matrix = document.getElementById('particle-matrix'); if (matrix.children.length > 0) return; const colors = ['#00ff9d', '#00e5ff', '#b026ff']; for(let i = 0; i < 45; i++) { let wrapper = document.createElement('div'); wrapper.className = 'particle-wrap'; wrapper.style.transform = `rotate(${Math.random() * 360}deg)`; let p = document.createElement('div'); p.className = 'particle'; p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; p.style.boxShadow = `0 0 8px ${p.style.backgroundColor}`; p.style.animation = `particle-inward ${2.5 + Math.random() * 3}s infinite ${Math.random() * 5}s linear`; wrapper.appendChild(p); matrix.appendChild(wrapper); } }
-        
-        const holoPopup = document.getElementById('holo-popup');
-        function openHolo(type) { 
-            playBeep(); 
-            let t_hr = parseInt(localStorage.getItem('kdrive_target_hr')) || 140; let t_weight = parseInt(localStorage.getItem('kdrive_target_weight')) || 65; let t_fat = parseFloat(localStorage.getItem('kdrive_target_fat')) || 15.0;
-            const holoData = { hr: { title: "HEART RATE", desc: `Yêu cầu nhịp tim đạt ${t_hr} BPM.`, color: "var(--crimson)" }, weight: { title: "WEIGHT", desc: `Mục tiêu cân nặng: ${t_weight}.0 kg.`, color: "var(--mint)" }, sleep: { title: "SLEEP", desc: "Ngủ phục hồi tối thiểu 7.0 giờ/đêm.", color: "var(--cyan)" }, fat: { title: "FAT (%)", desc: `Giữ tỷ lệ mỡ dưới ${t_fat}%.`, color: "var(--mint)" }, water: { title: "WATER (%)", desc: "Yêu cầu lượng nước cơ thể 55.0%.", color: "var(--cyan)" }, steps: { title: "STEPS", desc: "Tối thiểu 6.000 bước vận động.", color: "var(--amber)" } };
-            const data = holoData[type]; document.getElementById('holo-title').innerText = data.title; document.getElementById('holo-title').style.color = data.color; document.getElementById('holo-box').style.borderColor = data.color; 
-            if(window.kDriveData && window.kDriveData.synced) { document.getElementById('btn-close-holo').style.display = 'block'; document.getElementById('btn-close-holo').onclick = function() { playBeep(); closeHoloDirect(); }; }
-            document.getElementById('holo-desc').innerText = data.desc; holoPopup.classList.add('active'); 
-        }
-        function closeHoloDirect() { holoPopup.classList.remove('active'); }
-        function closeHolo(e) { if(e.target === holoPopup){ playBeep(); closeHoloDirect(); } }
-
-        function updateStreakBoxUI(sciScore = null) {
-            const streakBox = document.getElementById('streak-box');
-            if (!streakBox) return;
-            if (localStorage.getItem('combat_committed') !== 'true') { streakBox.innerText = 'CHƯA NHẬP MÔN'; streakBox.className = 'streak-box alert-unsigned'; return; }
-            if (sciScore !== null && sciScore < 85) { localStorage.removeItem('mushin_start_date'); streakBox.innerText = 'ĐANG THANH TẨY'; streakBox.className = 'streak-box streak-cleansing'; } 
-            else {
-                let startDateStr = localStorage.getItem('mushin_start_date'); const today = new Date(); today.setHours(0,0,0,0);
-                if (!startDateStr) { localStorage.setItem('mushin_start_date', today.toISOString()); streakBox.innerText = 'MUSHIN: 1000 DAYS'; } 
-                else { const diffDays = Math.floor(Math.abs(today - new Date(startDateStr)) / (1000 * 60 * 60 * 24)); streakBox.innerText = `MUSHIN: ${Math.max(1000 - diffDays, 0)} DAYS`; }
-                streakBox.className = 'streak-box streak-mushin';
-            }
-        }
-
-        function toggleRankMenu() { document.getElementById('rank-overlay').classList.toggle('active'); }
-        function toggleTier(id, btnElement) { 
-            if(id === 'tier3') { triggerMushinProtocol(btnElement); } else { playSlashSound(); }
-            const c = document.getElementById(id); c.classList.contains('open') ? c.classList.remove('open') : (document.querySelectorAll('.tier-content').forEach(e=>e.classList.remove('open')), c.classList.add('open')); 
-        }
-
-        const dynamicBtn = document.getElementById('dynamic-hold-btn');
-        function updateButtonState() {
-            const streakBtn = document.getElementById('streak-box');
-            if (localStorage.getItem('combat_committed') === 'true') { dynamicBtn.className = 'hold-btn state-abort'; dynamicBtn.innerHTML = 'GIỮ 3S: PHÁ THỀ - XUẤT MÔN<div id="hold-progress" class="hold-progress"></div>'; if(streakBtn) streakBtn.classList.remove('alert-unsigned'); } 
-            else { dynamicBtn.className = 'hold-btn state-sign'; dynamicBtn.innerHTML = 'GIỮ 3S: HUYẾT THỆ NHẬP MÔN<div id="hold-progress" class="hold-progress"></div>'; if(streakBtn) streakBtn.classList.add('alert-unsigned'); }
-        }
-
-        let holdTimer, startTime=0; 
-        function startHold(e) { e.preventDefault(); startTime = Date.now(); playChargeSound(); dynamicBtn.classList.add('charging'); if(navigator.vibrate) navigator.vibrate([50, 50, 50, 50]); const prog = document.getElementById('hold-progress'); holdTimer = setInterval(() => { let p = ((Date.now() - startTime) / 3000) * 100; if(p>=100){ p=100; clearInterval(holdTimer); stopChargeSound(); playLockSound(); dynamicBtn.classList.remove('charging'); if(navigator.vibrate) navigator.vibrate(300); if(localStorage.getItem('combat_committed')==='true') { triggerAbort(); } else { confirmCommitment(); } } prog.style.width = p+'%'; }, 50); }
-        function cancelHold() { clearInterval(holdTimer); stopChargeSound(); dynamicBtn.classList.remove('charging'); if(navigator.vibrate) navigator.vibrate(0); const prog = document.getElementById('hold-progress'); if(prog) prog.style.width = '0%'; }
-        function confirmCommitment() { playBeep(); document.getElementById('rank-overlay').classList.remove('active'); document.getElementById('onboarding-popup').classList.add('active'); }
-
-        function animateValue(id, start, end, duration) {
-            let obj = document.getElementById(id); if(!obj) return; let startTimestamp = null;
-            const step = (timestamp) => { if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1); obj.innerHTML = Math.floor(progress * (end - start) + start); if (progress < 1) { window.requestAnimationFrame(step); } };
-            window.requestAnimationFrame(step);
-        }
-        
-        function submitOnboarding() {
-            let year = parseInt(document.getElementById('ob-year').value) || 0; let height = parseInt(document.getElementById('ob-height').value) || 0; let weight = parseInt(document.getElementById('ob-weight').value) || 0;
-            let w = document.getElementById('ob-warning'); let title = document.getElementById('ob-title');
-            if(year === 0 || height === 0 || weight === 0) { playLockSound(); title.style.color = "var(--crimson)"; w.innerHTML = ">_ LỖI: YÊU CẦU NHẬP SỐ LIỆU NGƯỜI THỰC!"; setTimeout(() => { title.style.color = "#fff"; }, 1500); return; }
-
-            playFusionSound();
-            let age = 2026 - year; let targetHR = Math.round((220 - age) * 0.75); let targetWeight = Math.round(21.0 * (height / 100) * (height / 100)); let targetFat = 15.0;
-            let box = document.getElementById('ob-box-content');
-            box.innerHTML = `<div class="fusion-title" style="color:var(--amber);">ĐANG TÍCH HỢP DỮ LIỆU...</div>`;
-            setTimeout(() => { box.innerHTML = `<div class="fusion-title" style="color:var(--cyan);">TỌA ĐỘ SINH TỬ ĐÃ THIẾT LẬP</div><div class="fusion-grid"><div class="fusion-box"><div class="fb-lbl">HR PEAK</div><div class="fb-val" id="rl-hr">0</div></div><div class="fusion-box"><div class="fb-lbl">WEIGHT</div><div class="fb-val pink" id="rl-wgt">0</div></div><div class="fusion-box"><div class="fb-lbl">FAT LIMIT</div><div class="fb-val mint" id="rl-fat">0</div></div></div>`; animateValue('rl-hr', 0, targetHR, 1000); animateValue('rl-wgt', 0, targetWeight, 1000); animateValue('rl-fat', 0, targetFat, 1000); playSlashSound(); }, 2000);
-            setTimeout(() => { localStorage.setItem('kdrive_target_hr', targetHR); localStorage.setItem('kdrive_target_weight', targetWeight); localStorage.setItem('kdrive_target_fat', targetFat); localStorage.setItem('combat_committed', 'true'); document.getElementById('onboarding-popup').classList.remove('active'); isSafetyUnlocked = false; document.getElementById('safety-lock-hud').classList.remove('unlocked'); document.body.classList.remove('uncommitted', 'sync-complete'); document.body.classList.add('standby-mode', 'pre-scan-locked'); updateButtonState(); updateStreakBoxUI(); updateMarquee('standby'); }, 4000);
-        }
-
-        function triggerAbort() { localStorage.removeItem('combat_committed'); window.location.replace('login.html'); }
-        dynamicBtn.addEventListener('mousedown', startHold); dynamicBtn.addEventListener('mouseup', cancelHold); dynamicBtn.addEventListener('mouseleave', cancelHold); dynamicBtn.addEventListener('touchstart', startHold, {passive: false}); dynamicBtn.addEventListener('touchend', cancelHold);
-
-        /* BUSHIDO JAVASCRIPT */
-        let isBushidoActive = false; 
-        
-        function openBushidoFullscreen() { 
-            playBeep(); 
-            document.getElementById('rank-overlay').classList.remove('active'); 
-            document.getElementById('bushido-fullscreen').classList.add('active'); 
-        }
-        
-        function closeBushidoFullscreen(e) { 
-            e.stopPropagation(); 
-            playBeep(); 
-            isBushidoActive = false; 
-            
-            try { bushidoAudio.pause(); bushidoAudio.currentTime = 0; } catch(e){}
-            
-            document.getElementById('bushido-fullscreen').classList.remove('active', 'awakened'); 
-            document.getElementById('fs-slogan-container').style.opacity = '1'; 
-            document.getElementById('rank-overlay').classList.add('active'); 
-        }
-        
-        function activateBushidoMode(e) { 
-            if(e.target.className === 'btn-exit-fs') return; 
-            if (isBushidoActive) return; 
-            isBushidoActive = true; 
-            playSlashSound(); 
-            
-            try { bushidoAudio.play(); } catch(e){}
-            
-            document.getElementById('fs-slogan-container').style.opacity = '0'; 
-            document.getElementById('bushido-fullscreen').classList.add('awakened'); 
-        }
-
-        function openFullscreen(imgElement) { playBeep(); document.getElementById('viewer-img').src = imgElement.src; document.getElementById('img-viewer').classList.add('active'); }
-        function closeFullscreen() { playBeep(); document.getElementById('img-viewer').classList.remove('active'); }
-
-        /* =======================================================
-           LOGIC KHO THẺ & MÃ ẤN QUYẾT (CARD VAULT)
-           ======================================================= */
-        function openPasscode() {
-            playBeep();
-            document.getElementById('vault-pin').value = '';
-            let warning = document.getElementById('pin-warning');
-            warning.innerText = '>_ Yêu cầu mã bảo mật cấp cao.';
-            warning.style.color = 'rgba(255,255,255,0.6)';
-            document.getElementById('passcode-popup').classList.add('active');
-            setTimeout(() => document.getElementById('vault-pin').focus(), 100);
-        }
-        
-        function closePasscode(e) {
-            if(e && e.target !== document.getElementById('passcode-popup')) return;
-            document.getElementById('passcode-popup').classList.remove('active');
-            playBeep();
-        }
-
-        function checkPin() {
-            let pin = document.getElementById('vault-pin').value;
-            let warning = document.getElementById('pin-warning');
-            if(pin.length === 4) {
-                if(pin === window.kDriveData.currentOTP) {
-                    playFusionSound();
-                    warning.innerText = '>_ XÁC THỰC THÀNH CÔNG.';
-                    warning.style.color = 'var(--mint)';
-                    setTimeout(() => {
-                        document.getElementById('passcode-popup').classList.remove('active');
-                        openVaultReal();
-                    }, 500);
-                } else {
-                    playLockSound();
-                    warning.innerText = '>_ SAI MÃ. TỪ CHỐI TRUY CẬP.';
-                    warning.style.color = 'var(--crimson)';
-                    document.getElementById('vault-pin').value = '';
-                }
-            }
-        }
-
-        function openVaultReal() {
-            // Load số lần xuất thẻ
-            document.getElementById('count-s').innerText = `Đã xuất: ${localStorage.getItem('kdrive_card_s') || 0}`;
-            document.getElementById('count-a').innerText = `Đã xuất: ${localStorage.getItem('kdrive_card_a') || 0}`;
-            document.getElementById('count-c').innerText = `Đã xuất: ${localStorage.getItem('kdrive_card_c') || 0}`;
-            
-            // Xử lý Thẻ Gold đếm ngược
-            let startDateStr = localStorage.getItem('mushin_start_date'); 
-            let daysLeft = 999;
-            if(startDateStr) {
-                const today = new Date(); today.setHours(0,0,0,0);
-                const diffDays = Math.floor(Math.abs(today - new Date(startDateStr)) / (1000 * 60 * 60 * 24));
-                daysLeft = Math.max(1000 - diffDays, 0);
-            }
-            
-            let goldCard = document.getElementById('card-gold');
-            if(daysLeft <= 0) {
-                goldCard.classList.remove('locked');
-                goldCard.setAttribute('data-days', 0);
-            } else {
-                goldCard.classList.add('locked');
-                goldCard.setAttribute('data-days', daysLeft);
-            }
-
-            // Logic khóa thẻ thực chiến dựa trên điểm SCI
-            let sci = window.kDriveData.sciToday || 0;
-            
-            document.getElementById('card-c').classList.remove('locked');
-            document.getElementById('card-a').classList.remove('locked');
-            document.getElementById('card-s').classList.remove('locked');
-
-            if(sci < 50) {
-                document.getElementById('card-c').classList.add('locked');
-                document.getElementById('card-a').classList.add('locked');
-                document.getElementById('card-s').classList.add('locked');
-            } else if(sci < 70) {
-                document.getElementById('card-a').classList.add('locked');
-                document.getElementById('card-s').classList.add('locked');
-            } else if(sci < 85) {
-                document.getElementById('card-s').classList.add('locked');
-            }
-
-            document.getElementById('vault-popup').classList.add('active');
-        }
-
-        function closeVault(e, force=false) {
-            if(force || (e && e.target === document.getElementById('vault-popup'))) {
-                document.getElementById('vault-popup').classList.remove('active');
-                playBeep();
-            }
-        }
-
-        let drawTimer, drawStartTime=0, drawingCard=null;
-        
-        function clickGold() {
-            let card = document.getElementById('card-gold');
-            let days = card.getAttribute('data-days') || '999';
-            let overlay = document.getElementById('lock-gold');
-            
-            if(card.classList.contains('locked')) {
-                playLockSound();
-                overlay.innerHTML = `>_ TỪ CHỐI TRUY CẬP.<br>PHONG ẤN CÒN: ${days} NGÀY.`;
-                overlay.style.display = 'flex';
-                setTimeout(() => { overlay.style.display = 'none'; }, 2500);
-            } else {
-                playFusionSound();
-                overlay.innerHTML = `>_ ĐÃ XUẤT THẺ GOLD.<br>CHÚC BẠN VÔ ĐỊCH THẾ GIỚI!`;
-                overlay.style.color = '#fff';
-                overlay.style.display = 'flex';
-                setTimeout(() => { overlay.style.display = 'none'; closeVault(null, true); }, 3000);
-            }
-        }
-
-        function startDraw(e, cardType) {
-            e.preventDefault();
-            let cardEl = document.getElementById(`card-${cardType.toLowerCase()}`);
-            
-            if(cardEl.classList.contains('locked')) {
-                playLockSound();
-                let overlay = document.getElementById(`lock-${cardType.toLowerCase()}`);
-                if(overlay) {
-                    let req = "";
-                    if(cardType === 'C') req = "YÊU CẦU TIER 2 (SCI >= 50)";
-                    if(cardType === 'A') req = "YÊU CẦU TIER 2 BẬC CAO (SCI >= 70)";
-                    if(cardType === 'S') req = "YÊU CẦU TIER 3 (SCI >= 85)";
-                    overlay.innerHTML = `>_ TỪ CHỐI TRUY CẬP.<br>${req}`;
-                    overlay.style.display = 'flex';
-                    setTimeout(() => { overlay.style.display = 'none'; }, 2000);
-                }
-                return;
-            }
-            
-            drawingCard = cardType;
-            drawStartTime = Date.now();
-            playChargeSound();
-            if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
-            
-            let prog = document.getElementById(`prog-${cardType.toLowerCase()}`);
-            drawTimer = setInterval(() => {
-                let p = ((Date.now() - drawStartTime) / 2000) * 100;
-                if(p >= 100) {
-                    p = 100;
-                    completeDraw(cardType);
-                }
-                prog.style.width = p + '%';
-            }, 50);
-        }
-
-        function cancelDraw() {
-            if(!drawingCard) return;
-            clearInterval(drawTimer);
-            stopChargeSound();
-            if(navigator.vibrate) navigator.vibrate(0);
-            let prog = document.getElementById(`prog-${drawingCard.toLowerCase()}`);
-            if(prog) prog.style.width = '0%';
-            drawingCard = null;
-        }
-
-        function completeDraw(cardType) {
-            clearInterval(drawTimer);
-            stopChargeSound();
-            playSlashSound();
-            setTimeout(playBeep, 200);
-            if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-            
-            let prog = document.getElementById(`prog-${cardType.toLowerCase()}`);
-            if(prog) prog.style.width = '0%';
-            
-            // Lưu dữ liệu tích đếm xuất chiến
-            let key = `kdrive_card_${cardType.toLowerCase()}`;
-            let count = parseInt(localStorage.getItem(key)) || 0;
-            count++;
-            localStorage.setItem(key, count);
-            document.getElementById(`count-${cardType.toLowerCase()}`).innerText = `Đã xuất: ${count}`;
-            
-            // Cập nhật Marquee và đóng cửa Kho
-            document.getElementById('vault-popup').classList.remove('active');
-            const mqText = document.getElementById('marquee-text'); 
-            const box = document.getElementById('combat-marquee'); 
-            const icon = document.getElementById('mq-icon');
-            
-            box.style.borderColor = 'var(--neon-pink)'; 
-            box.style.background = 'rgba(255, 0, 255, 0.1)'; 
-            icon.innerHTML = '🔥'; 
-            icon.style.color = 'var(--neon-pink)'; 
-            mqText.innerHTML = `ĐÃ XUẤT THẺ ${cardType} - CHÚC VẬN ĐỘNG VIÊN BẢO TOÀN LÝ TRÍ`;
-            
-            drawingCard = null;
-        }
-
     </script>
 </body>
 </html>
