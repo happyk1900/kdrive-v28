@@ -240,7 +240,7 @@
                     </div>
                     <div class="metric-card-row" style="padding-bottom: 2px; margin-bottom: 0; border-bottom: none;">
                         <div class="metric-top-line">
-                            <span>Tốc độ phản xạ</span>
+                            <span>Tốc độ phản ứng</span>
                             <span id="final-slash">0 ms</span>
                         </div>
                         <div class="metric-bot-line">
@@ -404,7 +404,7 @@
             if (id === '1') {
                 bTitle = "BÀI 1"; bTarget = "GIỮ VỮNG QUỸ ĐẠO<br><br>Hệ thống thả một luồng gió.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Rê ngón tay/chuột bám sát theo điểm sáng. Tuột mục tiêu quá 2 giây sẽ bị trừ năng lượng.";
             } else if (id === '2') {
-                bTitle = "BÀI 2"; bTarget = "PHÁN ĐOÁN TÀNG HÌNH<br><br>Mục tiêu di chuyển và tàng hình ngẫu nhiên.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Chém trúng mục tiêu ngay lúc nó hiện ra. Bỏ lỡ khi hạt hiển thị sẽ bị LẬP TỨC trừ năng lượng!";
+                bTitle = "BÀI 2"; bTarget = "PHÁN ĐOÁN TÀNG HÌNH<br><br>Mục tiêu di chuyển và tàng hình ngẫu nhiên.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Chạm trúng mục tiêu khi nó hiện ra. Bỏ lỡ khi hạt hiển thị sẽ bị TRỪ NĂNG LƯỢNG. Ấn nhấp nhả thoải mái!";
             } 
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
@@ -529,13 +529,19 @@
                     tEl.style.top = ty + 'px';
 
                     clearAllTimeouts();
-                    let speedFactor = Math.max(0.4, 1 - (aScore / 7000));
+                    let speedFactor = Math.max(0.35, 1 - (aScore / 7000));
                     let nextTime = Math.floor(Math.random() * 800) + 400;
                     let tm = setTimeout(scheduleGhostToggle, nextTime * speedFactor);
                     gTimeouts.push(tm);
                 }
             } 
         }
+
+        // BÀI 2: ẤN RA NGOÀI HOÀN TOÀN THẢNH THƠI, KHÔNG TRỪ MẠNG
+        document.getElementById('game-play-zone').addEventListener('pointerdown', function(e) {
+            if (!isPlaying || isPausedForStart) return;
+            // Đã bỏ hoàn toàn logic phạt khi ấn ra ngoài nền
+        });
 
         function addScore(points) {
             aScore += points;
@@ -591,6 +597,7 @@
         function scheduleGhostToggle() {
             if(!isPlaying || isPausedForStart || cGame !== '2') return;
             
+            // BÀI 2: CHỈ TRỪ MẠNG KHI HẠT HIỆN LÊN RỒI TỰ TÀNG HÌNH MÀ NGƯỜI CHƠI KHÔNG KỊP BẤM
             if (!isGhost && !gTargetClicked) {
                 loseLife();
             }
@@ -606,12 +613,12 @@
                 tEl.style.opacity = '0';
             }
 
-            let nextTime = isGhost 
-                ? Math.floor(Math.random() * 800) + 400 
-                : Math.floor(Math.random() * 1000) + 600;
-
-            let speedFactor = Math.max(0.4, 1 - (aScore / 7000));
-            nextTime *= speedFactor;
+            // THỜI GIAN HIỆN VÀ TÀNG HÌNH RÚT NGẮN DẦN THEO ĐIỂM SỐ
+            let baseShowTime = Math.floor(Math.random() * 600) + 700; // Thời gian hiện ban đầu
+            let baseHideTime = Math.floor(Math.random() * 600) + 400; // Thời gian tàng hình
+            
+            let speedFactor = Math.max(0.35, 1 - (aScore / 7000));
+            let nextTime = isGhost ? (baseHideTime * speedFactor) : (baseShowTime * speedFactor);
 
             let tm = setTimeout(scheduleGhostToggle, nextTime);
             gTimeouts.push(tm);
@@ -622,7 +629,8 @@
 
             gFrameCount++;
             
-            let currentTargetSpeed = 4.0 + (aScore * 0.0015);
+            // BÀI 1: TỐC ĐỘ KHỞI ĐẦU CHẬM RÃI THẢ RƠI (2.5), CHỈ TĂNG TỐC MẠNH KHI QUA MỐC 3000-5000 ĐIỂM
+            let currentTargetSpeed = 2.5 + (aScore * 0.002);
             if (currentTargetSpeed > 18.0) currentTargetSpeed = 18.0; 
 
             let turnFreqOffset = 0; 
@@ -742,7 +750,7 @@
                     document.getElementById('result-metric-val').innerText = finalMaxFocusSec + "s";
                     document.getElementById('result-metric-badge').innerHTML = getRankHTML(getFocusRank(finalMaxFocusSec));
                 } else {
-                    document.getElementById('result-metric-name').innerText = "Tốc độ phản xạ";
+                    document.getElementById('result-metric-name').innerText = "Tốc độ phản ứng";
                     document.getElementById('result-metric-val').innerText = (aScore > 0 && finalAvgSlashMs > 0) ? finalAvgSlashMs + " ms" : "Chưa đủ Data";
                     document.getElementById('result-metric-badge').innerHTML = getRankHTML(getSlashRank(finalAvgSlashMs));
                 }
