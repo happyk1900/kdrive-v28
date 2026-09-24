@@ -321,12 +321,13 @@
             return { name: "Kém", feedback: "« Cần rèn luyện thêm để vượt qua các mốc cấu trúc cơ bản. »" };
         }
 
+        // SIẾT CHẶT ĐÁNH GIÁ THỜI GIAN TRÍCH XUẤT THỦY LUÂN THEO CHUẨN ESPORTS
         function getExtractionRankByMs(ms) {
             if (ms <= 0 || ms > 2500) return "Kém";
             if (ms <= 250) return "Thần Đồng";
             if (ms <= 450) return "Xuất Sắc";
-            if (ms <= 750) return "Giỏi";
-            if (ms <= 1200) return "Trung Bình";
+            if (ms <= 650) return "Giỏi";
+            if (ms <= 1000) return "Trung Bình";
             return "Kém";
         }
 
@@ -377,6 +378,7 @@
         let gameLogicTimer;
 
         let cueHideTimestamp = 0;
+        let tempFirstTapMs = 0; // Ghi nhớ nháp thời gian trích xuất
         let extractionTimes = [];
         let nextHpMilestone = 1000;
 
@@ -491,8 +493,7 @@
         function devFastWin() {
             if(!isPlaying || isPausedForStart) return;
             clearTimeout(gameLogicTimer);
-            let multiplier = currentLevel * 15;
-            processCorrectTap(multiplier);
+            aScore += 10;
             checkLevelUp();
         }
 
@@ -542,12 +543,12 @@
             setTimeout(() => alertBox.remove(), 1200);
         }
 
-        function processCorrectTap(currentSeqLength) { 
+        // CỐ ĐỊNH 10 ĐIỂM/NHẤN VÀ HỒI 1 MẠNG MỖI 1000 ĐIỂM
+        function processCorrectTap() { 
             if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
 
             playSound('coin', 1); 
-            let pointsToAdd = 15 + (currentLevel * 5); 
-            aScore += pointsToAdd;
+            aScore += 10;
             document.getElementById('boo-points').innerText = Math.round(aScore);
 
             if (aScore >= nextHpMilestone) {
@@ -605,7 +606,7 @@
         }
 
         function runGame1() {
-            if(!isPlaying || isPausedForStart) return; buildDynamicGrid(); patternSeq = []; userSeq = []; canClick = false; 
+            if(!isPlaying || isPausedForStart) return; buildDynamicGrid(); patternSeq = []; userSeq = []; canClick = false; tempFirstTapMs = 0;
             let config = getGridConfigByLevel(currentLevel); 
             let count = Math.min(3 + currentLevel * 2, Math.floor(config.total * 0.6)); 
             
@@ -625,23 +626,27 @@
             if(!canClick || !isPlaying || isPausedForStart || userSeq.includes(idx)) return; 
             
             if (userSeq.length === 0) {
-                let msTime = Date.now() - cueHideTimestamp;
-                extractionTimes.push(msTime);
+                tempFirstTapMs = Date.now() - cueHideTimestamp;
             }
 
             userSeq.push(idx); 
             if (patternSeq.includes(idx)) { 
                 cellEl.classList.add('correct'); 
-                processCorrectTap(userSeq.length); 
+                processCorrectTap(); 
+                // CHỈ LƯU VÀO DATA KHI HOÀN THÀNH ĐÚNG 100%
                 if(userSeq.length === patternSeq.length) { 
+                    extractionTimes.push(tempFirstTapMs);
                     canClick = false; 
                     checkLevelUp();
                 } 
-            } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
+            } else { 
+                extractionTimes.push(1500); // PHẠT 1500MS VÀO DATA NẾU BẤM SAI
+                cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); 
+            }
         }
 
         function runGame2() {
-            if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; 
+            if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; tempFirstTapMs = 0;
             let count = getG2SymbolCount(currentLevel);
             let availableSymbols = getAvailableSymbolsForLevel(currentLevel);
             
@@ -666,8 +671,7 @@
             if(!canClick || !isPlaying || isPausedForStart) return;
 
             if (userSeq.length === 0) {
-                let msTime = Date.now() - cueHideTimestamp;
-                extractionTimes.push(msTime);
+                tempFirstTapMs = Date.now() - cueHideTimestamp;
             }
 
             if(key === patternSeq[userSeq.length]) {
@@ -678,12 +682,17 @@
                 area.innerHTML = html;
                 area.scrollTop = area.scrollHeight;
                 
-                processCorrectTap(patternSeq.length); 
+                processCorrectTap(); 
+                // CHỈ LƯU VÀO DATA KHI HOÀN THÀNH ĐÚNG 100%
                 if(userSeq.length === patternSeq.length) { 
+                    extractionTimes.push(tempFirstTapMs);
                     canClick = false; 
                     checkLevelUp();
                 }
-            } else { playSound('wrong'); failSequence(); }
+            } else { 
+                extractionTimes.push(1500); // PHẠT 1500MS VÀO DATA NẾU BẤM SAI
+                playSound('wrong'); failSequence(); 
+            }
         }
 
         function finishGame() {
