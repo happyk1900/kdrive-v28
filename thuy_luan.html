@@ -89,10 +89,6 @@
         .metric-top-line span:last-child { color: #38ef7d; text-align: right; min-width: 100px; font-weight: bold; }
         .metric-bot-line { display: flex; justify-content: flex-start; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; color: #38ef7d; width: 100%; }
 
-        .final-eval-row { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 4px; }
-        .final-eval-label { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #fff; font-weight: 900; letter-spacing: 1px; }
-        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 11.5px; color: #a0b0c0; font-style: italic; text-align: left; margin-top: 8px; line-height: 1.4; border-top: 1px dashed rgba(56,239,125,0.3); padding-top: 8px; font-weight: 500; }
-
         .rank-icon-img { width: 22px; height: 22px; vertical-align: middle; margin-right: 6px; filter: drop-shadow(0 0 3px rgba(56,239,125,0.4)); }
 
         .result-btn-row { display: flex; gap: 10px; width: 88%; max-width: 280px; margin-top: 10px; }
@@ -111,8 +107,12 @@
         .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
         .stat-line span:last-child { text-align: right; min-width: 100px; color: #38ef7d; }
 
-        .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: rgba(56, 239, 125, 0.2); border: 1.5px solid #38ef7d; border-radius: 8px; color: #38ef7d; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; }
+        .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: rgba(56, 239, 125, 0.2); border: 1.5px solid #38ef7d; border-radius: 8px; color: #38ef7d; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 5px; }
         .final-btn-exit:hover { background: #38ef7d; color: #000; }
+
+        /* ĐỊNH DẠNG CÂU ĐÁNH GIÁ CHUẨN SCI-FI, PHÓNG TO, GLOW NHẤP NHÁY */
+        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: #38ef7d; font-style: italic; text-align: center; margin-top: 6px; line-height: 1.4; font-weight: 600; animation: textPulse 1.5s infinite alternate; }
+        @keyframes textPulse { 0% { opacity: 0.85; text-shadow: 0 0 5px rgba(56,239,125,0.4); } 100% { opacity: 1; text-shadow: 0 0 15px rgba(56,239,125,0.8); } }
 
         .game-container { display: none; width: 100%; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .game-container.active { display: flex; }
@@ -149,8 +149,6 @@
         .status-notification { position: absolute; top: 105%; left: 0; font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 900; color: #00ffcc; text-align: left; text-shadow: 0 0 10px #00ffcc; z-index: 999999; pointer-events: none; white-space: nowrap; animation: topAlertAnim 1.2s ease-out forwards; }
         
         .matrix-expand-alert { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: 900; color: #38ef7d; text-align: center; text-shadow: 0 0 10px #38ef7d; z-index: 999999; pointer-events: none; white-space: nowrap; background: rgba(2, 8, 15, 0.95); padding: 6px 16px; border-radius: 6px; border: 1px solid rgba(56,239,125,0.5); animation: topAlertAnim 1.2s ease-out forwards; }
-        
-        @keyframes topAlertAnim { 0% { opacity: 0; transform: translateY(-5px); } 20% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-5px); } }
     </style>
 </head>
 <body>
@@ -232,7 +230,6 @@
                             <span id="bio-rank-badge-mem">KÉM</span>
                         </div>
                     </div>
-                    <div class="master-feedback" id="master-feedback-text"></div>
                 </div>
 
                 <div class="result-btn-row">
@@ -270,6 +267,7 @@
                             <span id="sum-rank-mem">KÉM</span>
                         </div>
                     </div>
+                    <div class="master-feedback" id="master-feedback-text">Chờ đánh giá...</div>
                 </div>
 
                 <button class="final-btn-exit" onclick="closeArena()">VỀ SẢNH CHÍNH</button>
@@ -313,21 +311,20 @@
         };
 
         function getRankByStructure(completedLevel, score) {
-            if (score < 500 || completedLevel <= 1) return { name: "Kém", feedback: "« Hoàn thành mức 3x3 / 4 hình. Xếp loại Kém. »" };
-            if (completedLevel === 2) return { name: "Trung Bình", feedback: "« Hoàn thành mức 5x5 / 5 hình. Xếp loại Trung Bình. »" };
-            if (completedLevel === 3) return { name: "Giỏi", feedback: "« Hoàn thành mức 7x7 / 7 hình. Xếp loại Giỏi. »" };
-            if (completedLevel === 4) return { name: "Xuất Sắc", feedback: "« Hoàn thành mức 9x9 / 9 hình (mở khóa hình mới). Xếp loại Xuất Sắc. »" };
-            if (completedLevel >= 5) return { name: "Thần Đồng", feedback: "« Cảnh giới đỉnh cao! Chinh phục cấu trúc cực hạn full màn hình (12x12 / 18 hình). »" };
-            return { name: "Kém", feedback: "« Cần rèn luyện thêm để vượt qua các mốc cấu trúc cơ bản. »" };
+            if (score < 500 || completedLevel <= 1) return { name: "Kém", feedback: "Hoàn thành mức 3x3 / 4 hình. Xếp loại Kém." };
+            if (completedLevel === 2) return { name: "Trung Bình", feedback: "Hoàn thành mức 5x5 / 5 hình. Xếp loại Trung Bình." };
+            if (completedLevel === 3) return { name: "Giỏi", feedback: "Hoàn thành mức 7x7 / 7 hình. Xếp loại Giỏi." };
+            if (completedLevel === 4) return { name: "Xuất Sắc", feedback: "Hoàn thành mức 9x9 / 9 hình (mở khóa hình mới). Xếp loại Xuất Sắc." };
+            if (completedLevel >= 5) return { name: "Thần Đồng", feedback: "Cảnh giới đỉnh cao! Chinh phục cấu trúc cực hạn full màn hình (12x12 / 18 hình)." };
+            return { name: "Kém", feedback: "Cần rèn luyện thêm để vượt qua các mốc cấu trúc cơ bản." };
         }
 
-        // SIẾT CHẶT ĐÁNH GIÁ THỜI GIAN TRÍCH XUẤT THỦY LUÂN THEO CHUẨN ESPORTS
         function getExtractionRankByMs(ms) {
             if (ms <= 0 || ms > 2500) return "Kém";
-            if (ms <= 250) return "Thần Đồng";
-            if (ms <= 450) return "Xuất Sắc";
-            if (ms <= 650) return "Giỏi";
-            if (ms <= 1000) return "Trung Bình";
+            if (ms <= 500) return "Thần Đồng";
+            if (ms <= 800) return "Xuất Sắc";
+            if (ms <= 1200) return "Giỏi";
+            if (ms <= 1800) return "Trung Bình";
             return "Kém";
         }
 
@@ -378,7 +375,6 @@
         let gameLogicTimer;
 
         let cueHideTimestamp = 0;
-        let tempFirstTapMs = 0; // Ghi nhớ nháp thời gian trích xuất
         let extractionTimes = [];
         let nextHpMilestone = 1000;
 
@@ -493,7 +489,8 @@
         function devFastWin() {
             if(!isPlaying || isPausedForStart) return;
             clearTimeout(gameLogicTimer);
-            aScore += 10;
+            let multiplier = currentLevel * 15;
+            processCorrectTap(multiplier);
             checkLevelUp();
         }
 
@@ -543,12 +540,12 @@
             setTimeout(() => alertBox.remove(), 1200);
         }
 
-        // CỐ ĐỊNH 10 ĐIỂM/NHẤN VÀ HỒI 1 MẠNG MỖI 1000 ĐIỂM
-        function processCorrectTap() { 
+        function processCorrectTap(currentSeqLength) { 
             if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
 
             playSound('coin', 1); 
-            aScore += 10;
+            let pointsToAdd = 15 + (currentSeqLength * currentLevel * 5); 
+            aScore += pointsToAdd;
             document.getElementById('boo-points').innerText = Math.round(aScore);
 
             if (aScore >= nextHpMilestone) {
@@ -606,7 +603,7 @@
         }
 
         function runGame1() {
-            if(!isPlaying || isPausedForStart) return; buildDynamicGrid(); patternSeq = []; userSeq = []; canClick = false; tempFirstTapMs = 0;
+            if(!isPlaying || isPausedForStart) return; buildDynamicGrid(); patternSeq = []; userSeq = []; canClick = false; 
             let config = getGridConfigByLevel(currentLevel); 
             let count = Math.min(3 + currentLevel * 2, Math.floor(config.total * 0.6)); 
             
@@ -626,27 +623,23 @@
             if(!canClick || !isPlaying || isPausedForStart || userSeq.includes(idx)) return; 
             
             if (userSeq.length === 0) {
-                tempFirstTapMs = Date.now() - cueHideTimestamp;
+                let msTime = Date.now() - cueHideTimestamp;
+                extractionTimes.push(msTime);
             }
 
             userSeq.push(idx); 
             if (patternSeq.includes(idx)) { 
                 cellEl.classList.add('correct'); 
-                processCorrectTap(); 
-                // CHỈ LƯU VÀO DATA KHI HOÀN THÀNH ĐÚNG 100%
+                processCorrectTap(userSeq.length); 
                 if(userSeq.length === patternSeq.length) { 
-                    extractionTimes.push(tempFirstTapMs);
                     canClick = false; 
                     checkLevelUp();
                 } 
-            } else { 
-                extractionTimes.push(1500); // PHẠT 1500MS VÀO DATA NẾU BẤM SAI
-                cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); 
-            }
+            } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
         }
 
         function runGame2() {
-            if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; tempFirstTapMs = 0;
+            if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; 
             let count = getG2SymbolCount(currentLevel);
             let availableSymbols = getAvailableSymbolsForLevel(currentLevel);
             
@@ -671,7 +664,8 @@
             if(!canClick || !isPlaying || isPausedForStart) return;
 
             if (userSeq.length === 0) {
-                tempFirstTapMs = Date.now() - cueHideTimestamp;
+                let msTime = Date.now() - cueHideTimestamp;
+                extractionTimes.push(msTime);
             }
 
             if(key === patternSeq[userSeq.length]) {
@@ -682,17 +676,12 @@
                 area.innerHTML = html;
                 area.scrollTop = area.scrollHeight;
                 
-                processCorrectTap(); 
-                // CHỈ LƯU VÀO DATA KHI HOÀN THÀNH ĐÚNG 100%
+                processCorrectTap(patternSeq.length); 
                 if(userSeq.length === patternSeq.length) { 
-                    extractionTimes.push(tempFirstTapMs);
                     canClick = false; 
                     checkLevelUp();
                 }
-            } else { 
-                extractionTimes.push(1500); // PHẠT 1500MS VÀO DATA NẾU BẤM SAI
-                playSound('wrong'); failSequence(); 
-            }
+            } else { playSound('wrong'); failSequence(); }
         }
 
         function finishGame() {
@@ -733,8 +722,6 @@
                 document.getElementById('bio-rank-badge-ms').innerHTML = getRankHTML(extractionRankName);
                 document.getElementById('bio-rank-badge-mem').innerHTML = getRankHTML(memRankObj.name);
 
-                document.getElementById('master-feedback-text').innerText = (aScore === 0) ? "« Chưa đạt ngưỡng tối thiểu (500 Data). Xếp loại Kém! »" : memRankObj.feedback;
-
                 let btnNext = document.getElementById('btn-next');
                 if (cGame === '1') { 
                     btnNext.innerText = "BÀI 2"; 
@@ -771,6 +758,12 @@
 
             document.getElementById('sum-rank-ms').innerHTML = getRankHTML(extractionRankName);
             document.getElementById('sum-rank-mem').innerHTML = getRankHTML(finalRankObj.name);
+
+            if (totalSessionScore < 500) {
+                document.getElementById('master-feedback-text').innerText = "Chưa đạt ngưỡng tối thiểu (500 Data). Cần rèn luyện thêm!";
+            } else {
+                document.getElementById('master-feedback-text').innerText = finalRankObj.feedback;
+            }
 
             document.getElementById('final-summary-overlay').classList.add('active');
         }
