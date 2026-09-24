@@ -237,7 +237,6 @@
             'Thần Đồng': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%205%20(1).png?raw=true'
         };
 
-        // CẬP NHẬT THANG ĐO RANK ESPORTS KHẮT KHE MỚI
         function getRankByPhongLuanScore(score) {
             if (score < 2000) return { name: "Kém", feedback: "« Chưa làm chủ được quỹ đạo. Cần tập trung hơn! »" };
             if (score >= 7000) return { name: "Thần Đồng", feedback: "« Cảnh giới viễn tưởng! Phản xạ thần kinh vượt ngưỡng nhân loại. »" };
@@ -322,6 +321,7 @@
         let gMissFrames = 0;
 
         let isGhost = false;
+        let gTargetClicked = false; // Biến cờ theo dõi xem người chơi đã chém hạt lúc nó hiện ra chưa
         let nextHpMilestone = 1000;
 
         window.onload = () => {
@@ -346,9 +346,9 @@
             
             let bTitle = "", bTarget = "";
             if (id === '1') {
-                bTitle = "BÀI 1"; bTarget = "GIỮ VỮNG QUỸ ĐẠO<br><br>Hệ thống thả một luồng gió.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Rê ngón tay/chuột bám sát theo điểm sáng. Tuột mục tiêu quá lâu (3 giây) sẽ mất năng lượng.";
+                bTitle = "BÀI 1"; bTarget = "GIỮ VỮNG QUỸ ĐẠO<br><br>Hệ thống thả một luồng gió.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Rê ngón tay/chuột bám sát theo điểm sáng. Tuột mục tiêu quá lâu (2 giây) sẽ mất năng lượng.";
             } else if (id === '2') {
-                bTitle = "BÀI 2"; bTarget = "PHÁN ĐOÁN TÀNG HÌNH<br><br>Mục tiêu di chuyển và tàng hình ngẫu nhiên.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Chém trúng mục tiêu (kể cả lúc đang tàng hình). Chém hụt vào khoảng không sẽ LẬP TỨC bị trừ năng lượng!";
+                bTitle = "BÀI 2"; bTarget = "PHÁN ĐOÁN TÀNG HÌNH<br><br>Mục tiêu di chuyển và tàng hình ngẫu nhiên.<br><br><span style='color:#00ff66; font-weight:bold;'>MỤC TIÊU:</span> Chém trúng mục tiêu (lúc nó hiện ra). Nếu hạt biến mất mà chưa kịp bấm thì sẽ bị LẬP TỨC trừ năng lượng!";
             } 
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
@@ -356,7 +356,6 @@
             document.getElementById('start-prompt-overlay').classList.remove('hidden');
         }
 
-        // CẬP NHẬT THANH NĂNG LƯỢNG 2 HÀNG RỰC RỠ
         function updateHpDisplay() {
             let hp1 = Math.min(10, Math.max(0, stabilityHP));
             let hp2 = Math.min(10, Math.max(0, stabilityHP - 10));
@@ -444,43 +443,40 @@
         document.getElementById('game-play-zone').addEventListener('mousemove', updateMousePos);
         document.getElementById('game-play-zone').addEventListener('touchmove', (e) => { e.preventDefault(); updateMousePos(e); }, {passive: false});
 
-        // XỬ LÝ CHÉM TRÚNG MỤC TIÊU BÀI 2
         function handleTargetClick(e) {
             if(!isPlaying || isPausedForStart) return;
             
             if(cGame === '2') {
-                e.stopPropagation(); // Ngăn chặn sự kiện click lan ra nền background
+                e.stopPropagation(); 
                 
-                let pointsToAdd = 50;
-                if(aScore >= 7000) pointsToAdd = 150;
-                else if(aScore >= 4000) pointsToAdd = 100;
-                else if(aScore >= 3000) pointsToAdd = 80;
-                else if(aScore >= 2000) pointsToAdd = 60;
+                // Chỉ nhận chém khi mục tiêu đang HIỆN và chưa bị chém trong chu kỳ này
+                if (!isGhost && !gTargetClicked) {
+                    gTargetClicked = true;
+                    let pointsToAdd = 50;
+                    if(aScore >= 7000) pointsToAdd = 150;
+                    else if(aScore >= 4000) pointsToAdd = 100;
+                    else if(aScore >= 3000) pointsToAdd = 80;
+                    else if(aScore >= 2000) pointsToAdd = 60;
 
-                addScore(pointsToAdd);
-                playSound('katana'); 
-                
-                tx = 60 + Math.random() * (maxX - 120); 
-                ty = 60 + Math.random() * (maxY - 120);
-                
-                // Khi chém trúng, ép tàng hình luôn để đổi hướng gắt
-                isGhost = true;
-                tEl.style.opacity = '0'; 
+                    addScore(pointsToAdd);
+                    playSound('katana'); 
+                    
+                    tx = 60 + Math.random() * (maxX - 120); 
+                    ty = 60 + Math.random() * (maxY - 120);
+                    
+                    isGhost = true;
+                    tEl.style.opacity = '0'; 
+
+                    // Ngay khi chém trúng, reset chu kỳ để tàng hình lập tức
+                    clearAllTimeouts();
+                    let speedFactor = Math.max(0.4, 1 - (aScore / 7000));
+                    let nextTime = Math.floor(Math.random() * 800) + 400;
+                    let tm = setTimeout(scheduleGhostToggle, nextTime * speedFactor);
+                    gTimeouts.push(tm);
+                }
             } 
         }
 
-        // XỬ LÝ CHÉM TRƯỢT (Ấn nhầm nền ở Bài 2)
-        document.getElementById('game-play-zone').addEventListener('pointerdown', function(e) {
-            if (!isPlaying || isPausedForStart) return;
-            if (cGame === '2') {
-                // Nếu click không trúng target bóng
-                if (e.target.id !== 'game-target' && !e.target.closest('#game-target')) {
-                    loseLife();
-                }
-            }
-        });
-
-        // CƠ CHẾ THƯỞNG +1 MẠNG MỖI 1000 DATA
         function addScore(points) {
             aScore += points;
             document.getElementById('boo-points').innerText = Math.floor(aScore);
@@ -518,8 +514,9 @@
         function initG2() {
             tEl.className = 'wind-target style-slash'; 
             document.getElementById('custom-cursor').style.display = 'none';
-            document.getElementById('warning-bar-container').style.display = 'none'; // XÓA BỎ THANH SINH TỒN Ở BÀI 2
-            isGhost = false;
+            document.getElementById('warning-bar-container').style.display = 'none'; 
+            isGhost = true; 
+            gTargetClicked = false;
             
             gFrameCount = 0;
             gDashFrames = 0;
@@ -533,15 +530,24 @@
         function scheduleGhostToggle() {
             if(!isPlaying || isPausedForStart || cGame !== '2') return;
             
+            // XỬ LÝ PHẠT: Nếu đang là HIỆN mà cờ chém vẫn là false -> người chơi chưa chém -> TRỪ MẠNG
+            if (!isGhost && !gTargetClicked) {
+                loseLife();
+            }
+
             isGhost = !isGhost;
             tEl.style.opacity = isGhost ? '0' : '1';
-            // Không set pointer-events: none, vẫn cho phép bấm để chém lúc tàng hình
+            
+            // Khi mục tiêu vừa mới hiện ra, reset cờ chém
+            if (!isGhost) {
+                gTargetClicked = false;
+            }
 
             let nextTime = isGhost 
                 ? Math.floor(Math.random() * 800) + 400 
                 : Math.floor(Math.random() * 1000) + 600;
 
-            let speedFactor = Math.max(0.4, 1 - (aScore / 5000));
+            let speedFactor = Math.max(0.4, 1 - (aScore / 7000));
             nextTime *= speedFactor;
 
             let tm = setTimeout(scheduleGhostToggle, nextTime);
@@ -553,9 +559,9 @@
 
             gFrameCount++;
             
-            // CẬP NHẬT TỐC ĐỘ XUẤT PHÁT CHẬM LẠI CHO MƯỢT MÀ
-            let currentTargetSpeed = 2.5 + (aScore * 0.001);
-            if (currentTargetSpeed > 20.0) currentTargetSpeed = 20.0; 
+            // TRẢ LẠI TỐC ĐỘ BÀN THỜ NHƯ CŨ (Khởi đầu 4.0 và gia tốc từ từ)
+            let currentTargetSpeed = 4.0 + (aScore * 0.0015);
+            if (currentTargetSpeed > 18.0) currentTargetSpeed = 18.0; 
 
             let turnFreqOffset = 0; 
             if (aScore < 2000) turnFreqOffset = 0;
@@ -602,18 +608,18 @@
             tEl.style.transform = `translate(-50%, -50%)`;
 
             if (cGame === '1') {
-                // CẬP NHẬT LƯỢNG ĐIỂM CỘNG LŨY TIẾN THEO CHUẨN RANK
+                // ĐIỂM SỐ LŨY TIẾN "HẠ NHIỆT" CHỐNG LẠM PHÁT
                 let pointsToAdd = 1.0;
-                if (aScore >= 7000) pointsToAdd = 15.0;
-                else if (aScore >= 4000) pointsToAdd = 8.0;
-                else if (aScore >= 3000) pointsToAdd = 4.0;
-                else if (aScore >= 2000) pointsToAdd = 2.0;
+                if (aScore >= 7000) pointsToAdd = 6.0;
+                else if (aScore >= 4000) pointsToAdd = 4.0;
+                else if (aScore >= 3000) pointsToAdd = 2.5;
+                else if (aScore >= 2000) pointsToAdd = 1.5;
 
                 let dist = Math.hypot(mx - tx, my - ty);
                 let hitRadius = 60;
                 
-                // NỚI LỎNG THỜI GIAN SINH TỒN LÊN 3 GIÂY (~180 frames)
-                const G1_MAX_MISS_FRAMES = 180; 
+                // SIẾT LẠI THỜI GIAN SINH TỒN VỀ 2 GIÂY (~120 frames)
+                const G1_MAX_MISS_FRAMES = 120; 
                 
                 if(dist < hitRadius) {
                     addScore(pointsToAdd);
@@ -628,7 +634,7 @@
 
                     if(gMissFrames > G1_MAX_MISS_FRAMES) { 
                         loseLife();
-                        gMissFrames = 0; // Reset thanh thời gian sau khi bị trừ máu
+                        gMissFrames = 0; 
                     }
                 }
             } 
