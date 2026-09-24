@@ -100,7 +100,7 @@
         #btn-next { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         #btn-next:active { background: #fff; color: #000; }
 
-        /* BÁO CÁO TỔNG HỢP CUỐI CÙNG HOÀN CHỈNH VỚI ICON VÀ ĐÁNH GIÁ */
+        /* BÁO CÁO TỔNG HỢP CUỐI CÙNG HOÀN CHỈNH */
         #final-summary-overlay { position: absolute; inset: 0; background: #0d0202; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999999; gap: 8px; padding: 12px; }
         #final-summary-overlay.active { display: flex; }
         .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #ff3333; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px #ff3333; }
@@ -109,6 +109,9 @@
         .stat-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #ffffff; width: 100%; font-weight: bold; }
         .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
         .stat-line span:last-child { text-align: right; min-width: 100px; color: #ffb700; }
+
+        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: #ffb700; font-style: italic; text-align: center; margin-top: 6px; line-height: 1.4; font-weight: 600; text-shadow: 0 0 10px rgba(255,183,0,0.4); animation: textPulse 1.5s infinite alternate; }
+        @keyframes textPulse { 0% { opacity: 0.85; text-shadow: 0 0 5px rgba(255,183,0,0.4); } 100% { opacity: 1; text-shadow: 0 0 15px rgba(255,183,0,0.8); } }
 
         .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: rgba(255, 51, 51, 0.2); border: 1.5px solid #ff3333; border-radius: 8px; color: #ff3333; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 5px; }
         .final-btn-exit:hover { background: #ff3366; color: #fff; }
@@ -287,6 +290,7 @@
                             <span id="sum-rank-2">KÉM</span>
                         </div>
                     </div>
+                    <div class="master-feedback" id="master-feedback-text">Chờ đánh giá...</div>
                 </div>
 
                 <button class="final-btn-exit" onclick="closeArena()">VỀ SẢNH CHÍNH</button>
@@ -339,6 +343,16 @@
                 if (cps >= 14) return "Trung Bình";
                 return "Kém";
             }
+        }
+
+        // HÀM ĐÁNH GIÁ NHẬN XÉT TỔNG QUAN HỎA LUÂN
+        function getOverallFeedback(score) {
+            if (score < 2000) return "Chưa làm chủ được nhịp độ. Cần rèn luyện thêm!";
+            if (score >= 8000) return "Cảnh giới viễn tưởng! Phản xạ và bạo phát vượt ngưỡng nhân loại.";
+            if (score >= 6000) return "Tốc độ chớp nhoáng và uy lực bạo phát cực kỳ sắc bén.";
+            if (score >= 4000) return "Tốc độ đáng gờm, giới hạn đỉnh cao của người bình thường.";
+            if (score >= 2000) return "Phản ứng cơ bản ổn định, cần đẩy nhanh tốc độ hơn.";
+            return "Cần rèn luyện thêm!";
         }
 
         function getRankHTML(rankName) {
@@ -763,6 +777,12 @@
 
             document.getElementById('sum-rank-1').innerHTML = getRankHTML(reflexRankName);
             document.getElementById('sum-rank-2').innerHTML = getRankHTML(burstRankName);
+
+            if (totalSessionScore < 1000) {
+                document.getElementById('master-feedback-text').innerText = "Chưa đạt ngưỡng tối thiểu (1000 Data). Cần rèn luyện thêm!";
+            } else {
+                document.getElementById('master-feedback-text').innerText = getOverallFeedback(totalSessionScore);
+            }
 
             document.getElementById('final-summary-overlay').classList.add('active');
         }
