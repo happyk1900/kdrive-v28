@@ -234,6 +234,13 @@
         function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport); fixViewport();
 
+        // LẮNG NGHE SỰ KIỆN DEVICE READY ĐẢM BẢO CORDOVA PLUGIN ĐÃ SẴN SÀNG
+        let isDeviceReady = false;
+        document.addEventListener('deviceready', () => {
+            isDeviceReady = true;
+            console.log("Cordova Device Ready triggered.");
+        }, false);
+
         window.onload = () => {
             initParticles();
             
@@ -342,7 +349,7 @@
             return score.toFixed(1);
         }
 
-        // HÀM KÍCH HOẠT GỌI HEALTH CONNECT TRỰC TIẾP
+        // HÀM KÍCH HOẠT GỌI HEALTH CONNECT AN TOÀN ĐA TẦNG
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -368,10 +375,11 @@
                 let liveHR = 0, liveSleep = 0, liveSteps = 0;
                 let liveWeight = 0, liveFat = 0, liveWater = 0;
 
-                const healthPlugin = window.navigator.health || (window.plugins && window.plugins.health);
+                // TÌM KIẾM PLUGIN HEALTH Ở TẤT CẢ CÁC ĐỐI TƯỢNG GỐC CỦA CORDOVA/CAPACITOR
+                const healthPlugin = (window.plugins && window.plugins.health) ? window.plugins.health : ((window.navigator && window.navigator.health) ? window.navigator.health : null);
                 
                 if (!healthPlugin) {
-                    alert("LỖI: Plugin Health chưa sẵn sàng. Hãy kiểm tra lại môi trường Capacitor!");
+                    alert("LỖI: Plugin Health chưa sẵn sàng. Hãy cấp thời gian để WebView khởi tạo!");
                     throw new Error("Health plugin not found");
                 }
 
