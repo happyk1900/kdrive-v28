@@ -12,15 +12,8 @@
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Space Grotesk', sans-serif; color: #fff; }
 
-        /* --- ÉP ẨN TRIỆT ĐỂ NÚT PLAY MẶC ĐỊNH CỦA ANDROID WEBVIEW --- */
-        video::-webkit-media-controls,
-        video::-webkit-media-controls-enclosure,
-        video::-webkit-media-controls-panel,
-        video::-webkit-media-controls-play-button,
-        video::-webkit-media-controls-start-playback-button {
-            display: none !important;
-            -webkit-appearance: none !important;
-        }
+        /* Ép ẩn nút play mặc định */
+        video::-webkit-media-controls { display: none !important; }
 
         #quantum-flash-overlay {
             position: fixed; inset: 0; width: 100vw; height: 100vh; background: #00ffff;
@@ -36,6 +29,7 @@
             100% { opacity: 0; filter: none; }
         }
 
+        /* --- THUẬT TÀNG HÌNH: Video bắt đầu với opacity 0 --- */
         #bg-video {
             position: fixed;
             top: 0;
@@ -44,9 +38,10 @@
             height: 100vh;
             object-fit: cover;
             z-index: 0;
-            opacity: 1;
+            opacity: 0; /* Ẩn đi lúc mới load */
             pointer-events: none;
             -o-object-fit: cover;
+            transition: opacity 0.8s ease-in; /* Hiệu ứng mờ dần hiện lên */
         }
 
         #content-wrapper {
@@ -323,9 +318,23 @@
             applyTranslations();
             const vid = document.getElementById('bg-video');
             if (vid) {
-                vid.play().catch(e => {
-                    document.body.addEventListener('click', () => vid.play(), { once: true });
-                });
+                // Ép play ngầm, thành công thì hiện lên mượt mà
+                let playPromise = vid.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        vid.style.opacity = 1; // Play được mới hiện lên
+                    }).catch(error => {
+                        // Nếu bị chặn, đợi chạm màn hình một cái là chạy luôn
+                        document.body.addEventListener('touchstart', () => {
+                            vid.play();
+                            vid.style.opacity = 1;
+                        }, { once: true });
+                        document.body.addEventListener('click', () => {
+                            vid.play();
+                            vid.style.opacity = 1;
+                        }, { once: true });
+                    });
+                }
             }
         });
     </script>
