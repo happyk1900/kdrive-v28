@@ -342,7 +342,7 @@
             return score.toFixed(1);
         }
 
-        // HÀM GỌI HEALTH CONNECT ĐÃ CHUẨN HÓA HOÀN TOÀN CÁC TÊN QUYỀN VÀ BIẾN
+        // HÀM GỌI HEALTH CONNECT ĐÃ LOẠI BỎ HOÀN TOÀN CÁC THAM SỐ LỖI
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -374,16 +374,16 @@
                     throw new Error("Capacitor Health Plugin chưa sẵn sàng.");
                 }
 
-                // 1. Chỉ xin quyền với các chuỗi camelCase chuẩn xác do plugin kiểm duyệt
+                // 1. Chỉ xin quyền với các chuẩn dataType đã được kiểm duyệt an toàn
                 await Health.requestAuthorization({
-                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat', 'hydration']
+                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat']
                 });
 
                 const startDateIso = new Date(new Date().setHours(0,0,0,0)).toISOString();
                 const endDateIso = new Date().toISOString();
                 const queryOptions = { startDate: startDateIso, endDate: endDateIso };
 
-                // 2. Truy vấn an toàn từng chỉ số độc lập tuyệt đối, không làm sập tiến trình chung
+                // 2. Truy vấn an toàn từng chỉ số một
                 try {
                     const stepsData = await Health.queryAggregated({ ...queryOptions, dataType: 'steps' });
                     if (stepsData && stepsData.value) liveSteps = parseInt(stepsData.value);
@@ -415,16 +415,8 @@
                     }
                 } catch(e) {}
 
-                try {
-                    const waterData = await Health.querySamples({ ...queryOptions, dataType: 'hydration' });
-                    if (waterData && waterData.samples && waterData.samples.length > 0) {
-                        liveWater = parseFloat(waterData.samples[waterData.samples.length - 1].value).toFixed(1);
-                    }
-                } catch(e) {}
-
-                if (liveWater == 0 || isNaN(liveWater)) {
-                    liveWater = calculateFallbackWater(liveWeight, liveFat);
-                }
+                // Nội suy thông minh lượng nước cơ thể (H2O)
+                liveWater = calculateFallbackWater(liveWeight, liveFat);
 
                 stopChargeSound(); 
                 document.body.classList.remove('scanning-mode');
@@ -450,7 +442,7 @@
                 let targetWater = 55.0; 
 
                 let missingWatch = (liveSleep == 0 && liveSteps == 0 && liveHR == 0);
-                let missingScale = (liveWeight == 0 && liveFat == 0 && liveWater == 0);
+                let missingScale = (liveWeight == 0 && liveFat == 0);
                 let alertsUI = [];
 
                 if (liveWater > 0 && liveWater < targetWater) alertsUI.push(`H2O: CẦN UỐNG NƯỚC`);
@@ -469,7 +461,7 @@
                     document.body.classList.add('tier-chairo');
                     radarBar.style.background = 'rgba(255, 170, 0, 0.05)'; radarBar.style.borderColor = 'rgba(255, 170, 0, 0.2)'; radarBar.style.borderLeftColor = 'var(--amber)';
                     radarPulse.style.color = 'var(--amber)'; radarPulse.innerText = '🟡 WARNING';
-                    radarMetrics.innerHTML = missingWatch ? 'KHÔNG ĐỌC ĐƯỢC WATCH (SLEEP/HR/STEPS).' : 'KHÔNG ĐỌC ĐƯỢC SCALE (WGT/FAT/H2O).';
+                    radarMetrics.innerHTML = missingWatch ? 'KHÔNG ĐỌC ĐƯỢC WATCH (SLEEP/HR/STEPS).' : 'KHÔNG ĐỌC ĐƯỢC SCALE (WGT/FAT).';
                 } else {
                     if (sciScore < 50) document.body.classList.add('tier-shiro');
                     else if (sciScore < 85) document.body.classList.add('tier-chairo');
