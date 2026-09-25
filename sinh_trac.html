@@ -2,7 +2,6 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <script src="cordova.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#050608">
     <title>Spades Node - Event Horizon Core</title>
@@ -235,12 +234,6 @@
         function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport); fixViewport();
 
-        let isDeviceReady = false;
-        document.addEventListener('deviceready', () => {
-            isDeviceReady = true;
-            console.log("Cordova Device Ready triggered.");
-        }, false);
-
         window.onload = () => {
             initParticles();
             
@@ -349,7 +342,7 @@
             return score.toFixed(1);
         }
 
-        // HÀM KÍCH HOẠT GỌI HEALTH CONNECT
+        // HÀM KÍCH HOẠT GỌI HEALTH CONNECT AN TOÀN ĐA TẦNG (TỰ ĐỘNG CHỜ BRIDGE)
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -375,11 +368,16 @@
                 let liveHR = 0, liveSleep = 0, liveSteps = 0;
                 let liveWeight = 0, liveFat = 0, liveWater = 0;
 
-                const healthPlugin = (window.plugins && window.plugins.health) ? window.plugins.health : ((window.navigator && window.navigator.health) ? window.navigator.health : null);
+                // CHỜ TỐI ĐA 2 GIÂY ĐỂ WEBLIEV KỊP NẠP BRIDGE
+                let healthPlugin = null;
+                for (let i = 0; i < 20; i++) {
+                    healthPlugin = window.plugins?.health || window.navigator?.health || window.Capacitor?.Plugins?.HealthConnect || null;
+                    if (healthPlugin) break;
+                    await new Promise(r => setTimeout(r, 100));
+                }
                 
                 if (!healthPlugin) {
-                    alert("LỖI: Plugin Health chưa sẵn sàng. Hãy kiểm tra lại thẻ cordova.js!");
-                    throw new Error("Health plugin not found");
+                    throw new Error("Không tìm thấy interface Health trong WebView.");
                 }
 
                 // 1. GỌI BẢNG XIN QUYỀN TRỰC TIẾP TỪ HEALTH CONNECT
