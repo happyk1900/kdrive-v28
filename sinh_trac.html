@@ -342,7 +342,7 @@
             return score.toFixed(1);
         }
 
-        // HÀM GỌI HEALTH CONNECT HỖ TRỢ ĐỌC ĐÚNG MẢNG KẾT QUẢ TỪ PLUGIN CAPGO
+        // HÀM GỌI HEALTH CONNECT CHUẨN XÁC ĐÃ TỐI ƯU CÁC CHỈ SỐ THỰC TẾ
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -374,16 +374,16 @@
                     throw new Error("Capacitor Health Plugin chưa sẵn sàng.");
                 }
 
-                // 1. Xin quyền truy cập các chỉ số cốt lõi
                 await Health.requestAuthorization({
                     read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat']
                 });
 
+                // Lấy mốc thời gian bắt đầu từ 00:00:00 hôm nay để lọc đúng dữ liệu trong ngày
                 const startDateIso = new Date(new Date().setHours(0,0,0,0)).toISOString();
                 const endDateIso = new Date().toISOString();
                 const queryOptions = { startDate: startDateIso, endDate: endDateIso };
 
-                // 2. Trích xuất dữ liệu an toàn, hỗ trợ bóc tách linh hoạt mọi cấu trúc mảng trả về
+                // 1. Số bước chân (lấy tổng trong ngày)
                 try {
                     const stepsData = await Health.queryAggregated({ ...queryOptions, dataType: 'steps' });
                     if (stepsData) {
@@ -391,6 +391,7 @@
                     }
                 } catch(e) {}
 
+                // 2. Nhịp tim (lấy mẫu mới nhất hiện tại, ví dụ 73 BPM)
                 try {
                     const hrData = await Health.querySamples({ ...queryOptions, dataType: 'heartRate' });
                     let hrList = hrData.samples || hrData.values || (Array.isArray(hrData) ? hrData : []);
@@ -399,14 +400,28 @@
                     }
                 } catch(e) {}
 
+                // 3. Giấc ngủ thực tế (lọc bản ghi có thời lượng ngủ thực tế)
                 try {
-                    const sleepData = await Health.queryAggregated({ ...queryOptions, dataType: 'sleep' });
-                    if (sleepData) {
-                        let sleepSec = parseFloat(sleepData.value || (sleepData.samples && sleepData.samples[0] ? sleepData.samples[0].value : 0) || 0);
-                        if (sleepSec > 0) liveSleep = (sleepSec / 3600).toFixed(1);
+                    const sleepData = await Health.querySamples({ ...queryOptions, dataType: 'sleep' });
+                    let sleepList = sleepData.samples || sleepData.values || (Array.isArray(sleepData) ? sleepData : []);
+                    if (sleepList.length > 0) {
+                        // Lấy bản ghi giấc ngủ gần nhất hoặc tính tổng thời lượng thực tế
+                        let latestSleep = sleepList[sleepList.length - 1];
+                        let sleepSec = parseFloat(latestSleep.value || latestSleep.duration || 0);
+                        if (sleepSec > 0) {
+                            // Nếu giá trị lớn hơn 24 thì tính bằng giây, quy đổi ra giờ
+                            liveSleep = (sleepSec > 100 ? sleepSec / 3600 : sleepSec).toFixed(1);
+                        }
+                    } else {
+                        // Fallback sang aggregated nếu querySamples không có
+                        const sleepAgg = await Health.queryAggregated({ ...queryOptions, dataType: 'sleep' });
+                        if (sleepAgg && sleepAgg.value) {
+                            liveSleep = (sleepAgg.value / 3600).toFixed(1);
+                        }
                     }
                 } catch(e) {}
 
+                // 4. Cân nặng (lấy giá trị chuẩn 61,2 kg mới nhất)
                 try {
                     const weightData = await Health.querySamples({ ...queryOptions, dataType: 'weight' });
                     let wList = weightData.samples || weightData.values || (Array.isArray(weightData) ? weightData : []);
@@ -415,6 +430,7 @@
                     }
                 } catch(e) {}
 
+                // 5. Mỡ cơ thể
                 try {
                     const fatData = await Health.querySamples({ ...queryOptions, dataType: 'bodyFat' });
                     let fList = fatData.samples || fatData.values || (Array.isArray(fatData) ? fatData : []);
