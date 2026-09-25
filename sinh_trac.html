@@ -342,7 +342,7 @@
             return score.toFixed(1);
         }
 
-        // HÀM GỌI HEALTH CONNECT CHUẨN XÁC VỚI CAPGO PLUGIN (@capgo/capacitor-health)
+        // HÀM GỌI HEALTH CONNECT VỚI ĐỊNH DẠNG CHUẨN CAPGO PLUGIN (@capgo/capacitor-health)
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -374,23 +374,23 @@
                     throw new Error("Capacitor Health Plugin chưa sẵn sàng.");
                 }
 
-                // 1. Xin quyền truy cập đầy đủ các thông số
+                // 1. Xin quyền truy cập với tên dataType chuẩn xác của plugin Capgo
                 await Health.requestAuthorization({
-                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFatPercentage', 'hydration']
+                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat', 'dietaryWater']
                 });
 
                 const startDateIso = new Date(new Date().setHours(0,0,0,0)).toISOString();
                 const endDateIso = new Date().toISOString();
                 const queryOptions = { startDate: startDateIso, endDate: endDateIso };
 
-                // 2. Truy vấn dữ liệu với cú pháp chuẩn của Capgo Health API
+                // 2. Truy vấn dữ liệu an toàn từng chỉ số với dataType chuẩn
                 try {
                     const stepsData = await Health.queryAggregated({ ...queryOptions, dataType: 'steps' });
                     if (stepsData && stepsData.value) liveSteps = parseInt(stepsData.value);
                 } catch(e) { console.error("Steps error:", e); }
 
                 try {
-                    const hrData = await Health.readSamples({ ...queryOptions, dataType: 'heartRate' });
+                    const hrData = await Health.querySamples({ ...queryOptions, dataType: 'heartRate' });
                     if (hrData && hrData.samples && hrData.samples.length > 0) {
                         liveHR = parseInt(hrData.samples[hrData.samples.length - 1].value);
                     }
@@ -402,21 +402,21 @@
                 } catch(e) { console.error("Sleep error:", e); }
 
                 try {
-                    const weightData = await Health.readSamples({ ...queryOptions, dataType: 'weight' });
+                    const weightData = await Health.querySamples({ ...queryOptions, dataType: 'weight' });
                     if (weightData && weightData.samples && weightData.samples.length > 0) {
                         liveWeight = parseFloat(weightData.samples[weightData.samples.length - 1].value).toFixed(1);
                     }
                 } catch(e) { console.error("Weight error:", e); }
 
                 try {
-                    const fatData = await Health.readSamples({ ...queryOptions, dataType: 'bodyFatPercentage' });
+                    const fatData = await Health.querySamples({ ...queryOptions, dataType: 'bodyFat' });
                     if (fatData && fatData.samples && fatData.samples.length > 0) {
                         liveFat = parseFloat(fatData.samples[fatData.samples.length - 1].value).toFixed(1);
                     }
                 } catch(e) { console.error("Fat error:", e); }
 
                 try {
-                    const waterData = await Health.readSamples({ ...queryOptions, dataType: 'hydration' });
+                    const waterData = await Health.querySamples({ ...queryOptions, dataType: 'dietaryWater' });
                     if (waterData && waterData.samples && waterData.samples.length > 0) {
                         liveWater = parseFloat(waterData.samples[waterData.samples.length - 1].value).toFixed(1);
                     }
