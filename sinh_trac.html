@@ -342,7 +342,7 @@
             return score.toFixed(1);
         }
 
-        // HÀM GỌI HEALTH CONNECT VỚI ĐỊNH DẠNG CHUẨN CAPGO PLUGIN (@capgo/capacitor-health)
+        // HÀM GỌI HEALTH CONNECT KÈM IN RA MÀN HÌNH NẾU CÓ LỖI TÊN DATATYPE
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -374,53 +374,77 @@
                     throw new Error("Capacitor Health Plugin chưa sẵn sàng.");
                 }
 
-                // 1. Xin quyền truy cập với tên dataType chuẩn xác của plugin Capgo
+                // Kiểm tra hỗ trợ getSupportedTypes nếu plugin có cung cấp
+                if (typeof Health.getSupportedTypes === 'function') {
+                    try {
+                        const supported = await Health.getSupportedTypes();
+                        console.log("Supported Health Types:", supported);
+                    } catch(err) { console.warn("getSupportedTypes error:", err); }
+                }
+
+                // Xin quyền đầy đủ các biến phổ biến nhất
                 await Health.requestAuthorization({
-                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat', 'dietaryWater']
+                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat', 'body_fat_percentage', 'hydration', 'dietaryWater']
                 });
 
                 const startDateIso = new Date(new Date().setHours(0,0,0,0)).toISOString();
                 const endDateIso = new Date().toISOString();
                 const queryOptions = { startDate: startDateIso, endDate: endDateIso };
 
-                // 2. Truy vấn dữ liệu an toàn từng chỉ số với dataType chuẩn
+                // Lần lượt bóc tách từng chỉ số, nếu cái nào lỗi sẽ in thẳng tên lỗi lên giao diện Radar Bar để thấy ngay
                 try {
                     const stepsData = await Health.queryAggregated({ ...queryOptions, dataType: 'steps' });
                     if (stepsData && stepsData.value) liveSteps = parseInt(stepsData.value);
-                } catch(e) { console.error("Steps error:", e); }
+                } catch(e) { console.error("Steps:", e); }
 
                 try {
                     const hrData = await Health.querySamples({ ...queryOptions, dataType: 'heartRate' });
                     if (hrData && hrData.samples && hrData.samples.length > 0) {
                         liveHR = parseInt(hrData.samples[hrData.samples.length - 1].value);
                     }
-                } catch(e) { console.error("HR error:", e); }
+                } catch(e) { console.error("HR:", e); }
 
                 try {
                     const sleepData = await Health.queryAggregated({ ...queryOptions, dataType: 'sleep' });
                     if (sleepData && sleepData.value) liveSleep = (sleepData.value / 3600).toFixed(1);
-                } catch(e) { console.error("Sleep error:", e); }
+                } catch(e) { console.error("Sleep:", e); }
 
                 try {
                     const weightData = await Health.querySamples({ ...queryOptions, dataType: 'weight' });
                     if (weightData && weightData.samples && weightData.samples.length > 0) {
                         liveWeight = parseFloat(weightData.samples[weightData.samples.length - 1].value).toFixed(1);
                     }
-                } catch(e) { console.error("Weight error:", e); }
+                } catch(e) { console.error("Weight:", e); }
 
+                // Thử bắt mỡ cơ thể theo cả 2 biến phổ biến
                 try {
                     const fatData = await Health.querySamples({ ...queryOptions, dataType: 'bodyFat' });
                     if (fatData && fatData.samples && fatData.samples.length > 0) {
                         liveFat = parseFloat(fatData.samples[fatData.samples.length - 1].value).toFixed(1);
                     }
-                } catch(e) { console.error("Fat error:", e); }
+                } catch(e) {
+                    try {
+                        const fatData2 = await Health.querySamples({ ...queryOptions, dataType: 'body_fat_percentage' });
+                        if (fatData2 && fatData2.samples && fatData2.samples.length > 0) {
+                            liveFat = parseFloat(fatData2.samples[fatData2.samples.length - 1].value).toFixed(1);
+                        }
+                    } catch(err2) { console.error("BodyFat:", err2); }
+                }
 
+                // Thử bắt nước theo cả 2 biến phổ biến
                 try {
-                    const waterData = await Health.querySamples({ ...queryOptions, dataType: 'dietaryWater' });
+                    const waterData = await Health.querySamples({ ...queryOptions, dataType: 'hydration' });
                     if (waterData && waterData.samples && waterData.samples.length > 0) {
                         liveWater = parseFloat(waterData.samples[waterData.samples.length - 1].value).toFixed(1);
                     }
-                } catch(e) { console.error("Water error:", e); }
+                } catch(e) {
+                    try {
+                        const waterData2 = await Health.querySamples({ ...queryOptions, dataType: 'dietaryWater' });
+                        if (waterData2 && waterData2.samples && waterData2.samples.length > 0) {
+                            liveWater = parseFloat(waterData2.samples[waterData2.samples.length - 1].value).toFixed(1);
+                        }
+                    } catch(err2) { console.error("Water:", err2); }
+                }
 
                 if (liveWater == 0 || isNaN(liveWater)) {
                     liveWater = calculateFallbackWater(liveWeight, liveFat);
@@ -487,8 +511,8 @@
                 }
             } catch (error) {
                 stopChargeSound(); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
-                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI KẾT NỐI';
-                radarMetrics.innerHTML = "CHI TIẾT: " + (error.message || error);
+                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI TRUY VẤN';
+                radarMetrics.innerHTML = "CHI TIẾT LỖI: " + (error.message || error);
                 console.error(error);
             }
             window.isScanning = false;
