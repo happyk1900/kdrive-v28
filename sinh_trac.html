@@ -342,7 +342,7 @@
             return score.toFixed(1);
         }
 
-        // GỌI HEALTH CONNECT CHUẨN NATIVE CAPACITOR PLUGIN (@capgo/capacitor-health)
+        // HÀM KÍCH HOẠT GỌI HEALTH CONNECT (ĐÃ TỐI ƯU HÓA DATATYPE CHUẨN CAPGO)
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -368,19 +368,17 @@
                 let liveHR = 0, liveSleep = 0, liveSteps = 0;
                 let liveWeight = 0, liveFat = 0, liveWater = 0;
 
-                // Lấy đối tượng Health từ Capacitor Plugins chuẩn Native
                 const Health = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health ? window.Capacitor.Plugins.Health : null;
 
                 if (!Health) {
-                    throw new Error("Capacitor Health Plugin chưa sẵn sàng trong môi trường Native.");
+                    throw new Error("Capacitor Health Plugin chưa sẵn sàng.");
                 }
 
-                // 1. Yêu cầu quyền truy cập
+                // Sử dụng các định dạng dataType chuẩn của plugin `@capgo/capacitor-health`
                 await Health.requestAuthorization({
-                    read: ['steps', 'heart_rate', 'sleep', 'weight', 'fat_percentage', 'water']
+                    read: ['steps', 'heart_rate', 'sleep', 'weight', 'body_fat_percentage', 'hydration']
                 });
 
-                // 2. Kéo dữ liệu 24 giờ qua
                 const endTime = new Date();
                 const startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
                 const queryOptions = { startDate: startTime.toISOString(), endDate: endTime.toISOString() };
@@ -410,14 +408,14 @@
                 } catch(e) {}
 
                 try {
-                    const fatData = await Health.query({ ...queryOptions, dataType: 'fat_percentage' });
+                    const fatData = await Health.query({ ...queryOptions, dataType: 'body_fat_percentage' });
                     if (fatData && fatData.values && fatData.values.length > 0) {
                         liveFat = parseFloat(fatData.values[fatData.values.length - 1].value).toFixed(1);
                     }
                 } catch(e) {}
 
                 try {
-                    const waterData = await Health.query({ ...queryOptions, dataType: 'water' });
+                    const waterData = await Health.query({ ...queryOptions, dataType: 'hydration' });
                     if (waterData && waterData.values && waterData.values.length > 0) {
                         liveWater = parseFloat(waterData.values[waterData.values.length - 1].value).toFixed(1);
                     }
