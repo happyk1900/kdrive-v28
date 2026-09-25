@@ -230,7 +230,6 @@
         </div>
     </div>
 
-    <!-- SCRIPT TỐI GIẢN LÕI & TÍCH HỢP HEALTH CONNECT THỰC TẾ -->
     <script>
         function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport); fixViewport();
@@ -238,7 +237,6 @@
         window.onload = () => {
             initParticles();
             
-            // Render Select Options
             const y = document.getElementById('ob-year');
             let yHtml = '<option value="0" disabled selected>0000</option>'; for(let i=1960; i<=2010; i++) yHtml += `<option value="${i}">${i}</option>`; y.innerHTML = yHtml;
             const h = document.getElementById('ob-height'); 
@@ -246,7 +244,6 @@
             const w = document.getElementById('ob-weight'); 
             let wHtml = '<option value="0" disabled selected>00</option>'; for(let i=40; i<=120; i++) wHtml += `<option value="${i}">${i}</option>`; w.innerHTML = wHtml;
 
-            // Check Onboarding
             if (localStorage.getItem('kdrive_core_initialized') !== 'true') {
                 document.getElementById('onboarding-popup').classList.add('active');
             } else {
@@ -323,48 +320,29 @@
 
         window.isScanning = false;
 
-        // THUẬT TOÁN NỘI SUY BÙ TRỪ H2O (FALLBACK ALGORITHM)
         function calculateFallbackWater(weightKg, fatPercent) {
-            if (!weightKg || !fatPercent || weightKg <= 0 || fatPercent <= 0) return 0;
-            // Công thức nội suy: Nước tỉ lệ nghịch với mỡ.
-            // Trung bình cơ thể người nam chuẩn: Nước 55-60%, Mỡ 15%. 
-            // Cứ tăng 1% mỡ, tỉ lệ nước sẽ giảm tương ứng khoảng 0.25% - 0.3%.
+            if (!weightKg || !fatPercent || weightKg <= 0 || fatPercent <= 0) return 55.0;
             let baseWater = 60.0;
-            let fatDelta = fatPercent - 15.0; // Dựa trên mức mỡ chuẩn 15%
+            let fatDelta = fatPercent - 15.0; 
             let estimatedWater = baseWater - (fatDelta * 0.3);
-            
-            // Giới hạn an toàn (từ 45% đến 65%)
             if (estimatedWater > 65.0) estimatedWater = 65.0;
             if (estimatedWater < 45.0) estimatedWater = 45.0;
-            
             return estimatedWater.toFixed(1);
         }
 
-        // HÀM TÍNH ĐIỂM LỰC CHIẾN (SCI) CƠ BẢN DỰA TRÊN 6 CHỈ SỐ
         function calculateSCIScore(hr, sleep, steps, weight, fat, water) {
             let score = 100;
-            
-            // Phạt nợ giấc ngủ (Dưới 7h trừ điểm nặng)
             if (sleep > 0 && sleep < 7.0) { score -= (7.0 - sleep) * 5; }
-            
-            // Phạt nợ bước chân (Dưới mục tiêu trừ điểm)
             if (steps > 0 && steps < 6000) { score -= ((6000 - steps) / 1000) * 2; }
-            
-            // Phạt chỉ số mỡ (Dư mỡ trừ điểm)
             let t_fat = parseFloat(localStorage.getItem('kdrive_target_fat')) || 15.0;
             if (fat > t_fat) { score -= (fat - t_fat) * 1.5; }
-            
-            // Phạt thiếu nước
             if (water > 0 && water < 50.0) { score -= (50.0 - water) * 1; }
-
-            // Giới hạn điểm an toàn
             if (score > 100) score = 100;
             if (score < 0) score = 0;
-            
             return score.toFixed(1);
         }
 
-        // KÍCH HOẠT QUÉT DỮ LIỆU HEALTH CONNECT REAL-TIME
+        // HÀM KÍCH HOẠT GỌI HEALTH CONNECT TRỰC TIẾP
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -381,96 +359,82 @@
             radarBar.style.borderLeftColor = 'var(--cyan)';
             radarPulse.style.color = 'var(--cyan)';
             radarPulse.innerText = '⚡ SCANNING...';
-            radarMetrics.innerHTML = 'ĐANG ĐỒNG BỘ HEALTH CONNECT TỪ GALAXY WATCH...';
+            radarMetrics.innerHTML = 'ĐANG KẾT NỐI HEALTH CONNECT TRÊN S25 ULTRA...';
 
             playChargeSound(); 
             if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
 
             try {
-                // Biến lưu trữ dữ liệu kéo về
                 let liveHR = 0, liveSleep = 0, liveSteps = 0;
                 let liveWeight = 0, liveFat = 0, liveWater = 0;
 
-                // KIỂM TRA MÔI TRƯỜNG CAPACITOR CÓ SẴN SÀNG KHÔNG
-                if (window.navigator && window.navigator.health) {
-                    
-                    // 1. XIN QUYỀN TRUY CẬP TỪ HEALTH CONNECT
-                    await new Promise((resolve, reject) => {
-                        window.navigator.health.requestAuthorization([
-                            { read: ['steps', 'heart_rate', 'sleep', 'weight', 'fat_percentage', 'water'] }
-                        ], resolve, reject);
-                    });
-
-                    // 2. KÉO DỮ LIỆU TRONG 24 GIỜ QUA
-                    const endTime = new Date();
-                    const startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
-                    const queryObj = { startDate: startTime, endDate: endTime };
-
-                    // Kéo Bước chân
-                    await new Promise(resolve => {
-                        window.navigator.health.queryAggregated({ ...queryObj, dataType: 'steps' }, (data) => {
-                            if (data && data.value) liveSteps = parseInt(data.value); resolve();
-                        }, resolve);
-                    });
-
-                    // Kéo Nhịp tim (Trung bình)
-                    await new Promise(resolve => {
-                        window.navigator.health.query({ ...queryObj, dataType: 'heart_rate' }, (data) => {
-                            if (data && data.length > 0) liveHR = parseInt(data[0].value); resolve();
-                        }, resolve);
-                    });
-
-                    // Kéo Giấc ngủ
-                    await new Promise(resolve => {
-                        window.navigator.health.queryAggregated({ ...queryObj, dataType: 'sleep' }, (data) => {
-                            if (data && data.value) liveSleep = (data.value / 3600).toFixed(1); resolve(); // Trả về số giờ
-                        }, resolve);
-                    });
-
-                    // Kéo Cân nặng
-                    await new Promise(resolve => {
-                        window.navigator.health.query({ ...queryObj, dataType: 'weight' }, (data) => {
-                            if (data && data.length > 0) liveWeight = parseFloat(data[data.length-1].value).toFixed(1); resolve();
-                        }, resolve);
-                    });
-
-                    // Kéo Tỉ lệ Mỡ
-                    await new Promise(resolve => {
-                        window.navigator.health.query({ ...queryObj, dataType: 'fat_percentage' }, (data) => {
-                            if (data && data.length > 0) liveFat = parseFloat(data[data.length-1].value).toFixed(1); resolve();
-                        }, resolve);
-                    });
-
-                    // Kéo Tỉ lệ Nước (H2O)
-                    await new Promise(resolve => {
-                        window.navigator.health.query({ ...queryObj, dataType: 'water' }, (data) => {
-                            if (data && data.length > 0) liveWater = parseFloat(data[data.length-1].value).toFixed(1); resolve();
-                        }, resolve);
-                    });
-
-                } else {
-                    // Môi trường Web Test: Nếu không chạy trên App thật, dùng data giả lập để Radar không sập
-                    console.log("Không tìm thấy Health Connect, đang dùng Fallback Simulation...");
-                    liveHR = 65; liveSleep = 6.5; liveSteps = 4500;
-                    liveWeight = 68.5; liveFat = 16.5; liveWater = 0; // Cố tình để 0 để test nội suy
+                const healthPlugin = window.navigator.health || (window.plugins && window.plugins.health);
+                
+                if (!healthPlugin) {
+                    alert("LỖI: Plugin Health chưa sẵn sàng. Hãy kiểm tra lại môi trường Capacitor!");
+                    throw new Error("Health plugin not found");
                 }
 
-                // 3. XỬ LÝ FALLBACK BÙ TRỪ NỘI SUY H2O
+                // 1. GỌI BẢNG XIN QUYỀN TRỰC TIẾP TỪ HEALTH CONNECT
+                await new Promise((resolve, reject) => {
+                    healthPlugin.requestAuthorization([
+                        { read: ['steps', 'heart_rate', 'sleep', 'weight', 'fat_percentage', 'water'] }
+                    ], resolve, reject);
+                });
+
+                // 2. KÉO DỮ LIỆU 24 GIỜ QUA
+                const endTime = new Date();
+                const startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
+                const queryObj = { startDate: startTime, endDate: endTime };
+
+                await new Promise(resolve => {
+                    healthPlugin.queryAggregated({ ...queryObj, dataType: 'steps' }, (data) => {
+                        if (data && data.value) liveSteps = parseInt(data.value); resolve();
+                    }, resolve);
+                });
+
+                await new Promise(resolve => {
+                    healthPlugin.query({ ...queryObj, dataType: 'heart_rate' }, (data) => {
+                        if (data && data.length > 0) liveHR = parseInt(data[0].value); resolve();
+                    }, resolve);
+                });
+
+                await new Promise(resolve => {
+                    healthPlugin.queryAggregated({ ...queryObj, dataType: 'sleep' }, (data) => {
+                        if (data && data.value) liveSleep = (data.value / 3600).toFixed(1); resolve();
+                    }, resolve);
+                });
+
+                await new Promise(resolve => {
+                    healthPlugin.query({ ...queryObj, dataType: 'weight' }, (data) => {
+                        if (data && data.length > 0) liveWeight = parseFloat(data[data.length-1].value).toFixed(1); resolve();
+                    }, resolve);
+                });
+
+                await new Promise(resolve => {
+                    healthPlugin.query({ ...queryObj, dataType: 'fat_percentage' }, (data) => {
+                        if (data && data.length > 0) liveFat = parseFloat(data[data.length-1].value).toFixed(1); resolve();
+                    }, resolve);
+                });
+
+                await new Promise(resolve => {
+                    healthPlugin.query({ ...queryObj, dataType: 'water' }, (data) => {
+                        if (data && data.length > 0) liveWater = parseFloat(data[data.length-1].value).toFixed(1); resolve();
+                    }, resolve);
+                });
+
                 if (liveWater == 0 || isNaN(liveWater)) {
-                    console.log("Health Connect giấu H2O. Kích hoạt thuật toán nội suy...");
                     liveWater = calculateFallbackWater(liveWeight, liveFat);
                 }
 
                 stopChargeSound(); 
                 document.body.classList.remove('scanning-mode');
 
-                // TÍNH LỰC CHIẾN SCI TỪ 6 CHỈ SỐ THỰC TẾ
                 let sciScore = calculateSCIScore(liveHR, liveSleep, liveSteps, liveWeight, liveFat, liveWater);
 
                 document.body.classList.add('sync-complete'); 
                 playBeep(); if(navigator.vibrate) navigator.vibrate(200);
 
-                // HIỂN THỊ LÊN GIAO DIỆN
                 document.getElementById('val-sci').innerText = sciScore || '---'; 
                 document.getElementById('val-hr').innerText = liveHR || '---'; 
                 document.getElementById('val-weight').innerText = liveWeight || '---'; 
@@ -479,7 +443,6 @@
                 document.getElementById('val-water').innerText = liveWater || '---'; 
                 document.getElementById('val-steps').innerText = liveSteps || '---';
 
-                // TÍNH TOÁN CẢNH BÁO ALERT BAR
                 const d = new Date(); const isSunday = d.getDay() === 0;
                 let t_hr = parseInt(localStorage.getItem('kdrive_target_hr')) || 140; 
                 let t_weight = parseInt(localStorage.getItem('kdrive_target_weight')) || 65; 
@@ -498,12 +461,11 @@
                 if (liveWeight > 0 && liveWeight > t_weight + 0.5) alertsUI.push(`WGT: GIẢM ${Math.abs(liveWeight - t_weight).toFixed(1)}KG`);
                 if (liveFat > 0 && liveFat > t_fat) alertsUI.push(`FAT: GIẢM ${(liveFat - t_fat).toFixed(1)}%`);
 
-                // CẬP NHẬT MÀU SẮC LÕI
                 if (missingWatch && missingScale) {
                     document.body.classList.add('tier-shiro');
                     radarBar.style.background = 'rgba(255, 42, 42, 0.05)'; radarBar.style.borderColor = 'rgba(255, 42, 42, 0.2)'; radarBar.style.borderLeftColor = 'var(--crimson)';
                     radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 ERROR';
-                    radarMetrics.innerHTML = 'TÍN HIỆU ĐẦU VÀO TRỐNG. HÃY ĐEO ĐỒNG HỒ VÀ BƯỚC LÊN CÂN NGAY.';
+                    radarMetrics.innerHTML = 'TÍN HIỆU TRỐNG. HÃY ĐEO ĐỒNG HỒ VÀ BƯỚC LÊN CÂN NGAY.';
                 } else if (missingWatch || missingScale) {
                     document.body.classList.add('tier-chairo');
                     radarBar.style.background = 'rgba(255, 170, 0, 0.05)'; radarBar.style.borderColor = 'rgba(255, 170, 0, 0.2)'; radarBar.style.borderLeftColor = 'var(--amber)';
@@ -526,8 +488,8 @@
                 }
             } catch (error) {
                 stopChargeSound(); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
-                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 OFFLINE';
-                radarMetrics.innerHTML = "LỖI TRUY CẬP HEALTH CONNECT. VUI LÒNG KIỂM TRA QUYỀN TRÊN MÁY.";
+                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI KẾT NỐI';
+                radarMetrics.innerHTML = "CHI TIẾT: " + (error.message || error);
                 console.error(error);
             }
             window.isScanning = false;
