@@ -342,7 +342,7 @@
             return score.toFixed(1);
         }
 
-        // HÀM GỌI HEALTH CONNECT ĐÃ LOẠI BỎ HOÀN TOÀN CÁC THAM SỐ LỖI
+        // HÀM GỌI HEALTH CONNECT HỖ TRỢ ĐỌC ĐÚNG MẢNG KẾT QUẢ TỪ PLUGIN CAPGO
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -374,7 +374,7 @@
                     throw new Error("Capacitor Health Plugin chưa sẵn sàng.");
                 }
 
-                // 1. Chỉ xin quyền với các chuẩn dataType đã được kiểm duyệt an toàn
+                // 1. Xin quyền truy cập các chỉ số cốt lõi
                 await Health.requestAuthorization({
                     read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat']
                 });
@@ -383,40 +383,49 @@
                 const endDateIso = new Date().toISOString();
                 const queryOptions = { startDate: startDateIso, endDate: endDateIso };
 
-                // 2. Truy vấn an toàn từng chỉ số một
+                // 2. Trích xuất dữ liệu an toàn, hỗ trợ bóc tách linh hoạt mọi cấu trúc mảng trả về
                 try {
                     const stepsData = await Health.queryAggregated({ ...queryOptions, dataType: 'steps' });
-                    if (stepsData && stepsData.value) liveSteps = parseInt(stepsData.value);
+                    if (stepsData) {
+                        liveSteps = parseInt(stepsData.value || (stepsData.samples && stepsData.samples[0] ? stepsData.samples[0].value : 0) || 0);
+                    }
                 } catch(e) {}
 
                 try {
                     const hrData = await Health.querySamples({ ...queryOptions, dataType: 'heartRate' });
-                    if (hrData && hrData.samples && hrData.samples.length > 0) {
-                        liveHR = parseInt(hrData.samples[hrData.samples.length - 1].value);
+                    let hrList = hrData.samples || hrData.values || (Array.isArray(hrData) ? hrData : []);
+                    if (hrList.length > 0) {
+                        liveHR = parseInt(hrList[hrList.length - 1].value || 0);
                     }
                 } catch(e) {}
 
                 try {
                     const sleepData = await Health.queryAggregated({ ...queryOptions, dataType: 'sleep' });
-                    if (sleepData && sleepData.value) liveSleep = (sleepData.value / 3600).toFixed(1);
+                    if (sleepData) {
+                        let sleepSec = parseFloat(sleepData.value || (sleepData.samples && sleepData.samples[0] ? sleepData.samples[0].value : 0) || 0);
+                        if (sleepSec > 0) liveSleep = (sleepSec / 3600).toFixed(1);
+                    }
                 } catch(e) {}
 
                 try {
                     const weightData = await Health.querySamples({ ...queryOptions, dataType: 'weight' });
-                    if (weightData && weightData.samples && weightData.samples.length > 0) {
-                        liveWeight = parseFloat(weightData.samples[weightData.samples.length - 1].value).toFixed(1);
+                    let wList = weightData.samples || weightData.values || (Array.isArray(weightData) ? weightData : []);
+                    if (wList.length > 0) {
+                        liveWeight = parseFloat(wList[wList.length - 1].value || 0).toFixed(1);
                     }
                 } catch(e) {}
 
                 try {
                     const fatData = await Health.querySamples({ ...queryOptions, dataType: 'bodyFat' });
-                    if (fatData && fatData.samples && fatData.samples.length > 0) {
-                        liveFat = parseFloat(fatData.samples[fatData.samples.length - 1].value).toFixed(1);
+                    let fList = fatData.samples || fatData.values || (Array.isArray(fatData) ? fatData : []);
+                    if (fList.length > 0) {
+                        liveFat = parseFloat(fList[fList.length - 1].value || 0).toFixed(1);
                     }
                 } catch(e) {}
 
-                // Nội suy thông minh lượng nước cơ thể (H2O)
-                liveWater = calculateFallbackWater(liveWeight, liveFat);
+                if (liveWater == 0 || isNaN(liveWater)) {
+                    liveWater = calculateFallbackWater(liveWeight, liveFat);
+                }
 
                 stopChargeSound(); 
                 document.body.classList.remove('scanning-mode');
