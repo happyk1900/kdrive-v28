@@ -342,7 +342,7 @@
             return score.toFixed(1);
         }
 
-        // HÀM KÍCH HOẠT GỌI HEALTH CONNECT (ĐÃ TỐI ƯU HÓA DATATYPE CHUẨN CAPGO)
+        // HÀM KÍCH HOẠT GỌI HEALTH CONNECT CHUẨN XÁC (@capgo/capacitor-health)
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -368,15 +368,16 @@
                 let liveHR = 0, liveSleep = 0, liveSteps = 0;
                 let liveWeight = 0, liveFat = 0, liveWater = 0;
 
+                // Kiểm tra plugin Health từ Capgo trong Capacitor Native
                 const Health = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health ? window.Capacitor.Plugins.Health : null;
 
                 if (!Health) {
                     throw new Error("Capacitor Health Plugin chưa sẵn sàng.");
                 }
 
-                // Sử dụng các định dạng dataType chuẩn của plugin `@capgo/capacitor-health`
+                // Xin quyền truy cập theo chuẩn `@capgo/capacitor-health`
                 await Health.requestAuthorization({
-                    read: ['steps', 'heart_rate', 'sleep', 'weight', 'body_fat_percentage', 'hydration']
+                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFatPercentage', 'hydration']
                 });
 
                 const endTime = new Date();
@@ -389,9 +390,9 @@
                 } catch(e) {}
 
                 try {
-                    const hrData = await Health.query({ ...queryOptions, dataType: 'heart_rate' });
-                    if (hrData && hrData.values && hrData.values.length > 0) {
-                        liveHR = parseInt(hrData.values[hrData.values.length - 1].value);
+                    const hrData = await Health.readSamples({ ...queryOptions, dataType: 'heartRate' });
+                    if (hrData && hrData.samples && hrData.samples.length > 0) {
+                        liveHR = parseInt(hrData.samples[hrData.samples.length - 1].value);
                     }
                 } catch(e) {}
 
@@ -401,23 +402,23 @@
                 } catch(e) {}
 
                 try {
-                    const weightData = await Health.query({ ...queryOptions, dataType: 'weight' });
-                    if (weightData && weightData.values && weightData.values.length > 0) {
-                        liveWeight = parseFloat(weightData.values[weightData.values.length - 1].value).toFixed(1);
+                    const weightData = await Health.readSamples({ ...queryOptions, dataType: 'weight' });
+                    if (weightData && weightData.samples && weightData.samples.length > 0) {
+                        liveWeight = parseFloat(weightData.samples[weightData.samples.length - 1].value).toFixed(1);
                     }
                 } catch(e) {}
 
                 try {
-                    const fatData = await Health.query({ ...queryOptions, dataType: 'body_fat_percentage' });
-                    if (fatData && fatData.values && fatData.values.length > 0) {
-                        liveFat = parseFloat(fatData.values[fatData.values.length - 1].value).toFixed(1);
+                    const fatData = await Health.readSamples({ ...queryOptions, dataType: 'bodyFatPercentage' });
+                    if (fatData && fatData.samples && fatData.samples.length > 0) {
+                        liveFat = parseFloat(fatData.samples[fatData.samples.length - 1].value).toFixed(1);
                     }
                 } catch(e) {}
 
                 try {
-                    const waterData = await Health.query({ ...queryOptions, dataType: 'hydration' });
-                    if (waterData && waterData.values && waterData.values.length > 0) {
-                        liveWater = parseFloat(waterData.values[waterData.values.length - 1].value).toFixed(1);
+                    const waterData = await Health.readSamples({ ...queryOptions, dataType: 'hydration' });
+                    if (waterData && waterData.samples && waterData.samples.length > 0) {
+                        liveWater = parseFloat(waterData.samples[waterData.samples.length - 1].value).toFixed(1);
                     }
                 } catch(e) {}
 
