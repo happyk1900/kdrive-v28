@@ -2,6 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <script src="cordova.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#050608">
     <title>Spades Node - Event Horizon Core</title>
@@ -234,7 +235,6 @@
         function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport); fixViewport();
 
-        // LẮNG NGHE SỰ KIỆN DEVICE READY ĐẢM BẢO CORDOVA PLUGIN ĐÃ SẴN SÀNG
         let isDeviceReady = false;
         document.addEventListener('deviceready', () => {
             isDeviceReady = true;
@@ -349,7 +349,7 @@
             return score.toFixed(1);
         }
 
-        // HÀM KÍCH HOẠT GỌI HEALTH CONNECT AN TOÀN ĐA TẦNG
+        // HÀM KÍCH HOẠT GỌI HEALTH CONNECT
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -375,11 +375,10 @@
                 let liveHR = 0, liveSleep = 0, liveSteps = 0;
                 let liveWeight = 0, liveFat = 0, liveWater = 0;
 
-                // TÌM KIẾM PLUGIN HEALTH Ở TẤT CẢ CÁC ĐỐI TƯỢNG GỐC CỦA CORDOVA/CAPACITOR
                 const healthPlugin = (window.plugins && window.plugins.health) ? window.plugins.health : ((window.navigator && window.navigator.health) ? window.navigator.health : null);
                 
                 if (!healthPlugin) {
-                    alert("LỖI: Plugin Health chưa sẵn sàng. Hãy cấp thời gian để WebView khởi tạo!");
+                    alert("LỖI: Plugin Health chưa sẵn sàng. Hãy kiểm tra lại thẻ cordova.js!");
                     throw new Error("Health plugin not found");
                 }
 
@@ -425,7 +424,7 @@
                     }, resolve);
                 });
 
-                await new Promise(resolve => {
+❤️                await new Promise(resolve => {
                     healthPlugin.query({ ...queryObj, dataType: 'water' }, (data) => {
                         if (data && data.length > 0) liveWater = parseFloat(data[data.length-1].value).toFixed(1); resolve();
                     }, resolve);
