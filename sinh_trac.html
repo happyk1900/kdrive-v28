@@ -342,7 +342,7 @@
             return score.toFixed(1);
         }
 
-        // HÀM GỌI HEALTH CONNECT ĐÃ VÁ LỖI TIMEOUT & STRICT TIMESTAMP VALIDATION (6/6 CHỈ SỐ)
+        // HÀM GỌI HEALTH CONNECT CHUẨN NGHIỆP VỤ: WATCH (REAL-TIME, CHECK HR) & SCALE (BẮT BUỘC CÓ DỮ LIỆU TRONG NGÀY)
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -374,7 +374,6 @@
                     throw new Error("Capacitor Health Plugin chưa sẵn sàng.");
                 }
 
-                // Timeout wrapper chống treo tiến trình ngầm (10 giây)
                 const withTimeout = (promise, timeoutMs = 10000) => {
                     return Promise.race([
                         promise,
@@ -386,15 +385,19 @@
                     read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat']
                 }));
 
-                const startDate = new Date();
-                startDate.setHours(0, 0, 0, 0); // Mốc 00:00:00 hôm nay
-                const startTimestamp = startDate.getTime();
                 const endDate = new Date();
-                const queryOptions = { startDate: startDate.toISOString(), endDate: endDate.toISOString() };
+                const startDateToday = new Date();
+                startDateToday.setHours(0, 0, 0, 0); // Mốc 00:00:00 hôm nay
+                const startTimestamp = startDateToday.getTime();
 
-                // 1. Số bước chân trong ngày (Strict Timestamp Check >= 00:00)
+                // ==========================================
+                // 1. LUỒNG REAL-TIME (WATCH: HR, Steps, Sleep)
+                // ==========================================
+                const realTimeOptions = { startDate: startDateToday.toISOString(), endDate: endDate.toISOString() };
+
+                // Steps
                 try {
-                    const stepsData = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'steps' }));
+                    const stepsData = await withTimeout(Health.querySamples({ ...realTimeOptions, dataType: 'steps' }));
                     let sList = stepsData.samples || stepsData.values || (Array.isArray(stepsData) ? stepsData : []);
                     let validSteps = 0;
                     sList.forEach(item => {
@@ -406,9 +409,9 @@
                     liveSteps = validSteps;
                 } catch(e) { liveSteps = 0; }
 
-                // 2. Nhịp tim mới nhất trong ngày (Strict Timestamp Check)
+                // Heart Rate (Lấy nhịp tim mới nhất trong ngày để đối soát kết nối đồng hồ)
                 try {
-                    const hrData = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'heartRate' }));
+                    const hrData = await withTimeout(Health.querySamples({ ...realTimeOptions, dataType: 'heartRate' }));
                     let hrList = hrData.samples || hrData.values || (Array.isArray(hrData) ? hrData : []);
                     let validHRList = hrList.filter(item => {
                         let itemTime = new Date(item.endTime || item.startDate || Date.now()).getTime();
@@ -419,9 +422,9 @@
                     }
                 } catch(e) { liveHR = 0; }
 
-                // 3. Giấc ngủ thực tế trong ngày (Strict Timestamp Check)
+                // Sleep
                 try {
-                    const sleepData = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'sleep' }));
+                    const sleepData = await withTimeout(Health.querySamples({ ...realTimeOptions, dataType: 'sleep' }));
                     let totalSleepMinutes = 0;
                     let records = sleepData.samples || sleepData.values || (Array.isArray(sleepData) ? sleepData : []);
                     records.forEach(rec => {
@@ -434,37 +437,34 @@
                     liveSleep = totalSleepMinutes > 0 ? (totalSleepMinutes / 60).toFixed(1) : 0;
                 } catch(e) { liveSleep = 0; }
 
-                // 4. Cân nặng mới nhất (Bắt buộc phải có bản ghi từ 00:00 hôm nay, chống lấy nhầm dữ liệu ngày hôm trước)
+
+                // ==========================================
+                // 2. LUỒNG SNAPSHOT (SCALE: Weight, Fat, Water - Bắt buộc có bản ghi mới trong ngày)
+                // ==========================================
                 try {
                     const weightData = await withTimeout(Health.querySamples({ startDate: new Date(Date.now() - 86400000).toISOString(), endDate: endDate.toISOString(), dataType: 'weight' }));
                     let wList = weightData.samples || weightData.values || (Array.isArray(weightData) ? weightData : []);
                     let todayWeightRecord = wList.slice().reverse().find(item => {
                         let itemTime = new Date(item.endTime || item.startDate || Date.now()).getTime();
-                        return itemTime >= startTimestamp;
+                        return itemTime >= startTimestamp; // Phải có bản ghi từ 00:00 hôm nay
                     });
                     if (todayWeightRecord) {
                         liveWeight = parseFloat(todayWeightRecord.value || 0).toFixed(1);
-                    } else {
-                        liveWeight = 0; // Chưa lên cân trong ngày -> Trả về 0 để báo thiếu
                     }
                 } catch(e) { liveWeight = 0; }
 
-                // 5. Mỡ cơ thể mới nhất trong ngày (Strict Timestamp Check)
                 try {
                     const fatData = await withTimeout(Health.querySamples({ startDate: new Date(Date.now() - 86400000).toISOString(), endDate: endDate.toISOString(), dataType: 'bodyFat' }));
                     let fList = fatData.samples || fatData.values || (Array.isArray(fatData) ? fatData : []);
                     let todayFatRecord = fList.slice().reverse().find(item => {
                         let itemTime = new Date(item.endTime || item.startDate || Date.now()).getTime();
-                        return itemTime >= startTimestamp;
+                        return itemTime >= startTimestamp; // Phải có bản ghi từ 00:00 hôm nay
                     });
                     if (todayFatRecord) {
                         liveFat = parseFloat(todayFatRecord.value || 0).toFixed(1);
-                    } else {
-                        liveFat = 0; // Chưa có dữ liệu mỡ trong ngày -> Trả về 0
                     }
                 } catch(e) { liveFat = 0; }
 
-                // 6. Tính toán H2O dựa trên cân nặng thực tế hợp lệ
                 liveWater = calculateFallbackWater(liveWeight, liveFat);
 
                 stopChargeSound(); 
@@ -490,8 +490,9 @@
                 let targetSteps = isSunday ? 0 : 6000; 
                 let targetWater = 55.0; 
 
-                let missingWatch = (liveSleep == 0 && liveSteps == 0 && liveHR == 0);
-                let missingScale = (liveWeight == 0 && liveFat == 0);
+                // Kiểm tra trạng thái thiết bị theo nguyên lý đã chốt: Watch dựa vào HR, Scale dựa vào Weight/Fat trong ngày
+                let missingWatch = (liveHR == 0); 
+                let missingScale = (liveWeight == 0 || liveFat == 0);
                 let alertsUI = [];
 
                 if (liveWater > 0 && liveWater < targetWater) alertsUI.push(`H2O: CẦN UỐNG NƯỚC`);
@@ -505,12 +506,17 @@
                     document.body.classList.add('tier-shiro');
                     radarBar.style.background = 'rgba(255, 42, 42, 0.05)'; radarBar.style.borderColor = 'rgba(255, 42, 42, 0.2)'; radarBar.style.borderLeftColor = 'var(--crimson)';
                     radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 ERROR';
-                    radarMetrics.innerHTML = 'TÍN HIỆU TRỐNG. HÃY ĐEO ĐỒNG HỒ VÀ BƯỚC LÊN CÂN NGAY.';
-                } else if (missingWatch || missingScale) {
+                    radarMetrics.innerHTML = 'CHƯA ĐEO ĐỒNG HỒ & HÔM NAY CHƯA LÊN CÂN.';
+                } else if (missingWatch) {
                     document.body.classList.add('tier-chairo');
                     radarBar.style.background = 'rgba(255, 170, 0, 0.05)'; radarBar.style.borderColor = 'rgba(255, 170, 0, 0.2)'; radarBar.style.borderLeftColor = 'var(--amber)';
-                    radarPulse.style.color = 'var(--amber)'; radarPulse.innerText = '🟡 WARNING';
-                    radarMetrics.innerHTML = missingWatch ? 'KHÔNG ĐỌC ĐƯỢC WATCH (SLEEP/HR/STEPS).' : 'KHÔNG ĐỌC ĐƯỢC SCALE (WGT/FAT - CÓ THỂ BỊ KẸT TIẾN TRÌNH).';
+                    radarPulse.style.color = 'var(--amber)'; radarPulse.innerText = '🟡 MẤT KẾT NỐI WATCH';
+                    radarMetrics.innerHTML = 'KHÔNG ĐỌC ĐƯỢC NHỊP TIM TỪ ĐỒNG HỒ.';
+                } else if (missingScale) {
+                    document.body.classList.add('tier-chairo');
+                    radarBar.style.background = 'rgba(255, 170, 0, 0.05)'; radarBar.style.borderColor = 'rgba(255, 170, 0, 0.2)'; radarBar.style.borderLeftColor = 'var(--amber)';
+                    radarPulse.style.color = 'var(--amber)'; radarPulse.innerText = '🟡 CHƯA LÊN CÂN HÔM NAY';
+                    radarMetrics.innerHTML = 'HÔM NAY BẠN CHƯA CÂN. HÃY BƯỚC LÊN CÂN ĐỂ CHỐT SỐ LIỆU.';
                 } else {
                     if (sciScore < 50) document.body.classList.add('tier-shiro');
                     else if (sciScore < 85) document.body.classList.add('tier-chairo');
@@ -528,7 +534,7 @@
                 }
             } catch (error) {
                 stopChargeSound(); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
-                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI HỆ THỐNG / KẸT KẾT NỐI';
+                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI HỆ THỐNG';
                 radarMetrics.innerHTML = "CHI TIẾT: " + (error.message || error);
                 console.error(error);
             }
