@@ -321,7 +321,7 @@
         window.isScanning = false;
 
         function calculateFallbackWater(weightKg, fatPercent) {
-            if (!weightKg || !fatPercent || weightKg <= 0 || fatPercent <= 0) return 55.0;
+            if (!weightKg || !fatPercent || weightKg <= 0 || fatPercent <= 0) return 0;
             let baseWater = 60.0;
             let fatDelta = fatPercent - 15.0; 
             let estimatedWater = baseWater - (fatDelta * 0.3);
@@ -342,7 +342,7 @@
             return score.toFixed(1);
         }
 
-        // HÀM GỌI HEALTH CONNECT HOÀN CHỈNH 6/6 CHỈ SỐ SINH TRẮC HỌC
+        // HÀM GỌI HEALTH CONNECT ĐÃ VÁ LỖI TIMEOUT & STRICT TIMESTAMP VALIDATION (6/6 CHỈ SỐ)
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -374,76 +374,97 @@
                     throw new Error("Capacitor Health Plugin chưa sẵn sàng.");
                 }
 
-                await Health.requestAuthorization({
+                // Timeout wrapper chống treo tiến trình ngầm (10 giây)
+                const withTimeout = (promise, timeoutMs = 10000) => {
+                    return Promise.race([
+                        promise,
+                        new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout: Thiết bị/Health Connect không phản hồi")), timeoutMs))
+                    ]);
+                };
+
+                await withTimeout(Health.requestAuthorization({
                     read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat']
-                });
+                }));
 
                 const startDate = new Date();
-                startDate.setHours(0, 0, 0, 0);
+                startDate.setHours(0, 0, 0, 0); // Mốc 00:00:00 hôm nay
+                const startTimestamp = startDate.getTime();
                 const endDate = new Date();
                 const queryOptions = { startDate: startDate.toISOString(), endDate: endDate.toISOString() };
 
-                // 1. Số bước chân chuẩn xác trong ngày
+                // 1. Số bước chân trong ngày (Strict Timestamp Check >= 00:00)
                 try {
-                    const stepsData = await Health.queryAggregated({ ...queryOptions, dataType: 'steps' });
-                    if (stepsData) {
-                        liveSteps = parseInt(stepsData.value || (stepsData.samples && stepsData.samples[0] ? stepsData.samples[0].value : 0) || 0);
-                    }
-                } catch(e) {
-                    try {
-                        const stepsSamples = await Health.querySamples({ ...queryOptions, dataType: 'steps' });
-                        let sList = stepsSamples.samples || stepsSamples.values || (Array.isArray(stepsSamples) ? stepsSamples : []);
-                        if (sList.length > 0) {
-                            liveSteps = sList.reduce((sum, item) => sum + parseInt(item.value || 0), 0);
+                    const stepsData = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'steps' }));
+                    let sList = stepsData.samples || stepsData.values || (Array.isArray(stepsData) ? stepsData : []);
+                    let validSteps = 0;
+                    sList.forEach(item => {
+                        let itemTime = new Date(item.endTime || item.startDate || Date.now()).getTime();
+                        if (itemTime >= startTimestamp) {
+                            validSteps += parseInt(item.value || 0);
                         }
-                    } catch(err) {}
-                }
+                    });
+                    liveSteps = validSteps;
+                } catch(e) { liveSteps = 0; }
 
-                // 2. Nhịp tim mới nhất (HR)
+                // 2. Nhịp tim mới nhất trong ngày (Strict Timestamp Check)
                 try {
-                    const hrData = await Health.querySamples({ ...queryOptions, dataType: 'heartRate' });
+                    const hrData = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'heartRate' }));
                     let hrList = hrData.samples || hrData.values || (Array.isArray(hrData) ? hrData : []);
-                    if (hrList.length > 0) {
-                        liveHR = parseInt(hrList[hrList.length - 1].value || 73);
+                    let validHRList = hrList.filter(item => {
+                        let itemTime = new Date(item.endTime || item.startDate || Date.now()).getTime();
+                        return itemTime >= startTimestamp;
+                    });
+                    if (validHRList.length > 0) {
+                        liveHR = parseInt(validHRList[validHRList.length - 1].value || 0);
                     }
-                } catch(e) { liveHR = 73; }
+                } catch(e) { liveHR = 0; }
 
-                // 3. Giấc ngủ thực tế (Asleep duration)
+                // 3. Giấc ngủ thực tế trong ngày (Strict Timestamp Check)
                 try {
-                    const sleepData = await Health.querySamples({ ...queryOptions, dataType: 'sleep' });
+                    const sleepData = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'sleep' }));
                     let totalSleepMinutes = 0;
                     let records = sleepData.samples || sleepData.values || (Array.isArray(sleepData) ? sleepData : []);
                     records.forEach(rec => {
-                        if (rec.stage === 'ASLEEP' || rec.title === 'Asleep' || rec.duration) {
+                        let recTime = new Date(rec.endTime || rec.startDate || Date.now()).getTime();
+                        if (recTime >= startTimestamp && (rec.stage === 'ASLEEP' || rec.title === 'Asleep' || rec.duration)) {
                             let durationMins = rec.duration ? (rec.duration / 60) : ((new Date(rec.endTime) - new Date(rec.startTime)) / 60000);
                             totalSleepMinutes += durationMins;
                         }
                     });
-                    liveSleep = totalSleepMinutes > 0 ? (totalSleepMinutes / 60).toFixed(1) : "4.9";
-                } catch(e) { liveSleep = "4.9"; }
+                    liveSleep = totalSleepMinutes > 0 ? (totalSleepMinutes / 60).toFixed(1) : 0;
+                } catch(e) { liveSleep = 0; }
 
-                // 4. Cân nặng (Weight)
+                // 4. Cân nặng mới nhất (Bắt buộc phải có bản ghi từ 00:00 hôm nay, chống lấy nhầm dữ liệu ngày hôm trước)
                 try {
-                    const weightData = await Health.querySamples({ startDate: new Date(Date.now() - 86400000*7).toISOString(), endDate: endDate.toISOString(), dataType: 'weight' });
+                    const weightData = await withTimeout(Health.querySamples({ startDate: new Date(Date.now() - 86400000).toISOString(), endDate: endDate.toISOString(), dataType: 'weight' }));
                     let wList = weightData.samples || weightData.values || (Array.isArray(weightData) ? weightData : []);
-                    if (wList.length > 0) {
-                        liveWeight = parseFloat(wList[wList.length - 1].value || 61.2).toFixed(1);
+                    let todayWeightRecord = wList.slice().reverse().find(item => {
+                        let itemTime = new Date(item.endTime || item.startDate || Date.now()).getTime();
+                        return itemTime >= startTimestamp;
+                    });
+                    if (todayWeightRecord) {
+                        liveWeight = parseFloat(todayWeightRecord.value || 0).toFixed(1);
                     } else {
-                        liveWeight = 61.2;
+                        liveWeight = 0; // Chưa lên cân trong ngày -> Trả về 0 để báo thiếu
                     }
-                } catch(e) { liveWeight = 61.2; }
+                } catch(e) { liveWeight = 0; }
 
-                // 5. Mỡ cơ thể (Fat)
+                // 5. Mỡ cơ thể mới nhất trong ngày (Strict Timestamp Check)
                 try {
-                    const fatData = await Health.querySamples({ ...queryOptions, dataType: 'bodyFat' });
+                    const fatData = await withTimeout(Health.querySamples({ startDate: new Date(Date.now() - 86400000).toISOString(), endDate: endDate.toISOString(), dataType: 'bodyFat' }));
                     let fList = fatData.samples || fatData.values || (Array.isArray(fatData) ? fatData : []);
-                    if (fList.length > 0) {
-                        liveFat = parseFloat(fList[fList.length - 1].value || 15.0).toFixed(1);
+                    let todayFatRecord = fList.slice().reverse().find(item => {
+                        let itemTime = new Date(item.endTime || item.startDate || Date.now()).getTime();
+                        return itemTime >= startTimestamp;
+                    });
+                    if (todayFatRecord) {
+                        liveFat = parseFloat(todayFatRecord.value || 0).toFixed(1);
                     } else {
-                        liveFat = 15.0;
+                        liveFat = 0; // Chưa có dữ liệu mỡ trong ngày -> Trả về 0
                     }
-                } catch(e) { liveFat = 15.0; }
+                } catch(e) { liveFat = 0; }
 
+                // 6. Tính toán H2O dựa trên cân nặng thực tế hợp lệ
                 liveWater = calculateFallbackWater(liveWeight, liveFat);
 
                 stopChargeSound(); 
@@ -454,13 +475,13 @@
                 document.body.classList.add('sync-complete'); 
                 playBeep(); if(navigator.vibrate) navigator.vibrate(200);
 
-                document.getElementById('val-sci').innerText = sciScore || '---'; 
-                document.getElementById('val-hr').innerText = liveHR || '---'; 
-                document.getElementById('val-weight').innerText = liveWeight || '---'; 
-                document.getElementById('val-sleep').innerText = liveSleep || '---'; 
-                document.getElementById('val-fat').innerText = liveFat || '---'; 
-                document.getElementById('val-water').innerText = liveWater || '---'; 
-                document.getElementById('val-steps').innerText = liveSteps || '---';
+                document.getElementById('val-sci').innerText = sciScore > 0 ? sciScore : '0.0'; 
+                document.getElementById('val-hr').innerText = liveHR > 0 ? liveHR : '---'; 
+                document.getElementById('val-weight').innerText = liveWeight > 0 ? liveWeight : '---'; 
+                document.getElementById('val-sleep').innerText = liveSleep > 0 ? liveSleep : '---'; 
+                document.getElementById('val-fat').innerText = liveFat > 0 ? liveFat : '---'; 
+                document.getElementById('val-water').innerText = liveWater > 0 ? liveWater : '---'; 
+                document.getElementById('val-steps').innerText = liveSteps > 0 ? liveSteps : '0';
 
                 const d = new Date(); const isSunday = d.getDay() === 0;
                 let t_hr = parseInt(localStorage.getItem('kdrive_target_hr')) || 140; 
@@ -489,7 +510,7 @@
                     document.body.classList.add('tier-chairo');
                     radarBar.style.background = 'rgba(255, 170, 0, 0.05)'; radarBar.style.borderColor = 'rgba(255, 170, 0, 0.2)'; radarBar.style.borderLeftColor = 'var(--amber)';
                     radarPulse.style.color = 'var(--amber)'; radarPulse.innerText = '🟡 WARNING';
-                    radarMetrics.innerHTML = missingWatch ? 'KHÔNG ĐỌC ĐƯỢC WATCH (SLEEP/HR/STEPS).' : 'KHÔNG ĐỌC ĐƯỢC SCALE (WGT/FAT).';
+                    radarMetrics.innerHTML = missingWatch ? 'KHÔNG ĐỌC ĐƯỢC WATCH (SLEEP/HR/STEPS).' : 'KHÔNG ĐỌC ĐƯỢC SCALE (WGT/FAT - CÓ THỂ BỊ KẸT TIẾN TRÌNH).';
                 } else {
                     if (sciScore < 50) document.body.classList.add('tier-shiro');
                     else if (sciScore < 85) document.body.classList.add('tier-chairo');
@@ -507,7 +528,7 @@
                 }
             } catch (error) {
                 stopChargeSound(); document.body.classList.remove('scanning-mode'); document.body.classList.add('standby-mode');
-                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI HỆ THỐNG';
+                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI HỆ THỐNG / KẸT KẾT NỐI';
                 radarMetrics.innerHTML = "CHI TIẾT: " + (error.message || error);
                 console.error(error);
             }
