@@ -9,11 +9,10 @@
     <!-- MÁY QUÉT LỖI TOÀN CỤC: CHẶN MỌI LỖI CHẾT NGẦM -->
     <script>
         window.onerror = function(message, source, lineno, colno, error) {
-            alert("⚠️ LỖI HỆ THỐNG:\n" + message + "\nDòng: " + lineno);
             const statusEl = document.getElementById('loginStatus');
             if(statusEl) {
-                statusEl.style.color = "red";
-                statusEl.innerHTML = "CRASH: " + message;
+                statusEl.style.color = "#ff3333";
+                statusEl.innerHTML = "CRASH GLOBAL: " + message;
             }
             return true;
         };
@@ -103,7 +102,6 @@
         .terms-text { color: #b0e0e6; font-size: 9.5px; font-family: 'Montserrat', sans-serif; line-height: 1.35; }
         .terms-link { color: #ffd700; text-decoration: underline; cursor: pointer; font-weight: 700; }
         
-        /* BẢNG LOG ĐỂ BẮT LỖI RÕ RÀNG TRÊN MÀN HÌNH */
         #loginStatus { 
             margin-top: 10px; font-weight: 700; text-align: center; font-size: 9.5px; 
             color: #00e5ff; min-height: 40px; text-shadow: 0 0 8px rgba(0,229,255,0.6); 
@@ -153,7 +151,7 @@
     <div class="terms-modal-overlay" id="termsModal">
         <div class="terms-modal-content">
             <h3>QUY CHẾ K-DRIVE</h3>
-            <p>K-Drive vận hành trên nguyên tắc minh bạch tuyệt đối.</p>
+            <p>K-Drive vận hành trên nguyên tắc sòng phẳng và minh bạch tuyệt đối.</p>
             <button class="terms-close-btn" onclick="closeTermsModal()">ĐÃ HIỂU & ĐÓNG</button>
         </div>
     </div>
@@ -161,7 +159,6 @@
     <div class="kdrive-image-wrapper">
         <img id="bgImageElement" src="https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true" class="kdrive-bg-target" alt="BG">
         <div class="gateway-container" id="loginPanelContainer">
-            <!-- Gắn onclick cứng vào HTML -->
             <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL%20CAT.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="window.triggerDiagnosticLogin()" alt="Google Login">
             <div class="terms-box-container">
                 <input type="checkbox" class="terms-checkbox" id="termsCheck" onchange="toggleTermsAgreement()">
@@ -169,30 +166,31 @@
                     Tôi đồng ý với <span class="terms-link" onclick="openTermsModal()">Điều khoản dịch vụ</span> của K-Drive.
                 </div>
             </div>
-            <!-- KHU VỰC IN LỖI -->
-            <div id="loginStatus">[HỆ THỐNG ĐÃ SẴN SÀNG]</div>
+            <div id="loginStatus">[HỆ THỐNG ĐANG KIỂM TRA MÔI TRƯỜNG...]</div>
         </div>
     </div>
 
-    <!-- MODULE NATIVE GOOGLE AUTH VỚI TRÌNH CHẨN ĐOÁN -->
-    <script type="module">
-        import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
-
+    <!-- SCRIPT CHUẨN: KHÔNG DÙNG IMPORT, LẤY TRỰC TIẾP TỪ CAPACITOR -->
+    <script>
         const statusEl = document.getElementById('loginStatus');
 
-        try {
-            statusEl.innerHTML += "<br>> Đang khởi tạo Plugin...";
-            GoogleAuth.initialize();
-            statusEl.innerHTML += " [OK]";
-        } catch (e) {
-            statusEl.innerHTML += "<br><span style='color:red'>LỖI KHỞI TẠO: " + e.message + "</span>";
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            // Kiểm tra xem App có đang bọc Capacitor không và Plugin đã nạp chưa
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
+                window.GoogleAuthPlugin = window.Capacitor.Plugins.GoogleAuth;
+                try {
+                    window.GoogleAuthPlugin.initialize();
+                    statusEl.innerHTML = "[HỆ THỐNG NATIVE PLUGIN ĐÃ SẴN SÀNG]";
+                    statusEl.style.color = "#00ffcc";
+                } catch (e) {
+                    statusEl.innerHTML = "<span style='color:red'>LỖI KHỞI TẠO PLUGIN: " + e.message + "</span>";
+                }
+            } else {
+                statusEl.innerHTML = "<span style='color:#ff3333'>⚠️ KHÔNG TÌM THẤY MÔI TRƯỜNG CAPACITOR! Đảm bảo bạn đang chạy trên máy ảo/máy thật.</span>";
+            }
+        });
 
-        // Gắn hàm vào window để HTML có thể gọi được
         window.triggerDiagnosticLogin = async function() {
-            // Bước 1: Xác nhận nút đã nhận Click
-            alert("✅ BƯỚC 1: Nút Gmail đã nhận Click thành công!");
-            
             const checkbox = document.getElementById('termsCheck');
             if (!checkbox.checked) {
                 statusEl.style.color = "#ff3333";
@@ -201,40 +199,37 @@
             }
 
             statusEl.style.color = "#ffff00";
-            statusEl.innerHTML = "1. Đã nhận lệnh click<br>2. Đang kiểm tra GoogleAuth...";
+            statusEl.innerHTML = "1. Nhận lệnh Click<br>2. Đang mở bảng chọn tài khoản Google...";
 
             try {
-                if (!GoogleAuth) {
-                    throw new Error("Plugin GoogleAuth bị NULL. Chưa được import đúng cách.");
+                if (!window.GoogleAuthPlugin) {
+                    throw new Error("Plugin GoogleAuth chưa được nạp. Hãy kiểm tra lại MainActivity.java");
                 }
-
-                statusEl.innerHTML += "<br>3. Gọi lệnh GoogleAuth.signIn()...";
                 
-                // Bước 2: Gọi Native Sign In
-                const googleUser = await GoogleAuth.signIn();
-                
-                statusEl.innerHTML += "<br>4. Đã nhận data từ Google!";
+                // Gọi thẳng Native
+                const googleUser = await window.GoogleAuthPlugin.signIn();
+                statusEl.innerHTML += "<br>3. Đã nhận data từ Google!";
                 
                 if (!googleUser) {
-                    throw new Error("Dữ liệu googleUser trả về trống rỗng.");
+                    throw new Error("Dữ liệu googleUser bị trống.");
                 }
 
-                // Thành công
-                alert("✅ ĐĂNG NHẬP THÀNH CÔNG: " + (googleUser.email || "Không rõ email"));
+                // Xử lý thành công
+                statusEl.style.color = "#00ffcc";
+                statusEl.innerText = "✅ ĐĂNG NHẬP THÀNH CÔNG!";
+                
                 sessionStorage.setItem('kdrive_session', 'active');
                 localStorage.setItem('kdrive_logged_in_user', googleUser.name || googleUser.givenName || 'Chiến binh K-Drive');
+                localStorage.setItem('kdrive_user_email', googleUser.email || '');
                 
-                window.location.href = 'LucChien.html';
+                setTimeout(() => {
+                    window.location.href = 'LucChien.html';
+                }, 500);
                 
             } catch (error) {
-                // BƯỚC 3: In TOÀN BỘ lỗi ra màn hình
                 statusEl.style.color = "#ff3333";
-                let errorDetails = "Message: " + (error.message || "N/A") + "<br>";
-                errorDetails += "Code: " + (error.code || "N/A") + "<br>";
-                errorDetails += "Full: " + JSON.stringify(error);
-                
-                statusEl.innerHTML = "❌ LỖI ĐĂNG NHẬP:<br>" + errorDetails;
-                alert("❌ LỖI CHI TIẾT:\n" + (error.message || JSON.stringify(error)));
+                statusEl.innerHTML = "❌ LỖI ĐĂNG NHẬP NATIVE:<br>" + (error.message || JSON.stringify(error));
+                console.error("Native Error:", error);
             }
         };
     </script>
