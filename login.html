@@ -6,6 +6,19 @@
     
     <title>K-Drive</title>
     
+    <!-- MÁY QUÉT LỖI TOÀN CỤC: CHẶN MỌI LỖI CHẾT NGẦM -->
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            alert("⚠️ LỖI HỆ THỐNG:\n" + message + "\nDòng: " + lineno);
+            const statusEl = document.getElementById('loginStatus');
+            if(statusEl) {
+                statusEl.style.color = "red";
+                statusEl.innerHTML = "CRASH: " + message;
+            }
+            return true;
+        };
+    </script>
+
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#010a14">
     <link rel="apple-touch-icon" href="./k-icon-sci.png">
@@ -64,9 +77,10 @@
         .google-auth-btn-img {
             width: 100%; max-width: 170px; height: auto; cursor: pointer;
             filter: grayscale(1) brightness(0.4); opacity: 0.3; pointer-events: none; transition: 0.5s ease;
+            position: relative; z-index: 999999;
         }
         .google-auth-btn-img.unlocked {
-            opacity: 1; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.7));
+            opacity: 1; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.9));
             animation: buttonBreathe 2.2s infinite ease-in-out; pointer-events: auto !important;
         }
         @keyframes buttonBreathe {
@@ -80,15 +94,22 @@
             border-radius: 8px; padding: 8px 10px; display: flex; align-items: flex-start; gap: 8px; backdrop-filter: blur(8px);
         }
         .terms-checkbox {
-            appearance: none; -webkit-appearance: none; width: 14px; height: 14px;
-            border: 1.5px solid #00e5ff; border-radius: 3px; background: rgba(0, 0, 0, 0.6); cursor: pointer; margin-top: 2px; flex-shrink: 0;
-            position: relative;
+            appearance: none; -webkit-appearance: none; width: 16px; height: 16px;
+            border: 1.5px solid #00e5ff; border-radius: 3px; background: rgba(0, 0, 0, 0.6); cursor: pointer; margin-top: 1px; flex-shrink: 0;
+            position: relative; pointer-events: auto;
         }
         .terms-checkbox:checked { background: #00e5ff; box-shadow: 0 0 10px #00e5ff; }
-        .terms-checkbox:checked::after { content: '✔'; position: absolute; top: -2px; left: 2px; font-size: 9px; color: #000; font-weight: bold; }
-        .terms-text { color: #b0e0e6; font-size: 9px; font-family: 'Montserrat', sans-serif; line-height: 1.35; }
+        .terms-checkbox:checked::after { content: '✔'; position: absolute; top: -2px; left: 2px; font-size: 10px; color: #000; font-weight: bold; }
+        .terms-text { color: #b0e0e6; font-size: 9.5px; font-family: 'Montserrat', sans-serif; line-height: 1.35; }
         .terms-link { color: #ffd700; text-decoration: underline; cursor: pointer; font-weight: 700; }
-        #loginStatus { margin-top: 10px; font-weight: 700; text-align: center; font-size: 10px; color: #00e5ff; min-height: 14px; text-shadow: 0 0 8px rgba(0,229,255,0.6); }
+        
+        /* BẢNG LOG ĐỂ BẮT LỖI RÕ RÀNG TRÊN MÀN HÌNH */
+        #loginStatus { 
+            margin-top: 10px; font-weight: 700; text-align: center; font-size: 9.5px; 
+            color: #00e5ff; min-height: 40px; text-shadow: 0 0 8px rgba(0,229,255,0.6); 
+            width: 100%; background: rgba(0,0,0,0.5); border-radius: 4px; padding: 5px;
+            word-wrap: break-word; line-height: 1.4;
+        }
 
         .terms-modal-overlay {
             position: fixed; inset: 0; background: rgba(1, 2, 4, 0.92); backdrop-filter: blur(10px); z-index: 9999999;
@@ -120,16 +141,6 @@
             <div class="lang-grid-exact">
                 <div class="lang-cell selected" onclick="selectLangCell('vi', this)">🇻🇳 Tiếng Việt</div>
                 <div class="lang-cell" onclick="selectLangCell('en', this)">🇬🇧 English</div>
-                <div class="lang-cell" onclick="selectLangCell('zh', this)">🇨🇳 中文</div>
-                <div class="lang-cell" onclick="selectLangCell('ja', this)">🇯🇵 日本語</div>
-                <div class="lang-cell" onclick="selectLangCell('ko', this)">🇰🇷 한국어</div>
-                <div class="lang-cell" onclick="selectLangCell('fr', this)">🇫🇷 Français</div>
-                <div class="lang-cell" onclick="selectLangCell('de', this)">🇩🇪 Deutsch</div>
-                <div class="lang-cell" onclick="selectLangCell('es', this)">🇪🇸 Español</div>
-                <div class="lang-cell" onclick="selectLangCell('ru', this)">🇷🇺 Русский</div>
-                <div class="lang-cell" onclick="selectLangCell('th', this)">🇹🇭 ไทย</div>
-                <div class="lang-cell" onclick="selectLangCell('id', this)">🇮🇩 Indonesia</div>
-                <div class="lang-cell" onclick="selectLangCell('ar', this)">🇸🇦 العربية</div>
             </div>
             <div class="lang-footer-btns">
                 <button class="btn-close-lang" onclick="closeLangModal()">ĐÓNG LẠI</button>
@@ -141,8 +152,8 @@
     <!-- MODAL ĐIỀU KHOẢN -->
     <div class="terms-modal-overlay" id="termsModal">
         <div class="terms-modal-content">
-            <h3>QUY CHẾ K-DRIVE (CORE PROTOCOLS)</h3>
-            <p>K-Drive vận hành trên nguyên tắc minh bạch tuyệt đối và bảo mật thông tin hội viên.</p>
+            <h3>QUY CHẾ K-DRIVE</h3>
+            <p>K-Drive vận hành trên nguyên tắc minh bạch tuyệt đối.</p>
             <button class="terms-close-btn" onclick="closeTermsModal()">ĐÃ HIỂU & ĐÓNG</button>
         </div>
     </div>
@@ -150,79 +161,86 @@
     <div class="kdrive-image-wrapper">
         <img id="bgImageElement" src="https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true" class="kdrive-bg-target" alt="BG">
         <div class="gateway-container" id="loginPanelContainer">
-            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL%20CAT.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="triggerGoogleOAuth()" alt="Google Login">
+            <!-- Gắn onclick cứng vào HTML -->
+            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL%20CAT.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="window.triggerDiagnosticLogin()" alt="Google Login">
             <div class="terms-box-container">
                 <input type="checkbox" class="terms-checkbox" id="termsCheck" onchange="toggleTermsAgreement()">
                 <div class="terms-text">
                     Tôi đồng ý với <span class="terms-link" onclick="openTermsModal()">Điều khoản dịch vụ</span> của K-Drive.
                 </div>
             </div>
-            <div id="loginStatus"></div>
+            <!-- KHU VỰC IN LỖI -->
+            <div id="loginStatus">[HỆ THỐNG ĐÃ SẴN SÀNG]</div>
         </div>
     </div>
 
-    <!-- NATIVE CAPACITOR GOOGLE AUTH (SẠCH SẼ, KHÔNG CÓ BẤT KỲ FIREBASE WEB NÀO) -->
+    <!-- MODULE NATIVE GOOGLE AUTH VỚI TRÌNH CHẨN ĐOÁN -->
     <script type="module">
         import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
+        const statusEl = document.getElementById('loginStatus');
+
         try {
+            statusEl.innerHTML += "<br>> Đang khởi tạo Plugin...";
             GoogleAuth.initialize();
+            statusEl.innerHTML += " [OK]";
         } catch (e) {
-            console.log("GoogleAuth Init Error:", e);
+            statusEl.innerHTML += "<br><span style='color:red'>LỖI KHỞI TẠO: " + e.message + "</span>";
         }
 
-        window.triggerGoogleOAuth = async function() {
+        // Gắn hàm vào window để HTML có thể gọi được
+        window.triggerDiagnosticLogin = async function() {
+            // Bước 1: Xác nhận nút đã nhận Click
+            alert("✅ BƯỚC 1: Nút Gmail đã nhận Click thành công!");
+            
             const checkbox = document.getElementById('termsCheck');
-            const statusEl = document.getElementById('loginStatus');
-
             if (!checkbox.checked) {
                 statusEl.style.color = "#ff3333";
-                statusEl.innerText = "⚠️ HÃY TÍCH CHỌN ĐỒNG Ý ĐIỀU KHOẢN!";
+                statusEl.innerText = "⚠️ BẠN CHƯA TÍCH ĐỒNG Ý ĐIỀU KHOẢN!";
                 return;
             }
 
-            const container = document.getElementById('loginPanelContainer');
-            container.classList.add('glitching');
-            statusEl.style.color = "#00e5ff";
-            statusEl.innerText = "⚡ ĐANG GỌI TÀI KHOẢN GOOGLE NATIVE...";
+            statusEl.style.color = "#ffff00";
+            statusEl.innerHTML = "1. Đã nhận lệnh click<br>2. Đang kiểm tra GoogleAuth...";
 
             try {
-                // Gọi thẳng bảng chọn tài khoản của hệ điều hành, không dùng trình duyệt Web
+                if (!GoogleAuth) {
+                    throw new Error("Plugin GoogleAuth bị NULL. Chưa được import đúng cách.");
+                }
+
+                statusEl.innerHTML += "<br>3. Gọi lệnh GoogleAuth.signIn()...";
+                
+                // Bước 2: Gọi Native Sign In
                 const googleUser = await GoogleAuth.signIn();
                 
+                statusEl.innerHTML += "<br>4. Đã nhận data từ Google!";
+                
                 if (!googleUser) {
-                    throw new Error("Không nhận được dữ liệu xác thực.");
+                    throw new Error("Dữ liệu googleUser trả về trống rỗng.");
                 }
 
+                // Thành công
+                alert("✅ ĐĂNG NHẬP THÀNH CÔNG: " + (googleUser.email || "Không rõ email"));
                 sessionStorage.setItem('kdrive_session', 'active');
-                sessionStorage.setItem('kdrive_username', googleUser.name || googleUser.givenName || 'Chiến binh K-Drive');
                 localStorage.setItem('kdrive_logged_in_user', googleUser.name || googleUser.givenName || 'Chiến binh K-Drive');
-                localStorage.setItem('kdrive_user_email', googleUser.email || '');
-
-                statusEl.style.color = "#00ffcc";
-                statusEl.innerText = "✅ ĐĂNG NHẬP THÀNH CÔNG!";
-
-                const successVid = document.getElementById('successVideo');
-                if(successVid) {
-                    successVid.style.display = 'block'; 
-                    successVid.play().then(() => { 
-                        successVid.onended = () => { window.location.href = 'LucChien.html'; };
-                    }).catch(err => { window.location.href = 'LucChien.html'; });
-                } else { 
-                    window.location.href = 'LucChien.html'; 
-                }
+                
+                window.location.href = 'LucChien.html';
+                
             } catch (error) {
-                container.classList.remove('glitching');
+                // BƯỚC 3: In TOÀN BỘ lỗi ra màn hình
                 statusEl.style.color = "#ff3333";
-                statusEl.innerText = "⚠️ LỖI: " + (error.message || JSON.stringify(error));
-                console.error("Native Auth Error:", error);
+                let errorDetails = "Message: " + (error.message || "N/A") + "<br>";
+                errorDetails += "Code: " + (error.code || "N/A") + "<br>";
+                errorDetails += "Full: " + JSON.stringify(error);
+                
+                statusEl.innerHTML = "❌ LỖI ĐĂNG NHẬP:<br>" + errorDetails;
+                alert("❌ LỖI CHI TIẾT:\n" + (error.message || JSON.stringify(error)));
             }
         };
     </script>
 
     <script>
         let selectedLangChoice = localStorage.getItem('kdrive_lang') || 'vi';
-
         const preloadedLoginBg = new Image();
         preloadedLoginBg.src = "https://github.com/happyk1900/HOSOGOC/blob/main/k%20login.png?raw=true";
 
@@ -233,26 +251,15 @@
         }
 
         function confirmLanguage() {
-            localStorage.setItem('kdrive_lang', selectedLangChoice);
-            const bgm = document.getElementById('bgMusic');
-            if (bgm) { bgm.volume = 1.0; bgm.play().catch(e => {}); }
-
             document.getElementById('langGateModal').classList.add('hidden');
-            
             setTimeout(() => {
                 const bgImg = document.getElementById('bgImageElement');
-                if (bgImg) {
-                    bgImg.style.opacity = 0;
-                    setTimeout(() => {
-                        bgImg.src = preloadedLoginBg.src;
-                        bgImg.style.opacity = 1;
-                    }, 400);
-                }
+                if (bgImg) { bgImg.src = preloadedLoginBg.src; }
                 setTimeout(() => {
                     const loginPanel = document.getElementById('loginPanelContainer');
                     if (loginPanel) loginPanel.classList.add('show-login');
-                }, 1000);
-            }, 500);
+                }, 500);
+            }, 300);
         }
 
         function closeLangModal() { confirmLanguage(); }
