@@ -161,24 +161,15 @@
         </div>
     </div>
 
-    <!-- FIREBASE WEB AUTH VỚI TRY...CATCH VÀ CONSOLE.ERROR ĐẦY ĐỦ -->
+    <!-- NATIVE CAPACITOR GOOGLE AUTH (SẠCH SẼ, KHÔNG CÓ BẤT KỲ FIREBASE WEB NÀO) -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAeTj7tuGuB8RNireo5ElSR2COZ1R_-iew",
-            authDomain: "kdrive-ef271.firebaseapp.com",
-            projectId: "kdrive-ef271",
-            storageBucket: "kdrive-ef271.firebasestorage.app",
-            messagingSenderId: "159440914562",
-            appId: "1:159440914562:web:2d06f2fe7d787ed2f8cc9b",
-            measurementId: "G-VF03K864DM"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+        try {
+            GoogleAuth.initialize();
+        } catch (e) {
+            console.log("GoogleAuth Init Error:", e);
+        }
 
         window.triggerGoogleOAuth = async function() {
             const checkbox = document.getElementById('termsCheck');
@@ -187,28 +178,29 @@
             if (!checkbox.checked) {
                 statusEl.style.color = "#ff3333";
                 statusEl.innerText = "⚠️ HÃY TÍCH CHỌN ĐỒNG Ý ĐIỀU KHOẢN!";
-                console.error("[K-Drive Auth]: Chưa tích chọn điều khoản.");
                 return;
             }
 
             const container = document.getElementById('loginPanelContainer');
             container.classList.add('glitching');
             statusEl.style.color = "#00e5ff";
-            statusEl.innerText = "⚡ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...";
-            console.log("[K-Drive Auth]: Bắt đầu gọi signInWithPopup...");
+            statusEl.innerText = "⚡ ĐANG GỌI TÀI KHOẢN GOOGLE NATIVE...";
 
             try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                console.log("[K-Drive Auth]: Đăng nhập thành công với user:", user.email);
+                // Gọi thẳng bảng chọn tài khoản của hệ điều hành, không dùng trình duyệt Web
+                const googleUser = await GoogleAuth.signIn();
+                
+                if (!googleUser) {
+                    throw new Error("Không nhận được dữ liệu xác thực.");
+                }
 
                 sessionStorage.setItem('kdrive_session', 'active');
-                sessionStorage.setItem('kdrive_username', user.displayName || 'Chiến binh K-Drive');
-                localStorage.setItem('kdrive_logged_in_user', user.displayName || 'Chiến binh K-Drive');
-                localStorage.setItem('kdrive_user_email', user.email || '');
+                sessionStorage.setItem('kdrive_username', googleUser.name || googleUser.givenName || 'Chiến binh K-Drive');
+                localStorage.setItem('kdrive_logged_in_user', googleUser.name || googleUser.givenName || 'Chiến binh K-Drive');
+                localStorage.setItem('kdrive_user_email', googleUser.email || '');
 
                 statusEl.style.color = "#00ffcc";
-                statusEl.innerText = "✅ XÁC THỰC THÀNH CÔNG!";
+                statusEl.innerText = "✅ ĐĂNG NHẬP THÀNH CÔNG!";
 
                 const successVid = document.getElementById('successVideo');
                 if(successVid) {
@@ -222,11 +214,8 @@
             } catch (error) {
                 container.classList.remove('glitching');
                 statusEl.style.color = "#ff3333";
-                statusEl.innerText = "⚠️ LỖI: " + error.message;
-                // Vạch mặt lỗi chính xác ra console để kiểm tra ngay lập tức
-                console.error("[K-Drive Auth Error Code]:", error.code);
-                console.error("[K-Drive Auth Error Message]:", error.message);
-                console.error("[K-Drive Auth Full Error]:", error);
+                statusEl.innerText = "⚠️ LỖI: " + (error.message || JSON.stringify(error));
+                console.error("Native Auth Error:", error);
             }
         };
     </script>
