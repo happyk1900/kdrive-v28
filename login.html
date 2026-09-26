@@ -282,10 +282,10 @@
         </div>
     </div>
 
-    <!-- TÍCH HỢP FIREBASE AUTH & CAPACITOR REDIRECT FIX -->
+    <!-- TÍCH HỢP FIREBASE AUTH TRỰC DIỆN KHÔNG TREO REDIRECT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithCredential, OAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAeTj7tuGuB8RNireo5ElSR2COZ1R_-iew",
@@ -300,34 +300,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
-
-        // Xử lý kết quả trả về từ Redirect an toàn
-        getRedirectResult(auth)
-            .then((result) => {
-                if (result && result.user) {
-                    onLoginSuccess(result.user);
-                }
-            })
-            .catch((error) => {
-                console.error("Redirect Auth Error:", error);
-            });
-
-        function onLoginSuccess(user) {
-            sessionStorage.setItem('kdrive_session', 'active');
-            sessionStorage.setItem('kdrive_username', user.displayName || 'Chiến binh K-Drive');
-            localStorage.setItem('kdrive_logged_in_user', user.displayName || 'Chiến binh K-Drive');
-            localStorage.setItem('kdrive_user_email', user.email || '');
-
-            const successVid = document.getElementById('successVideo');
-            if(successVid) {
-                successVid.style.display = 'block'; 
-                successVid.play().then(() => { 
-                    successVid.onended = () => { window.location.href = 'LucChien.html'; };
-                }).catch(err => { window.location.href = 'LucChien.html'; });
-            } else { 
-                window.location.href = 'LucChien.html'; 
-            }
-        }
 
         window.triggerGoogleOAuth = async function() {
             const checkbox = document.getElementById('termsCheck');
@@ -344,20 +316,32 @@
             const container = document.getElementById('loginPanelContainer');
             container.classList.add('glitching');
             statusEl.style.color = "#00e5ff";
-            statusEl.innerText = "⚡ KÍCH HOẠT XÁC THỰC GOOGLE...";
+            statusEl.innerText = "⚡ ĐANG XÁC THỰC TÀI KHOẢN...";
 
             try {
-                // Thử dùng Popup trước, nếu môi trường app di động chặn sẽ tự chuyển sang Redirect
-                await signInWithPopup(auth, provider).then((result) => {
-                    onLoginSuccess(result.user);
-                }).catch(async (popupErr) => {
-                    console.log("Popup blocked or failed, switching to Redirect...", popupErr);
-                    await signInWithRedirect(auth, provider);
-                });
+                // Gọi popup trực tiếp để lấy token xác thực lập tức mà không bị kẹt trang redirect
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                
+                sessionStorage.setItem('kdrive_session', 'active');
+                sessionStorage.setItem('kdrive_username', user.displayName || 'Chiến binh K-Drive');
+                localStorage.setItem('kdrive_logged_in_user', user.displayName || 'Chiến binh K-Drive');
+                localStorage.setItem('kdrive_user_email', user.email || '');
+
+                const successVid = document.getElementById('successVideo');
+                if(successVid) {
+                    successVid.style.display = 'block'; 
+                    successVid.play().then(() => { 
+                        successVid.onended = () => { window.location.href = 'LucChien.html'; };
+                    }).catch(err => { window.location.href = 'LucChien.html'; });
+                } else { 
+                    window.location.href = 'LucChien.html'; 
+                }
             } catch (error) {
                 container.classList.remove('glitching');
                 statusEl.style.color = "#ff3333";
                 statusEl.innerText = "⚠️ XÁC THỰC THẤT BẠI. THỬ LẠI!";
+                console.error("Google Auth Error:", error);
             }
         };
     </script>
