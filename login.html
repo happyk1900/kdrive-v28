@@ -360,6 +360,72 @@
         </div>
     </div>
 
+    <!-- TÍCH HỢP FIREBASE SDK CHÍNH THỨC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAeTj7tuGuB8RNireo5ElSR2COZ1R_-iew",
+            authDomain: "kdrive-ef271.firebaseapp.com",
+            projectId: "kdrive-ef271",
+            storageBucket: "kdrive-ef271.firebasestorage.app",
+            messagingSenderId: "159440914562",
+            appId: "1:159440914562:web:2d06f2fe7d787ed2f8cc9b",
+            measurementId: "G-VF03K864DM"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        window.triggerGoogleOAuth = async function() {
+            const checkbox = document.getElementById('termsCheck');
+            const statusEl = document.getElementById('loginStatus');
+            const t = getTranslation(currentLang);
+
+            if (!hasReadTerms || !checkbox.checked) {
+                statusEl.style.color = "#ff3333";
+                statusEl.innerText = t.warning;
+                openTermsModal();
+                return;
+            }
+
+            const container = document.getElementById('loginPanelContainer');
+            container.classList.add('glitching');
+            statusEl.style.color = "#00e5ff";
+            statusEl.innerText = "⚡ ĐANG XÁC THỰC GOOGLE...";
+
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                sessionStorage.setItem('kdrive_session', 'active');
+                sessionStorage.setItem('kdrive_username', user.displayName || 'Chiến binh K-Drive');
+                localStorage.setItem('kdrive_logged_in_user', user.displayName || 'Chiến binh K-Drive');
+                localStorage.setItem('kdrive_user_email', user.email || '');
+
+                container.classList.remove('glitching');
+                container.style.opacity = '0';
+                container.style.transform = 'scale(0)';
+
+                const successVid = document.getElementById('successVideo');
+                if(successVid) {
+                    successVid.style.display = 'block'; 
+                    successVid.play().then(() => { 
+                        successVid.onended = () => { window.location.href = 'LucChien.html'; };
+                    }).catch(err => { window.location.href = 'LucChien.html'; });
+                } else { 
+                    window.location.href = 'LucChien.html'; 
+                }
+            } catch (error) {
+                container.classList.remove('glitching');
+                statusEl.style.color = "#ff3333";
+                statusEl.innerText = "⚠️ XÁC THỰC THẤT BẠI. THỬ LẠI!";
+            }
+        };
+    </script>
+
     <script>
         let hasReadTerms = false;
         let selectedLangChoice = localStorage.getItem('kdrive_lang') || 'vi';
@@ -515,46 +581,6 @@
                 document.getElementById('googleBtn').classList.add('unlocked');
             }
         });
-
-        // HÀM XỬ LÝ ĐĂNG NHẬP AN TOÀN TRÊN MOBILE
-        function triggerGoogleOAuth() {
-            const checkbox = document.getElementById('termsCheck');
-            const statusEl = document.getElementById('loginStatus');
-            const t = getTranslation(currentLang);
-
-            if (!hasReadTerms || !checkbox.checked) {
-                statusEl.style.color = "#ff3333";
-                statusEl.innerText = t.warning;
-                openTermsModal();
-                return;
-            }
-
-            const container = document.getElementById('loginPanelContainer');
-            container.classList.add('glitching');
-            statusEl.style.color = "#00e5ff";
-            statusEl.innerText = "⚡ ĐANG KHỞI TẠO TỌA ĐỘ...";
-
-            setTimeout(() => {
-                sessionStorage.setItem('kdrive_session', 'active');
-                sessionStorage.setItem('kdrive_username', 'KaiRipe');
-                localStorage.setItem('kdrive_logged_in_user', 'KaiRipe');
-                localStorage.setItem('kdrive_user_email', 'happyk1988love@gmail.com');
-
-                container.classList.remove('glitching');
-                container.style.opacity = '0';
-                container.style.transform = 'scale(0)';
-
-                const successVid = document.getElementById('successVideo');
-                if(successVid) {
-                    successVid.style.display = 'block'; 
-                    successVid.play().then(() => { 
-                        successVid.onended = () => { window.location.href = 'LucChien.html'; };
-                    }).catch(err => { window.location.href = 'LucChien.html'; });
-                } else { 
-                    window.location.href = 'LucChien.html'; 
-                }
-            }, 800);
-        }
     </script>
 </body>
 </html>
