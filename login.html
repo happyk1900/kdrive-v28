@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <title>Telepathy K-Drive</title>
+    <title>K-Drive</title>
     
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#010a14">
@@ -26,16 +26,6 @@
             width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; 
             opacity: 1; transition: opacity 0.5s ease-in-out; 
         }
-
-        #cinematic-welcome {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 88%; text-align: center; z-index: 5;
-            color: #fff; font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 800; line-height: 1.7;
-            text-shadow: 0 0 20px rgba(0, 229, 255, 0.9), 0 0 40px rgba(0, 229, 255, 0.5), 0 0 60px rgba(176, 38, 255, 0.4);
-            letter-spacing: 1px;
-            opacity: 0; visibility: hidden; transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
-        }
-        #cinematic-welcome.show { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1.02); }
 
         .lang-gate-overlay {
             position: fixed; inset: 0; z-index: 999999; background: transparent;
@@ -71,7 +61,6 @@
             color: #b0e0e6; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 6px;
             font-family: 'Montserrat', sans-serif;
         }
-        .lang-cell:hover { border-color: #00e5ff; background: rgba(0, 229, 255, 0.15); color: #fff; }
         .lang-cell.selected { border-color: #ffd700; background: rgba(0, 229, 255, 0.2); color: #fff; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
         .lang-footer-btns { display: flex; gap: 8px; }
         .btn-close-lang {
@@ -97,7 +86,7 @@
 
         .google-auth-btn-img {
             width: 100%; max-width: 170px; height: auto; cursor: pointer;
-            filter: grayscale(1) brightness(0.4); opacity: 0.4; pointer-events: none; transition: 0.5s ease;
+            filter: grayscale(1) brightness(0.4); opacity: 0.3; pointer-events: none; transition: 0.5s ease;
         }
         .google-auth-btn-img.unlocked {
             opacity: 1; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.7));
@@ -116,6 +105,7 @@
         .terms-checkbox {
             appearance: none; -webkit-appearance: none; width: 14px; height: 14px;
             border: 1.5px solid #00e5ff; border-radius: 3px; background: rgba(0, 0, 0, 0.6); cursor: pointer; margin-top: 2px; flex-shrink: 0;
+            position: relative;
         }
         .terms-checkbox:checked { background: #00e5ff; box-shadow: 0 0 10px #00e5ff; }
         .terms-checkbox:checked::after { content: '✔'; position: absolute; top: -2px; left: 2px; font-size: 9px; color: #000; font-weight: bold; }
@@ -148,7 +138,7 @@
     <audio id="bgMusic" src="https://raw.githubusercontent.com/happyk1900/HOSOGOC/main/K_Drive_Initialized.mp3" preload="auto" loop></audio>
     <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20GPS%20FULL.mp4" autoplay muted playsinline webkit-playsinline style="pointer-events: none;"></video>
 
-    <!-- BẢNG CHỌN 12 NGÔN NGỮ QUỐC TẾ -->
+    <!-- BẢNG CHỌN NGÔN NGỮ -->
     <div class="lang-gate-overlay" id="langGateModal">
         <div class="lang-box">
             <div class="lang-title-area">CHỌN NGÔN NGỮ QUỐC TẾ</div>
@@ -197,9 +187,9 @@
         <div class="gateway-container" id="loginPanelContainer">
             <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL%20CAT.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="triggerGoogleOAuth()" alt="Google Login">
             <div class="terms-box-container">
-                <input type="checkbox" class="terms-checkbox" id="termsCheck" disabled onchange="toggleTermsAgreement()">
+                <input type="checkbox" class="terms-checkbox" id="termsCheck" onchange="toggleTermsAgreement()">
                 <div class="terms-text">
-                    Tôi đồng ý với <span class="terms-link" onclick="openTermsModal()">Điều khoản dịch vụ</span> & <span class="terms-link" onclick="openTermsModal()">Quy chế thi đấu</span> của Telepathy.
+                    Tôi đồng ý với <span class="terms-link" onclick="openTermsModal()">Điều khoản dịch vụ</span> của Telepathy K-Drive.
                 </div>
             </div>
             <div id="loginStatus"></div>
@@ -228,29 +218,31 @@
         try {
             GoogleAuth.initialize();
         } catch (e) {
-            console.log("GoogleAuth Init:", e);
+            console.log("GoogleAuth Init Error:", e);
         }
 
         window.triggerGoogleOAuth = async function() {
             const checkbox = document.getElementById('termsCheck');
             const statusEl = document.getElementById('loginStatus');
 
-            if (!hasReadTerms || !checkbox.checked) {
+            if (!checkbox.checked) {
                 statusEl.style.color = "#ff3333";
-                statusEl.innerText = "⚠️ BẠN PHẢI BẤM ĐỌC ĐIỀU KHOẢN TRƯỚC!";
-                openTermsModal();
+                statusEl.innerText = "⚠️ BẠN PHẢI TÍCH CHỌN ĐỒNG Ý ĐIỀU KHOẢN!";
                 return;
             }
 
             const container = document.getElementById('loginPanelContainer');
             container.classList.add('glitching');
             statusEl.style.color = "#00e5ff";
-            statusEl.innerText = "⚡ KÍCH HOẠT NATIVE GOOGLE LOGIN...";
+            statusEl.innerText = "⚡ ĐANG GỌI TÀI KHOẢN GOOGLE...";
 
             try {
                 const googleUser = await GoogleAuth.signIn();
-                const idToken = googleUser.authentication.idToken;
+                if (!googleUser || !googleUser.authentication) {
+                    throw new Error("Không lấy được dữ liệu xác thực.");
+                }
 
+                const idToken = googleUser.authentication.idToken;
                 const credential = GoogleAuthProvider.credential(idToken);
                 const result = await signInWithCredential(auth, credential);
                 const user = result.user;
@@ -259,6 +251,8 @@
                 sessionStorage.setItem('kdrive_username', user.displayName || 'Chiến binh K-Drive');
                 localStorage.setItem('kdrive_logged_in_user', user.displayName || 'Chiến binh K-Drive');
                 localStorage.setItem('kdrive_user_email', user.email || '');
+
+                statusEl.innerText = "✅ ĐĂNG NHẬP THÀNH CÔNG!";
 
                 const successVid = document.getElementById('successVideo');
                 if(successVid) {
@@ -272,14 +266,13 @@
             } catch (error) {
                 container.classList.remove('glitching');
                 statusEl.style.color = "#ff3333";
-                statusEl.innerText = "⚠️ ĐĂNG NHẬP THẤT BẠI. THỬ LẠI!";
+                statusEl.innerText = "⚠️ LỖI: " + (error.message || "Không thể đăng nhập");
                 console.error("Native Auth Error:", error);
             }
         };
     </script>
 
     <script>
-        let hasReadTerms = false;
         let selectedLangChoice = localStorage.getItem('kdrive_lang') || 'vi';
 
         const preloadedLoginBg = new Image();
@@ -321,33 +314,13 @@
             const googleBtn = document.getElementById('googleBtn');
             if (checkbox.checked) {
                 googleBtn.classList.add('unlocked');
-                localStorage.setItem('kdrive_terms_agreed', 'true');
             } else {
                 googleBtn.classList.remove('unlocked');
-                localStorage.removeItem('kdrive_terms_agreed');
             }
         }
 
         function openTermsModal() { document.getElementById('termsModal').classList.add('active'); }
-        function closeTermsModal() {
-            document.getElementById('termsModal').classList.remove('active');
-            hasReadTerms = true;
-            const checkbox = document.getElementById('termsCheck');
-            checkbox.disabled = false;
-            checkbox.checked = true;
-            toggleTermsAgreement();
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const isAgreedBefore = localStorage.getItem('kdrive_terms_agreed');
-            if (isAgreedBefore === 'true') {
-                hasReadTerms = true;
-                const checkbox = document.getElementById('termsCheck');
-                checkbox.disabled = false;
-                checkbox.checked = true;
-                document.getElementById('googleBtn').classList.add('unlocked');
-            }
-        });
+        function closeTermsModal() { document.getElementById('termsModal').classList.remove('active'); }
     </script>
 </body>
 </html>
