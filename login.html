@@ -14,116 +14,103 @@
     
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-        body { background-color: #010204; height: 100vh; height: 100dvh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; pointer-events: auto; }
+        body { background-color: #010204; height: 100vh; height: 100dvh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; }
         img, video { -webkit-user-drag: none; pointer-events: none; }
 
         .kdrive-image-wrapper { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; 
-            background: #010204; 
-            z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            pointer-events: none; /* Không cho lớp nền cản trở tương tác */
+            background: #010204; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; 
         }
         .kdrive-bg-target { 
             width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; 
-            opacity: 1; transition: opacity 0.5s ease-in-out; pointer-events: none;
+            opacity: 1; transition: opacity 0.5s ease-in-out; 
         }
 
         .lang-gate-overlay {
-            position: fixed; inset: 0; z-index: 9999999; background: rgba(1, 2, 4, 0.95);
+            position: fixed; inset: 0; z-index: 999999; background: transparent;
             display: flex; justify-content: center; align-items: center; 
             transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-            opacity: 1; visibility: visible; pointer-events: auto;
+            opacity: 1; visibility: visible;
         }
         .lang-gate-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         
         .lang-box {
-            width: 90%; max-width: 325px; background: rgba(2, 12, 24, 0.95);
+            width: 90%; max-width: 325px; background: rgba(2, 12, 24, 0.88);
             border: 2px solid #00e5ff; border-radius: 14px; padding: 16px 12px;
-            box-shadow: 0 0 35px rgba(0,229,255,0.45); text-align: center; color: #fff; z-index: 10000000;
+            box-shadow: 0 0 35px rgba(0,229,255,0.45), inset 0 0 15px rgba(0,229,255,0.15); 
+            text-align: center; color: #fff; z-index: 10; backdrop-filter: blur(3px);
         }
         .lang-title-area { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 800; color: #ffd700; margin-bottom: 8px; }
         .alien-box-container { width: 100%; height: 36px; background: rgba(0, 15, 30, 0.6); border: 1.5px solid rgba(0, 229, 255, 0.3); border-radius: 6px; display: flex; justify-content: center; align-items: center; margin-bottom: 8px; }
         .alien-emblem { font-size: 18px; }
         .lang-grid-exact { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 12px; }
         .lang-cell {
-            background: rgba(0, 15, 30, 0.85); border: 1.5px solid rgba(0, 229, 255, 0.25);
+            background: rgba(0, 15, 30, 0.65); border: 1.5px solid rgba(0, 229, 255, 0.25);
             border-radius: 6px; padding: 7px 8px; font-size: 10px; font-weight: 700;
             color: #b0e0e6; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 6px;
         }
-        .lang-cell.selected { border-color: #ffd700; background: rgba(0, 229, 255, 0.3); color: #fff; }
+        .lang-cell.selected { border-color: #ffd700; background: rgba(0, 229, 255, 0.2); color: #fff; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
         .lang-footer-btns { display: flex; gap: 8px; }
-        .btn-close-lang { flex: 1; background: rgba(140, 0, 30, 0.3); border: 1.5px solid #ff3344; color: #ff6677; padding: 9px; border-radius: 6px; font-weight: 800; font-size: 9.5px; cursor: pointer; }
-        .btn-confirm-lang { flex: 1; background: #ffd700; border: 1.5px solid #ffea00; color: #000; padding: 9px; border-radius: 6px; font-weight: 900; font-size: 9.5px; cursor: pointer; }
+        .btn-close-lang { flex: 1; background: rgba(140, 0, 30, 0.3); border: 1.5px solid #ff3344; color: #ff6677; padding: 9px; border-radius: 6px; font-weight: 800; font-size: 9.5px; cursor: pointer; text-transform: uppercase; }
+        .btn-confirm-lang { flex: 1; background: #ffd700; border: 1.5px solid #ffea00; color: #000; padding: 9px; border-radius: 6px; font-weight: 900; font-size: 9.5px; cursor: pointer; text-transform: uppercase; }
 
         .gateway-container {
-            position: relative; width: 85%; max-width: 270px; z-index: 999999;
+            position: relative; width: 85%; max-width: 270px; z-index: 10;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transform: scale(0.95); transition: opacity 1s ease, transform 1s ease;
         }
         .gateway-container.show-login { opacity: 1; pointer-events: auto; transform: scale(1); }
-        .gateway-container.glitching { animation: glitchAnim 0.3s infinite alternate; }
-        @keyframes glitchAnim {
-            0% { transform: translate(0, 0) scale(1); filter: hue-rotate(0deg); }
-            100% { transform: translate(-3px, 2px) scale(1.02); filter: hue-rotate(90deg); }
-        }
 
-        /* ÉP NÚT GMAIL NHẬN SỰ KIỆN CHẠM TUYỆT ĐỐI */
         .google-auth-btn-img {
             width: 100%; max-width: 170px; height: auto; cursor: pointer;
-            filter: grayscale(1) brightness(0.4); opacity: 0.3; 
-            pointer-events: none; /* Mặc định chưa tích thì không bấm được */
-            transition: 0.5s ease;
-            position: relative; z-index: 1000000;
+            filter: grayscale(1) brightness(0.4); opacity: 0.3; pointer-events: none; transition: 0.5s ease;
         }
         .google-auth-btn-img.unlocked {
-            opacity: 1; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.9));
-            animation: buttonBreathe 2.2s infinite ease-in-out; 
-            pointer-events: auto !important; /* Mở khóa hoàn toàn tương tác chạm */
+            opacity: 1; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.7));
+            animation: buttonBreathe 2.2s infinite ease-in-out; pointer-events: auto !important;
         }
         @keyframes buttonBreathe {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.6)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(0, 229, 255, 1)); }
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.5)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(0, 229, 255, 0.95)); }
         }
 
         .terms-box-container {
             position: relative; width: 100%; margin-top: 12px;
-            background: rgba(3, 9, 22, 0.95); border: 1.5px solid rgba(0, 229, 255, 0.6);
-            border-radius: 8px; padding: 10px; display: flex; align-items: flex-start; gap: 8px;
-            z-index: 1000000; pointer-events: auto;
+            background: rgba(3, 9, 22, 0.85); border: 1.5px solid rgba(0, 229, 255, 0.45);
+            border-radius: 8px; padding: 8px 10px; display: flex; align-items: flex-start; gap: 8px; backdrop-filter: blur(8px);
         }
         .terms-checkbox {
-            appearance: none; -webkit-appearance: none; width: 16px; height: 16px;
-            border: 1.5px solid #00e5ff; border-radius: 3px; background: rgba(0, 0, 0, 0.8); cursor: pointer; margin-top: 2px; flex-shrink: 0;
-            position: relative; pointer-events: auto;
+            appearance: none; -webkit-appearance: none; width: 14px; height: 14px;
+            border: 1.5px solid #00e5ff; border-radius: 3px; background: rgba(0, 0, 0, 0.6); cursor: pointer; margin-top: 2px; flex-shrink: 0;
+            position: relative;
         }
         .terms-checkbox:checked { background: #00e5ff; box-shadow: 0 0 10px #00e5ff; }
-        .terms-checkbox:checked::after { content: '✔'; position: absolute; top: -1px; left: 2px; font-size: 10px; color: #000; font-weight: bold; }
-        .terms-text { color: #b0e0e6; font-size: 9.5px; font-family: 'Montserrat', sans-serif; line-height: 1.4; pointer-events: auto; }
+        .terms-checkbox:checked::after { content: '✔'; position: absolute; top: -2px; left: 2px; font-size: 9px; color: #000; font-weight: bold; }
+        .terms-text { color: #b0e0e6; font-size: 9px; font-family: 'Montserrat', sans-serif; line-height: 1.35; }
         .terms-link { color: #ffd700; text-decoration: underline; cursor: pointer; font-weight: 700; }
-        #loginStatus { margin-top: 10px; font-weight: 700; text-align: center; font-size: 10px; color: #00e5ff; min-height: 14px; text-shadow: 0 0 8px rgba(0,229,255,0.6); z-index: 1000000; position: relative; }
+        #loginStatus { margin-top: 10px; font-weight: 700; text-align: center; font-size: 10px; color: #00e5ff; min-height: 14px; text-shadow: 0 0 8px rgba(0,229,255,0.6); }
 
         .terms-modal-overlay {
-            position: fixed; inset: 0; background: rgba(1, 2, 4, 0.95); z-index: 99999999;
+            position: fixed; inset: 0; background: rgba(1, 2, 4, 0.92); backdrop-filter: blur(10px); z-index: 9999999;
             display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.3s ease; padding: 15px;
-            pointer-events: auto;
         }
         .terms-modal-overlay.active { opacity: 1; visibility: visible; }
         .terms-modal-content {
             width: 100%; max-width: 350px; max-height: 85vh; overflow-y: auto;
-            background: rgba(6, 14, 26, 0.98); border: 2px solid #00e5ff; border-radius: 12px; padding: 18px; color: #e0f7fa; font-size: 11px; line-height: 1.6;
+            background: rgba(6, 14, 26, 0.97); border: 2px solid #00e5ff; border-radius: 12px; padding: 18px; color: #e0f7fa; font-size: 11px; line-height: 1.6;
         }
-        .terms-close-btn { width: 100%; margin-top: 14px; padding: 10px; background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #fff; font-weight: 800; border-radius: 6px; cursor: pointer; }
+        .terms-close-btn { width: 100%; margin-top: 14px; padding: 10px; background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #fff; font-weight: 800; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
 
         #successVideo { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; 
-            object-fit: cover; z-index: 999999999; display: none; background: #000; pointer-events: none;
+            object-fit: cover; z-index: 9999999; display: none; background: #000; 
         }
     </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
     <audio id="bgMusic" src="https://raw.githubusercontent.com/happyk1900/HOSOGOC/main/K_Drive_Initialized.mp3" preload="auto" loop></audio>
-    <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20GPS%20FULL.mp4" autoplay muted playsinline webkit-playsinline></video>
+    <video id="successVideo" src="https://github.com/happyk1900/-m-thanh-app/raw/refs/heads/main/VIDEO%20GPS%20FULL.mp4" autoplay muted playsinline webkit-playsinline style="pointer-events: none;"></video>
 
     <!-- BẢNG CHỌN NGÔN NGỮ -->
     <div class="lang-gate-overlay" id="langGateModal">
@@ -155,9 +142,7 @@
     <div class="terms-modal-overlay" id="termsModal">
         <div class="terms-modal-content">
             <h3>QUY CHẾ K-DRIVE (CORE PROTOCOLS)</h3>
-            <p>K-Drive vận hành trên nguyên tắc sòng phẳng và minh bạch tuyệt đối:</p>
-            <p style="margin-top:8px;">1. Bảo mật sinh trắc học và lực chiến.</p>
-            <p>2. Tuân thủ quy chế thi đấu Telepathy.</p>
+            <p>K-Drive vận hành trên nguyên tắc minh bạch tuyệt đối và bảo mật thông tin hội viên.</p>
             <button class="terms-close-btn" onclick="closeTermsModal()">ĐÃ HIỂU & ĐÓNG</button>
         </div>
     </div>
@@ -165,8 +150,7 @@
     <div class="kdrive-image-wrapper">
         <img id="bgImageElement" src="https://github.com/happyk1900/HOSOGOC/blob/main/k-ngon%20ngu.png?raw=true" class="kdrive-bg-target" alt="BG">
         <div class="gateway-container" id="loginPanelContainer">
-            <!-- Nút Gmail chuẩn xác có gán sự kiện trực tiếp -->
-            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL%20CAT.png?raw=true" class="google-auth-btn-img" id="googleBtn" alt="Google Login">
+            <img src="https://github.com/happyk1900/-m-thanh-app/blob/main/NUT%20GMAIL%20CAT.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="triggerGoogleOAuth()" alt="Google Login">
             <div class="terms-box-container">
                 <input type="checkbox" class="terms-checkbox" id="termsCheck" onchange="toggleTermsAgreement()">
                 <div class="terms-text">
@@ -177,11 +161,10 @@
         </div>
     </div>
 
-    <!-- NATIVE GOOGLE AUTH & FIREBASE INTEGRATION -->
+    <!-- FIREBASE WEB AUTH VỚI TRY...CATCH VÀ CONSOLE.ERROR ĐẦY ĐỦ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithCredential } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAeTj7tuGuB8RNireo5ElSR2COZ1R_-iew",
@@ -195,12 +178,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-
-        try {
-            GoogleAuth.initialize();
-        } catch (e) {
-            console.log("GoogleAuth Init Error:", e);
-        }
+        const provider = new GoogleAuthProvider();
 
         window.triggerGoogleOAuth = async function() {
             const checkbox = document.getElementById('termsCheck');
@@ -209,24 +187,20 @@
             if (!checkbox.checked) {
                 statusEl.style.color = "#ff3333";
                 statusEl.innerText = "⚠️ HÃY TÍCH CHỌN ĐỒNG Ý ĐIỀU KHOẢN!";
+                console.error("[K-Drive Auth]: Chưa tích chọn điều khoản.");
                 return;
             }
 
             const container = document.getElementById('loginPanelContainer');
             container.classList.add('glitching');
             statusEl.style.color = "#00e5ff";
-            statusEl.innerText = "⚡ ĐANG KÍCH HOẠT GOOGLE LOGIN...";
+            statusEl.innerText = "⚡ ĐANG KẾT NỐI TÀI KHOẢN GOOGLE...";
+            console.log("[K-Drive Auth]: Bắt đầu gọi signInWithPopup...");
 
             try {
-                const googleUser = await GoogleAuth.signIn();
-                if (!googleUser || !googleUser.authentication) {
-                    throw new Error("Không lấy được dữ liệu xác thực từ Google.");
-                }
-
-                const idToken = googleUser.authentication.idToken;
-                const credential = GoogleAuthProvider.credential(idToken);
-                const result = await signInWithCredential(auth, credential);
+                const result = await signInWithPopup(auth, provider);
                 const user = result.user;
+                console.log("[K-Drive Auth]: Đăng nhập thành công với user:", user.email);
 
                 sessionStorage.setItem('kdrive_session', 'active');
                 sessionStorage.setItem('kdrive_username', user.displayName || 'Chiến binh K-Drive');
@@ -248,25 +222,13 @@
             } catch (error) {
                 container.classList.remove('glitching');
                 statusEl.style.color = "#ff3333";
-                statusEl.innerText = "⚠️ LỖI: " + (error.message || JSON.stringify(error));
-                console.error("Native Auth Error Details:", error);
+                statusEl.innerText = "⚠️ LỖI: " + error.message;
+                // Vạch mặt lỗi chính xác ra console để kiểm tra ngay lập tức
+                console.error("[K-Drive Auth Error Code]:", error.code);
+                console.error("[K-Drive Auth Error Message]:", error.message);
+                console.error("[K-Drive Auth Full Error]:", error);
             }
         };
-
-        // Gắn sự kiện lắng nghe trực tiếp vào nút bằng JS để triệt tiêu mọi lỗi không nhận click
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('googleBtn');
-            if (btn) {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    window.triggerGoogleOAuth();
-                });
-                btn.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    window.triggerGoogleOAuth();
-                });
-            }
-        });
     </script>
 
     <script>
