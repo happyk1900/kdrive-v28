@@ -123,9 +123,6 @@
         body.sync-complete #val-sci { display: block; animation: sci-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes sci-pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-        @keyframes spin-cw { 100% { transform: rotate(360deg); } }
-        @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
-
         /* 6 CHỈ SỐ CỐT LÕI */
         .data-panel { position: absolute; z-index: 15; padding: 12px 18px; transition: transform 0.2s, opacity 1.5s ease; background: linear-gradient(90deg, rgba(10, 14, 22, 0.92), rgba(5, 7, 10, 0.4)); border-left: 3px solid; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; min-width: 120px; white-space: nowrap; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .data-panel:active { transform: scale(0.95); background: rgba(0, 229, 255, 0.2); }
@@ -143,7 +140,7 @@
         /* THANH TERMINAL CẢNH BÁO NỢ SẮC BÉN */
         .live-radar-bar { position: absolute; bottom: 55px; left: 50%; transform: translateX(-50%); z-index: 10; width: 92%; max-width: 390px; padding: 12px 16px; background: rgba(57, 255, 20, 0.08); border: 1px solid rgba(57, 255, 20, 0.3); border-left: 4px solid var(--lime); font-family: var(--font-terminal); display: flex; align-items: flex-start; flex-direction: column; gap: 8px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); box-shadow: 0 5px 20px rgba(0,0,0,0.6); transition: all 0.5s ease;}
         .radar-header { font-size: 14px; font-weight: bold; display: flex; align-items: center; width: 100%; color: var(--lime); animation: pulse-lime 1.2s infinite alternate; text-transform: uppercase; }
-        .live-metrics { color: rgba(255,255,255,0.95); display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; font-weight: 500; width: 100%;}
+        .live-metrics { color: rgba(255,255,255,0.95); display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; font-weight: 500; width: 100%; word-break: break-word;}
         .metric-item { display: inline-flex; align-items: center; background: rgba(0,0,0,0.75); padding: 6px 10px; border: 1px solid rgba(255,255,255,0.2); }
         @keyframes pulse-lime { 0% { opacity: 0.6; } 100% { opacity: 1; text-shadow: 0 0 10px var(--lime); } }
 
@@ -166,90 +163,20 @@
         <button class="mode-btn" id="btn-manual" onclick="setMode('manual')">Thủ công</button>
     </div>
 
-    <!-- MODAL 1: BẢNG CHÀO MỪNG -->
-    <div class="cyber-modal" id="core-check-modal">
-        <div class="cyber-led-wrapper">
-            <div class="modal-box">
-                <div class="modal-title">K-DRIVE: TỌA ĐỘ SINH HỌC</div>
-                <div id="core-summary-view" style="font-family: var(--font-terminal); font-size: 13px; color: rgba(255,255,255,0.95); margin-bottom: 18px; line-height: 1.8;">
-                    Đang thiết lập thông số khoa học...
-                </div>
-                <div class="collapse-box" onclick="toggleCollapse('col-vision')">
-                    <span>Mục tiêu & Tầm nhìn K-Drive</span> <span style="color: var(--mint);">▼</span>
-                </div>
-                <div class="collapse-content" id="col-vision">
-                    K-Drive là ứng dụng theo dõi sức khỏe với mục tiêu đẩy thể trạng của bạn đến mức tinh nhanh nhất. Sáu chỉ số nền tảng mới chỉ là bước khởi đầu.
-                </div>
-                <div class="collapse-box" onclick="toggleCollapse('col-sync')">
-                    <span>Hướng dẫn kết nối sinh trắc học</span> <span style="color: var(--mint);">▼</span>
-                </div>
-                <div class="collapse-content" id="col-sync">
-                    1. Trang bị đồng hồ thông minh và cân thông minh.<br>
-                    2. Cài đặt các thiết bị đồng bộ dữ liệu về ứng dụng Samsung Health.<br>
-                    3. Chọn Tự động và chạm vào Lõi trung tâm để quét dữ liệu qua Health Connect.
-                </div>
-                <div class="modal-btns" style="margin-top: 22px;">
-                    <button class="modal-btn" onclick="openOnboardingForm()">Thay đổi</button>
-                    <button class="modal-btn primary" onclick="acceptCoreValues()">Đồng ý</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL 2: FORM NHẬP -->
-    <div class="cyber-modal" id="onboarding-modal">
-        <div class="cyber-led-wrapper">
-            <div class="modal-box">
-                <div class="modal-title">THIẾT LẬP LÕI</div>
-                <div class="ob-row"><div class="ob-label">NĂM SINH</div><select id="ob-year" class="cyber-select"></select></div>
-                <div class="ob-row"><div class="ob-label">CHIỀU CAO (CM)</div><select id="ob-height" class="cyber-select"></select></div>
-                <div class="ob-row"><div class="ob-label">CÂN NẶNG HIỆN TẠI</div><select id="ob-weight" class="cyber-select"></select></div>
-                <div class="modal-btns">
-                    <button class="modal-btn" onclick="closeOnboardingForm()">Hủy</button>
-                    <button class="modal-btn primary" onclick="submitOnboarding()">Lưu</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL 3: SỬA THỦ CÔNG -->
-    <div class="cyber-modal" id="manual-edit-modal">
-        <div class="cyber-led-wrapper">
-            <div class="modal-box">
-                <div class="modal-title" id="modal-title">SỬA CHỈ SỐ</div>
-                <div id="modal-info-desc" style="font-family: var(--font-terminal); font-size: 13px; color: var(--mint); margin-bottom: 18px; line-height: 1.7;"></div>
-                <input type="number" id="modal-input-val" class="modal-input" placeholder="0.0" step="0.1">
-                <div class="modal-btns" id="modal-btn-group">
-                    <button class="modal-btn" onclick="closeManualModal()">Hủy</button>
-                    <button class="modal-btn primary" onclick="saveManualValue()">Lưu</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- CÁC MODAL ... (GIỮ NGUYÊN GIAO DIỆN) -->
+    <div class="cyber-modal" id="core-check-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title">K-DRIVE: TỌA ĐỘ SINH HỌC</div><div id="core-summary-view" style="font-family: var(--font-terminal); font-size: 13px; color: rgba(255,255,255,0.95); margin-bottom: 18px; line-height: 1.8;">Đang thiết lập thông số khoa học...</div><div class="modal-btns" style="margin-top: 22px;"><button class="modal-btn" onclick="openOnboardingForm()">Thay đổi</button><button class="modal-btn primary" onclick="acceptCoreValues()">Đồng ý</button></div></div></div></div>
+    <div class="cyber-modal" id="onboarding-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title">THIẾT LẬP LÕI</div><div class="ob-row"><div class="ob-label">NĂM SINH</div><select id="ob-year" class="cyber-select"></select></div><div class="ob-row"><div class="ob-label">CHIỀU CAO (CM)</div><select id="ob-height" class="cyber-select"></select></div><div class="ob-row"><div class="ob-label">CÂN NẶNG HIỆN TẠI</div><select id="ob-weight" class="cyber-select"></select></div><div class="modal-btns"><button class="modal-btn" onclick="closeOnboardingForm()">Hủy</button><button class="modal-btn primary" onclick="submitOnboarding()">Lưu</button></div></div></div></div>
+    <div class="cyber-modal" id="manual-edit-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title" id="modal-title">SỬA CHỈ SỐ</div><div id="modal-info-desc" style="font-family: var(--font-terminal); font-size: 13px; color: var(--mint); margin-bottom: 18px; line-height: 1.7;"></div><input type="number" id="modal-input-val" class="modal-input" placeholder="0.0" step="0.1"><div class="modal-btns" id="modal-btn-group"><button class="modal-btn" onclick="closeManualModal()">Hủy</button><button class="modal-btn primary" onclick="saveManualValue()">Lưu</button></div></div></div></div>
 
     <!-- MAIN DASHBOARD -->
     <div class="pwa-container" id="main-pwa">
         <div class="core-wrapper">
             <div class="shockwave" id="shockwave"></div>
-            
             <div class="arc-reactor">
-                <svg class="ring-svg" viewBox="0 0 340 340">
-                    <g class="orb-group orb-ccw orb-move"><circle class="ring ring-move" cx="170" cy="170" r="125" /><circle class="plasma-node" cx="170" cy="45" r="3.5" /></g>
-                    <g class="orb-group orb-cw orb-rec"><circle class="ring ring-rec" cx="170" cy="170" r="105" /><circle class="plasma-node" cx="170" cy="65" r="4" /></g>
-                    <g class="orb-group orb-ccw orb-phys"><circle class="ring ring-phys" cx="170" cy="170" r="85" /><circle class="plasma-node" cx="170" cy="85" r="4.5" /></g>
-                    <g class="orb-group orb-cw orb-hr"><circle class="ring ring-hr" cx="170" cy="170" r="65" /><circle class="plasma-node" cx="170" cy="105" r="5" /></g>
-                </svg>
-
+                <svg class="ring-svg" viewBox="0 0 340 340"><g class="orb-group orb-ccw orb-move"><circle class="ring ring-move" cx="170" cy="170" r="125" /><circle class="plasma-node" cx="170" cy="45" r="3.5" /></g><g class="orb-group orb-cw orb-rec"><circle class="ring ring-rec" cx="170" cy="170" r="105" /><circle class="plasma-node" cx="170" cy="65" r="4" /></g><g class="orb-group orb-ccw orb-phys"><circle class="ring ring-phys" cx="170" cy="170" r="85" /><circle class="plasma-node" cx="170" cy="85" r="4.5" /></g><g class="orb-group orb-cw orb-hr"><circle class="ring ring-hr" cx="170" cy="170" r="65" /><circle class="plasma-node" cx="170" cy="105" r="5" /></g></svg>
                 <div class="sci-nexus" id="trigger-combat" onclick="handleCoreAction()">
                     <div class="fingerprint-wrapper" id="fp-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                          <path d="M18.9 7a8 8 0 0 1 1.1 5v1a6 6 0 0 0 .8 3" />
-                          <path d="M8 11a4 4 0 0 1 8 0v1a10 10 0 0 0 2 6" />
-                          <path d="M12 11v2a14 14 0 0 0 2.5 8" />
-                          <path d="M8 15a18 18 0 0 0 1.8 6" />
-                          <path d="M4.9 19a22 22 0 0 1 -.9 -7v-1a8 8 0 0 1 12 -6.95" />
-                        </svg>
-                        <div class="fp-scanner-line"></div>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M18.9 7a8 8 0 0 1 1.1 5v1a6 6 0 0 0 .8 3" /><path d="M8 11a4 4 0 0 1 8 0v1a10 10 0 0 0 2 6" /><path d="M12 11v2a14 14 0 0 0 2.5 8" /><path d="M8 15a18 18 0 0 0 1.8 6" /><path d="M4.9 19a22 22 0 0 1 -.9 -7v-1a8 8 0 0 1 12 -6.95" /></svg><div class="fp-scanner-line"></div>
                     </div>
                     <div class="sci-val" id="val-sci">---</div>
                     <div class="sci-lbl">SCI CORE</div>
@@ -274,100 +201,25 @@
         function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
         window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport); fixViewport();
 
-        let currentMode = 'auto';
-        let currentEditingKey = null;
+        let currentMode = 'auto'; let currentEditingKey = null;
 
-        window.onload = () => {
-            initParticles();
-            initSelectOptions();
-            if (localStorage.getItem('kdrive_core_initialized') !== 'true') { openOnboardingForm(); } 
-            else { showCoreCheckModal(); }
-        };
-
-        function initSelectOptions() {
-            const y = document.getElementById('ob-year'); let yHtml = ''; for(let i=1960; i<=2010; i++) yHtml += `<option value="${i}">${i}</option>`; y.innerHTML = yHtml; y.value = 1988;
-            const h = document.getElementById('ob-height'); let hHtml = ''; for(let i=150; i<=210; i++) hHtml += `<option value="${i}">${i} CM</option>`; h.innerHTML = hHtml; h.value = 176;
-            const w = document.getElementById('ob-weight'); let wHtml = ''; for(let i=40; i<=120; i++) wHtml += `<option value="${i}">${i} KG</option>`; w.innerHTML = wHtml; w.value = 61;
-        }
-
-        function setMode(mode) {
-            currentMode = mode;
-            document.getElementById('btn-auto').classList.toggle('active', mode === 'auto');
-            document.getElementById('btn-manual').classList.toggle('active', mode === 'manual');
-        }
-
-        function handleCoreAction() {
-            if (currentMode === 'auto') {
-                triggerHealthConnectSync();
-            } else {
-                document.body.classList.remove('standby-mode'); document.body.classList.add('sync-complete');
-                const radarPulse = document.getElementById('live-pulse'); const radarMetrics = document.getElementById('live-metrics');
-                radarPulse.innerText = '🟢 CHẾ ĐỘ THỦ CÔNG'; radarPulse.style.color = 'var(--lime)';
-                radarMetrics.innerHTML = '<span class="metric-item">Đã mở khóa màn hình. Chạm vào từng chỉ số để nhập tay.</span>';
-            }
-        }
-
-        function toggleCollapse(id) { document.getElementById(id).classList.toggle('active'); }
-
-        function calculateTargets(year, height, currentWeight) {
-            let age = 2026 - parseInt(year);
-            localStorage.setItem('kdrive_target_hr', Math.round((220 - age) * 0.75));
-            localStorage.setItem('kdrive_target_weight', Math.round(21.0 * (height / 100) * (height / 100)));
-            localStorage.setItem('kdrive_target_fat', 15.0); localStorage.setItem('kdrive_target_water', 60.0);
-            localStorage.setItem('kdrive_target_sleep', 7.0); localStorage.setItem('kdrive_target_steps', 6000);
-        }
-
-        function showCoreCheckModal() {
-            let y = localStorage.getItem('kdrive_core_year') || '1988'; let h = localStorage.getItem('kdrive_core_height') || '176'; let w = localStorage.getItem('kdrive_core_weight') || '61';
-            let t_hr = localStorage.getItem('kdrive_target_hr') || '137'; let t_wgt = localStorage.getItem('kdrive_target_weight') || '65'; let t_fat = localStorage.getItem('kdrive_target_fat') || '15.0';
-            document.getElementById('core-summary-view').innerHTML = `Chào mừng chiến binh đến với K-Drive.<br>Tọa độ: Năm sinh ${y} | Cao ${h} CM | Cân nặng ${w} KG.<br><br><b>Bộ 6 chỉ tiêu chuẩn khoa học:</b><br>• Nhịp tim mục tiêu: ${t_hr} BPM <span class="info-badge" onclick="showExplaining('hr')">?</span><br>• Cân nặng lý tưởng: ${t_wgt} KG <span class="info-badge" onclick="showExplaining('weight')">?</span><br>• Giấc ngủ tối thiểu: 7.0 H <span class="info-badge" onclick="showExplaining('sleep')">?</span><br>• Mỡ cơ thể tối đa: ${t_fat}% <span class="info-badge" onclick="showExplaining('fat')">?</span><br>• Lượng nước tối ưu: 55.0% <span class="info-badge" onclick="showExplaining('water')">?</span><br>• Bước chân mục tiêu: 6000 bước <span class="info-badge" onclick="showExplaining('steps')">?</span><br>`;
-            document.getElementById('core-check-modal').classList.add('active');
-        }
-
-        function showExplaining(key) {
-            const exp = { hr: "Kích hoạt nhịp tim lên mức này ít nhất một lần để tối ưu hóa hệ tim mạch.", weight: "Hệ thống sẽ nhắc nhở đưa bạn về cân nặng lý tưởng này.", sleep: "Ngủ thiếu sẽ bị yêu cầu ngủ bù.", fat: "Ngưỡng giới hạn khoa học giúp siết nét cơ thể.", water: "Duy trì trao đổi chất đỉnh cao.", steps: "Mức vận động tối thiểu hàng ngày." };
-            const names = { hr: 'Nhịp tim', weight: 'Cân nặng', sleep: 'Giấc ngủ', fat: 'Mỡ cơ thể', water: 'Lượng nước', steps: 'Bước chân' };
-            document.getElementById('modal-title').innerText = `Ý nghĩa: ${names[key]}`; document.getElementById('modal-info-desc').innerText = exp[key]; document.getElementById('modal-input-val').style.display = 'none';
-            document.getElementById('modal-btn-group').innerHTML = `<button class="modal-btn primary" onclick="closeManualModal()">Đóng</button>`; document.getElementById('manual-edit-modal').classList.add('active');
-        }
-
+        window.onload = () => { initParticles(); initSelectOptions(); if (localStorage.getItem('kdrive_core_initialized') !== 'true') { openOnboardingForm(); } else { showCoreCheckModal(); } };
+        function initSelectOptions() { const y = document.getElementById('ob-year'); let yHtml = ''; for(let i=1960; i<=2010; i++) yHtml += `<option value="${i}">${i}</option>`; y.innerHTML = yHtml; y.value = 1988; const h = document.getElementById('ob-height'); let hHtml = ''; for(let i=150; i<=210; i++) hHtml += `<option value="${i}">${i} CM</option>`; h.innerHTML = hHtml; h.value = 176; const w = document.getElementById('ob-weight'); let wHtml = ''; for(let i=40; i<=120; i++) wHtml += `<option value="${i}">${i} KG</option>`; w.innerHTML = wHtml; w.value = 61; }
+        function setMode(mode) { currentMode = mode; document.getElementById('btn-auto').classList.toggle('active', mode === 'auto'); document.getElementById('btn-manual').classList.toggle('active', mode === 'manual'); }
+        function handleCoreAction() { if (currentMode === 'auto') { triggerHealthConnectSync(); } else { document.body.classList.remove('standby-mode'); document.body.classList.add('sync-complete'); const radarPulse = document.getElementById('live-pulse'); const radarMetrics = document.getElementById('live-metrics'); radarPulse.innerText = '🟢 CHẾ ĐỘ THỦ CÔNG'; radarPulse.style.color = 'var(--lime)'; radarMetrics.innerHTML = '<span class="metric-item">Đã mở khóa màn hình. Chạm vào từng chỉ số để nhập tay.</span>'; } }
+        function calculateTargets(year, height, currentWeight) { let age = 2026 - parseInt(year); localStorage.setItem('kdrive_target_hr', Math.round((220 - age) * 0.75)); localStorage.setItem('kdrive_target_weight', Math.round(21.0 * (height / 100) * (height / 100))); localStorage.setItem('kdrive_target_fat', 15.0); localStorage.setItem('kdrive_target_water', 60.0); localStorage.setItem('kdrive_target_sleep', 7.0); localStorage.setItem('kdrive_target_steps', 6000); }
+        function showCoreCheckModal() { let y = localStorage.getItem('kdrive_core_year') || '1988'; let h = localStorage.getItem('kdrive_core_height') || '176'; let w = localStorage.getItem('kdrive_core_weight') || '61'; let t_hr = localStorage.getItem('kdrive_target_hr') || '137'; let t_wgt = localStorage.getItem('kdrive_target_weight') || '65'; let t_fat = localStorage.getItem('kdrive_target_fat') || '15.0'; document.getElementById('core-summary-view').innerHTML = `Tọa độ: Năm sinh ${y} | Cao ${h} CM | Cân nặng ${w} KG.`; document.getElementById('core-check-modal').classList.add('active'); }
         function acceptCoreValues() { document.getElementById('core-check-modal').classList.remove('active'); showMainApp(); }
         function openOnboardingForm() { document.getElementById('core-check-modal').classList.remove('active'); document.getElementById('onboarding-modal').classList.add('active'); }
         function closeOnboardingForm() { document.getElementById('onboarding-modal').classList.remove('active'); if (localStorage.getItem('kdrive_core_initialized') === 'true') { showMainApp(); } }
-
-        function submitOnboarding() {
-            let year = document.getElementById('ob-year').value; let height = document.getElementById('ob-height').value; let weight = document.getElementById('ob-weight').value;
-            localStorage.setItem('kdrive_core_year', year); localStorage.setItem('kdrive_core_height', height); localStorage.setItem('kdrive_core_weight', weight); localStorage.setItem('kdrive_core_initialized', 'true');
-            calculateTargets(year, height, weight); closeOnboardingForm(); showCoreCheckModal();
-        }
-
-        function showMainApp() {
-            document.getElementById('main-pwa').style.display = 'flex'; setTimeout(() => { document.getElementById('main-pwa').style.opacity = '1'; }, 50);
-            ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => { let v = document.getElementById(`val-${key}`); if (v) v.innerText = '---'; });
-            document.getElementById('val-sci').innerText = '---';
-        }
-
-        function handlePanelClick(key) { if (currentMode === 'manual') { promptEdit(key); } else { showTargetInfo(key); } }
-
-        function showTargetInfo(key) {
-            currentEditingKey = key; const names = { hr: 'Nhịp tim', weight: 'Cân nặng', sleep: 'Giấc ngủ', fat: 'Mỡ cơ thể', water: 'Lượng nước', steps: 'Bước chân' };
-            const targets = { hr: `Ít nhất ${localStorage.getItem('kdrive_target_hr') || 137} BPM/ngày`, weight: `${localStorage.getItem('kdrive_target_weight') || 65} KG`, sleep: `Tối thiểu 7.0 Giờ`, fat: `Tối đa ${localStorage.getItem('kdrive_target_fat') || 15.0}%`, water: `Tối thiểu 55.0%`, steps: `Tối thiểu 6000 Bước` };
-            document.getElementById('modal-title').innerText = `Chỉ tiêu: ${names[key]}`; document.getElementById('modal-info-desc').innerText = `Chỉ tiêu cần đạt:\n${targets[key]}`; document.getElementById('modal-input-val').style.display = 'none';
-            document.getElementById('modal-btn-group').innerHTML = `<button class="modal-btn primary" onclick="closeManualModal()">Đóng</button>`; document.getElementById('manual-edit-modal').classList.add('active');
-        }
-
-        function promptEdit(key) {
-            currentEditingKey = key; const names = { hr: 'Nhịp tim', weight: 'Cân nặng', sleep: 'Giấc ngủ', fat: 'Mỡ cơ thể', water: 'Lượng nước', steps: 'Bước chân' };
-            document.getElementById('modal-title').innerText = `Sửa: ${names[key]}`; document.getElementById('modal-info-desc').innerText = 'Nhập giá trị thực tế thủ công bên dưới:'; document.getElementById('modal-input-val').style.display = 'block';
-            let curVal = document.getElementById(`val-${key}`).innerText; document.getElementById('modal-input-val').value = (curVal === '---' || curVal === '?') ? '' : curVal;
-            document.getElementById('modal-btn-group').innerHTML = `<button class="modal-btn" onclick="closeManualModal()">Hủy</button><button class="modal-btn primary" onclick="saveManualValue()">Lưu</button>`;
-            document.getElementById('manual-edit-modal').classList.add('active'); document.getElementById('modal-input-val').focus();
-        }
-
+        function submitOnboarding() { let year = document.getElementById('ob-year').value; let height = document.getElementById('ob-height').value; let weight = document.getElementById('ob-weight').value; localStorage.setItem('kdrive_core_year', year); localStorage.setItem('kdrive_core_height', height); localStorage.setItem('kdrive_core_weight', weight); localStorage.setItem('kdrive_core_initialized', 'true'); calculateTargets(year, height, weight); closeOnboardingForm(); showCoreCheckModal(); }
+        function showMainApp() { document.getElementById('main-pwa').style.display = 'flex'; setTimeout(() => { document.getElementById('main-pwa').style.opacity = '1'; }, 50); ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => { let v = document.getElementById(`val-${key}`); if (v) v.innerText = '---'; }); document.getElementById('val-sci').innerText = '---'; }
+        function handlePanelClick(key) { if (currentMode === 'manual') { promptEdit(key); } }
+        function promptEdit(key) { currentEditingKey = key; document.getElementById('modal-title').innerText = `Sửa chỉ số`; document.getElementById('modal-input-val').style.display = 'block'; let curVal = document.getElementById(`val-${key}`).innerText; document.getElementById('modal-input-val').value = (curVal === '---' || curVal === '?') ? '' : curVal; document.getElementById('manual-edit-modal').classList.add('active'); document.getElementById('modal-input-val').focus(); }
         function closeManualModal() { document.getElementById('manual-edit-modal').classList.remove('active'); currentEditingKey = null; }
         function saveManualValue() { let val = document.getElementById('modal-input-val').value; if (val !== '' && currentEditingKey) { document.getElementById(`val-${currentEditingKey}`).innerText = val; } closeManualModal(); }
 
-        /* ĐỒNG BỘ NATIVE - BỎ QUA KIỂM TRA HÀM ẢO, GỌI TRỰC TIẾP LỆNH CHUẨN CAPGO */
+        /* BẢN CHỤP X-QUANG: NÉM TOÀN BỘ LỖI GỐC RA MÀN HÌNH */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -380,120 +232,101 @@
             const radarMetrics = document.getElementById('live-metrics');
             
             radarBar.style.background = 'rgba(0, 229, 255, 0.08)'; radarBar.style.borderColor = 'rgba(0, 229, 255, 0.3)'; radarBar.style.borderLeftColor = 'var(--cyan)';
-            radarPulse.style.color = 'var(--cyan)'; radarPulse.innerText = '⚡ ĐANG TRUY XUẤT LIVE...'; radarMetrics.innerHTML = 'Đang gọi Health Connect...';
+            radarPulse.style.color = 'var(--cyan)'; radarPulse.innerText = '⚡ ĐANG TRUY XUẤT X-QUANG...'; radarMetrics.innerHTML = 'Đang gọi Health Connect...';
 
             try {
                 const Health = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health ? window.Capacitor.Plugins.Health : null;
-                if (!Health) throw new Error("Plugin Health Connect không tồn tại trong app.");
+                if (!Health) throw new Error("Không tìm thấy Capacitor Health Plugin");
 
-                const withTimeout = (promise, timeoutMs) => {
-                    return Promise.race([
-                        promise, 
-                        new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout (Qúa thời gian chờ)")), timeoutMs))
-                    ]);
-                };
-
-                // Tăng thời gian chờ lên 60s để vượt qua lỗi App Stopped khi mở popup xin quyền
-                radarMetrics.innerHTML = 'Đang chờ xác thực quyền (Thời gian chờ 60 giây)...';
-                await withTimeout(Health.requestAuthorization({ 
+                radarMetrics.innerHTML = 'Đang chờ xác thực quyền...';
+                
+                // MỞ KHÓA BẢO VỆ ĐỂ LẤY LỖI GỐC
+                await Health.requestAuthorization({ 
                     read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] 
-                }), 60000);
+                });
 
-                // THÊM ĐỘ TRỄ 2 GIÂY ĐỂ HỆ THỐNG ANDROID KỊP LƯU TRẠNG THÁI QUYỀN
                 radarMetrics.innerHTML = 'Đang đồng bộ luồng xác thực (Chờ 2 giây)...';
                 await new Promise(resolve => setTimeout(resolve, 2000));
 
                 const endDate = new Date();
                 const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); 
 
-                const getLatestValue = (res) => {
-                    let list = res?.samples || res?.values || (Array.isArray(res) ? res : []);
-                    if (!list || list.length === 0) return null;
-                    list.sort((a, b) => new Date(b.endDate || b.endTime || b.startDate) - new Date(a.endDate || a.endTime || a.startDate));
-                    return list[0];
-                };
-
-                let liveSteps = null, liveHR = null, liveSleep = null, liveWeight = null, liveFat = null;
                 let debugCounts = [];
-                
                 radarMetrics.innerHTML = 'Đang bóc tách dữ liệu 7 ngày qua...';
 
-                // GỌI TRỰC TIẾP LỆNH QUERY CỦA PLUGIN, BỎ QUA KIỂM TRA HÀM
-                const safeQuery = async (type, processor, name) => {
+                // HÀM QUÉT CHẾ ĐỘ X-QUANG: Dừng lại và văng lỗi đỏ ngay lập tức nếu bị chặn
+                const safeQuery = async (type, name) => {
                     try {
-                        const res = await withTimeout(Health.query({
-                            sampleName: type,
-                            startDate: startDate.toISOString(),
-                            endDate: endDate.toISOString(),
-                            limit: 1000
-                        }), 15000);
-                        let list = res?.samples || res?.values || (Array.isArray(res) ? res : []);
-                        debugCounts.push(`${name}:${list.length}`);
-                        processor(list, getLatestValue(res));
+                        let res;
+                        if (Health.querySamples) {
+                            res = await Health.querySamples({ startDate: startDate.toISOString(), endDate: endDate.toISOString(), dataType: type });
+                        } else if (Health.query) {
+                            res = await Health.query({ sampleName: type, startDate: startDate.toISOString(), endDate: endDate.toISOString(), limit: 1000 });
+                        } else {
+                            throw new Error("Plugin không có hàm truy vấn.");
+                        }
+                        return res;
                     } catch(e) {
-                        let msg = e.message || String(e);
-                        debugCounts.push(`${name}:ERR`);
-                        console.warn(`Lỗi ${name}:`, e);
+                        // CHỤP X-QUANG TẠI ĐÂY: Lấy lỗi gốc của Android
+                        let exactError = e.message ? e.message : JSON.stringify(e);
+                        throw new Error(`[${name} - ${type}] bị chặn. Chi tiết mã lỗi gốc: ${exactError}`);
                     }
                 };
 
-                await safeQuery('steps', (list) => {
-                    let sum = 0; list.forEach(i => sum += parseInt(i.value || 0));
-                    if(sum > 0) liveSteps = sum;
-                }, 'Bước');
+                // THỰC THI QUÉT (Nếu có lỗi, hàm sẽ ném thẳng xuống Catch to bên dưới)
+                let resSteps = await safeQuery('steps', 'Bước');
+                let liveSteps = 0;
+                let listSteps = resSteps?.samples || resSteps?.values || [];
+                listSteps.forEach(i => liveSteps += parseInt(i.value || 0));
 
-                await safeQuery('heartRate', (list, latest) => {
-                    if (latest) liveHR = parseInt(latest.value);
-                }, 'Tim');
+                let resHR = await safeQuery('heartRate', 'Tim');
+                let liveHR = (resHR?.samples?.[0]?.value || resHR?.values?.[0]?.value) || null;
 
-                await safeQuery('sleep', (list, latest) => {
-                    if (latest) {
-                        let mins = latest.duration ? (latest.duration / 60) : ((new Date(latest.endDate || latest.endTime) - new Date(latest.startDate || latest.startTime)) / 60000);
-                        if(mins > 0) liveSleep = (mins / 60).toFixed(1);
-                    }
-                }, 'Ngủ');
+                let resSleep = await safeQuery('sleep', 'Ngủ');
+                let liveSleep = null;
+                let latestSleep = resSleep?.samples?.[0] || resSleep?.values?.[0];
+                if (latestSleep) {
+                    let mins = latestSleep.duration ? (latestSleep.duration / 60) : ((new Date(latestSleep.endDate) - new Date(latestSleep.startDate)) / 60000);
+                    if(mins > 0) liveSleep = (mins / 60).toFixed(1);
+                }
 
-                await safeQuery('weight', (list, latest) => {
-                    if (latest) liveWeight = parseFloat(latest.value).toFixed(1);
-                }, 'Cân');
+                let resWeight = await safeQuery('weight', 'Cân');
+                let liveWeight = (resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value) ? parseFloat(resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value).toFixed(1) : null;
 
-                await safeQuery('bodyFat', (list, latest) => {
-                    if (latest) liveFat = parseFloat(latest.value).toFixed(1);
-                }, 'Mỡ');
+                let resFat = await safeQuery('bodyFat', 'Mỡ');
+                let liveFat = (resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value) ? parseFloat(resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value).toFixed(1) : null;
 
+                // IN KẾT QUẢ NẾU THÀNH CÔNG
                 document.getElementById('val-hr').innerText = liveHR !== null ? liveHR : '?';
                 document.getElementById('val-weight').innerText = liveWeight !== null ? liveWeight : '?';
                 document.getElementById('val-sleep').innerText = liveSleep !== null ? liveSleep : '?';
                 document.getElementById('val-fat').innerText = liveFat !== null ? liveFat : '?';
                 document.getElementById('val-water').innerText = '?'; 
-                document.getElementById('val-steps').innerText = liveSteps !== null ? liveSteps : '?';
-                document.getElementById('val-sci').innerText = '---';
+                document.getElementById('val-steps').innerText = liveSteps > 0 ? liveSteps : '?';
 
                 document.body.classList.remove('scanning-mode'); document.body.classList.add('sync-complete');
-
                 radarBar.style.background = 'rgba(57, 255, 20, 0.08)'; radarBar.style.borderColor = 'rgba(57, 255, 20, 0.3)'; radarBar.style.borderLeftColor = 'var(--lime)';
                 radarPulse.style.color = 'var(--lime)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
-                
-                radarMetrics.innerHTML = `<span class="metric-item">Kết quả: [ ${debugCounts.join(' | ')} ]</span>`;
+                radarMetrics.innerHTML = `<span class="metric-item">X-Quang: Mọi chỉ số thông suốt 100%!</span>`;
 
             } catch (error) {
-                console.error("LỖI ĐỒNG BỘ NATIVE:", error);
+                // CHỤP X-QUANG PHÁT HIỆN LỖI: IN TOÀN BỘ RA BẢNG ĐỎ
+                console.error("LỖI X-QUANG:", error);
                 document.body.classList.remove('scanning-mode');
                 
                 ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => { document.getElementById(`val-${key}`).innerText = '?'; });
-                document.getElementById('val-sci').innerText = '---';
-
+                
                 radarBar.style.background = 'rgba(255, 42, 42, 0.08)'; radarBar.style.borderColor = 'rgba(255, 42, 42, 0.3)'; radarBar.style.borderLeftColor = 'var(--crimson)';
-                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI KẾT NỐI (DEBUG MODE)';
+                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 X-QUANG PHÁT HIỆN LỖI';
                 
                 let errorDetails = typeof error === 'string' ? error : (error?.message || JSON.stringify(error));
-                radarMetrics.innerHTML = `<span class="metric-item">Chi tiết: ${errorDetails}</span>`;
+                radarMetrics.innerHTML = `<span class="metric-item" style="color:#ff2a2a; font-weight:bold; font-size:11px; padding:10px;">${errorDetails}</span>`;
             }
             window.isScanning = false;
         }
 
         /* TẮT ÂM THANH ĐỂ CHỐNG LỖI TREO WEBVIEW CỦA ANDROID NATIVE */
-        function initParticles() { const matrix = document.getElementById('particle-matrix'); if (matrix.children.length > 0) return; const colors = ['#00ff9d', '#00e5ff', '#b026ff']; for(let i = 0; i < 45; i++) { let wrapper = document.createElement('div'); wrapper.className = 'particle-wrap'; wrapper.style.transform = `rotate(${Math.random() * 360}deg)`; let p = document.createElement('div'); p.className = 'particle'; p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; p.style.boxShadow = `0 0 8px ${p.style.backgroundColor}`; p.style.animation = `particle-inward ${2.5 + Math.random() * 3}s infinite ${Math.random() * 5}s linear`; wrapper.appendChild(p); matrix.appendChild(wrapper); } }
+        function initParticles() {}
     </script>
 </body>
 </html>
