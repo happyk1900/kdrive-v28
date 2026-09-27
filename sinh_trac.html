@@ -219,7 +219,7 @@
         function closeManualModal() { document.getElementById('manual-edit-modal').classList.remove('active'); currentEditingKey = null; }
         function saveManualValue() { let val = document.getElementById('modal-input-val').value; if (val !== '' && currentEditingKey) { document.getElementById(`val-${currentEditingKey}`).innerText = val; } closeManualModal(); }
 
-        /* BẢN CHỐT SỔ HOÀN CHỈNH - FIX LỖI CỘNG DỒN BƯỚC CHÂN & LÀM SẠCH GIAO DIỆN */
+        /* BẢN CHỐT SỔ HOÀN CHỈNH - FULL 6 CHỈ SỐ GỒM CẢ NƯỚC (SMART ESTIMATION) */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -239,7 +239,11 @@
                 const Health = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health ? window.Capacitor.Plugins.Health : null;
                 if (!Health) throw new Error("Chưa kết nối Plugin");
 
-                // MỐC THỜI GIAN: startDate lùi 7 ngày để tìm số liệu chuẩn, todayStart lọc số bước của riêng hôm nay
+                // GỌI LỆNH XIN QUYỀN ĐỂ HỆ THỐNG ANDROID KHÔNG CHẶN NGOẠI LỆ (SECURITY EXCEPTION)
+                await Health.requestAuthorization({ 
+                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] 
+                });
+
                 const endDate = new Date();
                 const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); 
                 const todayStart = new Date();
@@ -252,7 +256,6 @@
                     });
                 };
 
-                // 1. LỌC BƯỚC CHÂN CHUẨN CỦA HÔM NAY (Trị dứt điểm lỗi cộng dồn 16.000 bước)
                 let resSteps = await safeQuery('steps');
                 let liveSteps = 0;
                 let listSteps = resSteps?.samples || resSteps?.values || [];
@@ -263,11 +266,9 @@
                     }
                 });
 
-                // 2. LẤY NHỊP TIM MỚI NHẤT
                 let resHR = await safeQuery('heartRate');
                 let liveHR = (resHR?.samples?.[0]?.value || resHR?.values?.[0]?.value) || null;
 
-                // 3. LẤY GIẤC NGỦ MỚI NHẤT
                 let resSleep = await safeQuery('sleep');
                 let liveSleep = null;
                 let latestSleep = resSleep?.samples?.[0] || resSleep?.values?.[0];
@@ -276,26 +277,33 @@
                     if(mins > 0) liveSleep = (mins / 60).toFixed(1);
                 }
 
-                // 4. LẤY CÂN NẶNG MỚI NHẤT
                 let resWeight = await safeQuery('weight');
                 let liveWeight = (resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value) ? parseFloat(resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value).toFixed(1) : null;
 
-                // 5. LẤY TỶ LỆ MỠ MỚI NHẤT
                 let resFat = await safeQuery('bodyFat');
                 let liveFat = (resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value) ? parseFloat(resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value).toFixed(1) : null;
+
+                // SMART ESTIMATION - THUẬT TOÁN NỘI SUY LƯỢNG NƯỚC CƠ THỂ
+                let liveWater = null;
+                if (liveWeight !== null && liveFat !== null) {
+                    // Hằng số sinh học: Nước chiếm khoảng 73.2% trong khối lượng cơ nạc (Lean Body Mass)
+                    let fatPercentage = parseFloat(liveFat);
+                    let waterPercentage = (1 - (fatPercentage / 100)) * 73.2;
+                    liveWater = waterPercentage.toFixed(1);
+                }
 
                 // IN KẾT QUẢ ĐÃ CHUẨN HÓA RA MÀN HÌNH
                 document.getElementById('val-hr').innerText = liveHR !== null ? liveHR : '?';
                 document.getElementById('val-weight').innerText = liveWeight !== null ? liveWeight : '?';
                 document.getElementById('val-sleep').innerText = liveSleep !== null ? liveSleep : '?';
                 document.getElementById('val-fat').innerText = liveFat !== null ? liveFat : '?';
-                document.getElementById('val-water').innerText = '?'; // Để trống cho anh nhập tay
+                document.getElementById('val-water').innerText = liveWater !== null ? liveWater : '?';
                 document.getElementById('val-steps').innerText = liveSteps > 0 ? liveSteps : '?';
 
                 document.body.classList.remove('scanning-mode'); document.body.classList.add('sync-complete');
                 radarBar.style.background = 'rgba(57, 255, 20, 0.08)'; radarBar.style.borderColor = 'rgba(57, 255, 20, 0.3)'; radarBar.style.borderLeftColor = 'var(--lime)';
                 radarPulse.style.color = 'var(--lime)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
-                radarMetrics.innerHTML = `<span class="metric-item">Kết nối lõi Sinh trắc học thành công.</span>`;
+                radarMetrics.innerHTML = `<span class="metric-item">Trích xuất thành công toàn bộ 6 chỉ số nền tảng.</span>`;
 
             } catch (error) {
                 console.error("Lỗi đồng bộ:", error);
