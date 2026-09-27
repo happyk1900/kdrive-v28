@@ -368,7 +368,7 @@
         function closeManualModal() { document.getElementById('manual-edit-modal').classList.remove('active'); currentEditingKey = null; }
         function saveManualValue() { let val = document.getElementById('modal-input-val').value; if (val !== '' && currentEditingKey) { document.getElementById(`val-${currentEditingKey}`).innerText = val; } closeManualModal(); }
 
-        /* ĐỒNG BỘ NATIVE - BẮT TẬN TAY LỖI, SỬA fatPercentage -> bodyFat */
+        /* ĐỒNG BỘ NATIVE - GỠ BỎ HOÀN TOÀN 'hydration' ĐỂ KHÔNG SẬP HỆ THỐNG */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -396,10 +396,10 @@
                     ]);
                 };
 
-                // FIX LỖI: Đã thay fatPercentage thành bodyFat
+                // ĐÃ BỎ 'hydration' RA KHỎI DANH SÁCH XIN QUYỀN VÌ PLUGIN KHÔNG HỖ TRỢ
                 radarMetrics.innerHTML = 'Đang xác thực quyền truy cập...';
                 await withTimeout(Health.requestAuthorization({ 
-                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat', 'hydration'] 
+                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] 
                 }));
 
                 const endDate = new Date();
@@ -444,16 +444,13 @@
                     let latest = getLatestValue(res); if (latest) liveWeight = parseFloat(latest.value).toFixed(1);
                 } catch(e) { console.warn("Lỗi Weight:", e); }
 
-                // FIX LỖI: dataType query cũng chuyển về chuẩn bodyFat
                 try {
                     const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'bodyFat' }));
                     let latest = getLatestValue(res); if (latest) liveFat = parseFloat(latest.value).toFixed(1);
                 } catch(e) { console.warn("Lỗi Fat:", e); }
 
-                try {
-                    const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'hydration' }));
-                    let latest = getLatestValue(res); if (latest) liveWater = parseFloat(latest.value).toFixed(1);
-                } catch(e) { console.warn("Lỗi Water:", e); }
+                // LƯỢNG NƯỚC: Do plugin không hỗ trợ truy xuất, hệ thống sẽ gán null để hiển thị '?' ép nhập tay
+                liveWater = null; 
 
                 // XUẤT GIAO DIỆN
                 document.getElementById('val-hr').innerText = liveHR !== null ? liveHR : '?';
@@ -468,7 +465,7 @@
 
                 radarBar.style.background = 'rgba(57, 255, 20, 0.08)'; radarBar.style.borderColor = 'rgba(57, 255, 20, 0.3)'; radarBar.style.borderLeftColor = 'var(--lime)';
                 radarPulse.style.color = 'var(--lime)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
-                radarMetrics.innerHTML = '<span class="metric-item">Đã cập nhật dữ liệu sinh trắc học thời gian thực từ 00:00:00 hôm nay.</span>';
+                radarMetrics.innerHTML = '<span class="metric-item">Đã cập nhật dữ liệu. (Lượng nước vui lòng nhập thủ công).</span>';
 
             } catch (error) {
                 console.error("LỖI ĐỒNG BỘ NATIVE:", error);
