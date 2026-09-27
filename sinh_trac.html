@@ -294,14 +294,13 @@
             currentMode = mode;
             document.getElementById('btn-auto').classList.toggle('active', mode === 'auto');
             document.getElementById('btn-manual').classList.toggle('active', mode === 'manual');
-            playBeep();
         }
 
         function handleCoreAction() {
             if (currentMode === 'auto') {
                 triggerHealthConnectSync();
             } else {
-                document.body.classList.remove('standby-mode'); document.body.classList.add('sync-complete'); playBeep();
+                document.body.classList.remove('standby-mode'); document.body.classList.add('sync-complete');
                 const radarPulse = document.getElementById('live-pulse'); const radarMetrics = document.getElementById('live-metrics');
                 radarPulse.innerText = '🟢 CHẾ ĐỘ THỦ CÔNG'; radarPulse.style.color = 'var(--lime)';
                 radarMetrics.innerHTML = '<span class="metric-item">Đã mở khóa màn hình. Chạm vào từng chỉ số để nhập tay.</span>';
@@ -339,7 +338,7 @@
         function submitOnboarding() {
             let year = document.getElementById('ob-year').value; let height = document.getElementById('ob-height').value; let weight = document.getElementById('ob-weight').value;
             localStorage.setItem('kdrive_core_year', year); localStorage.setItem('kdrive_core_height', height); localStorage.setItem('kdrive_core_weight', weight); localStorage.setItem('kdrive_core_initialized', 'true');
-            calculateTargets(year, height, weight); playFusionSound(); closeOnboardingForm(); showCoreCheckModal();
+            calculateTargets(year, height, weight); closeOnboardingForm(); showCoreCheckModal();
         }
 
         function showMainApp() {
@@ -368,7 +367,7 @@
         function closeManualModal() { document.getElementById('manual-edit-modal').classList.remove('active'); currentEditingKey = null; }
         function saveManualValue() { let val = document.getElementById('modal-input-val').value; if (val !== '' && currentEditingKey) { document.getElementById(`val-${currentEditingKey}`).innerText = val; } closeManualModal(); }
 
-        /* ĐỒNG BỘ NATIVE - BẢN KIỂM TRA DỮ LIỆU TRONG 7 NGÀY GẦN NHẤT */
+        /* ĐỒNG BỘ NATIVE - KẺ HỦY DIỆT LỖI (BULLETPROOF) */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -381,33 +380,44 @@
             const radarMetrics = document.getElementById('live-metrics');
             
             radarBar.style.background = 'rgba(0, 229, 255, 0.08)'; radarBar.style.borderColor = 'rgba(0, 229, 255, 0.3)'; radarBar.style.borderLeftColor = 'var(--cyan)';
-            radarPulse.style.color = 'var(--cyan)'; radarPulse.innerText = '⚡ ĐANG TRUY XUẤT LIVE...'; radarMetrics.innerHTML = 'Khởi tạo luồng quét dữ liệu 7 ngày qua...';
+            radarPulse.style.color = 'var(--cyan)'; radarPulse.innerText = '⚡ ĐANG TRUY XUẤT LIVE...'; radarMetrics.innerHTML = 'Đang gọi Health Connect...';
 
-            playChargeSound(); if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
+            if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
 
             try {
                 const Health = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health ? window.Capacitor.Plugins.Health : null;
                 if (!Health) throw new Error("Plugin Health Connect không tồn tại trong app.");
 
-                const withTimeout = (promise, timeoutMs = 10000) => {
+                const withTimeout = (promise, timeoutMs) => {
                     return Promise.race([
                         promise, 
-                        new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout (Quá thời gian chờ API)")), timeoutMs))
+                        new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout (Qúa thời gian chờ)")), timeoutMs))
                     ]);
                 };
 
-                radarMetrics.innerHTML = 'Đang xác thực quyền truy cập...';
+                radarMetrics.innerHTML = 'Đang chờ anh cấp quyền (Thời gian chờ 60 giây)...';
                 await withTimeout(Health.requestAuthorization({ 
                     read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] 
-                }));
+                }), 60000);
 
                 const endDate = new Date();
                 const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); 
-                const queryOptions = { startDate: startDate.toISOString(), endDate: endDate.toISOString() };
-                const sleepQueryOptions = { startDate: startDate.toISOString(), endDate: endDate.toISOString() };
+
+                // TUYỆT CHIÊU: Bắn tất cả các tham số và tên hàm mà các plugin Health thường dùng
+                const executeQuery = async (type) => {
+                    let opts = { 
+                        dataType: type, sampleName: type, sampleType: type,
+                        startDate: startDate.toISOString(), endDate: endDate.toISOString(),
+                        startTime: startDate.toISOString(), endTime: endDate.toISOString(),
+                        limit: 100
+                    };
+                    if (Health.query) return await Health.query(opts);
+                    if (Health.querySamples) return await Health.querySamples(opts);
+                    throw new Error("NoFunc (Không tìm thấy hàm query trong plugin)");
+                };
 
                 const getLatestValue = (res) => {
-                    let list = res.samples || res.values || (Array.isArray(res) ? res : []);
+                    let list = res?.samples || res?.values || (Array.isArray(res) ? res : []);
                     if (!list || list.length === 0) return null;
                     list.sort((a, b) => new Date(b.endDate || b.endTime || b.startDate) - new Date(a.endDate || a.endTime || a.startDate));
                     return list[0];
@@ -416,66 +426,63 @@
                 let liveSteps = null, liveHR = null, liveSleep = null, liveWeight = null, liveFat = null;
                 let debugCounts = [];
                 
-                radarMetrics.innerHTML = 'Đang bóc tách dữ liệu...';
+                radarMetrics.innerHTML = 'Đang bóc tách dữ liệu 7 ngày qua...';
 
-                try {
-                    const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'steps' }));
-                    let list = res.samples || res.values || (Array.isArray(res) ? res : []);
-                    debugCounts.push(`Bước:${list.length}`);
+                const safeQuery = async (type, processor, name) => {
+                    try {
+                        const res = await withTimeout(executeQuery(type), 15000);
+                        let list = res?.samples || res?.values || (Array.isArray(res) ? res : []);
+                        debugCounts.push(`${name}:${list.length}`);
+                        processor(list, getLatestValue(res));
+                    } catch(e) {
+                        let msg = e.message || String(e);
+                        debugCounts.push(`${name}:${msg.substring(0,8)}`);
+                        console.warn(`Lỗi ${name}:`, e);
+                    }
+                };
+
+                await safeQuery('steps', (list) => {
                     let sum = 0; list.forEach(i => sum += parseInt(i.value || 0));
                     if(sum > 0) liveSteps = sum;
-                } catch(e) { console.warn("Lỗi Steps:", e); debugCounts.push(`Bước:ERR`); }
+                }, 'Bước');
 
-                try {
-                    const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'heartRate' }));
-                    let list = res.samples || res.values || (Array.isArray(res) ? res : []);
-                    debugCounts.push(`Tim:${list.length}`);
-                    let latest = getLatestValue(res); if (latest) liveHR = parseInt(latest.value);
-                } catch(e) { console.warn("Lỗi HR:", e); debugCounts.push(`Tim:ERR`); }
+                await safeQuery('heartRate', (list, latest) => {
+                    if (latest) liveHR = parseInt(latest.value);
+                }, 'Tim');
 
-                try {
-                    const res = await withTimeout(Health.querySamples({ ...sleepQueryOptions, dataType: 'sleep' }));
-                    let list = res.samples || res.values || (Array.isArray(res) ? res : []);
-                    debugCounts.push(`Ngủ:${list.length}`);
-                    let latest = getLatestValue(res);
+                await safeQuery('sleep', (list, latest) => {
                     if (latest) {
                         let mins = latest.duration ? (latest.duration / 60) : ((new Date(latest.endDate || latest.endTime) - new Date(latest.startDate || latest.startTime)) / 60000);
                         if(mins > 0) liveSleep = (mins / 60).toFixed(1);
                     }
-                } catch(e) { console.warn("Lỗi Sleep:", e); debugCounts.push(`Ngủ:ERR`); }
+                }, 'Ngủ');
 
-                try {
-                    const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'weight' }));
-                    let list = res.samples || res.values || (Array.isArray(res) ? res : []);
-                    debugCounts.push(`Cân:${list.length}`);
-                    let latest = getLatestValue(res); if (latest) liveWeight = parseFloat(latest.value).toFixed(1);
-                } catch(e) { console.warn("Lỗi Weight:", e); debugCounts.push(`Cân:ERR`); }
+                await safeQuery('weight', (list, latest) => {
+                    if (latest) liveWeight = parseFloat(latest.value).toFixed(1);
+                }, 'Cân');
 
-                try {
-                    const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'bodyFat' }));
-                    let list = res.samples || res.values || (Array.isArray(res) ? res : []);
-                    debugCounts.push(`Mỡ:${list.length}`);
-                    let latest = getLatestValue(res); if (latest) liveFat = parseFloat(latest.value).toFixed(1);
-                } catch(e) { console.warn("Lỗi Fat:", e); debugCounts.push(`Mỡ:ERR`); }
+                await safeQuery('bodyFat', (list, latest) => {
+                    if (latest) liveFat = parseFloat(latest.value).toFixed(1);
+                }, 'Mỡ');
 
                 document.getElementById('val-hr').innerText = liveHR !== null ? liveHR : '?';
                 document.getElementById('val-weight').innerText = liveWeight !== null ? liveWeight : '?';
                 document.getElementById('val-sleep').innerText = liveSleep !== null ? liveSleep : '?';
                 document.getElementById('val-fat').innerText = liveFat !== null ? liveFat : '?';
-                document.getElementById('val-water').innerText = '?';
+                document.getElementById('val-water').innerText = '?'; 
                 document.getElementById('val-steps').innerText = liveSteps !== null ? liveSteps : '?';
                 document.getElementById('val-sci').innerText = '---';
 
-                stopChargeSound(); document.body.classList.remove('scanning-mode'); document.body.classList.add('sync-complete');
+                document.body.classList.remove('scanning-mode'); document.body.classList.add('sync-complete');
 
                 radarBar.style.background = 'rgba(57, 255, 20, 0.08)'; radarBar.style.borderColor = 'rgba(57, 255, 20, 0.3)'; radarBar.style.borderLeftColor = 'var(--lime)';
                 radarPulse.style.color = 'var(--lime)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
                 
-                radarMetrics.innerHTML = `<span class="metric-item">Kết quả 7 ngày: [ ${debugCounts.join(' | ')} ]</span>`;
+                radarMetrics.innerHTML = `<span class="metric-item">Kết quả: [ ${debugCounts.join(' | ')} ]</span>`;
 
             } catch (error) {
                 console.error("LỖI ĐỒNG BỘ NATIVE:", error);
-                stopChargeSound(); document.body.classList.remove('scanning-mode');
+                document.body.classList.remove('scanning-mode');
                 
                 ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => { document.getElementById(`val-${key}`).innerText = '?'; });
                 document.getElementById('val-sci').innerText = '---';
@@ -483,23 +490,14 @@
                 radarBar.style.background = 'rgba(255, 42, 42, 0.08)'; radarBar.style.borderColor = 'rgba(255, 42, 42, 0.3)'; radarBar.style.borderLeftColor = 'var(--crimson)';
                 radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI KẾT NỐI (DEBUG MODE)';
                 
-                let errorDetails = "";
-                if (typeof error === 'string') { errorDetails = error; } 
-                else if (error && error.message) { errorDetails = error.message; } 
-                else { errorDetails = JSON.stringify(error); }
-
-                radarMetrics.innerHTML = `<span class="metric-item">Chi tiết mã lỗi: ${errorDetails}</span>`;
+                let errorDetails = typeof error === 'string' ? error : (error?.message || JSON.stringify(error));
+                radarMetrics.innerHTML = `<span class="metric-item">Chi tiết: ${errorDetails}</span>`;
             }
             window.isScanning = false;
         }
 
-        /* ĐÃ TẮT ÂM THANH ĐỂ TRÁNH LỖI AAUDIO CRASH WEBVIEW */
+        /* TẮT ÂM THANH ĐỂ CHỐNG LỖI TREO WEBVIEW CỦA ANDROID NATIVE */
         function initParticles() { const matrix = document.getElementById('particle-matrix'); if (matrix.children.length > 0) return; const colors = ['#00ff9d', '#00e5ff', '#b026ff']; for(let i = 0; i < 45; i++) { let wrapper = document.createElement('div'); wrapper.className = 'particle-wrap'; wrapper.style.transform = `rotate(${Math.random() * 360}deg)`; let p = document.createElement('div'); p.className = 'particle'; p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; p.style.boxShadow = `0 0 8px ${p.style.backgroundColor}`; p.style.animation = `particle-inward ${2.5 + Math.random() * 3}s infinite ${Math.random() * 5}s linear`; wrapper.appendChild(p); matrix.appendChild(wrapper); } }
-        function initAudio() {}
-        function playBeep() {}
-        function playFusionSound() {}
-        function playChargeSound() {}
-        function stopChargeSound() {}
     </script>
 </body>
 </html>
