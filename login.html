@@ -25,23 +25,33 @@
     
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-        body { background-color: #010204; height: 100vh; height: 100dvh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; }
+        
+        /* HIỆU ỨNG LOAD TRANG ÊM ÁI */
+        body { 
+            background-color: #010204; height: 100vh; height: 100dvh; width: 100vw; 
+            display: flex; justify-content: center; align-items: center; margin: 0; 
+            overflow: hidden; font-family: 'Montserrat', sans-serif; 
+            opacity: 0; animation: fadeInBody 1.5s ease-in-out forwards;
+        }
+        @keyframes fadeInBody { to { opacity: 1; } }
+
         img, video { -webkit-user-drag: none; pointer-events: none; }
 
         .kdrive-image-wrapper { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; 
-            background: #010204; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            background: #010204; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 1.5s ease-in-out;
         }
         .kdrive-bg-target { 
             width: 100%; height: 100%; object-fit: contain; background-color: #010204; position: absolute; top: 0; left: 0; z-index: 2; 
-            opacity: 1; transition: opacity 0.5s ease-in-out; 
+            opacity: 1; transition: opacity 1.2s ease-in-out; 
         }
 
-        /* BẢNG CHỌN NGÔN NGỮ - TRẮNG MỜ (GLASSMORPHISM) */
+        /* BẢNG CHỌN NGÔN NGỮ - ĐÃ DỊCH XUỐNG DƯỚI ĐỂ LỘ LOGO K-DRIVE */
         .lang-gate-overlay {
             position: fixed; inset: 0; z-index: 999999; background: rgba(0, 0, 0, 0.4);
             display: flex; justify-content: center; align-items: center; 
-            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+            transition: opacity 1.2s ease-in-out, visibility 1.2s ease-in-out;
             opacity: 1; visibility: visible;
         }
         .lang-gate-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -51,7 +61,11 @@
             border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 14px; padding: 16px 12px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 15px rgba(255, 255, 255, 0.2); 
             text-align: center; color: #fff; z-index: 10; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            margin-top: 18vh; /* DỊCH XUỐNG DƯỚI 18% CHIỀU CAO MÀN HÌNH */
+            transition: transform 1s ease-in-out, opacity 1s ease-in-out;
         }
+        .lang-gate-overlay.hidden .lang-box { transform: translateY(20px); opacity: 0; }
+
         .lang-title-area { 
             font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 800; color: #ffffff; margin-bottom: 12px; letter-spacing: 0.5px; 
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
@@ -68,29 +82,30 @@
         .lang-cell.selected { border-color: #ffd700; background: rgba(255, 215, 0, 0.25); color: #fff; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
         
         .lang-footer-btns { display: flex; gap: 8px; }
-        .btn-close-lang { flex: 1; background: rgba(200, 0, 50, 0.4); border: 1px solid rgba(255, 100, 100, 0.5); color: #ffcccc; padding: 10px; border-radius: 6px; font-weight: 800; font-size: 10px; cursor: pointer; text-transform: uppercase; }
-        .btn-confirm-lang { flex: 1; background: rgba(255, 215, 0, 0.8); border: 1px solid #ffd700; color: #000; padding: 10px; border-radius: 6px; font-weight: 900; font-size: 10px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 10px rgba(255,215,0,0.4); }
+        .btn-close-lang { flex: 1; background: rgba(200, 0, 50, 0.4); border: 1px solid rgba(255, 100, 100, 0.5); color: #ffcccc; padding: 10px; border-radius: 6px; font-weight: 800; font-size: 10px; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn-confirm-lang { flex: 1; background: rgba(255, 215, 0, 0.8); border: 1px solid #ffd700; color: #000; padding: 10px; border-radius: 6px; font-weight: 900; font-size: 10px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 10px rgba(255,215,0,0.4); transition: 0.3s; }
 
         .gateway-container {
             position: relative; width: 85%; max-width: 270px; z-index: 10;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transform: scale(0.95); transition: opacity 1s ease, transform 1s ease;
+            opacity: 0; pointer-events: none; transform: translateY(15px); transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
+            margin-top: 15vh; /* Cân chỉnh nhẹ khung đăng nhập */
         }
-        .gateway-container.show-login { opacity: 1; pointer-events: auto; transform: scale(1); }
+        .gateway-container.show-login { opacity: 1; pointer-events: auto; transform: translateY(0); }
 
         /* NÚT GMAIL */
         .google-auth-btn-img {
             width: 100%; max-width: 170px; height: auto; cursor: pointer;
-            filter: grayscale(1) brightness(0.4); opacity: 0.3; pointer-events: none; transition: 0.5s ease;
+            filter: grayscale(1) brightness(0.4); opacity: 0.3; pointer-events: none; transition: 0.8s ease-in-out;
             position: relative; z-index: 999999;
         }
         .google-auth-btn-img.unlocked {
             opacity: 1; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.9));
-            animation: buttonBreathe 2.2s infinite ease-in-out; pointer-events: auto !important;
+            animation: buttonBreathe 2.5s infinite ease-in-out; pointer-events: auto !important;
         }
         @keyframes buttonBreathe {
             0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.5)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(0, 229, 255, 0.95)); }
+            50% { transform: scale(1.03); filter: drop-shadow(0 0 25px rgba(0, 229, 255, 0.95)); }
         }
 
         .terms-box-container {
@@ -101,34 +116,38 @@
         .terms-checkbox {
             appearance: none; -webkit-appearance: none; width: 16px; height: 16px;
             border: 1.5px solid #00e5ff; border-radius: 3px; background: rgba(0, 0, 0, 0.6); cursor: pointer; margin-top: 1px; flex-shrink: 0;
-            position: relative; pointer-events: auto;
+            position: relative; pointer-events: auto; transition: 0.3s;
         }
         .terms-checkbox:checked { background: #00e5ff; box-shadow: 0 0 10px #00e5ff; }
         .terms-checkbox:checked::after { content: '✔'; position: absolute; top: -2px; left: 2px; font-size: 10px; color: #000; font-weight: bold; }
         .terms-text { color: #b0e0e6; font-size: 9.5px; font-family: 'Montserrat', sans-serif; line-height: 1.35; }
-        .terms-link { color: #ffd700; text-decoration: underline; cursor: pointer; font-weight: 700; }
+        .terms-link { color: #ffd700; text-decoration: underline; cursor: pointer; font-weight: 700; transition: 0.2s; }
         
         #loginStatus { 
             margin-top: 10px; font-weight: 700; text-align: center; font-size: 9.5px; 
             color: #00e5ff; min-height: 40px; text-shadow: 0 0 8px rgba(0,229,255,0.6); 
             width: 100%; background: rgba(0,0,0,0.5); border-radius: 4px; padding: 5px;
-            word-wrap: break-word; line-height: 1.4;
+            word-wrap: break-word; line-height: 1.4; transition: opacity 0.5s;
         }
 
         .terms-modal-overlay {
             position: fixed; inset: 0; background: rgba(1, 2, 4, 0.92); backdrop-filter: blur(10px); z-index: 9999999;
-            display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.3s ease; padding: 15px;
+            display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.5s ease-in-out; padding: 15px;
         }
         .terms-modal-overlay.active { opacity: 1; visibility: visible; }
         .terms-modal-content {
             width: 100%; max-width: 350px; max-height: 85vh; overflow-y: auto;
             background: rgba(6, 14, 26, 0.97); border: 2px solid #00e5ff; border-radius: 12px; padding: 18px; color: #e0f7fa; font-size: 11px; line-height: 1.6;
+            transform: translateY(20px); opacity: 0; transition: 0.5s ease-in-out;
         }
-        .terms-close-btn { width: 100%; margin-top: 14px; padding: 10px; background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #fff; font-weight: 800; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
+        .terms-modal-overlay.active .terms-modal-content { transform: translateY(0); opacity: 1; }
+        .terms-close-btn { width: 100%; margin-top: 14px; padding: 10px; background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #fff; font-weight: 800; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
 
+        /* VIDEO HIỆN LÊN ÊM ÁI */
         #successVideo { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; 
             object-fit: cover; z-index: 9999999; display: none; background: #000; 
+            opacity: 0; transition: opacity 1.5s ease-in-out;
         }
     </style>
 </head>
@@ -137,7 +156,7 @@
     <audio id="bgMusic" src="https://raw.githubusercontent.com/happyk1900/HOSOGOC/main/K_Drive_Initialized.mp3" preload="auto" loop></audio>
     <video id="successVideo" src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/no%20audio%20-%20kich%20hoat%20loi%20trung%20tam.mp4" autoplay muted playsinline webkit-playsinline style="pointer-events: none;"></video>
 
-    <!-- BẢNG CHỌN 12 NGÔN NGỮ QUỐC TẾ (ĐÃ BỎ ALIEN & ĐỔI TRẮNG MỜ) -->
+    <!-- BẢNG CHỌN NGÔN NGỮ -->
     <div class="lang-gate-overlay" id="langGateModal">
         <div class="lang-box">
             <div class="lang-title-area">CHỌN NGÔN NGỮ QUỐC TẾ</div>
@@ -171,7 +190,7 @@
         </div>
     </div>
 
-    <div class="kdrive-image-wrapper">
+    <div class="kdrive-image-wrapper" id="mainWrapper">
         <img id="bgImageElement" src="https://github.com/happyk1900/Kai-Ripe/blob/main/k-ngon%20ngu.png?raw=true" class="kdrive-bg-target" alt="BG">
         <div class="gateway-container" id="loginPanelContainer">
             <img src="https://github.com/happyk1900/Kai-Ripe/blob/main/gmail%20login.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="window.triggerNativeLogin()" alt="Google Login">
@@ -211,47 +230,56 @@
         window.triggerNativeLogin = async function() {
             const checkbox = document.getElementById('termsCheck');
             if (!checkbox.checked) {
-                statusEl.style.color = "#ff3333";
-                statusEl.innerText = "⚠️ BẠN CHƯA TÍCH ĐỒNG Ý ĐIỀU KHOẢN!";
+                statusEl.style.opacity = '0';
+                setTimeout(() => {
+                    statusEl.style.color = "#ff3333";
+                    statusEl.innerText = "⚠️ BẠN CHƯA TÍCH ĐỒNG Ý ĐIỀU KHOẢN!";
+                    statusEl.style.opacity = '1';
+                }, 300);
                 return;
             }
 
-            statusEl.style.color = "#ffff00";
-            statusEl.innerHTML = "1. Nhận lệnh Click<br>2. Đang mở bảng Google...";
+            statusEl.style.opacity = '0';
+            setTimeout(() => {
+                statusEl.style.color = "#ffff00";
+                statusEl.innerHTML = "Đang mở cổng vệ tinh...";
+                statusEl.style.opacity = '1';
+            }, 300);
 
             try {
-                if (!window.GoogleAuthPlugin) {
-                    throw new Error("Plugin GoogleAuth chưa sẵn sàng.");
-                }
+                if (!window.GoogleAuthPlugin) { throw new Error("Plugin GoogleAuth chưa sẵn sàng."); }
                 
                 const googleUser = await window.GoogleAuthPlugin.signIn();
-                statusEl.innerHTML += "<br>3. Đã xác thực thành công!";
                 
-                if (!googleUser) {
-                    throw new Error("Tài khoản trả về bị rỗng.");
-                }
+                if (!googleUser) { throw new Error("Tài khoản bị từ chối."); }
 
                 statusEl.style.color = "#00ffcc";
-                statusEl.innerText = "✅ ĐĂNG NHẬP THÀNH CÔNG!";
+                statusEl.innerText = "✅ KHỚP LỆNH THÀNH CÔNG!";
                 
                 sessionStorage.setItem('kdrive_session', 'active');
                 localStorage.setItem('kdrive_logged_in_user', googleUser.name || googleUser.givenName || 'Chiến binh K-Drive');
                 localStorage.setItem('kdrive_user_email', googleUser.email || '');
                 
+                // HIỆU ỨNG CHUYỂN CẢNH MƯỢT MÀ SANG VIDEO
+                const mainWrapper = document.getElementById('mainWrapper');
                 const successVid = document.getElementById('successVideo');
-                if(successVid) {
-                    successVid.style.display = 'block'; 
-                    successVid.play().then(() => { 
-                        successVid.onended = () => { window.location.href = 'LucChien.html'; };
-                    }).catch(err => { window.location.href = 'LucChien.html'; });
-                } else { 
-                    setTimeout(() => { window.location.href = 'LucChien.html'; }, 500);
-                }
+                
+                setTimeout(() => {
+                    mainWrapper.style.opacity = '0'; // Làm mờ từ từ toàn bộ nền
+                    if(successVid) {
+                        successVid.style.display = 'block'; 
+                        setTimeout(() => { successVid.style.opacity = '1'; }, 100); // Video mờ dần hiện lên
+                        successVid.play().then(() => { 
+                            successVid.onended = () => { window.location.href = 'LucChien.html'; };
+                        }).catch(err => { window.location.href = 'LucChien.html'; });
+                    } else { 
+                        setTimeout(() => { window.location.href = 'LucChien.html'; }, 1000);
+                    }
+                }, 800);
                 
             } catch (error) {
                 statusEl.style.color = "#ff3333";
-                statusEl.innerHTML = "❌ LỖI NATIVE:<br>" + (error.message || JSON.stringify(error));
-                console.error("Lỗi đăng nhập:", error);
+                statusEl.innerHTML = "❌ LỖI ĐĂNG NHẬP:<br>" + (error.message || JSON.stringify(error));
             }
         };
     </script>
@@ -267,21 +295,33 @@
             cell.classList.add('selected');
         }
 
+        // HÀM CHUYỂN CẢNH MƯỢT MÀ TỪ BẢNG NGÔN NGỮ SANG MÀN HÌNH ĐĂNG NHẬP
         function confirmLanguage() {
             localStorage.setItem('kdrive_lang', selectedLangChoice);
             const bgm = document.getElementById('bgMusic');
             if (bgm) { bgm.volume = 1.0; bgm.play().catch(e => {}); }
 
-            document.getElementById('langGateModal').classList.add('hidden');
+            const gateModal = document.getElementById('langGateModal');
+            gateModal.style.opacity = '0'; // Mờ dần bảng ngôn ngữ
             
             setTimeout(() => {
+                gateModal.classList.add('hidden'); // Ẩn hoàn toàn sau khi mờ
+                
                 const bgImg = document.getElementById('bgImageElement');
-                if (bgImg) { bgImg.src = preloadedLoginBg.src; }
-                setTimeout(() => {
-                    const loginPanel = document.getElementById('loginPanelContainer');
-                    if (loginPanel) loginPanel.classList.add('show-login');
-                }, 500);
-            }, 300);
+                if (bgImg) { 
+                    bgImg.style.opacity = '0'; // Mờ ảnh nền cũ đi
+                    
+                    setTimeout(() => {
+                        bgImg.src = preloadedLoginBg.src; // Nạp ảnh mới
+                        bgImg.style.opacity = '1'; // Hiện ảnh mới lên từ từ
+                        
+                        setTimeout(() => {
+                            const loginPanel = document.getElementById('loginPanelContainer');
+                            if (loginPanel) loginPanel.classList.add('show-login'); // Nút Google trồi lên từ từ
+                        }, 800);
+                    }, 1000); // Đợi 1 giây cho ảnh cũ mờ hẳn
+                }
+            }, 1000);
         }
 
         function closeLangModal() { confirmLanguage(); }
