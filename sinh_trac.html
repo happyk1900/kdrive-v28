@@ -219,7 +219,7 @@
         function closeManualModal() { document.getElementById('manual-edit-modal').classList.remove('active'); currentEditingKey = null; }
         function saveManualValue() { let val = document.getElementById('modal-input-val').value; if (val !== '' && currentEditingKey) { document.getElementById(`val-${currentEditingKey}`).innerText = val; } closeManualModal(); }
 
-        /* BẢN CHỤP X-QUANG: NÉM TOÀN BỘ LỖI GỐC RA MÀN HÌNH */
+        /* BẢN CHỤP X-QUANG ĐỘT PHÁ: LỘT TRẦN TÊN HÀM CỦA PLUGIN */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -240,7 +240,6 @@
 
                 radarMetrics.innerHTML = 'Đang chờ xác thực quyền...';
                 
-                // MỞ KHÓA BẢO VỆ ĐỂ LẤY LỖI GỐC
                 await Health.requestAuthorization({ 
                     read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] 
                 });
@@ -254,26 +253,34 @@
                 let debugCounts = [];
                 radarMetrics.innerHTML = 'Đang bóc tách dữ liệu 7 ngày qua...';
 
-                // HÀM QUÉT CHẾ ĐỘ X-QUANG: Dừng lại và văng lỗi đỏ ngay lập tức nếu bị chặn
+                // HÀM QUÉT CHẾ ĐỘ X-QUANG: Truy lùng tên hàm thật sự của Plugin
                 const safeQuery = async (type, name) => {
                     try {
                         let res;
-                        if (Health.querySamples) {
+                        if (typeof Health.querySamples === 'function') {
                             res = await Health.querySamples({ startDate: startDate.toISOString(), endDate: endDate.toISOString(), dataType: type });
-                        } else if (Health.query) {
+                        } else if (typeof Health.query === 'function') {
                             res = await Health.query({ sampleName: type, startDate: startDate.toISOString(), endDate: endDate.toISOString(), limit: 1000 });
+                        } else if (typeof Health.readRecords === 'function') {
+                            res = await Health.readRecords({ metric: type, startDate: startDate.toISOString(), endDate: endDate.toISOString() });
+                        } else if (typeof Health.queryData === 'function') {
+                            res = await Health.queryData({ dataType: type, startDate: startDate.toISOString(), endDate: endDate.toISOString() });
                         } else {
-                            throw new Error("Plugin không có hàm truy vấn.");
+                            // LỘT TRẦN PLUGIN TẠI ĐÂY NẾU NÓ ĐỔI TÊN HÀM
+                            let methods = [];
+                            for (let key in Health) { 
+                                if(typeof Health[key] === 'function') methods.push(key); 
+                            }
+                            throw new Error(`Plugin đổi tên hàm. Các hàm khả dụng trên máy anh lúc này là: [ ${methods.join(', ')} ]`);
                         }
                         return res;
                     } catch(e) {
-                        // CHỤP X-QUANG TẠI ĐÂY: Lấy lỗi gốc của Android
                         let exactError = e.message ? e.message : JSON.stringify(e);
-                        throw new Error(`[${name} - ${type}] bị chặn. Chi tiết mã lỗi gốc: ${exactError}`);
+                        throw new Error(`[${name} - ${type}] bị chặn: ${exactError}`);
                     }
                 };
 
-                // THỰC THI QUÉT (Nếu có lỗi, hàm sẽ ném thẳng xuống Catch to bên dưới)
+                // THỰC THI QUÉT
                 let resSteps = await safeQuery('steps', 'Bước');
                 let liveSteps = 0;
                 let listSteps = resSteps?.samples || resSteps?.values || [];
