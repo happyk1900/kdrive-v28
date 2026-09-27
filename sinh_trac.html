@@ -126,7 +126,7 @@
         @keyframes spin-cw { 100% { transform: rotate(360deg); } }
         @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
 
-        /* 6 CHỈ SỐ CỐT LÕI - TO RÕ, MÀU SẮC PHÂN TẦNG KHOA HỌC */
+        /* 6 CHỈ SỐ CỐT LÕI */
         .data-panel { position: absolute; z-index: 15; padding: 12px 18px; transition: transform 0.2s, opacity 1.5s ease; background: linear-gradient(90deg, rgba(10, 14, 22, 0.92), rgba(5, 7, 10, 0.4)); border-left: 3px solid; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; min-width: 120px; white-space: nowrap; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .data-panel:active { transform: scale(0.95); background: rgba(0, 229, 255, 0.2); }
         .dp-right { border-left: none; border-right: 3px solid; text-align: right; background: linear-gradient(270deg, rgba(10, 14, 22, 0.92), rgba(5, 7, 10, 0.4)); align-items: flex-end; }
@@ -166,7 +166,7 @@
         <button class="mode-btn" id="btn-manual" onclick="setMode('manual')">Thủ công</button>
     </div>
 
-    <!-- MODAL 1: BẢNG CHÀO MỪNG ĐẲNG CẤP & THOÁNG ĐÃNG -->
+    <!-- MODAL 1: BẢNG CHÀO MỪNG -->
     <div class="cyber-modal" id="core-check-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
@@ -196,7 +196,7 @@
         </div>
     </div>
 
-    <!-- MODAL 2: FORM NHẬP 3 THÔNG SỐ ĐẦU VÀO -->
+    <!-- MODAL 2: FORM NHẬP -->
     <div class="cyber-modal" id="onboarding-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
@@ -212,7 +212,7 @@
         </div>
     </div>
 
-    <!-- MODAL 3: XEM GIẢI THÍCH CHI TIẾT / SỬA THỦ CÔNG -->
+    <!-- MODAL 3: SỬA THỦ CÔNG -->
     <div class="cyber-modal" id="manual-edit-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
@@ -368,7 +368,7 @@
         function closeManualModal() { document.getElementById('manual-edit-modal').classList.remove('active'); currentEditingKey = null; }
         function saveManualValue() { let val = document.getElementById('modal-input-val').value; if (val !== '' && currentEditingKey) { document.getElementById(`val-${currentEditingKey}`).innerText = val; } closeManualModal(); }
 
-        /* ĐỒNG BỘ NATIVE - KÈM BẮT LỖI HIỂN THỊ VÀ FAIL-SAFE TỪNG CHỈ SỐ */
+        /* ĐỒNG BỘ NATIVE - BẮT TẬN TAY LỖI, SỬA fatPercentage -> bodyFat */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -396,10 +396,10 @@
                     ]);
                 };
 
-                // Gọi yêu cầu quyền (nếu sai array dataType nó sẽ sập thẳng ra main catch ở dưới)
+                // FIX LỖI: Đã thay fatPercentage thành bodyFat
                 radarMetrics.innerHTML = 'Đang xác thực quyền truy cập...';
                 await withTimeout(Health.requestAuthorization({ 
-                    read: ['steps', 'heartRate', 'sleep', 'weight', 'fatPercentage', 'hydration'] 
+                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat', 'hydration'] 
                 }));
 
                 const endDate = new Date();
@@ -418,7 +418,6 @@
                 let liveSteps = null, liveHR = null, liveSleep = null, liveWeight = null, liveFat = null, liveWater = null;
                 radarMetrics.innerHTML = 'Đang bóc tách dữ liệu...';
 
-                // Từng block try...catch riêng biệt (Lỗi cái nào chỉ đánh rơi cái đó, không sập hệ thống)
                 try {
                     const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'steps' }));
                     let list = res.samples || res.values || (Array.isArray(res) ? res : []);
@@ -445,8 +444,9 @@
                     let latest = getLatestValue(res); if (latest) liveWeight = parseFloat(latest.value).toFixed(1);
                 } catch(e) { console.warn("Lỗi Weight:", e); }
 
+                // FIX LỖI: dataType query cũng chuyển về chuẩn bodyFat
                 try {
-                    const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'fatPercentage' }));
+                    const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'bodyFat' }));
                     let latest = getLatestValue(res); if (latest) liveFat = parseFloat(latest.value).toFixed(1);
                 } catch(e) { console.warn("Lỗi Fat:", e); }
 
@@ -471,7 +471,6 @@
                 radarMetrics.innerHTML = '<span class="metric-item">Đã cập nhật dữ liệu sinh trắc học thời gian thực từ 00:00:00 hôm nay.</span>';
 
             } catch (error) {
-                // ĐÂY LÀ KHU VỰC BẮT TẬN TAY LỖI HỆ THỐNG
                 console.error("LỖI ĐỒNG BỘ NATIVE:", error);
                 stopChargeSound(); document.body.classList.remove('scanning-mode');
                 
@@ -481,7 +480,6 @@
                 radarBar.style.background = 'rgba(255, 42, 42, 0.08)'; radarBar.style.borderColor = 'rgba(255, 42, 42, 0.3)'; radarBar.style.borderLeftColor = 'var(--crimson)';
                 radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI KẾT NỐI (DEBUG MODE)';
                 
-                // Trích xuất chuỗi lỗi thật để in ra màn hình
                 let errorDetails = "";
                 if (typeof error === 'string') { errorDetails = error; } 
                 else if (error && error.message) { errorDetails = error.message; } 
