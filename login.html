@@ -3,304 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#050608">
-    <title>K-Drive - Sinh Trắc Học</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>K-Drive</title>
+    
+    <!-- MÁY QUÉT LỖI TOÀN CỤC -->
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            const statusEl = document.getElementById('loginStatus');
+            if(statusEl) {
+                statusEl.style.color = "#ff3333";
+                statusEl.innerHTML = "CRASH GLOBAL: " + message;
+            }
+            return true;
+        };
+    </script>
+
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#010a14">
+    <link rel="apple-touch-icon" href="./k-icon-sci.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Orbitron:wght@600;800;900&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --bg-obsidian: #030406; --mint: #00ff9d; --cyan: #00e5ff;
-            --amber: #ffaa00; --violet: #b026ff; --crimson: #ff2a2a;
-            --neon-pink: #ff00ff; --lime: #39ff14;
-            --font-display: 'Space Grotesk', sans-serif; 
-            --font-terminal: 'Share Tech Mono', monospace;
-            --vh: 1vh; 
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+        body { background-color: #010204; height: 100vh; height: 100dvh; width: 100vw; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; }
+        img, video { -webkit-user-drag: none; pointer-events: none; }
+
+        .kdrive-image-wrapper { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; 
+            background: #010204; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+        }
+        .kdrive-bg-target { 
+            width: 100%; height: 100%; object-fit: contain; background-color: #010204; position: absolute; top: 0; left: 0; z-index: 2; 
+            opacity: 1; transition: opacity 0.5s ease-in-out; 
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        /* BẢNG CHỌN NGÔN NGỮ - TRẮNG MỜ (GLASSMORPHISM) */
+        .lang-gate-overlay {
+            position: fixed; inset: 0; z-index: 999999; background: rgba(0, 0, 0, 0.4);
+            display: flex; justify-content: center; align-items: center; 
+            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+            opacity: 1; visibility: visible;
+        }
+        .lang-gate-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        
+        .lang-box {
+            width: 90%; max-width: 340px; background: rgba(255, 255, 255, 0.15);
+            border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 14px; padding: 16px 12px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 15px rgba(255, 255, 255, 0.2); 
+            text-align: center; color: #fff; z-index: 10; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+        .lang-title-area { 
+            font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 800; color: #ffffff; margin-bottom: 12px; letter-spacing: 0.5px; 
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+        }
+        
+        .lang-grid-exact { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 15px; }
+        .lang-cell {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 6px; padding: 8px; font-size: 11px; font-weight: 700;
+            color: #ffffff; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 6px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); transition: 0.2s;
+        }
+        .lang-cell:hover { background: rgba(255, 255, 255, 0.25); }
+        .lang-cell.selected { border-color: #ffd700; background: rgba(255, 215, 0, 0.25); color: #fff; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        
+        .lang-footer-btns { display: flex; gap: 8px; }
+        .btn-close-lang { flex: 1; background: rgba(200, 0, 50, 0.4); border: 1px solid rgba(255, 100, 100, 0.5); color: #ffcccc; padding: 10px; border-radius: 6px; font-weight: 800; font-size: 10px; cursor: pointer; text-transform: uppercase; }
+        .btn-confirm-lang { flex: 1; background: rgba(255, 215, 0, 0.8); border: 1px solid #ffd700; color: #000; padding: 10px; border-radius: 6px; font-weight: 900; font-size: 10px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 10px rgba(255,215,0,0.4); }
 
-        body {
-            background-color: var(--bg-obsidian); color: white;
-            font-family: var(--font-display); overflow: hidden;
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); 
-            display: flex; justify-content: center; align-items: center;
+        .gateway-container {
+            position: relative; width: 85%; max-width: 270px; z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transform: scale(0.95); transition: opacity 1s ease, transform 1s ease;
+        }
+        .gateway-container.show-login { opacity: 1; pointer-events: auto; transform: scale(1); }
+
+        /* NÚT GMAIL */
+        .google-auth-btn-img {
+            width: 100%; max-width: 170px; height: auto; cursor: pointer;
+            filter: grayscale(1) brightness(0.4); opacity: 0.3; pointer-events: none; transition: 0.5s ease;
+            position: relative; z-index: 999999;
+        }
+        .google-auth-btn-img.unlocked {
+            opacity: 1; filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.9));
+            animation: buttonBreathe 2.2s infinite ease-in-out; pointer-events: auto !important;
+        }
+        @keyframes buttonBreathe {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.5)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(0, 229, 255, 0.95)); }
         }
 
-        /* BACKGROUNDS */
-        .tactical-grid-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-obsidian); z-index: 1; perspective: 600px; overflow: hidden; }
-        .grid-plane { position: absolute; width: 200vw; height: 200vh; left: -50vw; top: 0%; background-image: linear-gradient(rgba(0, 229, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.08) 1px, transparent 1px); background-size: 40px 40px; transform: rotateX(75deg); animation: grid-scroll 10s linear infinite; }
-        .vignette { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; background: radial-gradient(circle at center, transparent 20%, #030406 90%); }
-        @keyframes grid-scroll { 0% { background-position: 0 0; } 100% { background-position: 0 40px; } }
+        .terms-box-container {
+            position: relative; width: 100%; margin-top: 12px;
+            background: rgba(3, 9, 22, 0.85); border: 1.5px solid rgba(0, 229, 255, 0.45);
+            border-radius: 8px; padding: 8px 10px; display: flex; align-items: flex-start; gap: 8px; backdrop-filter: blur(8px);
+        }
+        .terms-checkbox {
+            appearance: none; -webkit-appearance: none; width: 16px; height: 16px;
+            border: 1.5px solid #00e5ff; border-radius: 3px; background: rgba(0, 0, 0, 0.6); cursor: pointer; margin-top: 1px; flex-shrink: 0;
+            position: relative; pointer-events: auto;
+        }
+        .terms-checkbox:checked { background: #00e5ff; box-shadow: 0 0 10px #00e5ff; }
+        .terms-checkbox:checked::after { content: '✔'; position: absolute; top: -2px; left: 2px; font-size: 10px; color: #000; font-weight: bold; }
+        .terms-text { color: #b0e0e6; font-size: 9.5px; font-family: 'Montserrat', sans-serif; line-height: 1.35; }
+        .terms-link { color: #ffd700; text-decoration: underline; cursor: pointer; font-weight: 700; }
         
-        .particle-matrix { position: fixed; top: 50%; left: 50%; z-index: 3; width: 0; height: 0; }
-        .particle-wrap { position: absolute; width: 2px; height: 250px; transform-origin: top center; top: 0; left: 0; }
-        .particle { position: absolute; bottom: 100%; left: -1px; width: 3px; height: 3px; border-radius: 50%; opacity: 0; }
-        
-        .edge-lighting { position: fixed; inset: 0; z-index: 999; pointer-events: none; transition: box-shadow 1s ease, border 1s ease; box-shadow: inset 0 0 0px transparent; border: 0px solid transparent; }
+        #loginStatus { 
+            margin-top: 10px; font-weight: 700; text-align: center; font-size: 9.5px; 
+            color: #00e5ff; min-height: 40px; text-shadow: 0 0 8px rgba(0,229,255,0.6); 
+            width: 100%; background: rgba(0,0,0,0.5); border-radius: 4px; padding: 5px;
+            word-wrap: break-word; line-height: 1.4;
+        }
 
-        /* THANH CHUYỂN ĐỔI CHẾ ĐỘ PHÍA TRÊN */
-        .mode-container { position: absolute; top: 45px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 10px; }
-        .mode-btn { font-family: var(--font-terminal); font-size: 13px; font-weight: bold; background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.4); color: rgba(255,255,255,0.6); padding: 8px 20px; cursor: pointer; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); text-transform: uppercase; transition: all 0.3s; }
-        .mode-btn.active { background: rgba(0,229,255,0.25); border-color: var(--cyan); color: var(--cyan); text-shadow: 0 0 10px var(--cyan); box-shadow: 0 0 15px rgba(0,229,255,0.3); }
+        .terms-modal-overlay {
+            position: fixed; inset: 0; background: rgba(1, 2, 4, 0.92); backdrop-filter: blur(10px); z-index: 9999999;
+            display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.3s ease; padding: 15px;
+        }
+        .terms-modal-overlay.active { opacity: 1; visibility: visible; }
+        .terms-modal-content {
+            width: 100%; max-width: 350px; max-height: 85vh; overflow-y: auto;
+            background: rgba(6, 14, 26, 0.97); border: 2px solid #00e5ff; border-radius: 12px; padding: 18px; color: #e0f7fa; font-size: 11px; line-height: 1.6;
+        }
+        .terms-close-btn { width: 100%; margin-top: 14px; padding: 10px; background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #fff; font-weight: 800; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
 
-        /* MODAL POPUP */
-        .cyber-modal { position: fixed; inset: 0; background: rgba(2, 3, 5, 0.92); z-index: 300000; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(15px); opacity: 0; transition: opacity 0.3s ease; padding: 12px; }
-        .cyber-modal.active { display: flex; opacity: 1; }
-        
-        .cyber-led-wrapper { position: relative; padding: 1.5px; overflow: hidden; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); width: 95vw; max-width: 440px; box-shadow: 0 0 30px rgba(0,229,255,0.15); }
-        .cyber-led-wrapper::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, transparent, transparent, var(--cyan)); animation: spin-led 4s linear infinite; }
-        @keyframes spin-led { 100% { transform: rotate(360deg); } }
-        
-        .modal-box { width: 100%; background: rgba(8, 12, 20, 0.98); padding: 26px 22px; text-align: left; position: relative; z-index: 1; display: flex; flex-direction: column; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); max-height: 88vh; overflow-y: auto; }
-        .modal-title { font-family: var(--font-display); color: var(--cyan); font-size: 18px; font-weight: 700; margin-bottom: 18px; letter-spacing: 2px; text-transform: uppercase; text-align: center; text-shadow: 0 0 10px rgba(0,229,255,0.4); }
-        
-        .ob-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.04); padding: 12px 16px; border: 1px solid rgba(0,229,255,0.15); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
-        .ob-label { font-family: var(--font-terminal); color: rgba(255,255,255,0.9); font-size: 13px; font-weight: bold; text-transform: uppercase; }
-        .cyber-select { background: transparent; border: none; color: var(--mint); font-family: var(--font-display); font-size: 18px; font-weight: 700; text-align: right; width: 130px; outline: none; appearance: none; }
-        .cyber-select option { background: var(--bg-obsidian); color: #fff; }
-
-        .modal-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--cyan); color: var(--mint); font-family: var(--font-display); font-size: 26px; font-weight: bold; padding: 12px; text-align: center; margin-bottom: 15px; outline: none; box-shadow: inset 0 0 10px rgba(0,229,255,0.1); }
-        
-        .modal-btns { display: flex; gap: 12px; margin-top: 18px; }
-        .modal-btn { flex: 1; padding: 14px; font-family: var(--font-display); font-size: 13px; font-weight: bold; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer; text-transform: uppercase; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); text-align: center; transition: all 0.2s; }
-        .modal-btn:active { transform: scale(0.96); }
-        .modal-btn.primary { background: var(--cyan); color: #000; border: none; box-shadow: 0 0 15px rgba(0,229,255,0.4); }
-
-        /* DASHBOARD LÕI */
-        .pwa-container { margin: 0 auto; width: 100%; max-width: 420px; height: 100%; position: relative; background: transparent; display: flex; flex-direction: column; z-index: 10; display: none; opacity: 0; transition: opacity 0.5s ease; }
-        
-        .core-wrapper { position: relative; flex: 1; width: 100%; display: block; z-index: 10; perspective: 1000px; }
-        .arc-reactor { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 340px; height: 340px; display: flex; justify-content: center; align-items: center; transform-style: preserve-3d; transition: opacity 1.5s ease; }
-        .ring-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; z-index: 5; transition: all 1.5s ease; }
-        .orb-group { transform-origin: 170px 170px; transition: all 1s ease; }
-        .orb-cw { animation: spin-cw 20s linear infinite; }
-        .orb-ccw { animation: spin-ccw 25s linear infinite; }
-        .ring { fill: none; stroke-linecap: round; transition: stroke 0.5s ease; }
-        .ring-hr { stroke: var(--crimson); stroke-width: 1.5; stroke-dasharray: 4 12; filter: drop-shadow(0 0 3px var(--crimson)); }
-        .ring-phys { stroke: var(--mint); stroke-width: 1.5; stroke-dasharray: 10 20; filter: drop-shadow(0 0 3px var(--mint)); }
-        .ring-rec { stroke: var(--cyan); stroke-width: 1.5; stroke-dasharray: 15 30; filter: drop-shadow(0 0 3px var(--cyan)); }
-        .ring-move { stroke: var(--amber); stroke-width: 1.5; stroke-dasharray: 5 15; filter: drop-shadow(0 0 3px var(--amber)); }
-        .plasma-node { fill: #fff; opacity: 0; transition: opacity 0.5s ease; }
-
-        .sci-nexus { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 15; width: 115px; height: 115px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(176, 38, 255, 0.15) 0%, transparent 70%); box-shadow: inset 0 0 25px rgba(176, 38, 255, 0.1); cursor: pointer; transition: all 1.5s ease; overflow: hidden; }
-        .shockwave { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; background: transparent; border: 4px solid var(--cyan); border-radius: 50%; z-index: 4; opacity: 0; pointer-events: none; }
-        .shockwave.active { animation: shockwave-boom 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
-        @keyframes shockwave-boom { 0% { width: 10px; height: 10px; opacity: 1; border-width: 15px; } 100% { width: 150vw; height: 150vw; opacity: 0; border-width: 1px; } }
-
-        /* VÂN TAY FLEX-CENTER */
-        .fingerprint-wrapper { width: 50px; height: 50px; display: none; justify-content: center; align-items: center; z-index: 20; position: relative; }
-        .fingerprint-wrapper svg { width: 100%; height: 100%; stroke: var(--cyan); filter: drop-shadow(0 0 8px var(--cyan)); }
-        .fp-scanner-line { position: absolute; width: 120%; height: 3px; background: var(--mint); box-shadow: 0 0 15px 3px var(--mint); left: -10%; border-radius: 50%; display: none; }
-        
-        .sci-val { font-family: var(--font-display); font-size: 36px; font-weight: 700; color: var(--violet); text-shadow: 0 0 18px rgba(176,38,255,0.6); letter-spacing: 2px; z-index: 2; }
-        .sci-lbl { font-family: var(--font-terminal); font-size: 11px; font-weight: 500; color: #fff; letter-spacing: 1.5px; opacity: 0.8; position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); text-transform: uppercase; }
-
-        body.standby-mode .data-panel, body.standby-mode .live-radar-bar { opacity: 0.1; pointer-events: none; filter: grayscale(1); }
-        body.standby-mode .ring-svg { opacity: 0.15; }
-        body.standby-mode #val-sci { display: none; }
-        body.standby-mode .sci-lbl { display: none; }
-        body.standby-mode .fingerprint-wrapper { display: flex; animation: pulse-fp 2s infinite alternate; }
-        @keyframes pulse-fp { 0% { opacity: 0.3; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1.05); } }
-
-        body.scanning-mode .fingerprint-wrapper { display: flex; }
-        body.scanning-mode .fingerprint-wrapper svg { stroke: var(--mint); filter: drop-shadow(0 0 5px var(--mint)); }
-        body.scanning-mode .fp-scanner-line { display: block; animation: scan-line 1.2s infinite linear alternate; }
-        @keyframes scan-line { 0% { top: -10%; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { top: 110%; opacity: 0; } }
-
-        body.sync-complete .fingerprint-wrapper { display: none !important; }
-        body.sync-complete #val-sci { display: block; animation: sci-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes sci-pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
-        /* 6 CHỈ SỐ CỐT LÕI */
-        .data-panel { position: absolute; z-index: 15; padding: 12px 18px; transition: transform 0.2s, opacity 1.5s ease; background: linear-gradient(90deg, rgba(10, 14, 22, 0.92), rgba(5, 7, 10, 0.4)); border-left: 3px solid; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; min-width: 120px; white-space: nowrap; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .data-panel:active { transform: scale(0.95); background: rgba(0, 229, 255, 0.2); }
-        .dp-right { border-left: none; border-right: 3px solid; text-align: right; background: linear-gradient(270deg, rgba(10, 14, 22, 0.92), rgba(5, 7, 10, 0.4)); align-items: flex-end; }
-        .dp-val { font-family: var(--font-display); font-size: 22px; font-weight: 700; line-height: 1.1; }
-        .dp-lbl { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: 1.5px; font-family: var(--font-terminal); text-transform: uppercase; }
-        
-        .pos-hr { top: 22%; left: 4%; border-color: var(--crimson); } .pos-hr .dp-val { color: var(--crimson); text-shadow: 0 0 8px rgba(255,42,42,0.7); }
-        .pos-phys1 { top: 50%; left: 4%; transform: translateY(-50%); border-color: var(--mint); } .pos-phys1 .dp-val { color: var(--mint); text-shadow: 0 0 8px rgba(0,255,157,0.7); }
-        .pos-rec1 { top: 78%; left: 4%; transform: translateY(-100%); border-color: var(--cyan); } .pos-rec1 .dp-val { color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.7); }
-        .pos-phys2 { top: 22%; right: 4%; border-color: var(--mint); } .pos-phys2 .dp-val { color: var(--mint); text-shadow: 0 0 8px rgba(0,255,157,0.7); }
-        .pos-rec2 { top: 50%; right: 4%; transform: translateY(-50%); border-color: var(--cyan); } .pos-rec2 .dp-val { color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.7); }
-        .pos-move { top: 78%; right: 4%; transform: translateY(-100%); border-color: var(--amber); } .pos-move .dp-val { color: var(--amber); text-shadow: 0 0 8px rgba(255,170,0,0.7); }
-        
-        /* THANH TERMINAL CẢNH BÁO */
-        .live-radar-bar { position: absolute; bottom: 55px; left: 50%; transform: translateX(-50%); z-index: 10; width: 92%; max-width: 390px; padding: 12px 16px; background: rgba(57, 255, 20, 0.08); border: 1px solid rgba(57, 255, 20, 0.3); border-left: 4px solid var(--lime); font-family: var(--font-terminal); display: flex; align-items: flex-start; flex-direction: column; gap: 8px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); box-shadow: 0 5px 20px rgba(0,0,0,0.6); transition: all 0.5s ease;}
-        .radar-header { font-size: 14px; font-weight: bold; display: flex; align-items: center; width: 100%; color: var(--lime); text-transform: uppercase; }
-        .live-metrics { color: rgba(255,255,255,0.95); display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; font-weight: 500; width: 100%; word-break: break-word;}
-        .metric-item { display: inline-flex; align-items: center; background: rgba(0,0,0,0.75); padding: 6px 10px; border: 1px solid rgba(255,255,255,0.2); }
+        #successVideo { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh; 
+            object-fit: cover; z-index: 9999999; display: none; background: #000; 
+        }
     </style>
 </head>
-<body class="standby-mode">
+<body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
-    <!-- BACKGROUNDS -->
-    <div class="tactical-grid-bg"><div class="grid-plane"></div></div>
-    <div class="particle-matrix" id="particle-matrix"></div>
-    <div class="vignette"></div>
-    <div class="edge-lighting" id="edge-lighting"></div>
+    <audio id="bgMusic" src="https://raw.githubusercontent.com/happyk1900/HOSOGOC/main/K_Drive_Initialized.mp3" preload="auto" loop></audio>
+    <video id="successVideo" src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/no%20audio%20-%20kich%20hoat%20loi%20trung%20tam.mp4" autoplay muted playsinline webkit-playsinline style="pointer-events: none;"></video>
 
-    <!-- 2 NÚT CHUYỂN ĐỔI CHẾ ĐỘ PHÍA TRÊN -->
-    <div class="mode-container">
-        <button class="mode-btn active" id="btn-auto" onclick="setMode('auto')">Tự động</button>
-        <button class="mode-btn" id="btn-manual" onclick="setMode('manual')">Thủ công</button>
+    <!-- BẢNG CHỌN 12 NGÔN NGỮ QUỐC TẾ (ĐÃ BỎ ALIEN & ĐỔI TRẮNG MỜ) -->
+    <div class="lang-gate-overlay" id="langGateModal">
+        <div class="lang-box">
+            <div class="lang-title-area">CHỌN NGÔN NGỮ QUỐC TẾ</div>
+            <div class="lang-grid-exact">
+                <div class="lang-cell selected" onclick="selectLangCell('vi', this)">🇻🇳 Tiếng Việt</div>
+                <div class="lang-cell" onclick="selectLangCell('en', this)">🇬🇧 English</div>
+                <div class="lang-cell" onclick="selectLangCell('zh', this)">🇨🇳 中文</div>
+                <div class="lang-cell" onclick="selectLangCell('ja', this)">🇯🇵 日本語</div>
+                <div class="lang-cell" onclick="selectLangCell('ko', this)">🇰🇷 한국어</div>
+                <div class="lang-cell" onclick="selectLangCell('fr', this)">🇫🇷 Français</div>
+                <div class="lang-cell" onclick="selectLangCell('de', this)">🇩🇪 Deutsch</div>
+                <div class="lang-cell" onclick="selectLangCell('es', this)">🇪🇸 Español</div>
+                <div class="lang-cell" onclick="selectLangCell('ru', this)">🇷🇺 Русский</div>
+                <div class="lang-cell" onclick="selectLangCell('th', this)">🇹🇭 ไทย</div>
+                <div class="lang-cell" onclick="selectLangCell('id', this)">🇮🇩 Indonesia</div>
+                <div class="lang-cell" onclick="selectLangCell('ar', this)">🇸🇦 العربية</div>
+            </div>
+            <div class="lang-footer-btns">
+                <button class="btn-close-lang" onclick="closeLangModal()">ĐÓNG LẠI</button>
+                <button class="btn-confirm-lang" onclick="confirmLanguage()">ĐỒNG Ý</button>
+            </div>
+        </div>
     </div>
 
-    <!-- CÁC MODAL THIẾT LẬP -->
-    <div class="cyber-modal" id="core-check-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title">K-DRIVE: TỌA ĐỘ SINH HỌC</div><div id="core-summary-view" style="font-family: var(--font-terminal); font-size: 13px; color: rgba(255,255,255,0.95); margin-bottom: 18px; line-height: 1.8;">Đang thiết lập thông số khoa học...</div><div class="modal-btns" style="margin-top: 22px;"><button class="modal-btn" onclick="openOnboardingForm()">Thay đổi</button><button class="modal-btn primary" onclick="acceptCoreValues()">Đồng ý</button></div></div></div></div>
-    <div class="cyber-modal" id="onboarding-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title">THIẾT LẬP LÕI</div><div class="ob-row"><div class="ob-label">NĂM SINH</div><select id="ob-year" class="cyber-select"></select></div><div class="ob-row"><div class="ob-label">CHIỀU CAO (CM)</div><select id="ob-height" class="cyber-select"></select></div><div class="ob-row"><div class="ob-label">CÂN NẶNG HIỆN TẠI</div><select id="ob-weight" class="cyber-select"></select></div><div class="modal-btns"><button class="modal-btn" onclick="closeOnboardingForm()">Hủy</button><button class="modal-btn primary" onclick="submitOnboarding()">Lưu</button></div></div></div></div>
-    <div class="cyber-modal" id="manual-edit-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title" id="modal-title">SỬA CHỈ SỐ</div><div id="modal-info-desc" style="font-family: var(--font-terminal); font-size: 13px; color: var(--mint); margin-bottom: 18px; line-height: 1.7;"></div><input type="number" id="modal-input-val" class="modal-input" placeholder="0.0" step="0.1"><div class="modal-btns" id="modal-btn-group"><button class="modal-btn" onclick="closeManualModal()">Hủy</button><button class="modal-btn primary" onclick="saveManualValue()">Lưu</button></div></div></div></div>
+    <!-- MODAL ĐIỀU KHOẢN -->
+    <div class="terms-modal-overlay" id="termsModal">
+        <div class="terms-modal-content">
+            <h3>QUY CHẾ K-DRIVE (CORE PROTOCOLS)</h3>
+            <p>K-Drive vận hành trên nguyên tắc sòng phẳng và minh bạch tuyệt đối.</p>
+            <button class="terms-close-btn" onclick="closeTermsModal()">ĐÃ HIỂU & ĐÓNG</button>
+        </div>
+    </div>
 
-    <!-- MAIN DASHBOARD -->
-    <div class="pwa-container" id="main-pwa">
-        <div class="core-wrapper">
-            <div class="shockwave" id="shockwave"></div>
-            <div class="arc-reactor">
-                <svg class="ring-svg" viewBox="0 0 340 340"><g class="orb-group orb-ccw orb-move"><circle class="ring ring-move" cx="170" cy="170" r="125" /><circle class="plasma-node" cx="170" cy="45" r="3.5" /></g><g class="orb-group orb-cw orb-rec"><circle class="ring ring-rec" cx="170" cy="170" r="105" /><circle class="plasma-node" cx="170" cy="65" r="4" /></g><g class="orb-group orb-ccw orb-phys"><circle class="ring ring-phys" cx="170" cy="170" r="85" /><circle class="plasma-node" cx="170" cy="85" r="4.5" /></g><g class="orb-group orb-cw orb-hr"><circle class="ring ring-hr" cx="170" cy="170" r="65" /><circle class="plasma-node" cx="170" cy="105" r="5" /></g></svg>
-                <div class="sci-nexus" id="trigger-combat" onclick="handleCoreAction()">
-                    <div class="fingerprint-wrapper" id="fp-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M18.9 7a8 8 0 0 1 1.1 5v1a6 6 0 0 0 .8 3" /><path d="M8 11a4 4 0 0 1 8 0v1a10 10 0 0 0 2 6" /><path d="M12 11v2a14 14 0 0 0 2.5 8" /><path d="M8 15a18 18 0 0 0 1.8 6" /><path d="M4.9 19a22 22 0 0 1 -.9 -7v-1a8 8 0 0 1 12 -6.95" /></svg><div class="fp-scanner-line"></div>
-                    </div>
-                    <div class="sci-val" id="val-sci">---</div>
-                    <div class="sci-lbl">SCI CORE</div>
+    <div class="kdrive-image-wrapper">
+        <img id="bgImageElement" src="https://github.com/happyk1900/Kai-Ripe/blob/main/k-ngon%20ngu.png?raw=true" class="kdrive-bg-target" alt="BG">
+        <div class="gateway-container" id="loginPanelContainer">
+            <img src="https://github.com/happyk1900/Kai-Ripe/blob/main/gmail%20login.png?raw=true" class="google-auth-btn-img" id="googleBtn" onclick="window.triggerNativeLogin()" alt="Google Login">
+            <div class="terms-box-container">
+                <input type="checkbox" class="terms-checkbox" id="termsCheck" onchange="toggleTermsAgreement()">
+                <div class="terms-text">
+                    Tôi đồng ý với <span class="terms-link" onclick="openTermsModal()">Điều khoản dịch vụ</span> của K-Drive.
                 </div>
             </div>
-
-            <div class="data-panel pos-hr" onclick="handlePanelClick('hr')"><div class="dp-val blinking" id="val-hr">---</div><div class="dp-lbl">Nhịp tim (BPM)</div></div>
-            <div class="data-panel pos-phys1" onclick="handlePanelClick('weight')"><div class="dp-val blinking" id="val-weight">---</div><div class="dp-lbl">Cân nặng (KG)</div></div>
-            <div class="data-panel pos-rec1" onclick="handlePanelClick('sleep')"><div class="dp-val blinking" id="val-sleep">---</div><div class="dp-lbl">Giấc ngủ (H)</div></div>
-            <div class="data-panel dp-right pos-phys2" onclick="handlePanelClick('fat')"><div class="dp-val blinking" id="val-fat">---</div><div class="dp-lbl">Mỡ cơ thể (%)</div></div>
-            <div class="data-panel dp-right pos-rec2" onclick="handlePanelClick('water')"><div class="dp-val blinking" id="val-water">---</div><div class="dp-lbl">Lượng nước (%)</div></div>
-            <div class="data-panel dp-right pos-move" onclick="handlePanelClick('steps')"><div class="dp-val blinking" id="val-steps">---</div><div class="dp-lbl">Bước chân</div></div>
-        </div>
-
-        <div class="live-radar-bar" id="live-radar-bar">
-            <div class="radar-header" id="live-pulse">🟢 SẴN SÀNG</div>
-            <div class="live-metrics" id="live-metrics">Chọn chế độ và chạm lõi để trích xuất dữ liệu.</div>
+            <div id="loginStatus">[HỆ THỐNG ĐANG KHỞI ĐỘNG...]</div>
         </div>
     </div>
 
+    <!-- SCRIPT CHUẨN NATIVE -->
     <script>
-        function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
-        window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport); fixViewport();
+        const statusEl = document.getElementById('loginStatus');
 
-        let currentMode = 'auto'; let currentEditingKey = null;
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
+                window.GoogleAuthPlugin = window.Capacitor.Plugins.GoogleAuth;
+                try {
+                    window.GoogleAuthPlugin.initialize({
+                        clientId: '159440914562-t22urib5q48l2orf9pg5fla7npqjj6mt.apps.googleusercontent.com',
+                        scopes: ['profile', 'email'],
+                        grantOfflineAccess: true
+                    });
+                    statusEl.innerHTML = "[HỆ THỐNG NATIVE SẴN SÀNG]";
+                    statusEl.style.color = "#00ffcc";
+                } catch (e) {
+                    statusEl.innerHTML = "<span style='color:red'>LỖI KHỞI TẠO: " + e.message + "</span>";
+                }
+            } else {
+                statusEl.innerHTML = "<span style='color:#ff3333'>⚠️ KHÔNG TÌM THẤY PLUGIN TRONG CAPACITOR!</span>";
+            }
+        });
 
-        window.onload = () => { initSelectOptions(); if (localStorage.getItem('kdrive_core_initialized') !== 'true') { openOnboardingForm(); } else { showCoreCheckModal(); } };
-        function initSelectOptions() { const y = document.getElementById('ob-year'); let yHtml = ''; for(let i=1960; i<=2010; i++) yHtml += `<option value="${i}">${i}</option>`; y.innerHTML = yHtml; y.value = 1988; const h = document.getElementById('ob-height'); let hHtml = ''; for(let i=150; i<=210; i++) hHtml += `<option value="${i}">${i} CM</option>`; h.innerHTML = hHtml; h.value = 176; const w = document.getElementById('ob-weight'); let wHtml = ''; for(let i=40; i<=120; i++) wHtml += `<option value="${i}">${i} KG</option>`; w.innerHTML = wHtml; w.value = 61; }
-        function setMode(mode) { currentMode = mode; document.getElementById('btn-auto').classList.toggle('active', mode === 'auto'); document.getElementById('btn-manual').classList.toggle('active', mode === 'manual'); }
-        function handleCoreAction() { if (currentMode === 'auto') { triggerHealthConnectSync(); } else { document.body.classList.remove('standby-mode'); document.body.classList.add('sync-complete'); const radarPulse = document.getElementById('live-pulse'); const radarMetrics = document.getElementById('live-metrics'); radarPulse.innerText = '🟢 CHẾ ĐỘ THỦ CÔNG'; radarPulse.style.color = 'var(--lime)'; radarMetrics.innerHTML = '<span class="metric-item">Đã mở khóa màn hình. Chạm vào từng chỉ số để nhập tay.</span>'; } }
-        function calculateTargets(year, height, currentWeight) { let age = 2026 - parseInt(year); localStorage.setItem('kdrive_target_hr', Math.round((220 - age) * 0.75)); localStorage.setItem('kdrive_target_weight', Math.round(21.0 * (height / 100) * (height / 100))); localStorage.setItem('kdrive_target_fat', 15.0); localStorage.setItem('kdrive_target_water', 60.0); localStorage.setItem('kdrive_target_sleep', 7.0); localStorage.setItem('kdrive_target_steps', 6000); }
-        function showCoreCheckModal() { let y = localStorage.getItem('kdrive_core_year') || '1988'; let h = localStorage.getItem('kdrive_core_height') || '176'; let w = localStorage.getItem('kdrive_core_weight') || '61'; document.getElementById('core-summary-view').innerHTML = `Tọa độ: Năm sinh ${y} | Cao ${h} CM | Cân nặng ${w} KG.`; document.getElementById('core-check-modal').classList.add('active'); }
-        function acceptCoreValues() { document.getElementById('core-check-modal').classList.remove('active'); showMainApp(); }
-        function openOnboardingForm() { document.getElementById('core-check-modal').classList.remove('active'); document.getElementById('onboarding-modal').classList.add('active'); }
-        function closeOnboardingForm() { document.getElementById('onboarding-modal').classList.remove('active'); if (localStorage.getItem('kdrive_core_initialized') === 'true') { showMainApp(); } }
-        function submitOnboarding() { let year = document.getElementById('ob-year').value; let height = document.getElementById('ob-height').value; let weight = document.getElementById('ob-weight').value; localStorage.setItem('kdrive_core_year', year); localStorage.setItem('kdrive_core_height', height); localStorage.setItem('kdrive_core_weight', weight); localStorage.setItem('kdrive_core_initialized', 'true'); calculateTargets(year, height, weight); closeOnboardingForm(); showCoreCheckModal(); }
-        function showMainApp() { document.getElementById('main-pwa').style.display = 'flex'; setTimeout(() => { document.getElementById('main-pwa').style.opacity = '1'; }, 50); ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => { let v = document.getElementById(`val-${key}`); if (v) v.innerText = '---'; }); document.getElementById('val-sci').innerText = '---'; }
-        function handlePanelClick(key) { if (currentMode === 'manual') { promptEdit(key); } }
-        function promptEdit(key) { currentEditingKey = key; document.getElementById('modal-title').innerText = `Sửa chỉ số`; document.getElementById('modal-input-val').style.display = 'block'; let curVal = document.getElementById(`val-${key}`).innerText; document.getElementById('modal-input-val').value = (curVal === '---' || curVal === '?') ? '' : curVal; document.getElementById('manual-edit-modal').classList.add('active'); document.getElementById('modal-input-val').focus(); }
-        function closeManualModal() { document.getElementById('manual-edit-modal').classList.remove('active'); currentEditingKey = null; }
-        function saveManualValue() { let val = document.getElementById('modal-input-val').value; if (val !== '' && currentEditingKey) { document.getElementById(`val-${currentEditingKey}`).innerText = val; } closeManualModal(); }
+        window.triggerNativeLogin = async function() {
+            const checkbox = document.getElementById('termsCheck');
+            if (!checkbox.checked) {
+                statusEl.style.color = "#ff3333";
+                statusEl.innerText = "⚠️ BẠN CHƯA TÍCH ĐỒNG Ý ĐIỀU KHOẢN!";
+                return;
+            }
 
-        /* BẢN CHỐT SỔ TUYỆT ĐỐI - KHÓA CHẶT BƯỚC CHÂN CHUẨN XÁC 100% TỪ 00:00:00 HÔM NAY */
-        async function triggerHealthConnectSync() {
-            if(window.isScanning) return; 
-            window.isScanning = true;
-            
-            document.body.classList.remove('standby-mode', 'sync-complete'); 
-            document.body.classList.add('scanning-mode');
-            
-            const radarBar = document.getElementById('live-radar-bar');
-            const radarPulse = document.getElementById('live-pulse'); 
-            const radarMetrics = document.getElementById('live-metrics');
-            
-            radarBar.style.background = 'rgba(0, 229, 255, 0.08)'; radarBar.style.borderColor = 'rgba(0, 229, 255, 0.3)'; radarBar.style.borderLeftColor = 'var(--cyan)';
-            radarPulse.style.color = 'var(--cyan)'; radarPulse.innerText = '⚡ Đang đồng bộ sinh trắc học...'; 
-            radarMetrics.innerHTML = 'Đang trích xuất Health Connect...';
+            statusEl.style.color = "#ffff00";
+            statusEl.innerHTML = "1. Nhận lệnh Click<br>2. Đang mở bảng Google...";
 
             try {
-                const Health = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health ? window.Capacitor.Plugins.Health : null;
-                if (!Health) throw new Error("Chưa kết nối Plugin");
-
-                await Health.requestAuthorization({ 
-                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] 
-                });
-
-                const endDate = new Date();
-                const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); 
+                if (!window.GoogleAuthPlugin) {
+                    throw new Error("Plugin GoogleAuth chưa sẵn sàng.");
+                }
                 
-                // MỐC THỜI GIAN TUYỆT ĐỐI BẮT ĐẦU TỪ 00:00:00 HÔM NAY
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-
-                const safeQuery = async (type) => {
-                    return await Health.readSamples({ 
-                        sampleName: type, dataType: type, 
-                        startDate: startDate.toISOString(), endDate: endDate.toISOString(), limit: 1000 
-                    });
-                };
-
-                // LỌC CHUẨN TỪNG BƯỚC CHÂN TỪ MỐC 00:00:00
-                let resSteps = await safeQuery('steps');
-                let liveSteps = 0;
-                let listSteps = resSteps?.samples || resSteps?.values || [];
-                listSteps.forEach(i => {
-                    let recordTime = new Date(i.endDate || i.endTime || i.startDate).getTime();
-                    if (recordTime >= todayStart.getTime() && recordTime <= endDate.getTime()) {
-                        liveSteps += parseInt(i.value || 0);
-                    }
-                });
-
-                let resHR = await safeQuery('heartRate');
-                let liveHR = (resHR?.samples?.[0]?.value || resHR?.values?.[0]?.value) || null;
-
-                let resSleep = await safeQuery('sleep');
-                let liveSleep = null;
-                let latestSleep = resSleep?.samples?.[0] || resSleep?.values?.[0];
-                if (latestSleep) {
-                    let mins = latestSleep.duration ? (latestSleep.duration / 60) : ((new Date(latestSleep.endDate) - new Date(latestSleep.startDate)) / 60000);
-                    if(mins > 0) liveSleep = (mins / 60).toFixed(1);
+                const googleUser = await window.GoogleAuthPlugin.signIn();
+                statusEl.innerHTML += "<br>3. Đã xác thực thành công!";
+                
+                if (!googleUser) {
+                    throw new Error("Tài khoản trả về bị rỗng.");
                 }
 
-                let resWeight = await safeQuery('weight');
-                let liveWeight = (resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value) ? parseFloat(resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value).toFixed(1) : null;
-
-                let resFat = await safeQuery('bodyFat');
-                let liveFat = (resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value) ? parseFloat(resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value).toFixed(1) : null;
-
-                let liveWater = null;
-                if (liveWeight !== null && liveFat !== null) {
-                    let fatPercentage = parseFloat(liveFat);
-                    let waterPercentage = (1 - (fatPercentage / 100)) * 73.2;
-                    liveWater = waterPercentage.toFixed(1);
+                statusEl.style.color = "#00ffcc";
+                statusEl.innerText = "✅ ĐĂNG NHẬP THÀNH CÔNG!";
+                
+                sessionStorage.setItem('kdrive_session', 'active');
+                localStorage.setItem('kdrive_logged_in_user', googleUser.name || googleUser.givenName || 'Chiến binh K-Drive');
+                localStorage.setItem('kdrive_user_email', googleUser.email || '');
+                
+                const successVid = document.getElementById('successVideo');
+                if(successVid) {
+                    successVid.style.display = 'block'; 
+                    successVid.play().then(() => { 
+                        successVid.onended = () => { window.location.href = 'LucChien.html'; };
+                    }).catch(err => { window.location.href = 'LucChien.html'; });
+                } else { 
+                    setTimeout(() => { window.location.href = 'LucChien.html'; }, 500);
                 }
-
-                document.getElementById('val-hr').innerText = liveHR !== null ? liveHR : '?';
-                document.getElementById('val-weight').innerText = liveWeight !== null ? liveWeight : '?';
-                document.getElementById('val-sleep').innerText = liveSleep !== null ? liveSleep : '?';
-                document.getElementById('val-fat').innerText = liveFat !== null ? liveFat : '?';
-                document.getElementById('val-water').innerText = liveWater !== null ? liveWater : '?';
-                document.getElementById('val-steps').innerText = liveSteps > 0 ? liveSteps : '?';
-
-                document.body.classList.remove('scanning-mode'); document.body.classList.add('sync-complete');
-                radarBar.style.background = 'rgba(57, 255, 20, 0.08)'; radarBar.style.borderColor = 'rgba(57, 255, 20, 0.3)'; radarBar.style.borderLeftColor = 'var(--lime)';
-                radarPulse.style.color = 'var(--lime)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
-                radarMetrics.innerHTML = `<span class="metric-item">Dữ liệu thời gian thực đã được khóa khớp chuẩn xác.</span>`;
-
+                
             } catch (error) {
-                console.error("Lỗi đồng bộ:", error);
-                document.body.classList.remove('scanning-mode');
-                
-                ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => { document.getElementById(`val-${key}`).innerText = '?'; });
-                
-                radarBar.style.background = 'rgba(255, 42, 42, 0.08)'; radarBar.style.borderColor = 'rgba(255, 42, 42, 0.3)'; radarBar.style.borderLeftColor = 'var(--crimson)';
-                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI ĐỒNG BỘ';
-                radarMetrics.innerHTML = `<span class="metric-item" style="color:#ff2a2a;">Lỗi: ${error.message || 'Mất kết nối API'}</span>`;
+                statusEl.style.color = "#ff3333";
+                statusEl.innerHTML = "❌ LỖI NATIVE:<br>" + (error.message || JSON.stringify(error));
+                console.error("Lỗi đăng nhập:", error);
             }
-            window.isScanning = false;
+        };
+    </script>
+
+    <script>
+        let selectedLangChoice = localStorage.getItem('kdrive_lang') || 'vi';
+        const preloadedLoginBg = new Image();
+        preloadedLoginBg.src = "https://github.com/happyk1900/Kai-Ripe/blob/main/loi%20trung%20tam.png?raw=true";
+
+        function selectLangCell(lang, cell) {
+            selectedLangChoice = lang;
+            document.querySelectorAll('.lang-cell').forEach(c => c.classList.remove('selected'));
+            cell.classList.add('selected');
         }
+
+        function confirmLanguage() {
+            localStorage.setItem('kdrive_lang', selectedLangChoice);
+            const bgm = document.getElementById('bgMusic');
+            if (bgm) { bgm.volume = 1.0; bgm.play().catch(e => {}); }
+
+            document.getElementById('langGateModal').classList.add('hidden');
+            
+            setTimeout(() => {
+                const bgImg = document.getElementById('bgImageElement');
+                if (bgImg) { bgImg.src = preloadedLoginBg.src; }
+                setTimeout(() => {
+                    const loginPanel = document.getElementById('loginPanelContainer');
+                    if (loginPanel) loginPanel.classList.add('show-login');
+                }, 500);
+            }, 300);
+        }
+
+        function closeLangModal() { confirmLanguage(); }
+
+        function toggleTermsAgreement() {
+            const checkbox = document.getElementById('termsCheck');
+            const googleBtn = document.getElementById('googleBtn');
+            if (checkbox.checked) {
+                googleBtn.classList.add('unlocked');
+            } else {
+                googleBtn.classList.remove('unlocked');
+            }
+        }
+
+        function openTermsModal() { document.getElementById('termsModal').classList.add('active'); }
+        function closeTermsModal() { document.getElementById('termsModal').classList.remove('active'); }
     </script>
 </body>
 </html>
