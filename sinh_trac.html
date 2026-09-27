@@ -163,7 +163,7 @@
         <button class="mode-btn" id="btn-manual" onclick="setMode('manual')">Thủ công</button>
     </div>
 
-    <!-- CÁC MODAL ... (GIỮ NGUYÊN GIAO DIỆN) -->
+    <!-- CÁC MODAL THIẾT LẬP -->
     <div class="cyber-modal" id="core-check-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title">K-DRIVE: TỌA ĐỘ SINH HỌC</div><div id="core-summary-view" style="font-family: var(--font-terminal); font-size: 13px; color: rgba(255,255,255,0.95); margin-bottom: 18px; line-height: 1.8;">Đang thiết lập thông số khoa học...</div><div class="modal-btns" style="margin-top: 22px;"><button class="modal-btn" onclick="openOnboardingForm()">Thay đổi</button><button class="modal-btn primary" onclick="acceptCoreValues()">Đồng ý</button></div></div></div></div>
     <div class="cyber-modal" id="onboarding-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title">THIẾT LẬP LÕI</div><div class="ob-row"><div class="ob-label">NĂM SINH</div><select id="ob-year" class="cyber-select"></select></div><div class="ob-row"><div class="ob-label">CHIỀU CAO (CM)</div><select id="ob-height" class="cyber-select"></select></div><div class="ob-row"><div class="ob-label">CÂN NẶNG HIỆN TẠI</div><select id="ob-weight" class="cyber-select"></select></div><div class="modal-btns"><button class="modal-btn" onclick="closeOnboardingForm()">Hủy</button><button class="modal-btn primary" onclick="submitOnboarding()">Lưu</button></div></div></div></div>
     <div class="cyber-modal" id="manual-edit-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title" id="modal-title">SỬA CHỈ SỐ</div><div id="modal-info-desc" style="font-family: var(--font-terminal); font-size: 13px; color: var(--mint); margin-bottom: 18px; line-height: 1.7;"></div><input type="number" id="modal-input-val" class="modal-input" placeholder="0.0" step="0.1"><div class="modal-btns" id="modal-btn-group"><button class="modal-btn" onclick="closeManualModal()">Hủy</button><button class="modal-btn primary" onclick="saveManualValue()">Lưu</button></div></div></div></div>
@@ -203,12 +203,12 @@
 
         let currentMode = 'auto'; let currentEditingKey = null;
 
-        window.onload = () => { initParticles(); initSelectOptions(); if (localStorage.getItem('kdrive_core_initialized') !== 'true') { openOnboardingForm(); } else { showCoreCheckModal(); } };
+        window.onload = () => { initSelectOptions(); if (localStorage.getItem('kdrive_core_initialized') !== 'true') { openOnboardingForm(); } else { showCoreCheckModal(); } };
         function initSelectOptions() { const y = document.getElementById('ob-year'); let yHtml = ''; for(let i=1960; i<=2010; i++) yHtml += `<option value="${i}">${i}</option>`; y.innerHTML = yHtml; y.value = 1988; const h = document.getElementById('ob-height'); let hHtml = ''; for(let i=150; i<=210; i++) hHtml += `<option value="${i}">${i} CM</option>`; h.innerHTML = hHtml; h.value = 176; const w = document.getElementById('ob-weight'); let wHtml = ''; for(let i=40; i<=120; i++) wHtml += `<option value="${i}">${i} KG</option>`; w.innerHTML = wHtml; w.value = 61; }
         function setMode(mode) { currentMode = mode; document.getElementById('btn-auto').classList.toggle('active', mode === 'auto'); document.getElementById('btn-manual').classList.toggle('active', mode === 'manual'); }
         function handleCoreAction() { if (currentMode === 'auto') { triggerHealthConnectSync(); } else { document.body.classList.remove('standby-mode'); document.body.classList.add('sync-complete'); const radarPulse = document.getElementById('live-pulse'); const radarMetrics = document.getElementById('live-metrics'); radarPulse.innerText = '🟢 CHẾ ĐỘ THỦ CÔNG'; radarPulse.style.color = 'var(--lime)'; radarMetrics.innerHTML = '<span class="metric-item">Đã mở khóa màn hình. Chạm vào từng chỉ số để nhập tay.</span>'; } }
         function calculateTargets(year, height, currentWeight) { let age = 2026 - parseInt(year); localStorage.setItem('kdrive_target_hr', Math.round((220 - age) * 0.75)); localStorage.setItem('kdrive_target_weight', Math.round(21.0 * (height / 100) * (height / 100))); localStorage.setItem('kdrive_target_fat', 15.0); localStorage.setItem('kdrive_target_water', 60.0); localStorage.setItem('kdrive_target_sleep', 7.0); localStorage.setItem('kdrive_target_steps', 6000); }
-        function showCoreCheckModal() { let y = localStorage.getItem('kdrive_core_year') || '1988'; let h = localStorage.getItem('kdrive_core_height') || '176'; let w = localStorage.getItem('kdrive_core_weight') || '61'; let t_hr = localStorage.getItem('kdrive_target_hr') || '137'; let t_wgt = localStorage.getItem('kdrive_target_weight') || '65'; let t_fat = localStorage.getItem('kdrive_target_fat') || '15.0'; document.getElementById('core-summary-view').innerHTML = `Tọa độ: Năm sinh ${y} | Cao ${h} CM | Cân nặng ${w} KG.`; document.getElementById('core-check-modal').classList.add('active'); }
+        function showCoreCheckModal() { let y = localStorage.getItem('kdrive_core_year') || '1988'; let h = localStorage.getItem('kdrive_core_height') || '176'; let w = localStorage.getItem('kdrive_core_weight') || '61'; document.getElementById('core-summary-view').innerHTML = `Tọa độ: Năm sinh ${y} | Cao ${h} CM | Cân nặng ${w} KG.`; document.getElementById('core-check-modal').classList.add('active'); }
         function acceptCoreValues() { document.getElementById('core-check-modal').classList.remove('active'); showMainApp(); }
         function openOnboardingForm() { document.getElementById('core-check-modal').classList.remove('active'); document.getElementById('onboarding-modal').classList.add('active'); }
         function closeOnboardingForm() { document.getElementById('onboarding-modal').classList.remove('active'); if (localStorage.getItem('kdrive_core_initialized') === 'true') { showMainApp(); } }
@@ -219,12 +219,12 @@
         function closeManualModal() { document.getElementById('manual-edit-modal').classList.remove('active'); currentEditingKey = null; }
         function saveManualValue() { let val = document.getElementById('modal-input-val').value; if (val !== '' && currentEditingKey) { document.getElementById(`val-${currentEditingKey}`).innerText = val; } closeManualModal(); }
 
-        /* BẢN CHỐT SỔ: SỬ DỤNG HÀM READSAMPLES ĐÃ ĐƯỢC X-QUANG KHAI PHÁ */
+        /* BẢN CHỐT SỔ HOÀN CHỈNH - FIX LỖI CỘNG DỒN BƯỚC CHÂN & LÀM SẠCH GIAO DIỆN */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
             
-            document.body.classList.remove('standby-mode', 'sync-complete', 'tier-shiro', 'tier-chairo', 'tier-kuro'); 
+            document.body.classList.remove('standby-mode', 'sync-complete'); 
             document.body.classList.add('scanning-mode');
             
             const radarBar = document.getElementById('live-radar-bar');
@@ -232,94 +232,83 @@
             const radarMetrics = document.getElementById('live-metrics');
             
             radarBar.style.background = 'rgba(0, 229, 255, 0.08)'; radarBar.style.borderColor = 'rgba(0, 229, 255, 0.3)'; radarBar.style.borderLeftColor = 'var(--cyan)';
-            radarPulse.style.color = 'var(--cyan)'; radarPulse.innerText = '⚡ ĐANG TRUY XUẤT DỮ LIỆU...'; radarMetrics.innerHTML = 'Đang gọi Health Connect...';
+            radarPulse.style.color = 'var(--cyan)'; radarPulse.innerText = '⚡ ĐANG TRUY XUẤT DỮ LIỆU...'; 
+            radarMetrics.innerHTML = 'Đang đồng bộ Health Connect...';
 
             try {
                 const Health = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health ? window.Capacitor.Plugins.Health : null;
-                if (!Health) throw new Error("Không tìm thấy Capacitor Health Plugin");
+                if (!Health) throw new Error("Chưa kết nối Plugin");
 
-                radarMetrics.innerHTML = 'Đang đồng bộ luồng xác thực (Chờ 2 giây)...';
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
+                // MỐC THỜI GIAN: startDate lùi 7 ngày để tìm số liệu chuẩn, todayStart lọc số bước của riêng hôm nay
                 const endDate = new Date();
                 const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); 
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
 
-                let debugCounts = [];
-                radarMetrics.innerHTML = 'Đang bóc tách dữ liệu 7 ngày qua...';
-
-                // GỌI CHÍNH XÁC HÀM readSamples MÀ X-QUANG ĐÃ CHỈ ĐIỂM
-                const safeQuery = async (type, name) => {
-                    try {
-                        let res = await Health.readSamples({ 
-                            sampleName: type,
-                            dataType: type, // Truyền phòng hờ cả 2 tham số phổ biến
-                            startDate: startDate.toISOString(), 
-                            endDate: endDate.toISOString(),
-                            limit: 1000 
-                        });
-                        return res;
-                    } catch(e) {
-                        throw new Error(`[${name}] lỗi: ${e.message || JSON.stringify(e)}`);
-                    }
+                const safeQuery = async (type) => {
+                    return await Health.readSamples({ 
+                        sampleName: type, dataType: type, 
+                        startDate: startDate.toISOString(), endDate: endDate.toISOString(), limit: 1000 
+                    });
                 };
 
-                // THỰC THI QUÉT BẰNG HÀM MỚI
-                let resSteps = await safeQuery('steps', 'Bước');
+                // 1. LỌC BƯỚC CHÂN CHUẨN CỦA HÔM NAY (Trị dứt điểm lỗi cộng dồn 16.000 bước)
+                let resSteps = await safeQuery('steps');
                 let liveSteps = 0;
                 let listSteps = resSteps?.samples || resSteps?.values || [];
-                listSteps.forEach(i => liveSteps += parseInt(i.value || 0));
-                debugCounts.push(`Bước: ${listSteps.length}`);
+                listSteps.forEach(i => {
+                    let recordDate = new Date(i.endDate || i.endTime || i.startDate);
+                    if (recordDate.getTime() >= todayStart.getTime()) {
+                        liveSteps += parseInt(i.value || 0);
+                    }
+                });
 
-                let resHR = await safeQuery('heartRate', 'Tim');
+                // 2. LẤY NHỊP TIM MỚI NHẤT
+                let resHR = await safeQuery('heartRate');
                 let liveHR = (resHR?.samples?.[0]?.value || resHR?.values?.[0]?.value) || null;
-                debugCounts.push(`Tim: ${resHR?.samples?.length || resHR?.values?.length || 0}`);
 
-                let resSleep = await safeQuery('sleep', 'Ngủ');
+                // 3. LẤY GIẤC NGỦ MỚI NHẤT
+                let resSleep = await safeQuery('sleep');
                 let liveSleep = null;
                 let latestSleep = resSleep?.samples?.[0] || resSleep?.values?.[0];
                 if (latestSleep) {
                     let mins = latestSleep.duration ? (latestSleep.duration / 60) : ((new Date(latestSleep.endDate) - new Date(latestSleep.startDate)) / 60000);
                     if(mins > 0) liveSleep = (mins / 60).toFixed(1);
                 }
-                debugCounts.push(`Ngủ: ${resSleep?.samples?.length || resSleep?.values?.length || 0}`);
 
-                let resWeight = await safeQuery('weight', 'Cân');
+                // 4. LẤY CÂN NẶNG MỚI NHẤT
+                let resWeight = await safeQuery('weight');
                 let liveWeight = (resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value) ? parseFloat(resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value).toFixed(1) : null;
-                debugCounts.push(`Cân: ${resWeight?.samples?.length || resWeight?.values?.length || 0}`);
 
-                let resFat = await safeQuery('bodyFat', 'Mỡ');
+                // 5. LẤY TỶ LỆ MỠ MỚI NHẤT
+                let resFat = await safeQuery('bodyFat');
                 let liveFat = (resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value) ? parseFloat(resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value).toFixed(1) : null;
-                debugCounts.push(`Mỡ: ${resFat?.samples?.length || resFat?.values?.length || 0}`);
 
-                // IN KẾT QUẢ NẾU THÀNH CÔNG
+                // IN KẾT QUẢ ĐÃ CHUẨN HÓA RA MÀN HÌNH
                 document.getElementById('val-hr').innerText = liveHR !== null ? liveHR : '?';
                 document.getElementById('val-weight').innerText = liveWeight !== null ? liveWeight : '?';
                 document.getElementById('val-sleep').innerText = liveSleep !== null ? liveSleep : '?';
                 document.getElementById('val-fat').innerText = liveFat !== null ? liveFat : '?';
-                document.getElementById('val-water').innerText = '?'; 
+                document.getElementById('val-water').innerText = '?'; // Để trống cho anh nhập tay
                 document.getElementById('val-steps').innerText = liveSteps > 0 ? liveSteps : '?';
 
                 document.body.classList.remove('scanning-mode'); document.body.classList.add('sync-complete');
                 radarBar.style.background = 'rgba(57, 255, 20, 0.08)'; radarBar.style.borderColor = 'rgba(57, 255, 20, 0.3)'; radarBar.style.borderLeftColor = 'var(--lime)';
                 radarPulse.style.color = 'var(--lime)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
-                radarMetrics.innerHTML = `<span class="metric-item">Đã quét hàm readSamples: [ ${debugCounts.join(' | ')} ]</span>`;
+                radarMetrics.innerHTML = `<span class="metric-item">Kết nối lõi Sinh trắc học thành công.</span>`;
 
             } catch (error) {
-                console.error("LỖI X-QUANG:", error);
+                console.error("Lỗi đồng bộ:", error);
                 document.body.classList.remove('scanning-mode');
                 
                 ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => { document.getElementById(`val-${key}`).innerText = '?'; });
                 
                 radarBar.style.background = 'rgba(255, 42, 42, 0.08)'; radarBar.style.borderColor = 'rgba(255, 42, 42, 0.3)'; radarBar.style.borderLeftColor = 'var(--crimson)';
-                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 X-QUANG PHÁT HIỆN LỖI';
-                
-                let errorDetails = typeof error === 'string' ? error : (error?.message || JSON.stringify(error));
-                radarMetrics.innerHTML = `<span class="metric-item" style="color:#ff2a2a; font-weight:bold; font-size:11px; padding:10px;">${errorDetails}</span>`;
+                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI ĐỒNG BỘ';
+                radarMetrics.innerHTML = `<span class="metric-item" style="color:#ff2a2a;">Lỗi trích xuất: ${error.message || 'Mất kết nối API'}</span>`;
             }
             window.isScanning = false;
         }
-
-        function initParticles() {}
     </script>
 </body>
 </html>
