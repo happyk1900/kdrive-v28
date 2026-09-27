@@ -163,7 +163,7 @@
         .info-badge:active { background: var(--mint); color: #000; }
     </style>
 </head>
-<body>
+<body class="standby-mode">
 
     <!-- BACKGROUNDS -->
     <div class="tactical-grid-bg"><div class="grid-plane"></div></div>
@@ -290,10 +290,10 @@
             <div class="data-panel dp-right pos-move" onclick="handlePanelClick('steps')"><div class="dp-val blinking" id="val-steps">---</div><div class="dp-lbl">Bước chân</div></div>
         </div>
 
-        <!-- THANH TERMINAL CẢNH BÁO NỢ SẮC BÉN -->
+        <!-- THANH TERMINAL CẢNH BÁO -->
         <div class="live-radar-bar" id="live-radar-bar">
             <div class="radar-header" id="live-pulse">🟢 SẴN SÀNG</div>
-            <div class="live-metrics" id="live-metrics">Chọn chế độ và chạm lõi để đối soát sinh học.</div>
+            <div class="live-metrics" id="live-metrics">Chọn chế độ và chạm lõi để trích xuất dữ liệu.</div>
         </div>
     </div>
 
@@ -337,7 +337,14 @@
             if (currentMode === 'auto') {
                 triggerHealthConnectSync();
             } else {
-                recalculateAndDisplay();
+                document.body.classList.remove('standby-mode');
+                document.body.classList.add('sync-complete');
+                playBeep();
+                const radarPulse = document.getElementById('live-pulse'); 
+                const radarMetrics = document.getElementById('live-metrics');
+                radarPulse.innerText = '🟢 CHẾ ĐỘ THỦ CÔNG';
+                radarPulse.style.color = 'var(--lime)';
+                radarMetrics.innerHTML = '<span class="metric-item">Đã mở khóa màn hình. Chạm vào từng chỉ số để nhập tay.</span>';
             }
         }
 
@@ -440,7 +447,12 @@
         function showMainApp() {
             document.getElementById('main-pwa').style.display = 'flex';
             setTimeout(() => { document.getElementById('main-pwa').style.opacity = '1'; }, 50);
-            loadSavedValues();
+            
+            ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => {
+                let v = document.getElementById(`val-${key}`);
+                if (v) v.innerText = '---';
+            });
+            document.getElementById('val-sci').innerText = '---';
         }
 
         function handlePanelClick(key) {
@@ -476,7 +488,7 @@
             document.getElementById('modal-info-desc').innerText = 'Nhập giá trị thực tế thủ công bên dưới:';
             document.getElementById('modal-input-val').style.display = 'block';
             let curVal = document.getElementById(`val-${key}`).innerText;
-            document.getElementById('modal-input-val').value = (curVal === '---') ? '' : curVal;
+            document.getElementById('modal-input-val').value = (curVal === '---' || curVal === '?') ? '' : curVal;
             document.getElementById('modal-btn-group').innerHTML = `
                 <button class="modal-btn" onclick="closeManualModal()">Hủy</button>
                 <button class="modal-btn primary" onclick="saveManualValue()">Lưu</button>
@@ -494,94 +506,11 @@
             let val = document.getElementById('modal-input-val').value;
             if (val !== '' && currentEditingKey) {
                 document.getElementById(`val-${currentEditingKey}`).innerText = val;
-                localStorage.setItem(`kdrive_manual_${currentEditingKey}`, val);
-                recalculateAndDisplay();
             }
             closeManualModal();
         }
 
-        function loadSavedValues() {
-            ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => {
-                let saved = localStorage.getItem(`kdrive_manual_${key}`);
-                if (saved) {
-                    document.getElementById(`val-${key}`).innerText = saved;
-                }
-            });
-            recalculateAndDisplay();
-        }
-
-        function recalculateAndDisplay() {
-            let liveHR = parseFloat(document.getElementById('val-hr').innerText) || 0;
-            let liveWeight = parseFloat(document.getElementById('val-weight').innerText) || 0;
-            let liveSleep = parseFloat(document.getElementById('val-sleep').innerText) || 0;
-            let liveFat = parseFloat(document.getElementById('val-fat').innerText) || 0;
-            let liveWater = parseFloat(document.getElementById('val-water').innerText) || 0;
-            let liveSteps = parseInt(document.getElementById('val-steps').innerText) || 0;
-
-            if (liveHR === 0 && liveWeight === 0) return;
-
-            document.body.classList.remove('standby-mode', 'sync-complete', 'tier-shiro', 'tier-chairo', 'tier-kuro');
-            let sciScore = calculateSCIScore(liveHR, liveSleep, liveSteps, liveWeight, liveFat, liveWater);
-
-            document.body.classList.add('sync-complete');
-            playBeep();
-
-            document.getElementById('val-sci').innerText = sciScore;
-            
-            const radarBar = document.getElementById('live-radar-bar');
-            const radarPulse = document.getElementById('live-pulse');
-            const radarMetrics = document.getElementById('live-metrics');
-
-            let t_hr = parseFloat(localStorage.getItem('kdrive_target_hr')) || 137;
-            let t_wgt = parseFloat(localStorage.getItem('kdrive_target_weight')) || 65;
-            let t_fat = parseFloat(localStorage.getItem('kdrive_target_fat')) || 15.0;
-
-            let alerts = [];
-            if (liveHR > 0 && liveHR < t_hr) alerts.push(`HR: ${liveHR} (CHƯA ĐẠT)`);
-            if (liveSleep > 0 && liveSleep < 7.0) alerts.push(`SLP: NỢ ${(7.0 - liveSleep).toFixed(1)}H`);
-            if (liveSteps > 0 && liveSteps < 6000) alerts.push(`STP: NỢ ${6000 - liveSteps}`);
-            if (liveFat > 0 && liveFat > t_fat) alerts.push(`FAT: VƯỢT ${(liveFat - t_fat).toFixed(1)}%`);
-            if (liveWater > 0 && liveWater < 55.0) alerts.push(`H2O: THIẾU NƯỚC`);
-
-            if(sciScore < 50) document.body.classList.add('tier-shiro');
-            else if(sciScore < 85) document.body.classList.add('tier-chairo');
-            else document.body.classList.add('tier-kuro');
-
-            if (alerts.length === 0) {
-                radarBar.style.background = 'rgba(57, 255, 20, 0.08)';
-                radarBar.style.borderColor = 'rgba(57, 255, 20, 0.3)';
-                radarBar.style.borderLeftColor = 'var(--lime)';
-                radarPulse.style.color = 'var(--lime)';
-                radarPulse.innerText = '🟢 TỐI ƯU';
-                radarMetrics.innerHTML = '<span class="metric-item">HỆ THỐNG SẠCH. KHÔNG CÒN NỢ SINH HỌC.</span>';
-            } else {
-                radarBar.style.background = 'rgba(255, 170, 0, 0.08)';
-                radarBar.style.borderColor = 'rgba(255, 170, 0, 0.3)';
-                radarBar.style.borderLeftColor = 'var(--amber)';
-                radarPulse.style.color = 'var(--amber)';
-                radarPulse.innerText = '🔴 CẢNH BÁO NỢ';
-                radarMetrics.innerHTML = alerts.map(a => `<span class="metric-item">${a}</span>`).join('');
-            }
-        }
-
-        function calculateSCIScore(hr, sleep, steps, weight, fat, water) {
-            let score = 100;
-            let t_hr = parseFloat(localStorage.getItem('kdrive_target_hr')) || 137;
-            let t_wgt = parseFloat(localStorage.getItem('kdrive_target_weight')) || 65;
-            let t_fat = parseFloat(localStorage.getItem('kdrive_target_fat')) || 15.0;
-
-            if (sleep > 0 && sleep < 7.0) { score -= (7.0 - sleep) * 5; }
-            if (steps > 0 && steps < 6000) { score -= ((6000 - steps) / 1000) * 2; }
-            if (fat > t_fat) { score -= (fat - t_fat) * 1.5; }
-            if (water > 0 && water < 55.0) { score -= (55.0 - water) * 1; }
-            if (Math.abs(weight - t_wgt) > 2.0) { score -= Math.abs(weight - t_wgt) * 1.0; }
-
-            if (score > 100) score = 100;
-            if (score < 0) score = 0;
-            return score.toFixed(1);
-        }
-
-        /* ĐỒNG BỘ TỰ ĐỘNG HEALTH CONNECT */
+        /* ĐỒNG BỘ TỰ ĐỘNG HEALTH CONNECT - ĐÃ CHUẨN HÓA 100% DATATYPE NATIVE */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -597,15 +526,15 @@
             radarBar.style.borderColor = 'rgba(0, 229, 255, 0.3)';
             radarBar.style.borderLeftColor = 'var(--cyan)';
             radarPulse.style.color = 'var(--cyan)';
-            radarPulse.innerText = '⚡ ĐANG QUÉT...';
-            radarMetrics.innerHTML = 'Đang kết nối Google Health Connect...';
+            radarPulse.innerText = '⚡ ĐANG TRUY XUẤT LIVE 100%...';
+            radarMetrics.innerHTML = 'Đang đồng bộ dữ liệu thời gian thực...';
 
             playChargeSound(); 
             if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
 
             try {
                 const Health = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health ? window.Capacitor.Plugins.Health : null;
-                if (!Health) throw new Error("Capacitor Health Plugin chưa sẵn sàng.");
+                if (!Health) throw new Error("Plugin Health Connect chưa sẵn sàng.");
 
                 const withTimeout = (promise, timeoutMs = 8000) => {
                     return Promise.race([
@@ -614,78 +543,111 @@
                     ]);
                 };
 
-                await withTimeout(Health.requestAuthorization({ read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] }));
+                // CHUẨN HÓA MẢNG QUYỀN ĐỌC ĐÚNG 6 CHỈ SỐ
+                await withTimeout(Health.requestAuthorization({ 
+                    read: ['steps', 'heartRate', 'sleep', 'weight', 'fatPercentage', 'hydration'] 
+                }));
 
                 const endDate = new Date();
-                const startDate = new Date(Date.now() - 48 * 3600000);
+                const startDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 0, 0, 0, 0); 
                 const queryOptions = { startDate: startDate.toISOString(), endDate: endDate.toISOString() };
+                
+                const sleepStartDate = new Date(startDate.getTime() - 12 * 3600000);
+                const sleepQueryOptions = { startDate: sleepStartDate.toISOString(), endDate: endDate.toISOString() };
 
-                let liveSteps = 331;
+                const getLatestValue = (res) => {
+                    let list = res.samples || res.values || (Array.isArray(res) ? res : []);
+                    if (!list || list.length === 0) return null;
+                    list.sort((a, b) => new Date(b.endDate || b.endTime || b.startDate) - new Date(a.endDate || a.endTime || a.startDate));
+                    return list[0];
+                };
+
+                let liveSteps = null, liveHR = null, liveSleep = null, liveWeight = null, liveFat = null, liveWater = null;
+
+                // 1. BƯỚC CHÂN
                 try {
                     const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'steps' }));
                     let list = res.samples || res.values || (Array.isArray(res) ? res : []);
-                    let sum = 0; list.forEach(i => sum += parseInt(i.value || 0));
+                    let sum = 0; 
+                    list.forEach(i => sum += parseInt(i.value || 0));
                     if(sum > 0) liveSteps = sum;
-                } catch(e){}
+                } catch(e) {}
 
-                let liveHR = 77;
+                // 2. NHỊP TIM
                 try {
                     const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'heartRate' }));
-                    let list = res.samples || res.values || (Array.isArray(res) ? res : []);
-                    if(list.length > 0) liveHR = parseInt(list[list.length - 1].value || 77);
-                } catch(e){}
+                    let latest = getLatestValue(res);
+                    if (latest) liveHR = parseInt(latest.value);
+                } catch(e) {}
 
-                let liveSleep = 5.8;
+                // 3. GIẤC NGỦ
                 try {
-                    const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'sleep' }));
-                    let list = res.samples || res.values || (Array.isArray(res) ? res : []);
-                    let mins = 0; list.forEach(r => {
-                        let d = r.duration ? (r.duration / 60) : ((new Date(r.endTime) - new Date(r.startTime)) / 60000);
-                        if(d > 0) mins += d;
-                    });
-                    if(mins > 0) liveSleep = (mins / 60).toFixed(1);
-                } catch(e){}
+                    const res = await withTimeout(Health.querySamples({ ...sleepQueryOptions, dataType: 'sleep' }));
+                    let latest = getLatestValue(res);
+                    if (latest) {
+                        let mins = latest.duration ? (latest.duration / 60) : ((new Date(latest.endDate || latest.endTime) - new Date(latest.startDate || latest.startTime)) / 60000);
+                        if(mins > 0) liveSleep = (mins / 60).toFixed(1);
+                    }
+                } catch(e) {}
 
-                let liveWeight = 61.6;
+                // 4. CÂN NẶNG
                 try {
                     const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'weight' }));
-                    let list = res.samples || res.values || (Array.isArray(res) ? res : []);
-                    if(list.length > 0) liveWeight = parseFloat(list[list.length - 1].value || 61.6).toFixed(1);
-                } catch(e){}
+                    let latest = getLatestValue(res);
+                    if (latest) liveWeight = parseFloat(latest.value).toFixed(1);
+                } catch(e) {}
 
-                let liveFat = 15.0;
+                // 5. MỠ CƠ THỂ
                 try {
-                    const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'bodyFat' }));
-                    let list = res.samples || res.values || (Array.isArray(res) ? res : []);
-                    if(list.length > 0) liveFat = parseFloat(list[list.length - 1].value || 15.0).toFixed(1);
-                } catch(e){}
+                    const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'fatPercentage' }));
+                    let latest = getLatestValue(res);
+                    if (latest) liveFat = parseFloat(latest.value).toFixed(1);
+                } catch(e) {}
 
-                let liveWater = 60.0;
+                // 6. LƯỢNG NƯỚC
+                try {
+                    const res = await withTimeout(Health.querySamples({ ...queryOptions, dataType: 'hydration' }));
+                    let latest = getLatestValue(res);
+                    if (latest) liveWater = parseFloat(latest.value).toFixed(1);
+                } catch(e) {}
 
-                document.getElementById('val-hr').innerText = liveHR;
-                document.getElementById('val-weight').innerText = liveWeight;
-                document.getElementById('val-sleep').innerText = liveSleep;
-                document.getElementById('val-fat').innerText = liveFat;
-                document.getElementById('val-water').innerText = liveWater;
-                document.getElementById('val-steps').innerText = liveSteps;
+                // XUẤT RA GIAO DIỆN
+                document.getElementById('val-hr').innerText = liveHR !== null ? liveHR : '?';
+                document.getElementById('val-weight').innerText = liveWeight !== null ? liveWeight : '?';
+                document.getElementById('val-sleep').innerText = liveSleep !== null ? liveSleep : '?';
+                document.getElementById('val-fat').innerText = liveFat !== null ? liveFat : '?';
+                document.getElementById('val-water').innerText = liveWater !== null ? liveWater : '?';
+                document.getElementById('val-steps').innerText = liveSteps !== null ? liveSteps : '?';
 
-                localStorage.setItem('kdrive_manual_hr', liveHR);
-                localStorage.setItem('kdrive_manual_weight', liveWeight);
-                localStorage.setItem('kdrive_manual_sleep', liveSleep);
-                localStorage.setItem('kdrive_manual_fat', liveFat);
-                localStorage.setItem('kdrive_manual_water', liveWater);
-                localStorage.setItem('kdrive_manual_steps', liveSteps);
+                document.getElementById('val-sci').innerText = '---';
 
                 stopChargeSound(); 
                 document.body.classList.remove('scanning-mode');
-                recalculateAndDisplay();
+                document.body.classList.add('sync-complete');
+
+                radarBar.style.background = 'rgba(57, 255, 20, 0.08)';
+                radarBar.style.borderColor = 'rgba(57, 255, 20, 0.3)';
+                radarBar.style.borderLeftColor = 'var(--lime)';
+                radarPulse.style.color = 'var(--lime)';
+                radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
+                radarMetrics.innerHTML = '<span class="metric-item">Đã cập nhật dữ liệu sinh trắc học thời gian thực từ 00:00:00 hôm nay.</span>';
 
             } catch (error) {
+                console.error("LỖI ĐỒNG BỘ NATIVE:", error);
                 stopChargeSound(); 
                 document.body.classList.remove('scanning-mode');
+                
+                ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => {
+                    document.getElementById(`val-${key}`).innerText = '?';
+                });
+                document.getElementById('val-sci').innerText = '---';
+
+                radarBar.style.background = 'rgba(255, 42, 42, 0.08)';
+                radarBar.style.borderColor = 'rgba(255, 42, 42, 0.3)';
+                radarBar.style.borderLeftColor = 'var(--crimson)';
                 radarPulse.style.color = 'var(--crimson)'; 
-                radarPulse.innerText = '🔴 LỖI ĐỒNG BỘ';
-                radarMetrics.innerHTML = '<span class="metric-item">Hãy chuyển sang chế độ thủ công để nhập tay.</span>';
+                radarPulse.innerText = '🔴 LỖI KẾT NỐI';
+                radarMetrics.innerHTML = '<span class="metric-item">Mất tín hiệu với Health Connect. Hãy kiểm tra ứng dụng gốc.</span>';
             }
             window.isScanning = false;
         }
