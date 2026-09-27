@@ -401,7 +401,6 @@
                     read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] 
                 }));
 
-                // CODE MỚI: Mở rộng vùng dò tìm ra 7 ngày trước để xem có dữ liệu không
                 const endDate = new Date();
                 const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); 
                 const queryOptions = { startDate: startDate.toISOString(), endDate: endDate.toISOString() };
@@ -415,7 +414,7 @@
                 };
 
                 let liveSteps = null, liveHR = null, liveSleep = null, liveWeight = null, liveFat = null;
-                let debugCounts = []; // Mảng chứa số lượng bản ghi tìm thấy
+                let debugCounts = [];
                 
                 radarMetrics.innerHTML = 'Đang bóc tách dữ liệu...';
 
@@ -459,12 +458,11 @@
                     let latest = getLatestValue(res); if (latest) liveFat = parseFloat(latest.value).toFixed(1);
                 } catch(e) { console.warn("Lỗi Fat:", e); debugCounts.push(`Mỡ:ERR`); }
 
-                // Xuất giao diện
                 document.getElementById('val-hr').innerText = liveHR !== null ? liveHR : '?';
                 document.getElementById('val-weight').innerText = liveWeight !== null ? liveWeight : '?';
                 document.getElementById('val-sleep').innerText = liveSleep !== null ? liveSleep : '?';
                 document.getElementById('val-fat').innerText = liveFat !== null ? liveFat : '?';
-                document.getElementById('val-water').innerText = '?'; // Vẫn giữ ? cho nước vì plugin ko hỗ trợ
+                document.getElementById('val-water').innerText = '?';
                 document.getElementById('val-steps').innerText = liveSteps !== null ? liveSteps : '?';
                 document.getElementById('val-sci').innerText = '---';
 
@@ -473,7 +471,6 @@
                 radarBar.style.background = 'rgba(57, 255, 20, 0.08)'; radarBar.style.borderColor = 'rgba(57, 255, 20, 0.3)'; radarBar.style.borderLeftColor = 'var(--lime)';
                 radarPulse.style.color = 'var(--lime)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
                 
-                // IN RA SỐ LƯỢNG BẢN GHI TÌM THẤY ĐỂ KIỂM TRA
                 radarMetrics.innerHTML = `<span class="metric-item">Kết quả 7 ngày: [ ${debugCounts.join(' | ')} ]</span>`;
 
             } catch (error) {
@@ -496,13 +493,13 @@
             window.isScanning = false;
         }
 
-        /* HIỆU ỨNG & ÂM THANH */
+        /* ĐÃ TẮT ÂM THANH ĐỂ TRÁNH LỖI AAUDIO CRASH WEBVIEW */
         function initParticles() { const matrix = document.getElementById('particle-matrix'); if (matrix.children.length > 0) return; const colors = ['#00ff9d', '#00e5ff', '#b026ff']; for(let i = 0; i < 45; i++) { let wrapper = document.createElement('div'); wrapper.className = 'particle-wrap'; wrapper.style.transform = `rotate(${Math.random() * 360}deg)`; let p = document.createElement('div'); p.className = 'particle'; p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; p.style.boxShadow = `0 0 8px ${p.style.backgroundColor}`; p.style.animation = `particle-inward ${2.5 + Math.random() * 3}s infinite ${Math.random() * 5}s linear`; wrapper.appendChild(p); matrix.appendChild(wrapper); } }
-        let audioCtx; function initAudio() { try { if(!audioCtx) { const AudioContext = window.AudioContext || window.webkitAudioContext; if(AudioContext) audioCtx = new AudioContext(); } } catch(e) { } }
-        function playBeep() { try { initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.frequency.value = 800; gain.gain.value = 0.1; gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.05); } catch(e){} }
-        function playFusionSound() { try { initAudio(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(100, audioCtx.currentTime); osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 1.5); gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 1.5); } catch(e){} }
-        let chargeOsc, chargeGain; function playChargeSound() { try { stopChargeSound(); initAudio(); chargeOsc = audioCtx.createOscillator(); chargeGain = audioCtx.createGain(); chargeOsc.type = 'square'; chargeOsc.frequency.setValueAtTime(100, audioCtx.currentTime); chargeOsc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 3); chargeGain.gain.setValueAtTime(0.05, audioCtx.currentTime); chargeOsc.connect(chargeGain); chargeGain.connect(audioCtx.destination); chargeOsc.start(); } catch(e){} }
-        function stopChargeSound() { if(chargeOsc) { chargeOsc.stop(); chargeOsc.disconnect(); chargeOsc = null; } }
+        function initAudio() {}
+        function playBeep() {}
+        function playFusionSound() {}
+        function playChargeSound() {}
+        function stopChargeSound() {}
     </script>
 </body>
 </html>
