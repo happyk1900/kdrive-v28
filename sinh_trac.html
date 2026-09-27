@@ -367,7 +367,7 @@
         function closeManualModal() { document.getElementById('manual-edit-modal').classList.remove('active'); currentEditingKey = null; }
         function saveManualValue() { let val = document.getElementById('modal-input-val').value; if (val !== '' && currentEditingKey) { document.getElementById(`val-${currentEditingKey}`).innerText = val; } closeManualModal(); }
 
-        /* ĐỒNG BỘ NATIVE - KẺ HỦY DIỆT LỖI (BULLETPROOF) */
+        /* ĐỒNG BỘ NATIVE - BẢN FIX XUNG ĐỘT LUỒNG (RACE CONDITION) SAU KHI XIN QUYỀN */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -400,10 +400,13 @@
                     read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] 
                 }), 60000);
 
+                // THÊM THEO GỢI Ý CỦA ẢNH: Thời gian trễ để Android kịp ghi nhận quyền (Chống xung đột)
+                radarMetrics.innerHTML = 'Đang đồng bộ luồng xác thực (Chờ 2 giây)...';
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
                 const endDate = new Date();
                 const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); 
 
-                // TUYỆT CHIÊU: Bắn tất cả các tham số và tên hàm mà các plugin Health thường dùng
                 const executeQuery = async (type) => {
                     let opts = { 
                         dataType: type, sampleName: type, sampleType: type,
