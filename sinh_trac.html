@@ -367,7 +367,7 @@
         function closeManualModal() { document.getElementById('manual-edit-modal').classList.remove('active'); currentEditingKey = null; }
         function saveManualValue() { let val = document.getElementById('modal-input-val').value; if (val !== '' && currentEditingKey) { document.getElementById(`val-${currentEditingKey}`).innerText = val; } closeManualModal(); }
 
-        /* ĐỒNG BỘ NATIVE - BẢN FIX XUNG ĐỘT LUỒNG (RACE CONDITION) SAU KHI XIN QUYỀN */
+        /* ĐỒNG BỘ NATIVE - BỎ QUA KIỂM TRA HÀM ẢO, GỌI TRỰC TIẾP LỆNH CHUẨN CAPGO */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -382,8 +382,6 @@
             radarBar.style.background = 'rgba(0, 229, 255, 0.08)'; radarBar.style.borderColor = 'rgba(0, 229, 255, 0.3)'; radarBar.style.borderLeftColor = 'var(--cyan)';
             radarPulse.style.color = 'var(--cyan)'; radarPulse.innerText = '⚡ ĐANG TRUY XUẤT LIVE...'; radarMetrics.innerHTML = 'Đang gọi Health Connect...';
 
-            if(navigator.vibrate) navigator.vibrate([50, 100, 50]);
-
             try {
                 const Health = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health ? window.Capacitor.Plugins.Health : null;
                 if (!Health) throw new Error("Plugin Health Connect không tồn tại trong app.");
@@ -395,29 +393,18 @@
                     ]);
                 };
 
-                radarMetrics.innerHTML = 'Đang chờ anh cấp quyền (Thời gian chờ 60 giây)...';
+                // Tăng thời gian chờ lên 60s để vượt qua lỗi App Stopped khi mở popup xin quyền
+                radarMetrics.innerHTML = 'Đang chờ xác thực quyền (Thời gian chờ 60 giây)...';
                 await withTimeout(Health.requestAuthorization({ 
                     read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] 
                 }), 60000);
 
-                // THÊM THEO GỢI Ý CỦA ẢNH: Thời gian trễ để Android kịp ghi nhận quyền (Chống xung đột)
+                // THÊM ĐỘ TRỄ 2 GIÂY ĐỂ HỆ THỐNG ANDROID KỊP LƯU TRẠNG THÁI QUYỀN
                 radarMetrics.innerHTML = 'Đang đồng bộ luồng xác thực (Chờ 2 giây)...';
                 await new Promise(resolve => setTimeout(resolve, 2000));
 
                 const endDate = new Date();
                 const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); 
-
-                const executeQuery = async (type) => {
-                    let opts = { 
-                        dataType: type, sampleName: type, sampleType: type,
-                        startDate: startDate.toISOString(), endDate: endDate.toISOString(),
-                        startTime: startDate.toISOString(), endTime: endDate.toISOString(),
-                        limit: 100
-                    };
-                    if (Health.query) return await Health.query(opts);
-                    if (Health.querySamples) return await Health.querySamples(opts);
-                    throw new Error("NoFunc (Không tìm thấy hàm query trong plugin)");
-                };
 
                 const getLatestValue = (res) => {
                     let list = res?.samples || res?.values || (Array.isArray(res) ? res : []);
@@ -431,15 +418,21 @@
                 
                 radarMetrics.innerHTML = 'Đang bóc tách dữ liệu 7 ngày qua...';
 
+                // GỌI TRỰC TIẾP LỆNH QUERY CỦA PLUGIN, BỎ QUA KIỂM TRA HÀM
                 const safeQuery = async (type, processor, name) => {
                     try {
-                        const res = await withTimeout(executeQuery(type), 15000);
+                        const res = await withTimeout(Health.query({
+                            sampleName: type,
+                            startDate: startDate.toISOString(),
+                            endDate: endDate.toISOString(),
+                            limit: 1000
+                        }), 15000);
                         let list = res?.samples || res?.values || (Array.isArray(res) ? res : []);
                         debugCounts.push(`${name}:${list.length}`);
                         processor(list, getLatestValue(res));
                     } catch(e) {
                         let msg = e.message || String(e);
-                        debugCounts.push(`${name}:${msg.substring(0,8)}`);
+                        debugCounts.push(`${name}:ERR`);
                         console.warn(`Lỗi ${name}:`, e);
                     }
                 };
