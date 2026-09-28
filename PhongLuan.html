@@ -10,8 +10,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --bg-obsidian: #010a15;
+            --cyan: #00e5ff;
+            --mint: #38ef7d;    
+            --neon-pink: #ff00ff; 
+            --amber: #ffaa00;   
+            --crimson: #ff3366;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #010a15; font-family: 'Space Grotesk', sans-serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; }
 
         #sanctum-bg { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; background: radial-gradient(circle at 50% 30%, #02162b 0%, #010811 80%); }
         
@@ -41,24 +50,79 @@
         .action-group { width: 100%; max-width: 330px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
         .start-action-box { width: 100%; background: rgba(0, 229, 255, 0.15); border: 2px solid #00e5ff; padding: 14px; border-radius: 8px; color: #00e5ff; font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 20px rgba(0, 229, 255, 0.3); text-align: center; transition: 0.2s; }
         .start-action-box:active { background: #00e5ff; color: #010a15; transform: scale(0.98); }
-        
-        #ingame-hud { position: absolute; top: 0; left: 0; width: 100%; height: 75px; background: rgba(2, 10, 20, 0.95); border-bottom: 1px solid rgba(0, 229, 255, 0.3); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 10000; pointer-events: auto; backdrop-filter: blur(5px); transition: opacity 0.3s; }
-        #ingame-hud.hidden { opacity: 0; pointer-events: none !important; }
-        
-        .hud-left { flex: 1.3; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 3px; position: relative; }
-        .hp-row { font-size: 16px; letter-spacing: 2px; line-height: 1.2; font-family: 'Share Tech Mono', monospace; }
 
-        .hud-center { flex: 1; display: flex; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #fff; font-weight: bold; white-space: nowrap; }
-        .hud-right { flex: 1; display: flex; justify-content: flex-end; gap: 10px; }
-        .hud-btn { width: 32px; height: 32px; border-radius: 4px; background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.5); color: #00e5ff; display: flex; justify-content: center; align-items: center; font-size: 14px; cursor: pointer; transition: 0.2s; }
-        .hud-btn.exit-btn { background: rgba(255, 0, 127, 0.1); border-color: #ff007f; color: #ff007f; font-size: 18px; font-weight: 900;}
+        /* =========================================
+           TẦNG TRÊN: THANH TRẠNG THÁI (NÉ ĐIỂM MÙ ĐỈNH)
+        ========================================= */
+        .game-top-bar {
+            position: fixed;
+            top: max(20px, env(safe-area-inset-top)); 
+            left: 0; width: 100vw; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 10000; pointer-events: auto;
+            transition: opacity 0.3s;
+        }
+        .game-top-bar.hidden { opacity: 0; pointer-events: none !important; }
 
-        .status-notification { position: absolute; top: 105%; left: 0; font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 900; color: #ffffff; text-align: left; text-shadow: 0 0 10px #ffffff; z-index: 999999; pointer-events: none; white-space: nowrap; animation: topAlertAnim 1.2s ease-out forwards; }
+        .health-container { display: flex; gap: 4px; align-items: center; }
+        .health-bar { width: 14px; height: 6px; background: rgba(255,255,255,0.1); transform: skewX(-20deg); transition: all 0.3s ease; }
+        
+        .health-bar.cyan.active { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+        .health-bar.pink.active { background: var(--neon-pink); box-shadow: 0 0 6px var(--neon-pink); }
+
+        .data-score { font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; color: #fff; display: flex; align-items: center; position: relative; }
+        .data-score span { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); font-size: 18px; margin-left: 5px; }
+
+        #hp-notification-area { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); width: 200px; text-align: center; }
+
+        /* =========================================
+           TẦNG DƯỚI: ĐIỀU HƯỚNG (NÉ ĐIỂM MÙ ĐÁY)
+        ========================================= */
+        .game-bottom-bar {
+            position: fixed;
+            bottom: max(15px, env(safe-area-inset-bottom)); 
+            left: 0; width: 100vw;
+            border-top: 1px solid rgba(0, 229, 255, 0.3); 
+            padding: 15px 20px 0 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 10000; pointer-events: auto;
+            background: linear-gradient(0deg, rgba(2,10,20,0.95) 0%, transparent 100%);
+            transition: opacity 0.3s;
+        }
+        .game-bottom-bar.hidden { opacity: 0; pointer-events: none !important; }
+
+        .btn-action {
+            width: 44px; height: 44px; background: rgba(5, 7, 10, 0.8); 
+            border: 1px solid var(--cyan); border-radius: 10px;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-action:active { transform: scale(0.9); }
+        
+        .btn-back { color: var(--cyan); font-family: 'Share Tech Mono', monospace; font-size: 24px; font-weight: bold; box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); padding-bottom: 2px; padding-right: 2px; }
+        .btn-back:active { background: rgba(0, 229, 255, 0.25); box-shadow: 0 0 20px rgba(0, 229, 255, 0.6); }
+
+        .btn-pause { border-color: rgba(255, 170, 0, 0.5); box-shadow: 0 0 10px rgba(255, 170, 0, 0.15); }
+        .btn-pause::before, .btn-pause::after { content: ''; width: 4px; height: 16px; background: var(--amber); margin: 0 3px; border-radius: 2px; box-shadow: 0 0 5px var(--amber); }
+        .btn-pause:active { background: rgba(255, 170, 0, 0.2); box-shadow: 0 0 20px rgba(255, 170, 0, 0.5); }
+
+
+        .status-notification { font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 900; color: var(--neon-pink); text-align: left; text-shadow: 0 0 10px var(--neon-pink); z-index: 999999; pointer-events: none; white-space: nowrap; animation: topAlertAnim 1.2s ease-out forwards; }
         @keyframes topAlertAnim { 0% { opacity: 0; transform: translateY(-5px); } 20% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-5px); } }
 
         #freeze-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 200000; display: none; align-items: center; justify-content: center; }
         #freeze-overlay.active { display: flex; }
         .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #00e5ff; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px #00e5ff; }
+
+        /* MÀN HÌNH TẠM DỪNG */
+        #pause-menu-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; backdrop-filter: blur(5px); }
+        #pause-menu-overlay.active { opacity: 1; pointer-events: auto; }
+        .pause-box { width: 85%; max-width: 300px; background: rgba(10, 25, 40, 0.95); border: 1px solid rgba(0,229,255,0.5); border-radius: 12px; padding: 25px 20px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        .pause-title { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #00e5ff; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
+        .pause-btn { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
+        .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
+        .pause-btn.exit { background: rgba(255, 0, 127, 0.2); border: 1px solid #ff007f; color: #ff007f; margin-bottom: 0; }
 
         /* MÀN HÌNH KẾT QUẢ TỪNG BÀI */
         #result-overlay { position: absolute; inset: 0; background: rgba(2, 10, 20, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 10px; border-radius: 12px; padding: 12px; }
@@ -76,17 +140,16 @@
         .metric-card-row span:last-child { color: #00e5ff; font-weight: bold; }
 
         .result-rank-box { display: flex; justify-content: space-between; align-items: center; width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: bold; color: #fff; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; margin-top: 2px; }
-
         .rank-icon-img { width: 22px; height: 22px; vertical-align: middle; margin-right: 6px; filter: drop-shadow(0 0 3px rgba(0,229,255,0.4)); }
 
         .result-btn-row { display: flex; gap: 10px; width: 88%; max-width: 280px; margin-top: 10px; }
         .result-action-btn { flex: 1; padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; }
-        #btn-replay { background: transparent; border: 1px solid #ff3366; color: #ff3366; }
-        #btn-replay:active { background: #ff3366; color: #fff; }
+        #btn-replay { background: transparent; border: 1px solid var(--crimson); color: var(--crimson); }
+        #btn-replay:active { background: var(--crimson); color: #fff; }
         #btn-next { background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #00e5ff; }
         #btn-next:active { background: #00e5ff; color: #000; }
 
-        /* BẢNG TỔNG KẾT PHONG LUÂN CUỐI CÙNG (HIỆU ỨNG ĐỘNG VÀ CHỮ TO RÕ) */
+        /* BẢNG TỔNG KẾT PHONG LUÂN CUỐI CÙNG */
         #final-summary-overlay { position: absolute; inset: 0; background: #010a15; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 12px; }
         #final-summary-overlay.active { display: flex; }
         .final-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #00e5ff; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 12px #00e5ff; animation: headerGlow 2s infinite alternate; }
@@ -99,27 +162,13 @@
 
         .final-rank-display-box { display: flex; align-items: center; justify-content: space-between; width: 100%; border-top: 1px dashed rgba(255,255,255,0.25); margin-top: 3px; padding-top: 8px; font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: bold; color: #fff; }
 
-        /* HIỆU ỨNG VÀ CỠ CHỮ TO RÕ CHO PHẦN ĐÁNH GIÁ CUỐI CÙNG */
         .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: #00ffff; font-style: italic; text-align: center; margin-top: 6px; line-height: 1.4; font-weight: 600; text-shadow: 0 0 10px rgba(0,255,255,0.4); animation: textPulse 1.5s infinite alternate; }
         @keyframes textPulse { 0% { opacity: 0.85; } 100% { opacity: 1; text-shadow: 0 0 15px rgba(0,255,255,0.8); } }
 
         .final-btn-exit { width: 92%; max-width: 310px; padding: 13px; background: rgba(0, 229, 255, 0.25); border: 1.5px solid #00e5ff; border-radius: 8px; color: #00e5ff; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 4px; box-shadow: 0 0 15px rgba(0,229,255,0.2); }
         .final-btn-exit:hover { background: #00e5ff; color: #000; }
 
-        #pause-menu-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; backdrop-filter: blur(5px); }
-        #pause-menu-overlay.active { opacity: 1; pointer-events: auto; }
-        .pause-box { width: 85%; max-width: 300px; background: rgba(10, 25, 40, 0.95); border: 1px solid rgba(0,229,255,0.5); border-radius: 12px; padding: 25px 20px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
-        .pause-title { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #00e5ff; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
-        .pause-btn { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
-        .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
-        .pause-btn.exit { background: rgba(255, 0, 127, 0.2); border: 1px solid #ff007f; color: #ff007f; margin-bottom: 0; }
-
-        #terminal-bar { position: fixed; bottom: 0; left: 0; width: 100vw; background: rgba(5, 12, 20, 0.95); border-top: 1px solid rgba(0, 229, 255, 0.5); padding: 8px 0; z-index: 99999; overflow: hidden; display: flex; align-items: center; pointer-events: none; }
-        #terminal-bar.hidden { display: none !important; }
-        .terminal-track { display: inline-flex; white-space: nowrap; animation: ledScroll 15s linear infinite; }
-        @keyframes ledScroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-        .terminal-text { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; opacity: 0.9; }
-
+        /* KHU VỰC CHƠI GAME */
         #game-play-zone { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; overflow: hidden; z-index: 10; display: none;}
         #game-play-zone.active { display: block;}
         
@@ -132,11 +181,18 @@
 
         #custom-cursor { position: absolute; width: 20px; height: 20px; border: 2px solid #00e5ff; border-radius: 50%; pointer-events: none; z-index: 100; display: none; box-shadow: 0 0 10px #00e5ff; transform: translate(-50%, -50%); }
 
-        #warning-bar-container { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); width: 200px; height: 4px; background: rgba(255, 255, 255, 0.2); border-radius: 2px; overflow: hidden; display: none; z-index: 130;}
-        #warning-progress { width: 0%; height: 100%; background: #ff3366; transition: width 0.1s linear; }
+        #warning-bar-container { position: absolute; bottom: max(80px, calc(env(safe-area-inset-bottom) + 80px)); left: 50%; transform: translateX(-50%); width: 200px; height: 4px; background: rgba(255, 255, 255, 0.2); border-radius: 2px; overflow: hidden; display: none; z-index: 130;}
+        #warning-progress { width: 0%; height: 100%; background: var(--crimson); transition: width 0.1s linear; }
 
         .flashbang-red { position: fixed; inset: 0; background: rgba(255, 51, 102, 0.4); z-index: 999999; pointer-events: none; animation: flashRed 0.4s forwards; }
         @keyframes flashRed { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* THANH TERMINAL */
+        #terminal-bar { position: fixed; bottom: 0; left: 0; width: 100vw; background: rgba(5, 12, 20, 0.95); border-top: 1px solid rgba(0, 229, 255, 0.5); padding: 8px 0; z-index: 99999; overflow: hidden; display: flex; align-items: center; pointer-events: none; }
+        #terminal-bar.hidden { display: none !important; }
+        .terminal-track { display: inline-flex; white-space: nowrap; animation: ledScroll 15s linear infinite; }
+        @keyframes ledScroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+        .terminal-text { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; opacity: 0.9; }
 
     </style>
 </head>
@@ -148,17 +204,36 @@
     <div id="task-arena">
         <div class="play-area" id="play-area">
 
-            <div id="ingame-hud" class="hidden">
-                <div class="hud-left">
-                    <div id="hp-row-1" class="hp-row"></div>
-                    <div id="hp-row-2" class="hp-row"></div>
-                    <div id="hp-notification-area" style="position: relative;"></div>
+            <!-- TẦNG TRÊN: HIỂN THỊ MÁU VÀ ĐIỂM -->
+            <div id="game-top-bar" class="game-top-bar hidden">
+                <!-- 5 Máu Cyan Gốc -->
+                <div class="health-container">
+                    <div class="health-bar cyan active" id="hp-g-1"></div>
+                    <div class="health-bar cyan active" id="hp-g-2"></div>
+                    <div class="health-bar cyan active" id="hp-g-3"></div>
+                    <div class="health-bar cyan active" id="hp-g-4"></div>
+                    <div class="health-bar cyan active" id="hp-g-5"></div>
                 </div>
-                <div class="hud-center">DATA: <b id="boo-points" style="color:#00e5ff; margin-left: 5px; font-size: 18px;">0</b></div>
-                <div class="hud-right">
-                    <div class="hud-btn" onclick="pauseGame()">⏸</div>
-                    <div class="hud-btn exit-btn" onclick="confirmExitToLobby()">✕</div>
+
+                <!-- Điểm DATA ở giữa -->
+                <div class="data-score">DATA: <span id="boo-points">0</span>
+                    <div id="hp-notification-area"></div>
                 </div>
+
+                <!-- 5 Máu Hồng Thưởng -->
+                <div class="health-container">
+                    <div class="health-bar pink" id="hp-p-1"></div>
+                    <div class="health-bar pink" id="hp-p-2"></div>
+                    <div class="health-bar pink" id="hp-p-3"></div>
+                    <div class="health-bar pink" id="hp-p-4"></div>
+                    <div class="health-bar pink" id="hp-p-5"></div>
+                </div>
+            </div>
+
+            <!-- TẦNG DƯỚI: ĐIỀU HƯỚNG CẮT NGANG -->
+            <div id="game-bottom-bar" class="game-bottom-bar hidden">
+                <button class="btn-action btn-back" onclick="confirmExitToLobby()">⟨</button>
+                <button class="btn-action btn-pause" onclick="pauseGame()"></button>
             </div>
 
             <div id="start-prompt-overlay" class="hidden">
@@ -181,6 +256,7 @@
 
             <div id="freeze-overlay"><div class="freeze-text">KẾT THÚC</div></div>
 
+            <!-- KHU VỰC CHƠI GAME Ở GIỮA -->
             <div id="game-play-zone">
                 <div id="custom-cursor"></div>
                 <div id="game-target" class="wind-target" onpointerdown="handleTargetClick(event)"></div>
@@ -215,7 +291,7 @@
                 </div>
             </div>
 
-            <!-- BẢNG TỔNG KẾT CUỐI CÙNG (DỌN SẠCH DẤU NGOẶC, CHỮ TO RÕ, HIỆU ỨNG ĐỘNG) -->
+            <!-- BẢNG TỔNG KẾT CUỐI CÙNG -->
             <div id="final-summary-overlay">
                 <div class="final-header">TỔNG KẾT PHONG LUÂN</div>
                 
@@ -321,7 +397,7 @@
 
         let cGame = '1'; 
         let aScore = 0; 
-        let stabilityHP = 10; 
+        let stabilityHP = 5; // Mặc định 5 máu (5 Xanh / 0 Hồng)
         let isPlaying = false; 
         let isPausedForStart = true;
         
@@ -356,12 +432,29 @@
         let gTargetClicked = false; 
         let nextHpMilestone = 1000;
 
-        window.onload = () => {
-            openArena('1');
-        };
+        window.onload = () => { openArena('1'); };
+
+        function updateHpDisplay() {
+            let hp = Math.min(10, Math.max(0, stabilityHP));
+            let cyanCount = Math.min(5, hp);
+            let pinkCount = Math.max(0, hp - 5);
+
+            for(let i=1; i<=5; i++) {
+                document.getElementById('hp-g-'+i).classList.toggle('active', i <= cyanCount);
+                document.getElementById('hp-p-'+i).classList.toggle('active', i <= pinkCount);
+            }
+        }
+
+        function showHpRewardAlert() {
+            let alertBox = document.createElement('div');
+            alertBox.className = 'status-notification';
+            alertBox.innerHTML = `+1 NĂNG LƯỢNG`;
+            document.getElementById('hp-notification-area').appendChild(alertBox);
+            setTimeout(() => alertBox.remove(), 1200);
+        }
 
         function openArena(id) {
-            cGame = id; aScore = 0; stabilityHP = 10; isPlaying = false; isPausedForStart = true;
+            cGame = id; aScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
             nextHpMilestone = 1000;
             currentFocusFrames = 0; maxFocusFrames = 0; targetAppearTime = 0; reactionTimesG2 = [];
             
@@ -385,41 +478,24 @@
             } 
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
+            document.getElementById('game-top-bar').classList.add('hidden');
+            document.getElementById('game-bottom-bar').classList.add('hidden');
             document.getElementById('terminal-bar').classList.remove('hidden');
             document.getElementById('start-prompt-overlay').classList.remove('hidden');
         }
 
-        function updateHpDisplay() {
-            let hp1 = Math.min(10, Math.max(0, stabilityHP));
-            let hp2 = Math.min(10, Math.max(0, stabilityHP - 10));
-
-            let row1Full = Math.ceil(hp1 / 2);
-            let row1Empty = 5 - row1Full;
-            document.getElementById('hp-row-1').innerHTML = 
-                "<span style='color:#00e5ff; text-shadow: 0 0 8px #00e5ff;'>" + "▰".repeat(Math.max(0, row1Full)) + "</span>" +
-                "<span style='color:#112233;'>" + "▱".repeat(Math.max(0, row1Empty)) + "</span>";
-
-            let row2Full = Math.ceil(hp2 / 2);
-            let row2Empty = 5 - row2Full;
-            document.getElementById('hp-row-2').innerHTML = 
-                "<span style='color:#ffffff; text-shadow: 0 0 8px #ffffff;'>" + "▰".repeat(Math.max(0, row2Full)) + "</span>" +
-                "<span style='color:#222222;'>" + "▱".repeat(Math.max(0, row2Empty)) + "</span>";
-        }
-
-        function showHpRewardAlert() {
-            let alertBox = document.createElement('div');
-            alertBox.className = 'status-notification';
-            alertBox.innerHTML = `+1 NĂNG LƯỢNG`;
-            document.getElementById('hp-notification-area').appendChild(alertBox);
-            setTimeout(() => alertBox.remove(), 1200);
-        }
-
         function triggerStartGame() {
             initAudio(); playSound('coin');
-            document.getElementById('start-prompt-overlay').classList.add('hidden'); document.getElementById('terminal-bar').classList.add('hidden');
+            document.getElementById('start-prompt-overlay').classList.add('hidden'); 
+            document.getElementById('terminal-bar').classList.add('hidden');
             playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
             setTimeout(() => { let playAreaWrap = document.getElementById('play-area'); playAreaWrap.classList.add('fullscreen-mode'); laser.classList.add('expand'); }, 300);
-            setTimeout(() => { laser.remove(); isPausedForStart = false; document.getElementById('ingame-hud').classList.remove('hidden'); document.getElementById('game-play-zone').classList.add('active'); startArena(); }, 800);
+            setTimeout(() => { 
+                laser.remove(); isPausedForStart = false; 
+                document.getElementById('game-top-bar').classList.remove('hidden');
+                document.getElementById('game-bottom-bar').classList.remove('hidden');
+                document.getElementById('game-play-zone').classList.add('active'); startArena(); 
+            }, 800);
         }
 
         function clearAllTimeouts() {
@@ -429,7 +505,7 @@
 
         function startArena() {
             aScore = 0;
-            stabilityHP = 10;
+            stabilityHP = 5;
             cancelAnimationFrame(loopRaf);
             clearAllTimeouts();
 
@@ -521,14 +597,14 @@
 
             if (aScore >= nextHpMilestone) {
                 nextHpMilestone += 1000;
-                stabilityHP = Math.min(20, stabilityHP + 2);
+                stabilityHP = Math.min(10, stabilityHP + 1);
                 updateHpDisplay();
                 showHpRewardAlert();
             }
         }
 
         function loseLife() {
-            stabilityHP -= 2; 
+            stabilityHP -= 1; // Sai sẽ mất 1 Vạch Máu
             updateHpDisplay();
             playSound('error');
             
@@ -569,9 +645,7 @@
         function scheduleGhostToggle() {
             if(!isPlaying || isPausedForStart || cGame !== '2') return;
             
-            if (!isGhost && !gTargetClicked) {
-                loseLife();
-            }
+            if (!isGhost && !gTargetClicked) { loseLife(); }
 
             isGhost = !isGhost;
             
@@ -633,7 +707,7 @@
             ty += Math.sin(tAngle) * finalSpeed;
 
             let minX = 35, maxXBound = maxX - 35;
-            let minY = 95, maxYBound = maxY - 75;
+            let minY = 95, maxYBound = maxY - 100; // Tránh thanh Navigation ở đáy
 
             let hitWall = false;
             if (tx < minX) { tx = minX; hitWall = true; tAngle = Math.PI - tAngle; }
@@ -693,14 +767,20 @@
             if(cGame === '1') { 
                 sessionScoreG1 = Math.floor(aScore); 
                 finalMaxFocusSec = Math.round((maxFocusFrames / 60) * 10) / 10;
+                localStorage.setItem('phong_luan_bai1_score', sessionScoreG1);
             }
             if(cGame === '2') { 
                 sessionScoreG2 = Math.floor(aScore); 
                 finalAvgSlashMs = reactionTimesG2.length > 0 ? Math.round(reactionTimesG2.reduce((a,b)=>a+b, 0) / reactionTimesG2.length) : 0;
                 if (aScore < 1000) finalAvgSlashMs = 1500;
+                localStorage.setItem('phong_luan_bai2_score', sessionScoreG2);
             }
 
-            document.getElementById('ingame-hud').classList.add('hidden');
+            // Ghi lưu dữ liệu vào LocalStorage để Lực Chiến Đọc
+            localStorage.setItem('phong_luan_score', sessionScoreG1 + sessionScoreG2);
+
+            document.getElementById('game-top-bar').classList.add('hidden');
+            document.getElementById('game-bottom-bar').classList.add('hidden');
             let playAreaWrap = document.getElementById('play-area'); playAreaWrap.classList.remove('fullscreen-mode');
             document.getElementById('game-play-zone').classList.remove('active');
             
