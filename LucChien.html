@@ -31,10 +31,10 @@
         #quantum-flash-overlay.flash { animation: quantumFlashAnim 0.4s ease-out; }
         @keyframes quantumFlashAnim { 0% { opacity: 0.95; filter: brightness(3) drop-shadow(0 0 50px var(--cyan)); } 50% { opacity: 0.4; filter: brightness(1.5); } 100% { opacity: 0; filter: none; } }
 
-        /* ĐÃ FIX: TRỤC VIDEO LỆCH PHẢI TỔNG CỘNG 10PX ĐỂ THẲNG TẮP VỚI TÂM RADAR */
+        /* FIX: DỊCH CHUYỂN VIDEO SANG PHẢI +15PX ĐỂ THẲNG TRỤC RADAR */
         #bg-video { 
             position: fixed; top: 0; left: 50%; width: 100vw; height: 100vh; 
-            transform: translateX(calc(-50% + 10px)); 
+            transform: translateX(calc(-50% + 15px)); 
             object-fit: cover; object-position: center center; 
             z-index: 0; opacity: 0; pointer-events: none; transition: opacity 0.8s ease-in; 
         }
@@ -130,12 +130,17 @@
         .dot-yellow { background-color: var(--amber); box-shadow: 0 0 8px var(--amber), 0 0 12px var(--amber); animation: pulseYellow 1.5s infinite ease-in-out; }
         .dot-green { background-color: var(--mint); box-shadow: 0 0 8px var(--mint), 0 0 12px var(--mint); animation: pulseGreen 1.5s infinite ease-in-out; }
         
-        .dot-cyan { background-color: var(--cyan); box-shadow: 0 0 12px var(--cyan), 0 0 20px var(--cyan); }
-        @keyframes waterfallAnim { 0% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.4); } 100% { opacity: 0.1; transform: scale(0.8); } }
-        .waterfall-1 { animation: waterfallAnim 1.2s infinite 0.0s ease-in-out; }
-        .waterfall-2 { animation: waterfallAnim 1.2s infinite 0.3s ease-in-out; }
-        .waterfall-3 { animation: waterfallAnim 1.2s infinite 0.6s ease-in-out; }
-        .waterfall-4 { animation: waterfallAnim 1.2s infinite 0.9s ease-in-out; }
+        /* HIỆU ỨNG CHẠY SÓNG CYAN KHI CHÚI MÁY */
+        .dot-cyan { background-color: var(--cyan) !important; box-shadow: 0 0 12px var(--cyan), 0 0 20px var(--cyan) !important; animation: none; }
+        @keyframes waterfallAnim { 
+            0% { opacity: 0.1; transform: scale(0.8); } 
+            50% { opacity: 1; transform: scale(1.4); } 
+            100% { opacity: 0.1; transform: scale(0.8); } 
+        }
+        .waterfall-1 { animation: waterfallAnim 1.2s infinite 0.0s ease-in-out !important; }
+        .waterfall-2 { animation: waterfallAnim 1.2s infinite 0.3s ease-in-out !important; }
+        .waterfall-3 { animation: waterfallAnim 1.2s infinite 0.6s ease-in-out !important; }
+        .waterfall-4 { animation: waterfallAnim 1.2s infinite 0.9s ease-in-out !important; }
 
         @keyframes pulseRed { 0%, 100% { transform: scale(0.8); opacity: 0.6; } 50% { transform: scale(1.2); opacity: 1; } }
         @keyframes pulseYellow { 0%, 100% { transform: scale(0.8); opacity: 0.6; } 50% { transform: scale(1.2); opacity: 1; } }
@@ -343,7 +348,7 @@
         <div class="blip blip-3"></div>
     </div>
 
-    <!-- MODAL XÁC THỰC BẢO MẬT (FIX TYPOGRAPHY 2.0 KM) -->
+    <!-- MODAL XÁC THỰC BẢO MẬT (ĐÃ FIX XUỐNG DÒNG 2.0 KM) -->
     <div class="cyber-modal" id="radar-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
@@ -364,7 +369,7 @@
         </div>
     </div>
 
-    <!-- MODAL KẾT QUẢ TERMINAL GPS (FIX CHỮ TRẮNG) -->
+    <!-- MODAL KẾT QUẢ TERMINAL GPS (ĐÃ FIX CHỮ ĐỘC HÀNH MÀU TRẮNG) -->
     <div class="cyber-modal" id="terminal-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
@@ -482,6 +487,7 @@
             ];
             
             typeTerminalLines(introLines, termContent, () => {
+                // HỆ ĐIỀU HÀNH SẼ BẬT POP-UP XIN QUYỀN TẠI ĐÂY (NẾU CHẠY TRÊN HTTPS HOẶC LOCALHOST)
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         (position) => { showScanResults(termContent, btnClose); }, 
@@ -534,7 +540,7 @@
             localStorage.setItem('kdrive_last_date', today);
         }
 
-        /* HÃM PHANH GYRO Ở -175PX VÀ BẮT NHỊP ĐÈN THÁC NƯỚC LẬP TỨC */
+        /* HÃM PHANH GYRO Ở -175PX VÀ BẮT NHỊP ĐÈN THÁC NƯỚC LẬP TỨC KHI HỘP TRƯỢT LÊN */
         const cardBox = document.getElementById('stats-card-box');
         const dRadar = document.getElementById('dragon-radar');
 
@@ -558,7 +564,7 @@
                     
                     cardBox.style.transform = `translate(-50%, calc(-50% + ${moveY}px)) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
-                    // HIỆN RADAR & BẬT ĐÈN THÁC NƯỚC KHI CHÚI MÁY
+                    // HIỆN RADAR & BẬT ĐÈN THÁC NƯỚC NGAY LÚC CHÚI MÁY
                     if (moveY < -100 && !isGyroLocked) {
                         if(!dRadar.classList.contains('active')) {
                             dRadar.classList.add('active');
@@ -596,7 +602,7 @@
         }
 
         function syncAllBars() {
-            if(isWaterfallActive) return; // Không đè màu nếu đang chạy thác nước
+            if(isWaterfallActive) return; // Không đè màu gốc nếu đang mải chạy thác nước
             
             let activeCount = 0; let sciTotalPoints = 0; const pointsPerItem = 11.1;
             const physMetrics = [ { id: 'bar-hr', key: 'kdrive_live_hr' }, { id: 'bar-weight', key: 'kdrive_live_weight' }, { id: 'bar-sleep', key: 'kdrive_live_sleep' }, { id: 'bar-fat', key: 'kdrive_live_fat' }, { id: 'bar-water', key: 'kdrive_live_water' }, { id: 'bar-steps', key: 'kdrive_live_steps' } ];
