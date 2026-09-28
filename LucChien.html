@@ -43,7 +43,7 @@
             transition: opacity 0.8s ease-in;
         }
 
-        /* HẠT LƯỢNG TỬ (SƯƠNG MAI TRẮNG, VÀNG KIM, HỒNG NEON) */
+        /* HẠT LƯỢNG TỬ */
         .particle-matrix { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
         .atom-particle { position: absolute; border-radius: 50%; opacity: 0; animation: floatUpwards linear infinite; }
         
@@ -116,13 +116,16 @@
         #content-wrapper { position: absolute; inset: 0; z-index: 10; pointer-events: none; animation: fadeIn 1s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* KHUNG HỘP CHỈ SỐ TIẾN HÓA 3 CẤP ĐỘ (VẪN GIỮ ĐỘ TRONG SUỐT HIỆN ĐẠI Ở CẤP 3) */
+        /* KHUNG HỘP CHỈ SỐ HOLOGRAM (CÓ THỂ KÉO THẢ MƯỢT MÀ LÊN XUỐNG) */
         .stats-card {
-            position: absolute; top: 62%; left: 50%; transform: translate(-50%, -50%);
+            position: absolute; left: 50%; transform: translateX(-50%); top: 62%;
             width: 92%; max-width: 390px; border-radius: 14px; padding: 15px 18px; 
             display: flex; flex-direction: column; gap: 9px; pointer-events: auto; 
-            transition: all 0.5s ease;
+            transition: border 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            touch-action: none; /* Cho phép kéo thả mượt mà */
+            cursor: grab;
         }
+        .stats-card:active { cursor: grabbing; }
 
         /* CẤP 1: SƯƠNG MAI / TRONG SUỐT (0% - <50%) */
         .stats-card.tier-1 {
@@ -142,7 +145,7 @@
 
         /* CẤP 3: VÔ NGÃ / TRONG SUỐT MỜ ẢO KẾT HỢP VIỀN 7 MÀU VÀ TÂM TỎA SÁNG (100.0%) */
         .stats-card.tier-3 {
-            background: rgba(10, 8, 22, 0.65); /* Vẫn giữ độ trong suốt thấy nền phía sau */
+            background: rgba(10, 8, 22, 0.65);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border: 2px solid transparent;
             background-image: linear-gradient(rgba(10, 8, 22, 0.65), rgba(10, 8, 22, 0.65)), linear-gradient(90deg, #ff007f, #00e5ff, #ffd700, #ff2a2a, #00ff9d, #ff007f);
@@ -153,17 +156,6 @@
         @keyframes rainbowBorder {
             0% { filter: hue-rotate(0deg); }
             100% { filter: hue-rotate(360deg); }
-        }
-
-        /* TÂM PHẢN ỨNG TỎA SÁNG NHẸ NHÀNG Ở CẤP 3 */
-        .stats-card.tier-3::before {
-            content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none; z-index: -1;
-            background: radial-gradient(circle at center, rgba(255,0,127,0.15) 0%, rgba(0,229,255,0.08) 50%, transparent 80%);
-            animation: coreGlowPulse 3s infinite alternate ease-in-out;
-        }
-        @keyframes coreGlowPulse {
-            0% { opacity: 0.5; transform: scale(0.95); }
-            100% { opacity: 0.9; transform: scale(1.05); }
         }
 
         .sci-header { text-align: center; margin-bottom: 2px; cursor: pointer; transition: transform 0.15s; }
@@ -199,7 +191,7 @@
         .icon-wrap { width: 18px; height: 18px; display: flex; justify-content: center; align-items: center; overflow: visible; }
         .icon-wrap img { width: 220%; height: 220%; object-fit: contain; filter: drop-shadow(0 0 4px rgba(255,255,255,0.4)); }
         
-        .live-dot { width: 12px; height: 12px; border-radius: 50%; transition: all 0.5s ease; cursor: pointer; }
+        .live-dot { width: 12px; height: 12px; border-radius: 50%; transition: all 0.5s ease; }
         .dot-red { background-color: var(--crimson); box-shadow: 0 0 8px var(--crimson), 0 0 12px var(--crimson); animation: pulseRed 1.5s infinite ease-in-out; }
         .dot-yellow { background-color: var(--amber); box-shadow: 0 0 8px var(--amber), 0 0 12px var(--amber); animation: pulseYellow 1.5s infinite ease-in-out; }
         .dot-green { background-color: var(--mint); box-shadow: 0 0 8px var(--mint), 0 0 12px var(--mint); animation: pulseGreen 1.5s infinite ease-in-out; }
@@ -255,12 +247,12 @@
         <source src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/nen%20trang%20chu.mp4" type="video/mp4">
     </video>
 
-    <!-- THANH ĐIỀU HƯỚNG TRÊN -->
+    <!-- THANH ĐIỀU HƯỚNG TRÊN (CHẠM 3 LẦN VÀO NÚT ÂM THANH ĐỂ TEST DEBUG CẤP ĐỘ) -->
     <div class="top-nav">
         <button class="btn-back-cyber" onclick="returnToCore()">⟨</button>
         
         <div style="position: relative;">
-            <button class="btn-audio-cyber" id="audio-toggle-btn" onclick="toggleAudioPopup(event)">
+            <button class="btn-audio-cyber" id="audio-toggle-btn" onclick="handleAudioDebugClick(event)">
                 <div class="audio-equalizer">
                     <div class="eq-bar eq-bar-1"></div>
                     <div class="eq-bar eq-bar-2"></div>
@@ -282,7 +274,7 @@
     </audio>
 
     <div id="content-wrapper">
-        <!-- BẢNG CHỈ SỐ HOLOGRAM -->
+        <!-- BẢNG CHỈ SỐ HOLOGRAM CÓ THỂ KÉO THẢ MƯỢT MÀ -->
         <div class="stats-card tier-1" id="stats-card-box">
             <div class="sci-header" onclick="showSciInfoModal()">
                 <div class="sci-label">CHỈ SỐ KỶ LUẬT TẬP LUYỆN</div>
@@ -296,8 +288,7 @@
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20DIA.png?raw=true" alt="Sức Mạnh"></div>
                         <span>SỨC MẠNH</span>
                     </div>
-                    <!-- ĐÈN 1 (CHẠM BÍ MẬT BƯỚC 1) -->
-                    <div class="live-dot dot-red" id="dot-suc-manh" onclick="handleSecretDotClick(event, 0)"></div>
+                    <div class="live-dot dot-red" id="dot-suc-manh"></div>
                 </div>
                 <div class="sub-bars-grid">
                     <div class="sub-bar-item"><div class="sub-bar-container"><div class="sub-bar-fill" id="bar-hr"></div></div><div class="sub-bar-label">Tim</div></div>
@@ -316,8 +307,7 @@
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20THUY.png?raw=true" alt="Trí Nhớ"></div>
                         <span>TRÍ NHỚ</span>
                     </div>
-                    <!-- ĐÈN 2 (CHẠM BÍ MẬT BƯỚC 2) -->
-                    <div class="live-dot dot-red" id="dot-thuy" onclick="handleSecretDotClick(event, 1)"></div>
+                    <div class="live-dot dot-red" id="dot-thuy"></div>
                 </div>
                 <div class="dual-bars-grid">
                     <div class="stat-bar-container"><div class="stat-bar-fill fill-thuy" id="bar-thuy-1"></div></div>
@@ -332,8 +322,7 @@
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20HOA.png?raw=true" alt="Phản Xạ"></div>
                         <span>PHẢN XẠ</span>
                     </div>
-                    <!-- ĐÈN 3 (CHẠM BÍ MẬT BƯỚC 3) -->
-                    <div class="live-dot dot-red" id="dot-hoa" onclick="handleSecretDotClick(event, 2)"></div>
+                    <div class="live-dot dot-red" id="dot-hoa"></div>
                 </div>
                 <div class="dual-bars-grid">
                     <div class="stat-bar-container"><div class="stat-bar-fill fill-hoa" id="bar-hoa-1"></div></div>
@@ -348,8 +337,7 @@
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20PHONG.png?raw=true" alt="Phán Đoán"></div>
                         <span>PHÁN ĐOÁN</span>
                     </div>
-                    <!-- ĐÈN 4 (CHẠM BÍ MẬT BƯỚC 4) -->
-                    <div class="live-dot dot-red" id="dot-phong" onclick="handleSecretDotClick(event, 3)"></div>
+                    <div class="live-dot dot-red" id="dot-phong"></div>
                 </div>
                 <div class="dual-bars-grid">
                     <div class="stat-bar-container"><div class="stat-bar-fill fill-phong" id="bar-phong-1"></div></div>
@@ -446,35 +434,92 @@
             localStorage.setItem('kdrive_last_date', today);
         }
 
-        // CHUỖI MỞ KHÓA DEBUG BÍ MẬT BẰNG 4 ĐÈN TỪ TRÊN XUỐNG DƯỚI
-        let debugTierOverride = null; // null = tự động, 1, 2, 3 = ép cứng cấp độ
-        let expectedDotIndex = 0;
-        let secretTimer = null;
+        // TÍNH NĂNG DEBUG TEST CẤP ĐỘ BẰNG CÁCH CHẠM 3 LẦN VÀO NÚT ÂM THANH
+        let debugTierOverride = null; // null = tự động, 1, 2, 3 = ép cứng
+        let audioClickCount = 0;
+        let audioClickTimer = null;
 
-        function handleSecretDotClick(event, dotIndex) {
-            event.stopPropagation(); // Ngăn không cho nhảy sang trang test bài tập
-            
-            clearTimeout(secretTimer);
-            secretTimer = setTimeout(() => { expectedDotIndex = 0; }, 2000); // Quá 2 giây reset chuỗi
+        function handleAudioDebugClick(event) {
+            audioClickCount++;
+            clearTimeout(audioClickTimer);
+            audioClickTimer = setTimeout(() => { audioClickCount = 0; }, 1000);
 
-            if (dotIndex === expectedDotIndex) {
-                expectedDotIndex++;
-                if (expectedDotIndex >= 4) {
-                    // Đã bấm chuẩn xác từ trên xuống dưới cả 4 đèn!
-                    expectedDotIndex = 0;
-                    if (debugTierOverride === null) debugTierOverride = 1;
-                    else if (debugTierOverride === 1) debugTierOverride = 2;
-                    else if (debugTierOverride === 2) debugTierOverride = 3;
-                    else debugTierOverride = null;
+            if (audioClickCount >= 3) {
+                audioClickCount = 0;
+                if (debugTierOverride === null) debugTierOverride = 1;
+                else if (debugTierOverride === 1) debugTierOverride = 2;
+                else if (debugTierOverride === 2) debugTierOverride = 3;
+                else debugTierOverride = null;
 
-                    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-                    alert("DEBUG MODE: Đã chuyển sang Cấp độ " + (debugTierOverride !== null ? debugTierOverride : "TỰ ĐỘNG (Theo SCI)"));
-                    syncAllBars();
-                }
+                if (navigator.vibrate) navigator.vibrate([40, 40, 40]);
+                alert("DEBUG MODE: Đã chuyển sang Cấp độ " + (debugTierOverride !== null ? debugTierOverride : "TỰ ĐỘNG (Theo SCI)"));
+                syncAllBars();
             } else {
-                expectedDotIndex = (dotIndex === 0) ? 1 : 0;
+                toggleAudioPopup(event);
             }
         }
+
+        // TÍNH NĂNG KÉO THẢ MƯỢT MÀ BẢNG HOLOGRAM (DRAG-TO-MOVE)
+        const cardBox = document.getElementById('stats-card-box');
+        let isDragging = false;
+        let startY = 0;
+        let startTop = 0;
+
+        cardBox.addEventListener('touchstart', (e) => {
+            // Không chặn nếu bấm vào các nút tương tác bên trong
+            if (e.target.closest('.sci-header') || e.target.closest('.stat-group') || e.target.closest('.mushi-box-wrapper')) return;
+            isDragging = true;
+            startY = e.touches[0].clientY;
+            startTop = cardBox.offsetTop;
+            cardBox.style.transition = 'none';
+        }, {passive: true});
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            let currentY = e.touches[0].clientY;
+            let deltaY = currentY - startY;
+            let newTop = startTop + deltaY;
+            
+            // Giới hạn kéo trong khung màn hình
+            let maxTop = window.innerHeight - cardBox.offsetHeight - 20;
+            if (newTop < 80) newTop = 80;
+            if (newTop > maxTop) newTop = maxTop;
+
+            cardBox.style.top = newTop + 'px';
+            cardBox.style.transform = 'translateX(-50%)';
+        }, {passive: true});
+
+        window.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            cardBox.style.transition = 'all 0.3s ease';
+        });
+
+        // Hỗ trợ chuột cho máy tính / test giả lập
+        cardBox.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.sci-header') || e.target.closest('.stat-group') || e.target.closest('.mushi-box-wrapper')) return;
+            isDragging = true;
+            startY = e.clientY;
+            startTop = cardBox.offsetTop;
+            cardBox.style.transition = 'none';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let deltaY = e.clientY - startY;
+            let newTop = startTop + deltaY;
+            let maxTop = window.innerHeight - cardBox.offsetHeight - 20;
+            if (newTop < 80) newTop = 80;
+            if (newTop > maxTop) newTop = maxTop;
+            cardBox.style.top = newTop + 'px';
+            cardBox.style.transform = 'translateX(-50%)';
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            cardBox.style.transition = 'all 0.3s ease';
+        });
 
         function syncAllBars() {
             let activeCount = 0; 
@@ -561,7 +606,6 @@
                 else currentTier = 1;
             }
 
-            const cardBox = document.getElementById('stats-card-box');
             cardBox.className = 'stats-card tier-' + currentTier;
 
             // 5. CHỈ TRỪ NGÀY VÔ NGÃ KHI activeCount >= 9 (100.0% TUYỆT ĐỐI)
