@@ -54,9 +54,11 @@
             100% { transform: translateY(-10vh) translateX(-15px) scale(0.3); opacity: 0; }
         }
 
-        /* NÚT THOÁT CHUẨN HÓA */
+        /* NÚT THOÁT CHUẨN HÓA - ĐÃ NÉ ĐIỂM MÙ STATUS BAR */
         .top-nav {
-            position: fixed; top: 15px; left: 0; width: 100vw; padding: 0 20px;
+            position: fixed; 
+            top: max(45px, env(safe-area-inset-top)); /* Hạ thấp để né cụm camera và thời gian */
+            left: 0; width: 100vw; padding: 0 20px;
             display: flex; justify-content: flex-start; align-items: flex-start;
             z-index: 9999; pointer-events: none;
         }
@@ -75,7 +77,7 @@
         #content-wrapper { position: absolute; inset: 0; z-index: 10; pointer-events: none; animation: fadeIn 1s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* KHUNG HỘP */
+        /* KHUNG HỘP CHỈ SỐ */
         .stats-card {
             position: absolute; top: 62%; left: 50%; transform: translate(-50%, -50%);
             width: 92%; max-width: 390px; background: rgba(5, 8, 12, 0.88); 
@@ -101,12 +103,13 @@
         .icon-wrap { width: 18px; height: 18px; display: flex; justify-content: center; align-items: center; overflow: visible; }
         .icon-wrap img { width: 220%; height: 220%; object-fit: contain; filter: drop-shadow(0 0 4px rgba(255,255,255,0.4)); }
         
-        /* CHẤM TÍN HIỆU 3 TRẠNG THÁI (ĐỎ - VÀNG - XANH) */
+        /* CHẤM TÍN HIỆU 3 TRẠNG THÁI (ĐỀU CÓ ANIMATION NHẤP NHÁY) */
         .live-dot {
             width: 8px; height: 8px; border-radius: 50%; transition: all 0.5s ease;
         }
         .dot-red {
-            background-color: var(--crimson); opacity: 0.5; box-shadow: 0 0 4px var(--crimson);
+            background-color: var(--crimson); box-shadow: 0 0 8px var(--crimson), 0 0 12px var(--crimson);
+            animation: pulseRed 1.5s infinite ease-in-out;
         }
         .dot-yellow {
             background-color: var(--amber); box-shadow: 0 0 8px var(--amber), 0 0 12px var(--amber);
@@ -117,6 +120,10 @@
             animation: pulseGreen 1.5s infinite ease-in-out;
         }
         
+        @keyframes pulseRed {
+            0%, 100% { transform: scale(0.8); opacity: 0.6; box-shadow: 0 0 4px var(--crimson); }
+            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 12px var(--crimson); }
+        }
         @keyframes pulseYellow {
             0%, 100% { transform: scale(0.8); opacity: 0.6; box-shadow: 0 0 4px var(--amber); }
             50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 12px var(--amber); }
@@ -160,6 +167,7 @@
         <source src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/nen%20trang%20chu.mp4" type="video/mp4">
     </video>
 
+    <!-- THANH ĐIỀU HƯỚNG ĐÃ NÉ ĐIỂM MÙ -->
     <div class="top-nav">
         <button class="btn-back-cyber" onclick="returnToCore()">⟨</button>
     </div>
@@ -178,6 +186,7 @@
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20DIA.png?raw=true" alt="Sức Mạnh"></div>
                         <span data-i18n="lcDia">SỨC MẠNH</span>
                     </div>
+                    <!-- CHẤM TÍN HIỆU ĐỎ MẶC ĐỊNH SẼ NHẤP NHÁY -->
                     <div class="live-dot dot-red" id="dot-suc-manh"></div>
                 </div>
                 <div class="sub-bars-grid">
@@ -285,7 +294,7 @@
                 }
             });
 
-            // Logic chấm tín hiệu Sức Mạnh (Traffic Light)
+            // Logic chấm tín hiệu Sức Mạnh (Đỏ - Vàng - Xanh)
             let dotSucManh = document.getElementById('dot-suc-manh');
             if (activePhysCount === 0) dotSucManh.className = 'live-dot dot-red';
             else if (activePhysCount < 6) dotSucManh.className = 'live-dot dot-yellow';
@@ -301,24 +310,21 @@
                 if (b1 > 0) completedBars++;
                 if (b2 > 0) completedBars++;
                 
-                // Fallback nếu anh dùng hệ thống cũ (chỉ lưu 1 biến tổng)
                 if (completedBars === 0 && total > 0) completedBars = 1;
 
-                // Cập nhật giao diện vạch
                 if (completedBars >= 1) document.getElementById(bar1Id).style.width = '100%';
                 else document.getElementById(bar1Id).style.width = '0%';
 
                 if (completedBars >= 2) document.getElementById(bar2Id).style.width = '100%';
                 else document.getElementById(bar2Id).style.width = '0%';
 
-                // Cập nhật giao diện chấm tín hiệu
                 let dot = document.getElementById(dotId);
                 if (completedBars === 0) dot.className = 'live-dot dot-red';
                 else if (completedBars === 1) dot.className = 'live-dot dot-yellow';
                 else dot.className = 'live-dot dot-green';
             }
 
-            // Đồng bộ Trí Nhớ (Thủy), Phản Xạ (Hỏa), Phán Đoán (Phong)
+            // Đồng bộ Trí Nhớ, Phản Xạ, Phán Đoán
             syncCognitive('thuy_luan', 'bar-thuy-1', 'bar-thuy-2', 'dot-thuy');
             syncCognitive('hoa_luan', 'bar-hoa-1', 'bar-hoa-2', 'dot-hoa');
             syncCognitive('phong_luan', 'bar-phong-1', 'bar-phong-2', 'dot-phong');
@@ -347,13 +353,13 @@
             }
         });
 
-        // ================= I18N & ÂM THANH (GIỮ NGUYÊN) =================
+        // ================= I18N & ÂM THANH =================
         const i18nCore = {
             vi: { lcSciLabel: "CHỈ SỐ KỶ LUẬT TẬP LUYỆN", lcDia: "SỨC MẠNH", lcThuy: "TRÍ NHỚ", lcHoa: "PHẢN XẠ", lcPhong: "PHÁN ĐOÁN", lcVoNgaLabel: "CẢNH GIỚI TINH ANH", lcVoNgaValue: "1000 NGÀY" },
             en: { lcSciLabel: "TRAINING DISCIPLINE INDEX", lcDia: "VITALITY", lcThuy: "MEMORY", lcHoa: "REFLEX", lcPhong: "JUDGMENT", lcVoNgaLabel: "ELITE REALM", lcVoNgaValue: "1000 DAYS" }
         };
         const quantumMap = { /* ... */ }; 
-        function encodeQuantum(text) { return text; } // Simplified for display length
+        function encodeQuantum(text) { return text; } 
         let currentLang = localStorage.getItem('kdrive_lang') || 'vi';
 
         function applyTranslations() {
