@@ -80,11 +80,8 @@
             transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), background 0.3s, box-shadow 0.3s;
         }
         
-        /* Trạng thái Auto */
         body.mode-auto .cyber-switch-wrap .switch-lbl.auto { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); }
         body.mode-auto .cyber-switch { border-color: rgba(0, 229, 255, 0.5); }
-        
-        /* Trạng thái Manual */
         body.mode-manual .cyber-switch-wrap .switch-lbl.man { color: var(--amber); text-shadow: 0 0 8px var(--amber); }
         body.mode-manual .cyber-switch { border-color: rgba(255, 170, 0, 0.6); }
         body.mode-manual .switch-thumb { transform: translateX(22px); background: var(--amber); box-shadow: 0 0 8px var(--amber); }
@@ -131,16 +128,31 @@
         .orb-group { transform-origin: 170px 170px; transition: all 1s ease; }
         .orb-cw { animation: spin-cw 20s linear infinite; }
         .orb-ccw { animation: spin-ccw 25s linear infinite; }
-        .ring { fill: none; stroke-linecap: round; transition: stroke 0.5s ease; }
+        
+        /* HIỆU ỨNG VÀNH TRÒN ĐỔI MÀU & LIỀN NÉT THEO TIER */
+        .ring { fill: none; stroke-linecap: round; transition: stroke 1.5s ease, stroke-dasharray 1.5s ease; }
+        
+        /* Default: Tier Shiro (Màu rời rạc, nét đứt) */
         .ring-hr { stroke: var(--crimson); stroke-width: 1.5; stroke-dasharray: 4 12; filter: drop-shadow(0 0 3px var(--crimson)); }
         .ring-phys { stroke: var(--mint); stroke-width: 1.5; stroke-dasharray: 10 20; filter: drop-shadow(0 0 3px var(--mint)); }
         .ring-rec { stroke: var(--cyan); stroke-width: 1.5; stroke-dasharray: 15 30; filter: drop-shadow(0 0 3px var(--cyan)); }
         .ring-move { stroke: var(--amber); stroke-width: 1.5; stroke-dasharray: 5 15; filter: drop-shadow(0 0 3px var(--amber)); }
+        
+        /* Tier Chairo: Đồng màu Cyan, vẫn đứt nét */
+        body.tier-chairo .ring-hr, body.tier-chairo .ring-phys, body.tier-chairo .ring-rec, body.tier-chairo .ring-move {
+            stroke: var(--cyan); filter: drop-shadow(0 0 6px var(--cyan));
+        }
+
+        /* Tier Kuro: Nét liền hoàn toàn (solid), Đổi màu Hồng Neon/Violet */
+        body.tier-kuro .ring-hr, body.tier-kuro .ring-phys, body.tier-kuro .ring-rec, body.tier-kuro .ring-move {
+            stroke: var(--neon-pink); stroke-dasharray: none; filter: drop-shadow(0 0 10px var(--neon-pink));
+        }
+        
         .plasma-node { fill: #fff; opacity: 0; transition: opacity 0.5s ease; }
 
         .sci-nexus { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 15; width: 115px; height: 115px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(176, 38, 255, 0.15) 0%, transparent 70%); box-shadow: inset 0 0 25px rgba(176, 38, 255, 0.1); cursor: pointer; transition: all 1.5s ease; overflow: hidden; }
         
-        /* SÓNG XUNG KÍCH KHI ĐẠT ĐIỂM SCI CAO */
+        /* SÓNG XUNG KÍCH */
         .shockwave { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; background: transparent; border: 4px solid var(--violet); border-radius: 50%; z-index: 4; opacity: 0; pointer-events: none; }
         .shockwave.active { animation: shockwave-boom 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
         @keyframes shockwave-boom { 0% { width: 10px; height: 10px; opacity: 1; border-width: 15px; } 100% { width: 150vw; height: 150vw; opacity: 0; border-width: 1px; } }
@@ -328,40 +340,57 @@
 
         let currentMode = 'auto'; let currentEditingKey = null;
 
-        window.onload = () => { initSelectOptions(); if (localStorage.getItem('kdrive_core_initialized') !== 'true') { openOnboardingForm(); } else { showCoreCheckModal(); } };
+        /* HỆ THỐNG KIỂM TRA NGÀY MỚI (MIDNIGHT RESET) */
+        function checkMidnightReset() {
+            let lastDate = localStorage.getItem('kdrive_last_date');
+            let today = new Date().toDateString(); // Trả về chuỗi ngày (VD: "Mon Sep 28 2026")
+            
+            if (lastDate && lastDate !== today) {
+                // Nếu khác ngày, xóa toàn bộ thông số rèn luyện của ngày hôm trước
+                localStorage.removeItem('kdrive_live_hr');
+                localStorage.removeItem('kdrive_live_weight');
+                localStorage.removeItem('kdrive_live_sleep');
+                localStorage.removeItem('kdrive_live_fat');
+                localStorage.removeItem('kdrive_live_water');
+                localStorage.removeItem('kdrive_live_steps');
+                localStorage.removeItem('kdrive_sci_score');
+            }
+            
+            // Cập nhật lại mốc ngày hiện tại
+            localStorage.setItem('kdrive_last_date', today);
+        }
+
+        window.onload = () => { 
+            initSelectOptions(); 
+            checkMidnightReset(); // Khởi chạy kiểm tra xóa dữ liệu qua đêm
+            
+            if (localStorage.getItem('kdrive_core_initialized') !== 'true') { 
+                openOnboardingForm(); 
+            } else { 
+                showCoreCheckModal(); 
+            } 
+        };
+
         function initSelectOptions() { const y = document.getElementById('ob-year'); let yHtml = ''; for(let i=1960; i<=2010; i++) yHtml += `<option value="${i}">${i}</option>`; y.innerHTML = yHtml; y.value = 1988; const h = document.getElementById('ob-height'); let hHtml = ''; for(let i=150; i<=210; i++) hHtml += `<option value="${i}">${i} CM</option>`; h.innerHTML = hHtml; h.value = 176; const w = document.getElementById('ob-weight'); let wHtml = ''; for(let i=40; i<=120; i++) wHtml += `<option value="${i}">${i} KG</option>`; w.innerHTML = wHtml; w.value = 61; }
         
-        // HÀM QUAY LẠI (UNIVERSAL BACK BUTTON)
         function returnToPrev() {
             if(navigator.vibrate) navigator.vibrate([50]);
             const sw = document.getElementById('shockwave');
-            if(sw) {
-                sw.style.borderColor = 'var(--cyan)';
-                sw.classList.remove('active'); void sw.offsetWidth; sw.classList.add('active');
-            }
-            setTimeout(() => {
-                if (window.history.length > 1) { window.history.back(); } 
-                else { window.location.href = 'index.html'; }
-            }, 300);
+            if(sw) { sw.style.borderColor = 'var(--cyan)'; sw.classList.remove('active'); void sw.offsetWidth; sw.classList.add('active'); }
+            setTimeout(() => { if (window.history.length > 1) { window.history.back(); } else { window.location.href = 'index.html'; } }, 300);
         }
 
-        // HÀM CHUYỂN ĐỔI CẦN GẠT CYBER TOGGLE
         function toggleMode() {
             if (currentMode === 'auto') {
                 currentMode = 'manual';
-                document.body.classList.remove('mode-auto');
-                document.body.classList.add('mode-manual');
+                document.body.classList.remove('mode-auto'); document.body.classList.add('mode-manual');
             } else {
                 currentMode = 'auto';
-                document.body.classList.remove('mode-manual');
-                document.body.classList.add('mode-auto');
+                document.body.classList.remove('mode-manual'); document.body.classList.add('mode-auto');
             }
         }
 
-        function toggleAccordion(id) {
-            const el = document.getElementById(id);
-            if(el) el.classList.toggle('active');
-        }
+        function toggleAccordion(id) { const el = document.getElementById(id); if(el) el.classList.toggle('active'); }
 
         function showInfo(type) {
             const infoMap = {
@@ -390,25 +419,16 @@
             let age = 2026 - parseInt(year); 
             let tgtHr = Math.round((220 - age) * 0.75);
             let tgtWeight = Math.round(21.0 * (height / 100) * (height / 100));
-            localStorage.setItem('kdrive_target_hr', tgtHr); 
-            localStorage.setItem('kdrive_target_weight', tgtWeight); 
-            localStorage.setItem('kdrive_target_fat', 15.0); 
-            localStorage.setItem('kdrive_target_water', 60.0); 
-            localStorage.setItem('kdrive_target_sleep', 7.0); 
-            localStorage.setItem('kdrive_target_steps', 6000); 
+            localStorage.setItem('kdrive_target_hr', tgtHr); localStorage.setItem('kdrive_target_weight', tgtWeight); 
+            localStorage.setItem('kdrive_target_fat', 15.0); localStorage.setItem('kdrive_target_water', 60.0); 
+            localStorage.setItem('kdrive_target_sleep', 7.0); localStorage.setItem('kdrive_target_steps', 6000); 
         }
 
         function showCoreCheckModal() { 
-            let y = localStorage.getItem('kdrive_core_year') || '1988'; 
-            let h = localStorage.getItem('kdrive_core_height') || '176'; 
-            let w = localStorage.getItem('kdrive_core_weight') || '61'; 
-            let thr = localStorage.getItem('kdrive_target_hr') || '137';
-            let tw = localStorage.getItem('kdrive_target_weight') || '65';
-            
+            let y = localStorage.getItem('kdrive_core_year') || '1988'; let h = localStorage.getItem('kdrive_core_height') || '176'; let w = localStorage.getItem('kdrive_core_weight') || '61'; 
+            let thr = localStorage.getItem('kdrive_target_hr') || '137'; let tw = localStorage.getItem('kdrive_target_weight') || '65';
             document.getElementById('core-summary-view').innerHTML = `Tọa độ: Năm sinh ${y} | Cao ${h} CM | Cân nặng ${w} KG.`; 
-            document.getElementById('tgt-hr').innerText = thr;
-            document.getElementById('tgt-weight').innerText = tw;
-            
+            document.getElementById('tgt-hr').innerText = thr; document.getElementById('tgt-weight').innerText = tw;
             document.getElementById('core-check-modal').classList.add('active'); 
         }
 
@@ -417,62 +437,104 @@
         function closeOnboardingForm() { document.getElementById('onboarding-modal').classList.remove('active'); if (localStorage.getItem('kdrive_core_initialized') === 'true') { showCoreCheckModal(); } }
         
         function submitOnboarding() { 
-            let year = document.getElementById('ob-year').value; 
-            let height = document.getElementById('ob-height').value; 
-            let weight = document.getElementById('ob-weight').value; 
-            localStorage.setItem('kdrive_core_year', year); 
-            localStorage.setItem('kdrive_core_height', height); 
-            localStorage.setItem('kdrive_core_weight', weight); 
-            localStorage.setItem('kdrive_core_initialized', 'true'); 
-            calculateTargets(year, height, weight); 
-            closeOnboardingForm(); 
-            showCoreCheckModal(); 
+            let year = document.getElementById('ob-year').value; let height = document.getElementById('ob-height').value; let weight = document.getElementById('ob-weight').value; 
+            localStorage.setItem('kdrive_core_year', year); localStorage.setItem('kdrive_core_height', height); localStorage.setItem('kdrive_core_weight', weight); 
+            localStorage.setItem('kdrive_core_initialized', 'true'); calculateTargets(year, height, weight); closeOnboardingForm(); showCoreCheckModal(); 
+        }
+
+        // TẢI LẠI DỮ LIỆU ĐÃ LƯU (NẾU CÓ) KHI MỞ APP
+        function loadStoredValues() {
+            let hr = localStorage.getItem('kdrive_live_hr') || '0';
+            let w = localStorage.getItem('kdrive_live_weight') || '0';
+            let sl = localStorage.getItem('kdrive_live_sleep') || '0';
+            let fat = localStorage.getItem('kdrive_live_fat') || '0';
+            let h2o = localStorage.getItem('kdrive_live_water') || '0';
+            let steps = localStorage.getItem('kdrive_live_steps') || '0';
+            
+            document.getElementById('val-hr').innerText = hr;
+            document.getElementById('val-weight').innerText = w;
+            document.getElementById('val-sleep').innerText = sl;
+            document.getElementById('val-fat').innerText = fat;
+            document.getElementById('val-water').innerText = h2o;
+            document.getElementById('val-steps').innerText = steps;
+
+            let sci = localStorage.getItem('kdrive_sci_score') || '0';
+            document.getElementById('val-sci').innerText = parseFloat(sci).toFixed(1);
+
+            // Nếu SCI > 0, thoát chế độ standby và mở luôn chế độ sync-complete
+            if (parseFloat(sci) > 0) {
+                document.body.classList.remove('standby-mode');
+                document.body.classList.add('sync-complete');
+                applyTierEffects(parseFloat(sci));
+                
+                // Đổi thông báo bên dưới
+                const radarBar = document.getElementById('live-radar-bar');
+                const radarPulse = document.getElementById('live-pulse'); 
+                const radarMetrics = document.getElementById('live-metrics');
+                radarBar.style.background = 'rgba(57, 255, 20, 0.08)'; radarBar.style.borderColor = 'rgba(57, 255, 20, 0.3)'; radarBar.style.borderLeftColor = 'var(--lime)';
+                radarPulse.style.color = 'var(--lime)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
+                radarMetrics.innerHTML = `<span class="metric-item">Đã tải lại dữ liệu phiên trước.</span>`;
+            }
         }
 
         function showMainApp() { 
             document.getElementById('main-pwa').style.display = 'flex'; 
             setTimeout(() => { document.getElementById('main-pwa').style.opacity = '1'; }, 50); 
             
-            // Khởi tạo trạng thái Zero-State cho cả 6 chỉ số
-            ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => { 
-                let v = document.getElementById(`val-${key}`); 
-                if (v) v.innerText = '0'; 
-            }); 
-            document.getElementById('val-sci').innerText = '0'; 
             document.body.classList.remove('tier-shiro', 'tier-chairo', 'tier-kuro');
+            loadStoredValues(); // Tự động load dữ liệu phiên cũ lên màn hình
         }
 
-        // TÍNH ĐIỂM SCI & KÍCH HOẠT HIỆU ỨNG TIER
+        // TÍNH ĐIỂM SCI THỰC TẾ & LƯU TRỮ
         function updateSCIScore(hr, w, sl, fat, h2o, steps) {
             let score = 0;
-            // Mô phỏng tính điểm khoa học (Max ~99.9)
-            if(steps && parseInt(steps) > 0) score += Math.min(25, (parseInt(steps)/6000)*25);
-            if(sl && parseFloat(sl) > 0) score += Math.min(25, (parseFloat(sl)/7.0)*25);
-            if(hr && parseInt(hr) > 0) score += 15;
-            if(w && parseFloat(w) > 0) score += 10;
-            if(fat && parseFloat(fat) > 0) score += 15;
-            if(h2o && parseFloat(h2o) > 0) score += 10;
+            // Điểm Thể chất (Max ~70 điểm)
+            if(steps && parseInt(steps) > 0) score += Math.min(20, (parseInt(steps)/6000)*20);
+            if(sl && parseFloat(sl) > 0) score += Math.min(20, (parseFloat(sl)/7.0)*20);
+            if(hr && parseInt(hr) > 0) score += 10;
+            if(w && parseFloat(w) > 0) score += 5;
+            if(fat && parseFloat(fat) > 0) score += 10;
+            if(h2o && parseFloat(h2o) > 0) score += 5;
+
+            // Quét và cộng thêm điểm Trí lực (nếu có chơi game Trí nhớ, Phản xạ)
+            // Mỗi game hoàn thành được cộng thêm tối đa 10 điểm
+            let scoreThuy = localStorage.getItem('thuy_luan_score'); // Giả định key lưu điểm game
+            let scoreHoa = localStorage.getItem('hoa_luan_score');
+            let scorePhong = localStorage.getItem('phong_luan_score');
+
+            if(scoreThuy && parseInt(scoreThuy) > 0) score += 10;
+            if(scoreHoa && parseInt(scoreHoa) > 0) score += 10;
+            if(scorePhong && parseInt(scorePhong) > 0) score += 10;
             
-            if (score > 0) { score = Math.min(99.9, score + (Math.random() * 2)); }
+            if (score > 99.9) score = 99.9; // Khóa max trần
             
             document.getElementById('val-sci').innerText = score.toFixed(1);
             
-            // Kích hoạt viền Neon (Tier)
+            // LƯU TOÀN BỘ VÀO LOCAL STORAGE CHO LUYỆN LỰC CHIẾN ĐỌC
+            localStorage.setItem('kdrive_sci_score', score.toFixed(1));
+            localStorage.setItem('kdrive_live_hr', hr);
+            localStorage.setItem('kdrive_live_weight', w);
+            localStorage.setItem('kdrive_live_sleep', sl);
+            localStorage.setItem('kdrive_live_fat', fat);
+            localStorage.setItem('kdrive_live_water', h2o);
+            localStorage.setItem('kdrive_live_steps', steps);
+
+            applyTierEffects(score);
+        }
+
+        function applyTierEffects(score) {
             const b = document.body;
             b.classList.remove('tier-shiro', 'tier-chairo', 'tier-kuro');
             if(score >= 85) b.classList.add('tier-kuro');
             else if(score >= 60) b.classList.add('tier-chairo');
             else if(score > 0) b.classList.add('tier-shiro');
 
-            // Kích hoạt Shockwave
             const sw = document.getElementById('shockwave');
             if(score >= 85) sw.style.borderColor = 'var(--neon-pink)';
             else if(score >= 60) sw.style.borderColor = 'var(--cyan)';
             else sw.style.borderColor = 'var(--crimson)';
             
-            sw.classList.remove('active');
-            void sw.offsetWidth; // Force reflow
-            sw.classList.add('active');
+            sw.classList.remove('active'); void sw.offsetWidth; sw.classList.add('active');
         }
 
         function handlePanelClick(key) { if (currentMode === 'manual') { promptEdit(key); } }
@@ -484,13 +546,9 @@
                 document.getElementById(`val-${currentEditingKey}`).innerText = val; 
             }
             
-            // Tính lại SCI khi nhập thủ công
-            let hr = document.getElementById('val-hr').innerText;
-            let w = document.getElementById('val-weight').innerText;
-            let sl = document.getElementById('val-sleep').innerText;
-            let fat = document.getElementById('val-fat').innerText;
-            let h2o = document.getElementById('val-water').innerText;
-            let steps = document.getElementById('val-steps').innerText;
+            let hr = document.getElementById('val-hr').innerText; let w = document.getElementById('val-weight').innerText;
+            let sl = document.getElementById('val-sleep').innerText; let fat = document.getElementById('val-fat').innerText;
+            let h2o = document.getElementById('val-water').innerText; let steps = document.getElementById('val-steps').innerText;
             updateSCIScore(hr, w, sl, fat, h2o, steps);
 
             closeManualModal(); 
@@ -517,20 +575,14 @@
                 const Health = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health ? window.Capacitor.Plugins.Health : null;
                 if (!Health) throw new Error("Chưa kết nối Plugin");
 
-                await Health.requestAuthorization({ 
-                    read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] 
-                });
+                await Health.requestAuthorization({ read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] });
 
                 const endDate = new Date();
                 const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); 
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
+                const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
 
                 const safeQuery = async (type) => {
-                    return await Health.readSamples({ 
-                        sampleName: type, dataType: type, 
-                        startDate: startDate.toISOString(), endDate: endDate.toISOString(), limit: 1000 
-                    });
+                    return await Health.readSamples({ sampleName: type, dataType: type, startDate: startDate.toISOString(), endDate: endDate.toISOString(), limit: 1000 });
                 };
 
                 let resSteps = await safeQuery('steps');
@@ -538,15 +590,12 @@
                 let listSteps = resSteps?.samples || resSteps?.values || [];
                 listSteps.forEach(i => {
                     let recordDate = new Date(i.endDate || i.endTime || i.startDate);
-                    if (recordDate.getTime() >= todayStart.getTime()) {
-                        liveSteps += parseInt(i.value || 0);
-                    }
+                    if (recordDate.getTime() >= todayStart.getTime()) { liveSteps += parseInt(i.value || 0); }
                 });
 
                 let resHR = await safeQuery('heartRate');
                 let liveHR = (resHR?.samples?.[0]?.value || resHR?.values?.[0]?.value) || null;
 
-                // TÍNH TỔNG GIẤC NGỦ THỰC TẾ TRONG ĐÊM
                 let resSleep = await safeQuery('sleep');
                 let liveSleepMins = 0;
                 let listSleep = resSleep?.samples || resSleep?.values || [];
@@ -580,7 +629,7 @@
                 document.getElementById('val-water').innerText = liveWater !== null ? liveWater : '0';
                 document.getElementById('val-steps').innerText = liveSteps > 0 ? liveSteps : '0';
                 
-                // TÍNH & HIỂN THỊ ĐIỂM SCI ĐỂ KÍCH HOẠT HIỆU ỨNG TIER
+                // TÍNH & HIỂN THỊ ĐIỂM SCI ĐỂ KÍCH HOẠT HIỆU ỨNG TIER & LƯU DỮ LIỆU
                 updateSCIScore(liveHR, liveWeight, liveSleep, liveFat, liveWater, liveSteps);
 
                 document.body.classList.remove('scanning-mode'); document.body.classList.add('sync-complete');
