@@ -10,20 +10,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --bg-obsidian: #0d0202;
+            --cyan: #00e5ff;
+            --mint: #38ef7d;    
+            --neon-pink: #ff00ff; 
+            --amber: #ffaa00;   
+            --crimson: #ff3333;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #0d0202; font-family: 'Space Grotesk', sans-serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; }
 
         #sanctum-bg { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; background: radial-gradient(circle at 50% 30%, #2b0505 0%, #0a0101 80%); }
         #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
         .dust-particle { position: absolute; border-radius: 50%; opacity: 0.5; animation: floatDust linear infinite; }
-        .dust-small { width: 1.5px; height: 1.5px; background: #ff3333; box-shadow: 0 0 5px #ff3333; }
+        .dust-small { width: 1.5px; height: 1.5px; background: var(--crimson); box-shadow: 0 0 5px var(--crimson); }
         @keyframes floatDust { 0% { transform: translateY(100vh); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.3; } 100% { transform: translateY(-20vh); opacity: 0; } }
 
         #task-arena { position: fixed; inset: 0; background: transparent; z-index: 120; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
         .play-area { width: 100%; max-width: 360px; height: 100vh; height: 100dvh; background: transparent; position: relative; overflow: hidden; margin: 0 auto; transition: all 0.4s ease; }
         .play-area.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important; max-width: none !important; margin: 0 !important; z-index: 9990 !important; }
 
-        .laser-beam-horizontal { position: fixed; top: 50%; left: 0; width: 100vw; height: 2px; background: #ffb700; box-shadow: 0 0 20px #ff3333, 0 0 40px #ff6600; z-index: 99999; transform: scaleX(0); transform-origin: center; animation: laserShoot 0.3s forwards ease-out; pointer-events: none; }
+        .laser-beam-horizontal { position: fixed; top: 50%; left: 0; width: 100vw; height: 2px; background: #ffb700; box-shadow: 0 0 20px var(--crimson), 0 0 40px #ff6600; z-index: 99999; transform: scaleX(0); transform-origin: center; animation: laserShoot 0.3s forwards ease-out; pointer-events: none; }
         @keyframes laserShoot { 100% { transform: scaleX(1); height: 4px; } }
         .laser-beam-horizontal.expand { animation: laserExpand 0.5s forwards cubic-bezier(0.7, 0, 1, 1); }
         @keyframes laserExpand { 100% { height: 100vh; top: 0; opacity: 0; } }
@@ -32,7 +41,7 @@
         #start-prompt-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none !important; display: none; }
 
         .briefing-panel { background: rgba(25, 5, 5, 0.95); border: 2px solid #ff6600; border-radius: 8px; padding: 16px 18px; width: 100%; max-width: 330px; text-align: left; box-shadow: 0 0 20px rgba(255, 102, 0, 0.2); }
-        .briefing-title { color: #ff3333 !important; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(255, 255, 255, 0.2); padding-bottom: 8px; letter-spacing: 1.5px; text-shadow: 0 0 8px rgba(255, 51, 51, 0.5); }
+        .briefing-title { color: var(--crimson) !important; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(255, 255, 255, 0.2); padding-bottom: 8px; letter-spacing: 1.5px; text-shadow: 0 0 8px rgba(255, 51, 51, 0.5); }
         .briefing-target { color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; line-height: 1.6; font-weight: 500; }
         .briefing-target b { color: #ffb700; font-weight: bold; }
 
@@ -40,46 +49,84 @@
         .start-action-box { width: 100%; background: rgba(255, 255, 255, 0.1); border: 2px solid #ffffff; padding: 14px; border-radius: 8px; color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 15px rgba(255, 255, 255, 0.15); text-align: center; transition: 0.2s; }
         .start-action-box:active { background: #fff; color: #000; transform: scale(0.98); }
 
-        #ingame-hud { position: absolute; top: 0; left: 0; width: 100%; height: 75px; background: rgba(20, 4, 4, 0.95); border-bottom: 1px solid rgba(255, 51, 51, 0.3); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 10000; pointer-events: auto; backdrop-filter: blur(5px); transition: opacity 0.3s; }
-        #ingame-hud.hidden { opacity: 0; pointer-events: none !important; }
-        
-        .hud-left { flex: 1.3; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 1px; }
-        .hp-row { font-size: 16px; letter-spacing: 2px; line-height: 1.2; font-family: 'Share Tech Mono', monospace; }
+        /* =========================================
+           TẦNG TRÊN: THANH TRẠNG THÁI (NÉ ĐIỂM MÙ ĐỈNH)
+        ========================================= */
+        .game-top-bar {
+            position: fixed;
+            top: max(20px, env(safe-area-inset-top)); 
+            left: 0; width: 100vw; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 10000; pointer-events: auto;
+            transition: opacity 0.3s;
+        }
+        .game-top-bar.hidden { opacity: 0; pointer-events: none !important; }
 
-        .hud-center { flex: 1; display: flex; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #fff; font-weight: bold; white-space: nowrap; }
-        .hud-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
-        
-        .hud-btn { width: 32px; height: 32px; border-radius: 4px; background: rgba(255, 51, 51, 0.1); border: 1px solid rgba(255, 51, 51, 0.5); color: #ff3333; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 900; cursor: pointer; transition: 0.2s; line-height: 1; text-align: center; }
-        .hud-btn.exit-btn { background: rgba(255, 183, 0, 0.1); border-color: #ffb700; color: #ffb700; font-size: 18px; font-weight: 900; }
-        
-        .tier-badge { font-family: 'Share Tech Mono', monospace; font-size: 11px; background: rgba(255, 183, 0, 0.15); border: 1px solid #ffb700; color: #ffb700; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .health-container { display: flex; gap: 4px; align-items: center; }
+        .health-bar { width: 14px; height: 6px; background: rgba(255,255,255,0.1); transform: skewX(-20deg); transition: all 0.3s ease; }
+        .health-bar.green.active { background: var(--mint); box-shadow: 0 0 6px var(--mint); }
+        .health-bar.pink.active { background: var(--neon-pink); box-shadow: 0 0 6px var(--neon-pink); }
 
-        #terminal-bar { position: fixed; bottom: 0; left: 0; width: 100vw; background: rgba(20, 4, 4, 0.95); border-top: 1px solid rgba(255, 51, 51, 0.5); padding: 8px 0; z-index: 99999; overflow: hidden; display: flex; align-items: center; pointer-events: none; }
-        #terminal-bar.hidden { display: none !important; }
-        .terminal-track { display: inline-flex; white-space: nowrap; animation: ledScroll 15s linear infinite; }
-        @keyframes ledScroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-        .terminal-text { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; opacity: 0.9; }
+        .data-score { font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; color: #fff; display: flex; align-items: center; position: relative; }
+        .data-score span { color: #ffb700; text-shadow: 0 0 8px #ffb700; font-size: 18px; margin-left: 5px; }
+
+        #hp-notification-area { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); width: 200px; text-align: center; }
+
+        /* =========================================
+           TẦNG DƯỚI: ĐIỀU HƯỚNG (NÉ ĐIỂM MÙ ĐÁY)
+        ========================================= */
+        .game-bottom-bar {
+            position: fixed;
+            bottom: max(15px, env(safe-area-inset-bottom)); 
+            left: 0; width: 100vw;
+            border-top: 1px solid rgba(255, 51, 51, 0.3); 
+            padding: 15px 20px 0 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 10000; pointer-events: auto;
+            background: linear-gradient(0deg, rgba(20,4,4,0.95) 0%, transparent 100%);
+            transition: opacity 0.3s;
+        }
+        .game-bottom-bar.hidden { opacity: 0; pointer-events: none !important; }
+
+        .btn-action {
+            width: 44px; height: 44px; background: rgba(20, 4, 4, 0.8); 
+            border: 1px solid var(--crimson); border-radius: 10px;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-action:active { transform: scale(0.9); }
+        
+        .btn-back { color: var(--crimson); font-family: 'Share Tech Mono', monospace; font-size: 24px; font-weight: bold; box-shadow: 0 0 10px rgba(255, 51, 51, 0.2); padding-bottom: 2px; padding-right: 2px; }
+        .btn-back:active { background: rgba(255, 51, 51, 0.25); box-shadow: 0 0 20px rgba(255, 51, 51, 0.6); }
+
+        .btn-pause { border-color: rgba(255, 170, 0, 0.5); box-shadow: 0 0 10px rgba(255, 170, 0, 0.15); }
+        .btn-pause::before, .btn-pause::after { content: ''; width: 4px; height: 16px; background: var(--amber); margin: 0 3px; border-radius: 2px; box-shadow: 0 0 5px var(--amber); }
+        .btn-pause:active { background: rgba(255, 170, 0, 0.2); box-shadow: 0 0 20px rgba(255, 170, 0, 0.5); }
+
+        .tier-badge-container { position: absolute; left: 50%; transform: translateX(-50%); }
+        .tier-badge { font-family: 'Share Tech Mono', monospace; font-size: 14px; background: rgba(255, 183, 0, 0.15); border: 1px solid #ffb700; color: #ffb700; padding: 4px 12px; border-radius: 4px; font-weight: bold; box-shadow: 0 0 10px rgba(255, 183, 0, 0.3); }
 
         #pause-menu-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; backdrop-filter: blur(5px); }
         #pause-menu-overlay.active { opacity: 1; pointer-events: auto; }
         .pause-box { width: 85%; max-width: 300px; background: rgba(25, 5, 5, 0.95); border: 1px solid rgba(255,51,51,0.5); border-radius: 12px; padding: 25px 20px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
-        .pause-title { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #ff3333; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
+        .pause-title { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: var(--crimson); margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
         .pause-btn { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
         .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
-        .pause-btn.exit { background: rgba(255, 51, 51, 0.2); border: 1px solid #ff3333; color: #ff3333; margin-bottom: 0; }
+        .pause-btn.exit { background: rgba(255, 51, 51, 0.2); border: 1px solid var(--crimson); color: var(--crimson); margin-bottom: 0; }
 
         #freeze-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 200000; display: none; align-items: center; justify-content: center; }
         #freeze-overlay.active { display: flex; }
-        .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: #ff3333; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px #ff3333; }
+        .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: var(--crimson); letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px var(--crimson); }
 
         #result-overlay { position: absolute; inset: 0; background: rgba(20, 4, 4, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999999; gap: 8px; border-radius: 12px; padding: 12px; }
         #result-overlay.active { display: flex; }
-        .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #ff3333; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,51,51,0.5); }
+        .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: var(--crimson); letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,51,51,0.5); }
         .prestige-panel { width: 92%; max-width: 310px; background: rgba(30, 8, 8, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
         .prestige-row { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; width: 100%; }
         .prestige-label { color: #ffffff; letter-spacing: 1px; flex: 1; text-align: left; text-transform: uppercase; font-weight: bold; }
         .prestige-val-gold { color: #ffb700; font-weight: bold; font-size: 13px; text-align: right; min-width: 80px; }
-        .prestige-val-pink { color: #ff3333; font-weight: bold; font-size: 13px; text-align: right; min-width: 80px; }
+        .prestige-val-pink { color: var(--crimson); font-weight: bold; font-size: 13px; text-align: right; min-width: 80px; }
         .prestige-total-box { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; padding-top: 2px; width: 100%; border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 2px; }
         .prestige-total-label { color: #fff; font-size: 12px; font-weight: 900; letter-spacing: 1px; flex: 1; text-align: left; }
         .prestige-total-num { font-size: 26px; color: #ffb700; font-weight: 900; line-height: 1; text-align: right; min-width: 80px; }
@@ -100,17 +147,17 @@
         #btn-next { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         #btn-next:active { background: #fff; color: #000; }
 
-        /* BÁO CÁO TỔNG HỢP CUỐI CÙNG HOÀN CHỈNH VỚI ICON VÀ ĐÁNH GIÁ */
-        #final-summary-overlay { position: absolute; inset: 0; background: #0d0202; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999999; gap: 8px; padding: 12px; }
+        /* BÁO CÁO TỔNG HỢP CUỐI CÙNG */
+        #final-summary-overlay { position: absolute; inset: 0; background: var(--bg-obsidian); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999999; gap: 8px; padding: 12px; }
         #final-summary-overlay.active { display: flex; }
-        .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #ff3333; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px #ff3333; }
+        .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: var(--crimson); font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px var(--crimson); }
         
         .stat-box { width: 92%; max-width: 310px; background: rgba(30, 8, 8, 0.95); border: 1px solid rgba(255, 255, 255, 0.2); padding: 10px 14px; border-radius: 8px; }
         .stat-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #ffffff; width: 100%; font-weight: bold; }
         .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
         .stat-line span:last-child { text-align: right; min-width: 100px; color: #ffb700; }
 
-        .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: rgba(255, 51, 51, 0.2); border: 1.5px solid #ff3333; border-radius: 8px; color: #ff3333; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 5px; }
+        .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: rgba(255, 51, 51, 0.2); border: 1.5px solid var(--crimson); border-radius: 8px; color: var(--crimson); font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 5px; }
         .final-btn-exit:hover { background: #ff3366; color: #fff; }
 
         .orb { position: absolute; border-radius: 50%; cursor: crosshair; display: flex; justify-content: center; align-items: center; }
@@ -162,8 +209,9 @@
         .floating-cps { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-family: 'Share Tech Mono', monospace; font-size: 34px; font-weight: 900; color: #ffb700; text-shadow: 0 0 20px #ff3333; pointer-events: none; z-index: 100005; white-space: nowrap; width: 100%; text-align: center; animation: popCps 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes popCps { 0% { opacity: 0; transform: translate(-50%, -30%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -80%) scale(1.3); } }
 
-        .float-score { position: absolute; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 32px; font-weight: 900; color: #ffb700; text-shadow: 0 0 20px #ff3333; z-index: 110; animation: floatUpScore 1s forwards; pointer-events: none; }
-        @keyframes floatUpScore { 0% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50px) scale(1.5); } }
+        .status-notification { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 900; color: #00ffcc; text-align: center; text-shadow: 0 0 10px #00ffcc; z-index: 999999; pointer-events: none; white-space: nowrap; animation: topAlertAnim 1.2s ease-out forwards; }
+        @keyframes topAlertAnim { 0% { opacity: 0; transform: translate(-50%, -10px); } 15% { opacity: 1; transform: translate(-50%, 0); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -15px); } }
+
     </style>
 </head>
 <body>
@@ -173,18 +221,40 @@
 
     <div id="task-arena">
         <div class="play-area" id="play-area">
-            
-            <div id="ingame-hud" class="hidden">
-                <div class="hud-left">
-                    <div id="hp-row-1" class="hp-row"></div>
-                    <div id="hp-row-2" class="hp-row"></div>
+
+            <!-- TẦNG TRÊN: HIỂN THỊ MÁU VÀ ĐIỂM -->
+            <div id="game-top-bar" class="game-top-bar hidden">
+                <!-- 5 Máu Xanh Gốc -->
+                <div class="health-container">
+                    <div class="health-bar green active" id="hp-g-1"></div>
+                    <div class="health-bar green active" id="hp-g-2"></div>
+                    <div class="health-bar green active" id="hp-g-3"></div>
+                    <div class="health-bar green active" id="hp-g-4"></div>
+                    <div class="health-bar green active" id="hp-g-5"></div>
                 </div>
-                <div class="hud-center">DATA: <b id="boo-points" style="color:#ffb700; margin-left: 5px; font-size: 18px;">0</b></div>
-                <div class="hud-right">
+
+                <!-- Điểm DATA ở giữa -->
+                <div class="data-score">DATA: <span id="boo-points">0</span>
+                    <div id="hp-notification-area"></div>
+                </div>
+
+                <!-- 5 Máu Hồng Thưởng -->
+                <div class="health-container">
+                    <div class="health-bar pink" id="hp-p-1"></div>
+                    <div class="health-bar pink" id="hp-p-2"></div>
+                    <div class="health-bar pink" id="hp-p-3"></div>
+                    <div class="health-bar pink" id="hp-p-4"></div>
+                    <div class="health-bar pink" id="hp-p-5"></div>
+                </div>
+            </div>
+
+            <!-- TẦNG DƯỚI: ĐIỀU HƯỚNG CẮT NGANG -->
+            <div id="game-bottom-bar" class="game-bottom-bar hidden">
+                <button class="btn-action btn-back" onclick="confirmExitToLobby()">⟨</button>
+                <div class="tier-badge-container">
                     <div class="tier-badge" id="hud-tier-badge">X1</div>
-                    <div class="hud-btn" onclick="pauseGame()">⏸</div>
-                    <div class="hud-btn exit-btn" onclick="confirmExitToLobby()">✕</div>
                 </div>
+                <button class="btn-action btn-pause" onclick="pauseGame()"></button>
             </div>
 
             <!-- SẢNH CHỜ -->
@@ -296,10 +366,6 @@
         </div>
     </div>
 
-    <div id="terminal-bar">
-        <div class="terminal-track"><span class="terminal-text">HỆ THỐNG K-DRIVE - ĐO LƯỜNG PHẢN XẠ THÔNG MINH - HỆ THỐNG QUÉT LƯỢNG TỬ</span></div>
-    </div>
-
     <script>
         const RANK_ICONS = {
             'Kém': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%201%20(1).png?raw=true',
@@ -309,13 +375,7 @@
             'Thần Đồng': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%205%20(1).png?raw=true'
         };
 
-        const TIER_POINTS = {
-            1: 15, 
-            2: 15, 
-            3: 30, 
-            4: 60, 
-            5: 120  
-        };
+        const TIER_POINTS = { 1: 15, 2: 15, 3: 30, 4: 60, 5: 120 };
 
         function getReflexRankByMs(ms) {
             if (ms <= 0 || ms > 1500) return "Kém";
@@ -342,7 +402,6 @@
             }
         }
 
-        // HÀM ĐÁNH GIÁ NHẬN XÉT TỔNG QUAN HỎA LUÂN
         function getOverallFeedback(score) {
             if (score < 2000) return "Chưa làm chủ được nhịp độ. Cần rèn luyện thêm!";
             if (score >= 8000) return "Cảnh giới viễn tưởng! Phản xạ và bạo phát vượt ngưỡng nhân loại.";
@@ -357,7 +416,7 @@
             return `<img src="${iconUrl}" class="rank-icon-img" alt="Rank"> <span style="vertical-align: middle;">${rankName.toUpperCase()}</span>`;
         }
 
-        let cGame = '1'; let aScore = 0; let reflexScore = 0; let burstScore = 0; successfulHitsCount = 0; 
+        let cGame = '1'; let aScore = 0; let reflexScore = 0; let burstScore = 0; let successfulHitsCount = 0; 
         let sessionScoreG1 = 0, sessionScoreG2 = 0;
         let hitsCountG1 = 0, hitsCountG2 = 0; 
         let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, stabilityHP = 10;
@@ -408,8 +467,19 @@
 
         window.onload = () => { openArena('1'); };
 
+        function updateHpDisplay() {
+            let hp = Math.min(10, Math.max(0, stabilityHP));
+            let greenCount = Math.min(5, hp);
+            let pinkCount = Math.max(0, hp - 5);
+
+            for(let i=1; i<=5; i++) {
+                document.getElementById('hp-g-'+i).classList.toggle('active', i <= greenCount);
+                document.getElementById('hp-p-'+i).classList.toggle('active', i <= pinkCount);
+            }
+        }
+
         function openArena(id) {
-            cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; successfulHitsCount = 0; isPlaying = false; stabilityHP = 10;
+            cGame = id; aScore = 0; reflexScore = 0; burstScore = 0; successfulHitsCount = 0; isPlaying = false; stabilityHP = 5; // Khởi tạo 5 máu gốc
             isPausedForStart = true; bestCps = 0; reactionTimes = [];
             nextBurstMilestone = 500; burstCount = 0; lastAnnouncedTier = 1;
 
@@ -431,33 +501,22 @@
             }
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
-            document.getElementById('terminal-bar').classList.remove('hidden');
+            document.getElementById('game-top-bar').classList.add('hidden');
+            document.getElementById('game-bottom-bar').classList.add('hidden');
             document.getElementById('start-prompt-overlay').classList.remove('hidden');
-        }
-
-        function updateHpDisplay() {
-            let hp1 = Math.min(10, Math.max(0, stabilityHP));
-            let hp2 = Math.min(10, Math.max(0, stabilityHP - 10));
-
-            let row1Full = Math.ceil(hp1 / 2);
-            let row1Empty = 5 - row1Full;
-            document.getElementById('hp-row-1').innerHTML = 
-                "<span style='color:#fff; text-shadow: 0 0 8px #fff;'>" + "▰".repeat(Math.max(0, row1Full)) + "</span>" +
-                "<span style='color:#3a1010;'>" + "▱".repeat(Math.max(0, row1Empty)) + "</span>";
-
-            let row2Full = Math.ceil(hp2 / 2);
-            let row2Empty = 5 - row2Full;
-            document.getElementById('hp-row-2').innerHTML = 
-                "<span style='color:#00ffcc; text-shadow: 0 0 8px #00ffcc;'>" + "▰".repeat(Math.max(0, row2Full)) + "</span>" +
-                "<span style='color:#112222;'>" + "▱".repeat(Math.max(0, row2Empty)) + "</span>";
         }
 
         function triggerStartGame() {
             initAudio(); playSound('coin');
-            document.getElementById('start-prompt-overlay').classList.add('hidden'); document.getElementById('terminal-bar').classList.add('hidden');
+            document.getElementById('start-prompt-overlay').classList.add('hidden'); 
             playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
             setTimeout(() => { let playArea = document.getElementById('play-area'); playArea.classList.add('fullscreen-mode'); laser.classList.add('expand'); playSound('boom', 0.8); triggerVibration([200, 100, 300]); }, 300);
-            setTimeout(() => { laser.remove(); isPausedForStart = false; document.getElementById('ingame-hud').classList.remove('hidden'); startArena(); }, 800);
+            setTimeout(() => { 
+                laser.remove(); isPausedForStart = false; 
+                document.getElementById('game-top-bar').classList.remove('hidden'); 
+                document.getElementById('game-bottom-bar').classList.remove('hidden'); 
+                startArena(); 
+            }, 800);
         }
 
         function pauseGame() { if(!isPlaying || isPausedForStart) return; playSound('error'); isPausedForStart = true; clearTimeout(spawnTimer); if(burstTimer) clearTimeout(burstTimer); document.getElementById('pause-menu-overlay').classList.add('active'); }
@@ -496,11 +555,9 @@
             }
         }
 
-        function loseHalfLife() { if(isPausedForStart) return; stabilityHP -= 1; updateHpDisplay(); playSound('boom'); triggerVibration([100, 50, 100]); if(stabilityHP <= 0) finishGame(); }
-        
         function loseFullLife() { 
             if(isPausedForStart) return; 
-            stabilityHP -= 2; 
+            stabilityHP -= 1; // Mất 1 vạch máu
             updateHpDisplay(); 
             playSound('boom'); 
             triggerVibration([150, 50, 150]); 
@@ -515,7 +572,7 @@
             }
         }
 
-        function getSafeSpawns(playArea) { let maxX = playArea.clientWidth - 60; let maxY = playArea.clientHeight - 60; let minY = 75; return { px: 10 + Math.random() * Math.max(0, maxX - 10), py: minY + Math.random() * Math.max(0, maxY - minY) }; }
+        function getSafeSpawns(playArea) { let maxX = playArea.clientWidth - 60; let maxY = playArea.clientHeight - 60; let minY = 85; return { px: 10 + Math.random() * Math.max(0, maxX - 10), py: minY + Math.random() * Math.max(0, maxY - minY - 70) }; }
 
         function runG1() { spawnG1(); }
         function spawnG1() {
@@ -611,7 +668,7 @@
                 requiredCps = reqArr[Math.min(burstCount - 1, 4)];
             }
 
-            let instructionHtml = `ĐẠT ${requiredCps} LẦN/GIÂY<br>+1 NĂNG LƯỢNG`;
+            let instructionHtml = `ĐẠT ${requiredCps} LẦN/GIÂY<br>+1 MÁU`;
 
             if (cGame === '1') {
                 let orbWrap = document.createElement('div'); orbWrap.className = 'burst-orb-wrapper';
@@ -668,15 +725,13 @@
                 playSound('boom', 0.5);
 
                 if (normalizedCps >= reqCps) {
-                    stabilityHP = Math.min(20, stabilityHP + 2);
+                    stabilityHP = Math.min(10, stabilityHP + 1);
                     updateHpDisplay();
                     let hpMsg = document.createElement('div');
-                    hpMsg.className = 'floating-cps';
-                    hpMsg.style.fontSize = '18px';
-                    hpMsg.style.color = '#00ffcc';
+                    hpMsg.className = 'status-notification';
                     hpMsg.innerHTML = `+1 NĂNG LƯỢNG`;
-                    playArea.appendChild(hpMsg);
-                    setTimeout(() => hpMsg.remove(), 1500);
+                    document.getElementById('hp-notification-area').appendChild(hpMsg);
+                    setTimeout(() => hpMsg.remove(), 1200);
                 }
 
                 setTimeout(() => {
@@ -702,10 +757,13 @@
                 bestCps = 0;
             }
 
-            if(cGame === '1') sessionScoreG1 = Math.round(aScore);
-            else if(cGame === '2') sessionScoreG2 = Math.round(aScore);
+            // Ghi lưu dữ liệu vào LocalStorage để trang Lực Chiến đọc được
+            if(cGame === '1') { sessionScoreG1 = Math.round(aScore); localStorage.setItem('hoa_luan_bai1_score', sessionScoreG1); }
+            else if(cGame === '2') { sessionScoreG2 = Math.round(aScore); localStorage.setItem('hoa_luan_bai2_score', sessionScoreG2); }
+            localStorage.setItem('hoa_luan_score', sessionScoreG1 + sessionScoreG2);
 
-            document.getElementById('ingame-hud').classList.add('hidden');
+            document.getElementById('game-top-bar').classList.add('hidden');
+            document.getElementById('game-bottom-bar').classList.add('hidden');
             let playArea = document.getElementById('play-area'); playArea.classList.remove('fullscreen-mode');
             playArea.querySelectorAll('.orb, .child-projectile, .core-reactor, .blackout-bg, .beam, .explosion, .floating-ms, .floating-cps, .float-score, .burst-btn-diagonal').forEach(o => o.remove());
 
@@ -754,7 +812,6 @@
             }, 200); 
         }
 
-        // BẢNG TỔNG KẾT CUỐI CÙNG ĐẦY ĐỦ ICON VÀ ĐÁNH GIÁ CHUYÊN SÂU
         function showFinalSummary() {
             playSound('coin'); 
             document.getElementById('result-overlay').classList.remove('active');
