@@ -50,7 +50,7 @@
             100% { transform: translateY(-10vh) translateX(-15px) scale(0.3); opacity: 0; }
         }
 
-        /* NÚT THOÁT CHUẨN HÓA (UNIVERSAL BACK BUTTON) */
+        /* NÚT THOÁT CHUẨN HÓA */
         .top-nav {
             position: fixed; top: 15px; left: 0; width: 100vw; padding: 0 20px;
             display: flex; justify-content: flex-start; align-items: flex-start;
@@ -113,29 +113,31 @@
         .live-dot {
             width: 8px; height: 8px; background-color: #00ff9d; border-radius: 50%;
             box-shadow: 0 0 8px #00ff9d, 0 0 12px #00ff9d;
-            animation: pulseDot 1.5s infinite ease-in-out;
+            transition: opacity 0.5s ease;
         }
+        .live-dot.active { animation: pulseDot 1.5s infinite ease-in-out; opacity: 1; }
+        .live-dot.inactive { opacity: 0.1; box-shadow: none; background: #555; }
+        
         @keyframes pulseDot {
             0%, 100% { transform: scale(0.8); opacity: 0.4; box-shadow: 0 0 4px #00ff9d; }
             50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 12px #00ff9d; }
         }
 
-        /* 6 VẠCH NĂNG LƯỢNG CHO SỨC MẠNH (TÍCH HỢP BẬT/TẮT THEO DỮ LIỆU) */
+        /* 6 VẠCH NĂNG LƯỢNG SỨC MẠNH */
         .sub-bars-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; width: 100%; margin-top: 2px; }
         .sub-bar-item { display: flex; flex-direction: column; gap: 2px; }
         .sub-bar-container { width: 100%; height: 5px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
         
-        /* Mặc định là vạch tối màu (chưa có dữ liệu) */
         .sub-bar-fill { height: 100%; width: 100%; background: rgba(255, 255, 255, 0.05); transition: background 0.5s ease; }
-        /* Vạch sáng khi có dữ liệu */
         .sub-bar-fill.active { background: linear-gradient(90deg, #d4af37, #ffe066); box-shadow: 0 0 6px #ffe066; }
         
         .sub-bar-label { font-family: 'Share Tech Mono', monospace; font-size: 7.5px; color: rgba(255,255,255,0.6); text-align: center; text-transform: uppercase; }
 
-        /* THANH NĂNG LƯỢNG CHO TRÍ NHỚ, PHẢN XẠ, PHÁN ĐOÁN */
+        /* THANH NĂNG LƯỢNG CHO TRÍ NHỚ, PHẢN XẠ, PHÁN ĐOÁN (MẶC ĐỊNH MỨC 0%) */
         .dual-bars-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; margin-top: 2px; }
         .stat-bar-container { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden; }
-        .stat-bar-fill { height: 100%; width: 0%; transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        
+        .stat-bar-fill { height: 100%; width: 0%; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); }
 
         .fill-thuy { background: linear-gradient(90deg, #0055ff, #00aaff); box-shadow: 0 0 8px #00aaff; }
         .fill-hoa { background: linear-gradient(90deg, #cc0000, #ff4d4d); box-shadow: 0 0 8px #ff4d4d; }
@@ -177,7 +179,7 @@
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20DIA.png?raw=true" alt="Sức Mạnh"></div>
                         <span data-i18n="lcDia">SỨC MẠNH</span>
                     </div>
-                    <div class="live-dot" title="Đang kết nối tín hiệu"></div>
+                    <div class="live-dot" id="dot-suc-manh"></div>
                 </div>
                 <div class="sub-bars-grid">
                     <div class="sub-bar-item"><div class="sub-bar-container"><div class="sub-bar-fill" id="bar-hr"></div></div><div class="sub-bar-label">Tim</div></div>
@@ -189,48 +191,48 @@
                 </div>
             </div>
 
-            <!-- TRÍ NHỚ -->
+            <!-- TRÍ NHỚ (THỦY) -->
             <div class="stat-group" onclick="jumpToTest('thuy_luan.html')">
                 <div class="stat-info">
                     <div class="stat-name">
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20THUY.png?raw=true" alt="Trí Nhớ"></div>
                         <span data-i18n="lcThuy">TRÍ NHỚ</span>
                     </div>
-                    <div class="live-dot"></div>
+                    <div class="live-dot" id="dot-thuy"></div>
                 </div>
                 <div class="dual-bars-grid">
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-thuy" style="width: 100%;"></div></div>
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-thuy" style="width: 100%;"></div></div>
+                    <div class="stat-bar-container"><div class="stat-bar-fill fill-thuy" id="bar-thuy-1"></div></div>
+                    <div class="stat-bar-container"><div class="stat-bar-fill fill-thuy" id="bar-thuy-2"></div></div>
                 </div>
             </div>
 
-            <!-- PHẢN XẠ -->
+            <!-- PHẢN XẠ (HỎA) -->
             <div class="stat-group" onclick="jumpToTest('HoaLuan.html')">
                 <div class="stat-info">
                     <div class="stat-name">
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20HOA.png?raw=true" alt="Phản Xạ"></div>
                         <span data-i18n="lcHoa">PHẢN XẠ</span>
                     </div>
-                    <div class="live-dot"></div>
+                    <div class="live-dot" id="dot-hoa"></div>
                 </div>
                 <div class="dual-bars-grid">
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-hoa" style="width: 100%;"></div></div>
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-hoa" style="width: 100%;"></div></div>
+                    <div class="stat-bar-container"><div class="stat-bar-fill fill-hoa" id="bar-hoa-1"></div></div>
+                    <div class="stat-bar-container"><div class="stat-bar-fill fill-hoa" id="bar-hoa-2"></div></div>
                 </div>
             </div>
 
-            <!-- PHÁN ĐOÁN -->
+            <!-- PHÁN ĐOÁN (PHONG) -->
             <div class="stat-group" onclick="jumpToTest('PhongLuan.html')">
                 <div class="stat-info">
                     <div class="stat-name">
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20PHONG.png?raw=true" alt="Phán Đoán"></div>
                         <span data-i18n="lcPhong">PHÁN ĐOÁN</span>
                     </div>
-                    <div class="live-dot"></div>
+                    <div class="live-dot" id="dot-phong"></div>
                 </div>
                 <div class="dual-bars-grid">
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-phong" style="width: 100%;"></div></div>
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-phong" style="width: 100%;"></div></div>
+                    <div class="stat-bar-container"><div class="stat-bar-fill fill-phong" id="bar-phong-1"></div></div>
+                    <div class="stat-bar-container"><div class="stat-bar-fill fill-phong" id="bar-phong-2"></div></div>
                 </div>
             </div>
 
@@ -243,40 +245,84 @@
     </div>
 
     <script>
-        // QUÉT DỮ LIỆU ĐỂ BẬT/TẮT VẠCH NĂNG LƯỢNG SỨC MẠNH
-        function syncStrengthBars() {
-            // Danh sách các biến LocalStorage được đẩy sang từ sinh_trac.html
-            const metrics = [
-                { id: 'bar-hr', key: 'kdrive_live_hr' },
-                { id: 'bar-weight', key: 'kdrive_live_weight' },
-                { id: 'bar-sleep', key: 'kdrive_live_sleep' },
-                { id: 'bar-fat', key: 'kdrive_live_fat' },
-                { id: 'bar-water', key: 'kdrive_live_water' },
-                { id: 'bar-steps', key: 'kdrive_live_steps' }
+        /* HỆ THỐNG KIỂM TRA NGÀY MỚI (MIDNIGHT RESET) */
+        function checkMidnightReset() {
+            let lastDate = localStorage.getItem('kdrive_last_date');
+            let today = new Date().toDateString(); // VD: "Mon Sep 28 2026"
+            
+            if (lastDate && lastDate !== today) {
+                // Sang ngày mới -> Xóa sạch mọi kỷ lục của ngày cũ
+                const keysToRemove = [
+                    'kdrive_live_hr', 'kdrive_live_weight', 'kdrive_live_sleep', 'kdrive_live_fat', 'kdrive_live_water', 'kdrive_live_steps', 
+                    'kdrive_sci_score',
+                    'thuy_luan_score', 'hoa_luan_score', 'phong_luan_score'
+                ];
+                keysToRemove.forEach(k => localStorage.removeItem(k));
+            }
+            localStorage.setItem('kdrive_last_date', today);
+        }
+
+        // ĐỒNG BỘ TOÀN BỘ CÁC VẠCH NĂNG LƯỢNG (THỂ CHẤT + TRÍ LỰC)
+        function syncAllBars() {
+            // 1. Đồng bộ SCI Tổng
+            let sciScore = localStorage.getItem('kdrive_sci_score');
+            if (sciScore) document.getElementById('luc-chien-sci').innerText = 'SCI: ' + sciScore;
+
+            // 2. Đồng bộ 6 vạch Thể Chất (Sức Mạnh)
+            let sucManhActive = false;
+            const physMetrics = [
+                { id: 'bar-hr', key: 'kdrive_live_hr' }, { id: 'bar-weight', key: 'kdrive_live_weight' },
+                { id: 'bar-sleep', key: 'kdrive_live_sleep' }, { id: 'bar-fat', key: 'kdrive_live_fat' },
+                { id: 'bar-water', key: 'kdrive_live_water' }, { id: 'bar-steps', key: 'kdrive_live_steps' }
             ];
             
-            metrics.forEach(m => {
+            physMetrics.forEach(m => {
                 let val = parseFloat(localStorage.getItem(m.key)) || 0;
                 let bar = document.getElementById(m.id);
                 if(bar) {
-                    if(val > 0) {
-                        bar.classList.add('active'); // Sáng rực Vàng khi có dữ liệu
-                    } else {
-                        bar.classList.remove('active'); // Mờ xám khi nợ dữ liệu
-                    }
+                    if(val > 0) { bar.classList.add('active'); sucManhActive = true; } 
+                    else { bar.classList.remove('active'); }
                 }
             });
 
-            // Đồng bộ luôn điểm SCI tổng
-            let sciScore = localStorage.getItem('kdrive_sci_score');
-            if (sciScore) {
-                document.getElementById('luc-chien-sci').innerText = 'SCI: ' + sciScore;
+            // Chấm tín hiệu Sức mạnh
+            document.getElementById('dot-suc-manh').className = sucManhActive ? 'live-dot active' : 'live-dot inactive';
+
+            // 3. Đồng bộ Trí Nhớ (Thủy)
+            let thuyScore = localStorage.getItem('thuy_luan_score');
+            if(thuyScore && parseInt(thuyScore) > 0) {
+                document.getElementById('bar-thuy-1').style.width = '100%';
+                document.getElementById('bar-thuy-2').style.width = '100%';
+                document.getElementById('dot-thuy').className = 'live-dot active';
+            } else {
+                document.getElementById('dot-thuy').className = 'live-dot inactive';
+            }
+
+            // 4. Đồng bộ Phản Xạ (Hỏa)
+            let hoaScore = localStorage.getItem('hoa_luan_score');
+            if(hoaScore && parseInt(hoaScore) > 0) {
+                document.getElementById('bar-hoa-1').style.width = '100%';
+                document.getElementById('bar-hoa-2').style.width = '100%';
+                document.getElementById('dot-hoa').className = 'live-dot active';
+            } else {
+                document.getElementById('dot-hoa').className = 'live-dot inactive';
+            }
+
+            // 5. Đồng bộ Phán Đoán (Phong)
+            let phongScore = localStorage.getItem('phong_luan_score');
+            if(phongScore && parseInt(phongScore) > 0) {
+                document.getElementById('bar-phong-1').style.width = '100%';
+                document.getElementById('bar-phong-2').style.width = '100%';
+                document.getElementById('dot-phong').className = 'live-dot active';
+            } else {
+                document.getElementById('dot-phong').className = 'live-dot inactive';
             }
         }
 
         // KHỞI TẠO HẠT PHÂN TỬ VÀ ĐỒNG BỘ DỮ LIỆU KHI LOAD TRANG
         window.addEventListener('DOMContentLoaded', () => {
-            syncStrengthBars();
+            checkMidnightReset(); // Quét kiểm tra qua ngày chưa
+            setTimeout(syncAllBars, 100); // Delay nhẹ để CSS kịp render độ trượt
 
             const pMatrix = document.getElementById('particle-matrix');
             if(pMatrix) {
@@ -298,9 +344,7 @@
 
         const i18nCore = {
             vi: { lcSciLabel: "CHỈ SỐ KỶ LUẬT TẬP LUYỆN", lcDia: "SỨC MẠNH", lcThuy: "TRÍ NHỚ", lcHoa: "PHẢN XẠ", lcPhong: "PHÁN ĐOÁN", lcVoNgaLabel: "CẢNH GIỚI TINH ANH", lcVoNgaValue: "1000 NGÀY" },
-            en: { lcSciLabel: "TRAINING DISCIPLINE INDEX", lcDia: "VITALITY", lcThuy: "MEMORY", lcHoa: "REFLEX", lcPhong: "JUDGMENT", lcVoNgaLabel: "ELITE REALM", lcVoNgaValue: "1000 DAYS" },
-            zh: { lcSciLabel: "训练纪律指数", lcDia: "力量", lcThuy: "记忆", lcHoa: "反射", lcPhong: "判断", lcVoNgaLabel: "精英境界", lcVoNgaValue: "1000 天" },
-            ja: { lcSciLabel: "トレーニング規律指数", lcDia: "力", lcThuy: "記憶", lcHoa: "反射", lcPhong: "判断", lcVoNgaLabel: "エリートの境界", lcVoNgaValue: "1000 日" }
+            en: { lcSciLabel: "TRAINING DISCIPLINE INDEX", lcDia: "VITALITY", lcThuy: "MEMORY", lcHoa: "REFLEX", lcPhong: "JUDGMENT", lcVoNgaLabel: "ELITE REALM", lcVoNgaValue: "1000 DAYS" }
         };
 
         const quantumMap = {
@@ -330,9 +374,7 @@
 
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (t[key]) {
-                    el.innerHTML = isEncoded ? encodeQuantum(t[key]) : t[key];
-                }
+                if (t[key]) { el.innerHTML = isEncoded ? encodeQuantum(t[key]) : t[key]; }
             });
         }
 
