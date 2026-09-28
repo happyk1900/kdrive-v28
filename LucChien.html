@@ -116,13 +116,13 @@
         #content-wrapper { position: absolute; inset: 0; z-index: 10; pointer-events: none; animation: fadeIn 1s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* KHUNG HỘP CHỈ SỐ HOLOGRAM (CÓ THỂ KÉO THẢ MƯỢT MÀ LÊN XUỐNG) */
+        /* KHUNG HỘP CHỈ SỐ HOLOGRAM (KÉO THẢ MƯỢT MÀ) */
         .stats-card {
             position: absolute; left: 50%; transform: translateX(-50%); top: 62%;
             width: 92%; max-width: 390px; border-radius: 14px; padding: 15px 18px; 
             display: flex; flex-direction: column; gap: 9px; pointer-events: auto; 
             transition: border 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-            touch-action: none; /* Cho phép kéo thả mượt mà */
+            touch-action: none;
             cursor: grab;
         }
         .stats-card:active { cursor: grabbing; }
@@ -137,21 +137,21 @@
 
         /* CẤP 2: TĂNG TỐC / CỨNG CÁP (50% - <99.9%) */
         .stats-card.tier-2 {
-            background: rgba(5, 15, 25, 0.75);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            background: rgba(5, 15, 25, 0.65);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             border: 1.5px solid rgba(0, 229, 255, 0.6);
             box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 15px rgba(0, 229, 255, 0.2);
         }
 
-        /* CẤP 3: VÔ NGÃ / TRONG SUỐT MỜ ẢO KẾT HỢP VIỀN 7 MÀU VÀ TÂM TỎA SÁNG (100.0%) */
+        /* CẤP 3: VÔ NGÃ / NỀN VẪN TRONG SUỐT MỜ ẢO, VIỀN ÁNH SÁNG 7 MÀU MỎNG MANH HIỆN ĐẠI */
         .stats-card.tier-3 {
-            background: rgba(10, 8, 22, 0.65);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: rgba(5, 10, 22, 0.35); /* Nền mỏng trong suốt, thấy rõ nền phía sau */
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             border: 2px solid transparent;
-            background-image: linear-gradient(rgba(10, 8, 22, 0.65), rgba(10, 8, 22, 0.65)), linear-gradient(90deg, #ff007f, #00e5ff, #ffd700, #ff2a2a, #00ff9d, #ff007f);
+            background-image: linear-gradient(rgba(5, 10, 22, 0.35), rgba(5, 10, 22, 0.35)), linear-gradient(90deg, #ff007f, #00e5ff, #ffd700, #ff2a2a, #00ff9d, #ff007f);
             background-origin: border-box; background-clip: padding-box, border-box;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.95), inset 0 0 30px rgba(255, 0, 127, 0.25), 0 0 30px rgba(0, 229, 255, 0.35);
-            animation: rainbowBorder 6s linear infinite;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 15px rgba(255, 0, 127, 0.15), 0 0 20px rgba(0, 229, 255, 0.25);
+            animation: rainbowBorder 8s linear infinite;
         }
         @keyframes rainbowBorder {
             0% { filter: hue-rotate(0deg); }
@@ -466,7 +466,6 @@
         let startTop = 0;
 
         cardBox.addEventListener('touchstart', (e) => {
-            // Không chặn nếu bấm vào các nút tương tác bên trong
             if (e.target.closest('.sci-header') || e.target.closest('.stat-group') || e.target.closest('.mushi-box-wrapper')) return;
             isDragging = true;
             startY = e.touches[0].clientY;
@@ -480,7 +479,6 @@
             let deltaY = currentY - startY;
             let newTop = startTop + deltaY;
             
-            // Giới hạn kéo trong khung màn hình
             let maxTop = window.innerHeight - cardBox.offsetHeight - 20;
             if (newTop < 80) newTop = 80;
             if (newTop > maxTop) newTop = maxTop;
@@ -495,7 +493,6 @@
             cardBox.style.transition = 'all 0.3s ease';
         });
 
-        // Hỗ trợ chuột cho máy tính / test giả lập
         cardBox.addEventListener('mousedown', (e) => {
             if (e.target.closest('.sci-header') || e.target.closest('.stat-group') || e.target.closest('.mushi-box-wrapper')) return;
             isDragging = true;
