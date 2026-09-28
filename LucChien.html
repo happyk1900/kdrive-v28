@@ -116,7 +116,7 @@
         #content-wrapper { position: absolute; inset: 0; z-index: 10; pointer-events: none; animation: fadeIn 1s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* KHUNG HỘP CHỈ SỐ HOLOGRAM CỐ ĐỊNH NỬA DƯỚI, NGHIÊNG VÀ TRƯỢT LÊN XUỐNG THEO CẢM BIẾN */
+        /* KHUNG HỘP CHỈ SỐ HOLOGRAM */
         .stats-card {
             position: absolute; left: 50%; top: 62%; transform: translate(-50%, -50%);
             width: 92%; max-width: 390px; border-radius: 14px; padding: 15px 18px; 
@@ -124,7 +124,7 @@
             background: rgba(5, 15, 25, 0.65);
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 15px rgba(0, 229, 255, 0.15);
-            transition: border 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease-out; /* Transform mượt mà */
+            transition: border 0.3s ease, box-shadow 0.3s ease, transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             transform-style: preserve-3d;
         }
 
@@ -174,26 +174,27 @@
             font-family: 'Share Tech Mono', monospace;
             font-size: 13.5px;
             font-weight: bold;
-            color: var(--amber);
-            text-shadow: 0 0 8px rgba(255, 170, 0, 0.8);
             letter-spacing: 1.5px;
             display: flex;
             justify-content: center;
             align-items: center;
             margin-top: 2px;
             padding: 4px 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
         }
-        .countdown-timer.danger {
-            color: var(--crimson);
-            text-shadow: 0 0 10px rgba(255, 42, 42, 0.9);
-            animation: pulseVoNga 1s infinite alternate;
+        
+        /* 4 TRẠNG THÁI MÀU SẮC ĐỒNG HỒ */
+        .status-green { color: var(--mint); text-shadow: 0 0 8px rgba(0, 255, 157, 0.8); }
+        .status-yellow { color: var(--amber); text-shadow: 0 0 8px rgba(255, 170, 0, 0.8); }
+        .status-red { color: var(--crimson); text-shadow: 0 0 8px rgba(255, 42, 42, 0.8); }
+        .status-flash { 
+            color: var(--crimson); 
+            text-shadow: 0 0 12px rgba(255, 42, 42, 0.95); 
+            animation: pulseVoNga 0.7s infinite alternate; 
         }
 
         /* HỦY BỎ CLICK TOÀN HÀNG, CHUYỂN SANG NÚT BẤM CỤC BỘ (TRIGGER BTN) */
-        .stat-group { 
-            display: flex; flex-direction: column; gap: 5px; padding: 4px 6px; border-radius: 6px; 
-        }
-        
+        .stat-group { display: flex; flex-direction: column; gap: 5px; padding: 4px 6px; border-radius: 6px; }
         .stat-info { display: flex; justify-content: space-between; align-items: center; }
 
         /* VÙNG NÚT BẤM (HITBOX) CHỈ TẬP TRUNG VÀO ICON VÀ TÊN */
@@ -224,16 +225,7 @@
         .sub-bar-fill { height: 100%; width: 100%; background: rgba(255, 255, 255, 0.05); transition: background 0.5s ease; }
         .sub-bar-fill.active { background: linear-gradient(90deg, #d4af37, #ffe066); box-shadow: 0 0 6px #ffe066; }
         
-        .sub-bar-label { 
-            font-family: 'Share Tech Mono', monospace; 
-            font-size: 10.5px; 
-            font-weight: bold; 
-            color: rgba(255,255,255,0.95); 
-            text-align: center; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-            width: 100%;
-        }
+        .sub-bar-label { font-family: 'Share Tech Mono', monospace; font-size: 10.5px; font-weight: bold; color: rgba(255,255,255,0.95); text-align: center; text-transform: uppercase; letter-spacing: 0.5px; width: 100%; }
 
         .dual-bars-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; margin-top: 3px; }
         .stat-bar-container { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden; }
@@ -243,7 +235,6 @@
         .fill-hoa { background: linear-gradient(90deg, #cc0000, #ff4d4d); box-shadow: 0 0 8px #ff4d4d; }
         .fill-phong { background: linear-gradient(90deg, #cccccc, #ffffff); box-shadow: 0 0 10px #ffffff; }
 
-        /* CHỮ VÔ NGÃ TO RÕ ĐỒNG BỘ */
         .mushi-box-wrapper { position: relative; width: 100%; height: 38px; margin-top: 4px; display: flex; justify-content: center; align-items: center; gap: 30px; cursor: pointer; transition: transform 0.15s; }
         .mushi-box-wrapper:active { transform: scale(0.97); }
         .mushi-box-wrapper img.mushi-bg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.6); width: 100%; height: 100%; object-fit: contain; z-index: -1; pointer-events: none; }
@@ -253,60 +244,18 @@
         
         @keyframes pulseVoNga { from { opacity: 0.8; filter: brightness(1); } to { opacity: 1; filter: brightness(1.3); } }
 
-        /* MODAL STYLING */
-        .cyber-modal { fixed; inset: 0; z-index: 300000; display: none; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 16px; position: fixed;}
-        .cyber-modal::before {
-            content: ''; position: absolute; inset: 0; 
-            background: rgba(4, 9, 18, 0.65); 
-            z-index: 0; pointer-events: none;
-        }
-
+        /* MODAL STYLING CHUẨN XÁC */
+        .cyber-modal { position: fixed; inset: 0; background: url('https://github.com/happyk1900/Kai-Ripe/blob/main/nen%20van%20ban%20luc%20chien.png?raw=true') center/cover no-repeat; z-index: 300000; display: none; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 16px; }
+        .cyber-modal::before { content: ''; position: absolute; inset: 0; background: rgba(4, 9, 18, 0.65); z-index: 0; pointer-events: none; }
         .cyber-modal.active { display: flex; opacity: 1; }
         
-        .cyber-led-wrapper { 
-            position: relative; padding: 1.5px; overflow: hidden; 
-            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); 
-            width: 95vw; max-width: 420px; box-shadow: 0 0 35px rgba(0,229,255,0.3); 
-            z-index: 1; 
-        }
-        .cyber-led-wrapper::before { 
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; 
-            background: conic-gradient(transparent, transparent, transparent, var(--cyan)); 
-            animation: spin-led 4s linear infinite; 
-            z-index: -1; 
-        }
+        .cyber-led-wrapper { position: relative; padding: 1.5px; overflow: hidden; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); width: 95vw; max-width: 420px; box-shadow: 0 0 35px rgba(0,229,255,0.3); z-index: 1; }
+        .cyber-led-wrapper::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, transparent, transparent, var(--cyan)); animation: spin-led 4s linear infinite; z-index: -1; }
         @keyframes spin-led { 100% { transform: rotate(360deg); } }
         
-        .modal-box { 
-            width: 100%; 
-            background: rgba(5, 10, 18, 0.45); 
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            padding: 24px 20px; 
-            text-align: left; 
-            position: relative; 
-            z-index: 1; 
-            display: flex; 
-            flex-direction: column; 
-            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); 
-            max-height: 85vh; 
-            overflow-y: auto; 
-            border: 1px solid rgba(0,229,255,0.5); 
-        }
-        
+        .modal-box { width: 100%; background: rgba(5, 10, 18, 0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 24px 20px; text-align: left; position: relative; z-index: 1; display: flex; flex-direction: column; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); max-height: 85vh; overflow-y: auto; border: 1px solid rgba(0,229,255,0.5); }
         .modal-title { font-family: 'Share Tech Mono', monospace; color: #00e5ff; font-size: 18px; font-weight: 900; margin-bottom: 16px; letter-spacing: 2px; text-transform: uppercase; text-align: center; text-shadow: 0 0 12px rgba(0,0,0,0.8); }
-        
-        .modal-text-container {
-            background: rgba(8, 12, 18, 0.85); 
-            border: 1px solid rgba(0, 229, 255, 0.3);
-            border-radius: 8px;
-            padding: 16px;
-            font-family: 'Space Grotesk', sans-serif; 
-            font-size: 14.5px; 
-            color: #ffffff; 
-            line-height: 1.8; 
-            text-align: justify;
-        }
-
+        .modal-text-container { background: rgba(8, 12, 18, 0.85); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 8px; padding: 16px; font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; color: #ffffff; line-height: 1.8; text-align: justify; }
         .modal-btn { width: 100%; padding: 13px; font-family: 'Share Tech Mono', monospace; font-size: 14.5px; font-weight: bold; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--cyan); color: var(--cyan); cursor: pointer; text-transform: uppercase; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); text-align: center; transition: all 0.2s; margin-top: 20px; backdrop-filter: blur(4px); }
         .modal-btn:active { transform: scale(0.96); background: rgba(0, 229, 255, 0.3); }
     </style>
@@ -323,7 +272,6 @@
     <!-- THANH ĐIỀU HƯỚNG TRÊN -->
     <div class="top-nav">
         <button class="btn-back-cyber" onclick="returnToCore()">⟨</button>
-        
         <div style="position: relative;">
             <button class="btn-audio-cyber" id="audio-toggle-btn" onclick="handleAudioDebugClick(event)">
                 <div class="audio-equalizer">
@@ -332,8 +280,6 @@
                     <div class="eq-bar eq-bar-3"></div>
                 </div>
             </button>
-
-            <!-- SLIDER VOLUME POPUP -->
             <div class="volume-popup" id="volume-popup">
                 <div class="volume-label">ÂM LƯỢNG: <span id="vol-val">40%</span></div>
                 <input type="range" min="0" max="100" value="40" class="volume-slider" id="vol-slider" oninput="changeVolume(this.value)">
@@ -351,19 +297,17 @@
             <div class="sci-header" onclick="showSciInfoModal()">
                 <div class="sci-label">CHỈ SỐ KỶ LUẬT TẬP LUYỆN</div>
                 <div class="sci-value" id="luc-chien-sci">SCI: 0.0%</div>
-                <!-- ĐỒNG HỒ ĐẾM NGƯỢC THUẦN VIỆT -->
-                <div class="countdown-timer" id="midnight-timer">CÒN LẠI 00:00:00</div>
+                <!-- ĐỒNG HỒ ĐẾM NGƯỢC -->
+                <div class="countdown-timer status-green" id="midnight-timer">CÒN LẠI 00:00:00</div>
             </div>
 
             <!-- SỨC MẠNH -->
             <div class="stat-group">
                 <div class="stat-info">
-                    <!-- NÚT BẤM HITBOX GỌN GÀNG -->
                     <div class="stat-trigger-btn" onclick="jumpToTest('sinh_trac.html')">
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20DIA.png?raw=true" alt="Sức Mạnh"></div>
                         <span class="stat-name">SỨC MẠNH</span>
                     </div>
-                    <!-- ĐÈN DEBUG BÍ MẬT VẪN ĐƯỢC GIỮ -->
                     <div class="live-dot dot-red" id="dot-suc-manh" onclick="handleSecretDotClick(event, 0)"></div>
                 </div>
                 <div class="sub-bars-grid">
@@ -379,7 +323,6 @@
             <!-- TRÍ NHỚ -->
             <div class="stat-group">
                 <div class="stat-info">
-                    <!-- NÚT BẤM HITBOX GỌN GÀNG -->
                     <div class="stat-trigger-btn" onclick="jumpToTest('thuy_luan.html')">
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20THUY.png?raw=true" alt="Trí Nhớ"></div>
                         <span class="stat-name">TRÍ NHỚ</span>
@@ -395,7 +338,6 @@
             <!-- PHẢN XẠ -->
             <div class="stat-group">
                 <div class="stat-info">
-                    <!-- NÚT BẤM HITBOX GỌN GÀNG -->
                     <div class="stat-trigger-btn" onclick="jumpToTest('HoaLuan.html')">
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20HOA.png?raw=true" alt="Phản Xạ"></div>
                         <span class="stat-name">PHẢN XẠ</span>
@@ -411,7 +353,6 @@
             <!-- PHÁN ĐOÁN -->
             <div class="stat-group">
                 <div class="stat-info">
-                    <!-- NÚT BẤM HITBOX GỌN GÀNG -->
                     <div class="stat-trigger-btn" onclick="jumpToTest('PhongLuan.html')">
                         <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20PHONG.png?raw=true" alt="Phán Đoán"></div>
                         <span class="stat-name">PHÁN ĐOÁN</span>
@@ -424,7 +365,7 @@
                 </div>
             </div>
 
-            <!-- NÚT MỞ MODAL VÔ NGÃ (1000 NGÀY) -->
+            <!-- NÚT MỞ MODAL VÔ NGÃ -->
             <div class="mushi-box-wrapper" onclick="showVoNgaModal()">
                 <img class="mushi-bg" src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20MUSHI.png?raw=true" alt="Mushi Box">
                 <span class="vo-nga-label">VÔ NGÃ</span>
@@ -469,7 +410,6 @@
                         • Đúng 0h00 đêm: Toàn bộ vạch năng lượng và điểm SCI tự động reset về 0.
                     </div>
                 </div>
-
                 <button class="modal-btn" onclick="closeSciInfoModal()">ĐÃ HIỂU</button>
             </div>
         </div>
@@ -477,27 +417,36 @@
 
     <script>
         // ==========================================
-        // LOGIC ĐỒNG HỒ ĐẾM NGƯỢC THUẦN VIỆT ĐẾN 0H ĐÊM
+        // LOGIC ĐỒNG HỒ ĐẾM NGƯỢC THEO KHUNG GIỜ SINH HỌC
         // ==========================================
         function updateMidnightTimer() {
             const now = new Date();
+            const hours = now.getHours();
+            
             const tomorrow = new Date(now);
             tomorrow.setHours(24, 0, 0, 0); 
-            
             const diffMs = tomorrow - now;
             
-            const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
-            const minutes = Math.floor((diffMs / 1000 / 60) % 60).toString().padStart(2, '0');
-            const seconds = Math.floor((diffMs / 1000) % 60).toString().padStart(2, '0');
+            const hStr = Math.floor((diffMs / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+            const mStr = Math.floor((diffMs / 1000 / 60) % 60).toString().padStart(2, '0');
+            const sStr = Math.floor((diffMs / 1000) % 60).toString().padStart(2, '0');
             
             const timerEl = document.getElementById('midnight-timer');
             if(timerEl) {
-                timerEl.innerText = `CÒN LẠI ${hours}:${minutes}:${seconds}`;
-                // Báo động đỏ khi thời gian còn dưới 1 tiếng
-                if (diffMs < 3600000) {
-                    timerEl.classList.add('danger');
-                } else {
-                    timerEl.classList.remove('danger');
+                timerEl.innerText = `CÒN LẠI ${hStr}:${mStr}:${sStr}`;
+                
+                // Xóa toàn bộ class màu sắc cũ
+                timerEl.classList.remove('status-green', 'status-yellow', 'status-red', 'status-flash');
+                
+                // Gán màu theo khung giờ chốt
+                if (hours >= 0 && hours < 12) {
+                    timerEl.classList.add('status-green');
+                } else if (hours >= 12 && hours < 19) {
+                    timerEl.classList.add('status-yellow');
+                } else if (hours >= 19 && hours < 22) {
+                    timerEl.classList.add('status-red');
+                } else if (hours >= 22 && hours < 24) {
+                    timerEl.classList.add('status-flash');
                 }
             }
         }
@@ -542,28 +491,31 @@
         }
 
         /* ==========================================
-           TÍNH NĂNG NGHIÊNG BẢNG & TRƯỢT LÊN/XUỐNG MƯỢT MÀ THEO CON QUAY HỒI CHUYỂN 
+           NGHIÊNG VÀ TRƯỢT LÊN XUỐNG CHẠM NÚT VOLUME 
            ========================================== */
         const cardBox = document.getElementById('stats-card-box');
         if (window.DeviceOrientationEvent) {
             window.addEventListener('deviceorientation', (event) => {
-                let tiltX = event.gamma; // Trái/Phải (xoay)
-                let tiltY = event.beta;  // Trước/Sau (trượt lên/xuống)
+                let tiltX = event.gamma; 
+                let tiltY = event.beta;  
                 
                 if (tiltX !== null && tiltY !== null) {
-                    // Xoay hộp nghiêng theo chiều 3D
                     let rotateY = Math.max(-10, Math.min(10, tiltX * 0.4));
                     let rotateX = Math.max(-10, Math.min(10, -tiltY * 0.4));
                     
-                    // Tính toán trượt Y (Trọng tâm: Góc máy ~45 độ)
                     let baseBeta = 45; 
-                    // Chúi xuống = beta giảm dần về 0 -> moveY âm (đẩy lên)
-                    // Ngửa lên = beta tăng dần -> moveY dương (đẩy xuống)
-                    let boundedBeta = Math.max(10, Math.min(80, tiltY)); // Giới hạn góc tránh lỗi lật máy
-                    let moveY = (boundedBeta - baseBeta) * 1.5; 
+                    let boundedBeta = Math.max(0, Math.min(90, tiltY)); // Nới rộng dải trượt
                     
-                    // KHÓA GIỚI HẠN AN TOÀN TRÁNH VÙNG MÙ TRÊN/DƯỚI
-                    moveY = Math.max(-60, Math.min(60, moveY));
+                    let moveY = 0;
+                    if (boundedBeta < baseBeta) {
+                        // Chúi điện thoại -> trượt bay thẳng lên trên
+                        moveY = (boundedBeta - baseBeta) * 7; 
+                        moveY = Math.max(-260, moveY); // Khóa chốt sát nút Volume/Âm thanh
+                    } else {
+                        // Ngửa điện thoại -> trượt xuống dưới một chút
+                        moveY = (boundedBeta - baseBeta) * 2; 
+                        moveY = Math.min(50, moveY); // Khóa chốt an toàn không vượt lề đáy
+                    }
                     
                     cardBox.style.transform = `translate(-50%, calc(-50% + ${moveY}px)) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
                 }
@@ -599,7 +551,6 @@
 
         function handleSecretDotClick(event, dotIndex) {
             event.stopPropagation(); 
-            
             clearTimeout(secretTimer);
             secretTimer = setTimeout(() => { expectedDotIndex = 0; }, 2000); 
 
@@ -684,10 +635,21 @@
             syncCognitive('hoa_luan', 'bar-hoa-1', 'bar-hoa-2', 'dot-hoa');
             syncCognitive('phong_luan', 'bar-phong-1', 'bar-phong-2', 'dot-phong');
 
+            const timerEl = document.getElementById('midnight-timer');
+
+            // LOGIC TÀNG HÌNH ĐỒNG HỒ KHI HOÀN THÀNH 100%
             if (activeCount >= 9) {
                 sciTotalPoints = 100.0;
+                if(timerEl) {
+                    timerEl.style.opacity = '0';
+                    timerEl.style.visibility = 'hidden';
+                }
             } else {
                 sciTotalPoints = Math.min(99.9, sciTotalPoints);
+                if(timerEl) {
+                    timerEl.style.opacity = '1';
+                    timerEl.style.visibility = 'visible';
+                }
             }
 
             document.getElementById('luc-chien-sci').innerText = 'SCI: ' + sciTotalPoints.toFixed(1) + '%';
