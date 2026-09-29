@@ -66,16 +66,14 @@
 
         #hp-notification-area { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); width: 200px; text-align: center; }
 
-        /* THANH ĐIỀU HƯỚNG DƯỚI */
+        /* THANH ĐIỀU HƯỚNG DƯỚI - BỐ CỤC 3 NÚT CÂN ĐỐI */
         .game-bottom-bar {
             position: fixed; bottom: max(15px, env(safe-area-inset-bottom)); left: 0; width: 100vw;
             border-top: 1px solid rgba(0, 229, 255, 0.3); padding: 15px 20px 0 20px;
-            display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto;
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; z-index: 10000; pointer-events: auto;
             background: linear-gradient(0deg, rgba(2,8,15,0.95) 0%, transparent 100%); transition: opacity 0.3s;
         }
         .game-bottom-bar.hidden { opacity: 0; pointer-events: none !important; }
-
-        .bottom-actions-right { display: flex; gap: 8px; align-items: center; }
 
         .btn-action {
             width: 44px; height: 44px; background: rgba(5, 7, 10, 0.8); 
@@ -86,13 +84,13 @@
         }
         .btn-action:active { transform: scale(0.9); }
         
-        .btn-back { color: var(--cyan); font-family: 'Share Tech Mono', monospace; font-size: 24px; font-weight: bold; box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); padding-bottom: 2px; padding-right: 2px; }
+        .btn-back { justify-self: start; color: var(--cyan); font-family: 'Share Tech Mono', monospace; font-size: 24px; font-weight: bold; box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); padding-bottom: 2px; padding-right: 2px; }
         .btn-back:active { background: rgba(0, 229, 255, 0.25); box-shadow: 0 0 20px rgba(0, 229, 255, 0.6); }
 
-        .btn-skip { border-color: rgba(56, 239, 125, 0.6); color: var(--mint); font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: bold; box-shadow: 0 0 10px rgba(56, 239, 125, 0.2); }
+        .btn-skip { justify-self: center; border-color: rgba(56, 239, 125, 0.6); color: var(--mint); font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: bold; box-shadow: 0 0 10px rgba(56, 239, 125, 0.2); }
         .btn-skip:active { background: rgba(56, 239, 125, 0.25); box-shadow: 0 0 20px rgba(56, 239, 125, 0.6); }
 
-        .btn-pause { border-color: rgba(255, 170, 0, 0.5); box-shadow: 0 0 10px rgba(255, 170, 0, 0.15); }
+        .btn-pause { justify-self: end; border-color: rgba(255, 170, 0, 0.5); box-shadow: 0 0 10px rgba(255, 170, 0, 0.15); }
         .btn-pause::before, .btn-pause::after { content: ''; width: 4px; height: 16px; background: var(--amber); margin: 0 3px; border-radius: 2px; box-shadow: 0 0 5px var(--amber); }
         .btn-pause:active { background: rgba(255, 170, 0, 0.2); box-shadow: 0 0 20px rgba(255, 170, 0, 0.5); }
 
@@ -197,7 +195,7 @@
 
             <!-- TẦNG TRÊN: HIỂN THỊ MÁU VÀ ĐIỂM -->
             <div id="game-top-bar" class="game-top-bar hidden">
-                <!-- 5 Máu Xanh Gốc ở bên trái -->
+                <!-- 5 Máu Xanh Gốc bên trái (Bật sáng đầy đủ) -->
                 <div class="health-container">
                     <div class="health-bar green active" id="hp-g-1"></div>
                     <div class="health-bar green active" id="hp-g-2"></div>
@@ -211,7 +209,7 @@
                     <div id="hp-notification-area"></div>
                 </div>
 
-                <!-- 5 Máu Hồng Thưởng ở bên phải -->
+                <!-- 5 Máu Hồng Thưởng bên phải (Ban đầu tắt hoàn toàn) -->
                 <div class="health-container">
                     <div class="health-bar pink" id="hp-p-1"></div>
                     <div class="health-bar pink" id="hp-p-2"></div>
@@ -221,13 +219,11 @@
                 </div>
             </div>
 
-            <!-- TẦNG DƯỚI: ĐIỀU HƯỚNG CẮT NGANG -->
+            <!-- TẦNG DƯỚI: ĐIỀU HƯỚNG CẮT NGANG (Thế chân vạc 3 nút cân đối) -->
             <div id="game-bottom-bar" class="game-bottom-bar hidden">
                 <button class="btn-action btn-back" onclick="confirmExitToLobby()">⟨</button>
-                <div class="bottom-actions-right">
-                    <button class="btn-action btn-skip" id="btn-skip-stage" onclick="skipToNextStage()" title="Chuyển bài nhanh">⏭</button>
-                    <button class="btn-action btn-pause" onclick="pauseGame()"></button>
-                </div>
+                <button class="btn-action btn-skip" id="btn-skip-stage" onclick="skipToNextStage()" title="Chuyển bài nhanh">⏭</button>
+                <button class="btn-action btn-pause" onclick="pauseGame()"></button>
             </div>
 
             <!-- MODAL START GAME -->
@@ -348,7 +344,7 @@
         };
 
         function getRankByStructure(completedLevel, score) {
-            if (score < 300 || completedLevel <= 1) return { name: "Kém", feedback: "Hoàn thành mức 3x3 / 4 hình." };
+            if (score < 200 || completedLevel <= 1) return { name: "Kém", feedback: "Hoàn thành mức 3x3 / 4 hình." };
             if (completedLevel === 2) return { name: "Trung Bình", feedback: "Hoàn thành mức 5x5 / 5 hình." };
             if (completedLevel === 3) return { name: "Giỏi", feedback: "Hoàn thành mức 7x7 / 7 hình." };
             if (completedLevel === 4) return { name: "Xuất Sắc", feedback: "Hoàn thành mức 9x9 / 9 hình (mở khóa hình mới)." };
@@ -387,7 +383,7 @@
 
         let cGame = '1'; 
         let aScore = 0; 
-        let stabilityHP = 10; // Tổng = 10 HP (5 Xanh bên trái + 5 Hồng bên phải)
+        let stabilityHP = 5; // Khởi đầu chính xác 5 mạng xanh (5 vạch trái sáng, 5 vạch phải tắt)
         let isPlaying = false; 
         let isPausedForStart = true;
         
@@ -452,7 +448,7 @@
         }
 
         function openArena(id) {
-            cGame = id; aScore = 0; stabilityHP = 10; isPlaying = false; isPausedForStart = true;
+            cGame = id; aScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
             currentLevel = 1; highestCompletedLevel = 1; winsInCurrentLevel = 0;
             extractionTimes = []; nextHpMilestone = 1000;
 
@@ -515,7 +511,7 @@
         function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
         function closeArena() { window.location.href = 'LucChien.html'; }
 
-        // Nút chuyển bài trực tiếp (Skip)
+        // Nút chuyển bài trực tiếp (Skip) ở giữa thanh đáy
         function skipToNextStage() {
             playSound('coin');
             isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
@@ -549,7 +545,7 @@
 
         function failSequence() { 
             if(!isPlaying || isPausedForStart) return; canClick = false; 
-            stabilityHP -= 1; // Sai trừ 1 máu
+            stabilityHP -= 1; // Sai trừ 1 mạng
             updateHpDisplay(); 
             
             winsInCurrentLevel = 0; 
@@ -582,8 +578,18 @@
             if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
 
             playSound('coin', 1); 
-            // Cân chỉnh lại công thức điểm vừa phải, không bị quá lâu
-            let pointsToAdd = 25 + (currentSeqLength * currentLevel * 8); 
+            
+            // CƠ CHẾ ĐIỂM CỐ ĐỊNH THEO LEVEL KHÔNG BỊ LẠM PHÁT:
+            // Level 1 (3x3): +10 điểm / ô
+            // Level 2 (5x5): +12 điểm / ô
+            // Level 3 (7x7): +15 điểm / ô
+            // Level 4 trở lên: +20 điểm / ô
+            let basePointPerItem = 10;
+            if (currentLevel === 2) basePointPerItem = 12;
+            else if (currentLevel === 3) basePointPerItem = 15;
+            else if (currentLevel >= 4) basePointPerItem = 20;
+
+            let pointsToAdd = basePointPerItem; 
             aScore += pointsToAdd;
             document.getElementById('boo-points').innerText = Math.round(aScore);
 
@@ -597,12 +603,16 @@
 
         function checkLevelUp() { 
             winsInCurrentLevel++;
-            let requiredWins = (currentLevel < highestCompletedLevel) ? 1 : 2; // Giảm số trận thắng qua màn để đỡ mất thời gian
+            let requiredWins = (currentLevel < highestCompletedLevel) ? 1 : 2; 
 
             if (winsInCurrentLevel >= requiredWins) { 
                 winsInCurrentLevel = 0; currentLevel++;
                 if (currentLevel > highestCompletedLevel) { highestCompletedLevel = currentLevel; }
                 if(cGame === '2') buildG2Keyboard(); 
+
+                // Thưởng điểm hoàn thành màn chơi
+                aScore += (currentLevel * 25);
+                document.getElementById('boo-points').innerText = Math.round(aScore);
 
                 let alertBox = document.createElement('div');
                 alertBox.className = 'matrix-expand-alert';
@@ -704,7 +714,7 @@
             let currentHits = (cGame === '1') ? hitsCountG1 : hitsCountG2;
             let avgExtractionMs = extractionTimes.length > 0 ? Math.round(extractionTimes.reduce((a,b)=>a+b, 0) / extractionTimes.length) : 0;
 
-            if (aScore < 300 || currentHits < 3) {
+            if (aScore < 200 || currentHits < 3) {
                 aScore = 0; highestCompletedLevel = 1; avgExtractionMs = 2500;
             }
 
@@ -760,8 +770,8 @@
 
             document.getElementById('sum-rank-mem').innerHTML = getRankHTML(finalRankObj.name);
 
-            if (totalSessionScore < 300) {
-                document.getElementById('master-feedback-text').innerText = "Chưa đạt ngưỡng tối thiểu (300 Data). Cần rèn luyện thêm!";
+            if (totalSessionScore < 200) {
+                document.getElementById('master-feedback-text').innerText = "Chưa đạt ngưỡng tối thiểu (200 Data). Cần rèn luyện thêm!";
             } else {
                 document.getElementById('master-feedback-text').innerText = finalRankObj.feedback;
             }
