@@ -246,7 +246,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT TÍCH HỢP ĐA NGÔN NGỮ & XỬ LÝ LOGIC -->
+    <!-- SCRIPT XỬ LÝ LOGIC ĐÃ FIX LUỒNG KHỞI ĐỘNG -->
     <script>
         const statusEl = document.getElementById('loginStatus');
         let hasReadTerms = false;
@@ -256,7 +256,6 @@
         const langGateBg = new Image();
         langGateBg.src = "https://github.com/happyk1900/Kai-Ripe/blob/main/k-ngon%20ngu.png?raw=true";
 
-        // BỘ TỪ ĐIỂN ĐA NGÔN NGỮ (12 NGÔN NGỮ QUỐC TẾ)
         const translations = {
             vi: { title: "CHỌN NGÔN NGỮ QUỐC TẾ", close: "ĐÓNG LẠI", confirm: "ĐỒNG Ý", terms: 'Tôi đồng ý với <span class="terms-link" onclick="openTermsModal()">Điều khoản dịch vụ</span> của <span class="nowrap-text">K-DRIVE</span>.', agreeBtn: "ĐÃ ĐỌC & ĐỒNG Ý", init: "[HỆ THỐNG ĐANG KHỞI ĐỘNG...]" },
             en: { title: "SELECT INTERNATIONAL LANGUAGE", close: "CLOSE", confirm: "AGREE", terms: 'I agree to the <span class="terms-link" onclick="openTermsModal()">Terms of Service</span> of <span class="nowrap-text">K-DRIVE</span>.', agreeBtn: "READ & AGREE", init: "[SYSTEM INITIALIZING...]" },
@@ -269,7 +268,7 @@
             ru: { title: "ВЫБЕРИТЕ ЯЗЫК", close: "ЗАКРЫТЬ", confirm: "СОГЛАСЕН", terms: 'Я согласен с <span class="terms-link" onclick="openTermsModal()">Условиями использования</span> <span class="nowrap-text">K-DRIVE</span>.', agreeBtn: "ПРОЧИТАНО И СОГЛАСЕН", init: "[ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ...]" },
             th: { title: "เลือกภาษาต่างประเทศ", close: "ปิด", confirm: "ตกลง", terms: 'ฉันยอมรับ <span class="terms-link" onclick="openTermsModal()">ข้อกำหนดการให้บริการ</span> ของ <span class="nowrap-text">K-DRIVE</span>', agreeBtn: "อ่านและยอมรับ", init: "[กำลังเริ่มต้นระบบ...]" },
             id: { title: "PILIH BAHASA INTERNASIONAL", close: "TUTUP", confirm: "SETUJU", terms: 'Saya setuju dengan <span class="terms-link" onclick="openTermsModal()">Ketentuan Layanan</span> <span class="nowrap-text">K-DRIVE</span>.', agreeBtn: "BACA & SETUJU", init: "[SISTEM MENGINISIALISASI...]" },
-            ar: { title: "اختر Lاللغة الدولية", close: "إغلاق", confirm: "أوافق", terms: 'أوافق على <span class="terms-link" onclick="openTermsModal()">شروط الخدمة</span> الخاصة بـ <span class="nowrap-text">K-DRIVE</span>.', agreeBtn: "قراءة وموافقة", init: "[جاري تهيئة النظام...]" }
+            ar: { title: "اختر اللغة الدولية", close: "إغلاق", confirm: "أوافق", terms: 'أوافق على <span class="terms-link" onclick="openTermsModal()">شروط الخدمة</span> الخاصة بـ <span class="nowrap-text">K-DRIVE</span>.', agreeBtn: "قراءة وموافقة", init: "[جاري تهيئة النظام...]" }
         };
 
         function applyLanguageUI(lang) {
@@ -284,24 +283,36 @@
             }
         }
 
-        // KIỂM TRA PHIÊN ĐĂNG NHẬP (PERSISTENT LOGIN)
+        // LUỒNG MỚI: LUÔN KHỞI ĐỘNG TỪ INDEX, NHƯNG NẾU ĐÃ TỪNG ĐỌC ĐIỀU KHOẢN VÀ ĐĂNG NHẬP THÌ CHO PHÉP TÍCH SẴN HOẶC NHỚ TRẠNG THÁI
         window.addEventListener('DOMContentLoaded', () => {
-            const activeSession = localStorage.getItem('kdrive_session');
-            if (activeSession === 'active') {
-                window.location.href = 'LucChien.html';
-                return;
-            }
-
-            // Áp dụng ngôn ngữ đã lưu trước đó nếu có
             const savedLang = localStorage.getItem('kdrive_lang') || 'vi';
             applyLanguageUI(savedLang);
 
-            // CHỜ ẢNH NỀN TẢI XONG MỚI HIỆN BẢNG NGÔN NGỮ
+            // Kiểm tra xem user đã từng đọc và đồng ý điều khoản ở các lần trước chưa
+            const agreedBefore = localStorage.getItem('kdrive_terms_agreed');
+            if (agreedBefore === 'true') {
+                hasReadTerms = true;
+                const checkbox = document.getElementById('termsCheck');
+                checkbox.removeAttribute('disabled');
+                checkbox.classList.add('enabled');
+                checkbox.checked = true;
+                document.getElementById('googleBtn').classList.add('unlocked');
+            }
+
+            // CHỜ ẢNH NỀN TẢI XONG MỚI HIỆN BẢNG NGÔN NGỮ (CHỈ HIỆN KHI MỞ APP LẦN ĐẦU HOẶC CHƯA CHỌN)
             langGateBg.onload = () => {
                 const bgImg = document.getElementById('bgImageElement');
                 bgImg.src = langGateBg.src;
                 bgImg.style.opacity = '1';
-                document.getElementById('langGateModal').style.display = 'flex';
+                
+                // Nếu đã chọn ngôn ngữ ở lần trước, tự động ẩn bảng ngôn ngữ đi cho nhanh
+                if (localStorage.getItem('kdrive_lang')) {
+                    document.getElementById('langGateModal').style.display = 'none';
+                    bgImg.src = preloadedLoginBg.src;
+                    document.getElementById('loginPanelContainer').classList.add('show-login');
+                } else {
+                    document.getElementById('langGateModal').style.display = 'flex';
+                }
             };
 
             if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
@@ -365,8 +376,9 @@
                 statusEl.style.color = "#00ffcc";
                 statusEl.innerHTML = `✅ XIN CHÀO: ${maskedEmail}`;
                 
-                // LƯU PHIÊN ĐĂNG NHẬP VÀO LOCALSTORAGE
+                // LƯU TRẠNG THÁI ĐĂNG NHẬP & ĐỒNG Ý ĐIỀU KHOẢN
                 localStorage.setItem('kdrive_session', 'active');
+                localStorage.setItem('kdrive_terms_agreed', 'true');
                 localStorage.setItem('kdrive_logged_in_user', userName);
                 localStorage.setItem('kdrive_user_email', maskedEmail);
                 
@@ -434,7 +446,6 @@
 
         function closeLangModal() { confirmLanguage(); }
 
-        // XỬ LÝ MỞ VÀ ĐỌC TRANG GIẤY A4 ĐIỀU KHOẢN
         function openTermsModal() { 
             document.getElementById('termsModal').classList.add('active'); 
         }
@@ -445,7 +456,8 @@
             const checkbox = document.getElementById('termsCheck');
             checkbox.removeAttribute('disabled');
             checkbox.classList.add('enabled');
-            checkbox.checked = true; // Tự động đánh dấu sau khi đọc xong
+            checkbox.checked = true;
+            localStorage.setItem('kdrive_terms_agreed', 'true');
             toggleTermsAgreement();
         }
 
