@@ -45,7 +45,7 @@
             opacity: 1; transition: opacity 1.2s ease-in-out; 
         }
 
-        /* BẢNG CHỌN NGÔN NGỮ */
+        /* BẢNG CHỌN NGÔN NGỮ - CĂN GIỮA TUYỆT ĐỐI MÀN HÌNH */
         .lang-gate-overlay {
             position: fixed; inset: 0; z-index: 999999; background: rgba(0, 0, 0, 0.4);
             display: flex; justify-content: center; align-items: center; 
@@ -56,23 +56,23 @@
         
         .lang-box {
             width: 90%; max-width: 320px; background: rgba(255, 255, 255, 0.15);
-            border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 14px; padding: 16px 14px;
+            border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 14px; padding: 20px 14px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 15px rgba(255, 255, 255, 0.2); 
             text-align: center; color: #fff; z-index: 10; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            margin-top: 18vh;
+            margin: auto; /* CĂN GIỮA CHUẨN XÁC */
             transition: transform 1s ease-in-out, opacity 1s ease-in-out;
         }
         .lang-gate-overlay.hidden .lang-box { transform: translateY(20px); opacity: 0; }
 
         .lang-title-area { 
-            font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 800; color: #ffffff; margin-bottom: 12px; letter-spacing: 0.5px; 
+            font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 800; color: #ffffff; margin-bottom: 15px; letter-spacing: 0.5px; 
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
         }
         
-        .lang-grid-exact { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 15px; }
+        .lang-grid-exact { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 18px; }
         .lang-cell {
             background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 6px; padding: 10px; font-size: 12px; font-weight: 700;
+            border-radius: 8px; padding: 12px; font-size: 12px; font-weight: 700;
             color: #ffffff; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 8px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); transition: 0.2s;
         }
@@ -162,9 +162,9 @@
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
     <audio id="bgMusic" src="https://raw.githubusercontent.com/happyk1900/HOSOGOC/main/K_Drive_Initialized.mp3" preload="auto" loop></audio>
-    <video id="successVideo" src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/no%20audio%20-%20kich%20hoat%20loi%20trung%20tam.mp4" autoplay muted playsinline webkit-playsinline style="pointer-events: none;"></video>
+    <video id="successVideo" src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/no%20audio%20-%20kich%20hoat%20loi%20trung%20tam.mp4" preload="auto" muted playsinline webkit-playsinline style="pointer-events: none;"></video>
 
-    <!-- BẢNG CHỌN NGÔN NGỮ (LUÔN HIỆN ĐẦU TIÊN KHI KHỞI ĐỘNG) -->
+    <!-- BẢNG CHỌN NGÔN NGỮ (CĂN GIỮA MÀN HÌNH) -->
     <div class="lang-gate-overlay" id="langGateModal" style="display: flex;">
         <div class="lang-box">
             <div class="lang-title-area" id="txtLangTitle">CHỌN NGÔN NGỮ</div>
@@ -318,8 +318,6 @@
                 const bgImg = document.getElementById('bgImageElement');
                 bgImg.src = langGateBg.src;
                 bgImg.style.opacity = '1';
-                
-                // LUÔN HIỆN BẢNG CHỌN NGÔN NGỮ KHI KHỞI ĐỘNG (TRỪ KHI ĐÃ HOÀN TẤT CHỌN TRƯỚC ĐÓ)
                 document.getElementById('langGateModal').style.display = 'flex';
                 document.getElementById('langGateModal').classList.remove('hidden');
                 document.getElementById('langGateModal').style.opacity = '1';
@@ -393,18 +391,32 @@
                 const mainWrapper = document.getElementById('mainWrapper');
                 const successVid = document.getElementById('successVideo');
                 
+                // HIỆU ỨNG CHUYỂN CẢNH MƯỢT MÀ VÀ BỘ ĐẾM AN TOÀN CHỐNG TREO VIDEO
                 setTimeout(() => {
                     mainWrapper.style.opacity = '0';
                     if(successVid) {
                         successVid.style.display = 'block'; 
                         setTimeout(() => { successVid.style.opacity = '1'; }, 100);
+                        
+                        let hasNavigated = false;
+                        const goToMain = () => {
+                            if (!hasNavigated) {
+                                hasNavigated = true;
+                                window.location.href = 'LucChien.html';
+                            }
+                        };
+
                         successVid.play().then(() => { 
-                            successVid.onended = () => { window.location.href = 'LucChien.html'; };
-                        }).catch(err => { window.location.href = 'LucChien.html'; });
+                            successVid.onended = goToMain;
+                            // BỘ ĐẾM AN TOÀN (FALLBACK TIMER): SAU 4 GIÂY NẾU VIDEO GẶP SỰ CỐ VẪN TỰ ĐỘNG BAY VÀO LỰC CHIẾN
+                            setTimeout(goToMain, 4000);
+                        }).catch(err => { 
+                            goToMain(); 
+                        });
                     } else { 
                         setTimeout(() => { window.location.href = 'LucChien.html'; }, 1000);
                     }
-                }, 1000);
+                }, 800);
                 
             } catch (error) {
                 statusEl.style.color = "#ff3333";
