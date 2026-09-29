@@ -3,689 +3,673 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
-    <title>K-Drive: Hệ Thống Lực Chiến</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#050608">
+    <title>K-Drive - Sinh Trắc Học</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         :root {
+            --bg-obsidian: #030406; 
+            --mint: #00ff9d; 
             --cyan: #00e5ff;
-            --mint: #00ff9d;
-            --amber: #ffaa00;
-            --crimson: #ff2a2a;
-            --neon-pink: #ff007f;
-            --pure-white: #ffffff;
-            --gold: #ffd700;
-            --berry: #9c27b0;
-        }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Space Grotesk', sans-serif; color: #fff; perspective: 1000px; }
-
-        video::-webkit-media-controls { display: none !important; }
-
-        #quantum-flash-overlay {
-            position: fixed; inset: 0; width: 100vw; height: 100vh; background: var(--cyan);
-            z-index: 999999; opacity: 0; pointer-events: none; transition: opacity 0.15s ease;
-            mix-blend-mode: screen;
-        }
-        #quantum-flash-overlay.flash { animation: quantumFlashAnim 0.4s ease-out; }
-        @keyframes quantumFlashAnim { 0% { opacity: 0.95; filter: brightness(3) drop-shadow(0 0 50px var(--cyan)); } 50% { opacity: 0.4; filter: brightness(1.5); } 100% { opacity: 0; filter: none; } }
-
-        #bg-video { 
-            position: fixed; top: 0; left: 50%; width: 110vw; height: 100vh; 
-            transform: translateX(-50%); 
-            object-fit: cover; object-position: center center; 
-            z-index: 0; opacity: 0; pointer-events: none; transition: opacity 0.8s ease-in; 
+            --amber: #ffaa00; 
+            --gold: #ffd700;  /* Vàng Kim (Hoàn thành / Tầm nhìn) */
+            --berry: #9c27b0; /* Tím Việt Quất (Chưa đạt / Hướng dẫn) */
+            --violet: #b026ff; 
+            --crimson: #ff2a2a; /* Đỏ Cảnh Báo (Chưa có dữ liệu = 0) */
+            --lime: #39ff14;
+            --font-display: 'Space Grotesk', sans-serif; 
+            --font-terminal: 'Share Tech Mono', monospace;
+            --vh: 1vh; 
         }
 
-        .particle-matrix { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
-        .atom-particle { position: absolute; border-radius: 50%; opacity: 0; animation: floatUpwards linear infinite; }
-        .white-particle { background: rgba(255,255,255,0.7); box-shadow: 0 0 8px rgba(255,255,255,0.6); }
-        .gold-particle { background: var(--amber); box-shadow: 0 0 12px var(--amber), 0 0 24px #ffea00; }
-        .pink-particle { background: var(--neon-pink); box-shadow: 0 0 14px var(--neon-pink), 0 0 28px #ff00ff; }
-        @keyframes floatUpwards { 0% { transform: translateY(100vh) scale(0.6); opacity: 0; } 15% { opacity: 0.8; } 50% { transform: translateY(50vh) translateX(20px) scale(1.1); opacity: 0.6; } 85% { opacity: 0.8; } 100% { transform: translateY(-10vh) translateX(-20px) scale(0.4); opacity: 0; } }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
 
-        .top-nav { position: fixed; top: max(45px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 0 20px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 9999; pointer-events: none; }
-        .btn-back-cyber, .btn-audio-cyber { width: 40px; height: 40px; background: rgba(5, 7, 10, 0.75); border-radius: 10px; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: auto; }
-        .btn-back-cyber { border: 1px solid rgba(0, 229, 255, 0.5); color: var(--cyan); font-family: 'Share Tech Mono', monospace; font-size: 21px; font-weight: bold; box-shadow: 0 0 15px rgba(0, 229, 255, 0.2), inset 0 0 8px rgba(0, 229, 255, 0.15); padding-bottom: 2px; padding-right: 2px; }
-        .btn-back-cyber:active { transform: scale(0.9); background: rgba(0, 229, 255, 0.3); }
-        .btn-audio-cyber { border: 1px solid rgba(255, 0, 127, 0.6); box-shadow: 0 0 15px rgba(255, 0, 127, 0.3), inset 0 0 8px rgba(255, 0, 127, 0.2); position: relative; }
-        .btn-audio-cyber:active { transform: scale(0.9); background: rgba(255, 0, 127, 0.35); }
-        .audio-equalizer { display: flex; align-items: flex-end; justify-content: center; gap: 3px; height: 16px; width: 20px; }
-        .eq-bar { width: 3px; background: var(--neon-pink); border-radius: 2px; box-shadow: 0 0 6px var(--neon-pink); }
-        .eq-bar-1 { height: 8px; } .eq-bar-2 { height: 14px; } .eq-bar-3 { height: 11px; }
-        .btn-audio-cyber.muted .eq-bar { background: #555; box-shadow: none; height: 3px !important; }
-
-        .volume-popup { position: absolute; top: 50px; right: 0; background: rgba(8, 12, 20, 0.95); border: 1px solid rgba(255, 0, 127, 0.5); border-radius: 10px; padding: 12px 14px; display: none; flex-direction: column; gap: 8px; z-index: 10000; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.9); width: 140px; pointer-events: auto; }
-        .volume-popup.active { display: flex; animation: fadeInPopup 0.2s ease-out; }
-        @keyframes fadeInPopup { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-        .volume-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--neon-pink); text-align: center; letter-spacing: 1px; }
-        .volume-slider { -webkit-appearance: none; width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; outline: none; }
-        .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--neon-pink); cursor: pointer; box-shadow: 0 0 8px var(--neon-pink); }
-
-        #content-wrapper { position: absolute; inset: 0; z-index: 10; pointer-events: none; animation: fadeIn 1s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* KHUNG HỘP CHỈ SỐ HOLOGRAM */
-        .stats-card {
-            position: absolute; left: 50%; top: 62%; transform: translate(-50%, -50%);
-            width: 92%; max-width: 390px; border-radius: 14px; padding: 15px 18px; 
-            display: flex; flex-direction: column; gap: 10px; pointer-events: auto; 
-            background: rgba(5, 15, 25, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 15px rgba(0, 229, 255, 0.15);
-            transition: border 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease-out;
-            transform-style: preserve-3d;
+        body {
+            background-color: var(--bg-obsidian); color: white;
+            font-family: var(--font-display); overflow: hidden;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); 
+            display: flex; justify-content: center; align-items: center;
         }
 
-        .gyro-lock-btn {
-            position: absolute; top: -14px; right: 18px;
-            background: rgba(3, 7, 14, 0.9); border: 1px solid rgba(0,229,255,0.5);
-            color: rgba(0,229,255,0.6); font-family: 'Share Tech Mono', monospace; font-size: 9.5px; font-weight: bold;
-            padding: 4px 10px; border-radius: 4px; cursor: pointer; z-index: 100;
-            transition: all 0.3s ease; display: flex; align-items: center; gap: 4px; letter-spacing: 1px;
-            backdrop-filter: blur(4px); box-shadow: 0 0 10px rgba(0,0,0,0.8);
+        /* BACKGROUNDS & PARTICLES */
+        .tactical-grid-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-obsidian); z-index: 1; perspective: 600px; overflow: hidden; }
+        .grid-plane { position: absolute; width: 200vw; height: 200vh; left: -50vw; top: 0%; background-image: linear-gradient(rgba(0, 229, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.08) 1px, transparent 1px); background-size: 40px 40px; transform: rotateX(75deg); animation: grid-scroll 10s linear infinite; }
+        .vignette { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; background: radial-gradient(circle at center, transparent 20%, #030406 90%); }
+        @keyframes grid-scroll { 0% { background-position: 0 0; } 100% { background-position: 0 40px; } }
+        
+        .edge-lighting { position: fixed; inset: 0; z-index: 999; pointer-events: none; transition: box-shadow 1s ease, border 1s ease; box-shadow: inset 0 0 0px transparent; border: 0px solid transparent; }
+        body.tier-shiro .edge-lighting { box-shadow: inset 0 0 50px rgba(255, 42, 42, 0.2); border: 1px solid rgba(255, 42, 42, 0.1); }
+        body.tier-chairo .edge-lighting { box-shadow: inset 0 0 60px rgba(0, 229, 255, 0.3); border: 1px solid rgba(0, 229, 255, 0.15); }
+        body.tier-kuro .edge-lighting { box-shadow: inset 0 0 80px rgba(176, 38, 255, 0.35); border: 2px solid rgba(176, 38, 255, 0.2); animation: edge-breathe 1.5s infinite alternate; }
+        @keyframes edge-breathe { 0% { opacity: 0.7; } 100% { opacity: 1; box-shadow: inset 0 0 100px rgba(176, 38, 255, 0.5); border-width: 2px; } }
+
+        /* THANH ĐIỀU HƯỚNG */
+        .top-nav {
+            position: fixed; top: max(45px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 0 20px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 9999; pointer-events: none;
         }
-        .gyro-lock-btn.unlocked { border-color: var(--amber); color: var(--amber); box-shadow: 0 0 12px rgba(255,170,0,0.4), inset 0 0 5px rgba(255,170,0,0.2); text-shadow: 0 0 5px var(--amber); }
-        .gyro-lock-btn:active { transform: scale(0.9); }
+        .top-nav > * { pointer-events: auto; }
 
-        .stats-card.tier-1 { border: 1.5px solid rgba(255, 255, 255, 0.35); box-shadow: 0 15px 40px rgba(0,0,0,0.7), inset 0 0 10px rgba(255, 255, 255, 0.08); }
-        .stats-card.tier-2 { border: 1.5px solid rgba(0, 229, 255, 0.7); box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 15px rgba(0, 229, 255, 0.25); }
-        .stats-card.tier-3 { border: 2px solid rgba(255, 215, 0, 0.9); box-shadow: 0 25px 60px rgba(0,0,0,0.95), inset 0 0 25px rgba(255, 215, 0, 0.35), 0 0 25px rgba(255, 215, 0, 0.4); }
-
-        .sci-header { text-align: center; margin-bottom: 2px; cursor: pointer; transition: transform 0.15s; position: relative; }
-        .sci-header:active { transform: scale(0.97); }
-        .sci-label { font-family: 'Space Grotesk', sans-serif; font-size: 10px; color: #a0a0a0; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2px; }
-        
-        .sci-value { 
-            font-family: 'Share Tech Mono', monospace; font-size: 32px; font-weight: bold; color: #fff; 
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 5px var(--cyan);
-            position: relative; display: inline-block; overflow: hidden; margin-bottom: 4px;
+        .btn-back-cyber {
+            width: 38px; height: 38px; background: rgba(5, 7, 10, 0.7); border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 10px; color: var(--cyan); font-family: var(--font-terminal); font-size: 22px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 0 12px rgba(0, 229, 255, 0.15), inset 0 0 8px rgba(0, 229, 255, 0.1); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); padding-bottom: 2px; padding-right: 2px;
         }
-        .sci-value::after {
-            content: ''; position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
-            transform: skewX(-20deg); animation: electricPulse 3s infinite ease-in-out;
+        .btn-back-cyber:active { transform: scale(0.9); background: rgba(0, 229, 255, 0.25); box-shadow: 0 0 20px rgba(0, 229, 255, 0.6); }
+
+        /* NÚT TỰ ĐỘNG - THỦ CÔNG */
+        .cyber-switch-wrap {
+            display: flex; align-items: center; gap: 10px; background: rgba(5, 7, 10, 0.75); padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
         }
-        @keyframes electricPulse { 0% { left: -150%; opacity: 0; } 50% { opacity: 1; } 100% { left: 150%; opacity: 0; } }
-
-        .countdown-timer { font-family: 'Share Tech Mono', monospace; font-size: 13.5px; font-weight: bold; letter-spacing: 1.5px; display: flex; justify-content: center; align-items: center; margin-top: 2px; padding: 4px 0; transition: opacity 0.3s, visibility 0.3s, color 0.3s, text-shadow 0.3s; }
-        .status-green { color: var(--mint); text-shadow: 0 0 8px rgba(0, 255, 157, 0.8); }
-        .status-yellow { color: var(--amber); text-shadow: 0 0 8px rgba(255, 170, 0, 0.8); }
-        .status-red { color: var(--crimson); text-shadow: 0 0 8px rgba(255, 42, 42, 0.8); }
-        .status-flash { color: var(--crimson); text-shadow: 0 0 12px rgba(255, 42, 42, 0.95); animation: pulseVoNga 0.7s infinite alternate; }
-
-        .stat-group { display: flex; flex-direction: column; gap: 5px; padding: 4px 6px; border-radius: 6px; }
-        .stat-info { display: flex; justify-content: space-between; align-items: center; }
-        .stat-trigger-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.15s, transform 0.1s; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .stat-trigger-btn:active { transform: scale(0.95); background: rgba(0, 229, 255, 0.15); border-color: var(--cyan); }
-        .stat-name { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800; color: #fff; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+        .switch-lbl { font-family: var(--font-terminal); font-size: 11.5px; font-weight: bold; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; transition: all 0.3s ease; text-transform: uppercase; }
         
-        .icon-wrap { width: 18px; height: 18px; display: flex; justify-content: center; align-items: center; overflow: visible; }
-        .icon-wrap img { width: 220%; height: 220%; object-fit: contain; filter: drop-shadow(0 0 4px rgba(255,255,255,0.4)); }
+        .cyber-switch { width: 44px; height: 22px; background: rgba(0, 0, 0, 0.8); border-radius: 11px; position: relative; cursor: pointer; border: 1px solid rgba(0, 229, 255, 0.4); box-shadow: inset 0 0 5px rgba(0,0,0,1); transition: border-color 0.3s ease; }
+        .switch-thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: var(--cyan); border-radius: 50%; box-shadow: 0 0 8px var(--cyan); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), background 0.3s, box-shadow 0.3s; }
         
-        /* ĐÈN TÍN HIỆU TỔNG - GIỮ NGUYÊN BẢN SẮC */
-        .live-dot { width: 12px; height: 12px; border-radius: 50%; transition: all 0.5s ease; cursor: pointer;}
-        .dot-red { background-color: var(--crimson); box-shadow: 0 0 8px var(--crimson), 0 0 12px var(--crimson); animation: pulseRed 1.5s infinite ease-in-out; }
-        .dot-yellow { background-color: var(--amber); box-shadow: 0 0 8px var(--amber), 0 0 12px var(--amber); animation: pulseYellow 1.5s infinite ease-in-out; }
-        .dot-green { background-color: var(--mint); box-shadow: 0 0 8px var(--mint), 0 0 12px var(--mint); animation: pulseGreen 1.5s infinite ease-in-out; }
-        
-        .dot-cyan { background-color: var(--cyan) !important; box-shadow: 0 0 12px var(--cyan), 0 0 20px var(--cyan) !important; animation: none; }
-        @keyframes waterfallAnim { 0% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.4); } 100% { opacity: 0.1; transform: scale(0.8); } }
-        .waterfall-1 { animation: waterfallAnim 1.2s infinite 0.0s ease-in-out !important; }
-        .waterfall-2 { animation: waterfallAnim 1.2s infinite 0.3s ease-in-out !important; }
-        .waterfall-3 { animation: waterfallAnim 1.2s infinite 0.6s ease-in-out !important; }
-        .waterfall-4 { animation: waterfallAnim 1.2s infinite 0.9s ease-in-out !important; }
+        body.mode-auto .cyber-switch-wrap .switch-lbl.auto { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); }
+        body.mode-auto .cyber-switch { border-color: rgba(0, 229, 255, 0.5); }
+        body.mode-manual .cyber-switch-wrap .switch-lbl.man { color: var(--gold); text-shadow: 0 0 8px var(--gold); }
+        body.mode-manual .cyber-switch { border-color: rgba(255, 215, 0, 0.6); }
+        body.mode-manual .switch-thumb { transform: translateX(22px); background: var(--gold); box-shadow: 0 0 8px var(--gold); }
 
-        @keyframes pulseRed { 0%, 100% { transform: scale(0.8); opacity: 0.6; } 50% { transform: scale(1.2); opacity: 1; } }
-        @keyframes pulseYellow { 0%, 100% { transform: scale(0.8); opacity: 0.6; } 50% { transform: scale(1.2); opacity: 1; } }
-        @keyframes pulseGreen { 0%, 100% { transform: scale(0.8); opacity: 0.6; } 50% { transform: scale(1.2); opacity: 1; } }
-
-        .sub-bars-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; width: 100%; margin-top: 3px; }
-        .sub-bar-item { display: flex; flex-direction: column; gap: 3px; align-items: center; }
-        .sub-bar-container { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden; }
-        
-        /* LOGIC MÀU SẮC ĐỊA LUÂN CHO CÁC VẠCH CỐT LÕI */
-        .sub-bar-fill { height: 100%; width: 100%; background: rgba(255, 255, 255, 0.1); transition: background 0.5s ease; opacity: 0; }
-        .sub-bar-fill.active { opacity: 1; }
-        .sub-bar-fill.achieved { background: linear-gradient(90deg, #d4af37, var(--gold)); box-shadow: 0 0 8px var(--gold); opacity: 1; }
-        .sub-bar-fill.failed { background: linear-gradient(90deg, #7a1fa2, var(--berry)); box-shadow: 0 0 8px var(--berry); opacity: 1; }
-        
-        .sub-bar-label { font-family: 'Share Tech Mono', monospace; font-size: 10.5px; font-weight: bold; color: rgba(255,255,255,0.95); text-align: center; text-transform: uppercase; letter-spacing: 0.5px; width: 100%; }
-
-        .dual-bars-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; margin-top: 3px; }
-        .stat-bar-container { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden; }
-        .stat-bar-fill { height: 100%; width: 0%; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); }
-        .fill-thuy { background: linear-gradient(90deg, #0055ff, #00aaff); box-shadow: 0 0 8px #00aaff; }
-        .fill-hoa { background: linear-gradient(90deg, #cc0000, #ff4d4d); box-shadow: 0 0 8px #ff4d4d; }
-        .fill-phong { background: linear-gradient(90deg, #cccccc, #ffffff); box-shadow: 0 0 10px #ffffff; }
-
-        .mushi-box-wrapper { position: relative; width: 100%; height: 38px; margin-top: 4px; display: flex; justify-content: center; align-items: center; gap: 30px; cursor: pointer; transition: transform 0.15s; }
-        .mushi-box-wrapper:active { transform: scale(0.97); }
-        .mushi-box-wrapper img.mushi-bg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.6); width: 100%; height: 100%; object-fit: contain; z-index: -1; pointer-events: none; }
-        .vo-nga-label { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 900; color: #ff2a2a; letter-spacing: 1.5px; text-shadow: 0 0 8px rgba(255, 42, 42, 0.8); text-transform: uppercase; }
-        .vo-nga-value { font-family: 'Share Tech Mono', monospace; font-size: 14.5px; font-weight: bold; color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.8); animation: pulseVoNga 2s infinite alternate; }
-        @keyframes pulseVoNga { from { opacity: 0.8; filter: brightness(1); } to { opacity: 1; filter: brightness(1.3); } }
-
-        /* RADAR LƯỢNG TỬ ĐÁY MÀN HÌNH */
-        .dragon-radar {
-            position: fixed; bottom: 15vh; left: 50%; transform: translateX(-50%) scale(0.5);
-            width: 120px; height: 120px; border-radius: 50%;
-            border: 2.5px solid rgba(0, 229, 255, 0.8); background: #02060a; 
-            box-shadow: 0 0 25px rgba(0, 229, 255, 0.5), inset 0 0 20px rgba(0, 229, 255, 0.4);
-            cursor: pointer; opacity: 0; visibility: hidden; pointer-events: none;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 5; overflow: hidden;
-        }
-        .dragon-radar.active { opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) scale(1); }
-        .dragon-radar:active { transform: translateX(-50%) scale(0.95); }
-        
-        .radar-axis { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(0, 229, 255, 0.25); }
-        .radar-axis.v { transform: rotate(90deg); }
-        .radar-grid { position: absolute; inset: 0; background: radial-gradient(circle, transparent 30%, rgba(0,229,255,0.3) 32%, transparent 34%, transparent 60%, rgba(0,229,255,0.3) 62%, transparent 64%); }
-        
-        .radar-sweep {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: conic-gradient(from 0deg, transparent 70%, rgba(0, 229, 255, 0.8) 100%);
-            border-radius: 50%; animation: spin-sweep 2.5s linear infinite;
-        }
-        @keyframes spin-sweep { 100% { transform: rotate(360deg); } }
-
-        .blip { position: absolute; width: 4.5px; height: 4.5px; background: #fff; border-radius: 50%; box-shadow: 0 0 8px #fff, 0 0 15px var(--cyan); opacity: 0; }
-        .blip-1 { top: 30%; left: 65%; animation: blip-flash 2.5s infinite 0.5s; }
-        .blip-2 { top: 60%; left: 25%; animation: blip-flash 2.5s infinite 1.6s; }
-        .blip-3 { top: 75%; left: 70%; animation: blip-flash 2.5s infinite 2.2s; }
-        @keyframes blip-flash { 0%, 5% { opacity: 1; transform: scale(1.5); } 15%, 100% { opacity: 0; transform: scale(1); } }
-
-        /* MODAL KHUNG AR - XUYÊN THẤU KHUNG, ĐẶC LÕI */
-        .cyber-modal { position: fixed; inset: 0; background: transparent; z-index: 300000; display: none; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 16px; }
-        .cyber-modal::before { content: ''; position: absolute; inset: 0; background: rgba(2, 6, 12, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 0; pointer-events: none; }
+        /* CÁC MODAL & TYPOGRAPHY PHÓNG TO */
+        .cyber-modal { position: fixed; inset: 0; background: rgba(2, 3, 5, 0.92); z-index: 300000; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(15px); opacity: 0; transition: opacity 0.3s ease; padding: 12px; }
         .cyber-modal.active { display: flex; opacity: 1; }
-        
-        .cyber-led-wrapper { position: relative; padding: 1.5px; overflow: hidden; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); width: 95vw; max-width: 420px; box-shadow: 0 0 35px rgba(0,229,255,0.3); z-index: 1; }
-        .cyber-led-wrapper::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, transparent, transparent, var(--cyan)); animation: spin-led 4s linear infinite; z-index: -1; }
+        .cyber-led-wrapper { position: relative; padding: 1.5px; overflow: hidden; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); width: 95vw; max-width: 440px; box-shadow: 0 0 30px rgba(0,229,255,0.15); }
+        .cyber-led-wrapper::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, transparent, transparent, var(--cyan)); animation: spin-led 4s linear infinite; }
         @keyframes spin-led { 100% { transform: rotate(360deg); } }
         
-        .modal-box { width: 100%; background: rgba(5, 10, 18, 0.35); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 24px 20px; text-align: left; position: relative; z-index: 1; display: flex; flex-direction: column; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); max-height: 85vh; overflow-y: auto; border: 1px solid rgba(0,229,255,0.5); }
-        .modal-title { font-family: 'Share Tech Mono', monospace; color: #00e5ff; font-size: 18px; font-weight: 900; margin-bottom: 16px; letter-spacing: 2px; text-transform: uppercase; text-align: center; text-shadow: 0 0 12px rgba(0,0,0,0.8); }
+        .modal-box { width: 100%; background: rgba(8, 12, 20, 0.98); padding: 22px 18px; text-align: left; position: relative; z-index: 1; display: flex; flex-direction: column; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); max-height: 85vh; overflow-y: auto; }
+        .modal-title { font-family: var(--font-display); color: var(--cyan); font-size: 19px; font-weight: 700; margin-bottom: 18px; letter-spacing: 1px; text-transform: uppercase; text-align: center; text-shadow: 0 0 10px rgba(0,229,255,0.4); }
         
-        /* LÕI VĂN BẢN ĐẶC */
-        .modal-text-container { background: #060a0f; border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 8px; padding: 16px; font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; color: #ffffff; line-height: 1.8; text-align: justify; box-shadow: inset 0 0 20px rgba(0,0,0,1); }
-        
-        .modal-btn { width: 100%; padding: 13px; font-family: 'Share Tech Mono', monospace; font-size: 14.5px; font-weight: bold; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--cyan); color: var(--cyan); cursor: pointer; text-transform: uppercase; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); text-align: center; transition: all 0.2s; margin-top: 20px; backdrop-filter: blur(4px); }
-        .modal-btn:active { transform: scale(0.96); background: rgba(0, 229, 255, 0.3); }
+        .ob-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.04); padding: 12px 16px; border: 1px solid rgba(0,229,255,0.15); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+        .ob-label { font-family: var(--font-terminal); color: rgba(255,255,255,0.9); font-size: 14px; font-weight: bold; text-transform: uppercase; }
+        .cyber-select { background: transparent; border: none; color: var(--gold); font-family: var(--font-display); font-size: 18px; font-weight: 700; text-align: right; width: 130px; outline: none; appearance: none; }
+        .cyber-select option { background: var(--bg-obsidian); color: #fff; }
 
-        /* RADAR POP-UP: KHỐI ĐẶC CƠ KHÍ */
-        #radar-modal { background: none; } 
-        #radar-modal .cyber-modal::before { display: block; background: rgba(0,0,0,0.7); } 
-        #radar-modal .modal-box { border-color: rgba(255,170,0,0.6); background: #1c222a; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: 0 15px 40px rgba(0,0,0,0.9); }
-        #radar-modal .modal-text-container { background: #06090e; border-color: rgba(255,170,0,0.4); border-left: 3.5px solid var(--amber); box-shadow: inset 0 0 20px rgba(0,0,0,1); }
+        .modal-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--cyan); color: var(--gold); font-family: var(--font-display); font-size: 26px; font-weight: bold; padding: 12px; text-align: center; margin-bottom: 15px; outline: none; box-shadow: inset 0 0 10px rgba(0,229,255,0.1); }
         
-        /* TERMINAL POP-UP (KẾT QUẢ QUÉT GỌN GÀNG) */
-        #terminal-modal { background: none; z-index: 300005; }
-        #terminal-modal .cyber-led-wrapper { box-shadow: 0 0 35px rgba(0,229,255,0.4); }
-        #terminal-modal .modal-box { border-color: rgba(0,229,255,0.6); background: #080c14; }
-        #terminal-modal .modal-text-container { background: #020406; border-color: rgba(0,229,255,0.3); border-left: 3.5px solid var(--cyan); font-family: 'Share Tech Mono', monospace; font-size: 13.5px; }
+        .modal-btns { display: flex; gap: 12px; margin-top: 15px; }
+        .modal-btn { flex: 1; padding: 12px; font-family: var(--font-display); font-size: 14px; font-weight: bold; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer; text-transform: uppercase; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); text-align: center; transition: all 0.2s; }
+        .modal-btn:active { transform: scale(0.96); }
+        .modal-btn.primary { background: var(--gold); color: #000; border: none; font-weight: 900; box-shadow: 0 0 15px rgba(255,215,0,0.5); }
 
-        .btn-cancel { border-color: #555 !important; color: #aaa !important; background: rgba(255,255,255,0.05) !important; box-shadow: none !important; margin-top: 0 !important;}
-        .btn-accept { border-color: var(--amber) !important; color: var(--amber) !important; background: rgba(255,170,0,0.1) !important; box-shadow: 0 0 15px rgba(255,170,0,0.3) !important; margin-top: 0 !important;}
+        /* ACCORDION TẦM NHÌN (MÀU VÀNG GOLD) */
+        .collapse-box-gold { background: linear-gradient(90deg, rgba(255,215,0,0.08), rgba(255,255,255,0.02)); border: 1px solid rgba(255,215,0,0.4); margin-top: 8px; padding: 12px 14px; font-family: var(--font-terminal); font-size: 14px; font-weight: bold; cursor: pointer; color: var(--gold); text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .collapse-box-gold:active { background: rgba(255,215,0,0.15); }
+        .collapse-content-gold { display: none; padding: 14px 12px; font-family: var(--font-terminal); font-size: 14.5px; color: rgba(255,255,255,0.95); line-height: 1.7; border-left: 3px solid var(--gold); margin-top: 4px; background: rgba(255,215,0,0.03); text-align: justify; }
+        .collapse-content-gold.active { display: block; }
+
+        /* ACCORDION HƯỚNG DẪN KẾT NỐI (MÀU TÍM VIỆT QUẤT) */
+        .collapse-box-berry { background: linear-gradient(90deg, rgba(156,39,176,0.12), rgba(255,255,255,0.02)); border: 1px solid rgba(156,39,176,0.5); margin-top: 8px; padding: 12px 14px; font-family: var(--font-terminal); font-size: 14px; font-weight: bold; cursor: pointer; color: #ba68c8; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .collapse-box-berry:active { background: rgba(156,39,176,0.2); }
+        .collapse-content-berry { display: none; padding: 14px 12px; font-family: var(--font-terminal); font-size: 14.5px; color: rgba(255,255,255,0.95); line-height: 1.7; border-left: 3px solid var(--berry); margin-top: 4px; background: rgba(156,39,176,0.04); text-align: justify; }
+        .collapse-content-berry.active { display: block; }
+        
+        .metric-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 13.5px; font-family: var(--font-terminal); }
+        .metric-dot { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; margin-right: 10px; box-shadow: 0 0 5px var(--gold); }
+        .info-badge { display: inline-flex; justify-content: center; align-items: center; width: 18px; height: 18px; background: rgba(255,215,0,0.2); border: 1px solid var(--gold); color: var(--gold); border-radius: 50%; font-size: 11px; font-weight: bold; cursor: pointer; margin-left: 8px; box-shadow: 0 0 8px rgba(255,215,0,0.3); }
+        .info-badge:active { background: var(--gold); color: #000; }
+
+        /* MAIN DASHBOARD LÕI */
+        .pwa-container { margin: 0 auto; width: 100%; max-width: 420px; height: 100%; position: relative; background: transparent; display: flex; flex-direction: column; z-index: 10; display: none; opacity: 0; transition: opacity 0.5s ease; }
+        
+        .core-wrapper { position: relative; flex: 1; width: 100%; display: block; z-index: 10; perspective: 1000px; }
+        .arc-reactor { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 340px; height: 340px; display: flex; justify-content: center; align-items: center; transform-style: preserve-3d; transition: opacity 1.5s ease; }
+        .ring-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; z-index: 5; transition: all 1.5s ease; }
+        .orb-group { transform-origin: 170px 170px; transition: all 1s ease; }
+        .orb-cw { animation: spin-cw 20s linear infinite; }
+        .orb-ccw { animation: spin-ccw 25s linear infinite; }
+        
+        .ring { fill: none; stroke-linecap: round; transition: stroke 1.5s ease, stroke-dasharray 1.5s ease; }
+        .ring-hr { stroke: var(--crimson); stroke-width: 1.5; stroke-dasharray: 4 12; filter: drop-shadow(0 0 3px var(--crimson)); }
+        .ring-phys { stroke: var(--cyan); stroke-width: 1.5; stroke-dasharray: 10 20; filter: drop-shadow(0 0 3px var(--cyan)); }
+        .ring-rec { stroke: var(--cyan); stroke-width: 1.5; stroke-dasharray: 15 30; filter: drop-shadow(0 0 3px var(--cyan)); }
+        .ring-move { stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 5 15; filter: drop-shadow(0 0 3px var(--gold)); }
+        
+        body.tier-chairo .ring-hr, body.tier-chairo .ring-phys, body.tier-chairo .ring-rec, body.tier-chairo .ring-move { stroke: var(--cyan); filter: drop-shadow(0 0 6px var(--cyan)); }
+        body.tier-kuro .ring-hr, body.tier-kuro .ring-phys, body.tier-kuro .ring-rec, body.tier-kuro .ring-move { stroke: var(--neon-pink); stroke-dasharray: none; filter: drop-shadow(0 0 10px var(--neon-pink)); }
+        
+        .plasma-node { fill: #fff; opacity: 0; transition: opacity 0.5s ease; }
+
+        .sci-nexus { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 15; width: 115px; height: 115px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(176, 38, 255, 0.15) 0%, transparent 70%); box-shadow: inset 0 0 25px rgba(176, 38, 255, 0.1); cursor: pointer; transition: all 1.5s ease; overflow: hidden; }
+        
+        .shockwave { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; background: transparent; border: 4px solid var(--violet); border-radius: 50%; z-index: 4; opacity: 0; pointer-events: none; }
+        .shockwave.active { animation: shockwave-boom 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
+        @keyframes shockwave-boom { 0% { width: 10px; height: 10px; opacity: 1; border-width: 15px; } 100% { width: 150vw; height: 150vw; opacity: 0; border-width: 1px; } }
+
+        .fingerprint-wrapper { width: 50px; height: 50px; display: none; justify-content: center; align-items: center; z-index: 20; position: relative; }
+        .fingerprint-wrapper svg { width: 100%; height: 100%; stroke: var(--cyan); filter: drop-shadow(0 0 8px var(--cyan)); }
+        .fp-scanner-line { position: absolute; width: 120%; height: 3px; background: var(--cyan); box-shadow: 0 0 15px 3px var(--cyan); left: -10%; border-radius: 50%; display: none; }
+        
+        .sci-val { font-family: var(--font-display); font-size: 36px; font-weight: 700; color: #fff; text-shadow: 0 0 18px rgba(176,38,255,0.8); letter-spacing: 2px; z-index: 2; transition: color 0.5s, text-shadow 0.5s; }
+        .sci-lbl { font-family: var(--font-terminal); font-size: 11px; font-weight: 500; color: #fff; letter-spacing: 1.5px; opacity: 0.8; position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); text-transform: uppercase; }
+
+        body.standby-mode .data-panel, body.standby-mode .live-radar-bar { opacity: 0.1; pointer-events: none; filter: grayscale(1); }
+        body.standby-mode .ring-svg { opacity: 0.15; }
+        body.standby-mode #val-sci { display: none; }
+        body.standby-mode .sci-lbl { display: none; }
+        body.standby-mode .fingerprint-wrapper { display: flex; animation: pulse-fp 2s infinite alternate; }
+        @keyframes pulse-fp { 0% { opacity: 0.3; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1.05); } }
+
+        body.scanning-mode .fingerprint-wrapper { display: flex; }
+        body.scanning-mode .fingerprint-wrapper svg { stroke: var(--cyan); filter: drop-shadow(0 0 5px var(--cyan)); }
+        body.scanning-mode .fp-scanner-line { display: block; animation: scan-line 1.2s infinite linear alternate; }
+        @keyframes scan-line { 0% { top: -10%; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { top: 110%; opacity: 0; } }
+
+        body.sync-complete .fingerprint-wrapper { display: none !important; }
+        body.sync-complete #val-sci { display: block; animation: sci-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes sci-pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        /* 6 HỘP CHỈ SỐ CỐT LÕI - HIỂN THỊ "SỐ / MỤC TIÊU" ĐỔI MÀU LINH HOẠT THEO JS */
+        .data-panel { position: absolute; z-index: 15; padding: 12px 18px; transition: transform 0.2s, opacity 1.5s ease, border-color 0.5s ease; background: linear-gradient(90deg, rgba(10, 14, 22, 0.92), rgba(5, 7, 10, 0.4)); border-left: 3px solid var(--crimson); display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; min-width: 140px; white-space: nowrap; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .data-panel:active { transform: scale(0.95); background: rgba(255, 215, 0, 0.15); }
+        .dp-right { border-left: none; border-right: 3px solid var(--crimson); text-align: right; background: linear-gradient(270deg, rgba(10, 14, 22, 0.92), rgba(5, 7, 10, 0.4)); align-items: flex-end; }
+        .dp-val { font-family: var(--font-display); font-size: 24px; font-weight: 700; line-height: 1.1; transition: color 0.5s; display: flex; align-items: baseline; gap: 4px; }
+        .dp-lbl { font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: 1.5px; font-family: var(--font-terminal); text-transform: uppercase; margin-top: 2px;}
+
+        /* Vị trí các hộp */
+        .pos-hr { top: 22%; left: 2%; } 
+        .pos-phys1 { top: 50%; left: 2%; transform: translateY(-50%); } 
+        .pos-rec1 { top: 78%; left: 2%; transform: translateY(-100%); } 
+        .pos-phys2 { top: 22%; right: 2%; } 
+        .pos-rec2 { top: 50%; right: 2%; transform: translateY(-50%); } 
+        .pos-move { top: 78%; right: 2%; transform: translateY(-100%); } 
+        
+        /* THANH TERMINAL CẢNH BÁO DƯỚI ĐÁY */
+        .live-radar-bar { 
+            position: absolute; bottom: max(45px, calc(env(safe-area-inset-bottom) + 20px)); left: 50%; transform: translateX(-50%); z-index: 10; width: 92%; max-width: 390px; padding: 12px 16px; background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.3); border-left: 4px solid var(--gold); font-family: var(--font-terminal); display: flex; align-items: flex-start; flex-direction: column; gap: 8px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); box-shadow: 0 5px 20px rgba(0,0,0,0.6); transition: all 0.5s ease;
+        }
+        .radar-header { font-size: 14px; font-weight: bold; display: flex; align-items: center; width: 100%; color: var(--gold); animation: pulse-gold 1.2s infinite alternate; text-transform: uppercase; }
+        .live-metrics { color: rgba(255,255,255,0.95); display: flex; gap: 6px; flex-wrap: wrap; font-size: 13px; font-weight: 500; width: 100%; word-break: break-word;}
+        .metric-item { display: inline-flex; align-items: center; background: rgba(0,0,0,0.75); padding: 6px 10px; border: 1px solid rgba(255,255,255,0.2); }
+        @keyframes pulse-gold { 0% { opacity: 0.6; } 100% { opacity: 1; text-shadow: 0 0 10px var(--gold); } }
     </style>
 </head>
-<body>
+<body class="standby-mode mode-auto">
 
-    <div id="quantum-flash-overlay"></div>
+    <div class="tactical-grid-bg"><div class="grid-plane"></div></div>
     <div class="particle-matrix" id="particle-matrix"></div>
-
-    <video id="bg-video" autoplay loop muted playsinline webkit-playsinline x5-video-player-type="h5">
-        <source src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/nen%20trang%20chu.mp4" type="video/mp4">
-    </video>
+    <div class="vignette"></div>
+    <div class="edge-lighting" id="edge-lighting"></div>
 
     <div class="top-nav">
-        <button class="btn-back-cyber" onclick="returnToCore()">⟨</button>
-        <div style="position: relative;">
-            <button class="btn-audio-cyber" id="audio-toggle-btn" onclick="handleAudioDebugClick(event)">
-                <div class="audio-equalizer">
-                    <div class="eq-bar eq-bar-1"></div>
-                    <div class="eq-bar eq-bar-2"></div>
-                    <div class="eq-bar eq-bar-3"></div>
-                </div>
-            </button>
-            <div class="volume-popup" id="volume-popup">
-                <div class="volume-label">ÂM LƯỢNG: <span id="vol-val">40%</span></div>
-                <input type="range" min="0" max="100" value="40" class="volume-slider" id="vol-slider" oninput="changeVolume(this.value)">
+        <button class="btn-back-cyber" onclick="returnToPrev()">⟨</button>
+        <div class="cyber-switch-wrap">
+            <span class="switch-lbl auto">TỰ ĐỘNG</span>
+            <div class="cyber-switch" id="modeToggle" onclick="toggleMode()">
+                <div class="switch-thumb"></div>
             </div>
+            <span class="switch-lbl man">THỦ CÔNG</span>
         </div>
     </div>
 
-    <audio id="bg-audio" loop preload="auto">
-        <source src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/System%20Boot%20Failure.mp3" type="audio/mp3">
-    </audio>
-
-    <div id="content-wrapper">
-        <div class="stats-card tier-1" id="stats-card-box">
-            
-            <div class="gyro-lock-btn" id="gyro-lock-btn" onclick="toggleGyroLock()">🔒 ĐÃ KHÓA</div>
-
-            <div class="sci-header" onclick="showSciInfoModal()">
-                <div class="sci-label">CHỈ SỐ KỶ LUẬT TẬP LUYỆN</div>
-                <div class="sci-value" id="luc-chien-sci">SCI: 0.0%</div>
-                <div class="countdown-timer status-green" id="midnight-timer">CÒN LẠI 00:00:00</div>
-            </div>
-
-            <div class="stat-group">
-                <div class="stat-info">
-                    <div class="stat-trigger-btn" onclick="jumpToTest('sinh_trac.html')">
-                        <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20DIA.png?raw=true" alt="Sức Mạnh"></div>
-                        <span class="stat-name">SỨC MẠNH</span>
-                    </div>
-                    <div class="live-dot dot-red" id="dot-suc-manh" onclick="handleSecretDotClick(event, 0)"></div>
-                </div>
-                <div class="sub-bars-grid">
-                    <div class="sub-bar-item"><div class="sub-bar-container"><div class="sub-bar-fill" id="bar-hr"></div></div><div class="sub-bar-label">Tim</div></div>
-                    <div class="sub-bar-item"><div class="sub-bar-container"><div class="sub-bar-fill" id="bar-weight"></div></div><div class="sub-bar-label">Cân</div></div>
-                    <div class="sub-bar-item"><div class="sub-bar-container"><div class="sub-bar-fill" id="bar-sleep"></div></div><div class="sub-bar-label">Ngủ</div></div>
-                    <div class="sub-bar-item"><div class="sub-bar-container"><div class="sub-bar-fill" id="bar-fat"></div></div><div class="sub-bar-label">Mỡ</div></div>
-                    <div class="sub-bar-item"><div class="sub-bar-container"><div class="sub-bar-fill" id="bar-water"></div></div><div class="sub-bar-label">Nước</div></div>
-                    <div class="sub-bar-item"><div class="sub-bar-container"><div class="sub-bar-fill" id="bar-steps"></div></div><div class="sub-bar-label">Bước</div></div>
-                </div>
-            </div>
-
-            <div class="stat-group">
-                <div class="stat-info">
-                    <div class="stat-trigger-btn" onclick="jumpToTest('thuy_luan.html')">
-                        <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20THUY.png?raw=true" alt="Trí Nhớ"></div>
-                        <span class="stat-name">TRÍ NHỚ</span>
-                    </div>
-                    <div class="live-dot dot-red" id="dot-thuy" onclick="handleSecretDotClick(event, 1)"></div>
-                </div>
-                <div class="dual-bars-grid">
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-thuy" id="bar-thuy-1"></div></div>
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-thuy" id="bar-thuy-2"></div></div>
-                </div>
-            </div>
-
-            <div class="stat-group">
-                <div class="stat-info">
-                    <div class="stat-trigger-btn" onclick="jumpToTest('HoaLuan.html')">
-                        <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20HOA.png?raw=true" alt="Phản Xạ"></div>
-                        <span class="stat-name">PHẢN XẠ</span>
-                    </div>
-                    <div class="live-dot dot-red" id="dot-hoa" onclick="handleSecretDotClick(event, 2)"></div>
-                </div>
-                <div class="dual-bars-grid">
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-hoa" id="bar-hoa-1"></div></div>
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-hoa" id="bar-hoa-2"></div></div>
-                </div>
-            </div>
-
-            <div class="stat-group">
-                <div class="stat-info">
-                    <div class="stat-trigger-btn" onclick="jumpToTest('PhongLuan.html')">
-                        <div class="icon-wrap"><img src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20PHONG.png?raw=true" alt="Phán Đoán"></div>
-                        <span class="stat-name">PHÁN ĐOÁN</span>
-                    </div>
-                    <div class="live-dot dot-red" id="dot-phong" onclick="handleSecretDotClick(event, 3)"></div>
-                </div>
-                <div class="dual-bars-grid">
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-phong" id="bar-phong-1"></div></div>
-                    <div class="stat-bar-container"><div class="stat-bar-fill fill-phong" id="bar-phong-2"></div></div>
-                </div>
-            </div>
-
-            <div class="mushi-box-wrapper" onclick="showVoNgaModal()">
-                <img class="mushi-bg" src="https://github.com/happyk1900/-m-thanh-app/blob/main/A%20MUSHI.png?raw=true" alt="Mushi Box">
-                <span class="vo-nga-label">VÔ NGÃ</span>
-                <span class="vo-nga-value" id="vonga-days-display">1000 NGÀY</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- RADAR -->
-    <div class="dragon-radar" id="dragon-radar" onclick="showRadarModal()">
-        <div class="radar-axis"></div>
-        <div class="radar-axis v"></div>
-        <div class="radar-grid"></div>
-        <div class="radar-sweep"></div>
-        <div class="blip blip-1"></div>
-        <div class="blip blip-2"></div>
-        <div class="blip blip-3"></div>
-    </div>
-
-    <!-- MODAL XÁC THỰC BẢO MẬT -->
-    <div class="cyber-modal" id="radar-modal">
+    <!-- BẢNG CHÀO MỪNG ĐỊA LUÂN -->
+    <div class="cyber-modal" id="core-check-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
-                <div class="modal-title" style="color: var(--amber); text-shadow: 0 0 12px rgba(255,170,0,0.8);">RADAR LƯỢNG TỬ</div>
-                <div style="display: flex; flex-direction: column; gap: 14px;">
-                    <div class="modal-text-container">
-                        <span style="color: var(--amber); font-family: 'Share Tech Mono', monospace; font-weight: bold; font-size: 15px; display: block; margin-bottom: 6px;">[XÁC THỰC BẢO MẬT]</span>
-                        Hệ thống đang quét các Chiến binh K-Drive trong vùng an toàn bán kính từ:<br>
-                        <span style="color: var(--neon-pink); font-weight: bold;">2.0 KM</span> đến <span style="color: #00e5ff; font-weight: bold;">9.0 KM</span>.<br><br>
-                        Tính năng này yêu cầu gửi vị trí của bạn lên Hộp đen Máy chủ. Dữ liệu tọa độ được mã hóa ẩn danh một chiều và tự động hủy sau khi quét. Tuyệt đối không lưu vết.
-                    </div>
+                <div class="modal-title">ĐỊA LUÂN: TỌA ĐỘ SINH HỌC</div>
+                
+                <div id="core-summary-view" style="font-family: var(--font-terminal); font-size: 15px; color: rgba(255,255,255,0.9); margin-bottom: 12px; line-height: 1.6;">
+                    Đang tải tọa độ...
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
-                    <button class="modal-btn btn-cancel" onclick="closeRadarModal()">TỪ CHỐI</button>
-                    <button class="modal-btn btn-accept" onclick="startQuantumScan()">ĐỒNG Ý QUÉT</button>
+
+                <div style="font-family: var(--font-terminal); font-size: 14.5px; font-weight: bold; margin-bottom: 8px; color: var(--gold);">
+                    Bộ 6 chỉ tiêu chuẩn khoa học:
+                </div>
+                
+                <div style="font-family: var(--font-terminal); font-size: 13.5px; color: rgba(255,255,255,0.85); margin-bottom: 15px;">
+                    <div class="metric-row"><div class="metric-dot"></div> Nhịp tim mục tiêu: <span id="tgt-hr">137</span> BPM <div class="info-badge" onclick="showInfo('hr')">?</div></div>
+                    <div class="metric-row"><div class="metric-dot"></div> Cân nặng lý tưởng: <span id="tgt-weight">65</span> KG <div class="info-badge" onclick="showInfo('weight')">?</div></div>
+                    <div class="metric-row"><div class="metric-dot"></div> Giấc ngủ tối thiểu: 7.0 H <div class="info-badge" onclick="showInfo('sleep')">?</div></div>
+                    <div class="metric-row"><div class="metric-dot"></div> Mỡ cơ thể tối đa: 15% <div class="info-badge" onclick="showInfo('fat')">?</div></div>
+                    <div class="metric-row"><div class="metric-dot"></div> Lượng nước tối ưu: 55.0% <div class="info-badge" onclick="showInfo('water')">?</div></div>
+                    <div class="metric-row"><div class="metric-dot"></div> Bước chân mục tiêu: 6000 bước <div class="info-badge" onclick="showInfo('steps')">?</div></div>
+                </div>
+
+                <div class="collapse-box-gold" onclick="toggleAccordion('acc-vision')">MỤC TIÊU & TẦM NHÌN K-DRIVE <span style="font-size: 10px;">▼</span></div>
+                <div class="collapse-content-gold" id="acc-vision">
+                    Chào mừng chiến binh đến với K-Drive – trạm điều khiển sinh trắc học và kỷ luật bản thân thế hệ mới. Được đúc kết từ tinh hoa binh pháp kinh điển <i>Ngũ Luân Thư</i> của Miyamoto Musashi, <b>SCI (Self-Discipline Core - Lõi kỷ luật bản thân)</b> chính là nền tảng cốt lõi của hệ thống.<br><br>
+                    K-Drive quy chuẩn hóa <b>6 chỉ số thể chất</b> nền tảng kết hợp cùng <b>3 chỉ số trí lực</b> (Trí nhớ, Phản xạ, Phán đoán), tổng hòa thành <b>9 thông số lõi</b> mà chiến binh phải hoàn thiện mỗi ngày để đạt trạng thái cân bằng tuyệt đối giữa thân và tâm.
+                </div>
+
+                <div class="collapse-box-berry" onclick="toggleAccordion('acc-connect')">HƯỚNG DẪN KẾT NỐI SINH TRẮC HỌC <span style="font-size: 10px;">▼</span></div>
+                <div class="collapse-content-berry" id="acc-connect">
+                    Để trích xuất dữ liệu hoàn hảo từ hạ tầng SCI, chiến binh cần duy trì 2 kỷ luật: Đeo đồng hồ thông minh 24/24 và lên cân thông minh mỗi sáng.<br><br>
+                    Hệ thống yêu cầu tính <b>CHỦ ĐỘNG TUYỆT ĐỐI</b> trong việc kiểm soát dữ liệu:<br>
+                    • Chiến binh phải tự cài đặt hai thiết bị này (đồng hồ và cân) để tự động đổ dữ liệu về <b>Samsung Health</b>.<br>
+                    • Từ đó, <b>K-Drive</b> sẽ trích xuất thẳng dữ liệu trực tiếp từ <b>Samsung Health</b> và <b>Health Connect</b> để chấm điểm sức mạnh.<br><br>
+                    Do đó, chiến binh cần đặc biệt lưu ý các bước sau:<br>
+                    • <b>Sau khi lên cân:</b> Bắt buộc mở ứng dụng của cân để xác nhận dữ liệu đã được đẩy đi thành công.<br>
+                    • <b>Đánh thức hệ thống:</b> Thường xuyên mở ứng dụng Samsung Health để kiểm tra, ngăn chặn tình trạng app bị hệ điều hành treo ngầm gây kẹt số liệu.<br><br>
+                    <b>[CHẾ ĐỘ DỰ PHÒNG]</b><br>
+                    Lưu ý: Nếu hệ thống lỗi đồng bộ hoặc chiến binh chưa trang bị đủ thiết bị thông minh, hãy chuyển sang chế độ <b>THỦ CÔNG</b> ở góc trên màn hình để tự cập nhật số liệu. Kỷ luật rèn luyện không có ngoại lệ!<br><br>
+                    <i>Cảm ơn chiến binh đã lựa chọn K-Drive làm trạm điều khiển kỷ luật. Hãy kết nối dữ liệu và bắt đầu hành trình đánh thức sức mạnh cốt lõi ngay hôm nay!</i>
+                </div>
+
+                <div class="modal-btns">
+                    <button class="modal-btn" onclick="openOnboardingForm()">Thay đổi</button>
+                    <button class="modal-btn primary" onclick="acceptCoreValues()">Đồng ý</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL KẾT QUẢ TERMINAL GPS -->
-    <div class="cyber-modal" id="terminal-modal">
+    <!-- MODAL THIẾT LẬP LÕI -->
+    <div class="cyber-modal" id="onboarding-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
-                <div class="modal-title" style="color: var(--cyan); text-shadow: 0 0 12px rgba(0,229,255,0.8);">KẾT QUẢ RÀ QUÉT</div>
-                <div class="modal-text-container" id="terminal-content"></div>
-                <button class="modal-btn" id="btn-close-terminal" style="display: none; border-color: var(--cyan); color: var(--cyan);" onclick="closeTerminalModal()">ĐÓNG VÀ TRỞ VỀ</button>
+                <div class="modal-title">THIẾT LẬP LÕI</div>
+                <div style="font-family: var(--font-display); font-size: 13.5px; font-weight: 500; color: var(--gold); margin-bottom: 18px; text-align: justify; line-height: 1.5; background: rgba(255, 215, 0, 0.08); padding: 10px; border-left: 2px solid var(--gold);">
+                    Dựa trên tọa độ sinh học của bạn (năm sinh, chiều cao, cân nặng), hệ thống sẽ tự động phân tích và nội suy ra bộ chỉ số thể chất chuẩn mực lý tưởng nhất dành riêng cho cơ thể bạn theo tiêu chuẩn vận động viên.
+                </div>
+                <div class="ob-row"><div class="ob-label">Năm sinh</div><select id="ob-year" class="cyber-select"></select></div>
+                <div class="ob-row"><div class="ob-label">Chiều cao (CM)</div><select id="ob-height" class="cyber-select"></select></div>
+                <div class="ob-row"><div class="ob-label">Cân nặng (KG)</div><select id="ob-weight" class="cyber-select"></select></div>
+                <div class="modal-btns">
+                    <button class="modal-btn" onclick="closeOnboardingForm()">Hủy</button>
+                    <button class="modal-btn primary" onclick="submitOnboarding()">Lưu</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="cyber-modal" id="vonga-modal">
+    <!-- MODAL NHẬP THỦ CÔNG -->
+    <div class="cyber-modal" id="manual-edit-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
-                <div class="modal-title">ĐẠO TRƯỜNG VÔ NGÃ</div>
-                <div style="display: flex; flex-direction: column; gap: 14px;">
-                    <div class="modal-text-container" style="border-left: 3.5px solid #00e5ff;">
-                        <span style="color: #ffd700; font-family: 'Share Tech Mono', monospace; font-weight: bold; font-size: 15px; display: block; margin-bottom: 6px;">[KIẾM THÁNH MIYAMOTO MUSASHI]</span>
-                        Theo Ngũ Luân Thư của Kiếm thánh Miyamoto Musashi, Vô Ngã (Mushin) không phải là đánh mất chính mình, mà là dọn sạch tâm trí. Một tâm trí vô ngã tĩnh lặng như mặt nước hồ thu...
-                    </div>
-                    <div class="modal-text-container" style="background: #120508; border-left: 3.5px solid #ff2a2a; border-color: rgba(255,42,42,0.3);">
-                        <span style="color: #ff2a2a; font-family: 'Share Tech Mono', monospace; font-weight: bold; font-size: 15px; display: block; margin-bottom: 6px;">[HỆ THỐNG K-DRIVE]</span>
-                        1000 ngày liên tục rèn luyện tại lõi Core này chính là quá trình đo lường và đồng bộ trạng thái đó.
-                    </div>
+                <div class="modal-title" id="modal-title">SỬA CHỈ SỐ</div>
+                <input type="number" id="modal-input-val" class="modal-input" placeholder="0.0" step="0.1">
+                <div class="modal-btns">
+                    <button class="modal-btn" onclick="closeManualModal()">Hủy</button>
+                    <button class="modal-btn primary" onclick="saveManualValue()">Lưu</button>
                 </div>
-                <button class="modal-btn" onclick="closeVoNgaModal()">ĐÃ HIỂU</button>
             </div>
         </div>
     </div>
 
-    <div class="cyber-modal" id="sci-info-modal">
-        <div class="cyber-led-wrapper">
-            <div class="modal-box">
-                <div class="modal-title">CÔNG THỨC KỶ LUẬT SCI</div>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div class="modal-text-container" style="font-family: 'Share Tech Mono', monospace; padding: 18px 20px; border-left: 3.5px solid var(--gold);">
-                        • Tổng mức độ kỷ luật đạt tối đa <span style="color: #ffd700; font-weight: bold;">100.0%</span>.<br><br>
-                        • Hệ thống quy chuẩn gồm <span style="color: #00e5ff; font-weight: bold;">9 chỉ số nền tảng</span>.<br><br>
-                        • Mỗi đèn (chỉ số) sáng lên: Cộng dồn <span style="color: #ffd700; font-weight: bold;">11.1%</span>.<br><br>
-                        • Tất cả 9 đèn cùng sáng: Đạt tuyệt đối <span style="color: #ffd700; font-weight: bold;">100.0%</span> và tự động trừ lùi <span style="color: #ff2a2a; font-weight: bold;">1 ngày Vô Ngã</span>.
+    <!-- MAIN DASHBOARD -->
+    <div class="pwa-container" id="main-pwa">
+        <div class="core-wrapper">
+            <div class="shockwave" id="shockwave"></div>
+            <div class="arc-reactor">
+                <svg class="ring-svg" viewBox="0 0 340 340"><g class="orb-group orb-ccw orb-move"><circle class="ring ring-move" cx="170" cy="170" r="125" /><circle class="plasma-node" cx="170" cy="45" r="3.5" /></g><g class="orb-group orb-cw orb-rec"><circle class="ring ring-rec" cx="170" cy="170" r="105" /><circle class="plasma-node" cx="170" cy="65" r="4" /></g><g class="orb-group orb-ccw orb-phys"><circle class="ring ring-phys" cx="170" cy="170" r="85" /><circle class="plasma-node" cx="170" cy="85" r="4.5" /></g><g class="orb-group orb-cw orb-hr"><circle class="ring ring-hr" cx="170" cy="170" r="65" /><circle class="plasma-node" cx="170" cy="105" r="5" /></g></svg>
+                <div class="sci-nexus" id="trigger-combat" onclick="handleCoreAction()">
+                    <div class="fingerprint-wrapper" id="fp-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M18.9 7a8 8 0 0 1 1.1 5v1a6 6 0 0 0 .8 3" /><path d="M8 11a4 4 0 0 1 8 0v1a10 10 0 0 0 2 6" /><path d="M12 11v2a14 14 0 0 0 2.5 8" /><path d="M8 15a18 18 0 0 0 1.8 6" /><path d="M4.9 19a22 22 0 0 1 -.9 -7v-1a8 8 0 0 1 12 -6.95" /></svg><div class="fp-scanner-line"></div>
                     </div>
+                    <div class="sci-val" id="val-sci">0</div>
+                    <div class="sci-lbl">SCI CORE</div>
                 </div>
-                <button class="modal-btn" onclick="closeSciInfoModal()">ĐÃ HIỂU</button>
             </div>
+
+            <!-- CÁC HỘP CHỈ SỐ ĐƯỢC HIỂN THỊ DẠNG HP BAR (JS SẼ CAN THIỆP ĐỔI MÀU CHỮ VÀ VIỀN HỘP) -->
+            <div class="data-panel pos-hr" onclick="handlePanelClick('hr')">
+                <div class="dp-val" id="val-hr">0</div><div class="dp-lbl">Nhịp tim (BPM)</div>
+            </div>
+            <div class="data-panel pos-phys1" onclick="handlePanelClick('weight')">
+                <div class="dp-val" id="val-weight">0</div><div class="dp-lbl">Cân nặng (KG)</div>
+            </div>
+            <div class="data-panel pos-rec1" onclick="handlePanelClick('sleep')">
+                <div class="dp-val" id="val-sleep">0</div><div class="dp-lbl">Giấc ngủ (H)</div>
+            </div>
+            <div class="data-panel dp-right pos-phys2" onclick="handlePanelClick('fat')">
+                <div class="dp-val" id="val-fat">0</div><div class="dp-lbl">Mỡ cơ thể (%)</div>
+            </div>
+            <div class="data-panel dp-right pos-rec2" onclick="handlePanelClick('water')">
+                <div class="dp-val" id="val-water">0</div><div class="dp-lbl">Lượng nước (%)</div>
+            </div>
+            <div class="data-panel dp-right pos-move" onclick="handlePanelClick('steps')">
+                <div class="dp-val" id="val-steps">0</div><div class="dp-lbl">Bước chân</div>
+            </div>
+        </div>
+
+        <div class="live-radar-bar" id="live-radar-bar">
+            <div class="radar-header" id="live-pulse">🟢 SẴN SÀNG</div>
+            <div class="live-metrics" id="live-metrics">Chọn chế độ và chạm lõi để trích xuất dữ liệu.</div>
         </div>
     </div>
 
     <script>
-        let isGyroLocked = true; 
-        let isGyroFrozen = false; 
+        function fixViewport() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
+        window.addEventListener('resize', fixViewport); window.addEventListener('orientationchange', fixViewport); fixViewport();
 
-        function toggleGyroLock() {
-            isGyroLocked = !isGyroLocked;
-            const btn = document.getElementById('gyro-lock-btn');
-            if(isGyroLocked) { btn.innerHTML = "🔒 ĐÃ KHÓA"; btn.classList.remove('unlocked'); playSound('warp-out'); } 
-            else { btn.innerHTML = "🔓 MỞ KHÓA"; btn.classList.add('unlocked'); playSound('coin'); }
-        }
+        let currentMode = 'auto'; let currentEditingKey = null;
+        const nameMap = { 'hr': 'Nhịp tim', 'weight': 'Cân nặng', 'sleep': 'Giấc ngủ', 'fat': 'Mỡ cơ thể', 'water': 'Lượng nước', 'steps': 'Bước chân' };
 
-        function updateMidnightTimer() {
-            const now = new Date(); const hours = now.getHours(); const tomorrow = new Date(now); tomorrow.setHours(24, 0, 0, 0); const diffMs = tomorrow - now;
-            const hStr = Math.floor((diffMs / (1000 * 60 * 60)) % 24).toString().padStart(2, '0'); const mStr = Math.floor((diffMs / 1000 / 60) % 60).toString().padStart(2, '0'); const sStr = Math.floor((diffMs / 1000) % 60).toString().padStart(2, '0');
-            const timerEl = document.getElementById('midnight-timer');
-            if(timerEl) {
-                timerEl.innerText = `CÒN LẠI ${hStr}:${mStr}:${sStr}`;
-                timerEl.classList.remove('status-green', 'status-yellow', 'status-red', 'status-flash');
-                if (hours >= 0 && hours < 12) { timerEl.classList.add('status-green'); } else if (hours >= 12 && hours < 19) { timerEl.classList.add('status-yellow'); } else if (hours >= 19 && hours < 22) { timerEl.classList.add('status-red'); } else if (hours >= 22 && hours < 24) { timerEl.classList.add('status-flash'); }
-            }
-        }
-        setInterval(updateMidnightTimer, 1000); updateMidnightTimer();
-
-        function showRadarModal() { playSound('coin'); if(navigator.vibrate) navigator.vibrate([30, 30]); isGyroFrozen = true; document.getElementById('radar-modal').classList.add('active'); }
-        function closeRadarModal() { playSound('warp-out'); isGyroFrozen = false; document.getElementById('radar-modal').classList.remove('active'); }
-
-        let isWaterfallActive = false;
-        let dotBackupClasses = []; 
-
-        function activateWaterfall() {
-            if (isWaterfallActive) return;
-            isWaterfallActive = true;
-            const dots = [document.getElementById('dot-suc-manh'), document.getElementById('dot-thuy'), document.getElementById('dot-hoa'), document.getElementById('dot-phong')];
-            dotBackupClasses = dots.map(d => d.className); 
-            dots.forEach((dot, index) => {
-                dot.className = `live-dot dot-cyan waterfall-${index + 1}`; 
-            });
-        }
-
-        function deactivateWaterfall() {
-            if (!isWaterfallActive) return;
-            isWaterfallActive = false;
-            const dots = [document.getElementById('dot-suc-manh'), document.getElementById('dot-thuy'), document.getElementById('dot-hoa'), document.getElementById('dot-phong')];
-            if (dotBackupClasses.length === 4) {
-                dots.forEach((dot, index) => { dot.className = dotBackupClasses[index]; }); 
-            } else { syncAllBars(); } 
-        }
-
-        function startQuantumScan() {
-            document.getElementById('radar-modal').classList.remove('active');
-            playSound('warp-out');
-            
-            const termModal = document.getElementById('terminal-modal');
-            const termContent = document.getElementById('terminal-content');
-            const btnClose = document.getElementById('btn-close-terminal');
-            termModal.classList.add('active');
-            termContent.innerHTML = "";
-            btnClose.style.display = 'none';
-
-            let introLines = [
-                "<span style='color:#777'>[SYS] Kích hoạt lõi Radar...</span>",
-                "<span style='color:#777'>[GPS] Khóa tọa độ vệ tinh...</span>"
-            ];
-            
-            typeTerminalLines(introLines, termContent, () => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => { showScanResults(termContent, btnClose); }, 
-                        (error) => { showScanResults(termContent, btnClose); } 
-                    );
-                } else { showScanResults(termContent, btnClose); }
-            });
-        }
-
-        function showScanResults(container, btn) {
-            let finalLines = [
-                "<span style='color:var(--mint)'>[OK] Dữ liệu mã hóa ẩn danh.</span>",
-                "<span style='color:var(--amber)'>[QUÉT] Rà soát bán kính 9.0 KM...</span>",
-                "<br><span style='color:var(--crimson); font-weight:bold; font-size: 15px;'>[KẾT QUẢ] KHÔNG CÓ TÍN HIỆU SỐNG.</span>",
-                "<span style='color:var(--pure-white)'>[THÔNG ĐIỆP] Bạn đang độc hành. Vô Ngã là cảnh giới của sự cô độc. Hãy tiếp tục rèn luyện!</span>"
-            ];
-            typeTerminalLines(finalLines, container, () => { btn.style.display = 'block'; }, true);
-        }
-
-        function typeTerminalLines(lines, container, callback, append = false) {
-            if (!append) container.innerHTML = "";
-            let lineIdx = 0;
-            function nextLine() {
-                if (lineIdx < lines.length) {
-                    container.innerHTML += lines[lineIdx] + "<br>";
-                    lineIdx++;
-                    setTimeout(nextLine, 700); 
-                } else { if (callback) callback(); }
-            }
-            nextLine();
-        }
-
-        function closeTerminalModal() {
-            playSound('warp-out');
-            document.getElementById('terminal-modal').classList.remove('active');
-            isGyroFrozen = false; 
-        }
-
-        function showVoNgaModal() { playSound('coin'); if(navigator.vibrate) navigator.vibrate(30); document.getElementById('vonga-modal').classList.add('active'); }
-        function closeVoNgaModal() { playSound('warp-out'); document.getElementById('vonga-modal').classList.remove('active'); }
-        function showSciInfoModal() { playSound('coin'); if(navigator.vibrate) navigator.vibrate(30); document.getElementById('sci-info-modal').classList.add('active'); }
-        function closeSciInfoModal() { playSound('warp-out'); document.getElementById('sci-info-modal').classList.remove('active'); }
-
+        /* HỆ THỐNG RESET 0:00 - XÓA SẠCH TRỪ NHỊP TIM */
         function checkMidnightReset() {
-            let lastDate = localStorage.getItem('kdrive_last_date'); let today = new Date().toDateString(); 
+            let lastDate = localStorage.getItem('kdrive_last_date');
+            let today = new Date().toDateString(); 
+            
             if (lastDate && lastDate !== today) {
-                const keysToRemove = ['kdrive_live_hr', 'kdrive_live_weight', 'kdrive_live_sleep', 'kdrive_live_fat', 'kdrive_live_water', 'kdrive_live_steps', 'kdrive_sci_score', 'thuy_luan_score', 'thuy_luan_bai1_score', 'thuy_luan_bai2_score', 'hoa_luan_score', 'hoa_luan_bai1_score', 'hoa_luan_bai2_score', 'phong_luan_score', 'phong_luan_bai1_score', 'phong_luan_bai2_score'];
-                keysToRemove.forEach(k => localStorage.removeItem(k));
+                localStorage.removeItem('kdrive_live_weight');
+                localStorage.removeItem('kdrive_live_sleep');
+                localStorage.removeItem('kdrive_live_fat');
+                localStorage.removeItem('kdrive_live_water');
+                localStorage.removeItem('kdrive_live_steps');
+                localStorage.removeItem('kdrive_sci_score');
             }
             localStorage.setItem('kdrive_last_date', today);
         }
 
-        const cardBox = document.getElementById('stats-card-box');
-        const dRadar = document.getElementById('dragon-radar');
+        window.onload = () => { 
+            initSelectOptions(); 
+            checkMidnightReset(); 
+            
+            if (localStorage.getItem('kdrive_core_initialized') !== 'true') { 
+                openOnboardingForm(); 
+            } else { 
+                showCoreCheckModal(); 
+            } 
+        };
 
-        if (window.DeviceOrientationEvent) {
-            window.addEventListener('deviceorientation', (event) => {
-                if (isGyroFrozen) return; 
-                
-                let tiltX = event.gamma; let tiltY = event.beta;  
-                if (tiltX !== null && tiltY !== null) {
-                    let rotateY = Math.max(-10, Math.min(10, tiltX * 0.4));
-                    let rotateX = Math.max(-10, Math.min(10, -tiltY * 0.4));
-                    let baseBeta = 45; let boundedBeta = Math.max(0, Math.min(90, tiltY)); 
-                    let moveY = 0;
-
-                    if (boundedBeta < baseBeta) {
-                        if(isGyroLocked) { moveY = 0; } else {
-                            moveY = (boundedBeta - baseBeta) * 7; 
-                            moveY = Math.max(-175, moveY); 
-                        }
-                    } else { moveY = (boundedBeta - baseBeta) * 2; moveY = Math.min(50, moveY); }
-                    
-                    cardBox.style.transform = `translate(-50%, calc(-50% + ${moveY}px)) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-
-                    if (moveY <= -174 && !isGyroLocked) {
-                        if(!dRadar.classList.contains('active')) {
-                            dRadar.classList.add('active');
-                            activateWaterfall(); 
-                        }
-                    } else {
-                        if(dRadar.classList.contains('active')) {
-                            dRadar.classList.remove('active');
-                            deactivateWaterfall(); 
-                        }
-                    }
-                }
-            }, { passive: true });
+        function initSelectOptions() { const y = document.getElementById('ob-year'); let yHtml = ''; for(let i=1960; i<=2010; i++) yHtml += `<option value="${i}">${i}</option>`; y.innerHTML = yHtml; y.value = 1988; const h = document.getElementById('ob-height'); let hHtml = ''; for(let i=150; i<=210; i++) hHtml += `<option value="${i}">${i} CM</option>`; h.innerHTML = hHtml; h.value = 176; const w = document.getElementById('ob-weight'); let wHtml = ''; for(let i=40; i<=120; i++) wHtml += `<option value="${i}">${i} KG</option>`; w.innerHTML = wHtml; w.value = 61; }
+        
+        function returnToPrev() {
+            if(navigator.vibrate) navigator.vibrate([50]);
+            const sw = document.getElementById('shockwave');
+            if(sw) { sw.style.borderColor = 'var(--cyan)'; sw.classList.remove('active'); void sw.offsetWidth; sw.classList.add('active'); }
+            setTimeout(() => { if (window.history.length > 1) { window.history.back(); } else { window.location.href = 'index.html'; } }, 300);
         }
 
-        let debugTierOverride = null; let audioClickCount = 0; let audioClickTimer = null;
-        function handleAudioDebugClick(event) {
-            audioClickCount++; clearTimeout(audioClickTimer); audioClickTimer = setTimeout(() => { audioClickCount = 0; }, 1000);
-            if (audioClickCount >= 3) {
-                audioClickCount = 0; if (debugTierOverride === null) debugTierOverride = 1; else if (debugTierOverride === 1) debugTierOverride = 2; else if (debugTierOverride === 2) debugTierOverride = 3; else debugTierOverride = null;
-                if (navigator.vibrate) navigator.vibrate([40, 40, 40]); alert("DEBUG MODE: Cấp độ " + (debugTierOverride !== null ? debugTierOverride : "TỰ ĐỘNG")); syncAllBars();
-            } else { toggleAudioPopup(event); }
-        }
-
-        let expectedDotIndex = 0; let secretTimer = null;
-        function handleSecretDotClick(event, dotIndex) {
-            event.stopPropagation(); clearTimeout(secretTimer); secretTimer = setTimeout(() => { expectedDotIndex = 0; }, 2000); 
-            if (dotIndex === expectedDotIndex) {
-                expectedDotIndex++;
-                if (expectedDotIndex >= 4) {
-                    expectedDotIndex = 0; if (debugTierOverride === null) debugTierOverride = 1; else if (debugTierOverride === 1) debugTierOverride = 2; else if (debugTierOverride === 2) debugTierOverride = 3; else debugTierOverride = null;
-                    if (navigator.vibrate) navigator.vibrate([50, 50, 50]); alert("DEBUG MODE: Cấp độ " + (debugTierOverride !== null ? debugTierOverride : "TỰ ĐỘNG")); syncAllBars();
-                }
-            } else { expectedDotIndex = (dotIndex === 0) ? 1 : 0; }
-        }
-
-        /* THUẬT TOÁN ĐỌC MỤC TIÊU VÀ ĐỔI MÀU TÍM/VÀNG KIM CHO 6 VẠCH */
-        function syncAllBars() {
-            if(isWaterfallActive) return; 
-            
-            let activeCount = 0; let sciTotalPoints = 0; const pointsPerItem = 11.1;
-            
-            const physMetrics = [ 
-                { id: 'bar-hr', key: 'kdrive_live_hr', tgt: 'kdrive_target_hr', inv: false }, 
-                { id: 'bar-weight', key: 'kdrive_live_weight', tgt: 'kdrive_target_weight', inv: false }, 
-                { id: 'bar-sleep', key: 'kdrive_live_sleep', tgt: 'kdrive_target_sleep', inv: false }, 
-                { id: 'bar-fat', key: 'kdrive_live_fat', tgt: 'kdrive_target_fat', inv: true }, 
-                { id: 'bar-water', key: 'kdrive_live_water', tgt: 'kdrive_target_water', inv: false }, 
-                { id: 'bar-steps', key: 'kdrive_live_steps', tgt: 'kdrive_target_steps', inv: false } 
-            ];
-            
-            physMetrics.forEach(m => { 
-                let val = parseFloat(localStorage.getItem(m.key)) || 0; 
-                let target = parseFloat(localStorage.getItem(m.tgt)) || 0;
-                let bar = document.getElementById(m.id); 
-                
-                if(bar) { 
-                    bar.className = 'sub-bar-fill'; // Reset class
-                    if(val > 0) { 
-                        activeCount++; 
-                        sciTotalPoints += pointsPerItem; 
-                        
-                        let isMet = false;
-                        if (target > 0) {
-                            isMet = m.inv ? (val <= target) : (val >= target);
-                        } else {
-                            isMet = true; // Phòng hờ lỗi chưa có target thì cho pass tạm
-                        }
-
-                        if (isMet) {
-                            bar.classList.add('achieved'); // Đạt -> Sáng Vàng
-                        } else {
-                            bar.classList.add('failed'); // Chưa đạt -> Sáng Tím Việt Quất
-                        }
-                    } 
-                } 
-            });
-
-            // Đèn tổng (Sức Mạnh) không đổi logic
-            let dotSucManh = document.getElementById('dot-suc-manh'); 
-            if (activeCount === 0) dotSucManh.className = 'live-dot dot-red'; 
-            else if (activeCount < 6) dotSucManh.className = 'live-dot dot-yellow'; 
-            else dotSucManh.className = 'live-dot dot-green';
-
-            function syncCognitive(baseKey, bar1Id, bar2Id, dotId) {
-                let total = parseFloat(localStorage.getItem(baseKey + '_score')) || 0; let b1 = parseFloat(localStorage.getItem(baseKey + '_bai1_score')) || 0; let b2 = parseFloat(localStorage.getItem(baseKey + '_bai2_score')) || 0;
-                let completedSubTasks = 0; if (b1 > 0) completedSubTasks++; if (b2 > 0) completedSubTasks++; if (completedSubTasks === 0 && total > 0) completedSubTasks = 1;
-                if (completedSubTasks >= 1) document.getElementById(bar1Id).style.width = '100%'; else document.getElementById(bar1Id).style.width = '0%';
-                if (completedSubTasks >= 2) document.getElementById(bar2Id).style.width = '100%'; else document.getElementById(bar2Id).style.width = '0%';
-                let dot = document.getElementById(dotId); if (completedSubTasks === 0) { dot.className = 'live-dot dot-red'; } else if (completedSubTasks === 1) { dot.className = 'live-dot dot-yellow'; } else { dot.className = 'live-dot dot-green'; activeCount++; sciTotalPoints += pointsPerItem; }
+        function toggleMode() {
+            if (currentMode === 'auto') {
+                currentMode = 'manual';
+                document.body.classList.remove('mode-auto'); document.body.classList.add('mode-manual');
+            } else {
+                currentMode = 'auto';
+                document.body.classList.remove('mode-manual'); document.body.classList.add('mode-auto');
             }
-            syncCognitive('thuy_luan', 'bar-thuy-1', 'bar-thuy-2', 'dot-thuy'); syncCognitive('hoa_luan', 'bar-hoa-1', 'bar-hoa-2', 'dot-hoa'); syncCognitive('phong_luan', 'bar-phong-1', 'bar-phong-2', 'dot-phong');
-
-            const timerEl = document.getElementById('midnight-timer');
-            if (activeCount >= 9) { sciTotalPoints = 100.0; if(timerEl) { timerEl.style.display = 'none'; } } 
-            else { sciTotalPoints = Math.min(99.9, sciTotalPoints); if(timerEl) { timerEl.style.display = 'flex'; } }
-
-            document.getElementById('luc-chien-sci').innerText = 'SCI: ' + sciTotalPoints.toFixed(1) + '%'; localStorage.setItem('kdrive_sci_score', sciTotalPoints.toFixed(1));
-
-            let currentTier = 1; if (debugTierOverride !== null) { currentTier = debugTierOverride; } else { if (sciTotalPoints >= 100.0) currentTier = 3; else if (sciTotalPoints >= 50.0) currentTier = 2; else currentTier = 1; }
-            cardBox.className = 'stats-card tier-' + currentTier;
-
-            let baseDays = parseInt(localStorage.getItem('kdrive_vonga_days')); if (isNaN(baseDays)) { baseDays = 1000; localStorage.setItem('kdrive_vonga_days', 1000); }
-            let lastCompletedDate = localStorage.getItem('kdrive_vonga_last_checked'); let todayStr = new Date().toDateString();
-            if (activeCount >= 9 && lastCompletedDate !== todayStr) { baseDays = Math.max(0, baseDays - 1); localStorage.setItem('kdrive_vonga_days', baseDays); localStorage.setItem('kdrive_vonga_last_checked', todayStr); }
-            document.getElementById('vonga-days-display').innerText = baseDays + " NGÀY";
         }
 
-        const bgAudio = document.getElementById('bg-audio'); let savedVol = parseFloat(localStorage.getItem('kdrive_audio_vol')) || 0.4; bgAudio.volume = savedVol; document.getElementById('vol-slider').value = savedVol * 100; document.getElementById('vol-val').innerText = Math.round(savedVol * 100) + '%';
-        function toggleAudioPopup(event) { event.stopPropagation(); document.getElementById('volume-popup').classList.toggle('active'); }
-        window.addEventListener('click', () => { const popup = document.getElementById('volume-popup'); if(popup) popup.classList.remove('active'); });
-        function changeVolume(val) { let v = val / 100; bgAudio.volume = v; document.getElementById('vol-val').innerText = val + '%'; localStorage.setItem('kdrive_audio_vol', v); const btn = document.getElementById('audio-toggle-btn'); if (v == 0) { btn.classList.add('muted'); bgAudio.pause(); } else { btn.classList.remove('muted'); if (bgAudio.paused) bgAudio.play().catch(e=>{}); } }
-        function initAutoAudio() { if (localStorage.getItem('kdrive_audio_state') !== 'paused' && bgAudio.paused) { bgAudio.play().then(() => { document.getElementById('audio-toggle-btn').classList.remove('muted'); }).catch(e => {}); } window.removeEventListener('touchstart', initAutoAudio); window.removeEventListener('click', initAutoAudio); }
-        window.addEventListener('touchstart', initAutoAudio); window.addEventListener('click', initAutoAudio);
-        window.addEventListener('DOMContentLoaded', () => {
-            checkMidnightReset(); setTimeout(syncAllBars, 100); 
-            if (localStorage.getItem('kdrive_audio_state') === 'paused' || savedVol == 0) { bgAudio.pause(); document.getElementById('audio-toggle-btn').classList.add('muted'); }
-            const pMatrix = document.getElementById('particle-matrix');
-            if(pMatrix) { for(let i=0; i<35; i++){ let p = document.createElement('div'); let randType = Math.random(); if (randType < 0.4) { p.className = 'atom-particle white-particle'; } else if (randType < 0.75) { p.className = 'atom-particle gold-particle'; } else { p.className = 'atom-particle pink-particle'; } p.style.left = Math.random() * 100 + 'vw'; p.style.top = Math.random() * 100 + 'vh'; const size = Math.random() * 4 + 3; p.style.width = size + 'px'; p.style.height = size + 'px'; p.style.animationDuration = (Math.random() * 8 + 5) + 's'; p.style.animationDelay = (Math.random() * 4) + 's'; pMatrix.appendChild(p); } }
-        });
+        function toggleAccordion(id) { const el = document.getElementById(id); if(el) el.classList.toggle('active'); }
 
-        let fxCtx = null;
-        function playSound(type) { try { const ctx = fxCtx || new (window.AudioContext || window.webkitAudioContext)(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); if(type === 'warp-out') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(2000, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.6); gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6); osc.start(); osc.stop(ctx.currentTime + 0.6); } else if(type === 'coin') { osc.type = 'sine'; osc.frequency.setValueAtTime(1500, ctx.currentTime); osc.frequency.setValueAtTime(2000, ctx.currentTime + 0.1); gain.gain.setValueAtTime(0.2, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2); osc.start(); osc.stop(ctx.currentTime + 0.2); } } catch (e) {} }
+        function showInfo(type) {
+            const infoMap = {
+                'hr': "Được tính toán dựa trên công thức Karvonen. Đây là ngưỡng nhịp tim lý tưởng khi tập luyện để tối ưu hóa việc đốt mỡ và tăng cường sức bền hệ tim mạch mà không gây quá tải.",
+                'weight': "Được tính toán tự động dựa trên chỉ số khối cơ thể (BMI = 21.0 chuẩn vận động viên) kết hợp với chiều cao, đảm bảo tỷ lệ hoàn hảo nhất cho khung xương và sự linh hoạt của chiến binh.",
+                'sleep': "Mốc 7.0 giờ là tiêu chuẩn sinh học tối thiểu để cơ thể tái tạo năng lượng, phục hồi hệ thần kinh trung ương và tổng hợp protein cơ bắp sau ngày dài vận động.",
+                'fat': "Duy trì tỷ lệ mỡ dưới 15% là chìa khóa để giảm tải cho các cơ quan nội tạng, tăng cường độ dẻo dai và giữ vững độ sắc nét của hệ cơ xương.",
+                'water': "Tỷ lệ nước 55% - 65% là môi trường lý tưởng để tế bào thực hiện trao đổi chất, vận chuyển dinh dưỡng trơn tru và duy trì độ bôi trơn của các khớp.",
+                'steps': "Mốc 6.000 bước được thiết lập để kích hoạt hệ tuần hoàn ngoại vi liên tục, tiêu hao calo thụ động và giữ cho các khớp chân luôn trong trạng thái linh hoạt."
+            };
+            alert(infoMap[type]);
+        }
 
-        function jumpToTest(url) { playSound('warp-out'); if (navigator.vibrate) navigator.vibrate(50); const overlay = document.getElementById('quantum-flash-overlay'); if (overlay) overlay.classList.add('flash'); setTimeout(() => { window.location.href = url; }, 300); }
-        function returnToCore() { playSound('warp-out'); if(navigator.vibrate) navigator.vibrate([50]); const overlay = document.getElementById('quantum-flash-overlay'); if(overlay) overlay.classList.add('flash'); setTimeout(() => { if (window.history.length > 1) { window.history.back(); } else { window.location.href = 'index.html'; } }, 300); }
-        window.addEventListener('load', () => { const vid = document.getElementById('bg-video'); if (vid) { let playPromise = vid.play(); if (playPromise !== undefined) { playPromise.then(_ => { vid.style.opacity = 1; }).catch(error => { document.body.addEventListener('touchstart', () => { vid.play(); vid.style.opacity = 1; }, { once: true }); }); } } });
+        function handleCoreAction() { 
+            if (currentMode === 'auto') { 
+                triggerHealthConnectSync(); 
+            } else { 
+                document.body.classList.remove('standby-mode'); document.body.classList.add('sync-complete'); 
+                const radarPulse = document.getElementById('live-pulse'); const radarMetrics = document.getElementById('live-metrics'); 
+                radarPulse.innerText = '🟢 CHẾ ĐỘ THỦ CÔNG'; radarPulse.style.color = 'var(--gold)'; 
+                document.getElementById('live-radar-bar').style.borderLeftColor = 'var(--gold)';
+                radarMetrics.innerHTML = '<span class="metric-item">Đã mở khóa màn hình. Chạm vào từng chỉ số để nhập tay.</span>'; 
+            } 
+        }
+        
+        function calculateTargets(year, height, currentWeight) { 
+            let age = 2026 - parseInt(year); 
+            let tgtHr = Math.round((220 - age) * 0.75);
+            let tgtWeight = Math.round(21.0 * (height / 100) * (height / 100));
+            localStorage.setItem('kdrive_target_hr', tgtHr); localStorage.setItem('kdrive_target_weight', tgtWeight); 
+            localStorage.setItem('kdrive_target_fat', 15.0); localStorage.setItem('kdrive_target_water', 55.0); 
+            localStorage.setItem('kdrive_target_sleep', 7.0); localStorage.setItem('kdrive_target_steps', 6000); 
+        }
+
+        function showCoreCheckModal() { 
+            let y = localStorage.getItem('kdrive_core_year') || '1988'; let h = localStorage.getItem('kdrive_core_height') || '176'; let w = localStorage.getItem('kdrive_core_weight') || '61'; 
+            let thr = localStorage.getItem('kdrive_target_hr') || '137'; let tw = localStorage.getItem('kdrive_target_weight') || '65';
+            document.getElementById('core-summary-view').innerHTML = `Tọa độ: Năm sinh ${y} | Cao ${h} CM | Cân nặng ${w} KG.`; 
+            document.getElementById('tgt-hr').innerText = thr; document.getElementById('tgt-weight').innerText = tw;
+            document.getElementById('core-check-modal').classList.add('active'); 
+        }
+
+        function acceptCoreValues() { 
+            document.getElementById('core-check-modal').classList.remove('active'); 
+            showMainApp(); 
+        }
+        
+        function openOnboardingForm() { document.getElementById('core-check-modal').classList.remove('active'); document.getElementById('onboarding-modal').classList.add('active'); }
+        function closeOnboardingForm() { document.getElementById('onboarding-modal').classList.remove('active'); if (localStorage.getItem('kdrive_core_initialized') === 'true') { showCoreCheckModal(); } }
+        
+        function submitOnboarding() { 
+            let year = document.getElementById('ob-year').value; let height = document.getElementById('ob-height').value; let weight = document.getElementById('ob-weight').value; 
+            localStorage.setItem('kdrive_core_year', year); localStorage.setItem('kdrive_core_height', height); localStorage.setItem('kdrive_core_weight', weight); 
+            localStorage.setItem('kdrive_core_initialized', 'true'); calculateTargets(year, height, weight); closeOnboardingForm(); showCoreCheckModal(); 
+        }
+
+        /* LOGIC HIỂN THỊ "SỐ / MỤC TIÊU" (MÀU ĐỊA LUÂN: VÀNG GOLD VÀ TÍM VIỆT QUẤT) */
+        function updateDisplayValue(key, currentVal) {
+            let targetVal = localStorage.getItem('kdrive_target_' + key) || '--';
+            let c = parseFloat(currentVal);
+            let t = parseFloat(targetVal);
+            let isMet = false;
+            
+            let valColor = 'var(--crimson)'; // Mặc định ĐỎ nếu chưa có dữ liệu
+            let valShadow = 'rgba(255,42,42,0.7)';
+            
+            if (currentVal === '0' || currentVal === null || isNaN(c) || c === 0) {
+                currentVal = '0';
+            } else {
+                if (key === 'fat') isMet = (c <= t); // Mỡ thì càng thấp càng tốt
+                else isMet = (c >= t); // Cân, Nước, Giấc ngủ, Bước chân, Nhịp tim càng cao càng tốt
+                
+                if (isMet) {
+                    valColor = 'var(--gold)'; // Hoàn thành = Vàng Gold rực rỡ
+                    valShadow = 'rgba(255,215,0,0.7)';
+                } else {
+                    valColor = 'var(--berry)'; // Chưa hoàn thành = Tím Việt Quất hút mắt
+                    valShadow = 'rgba(156, 39, 176, 0.7)'; // Ánh sáng Tím Glow
+                }
+            }
+
+            let el = document.getElementById(`val-${key}`);
+            if(el) {
+                // Hiển thị dạng Số to / Số nhỏ
+                el.innerHTML = `<span style="color: ${valColor}; text-shadow: 0 0 10px ${valShadow}; font-size: 24px;">${currentVal}</span><span style="font-size: 13.5px; color: rgba(255,255,255,0.4); text-shadow: none; font-family: var(--font-terminal);">&nbsp;/&nbsp;${targetVal}</span>`;
+                
+                // Đồng bộ màu viền của hộp chứa nó
+                el.parentElement.style.borderColor = valColor;
+            }
+        }
+
+        /* ĐỒNG BỘ TOÀN BỘ GIAO DIỆN CHÍNH */
+        function syncUI() {
+            let keys = ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'];
+            let vals = {};
+            keys.forEach(k => {
+                vals[k] = localStorage.getItem('kdrive_live_' + k) || '0';
+                updateDisplayValue(k, vals[k]);
+            });
+            
+            // Cập nhật điểm lõi SCI
+            let score = calculateCoreScore(vals.hr, vals.weight, vals.sleep, vals.fat, vals.water, vals.steps);
+            document.getElementById('val-sci').innerText = score.toFixed(1);
+            localStorage.setItem('kdrive_sci_score', score.toFixed(1));
+            
+            applyTierEffects(score);
+        }
+
+        function calculateCoreScore(hr, w, sl, fat, h2o, steps) {
+            let score = 0;
+            if(steps && parseInt(steps) > 0) score += Math.min(20, (parseInt(steps)/6000)*20);
+            if(sl && parseFloat(sl) > 0) score += Math.min(20, (parseFloat(sl)/7.0)*20);
+            if(hr && parseInt(hr) > 0) score += 10;
+            if(w && parseFloat(w) > 0) score += 5;
+            if(fat && parseFloat(fat) > 0) score += 10;
+            if(h2o && parseFloat(h2o) > 0) score += 5;
+
+            let scoreThuy = localStorage.getItem('thuy_luan_score'); 
+            let scoreHoa = localStorage.getItem('hoa_luan_score');
+            let scorePhong = localStorage.getItem('phong_luan_score');
+
+            if(scoreThuy && parseInt(scoreThuy) > 0) score += 10;
+            if(scoreHoa && parseInt(scoreHoa) > 0) score += 10;
+            if(scorePhong && parseInt(scorePhong) > 0) score += 10;
+            
+            if (score > 99.9) score = 99.9; 
+            return score;
+        }
+
+        function applyTierEffects(score) {
+            const b = document.body;
+            b.classList.remove('tier-shiro', 'tier-chairo', 'tier-kuro');
+            if(score >= 85) b.classList.add('tier-kuro');
+            else if(score >= 60) b.classList.add('tier-chairo');
+            else if(score > 0) b.classList.add('tier-shiro');
+
+            const sw = document.getElementById('shockwave');
+            if(score >= 85) sw.style.borderColor = 'var(--neon-pink)';
+            else if(score >= 60) sw.style.borderColor = 'var(--cyan)';
+            else sw.style.borderColor = 'var(--crimson)';
+            
+            sw.classList.remove('active'); void sw.offsetWidth; sw.classList.add('active');
+        }
+
+        function showMainApp() { 
+            document.getElementById('main-pwa').style.display = 'flex'; 
+            setTimeout(() => { document.getElementById('main-pwa').style.opacity = '1'; }, 50); 
+            
+            let sci = localStorage.getItem('kdrive_sci_score') || '0';
+            if (parseFloat(sci) > 0) {
+                document.body.classList.remove('standby-mode'); document.body.classList.add('sync-complete');
+                const radarBar = document.getElementById('live-radar-bar');
+                const radarPulse = document.getElementById('live-pulse'); 
+                const radarMetrics = document.getElementById('live-metrics');
+                radarBar.style.background = 'rgba(255, 215, 0, 0.08)'; radarBar.style.borderColor = 'rgba(255, 215, 0, 0.3)'; radarBar.style.borderLeftColor = 'var(--gold)';
+                radarPulse.style.color = 'var(--gold)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
+                radarMetrics.innerHTML = `<span class="metric-item">Đã tải lại dữ liệu phiên trước.</span>`;
+            }
+            syncUI(); 
+        }
+
+        /* HÀNH ĐỘNG KHI CHẠM HỘP Ở CHẾ ĐỘ THỦ CÔNG (CHỈ LẤY SỐ THỰC) */
+        function handlePanelClick(key) { if (currentMode === 'manual') { promptEdit(key); } }
+        
+        function promptEdit(key) { 
+            currentEditingKey = key; 
+            let targetVal = localStorage.getItem('kdrive_target_' + key) || '--';
+            document.getElementById('modal-title').innerText = `SỬA ${nameMap[key].toUpperCase()} (MỤC TIÊU: ${targetVal})`; 
+            document.getElementById('modal-input-val').style.display = 'block'; 
+            
+            // Lấy trực tiếp từ số thô trong LocalStorage để tránh dính chữ "/ Mục tiêu"
+            let curVal = localStorage.getItem('kdrive_live_' + key) || '0'; 
+            document.getElementById('modal-input-val').value = (curVal === '0') ? '' : curVal; 
+            
+            document.getElementById('manual-edit-modal').classList.add('active'); 
+            document.getElementById('modal-input-val').focus(); 
+        }
+        
+        function closeManualModal() { document.getElementById('manual-edit-modal').classList.remove('active'); currentEditingKey = null; }
+        
+        function saveManualValue() { 
+            let val = document.getElementById('modal-input-val').value; 
+            if (val !== '' && currentEditingKey) { 
+                localStorage.setItem('kdrive_live_' + currentEditingKey, val); // Lưu số thô vào kho
+            }
+            syncUI(); // Quét lại màu và điểm số toàn hệ thống
+            closeManualModal(); 
+        }
+
+        /* ĐỒNG BỘ TỰ ĐỘNG HEALTH CONNECT */
+        async function triggerHealthConnectSync() {
+            if(window.isScanning) return; 
+            window.isScanning = true;
+            
+            document.body.classList.remove('standby-mode', 'sync-complete', 'tier-shiro', 'tier-chairo', 'tier-kuro'); 
+            document.body.classList.add('scanning-mode');
+            document.getElementById('val-sci').innerText = '0';
+            
+            const radarBar = document.getElementById('live-radar-bar');
+            const radarPulse = document.getElementById('live-pulse'); 
+            const radarMetrics = document.getElementById('live-metrics');
+            
+            radarBar.style.background = 'rgba(0, 229, 255, 0.08)'; radarBar.style.borderColor = 'rgba(0, 229, 255, 0.3)'; radarBar.style.borderLeftColor = 'var(--cyan)';
+            radarPulse.style.color = 'var(--cyan)'; radarPulse.innerText = '⚡ ĐANG TRUY XUẤT DỮ LIỆU...'; 
+            radarMetrics.innerHTML = 'Đang đồng bộ Health Connect...';
+
+            try {
+                const Health = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health ? window.Capacitor.Plugins.Health : null;
+                if (!Health) throw new Error("Chưa kết nối Plugin");
+
+                await Health.requestAuthorization({ read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] });
+
+                const endDate = new Date();
+                const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); 
+                const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+
+                const safeQuery = async (type) => {
+                    return await Health.readSamples({ sampleName: type, dataType: type, startDate: startDate.toISOString(), endDate: endDate.toISOString(), limit: 1000 });
+                };
+
+                let resSteps = await safeQuery('steps');
+                let liveSteps = 0;
+                let listSteps = resSteps?.samples || resSteps?.values || [];
+                listSteps.forEach(i => {
+                    let recordDate = new Date(i.endDate || i.endTime || i.startDate);
+                    if (recordDate.getTime() >= todayStart.getTime()) { liveSteps += parseInt(i.value || 0); }
+                });
+
+                let resHR = await safeQuery('heartRate');
+                let liveHR = (resHR?.samples?.[0]?.value || resHR?.values?.[0]?.value) || null;
+
+                let resSleep = await safeQuery('sleep');
+                let liveSleepMins = 0;
+                let listSleep = resSleep?.samples || resSleep?.values || [];
+                let sleepStartThreshold = new Date(todayStart.getTime() - (6 * 60 * 60 * 1000));
+                listSleep.forEach(i => {
+                    let recordDate = new Date(i.endDate || i.endTime || i.startDate);
+                    if (recordDate.getTime() >= sleepStartThreshold.getTime()) {
+                        let m = i.duration ? (i.duration / 60) : ((new Date(i.endDate) - new Date(i.startDate)) / 60000);
+                        liveSleepMins += m;
+                    }
+                });
+                let liveSleep = liveSleepMins > 0 ? (liveSleepMins / 60).toFixed(1) : null;
+
+                let resWeight = await safeQuery('weight');
+                let liveWeight = (resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value) ? parseFloat(resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value).toFixed(1) : null;
+
+                let resFat = await safeQuery('bodyFat');
+                let liveFat = (resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value) ? parseFloat(resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value).toFixed(1) : null;
+
+                let liveWater = null;
+                if (liveWeight !== null && liveFat !== null) {
+                    let fatPercentage = parseFloat(liveFat);
+                    let waterPercentage = (1 - (fatPercentage / 100)) * 73.2;
+                    liveWater = waterPercentage.toFixed(1);
+                }
+
+                // Lưu xuống LocalStorage
+                if(liveHR !== null) localStorage.setItem('kdrive_live_hr', liveHR);
+                if(liveWeight !== null) localStorage.setItem('kdrive_live_weight', liveWeight);
+                if(liveSleep !== null) localStorage.setItem('kdrive_live_sleep', liveSleep);
+                if(liveFat !== null) localStorage.setItem('kdrive_live_fat', liveFat);
+                if(liveWater !== null) localStorage.setItem('kdrive_live_water', liveWater);
+                if(liveSteps > 0) localStorage.setItem('kdrive_live_steps', liveSteps);
+
+                syncUI(); // Quét lại toàn bộ giao diện
+
+                document.body.classList.remove('scanning-mode'); document.body.classList.add('sync-complete');
+                radarBar.style.background = 'rgba(255, 215, 0, 0.08)'; radarBar.style.borderColor = 'rgba(255, 215, 0, 0.3)'; radarBar.style.borderLeftColor = 'var(--gold)';
+                radarPulse.style.color = 'var(--gold)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
+                radarMetrics.innerHTML = `<span class="metric-item">Trích xuất thành công toàn bộ 6 chỉ số nền tảng.</span>`;
+
+            } catch (error) {
+                console.error("Lỗi đồng bộ:", error);
+                document.body.classList.remove('scanning-mode');
+                
+                // Mặc định về 0 nếu lỗi
+                ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => { localStorage.setItem('kdrive_live_'+key, '0'); });
+                syncUI();
+                
+                radarBar.style.background = 'rgba(255, 42, 42, 0.08)'; radarBar.style.borderColor = 'rgba(255, 42, 42, 0.3)'; radarBar.style.borderLeftColor = 'var(--crimson)';
+                radarPulse.style.color = 'var(--crimson)'; radarPulse.innerText = '🔴 LỖI ĐỒNG BỘ';
+                radarMetrics.innerHTML = `<span class="metric-item" style="color:#ff2a2a;">Vui lòng mở ứng dụng Samsung Health để kích hoạt dữ liệu!</span>`;
+            }
+            window.isScanning = false;
+        }
     </script>
 </body>
 </html>
