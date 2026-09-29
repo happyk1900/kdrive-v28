@@ -130,7 +130,7 @@
             word-wrap: break-word; line-height: 1.4; transition: opacity 0.5s;
         }
 
-        /* GIAO DIỆN TỜ GIẤY A4 TRẮNG CHÍNH THỐNG CHO ĐIỀU KHOẢN */
+        /* GIAO DIỆN TỜ GIẤY A4 TRẮNG - ĐÃ THU NHỎ FONT TIÊU ĐỀ TRÁNH TRÀN CHỮ */
         .terms-modal-overlay {
             position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); z-index: 9999999;
             display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.4s ease-in-out; padding: 15px;
@@ -142,9 +142,9 @@
             display: flex; flex-direction: column; transform: translateY(30px); opacity: 0; transition: 0.4s ease-in-out;
         }
         .terms-modal-overlay.active .terms-paper-a4 { transform: translateY(0); opacity: 1; }
-        .terms-paper-header { text-align: center; border-bottom: 2px solid #222; padding-bottom: 12px; margin-bottom: 14px; }
-        .terms-paper-header h2 { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 900; color: #000; text-transform: uppercase; margin-bottom: 4px; white-space: nowrap; }
-        .terms-paper-header p { font-size: 9.5px; color: #555; }
+        .terms-paper-header { text-align: center; border-bottom: 2px solid #222; padding-bottom: 10px; margin-bottom: 12px; }
+        .terms-paper-header h2 { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; color: #000; text-transform: uppercase; margin-bottom: 3px; line-height: 1.4; }
+        .terms-paper-header p { font-size: 9px; color: #555; }
         
         .terms-paper-body { flex: 1; overflow-y: auto; font-family: 'Space Grotesk', sans-serif; font-size: 11.5px; line-height: 1.6; color: #222; text-align: justify; padding-right: 5px; }
         .terms-paper-body h4 { font-size: 12px; font-weight: 800; color: #000; margin-top: 12px; margin-bottom: 4px; }
@@ -165,7 +165,7 @@
     <audio id="bgMusic" src="https://raw.githubusercontent.com/happyk1900/HOSOGOC/main/K_Drive_Initialized.mp3" preload="auto" loop></audio>
     <video id="successVideo" src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/no%20audio%20-%20kich%20hoat%20loi%20trung%20tam.mp4" autoplay muted playsinline webkit-playsinline style="pointer-events: none;"></video>
 
-    <!-- BẢNG CHỌN NGÔN NGỮ -->
+    <!-- BẢNG CHỌN NGÔN NGỮ (LUÔN HIỆN KHI MỞ APP LẦN ĐẦU) -->
     <div class="lang-gate-overlay" id="langGateModal" style="display: none;">
         <div class="lang-box">
             <div class="lang-title-area" id="txtLangTitle">CHỌN NGÔN NGỮ QUỐC TẾ</div>
@@ -194,7 +194,7 @@
     <div class="terms-modal-overlay" id="termsModal">
         <div class="terms-paper-a4">
             <div class="terms-paper-header">
-                <h2>ĐIỀU KHOẢN DỊCH VỤ VÀ CHÍNH SÁCH BẢO MẬT</h2>
+                <h2>ĐIỀU KHOẢN DỊCH VỤ VÀ CHÍNH SÁCH BẢO MẬT K-DRIVE</h2>
                 <p>Đơn vị chủ quản: Telepathy Company | MST: [Đang cập nhật]</p>
             </div>
             <div class="terms-paper-body">
@@ -246,7 +246,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT XỬ LÝ LOGIC ĐÃ FIX LUỒNG KHỞI ĐỘNG -->
+    <!-- SCRIPT XỬ LÝ LUỒNG CHUẨN 100% -->
     <script>
         const statusEl = document.getElementById('loginStatus');
         let hasReadTerms = false;
@@ -283,12 +283,11 @@
             }
         }
 
-        // LUỒNG MỚI: LUÔN KHỞI ĐỘNG TỪ INDEX, NHƯNG NẾU ĐÃ TỪNG ĐỌC ĐIỀU KHOẢN VÀ ĐĂNG NHẬP THÌ CHO PHÉP TÍCH SẴN HOẶC NHỚ TRẠNG THÁI
+        // LUÔN LUÔN BẮT ĐẦU TỪ BẢNG CHỌN NGÔN NGỮ KHI KHỞI ĐỘNG
         window.addEventListener('DOMContentLoaded', () => {
             const savedLang = localStorage.getItem('kdrive_lang') || 'vi';
             applyLanguageUI(savedLang);
 
-            // Kiểm tra xem user đã từng đọc và đồng ý điều khoản ở các lần trước chưa
             const agreedBefore = localStorage.getItem('kdrive_terms_agreed');
             if (agreedBefore === 'true') {
                 hasReadTerms = true;
@@ -299,20 +298,12 @@
                 document.getElementById('googleBtn').classList.add('unlocked');
             }
 
-            // CHỜ ẢNH NỀN TẢI XONG MỚI HIỆN BẢNG NGÔN NGỮ (CHỈ HIỆN KHI MỞ APP LẦN ĐẦU HOẶC CHƯA CHỌN)
+            // CHỜ ẢNH NỀN TẢI XONG LÀ HIỆN BẢNG CHỌN NGÔN NGỮ ĐẦU TIÊN
             langGateBg.onload = () => {
                 const bgImg = document.getElementById('bgImageElement');
                 bgImg.src = langGateBg.src;
                 bgImg.style.opacity = '1';
-                
-                // Nếu đã chọn ngôn ngữ ở lần trước, tự động ẩn bảng ngôn ngữ đi cho nhanh
-                if (localStorage.getItem('kdrive_lang')) {
-                    document.getElementById('langGateModal').style.display = 'none';
-                    bgImg.src = preloadedLoginBg.src;
-                    document.getElementById('loginPanelContainer').classList.add('show-login');
-                } else {
-                    document.getElementById('langGateModal').style.display = 'flex';
-                }
+                document.getElementById('langGateModal').style.display = 'flex';
             };
 
             if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
@@ -376,7 +367,6 @@
                 statusEl.style.color = "#00ffcc";
                 statusEl.innerHTML = `✅ XIN CHÀO: ${maskedEmail}`;
                 
-                // LƯU TRẠNG THÁI ĐĂNG NHẬP & ĐỒNG Ý ĐIỀU KHOẢN
                 localStorage.setItem('kdrive_session', 'active');
                 localStorage.setItem('kdrive_terms_agreed', 'true');
                 localStorage.setItem('kdrive_logged_in_user', userName);
