@@ -572,7 +572,7 @@
             closeManualModal(); 
         }
 
-        /* ĐỒNG BỘ TỰ ĐỘNG HEALTH CONNECT - DÙNG QUERY AGGREGATED ĐỂ LẤY CHUẨN MỐC HÔM NAY */
+        /* ĐỒNG BỘ TỰ ĐỘNG HEALTH CONNECT - LỌC NGUỒN CHỈ LẤY ĐỒNG HỒ / THIẾT BỊ ĐEO */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -597,9 +597,8 @@
 
                 const now = new Date();
                 const todayStart = new Date(); 
-                todayStart.setHours(0, 0, 0, 0); // Khóa chặt mốc 00:00:00 hôm nay
+                todayStart.setHours(0, 0, 0, 0); // Khóa chặt mốc 0h00 hôm nay
 
-                // Sử dụng queryAggregated (nếu plugin hỗ trợ) hoặc query chính xác từ todayStart đến now
                 const safeQuery = async (type) => {
                     return await Health.readSamples({ 
                         sampleName: type, 
@@ -610,15 +609,26 @@
                     });
                 };
 
-                // 1. BƯỚC CHÂN: Lấy tổng chuẩn từ 0h hôm nay
+                // 1. BƯỚC CHÂN: Lọc bỏ nguồn từ điện thoại, chỉ lấy từ đồng hồ / Samsung Health đeo tay
                 let resSteps = await safeQuery('steps');
                 let liveSteps = 0;
                 let listSteps = resSteps?.samples || resSteps?.values || [];
-                listSteps.forEach(i => {
+                
+                // Lọc thông minh: Ưu tiên bản ghi có chứa từ khóa thiết bị đeo hoặc source từ shealth watch
+                let watchStepsRecords = listSteps.filter(i => {
+                    let source = (i.sourceName || i.packageName || i.device || "").toLowerCase();
+                    // Nếu bản ghi xuất phát từ điện thoại thuần túy (phone) thì loại bỏ để tránh cộng trùng
+                    let isPhoneOnly = source.includes('phone') && !source.includes('watch') && !source.includes('gear') && !source.includes('band');
+                    return !isPhoneOnly;
+                });
+
+                // Nếu bộ lọc thông minh lọc sạch hết, ta fallback lại lấy toàn bộ để không bị bằng 0
+                let finalStepList = watchStepsRecords.length > 0 ? watchStepsRecords : listSteps;
+                finalStepList.forEach(i => {
                     liveSteps += parseInt(i.value || 0);
                 });
 
-                // 2. NHỊP TIM: Lấy mẫu mới nhất trong ngày hôm nay
+                // 2. NHỊP TIM: Lấy mẫu mới nhất trong ngày
                 let resHR = await safeQuery('heartRate');
                 let listHR = resHR?.samples || resHR?.values || [];
                 let liveHR = null;
@@ -675,7 +685,7 @@
                 document.body.classList.remove('scanning-mode'); document.body.classList.add('sync-complete');
                 radarBar.style.background = 'rgba(255, 215, 0, 0.08)'; radarBar.style.borderColor = 'rgba(255, 215, 0, 0.3)'; radarBar.style.borderLeftColor = 'var(--gold)';
                 radarPulse.style.color = 'var(--gold)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
-                radarMetrics.innerHTML = `<span class="metric-item">Trích xuất chuẩn xác dữ liệu từ mốc 0h00 hôm nay.</span>`;
+                radarMetrics.innerHTML = `<span class="metric-item">Đã lọc nguồn đồng hồ và trích xuất chuẩn xác!</span>`;
 
             } catch (error) {
                 console.error("Lỗi đồng bộ:", error);
