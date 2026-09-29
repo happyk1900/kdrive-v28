@@ -195,7 +195,7 @@
 
             <!-- TẦNG TRÊN: HIỂN THỊ MÁU VÀ ĐIỂM -->
             <div id="game-top-bar" class="game-top-bar hidden">
-                <!-- 5 Máu Xanh Gốc bên trái (Bật sáng đầy đủ) -->
+                <!-- 5 Máu Xanh Gốc bên trái -->
                 <div class="health-container">
                     <div class="health-bar green active" id="hp-g-1"></div>
                     <div class="health-bar green active" id="hp-g-2"></div>
@@ -209,7 +209,7 @@
                     <div id="hp-notification-area"></div>
                 </div>
 
-                <!-- 5 Máu Hồng Thưởng bên phải (Ban đầu tắt hoàn toàn) -->
+                <!-- 5 Máu Hồng Thưởng bên phải (Ban đầu tắt) -->
                 <div class="health-container">
                     <div class="health-bar pink" id="hp-p-1"></div>
                     <div class="health-bar pink" id="hp-p-2"></div>
@@ -382,8 +382,9 @@
         }
 
         let cGame = '1'; 
-        let aScore = 0; 
-        let stabilityHP = 5; // Khởi đầu chính xác 5 mạng xanh (5 vạch trái sáng, 5 vạch phải tắt)
+        let aScore = 0;           // Điểm chính thức được chốt khi hoàn thành chuỗi
+        let pendingScore = 0;     // Điểm tạm thời tích lũy trong chuỗi chơi hiện tại
+        let stabilityHP = 5;      
         let isPlaying = false; 
         let isPausedForStart = true;
         
@@ -391,7 +392,7 @@
         let hitsCountG1 = 0, hitsCountG2 = 0; 
 
         let currentLevel = 1; 
-        let highestCompletedLevel = 1; 
+        let highestCompletedLevel = 1; // Chỉ tăng khi hoàn thành ván ở cấp độ đó
         let winsInCurrentLevel = 0; 
         let canClick = false;
         let patternSeq = [];
@@ -448,7 +449,7 @@
         }
 
         function openArena(id) {
-            cGame = id; aScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
+            cGame = id; aScore = 0; pendingScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
             currentLevel = 1; highestCompletedLevel = 1; winsInCurrentLevel = 0;
             extractionTimes = []; nextHpMilestone = 1000;
 
@@ -475,7 +476,6 @@
             if (id === '2') buildG2Keyboard();
         }
 
-        // Đồng bộ 5 vạch Xanh bên trái (0-5) và 5 vạch Hồng bên phải (6-10)
         function updateHpDisplay() {
             let hp = Math.min(10, Math.max(0, stabilityHP));
             let greenCount = Math.min(5, hp);
@@ -511,10 +511,11 @@
         function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
         function closeArena() { window.location.href = 'LucChien.html'; }
 
-        // Nút chuyển bài trực tiếp (Skip) ở giữa thanh đáy
         function skipToNextStage() {
             playSound('coin');
             isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
+            aScore += pendingScore; pendingScore = 0; // Chốt điểm tạm thời vào điểm chính thức khi skip
+
             if (cGame === '1') {
                 sessionScoreG1 = Math.round(aScore); 
                 localStorage.setItem('thuy_luan_bai1_score', sessionScoreG1);
@@ -545,9 +546,13 @@
 
         function failSequence() { 
             if(!isPlaying || isPausedForStart) return; canClick = false; 
-            stabilityHP -= 1; // Sai trừ 1 mạng
+            stabilityHP -= 1; 
             updateHpDisplay(); 
             
+            // XÓA SẠCH ĐIỂM TẠM THỜI TRONG CHUỖI THUA (Chưa hoàn thành ván không được cộng điểm)
+            pendingScore = 0;
+            document.getElementById('boo-points').innerText = Math.round(aScore);
+
             winsInCurrentLevel = 0; 
             currentLevel = Math.max(1, currentLevel - 1); 
             if(cGame === '2') buildG2Keyboard(); 
@@ -578,27 +583,14 @@
             if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
 
             playSound('coin', 1); 
-            
-            // CƠ CHẾ ĐIỂM CỐ ĐỊNH THEO LEVEL KHÔNG BỊ LẠM PHÁT:
-            // Level 1 (3x3): +10 điểm / ô
-            // Level 2 (5x5): +12 điểm / ô
-            // Level 3 (7x7): +15 điểm / ô
-            // Level 4 trở lên: +20 điểm / ô
             let basePointPerItem = 10;
             if (currentLevel === 2) basePointPerItem = 12;
             else if (currentLevel === 3) basePointPerItem = 15;
             else if (currentLevel >= 4) basePointPerItem = 20;
 
-            let pointsToAdd = basePointPerItem; 
-            aScore += pointsToAdd;
-            document.getElementById('boo-points').innerText = Math.round(aScore);
-
-            if (aScore >= nextHpMilestone) {
-                nextHpMilestone += 1000;
-                stabilityHP = Math.min(10, stabilityHP + 1); // Tối đa 10 máu (5 xanh + 5 hồng)
-                updateHpDisplay();
-                showHpRewardAlert();
-            }
+            // Chỉ cộng dồn vào điểm tạm thời (pendingScore), chưa đổ vào aScore chính thức cho đến khi hoàn thành ván
+            pendingScore += basePointPerItem; 
+            document.getElementById('boo-points').innerText = Math.round(aScore + pendingScore);
         }
 
         function checkLevelUp() { 
@@ -606,13 +598,18 @@
             let requiredWins = (currentLevel < highestCompletedLevel) ? 1 : 2; 
 
             if (winsInCurrentLevel >= requiredWins) { 
-                winsInCurrentLevel = 0; currentLevel++;
-                if (currentLevel > highestCompletedLevel) { highestCompletedLevel = currentLevel; }
-                if(cGame === '2') buildG2Keyboard(); 
-
-                // Thưởng điểm hoàn thành màn chơi
-                aScore += (currentLevel * 25);
+                winsInCurrentLevel = 0; 
+                
+                // HOÀN THÀNH TRỌN VẸN MÀN CHƠI Ở CẤP ĐỘ NÀY -> MỚI CHÍNH THỨC CỘNG DỒN VÀO LEVEL XẾP HẠNG VÀ KHO ĐIỂM CHÍNH THỨC
+                if (currentLevel > highestCompletedLevel) { 
+                    highestCompletedLevel = currentLevel; 
+                }
+                aScore += pendingScore + (currentLevel * 25); // Chốt điểm tạm thời + thưởng qua màn
+                pendingScore = 0;
                 document.getElementById('boo-points').innerText = Math.round(aScore);
+
+                currentLevel++;
+                if(cGame === '2') buildG2Keyboard(); 
 
                 let alertBox = document.createElement('div');
                 alertBox.className = 'matrix-expand-alert';
@@ -710,7 +707,8 @@
 
         function finishGame() {
             isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
-            
+            aScore += pendingScore; pendingScore = 0; // Chốt nốt điểm tạm thời còn lại
+
             let currentHits = (cGame === '1') ? hitsCountG1 : hitsCountG2;
             let avgExtractionMs = extractionTimes.length > 0 ? Math.round(extractionTimes.reduce((a,b)=>a+b, 0) / extractionTimes.length) : 0;
 
@@ -776,6 +774,7 @@
                 document.getElementById('master-feedback-text').innerText = finalRankObj.feedback;
             }
 
+            document.getElementById('final-summary-overlay').classList.active = true;
             document.getElementById('final-summary-overlay').classList.add('active');
         }
     </script>
