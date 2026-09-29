@@ -573,7 +573,7 @@
             closeManualModal(); 
         }
 
-        /* ĐỒNG BỘ TỰ ĐỘNG HEALTH CONNECT */
+        /* ĐỒNG BỘ TỰ ĐỘNG HEALTH CONNECT - ĐÃ FIX LỌC CHUẨN MỐC 0H00 HÔM NAY */
         async function triggerHealthConnectSync() {
             if(window.isScanning) return; 
             window.isScanning = true;
@@ -597,24 +597,38 @@
                 await Health.requestAuthorization({ read: ['steps', 'heartRate', 'sleep', 'weight', 'bodyFat'] });
 
                 const endDate = new Date();
-                const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000)); 
-                const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+                const startDate = new Date(endDate.getTime() - (2 * 24 * 60 * 60 * 1000)); // Chỉ quét từ 2 ngày gần nhất để tối ưu tốc độ
+                const todayStart = new Date(); 
+                todayStart.setHours(0, 0, 0, 0); // Mốc khóa chặt 00:00:00 hôm nay
 
                 const safeQuery = async (type) => {
                     return await Health.readSamples({ sampleName: type, dataType: type, startDate: startDate.toISOString(), endDate: endDate.toISOString(), limit: 1000 });
                 };
 
+                // 1. BƯỚC CHÂN: Chỉ cộng dồn từ 0h00 hôm nay trở đi
                 let resSteps = await safeQuery('steps');
                 let liveSteps = 0;
                 let listSteps = resSteps?.samples || resSteps?.values || [];
                 listSteps.forEach(i => {
                     let recordDate = new Date(i.endDate || i.endTime || i.startDate);
-                    if (recordDate.getTime() >= todayStart.getTime()) { liveSteps += parseInt(i.value || 0); }
+                    if (recordDate.getTime() >= todayStart.getTime()) { 
+                        liveSteps += parseInt(i.value || 0); 
+                    }
                 });
 
+                // 2. NHỊP TIM: Lấy mẫu mới nhất từ 0h00 hôm nay trở đi
                 let resHR = await safeQuery('heartRate');
-                let liveHR = (resHR?.samples?.[0]?.value || resHR?.values?.[0]?.value) || null;
+                let listHR = resHR?.samples || resHR?.values || [];
+                let liveHR = null;
+                // Sắp xếp giảm dần theo thời gian để lấy mẫu mới nhất trong ngày
+                listHR.filter(i => new Date(i.endDate || i.endTime || i.startDate).getTime() >= todayStart.getTime())
+                      .sort((a, b) => new Date(b.endDate || b.endTime || b.startDate) - new Date(a.endDate || a.endTime || a.startDate));
+                if (listHR.length > 0) {
+                    let validHR = listHR.find(i => new Date(i.endDate || i.endTime || i.startDate).getTime() >= todayStart.getTime());
+                    if (validHR) liveHR = validHR.value;
+                }
 
+                // 3. GIẤC NGỦ: Cho phép lùi 6 tiếng (từ 18h hôm qua) để gom trọn giấc ngủ đêm qua của chiến binh
                 let resSleep = await safeQuery('sleep');
                 let liveSleepMins = 0;
                 let listSleep = resSleep?.samples || resSleep?.values || [];
@@ -628,11 +642,20 @@
                 });
                 let liveSleep = liveSleepMins > 0 ? (liveSleepMins / 60).toFixed(1) : null;
 
+                // 4. CÂN NẶNG & MỠ: Lấy bản ghi cân đo mới nhất từ 0h00 hôm nay trở đi
                 let resWeight = await safeQuery('weight');
-                let liveWeight = (resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value) ? parseFloat(resWeight?.samples?.[0]?.value || resWeight?.values?.[0]?.value).toFixed(1) : null;
+                let listWeight = resWeight?.samples || resWeight?.values || [];
+                let liveWeight = null;
+                let validWeight = listWeight.filter(i => new Date(i.endDate || i.endTime || i.startDate).getTime() >= todayStart.getTime())
+                                            .sort((a, b) => new Date(b.endDate || b.endTime || b.startDate) - new Date(a.endDate || a.endTime || a.startDate))[0];
+                if (validWeight) liveWeight = parseFloat(validWeight.value).toFixed(1);
 
                 let resFat = await safeQuery('bodyFat');
-                let liveFat = (resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value) ? parseFloat(resFat?.samples?.[0]?.value || resFat?.values?.[0]?.value).toFixed(1) : null;
+                let listFat = resFat?.samples || resFat?.values || [];
+                let liveFat = null;
+                let validFat = listFat.filter(i => new Date(i.endDate || i.endTime || i.startDate).getTime() >= todayStart.getTime())
+                                          .sort((a, b) => new Date(b.endDate || b.endTime || b.startDate) - new Date(a.endDate || a.endTime || a.startDate))[0];
+                if (validFat) liveFat = parseFloat(validFat.value).toFixed(1);
 
                 let liveWater = null;
                 if (liveWeight !== null && liveFat !== null) {
@@ -654,7 +677,7 @@
                 document.body.classList.remove('scanning-mode'); document.body.classList.add('sync-complete');
                 radarBar.style.background = 'rgba(255, 215, 0, 0.08)'; radarBar.style.borderColor = 'rgba(255, 215, 0, 0.3)'; radarBar.style.borderLeftColor = 'var(--gold)';
                 radarPulse.style.color = 'var(--gold)'; radarPulse.innerText = '🟢 ĐỒNG BỘ HOÀN TẤT';
-                radarMetrics.innerHTML = `<span class="metric-item">Trích xuất thành công toàn bộ 6 chỉ số nền tảng.</span>`;
+                radarMetrics.innerHTML = `<span class="metric-item">Trích xuất chuẩn xác dữ liệu ngày mới.</span>`;
 
             } catch (error) {
                 console.error("Lỗi đồng bộ:", error);
