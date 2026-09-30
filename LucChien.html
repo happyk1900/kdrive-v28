@@ -497,7 +497,7 @@
         </div>
     </div>
 
-    <!-- MODAL AI PHÂN TÍCH ĐỘNG -->
+    <!-- MODAL AI PHÂN TÍCH ĐỘNG CHUẨN THỰC TẾ -->
     <div class="cyber-modal" id="ai-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box" style="padding-top: 45px; border-color: rgba(255,215,0,0.7); background: rgba(20, 10, 0, 0.95);">
@@ -776,7 +776,7 @@
             typingTimeouts = [];
         }
 
-        // HÀM AI PHÂN TÍCH ĐỘNG DỰA TRÊN CHỈ SỐ THẬT Ở LOCALSTORAGE
+        // HÀM AI PHÂN TÍCH CHUẨN XÁC DỰA TRÊN DỮ LIỆU THẬT (KHÔNG CÓ DỮ LIỆU SẼ BÁO CHƯA KÍCH HOẠT)
         function openAiAnalysis() {
             playSound('warp-out');
             document.getElementById('ai-modal').classList.add('active');
@@ -788,7 +788,6 @@
             sciEl.innerHTML = ""; marEl.innerHTML = ""; advEl.innerHTML = "";
             clearAllTyping();
 
-            // Đọc dữ liệu thực tế hiện tại
             let activeCount = 0;
             let lockedDots = JSON.parse(localStorage.getItem('kdrive_locked_dots') || '{}');
             const physKeys = ['kdrive_live_hr', 'kdrive_live_weight', 'kdrive_live_sleep', 'kdrive_live_fat', 'kdrive_live_water', 'kdrive_live_steps'];
@@ -802,9 +801,9 @@
             let adviceText = "";
 
             if (activeCount === 0) {
-                sciText = "Hệ thống đang ở trạng thái chờ tín hiệu sinh lý. Chưa có dữ liệu đầu vào hoặc các chỉ số đang ở mức trống. Cơ thể đang bảo toàn năng lượng nguyên thủy.";
-                martialText = "\"Bình minh chưa ló dạng, kiếm chưa khỏi vỏ.\" Chưa có dữ liệu rèn luyện nghĩa là chiến binh chưa giương cung xuất trận.";
-                adviceText = "Khởi động ngay các bài tập nền tảng để thắp sáng các đèn tín hiệu lượng tử.";
+                sciText = "HỆ THỐNG CHƯA CÓ ĐIỂM SỐ - LÕI CHƯA KÍCH HOẠT. Không có dữ liệu sinh lý hoặc trí lực được ghi nhận trong phiên làm việc hiện tại.";
+                martialText = "\"Kiếm chưa tuốt khỏi vỏ, tâm chưa hướng về chiến trận.\" Lõi năng lượng đang trống rỗng, chiến binh chưa khởi động quy trình rèn luyện.";
+                adviceText = "Hãy bắt đầu nhập liệu sinh lý hoặc hoàn thành các bài tập để kích hoạt toàn bộ hệ thống lượng tử.";
             } else if (activeCount >= 9) {
                 sciText = "Toàn bộ tham số sinh lý và tần số thần kinh vận hành ở mức tối ưu. Nhịp tim tĩnh ổn định, dung lượng trao đổi chất đạt đỉnh. Hệ thống thần kinh phản hồi cực nhạy với các kích thích phản xạ.";
                 martialText = "\"Nước chảy đá mòn, vạn vật quy về một thể.\" Thân và tâm đồng điệu, phản xạ tự sinh từ bản năng thuần khiết mà không cần toan tính.";
@@ -937,31 +936,21 @@
             }
             let lockedDots = JSON.parse(localStorage.getItem('kdrive_locked_dots') || '{}');
 
-            const physMetrics = [ { id: 'bar-hr', key: 'kdrive_live_hr', tgt: 'kdrive_target_hr', inv: false }, { id: 'bar-weight', key: 'kdrive_live_weight', tgt: 'kdrive_target_weight', inv: false }, { id: 'bar-sleep', key: 'kdrive_live_sleep', tgt: 'kdrive_target_sleep', inv: false }, { id: 'bar-fat', key: 'kdrive_live_fat', tgt: 'kdrive_target_fat', inv: true }, { id: 'bar-water', key: 'kdrive_live_water', tgt: 'kdrive_target_water', inv: false }, { id: 'bar-steps', key: 'kdrive_live_steps', tgt: 'kdrive_target_steps', inv: false } ];
+            const physMetrics = [ { id: 'bar-hr', key: 'kdrive_live_hr', inv: false }, { id: 'bar-weight', key: 'kdrive_live_weight', inv: false }, { id: 'bar-sleep', key: 'kdrive_live_sleep', inv: false }, { id: 'bar-fat', key: 'kdrive_live_fat', inv: true }, { id: 'bar-water', key: 'kdrive_live_water', inv: false }, { id: 'bar-steps', key: 'kdrive_live_steps', inv: false } ];
             
             physMetrics.forEach(m => { 
                 let val = parseFloat(localStorage.getItem(m.key)) || 0; 
-                let target = parseFloat(localStorage.getItem(m.tgt)) || 0; 
                 let bar = document.getElementById(m.id); 
                 let isAlreadyAchieved = lockedDots[m.key] === true;
 
                 if(bar) { 
                     bar.className = 'sub-bar-fill'; 
+                    // CHỈ CẦN CÓ CHỈ SỐ LỚN HƠN 0 HOẶC ĐÃ ĐƯỢC KHÓA LÀ BẬT SÁNG XANH (ACHIEVED) TRONG NGÀY
                     if(val > 0 || isAlreadyAchieved) { 
                         activeCount++; 
                         sciTotalPoints += pointsPerItem; 
-                        let isMet = false; 
-                        if (target > 0) { 
-                            isMet = m.inv ? (val <= target) : (val >= target); 
-                        } else { 
-                            isMet = true; 
-                        } 
-                        if (isMet || isAlreadyAchieved) { 
-                            bar.classList.add('achieved'); 
-                            lockedDots[m.key] = true; 
-                        } else { 
-                            bar.classList.add('failed'); 
-                        } 
+                        bar.classList.add('achieved'); 
+                        lockedDots[m.key] = true; 
                     } 
                 } 
             });
