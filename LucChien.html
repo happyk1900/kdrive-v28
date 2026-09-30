@@ -75,7 +75,7 @@
             display: flex; flex-direction: column; gap: 10px; pointer-events: auto; 
             background: rgba(5, 15, 25, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 15px rgba(0, 229, 255, 0.15);
-            transition: border 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease-out;
+            transition: border 0.3s ease, box-shadow 0.3s ease;
             transform-style: preserve-3d;
         }
 
@@ -196,7 +196,34 @@
         .vo-nga-label { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 900; color: #ff2a2a; letter-spacing: 1.5px; text-shadow: 0 0 8px rgba(255, 42, 42, 0.8); text-transform: uppercase; }
         .vo-nga-value { font-family: 'Share Tech Mono', monospace; font-size: 14.5px; font-weight: bold; color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.8); animation: pulseVoNga 2s infinite alternate; }
 
-        /* MODAL CHUNG TRÁNH TREO */
+        .dragon-radar {
+            position: fixed; bottom: 15vh; left: 50%; transform: translateX(-50%) scale(0.5);
+            width: 120px; height: 120px; border-radius: 50%;
+            border: 2.5px solid rgba(0, 229, 255, 0.8); background: #02060a; 
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.5), inset 0 0 20px rgba(0, 229, 255, 0.4);
+            cursor: pointer; opacity: 0; visibility: hidden; pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 5; overflow: hidden;
+        }
+        .dragon-radar.active { opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) scale(1); }
+        
+        .radar-axis { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(0, 229, 255, 0.25); }
+        .radar-axis.v { transform: rotate(90deg); }
+        .radar-grid { position: absolute; inset: 0; background: radial-gradient(circle, transparent 30%, rgba(0,229,255,0.3) 32%, transparent 34%, transparent 60%, rgba(0,229,255,0.3) 62%, transparent 64%); }
+        
+        .radar-sweep {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: conic-gradient(from 0deg, transparent 70%, rgba(0, 229, 255, 0.8) 100%);
+            border-radius: 50%; animation: spin-sweep 2.5s linear infinite;
+        }
+        @keyframes spin-sweep { 100% { transform: rotate(360deg); } }
+
+        .blip { position: absolute; width: 4.5px; height: 4.5px; background: #fff; border-radius: 50%; box-shadow: 0 0 8px #fff, 0 0 15px var(--cyan); opacity: 0; }
+        .blip-1 { top: 30%; left: 65%; animation: blip-flash 2.5s infinite 0.5s; }
+        .blip-2 { top: 60%; left: 25%; animation: blip-flash 2.5s infinite 1.6s; }
+        .blip-3 { top: 75%; left: 70%; animation: blip-flash 2.5s infinite 2.2s; }
+        @keyframes blip-flash { 0%, 5% { opacity: 1; transform: scale(1.5); } 15%, 100% { opacity: 0; transform: scale(1); } }
+
+        /* MODAL CHUNG - ĐẢM BẢO KHÔNG BAO GIỜ BỊ TREO HOẶC CHẶN CLICK */
         .cyber-modal { position: fixed; inset: 0; background: transparent; z-index: 300000; display: none; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 16px; pointer-events: none; }
         .cyber-modal::before { content: ''; position: absolute; inset: 0; background: rgba(2, 6, 12, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 0; pointer-events: none; }
         .cyber-modal.active { display: flex; opacity: 1; pointer-events: auto; }
@@ -389,6 +416,17 @@
         </div>
     </div>
 
+    <!-- RADAR -->
+    <div class="dragon-radar" id="dragon-radar" onclick="showRadarModal()">
+        <div class="radar-axis"></div>
+        <div class="radar-axis v"></div>
+        <div class="radar-grid"></div>
+        <div class="radar-sweep"></div>
+        <div class="blip blip-1"></div>
+        <div class="blip blip-2"></div>
+        <div class="blip blip-3"></div>
+    </div>
+
     <!-- MODAL NHẬT KÝ -->
     <div class="cyber-modal" id="history-modal">
         <div class="cyber-led-wrapper">
@@ -510,24 +548,75 @@
         }
         setInterval(updateMidnightTimer, 1000); updateMidnightTimer();
 
-        // ------------------ LOGIC LƯU LỊCH SỬ (RESET TRỐNG HOÀN TOÀN) ------------------
+        // ------------------ LOGIC LƯU LỊCH SỬ (SNAPSHOT CỐ ĐỊNH XUYÊN SUỐT NGÀY) ------------------
         function saveDailySnapshot() {
-            // Không tự động tạo dữ liệu ảo nữa, reset sạch sẽ theo yêu cầu
+            let hist = JSON.parse(localStorage.getItem('kdrive_history') || '[]');
+            let todayStr = new Date().toDateString();
+            
+            if (hist.length > 0 && hist[hist.length - 1].date === todayStr) return;
+
+            let lamps = 0; let physData = {};
+            const pKeys = [ 
+                { k: 'hr', act: 'kdrive_live_hr', tgt: 'kdrive_target_hr', inv: false },
+                { k: 'weight', act: 'kdrive_live_weight', tgt: 'kdrive_target_weight', inv: false },
+                { k: 'sleep', act: 'kdrive_live_sleep', tgt: 'kdrive_target_sleep', inv: false },
+                { k: 'fat', act: 'kdrive_live_fat', tgt: 'kdrive_target_fat', inv: true },
+                { k: 'water', act: 'kdrive_live_water', tgt: 'kdrive_target_water', inv: false },
+                { k: 'steps', act: 'kdrive_live_steps', tgt: 'kdrive_target_steps', inv: false }
+            ];
+
+            pKeys.forEach(m => {
+                let v = parseFloat(localStorage.getItem(m.act)) || 0;
+                let t = parseFloat(localStorage.getItem(m.tgt)) || 0;
+                let pass = false;
+                if(v > 0) {
+                    lamps++; 
+                    if(t > 0) pass = m.inv ? (v <= t) : (v >= t); else pass = true;
+                }
+                physData[m.k] = { val: v, tgt: t, pass: pass };
+            });
+
+            let thuy = parseFloat(localStorage.getItem('thuy_luan_score')) || 0;
+            let hoa = parseFloat(localStorage.getItem('hoa_luan_score')) || 0;
+            let phong = parseFloat(localStorage.getItem('phong_luan_score')) || 0;
+            if(thuy > 0) lamps++; if(hoa > 0) lamps++; if(phong > 0) lamps++;
+
+            function getTier(score, t1, t2) { if(score==0) return "CHƯA TẬP"; if(score >= t1) return "XUẤT SẮC/GIỎI"; else if(score >= t2) return "TRUNG BÌNH"; return "KÉM"; }
+
+            let snapshot = {
+                date: todayStr,
+                dayNum: hist.length + 1,
+                sciLamps: lamps,
+                phys: physData,
+                cog: { thuy: getTier(thuy, 2000, 1000), hoa: getTier(hoa, 3000, 1000), phong: getTier(phong, 4000, 2000) }
+            };
+            hist.push(snapshot);
+            localStorage.setItem('kdrive_history', JSON.stringify(hist));
         }
 
         function createDummyHistoryIfEmpty() {
-            // Đã xóa sạch dữ liệu mẫu, bảng lịch sử khởi tạo sẽ hoàn toàn trống
-            if(!localStorage.getItem('kdrive_history_initialized')) {
+            let hist = JSON.parse(localStorage.getItem('kdrive_history') || '[]');
+            if(hist.length === 0) {
+                // Khởi tạo mảng lịch sử trống sạch sẽ, không tạo dữ liệu ảo
                 localStorage.setItem('kdrive_history', JSON.stringify([]));
-                localStorage.setItem('kdrive_history_initialized', 'true');
             }
         }
         createDummyHistoryIfEmpty(); 
 
         function checkMidnightReset() {
-            let lastDate = localStorage.getItem('kdrive_last_date'); let today = new Date().toDateString(); 
+            let lastDate = localStorage.getItem('kdrive_last_date'); 
+            let today = new Date().toDateString(); 
+            
+            // Xóa sạch dữ liệu tích lũy và mở khóa đèn khi sang ngày mới (0 giờ)
             if (lastDate && lastDate !== today) {
-                const keysToRemove = ['kdrive_live_hr', 'kdrive_live_weight', 'kdrive_live_sleep', 'kdrive_live_fat', 'kdrive_live_water', 'kdrive_live_steps', 'kdrive_sci_score', 'thuy_luan_score', 'thuy_luan_bai1_score', 'thuy_luan_bai2_score', 'hoa_luan_score', 'hoa_luan_bai1_score', 'hoa_luan_bai2_score', 'phong_luan_score', 'phong_luan_bai1_score', 'phong_luan_bai2_score'];
+                saveDailySnapshot(); 
+                const keysToRemove = [
+                    'kdrive_live_hr', 'kdrive_live_weight', 'kdrive_live_sleep', 'kdrive_live_fat', 'kdrive_live_water', 'kdrive_live_steps', 
+                    'kdrive_sci_score', 'thuy_luan_score', 'thuy_luan_bai1_score', 'thuy_luan_bai2_score', 
+                    'hoa_luan_score', 'hoa_luan_bai1_score', 'hoa_luan_bai2_score', 
+                    'phong_luan_score', 'phong_luan_bai1_score', 'phong_luan_bai2_score',
+                    'kdrive_locked_today_date' // Reset mốc ngày khóa đèn
+                ];
                 keysToRemove.forEach(k => localStorage.removeItem(k));
             }
             localStorage.setItem('kdrive_last_date', today);
@@ -547,7 +636,6 @@
             } else {
                 document.getElementById('history-date-title').innerText = "CHƯA CÓ DỮ LIỆU";
                 document.getElementById('history-day-num').innerText = "TRỐNG";
-                // Reset hiển thị về mặc định khi chưa có dữ liệu lịch sử
                 document.getElementById('hist-sci-lamps').innerText = "0/9 ĐÈN";
                 document.getElementById('hist-sci-lamps').className = "val-fail";
                 document.getElementById('hist-led-sci').innerHTML = getLed('gray');
@@ -731,34 +819,22 @@
             document.getElementById('ai-modal').classList.remove('active'); 
         }
 
-        // GIỮ NGUYÊN CON QUAY HỒI CHUYỂN MƯỢT MÀ
-        const cardBox = document.getElementById('stats-card-box'); 
-        if (window.DeviceOrientationEvent) { 
-            window.addEventListener('deviceorientation', (event) => { 
-                if (isGyroFrozen) return; 
-                let tiltX = event.gamma; 
-                let tiltY = event.beta; 
-                if (tiltX !== null && tiltY !== null) { 
-                    let rotateY = Math.max(-10, Math.min(10, tiltX * 0.4)); 
-                    let rotateX = Math.max(-10, Math.min(10, -tiltY * 0.4)); 
-                    let baseBeta = 45; 
-                    let boundedBeta = Math.max(0, Math.min(90, tiltY)); 
-                    let moveY = 0; 
-                    if (boundedBeta < baseBeta) { 
-                        if(isGyroLocked) { moveY = 0; } 
-                        else { moveY = (boundedBeta - baseBeta) * 7; moveY = Math.max(-175, moveY); } 
-                    } else { 
-                        moveY = (boundedBeta - baseBeta) * 2; moveY = Math.min(50, moveY); 
-                    } 
-                    if(cardBox) {
-                        cardBox.style.transform = `translate(-50%, calc(-50% + ${moveY}px)) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`; 
-                    }
-                } 
-            }, { passive: true }); 
+        // CÁC HÀM CŨ XỬ LÝ RADAR AN TOÀN TRÁNH TREO
+        function showRadarModal() { 
+            playSound('coin'); 
+            if(navigator.vibrate) navigator.vibrate([30, 30]); 
+            isGyroFrozen = true; 
+            document.getElementById('radar-modal').classList.add('active'); 
+        }
+        function closeRadarModal() { 
+            playSound('warp-out'); 
+            isGyroFrozen = false; 
+            document.getElementById('radar-modal').classList.remove('active'); 
         }
 
-        function showRadarModal() { playSound('coin'); if(navigator.vibrate) navigator.vibrate([30, 30]); isGyroFrozen = true; document.getElementById('radar-modal').classList.add('active'); }
-        function closeRadarModal() { playSound('warp-out'); isGyroFrozen = false; document.getElementById('radar-modal').classList.remove('active'); }
+        let isWaterfallActive = false; let dotBackupClasses = []; 
+        function activateWaterfall() { if (isWaterfallActive) return; isWaterfallActive = true; const dots = [document.getElementById('dot-suc-manh'), document.getElementById('dot-thuy'), document.getElementById('dot-hoa'), document.getElementById('dot-phong')]; dotBackupClasses = dots.map(d => d.className); dots.forEach((dot, index) => { dot.className = `live-dot dot-cyan waterfall-${index + 1}`; }); }
+        function deactivateWaterfall() { if (!isWaterfallActive) return; isWaterfallActive = false; const dots = [document.getElementById('dot-suc-manh'), document.getElementById('dot-thuy'), document.getElementById('dot-hoa'), document.getElementById('dot-phong')]; if (dotBackupClasses.length === 4) { dots.forEach((dot, index) => { dot.className = dotBackupClasses[index]; }); } else { syncAllBars(); } }
         
         function startQuantumScan() { 
             document.getElementById('radar-modal').classList.remove('active'); 
@@ -815,20 +891,129 @@
         function showSciInfoModal() { playSound('coin'); if(navigator.vibrate) navigator.vibrate(30); document.getElementById('sci-info-modal').classList.add('active'); }
         function closeSciInfoModal() { playSound('warp-out'); document.getElementById('sci-info-modal').classList.remove('active'); }
 
+        const cardBox = document.getElementById('stats-card-box'); const dRadar = document.getElementById('dragon-radar');
+        if (window.DeviceOrientationEvent) { window.addEventListener('deviceorientation', (event) => { if (isGyroFrozen) return; let tiltX = event.gamma; let tiltY = event.beta; if (tiltX !== null && tiltY !== null) { let rotateY = Math.max(-10, Math.min(10, tiltX * 0.4)); let rotateX = Math.max(-10, Math.min(10, -tiltY * 0.4)); let baseBeta = 45; let boundedBeta = Math.max(0, Math.min(90, tiltY)); let moveY = 0; if (boundedBeta < baseBeta) { if(isGyroLocked) { moveY = 0; } else { moveY = (boundedBeta - baseBeta) * 7; moveY = Math.max(-175, moveY); } } else { moveY = (boundedBeta - baseBeta) * 2; moveY = Math.min(50, moveY); } cardBox.style.transform = `translate(-50%, calc(-50% + ${moveY}px)) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`; if (moveY <= -174 && !isGyroLocked) { if(!dRadar.classList.contains('active')) { dRadar.classList.add('active'); activateWaterfall(); } } else { if(dRadar.classList.contains('active')) { dRadar.classList.remove('active'); deactivateWaterfall(); } } } }, { passive: true }); }
         let debugTierOverride = null; let audioClickCount = 0; let audioClickTimer = null; function handleAudioDebugClick(event) { audioClickCount++; clearTimeout(audioClickTimer); audioClickTimer = setTimeout(() => { audioClickCount = 0; }, 1000); if (audioClickCount >= 3) { audioClickCount = 0; if (debugTierOverride === null) debugTierOverride = 1; else if (debugTierOverride === 1) debugTierOverride = 2; else if (debugTierOverride === 2) debugTierOverride = 3; else debugTierOverride = null; if (navigator.vibrate) navigator.vibrate([40, 40, 40]); alert("DEBUG MODE: Cấp độ " + (debugTierOverride !== null ? debugTierOverride : "TỰ ĐỘNG")); syncAllBars(); } else { toggleAudioPopup(event); } }
         let expectedDotIndex = 0; let secretTimer = null; function handleSecretDotClick(event, dotIndex) { event.stopPropagation(); clearTimeout(secretTimer); secretTimer = setTimeout(() => { expectedDotIndex = 0; }, 2000); if (dotIndex === expectedDotIndex) { expectedDotIndex++; if (expectedDotIndex >= 4) { expectedDotIndex = 0; if (debugTierOverride === null) debugTierOverride = 1; else if (debugTierOverride === 1) debugTierOverride = 2; else if (debugTierOverride === 2) debugTierOverride = 3; else debugTierOverride = null; if (navigator.vibrate) navigator.vibrate([50, 50, 50]); alert("DEBUG MODE: Cấp độ " + (debugTierOverride !== null ? debugTierOverride : "TỰ ĐỘNG")); syncAllBars(); } } else { expectedDotIndex = (dotIndex === 0) ? 1 : 0; } }
 
         function syncAllBars() {
+            if(isWaterfallActive) return; 
             let activeCount = 0; let sciTotalPoints = 0; const pointsPerItem = 11.1;
+            
+            // LOGIC KHÓA CHẾT 9 ĐÈN TRONG NGÀY (Lưu trạng thái vào localStorage để không bị mất khi thoát test giữa chừng)
+            let todayStr = new Date().toDateString();
+            let lockedDate = localStorage.getItem('kdrive_locked_today_date');
+            if (lockedDate !== todayStr) {
+                // Nếu sang ngày mới, xóa cache khóa cũ
+                localStorage.removeItem('kdrive_locked_dots');
+                localStorage.setItem('kdrive_locked_today_date', todayStr);
+            }
+            let lockedDots = JSON.parse(localStorage.getItem('kdrive_locked_dots') || '{}');
+
             const physMetrics = [ { id: 'bar-hr', key: 'kdrive_live_hr', tgt: 'kdrive_target_hr', inv: false }, { id: 'bar-weight', key: 'kdrive_live_weight', tgt: 'kdrive_target_weight', inv: false }, { id: 'bar-sleep', key: 'kdrive_live_sleep', tgt: 'kdrive_target_sleep', inv: false }, { id: 'bar-fat', key: 'kdrive_live_fat', tgt: 'kdrive_target_fat', inv: true }, { id: 'bar-water', key: 'kdrive_live_water', tgt: 'kdrive_target_water', inv: false }, { id: 'bar-steps', key: 'kdrive_live_steps', tgt: 'kdrive_target_steps', inv: false } ];
-            physMetrics.forEach(m => { let val = parseFloat(localStorage.getItem(m.key)) || 0; let target = parseFloat(localStorage.getItem(m.tgt)) || 0; let bar = document.getElementById(m.id); if(bar) { bar.className = 'sub-bar-fill'; if(val > 0) { activeCount++; sciTotalPoints += pointsPerItem; let isMet = false; if (target > 0) { isMet = m.inv ? (val <= target) : (val >= target); } else { isMet = true; } if (isMet) { bar.classList.add('achieved'); } else { bar.classList.add('failed'); } } } });
-            let dotSucManh = document.getElementById('dot-suc-manh'); if (activeCount === 0) dotSucManh.className = 'live-dot dot-red'; else if (activeCount < 6) dotSucManh.className = 'live-dot dot-yellow'; else dotSucManh.className = 'live-dot dot-green';
-            function syncCognitive(baseKey, bar1Id, bar2Id, dotId) { let total = parseFloat(localStorage.getItem(baseKey + '_score')) || 0; let b1 = parseFloat(localStorage.getItem(baseKey + '_bai1_score')) || 0; let b2 = parseFloat(localStorage.getItem(baseKey + '_bai2_score')) || 0; let completedSubTasks = 0; if (b1 > 0) completedSubTasks++; if (b2 > 0) completedSubTasks++; if (completedSubTasks === 0 && total > 0) completedSubTasks = 1; if (completedSubTasks >= 1) document.getElementById(bar1Id).style.width = '100%'; else document.getElementById(bar1Id).style.width = '0%'; if (completedSubTasks >= 2) document.getElementById(bar2Id).style.width = '100%'; else document.getElementById(bar2Id).style.width = '0%'; let dot = document.getElementById(dotId); if (completedSubTasks === 0) { dot.className = 'live-dot dot-red'; } else if (completedSubTasks === 1) { dot.className = 'live-dot dot-yellow'; } else { dot.className = 'live-dot dot-green'; activeCount++; sciTotalPoints += pointsPerItem; } }
-            syncCognitive('thuy_luan', 'bar-thuy-1', 'bar-thuy-2', 'dot-thuy'); syncCognitive('hoa_luan', 'bar-hoa-1', 'bar-hoa-2', 'dot-hoa'); syncCognitive('phong_luan', 'bar-phong-1', 'bar-phong-2', 'dot-phong');
-            const timerEl = document.getElementById('midnight-timer'); if (activeCount >= 9) { sciTotalPoints = 100.0; if(timerEl) { timerEl.style.display = 'none'; } } else { sciTotalPoints = Math.min(99.9, sciTotalPoints); if(timerEl) { timerEl.style.display = 'flex'; } }
-            document.getElementById('luc-chien-sci').innerText = 'SCI: ' + sciTotalPoints.toFixed(1) + '%'; localStorage.setItem('kdrive_sci_score', sciTotalPoints.toFixed(1));
-            let currentTier = 1; if (debugTierOverride !== null) { currentTier = debugTierOverride; } else { if (sciTotalPoints >= 100.0) currentTier = 3; else if (sciTotalPoints >= 50.0) currentTier = 2; else currentTier = 1; } cardBox.className = 'stats-card tier-' + currentTier;
-            let baseDays = parseInt(localStorage.getItem('kdrive_vonga_days')); if (isNaN(baseDays)) { baseDays = 1000; localStorage.setItem('kdrive_vonga_days', 1000); } let lastCompletedDate = localStorage.getItem('kdrive_vonga_last_checked'); let todayStr = new Date().toDateString(); if (activeCount >= 9 && lastCompletedDate !== todayStr) { baseDays = Math.max(0, baseDays - 1); localStorage.setItem('kdrive_vonga_days', baseDays); localStorage.setItem('kdrive_vonga_last_checked', todayStr); } document.getElementById('vonga-days-display').innerText = baseDays + " NGÀY";
+            
+            physMetrics.forEach(m => { 
+                let val = parseFloat(localStorage.getItem(m.key)) || 0; 
+                let target = parseFloat(localStorage.getItem(m.tgt)) || 0; 
+                let bar = document.getElementById(m.id); 
+                
+                // Kiểm tra xem đèn này đã được khóa sáng trước đó trong ngày chưa
+                let isAlreadyAchieved = lockedDots[m.key] === true;
+
+                if(bar) { 
+                    bar.className = 'sub-bar-fill'; 
+                    if(val > 0 || isAlreadyAchieved) { 
+                        activeCount++; 
+                        sciTotalPoints += pointsPerItem; 
+                        let isMet = false; 
+                        if (target > 0) { 
+                            isMet = m.inv ? (val <= target) : (val >= target); 
+                        } else { 
+                            isMet = true; 
+                        } 
+                        if (isMet || isAlreadyAchieved) { 
+                            bar.classList.add('achieved'); 
+                            lockedDots[m.key] = true; // Khóa chết trạng thái đạt
+                        } else { 
+                            bar.classList.add('failed'); 
+                        } 
+                    } 
+                } 
+            });
+
+            let dotSucManh = document.getElementById('dot-suc-manh'); 
+            let physAchievedCount = physMetrics.filter(m => lockedDots[m.key] === true).length;
+            if (physAchievedCount === 0) dotSucManh.className = 'live-dot dot-red'; 
+            else if (physAchievedCount < 6) dotSucManh.className = 'live-dot dot-yellow'; 
+            else dotSucManh.className = 'live-dot dot-green';
+
+            function syncCognitive(baseKey, bar1Id, bar2Id, dotId) { 
+                let total = parseFloat(localStorage.getItem(baseKey + '_score')) || 0; 
+                let b1 = parseFloat(localStorage.getItem(baseKey + '_bai1_score')) || 0; 
+                let b2 = parseFloat(localStorage.getItem(baseKey + '_bai2_score')) || 0; 
+                
+                let isCogLocked = lockedDots[baseKey] === true;
+                let completedSubTasks = 0; 
+                
+                if (b1 > 0 || isCogLocked) completedSubTasks++; 
+                if (b2 > 0 || isCogLocked) completedSubTasks++; 
+                if (completedSubTasks === 0 && (total > 0 || isCogLocked)) completedSubTasks = 1; 
+                
+                if (completedSubTasks >= 1 || isCogLocked) document.getElementById(bar1Id).style.width = '100%'; else document.getElementById(bar1Id).style.width = '0%'; 
+                if (completedSubTasks >= 2 || isCogLocked) document.getElementById(bar2Id).style.width = '100%'; else document.getElementById(bar2Id).style.width = '0%'; 
+                
+                let dot = document.getElementById(dotId); 
+                if (completedSubTasks === 0 && !isCogLocked) { 
+                    dot.className = 'live-dot dot-red'; 
+                } else if (completedSubTasks === 1 && !isCogLocked) { 
+                    dot.className = 'live-dot dot-yellow'; 
+                } else { 
+                    dot.className = 'live-dot dot-green'; 
+                    activeCount++; 
+                    sciTotalPoints += pointsPerItem; 
+                    lockedDots[baseKey] = true; // Khóa chết phân hệ trí lực trong ngày
+                } 
+            }
+
+            syncCognitive('thuy_luan', 'bar-thuy-1', 'bar-thuy-2', 'dot-thuy'); 
+            syncCognitive('hoa_luan', 'bar-hoa-1', 'bar-hoa-2', 'dot-hoa'); 
+            syncCognitive('phong_luan', 'bar-phong-1', 'bar-phong-2', 'dot-phong');
+
+            // Lưu lại trạng thái khóa đèn vào localStorage
+            localStorage.setItem('kdrive_locked_dots', JSON.stringify(lockedDots));
+
+            const timerEl = document.getElementById('midnight-timer'); 
+            if (activeCount >= 9) { 
+                sciTotalPoints = 100.0; 
+                if(timerEl) { timerEl.style.display = 'none'; } 
+            } else { 
+                sciTotalPoints = Math.min(99.9, sciTotalPoints); 
+                if(timerEl) { timerEl.style.display = 'flex'; } 
+            }
+            
+            document.getElementById('luc-chien-sci').innerText = 'SCI: ' + sciTotalPoints.toFixed(1) + '%'; 
+            localStorage.setItem('kdrive_sci_score', sciTotalPoints.toFixed(1));
+            
+            let currentTier = 1; 
+            if (debugTierOverride !== null) { 
+                currentTier = debugTierOverride; 
+            } else { 
+                if (sciTotalPoints >= 100.0) currentTier = 3; 
+                else if (sciTotalPoints >= 50.0) currentTier = 2; 
+                else currentTier = 1; 
+            } 
+            cardBox.className = 'stats-card tier-' + currentTier;
+            
+            let baseDays = parseInt(localStorage.getItem('kdrive_vonga_days')); 
+            if (isNaN(baseDays)) { baseDays = 1000; localStorage.setItem('kdrive_vonga_days', 1000); } 
+            
+            let lastCompletedDate = localStorage.getItem('kdrive_vonga_last_checked'); 
+            if (activeCount >= 9 && lastCompletedDate !== todayStr) { 
+                baseDays = Math.max(0, baseDays - 1); 
+                localStorage.setItem('kdrive_vonga_days', baseDays); 
+                localStorage.setItem('kdrive_vonga_last_checked', todayStr); 
+            } 
+            document.getElementById('vonga-days-display').innerText = baseDays + " NGÀY";
         }
 
         const bgAudio = document.getElementById('bg-audio'); let savedVol = parseFloat(localStorage.getItem('kdrive_audio_vol')) || 0.4; bgAudio.volume = savedVol; document.getElementById('vol-slider').value = savedVol * 100; document.getElementById('vol-val').innerText = Math.round(savedVol * 100) + '%';
