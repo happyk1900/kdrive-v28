@@ -230,13 +230,20 @@
         .blip-3 { top: 75%; left: 70%; animation: blip-flash 2.5s infinite 2.2s; }
         @keyframes blip-flash { 0%, 5% { opacity: 1; transform: scale(1.5); } 15%, 100% { opacity: 0; transform: scale(1); } }
 
-        /* MODAL CHUNG */
+        /* MODAL CHUNG TÍCH HỢP RADAR QUÉT QUAY RẦN RẦN TRÊN KHUNG VIỀN */
         .cyber-modal { position: fixed; inset: 0; background: transparent; z-index: 300000; display: none; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 16px; pointer-events: none; }
         .cyber-modal::before { content: ''; position: absolute; inset: 0; background: rgba(2, 6, 12, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 0; pointer-events: none; }
         .cyber-modal.active { display: flex; opacity: 1; pointer-events: auto; }
         
         .cyber-led-wrapper { position: relative; padding: 1.5px; overflow: hidden; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); width: 95vw; max-width: 420px; box-shadow: 0 0 35px rgba(0,229,255,0.3); z-index: 1; pointer-events: auto; }
-        .cyber-led-wrapper::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, transparent, transparent, var(--cyan)); animation: spin-led 4s linear infinite; z-index: -1; }
+        
+        /* Hiệu ứng Radar quét xoay tròn trực tiếp trên khung viền modal */
+        .cyber-led-wrapper::before { 
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; 
+            background: conic-gradient(from 0deg, transparent 60%, rgba(0,229,255,0.8) 100%); 
+            animation: spin-led 3s linear infinite; z-index: -1; 
+        }
+        @keyframes spin-led { 100% { transform: rotate(360deg); } }
         
         .modal-box { width: 100%; background: rgba(5, 10, 18, 0.35); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 24px 20px; text-align: left; position: relative; z-index: 1; display: flex; flex-direction: column; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); max-height: 85vh; overflow-y: auto; border: 1px solid rgba(0,229,255,0.5); pointer-events: auto; }
         .modal-title { font-family: 'Share Tech Mono', monospace; color: #00e5ff; font-size: 18px; font-weight: 900; margin-bottom: 16px; letter-spacing: 2px; text-transform: uppercase; text-align: center; text-shadow: 0 0 12px rgba(0,0,0,0.8); }
@@ -296,7 +303,7 @@
         .nav-arrow:active { background: rgba(255,255,255,0.2); }
         
         #ai-modal .cyber-led-wrapper { box-shadow: 0 0 35px rgba(255, 215, 0, 0.4); }
-        #ai-modal .cyber-led-wrapper::before { background: conic-gradient(transparent, transparent, transparent, var(--gold)); }
+        #ai-modal .cyber-led-wrapper::before { background: conic-gradient(from 0deg, transparent 60%, rgba(255,215,0,0.8) 100%); }
 
     </style>
 </head>
@@ -433,7 +440,7 @@
         <div class="blip blip-3"></div>
     </div>
 
-    <!-- MODAL XIN QUYỀN VỊ TRÍ CYBER (THAY THẾ POPUP MẶC ĐỊNH TRẮNG TRẺO) -->
+    <!-- MODAL XIN QUYỀN VỊ TRÍ CYBER -->
     <div class="cyber-modal" id="gps-permission-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box" style="text-align: center;">
@@ -511,7 +518,7 @@
         </div>
     </div>
 
-    <!-- MODAL AI PHÂN TÍCH ĐỘNG MỚI -->
+    <!-- MODAL AI PHÂN TÍCH -->
     <div class="cyber-modal" id="ai-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box" style="padding-top: 45px; border-color: rgba(255,215,0,0.7); background: rgba(20, 10, 0, 0.95);">
@@ -883,7 +890,7 @@
             document.getElementById('ai-modal').classList.remove('active'); 
         }
 
-        // ------------------ HỆ THỐNG XIN QUYỀN VỊ TRÍ CYBER (THAY THẾ POPUP MẶC ĐỊNH) ------------------
+        // ------------------ HỆ THỐNG XIN QUYỀN VỊ TRÍ CYBER ------------------
         function showRadarModal() { 
             playSound('coin'); 
             if(navigator.vibrate) navigator.vibrate([30, 30]); 
@@ -899,7 +906,6 @@
         function requestGpsPermission() {
             document.getElementById('radar-modal').classList.remove('active');
             playSound('coin');
-            // Hiển thị Cyber Modal xin quyền thay vì dùng popup trắng mặc định của trình duyệt
             document.getElementById('gps-permission-modal').classList.add('active');
         }
 
@@ -912,7 +918,7 @@
         function grantGpsPermission() {
             playSound('coin');
             document.getElementById('gps-permission-modal').classList.remove('active');
-            startQuantumScan(); // Thực thi quét GPS phần cứng chính xác cao
+            startQuantumScan();
         }
 
         let isWaterfallActive = false; let dotBackupClasses = []; 
