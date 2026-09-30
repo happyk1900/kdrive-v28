@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#010a15">
+    <meta name="theme-color" content="#ffffff">
     <title>K-Drive - Thủy Luân</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;600;700&display=swap" rel="stylesheet">
@@ -12,17 +12,19 @@
     <style>
         :root {
             --bg-obsidian: #01060b;
-            --cyan: #00e5ff;
-            --mint: #38ef7d;    
-            --neon-pink: #ff00ff; 
-            --amber: #ffaa00;   
-            --crimson: #ff2a2a;
+            --cyan: #00839f;
+            --mint: #0f8a44;    
+            --neon-pink: #c70066; 
+            --amber: #b37400;   
+            --crimson: #d32f2f;
+            --text-dark: #0a1118;
+            --panel-bg: rgba(255, 255, 255, 0.88);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; }
 
-        /* ẢNH NỀN CHỈ HIỆN KHI Ở MÀN HÌNH CHỜ, TỔNG KẾT VÀ KẾT QUẢ. KHI VÀO CHƠI SẼ TỰ ĐỘNG ẨN ĐI CHO TĨNH LẶNG */
+        /* ẢNH NỀN SÁNG SỦA, RỰC RỠ, ẨN ĐI KHI VÀO TRẬN CHIẾN */
         #sanctum-bg { 
             position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; 
             background: url('https://github.com/happyk1900/Kai-Ripe/blob/main/nen%20thuy%20luan%20.png?raw=true') no-repeat center center; 
@@ -30,11 +32,6 @@
             transition: opacity 0.5s ease;
         }
         #sanctum-bg.playing-mode { opacity: 0; pointer-events: none; }
-        #sanctum-bg::after {
-            content: ''; position: absolute; inset: 0; 
-            background: rgba(1, 6, 11, 0.65);
-            pointer-events: none;
-        }
 
         #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
         .dust-particle { position: absolute; border-radius: 50%; opacity: 0.3; animation: floatDust linear infinite; }
@@ -53,15 +50,15 @@
         #start-prompt-overlay { position: absolute; inset: 0; background: transparent; z-index: 110; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px 40px 15px; gap: 14px; transition: opacity 0.3s ease; }
         #start-prompt-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none !important; display: none; }
 
-        /* POPUP ĐƯỢC ĐIỀU CHỈNH ĐỘ TRONG SUỐT VỪA PHẢI ĐỂ THẤY MỜ MỜ ẢNH NỀN PHÍA SAU */
-        .briefing-panel { background: rgba(5, 12, 22, 0.78); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 2px solid var(--mint); border-radius: 8px; padding: 16px 18px; width: 100%; max-width: 330px; text-align: left; box-shadow: 0 0 25px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(56, 239, 125, 0.1); }
-        .briefing-title { color: var(--mint) !important; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(255, 255, 255, 0.2); padding-bottom: 8px; letter-spacing: 1.5px; text-shadow: 0 0 8px rgba(56, 239, 125, 0.4); }
-        .briefing-target { color: #d0d8e8; font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; line-height: 1.6; font-weight: 500; }
+        /* POPUP GIAO DIỆN SÁNG (NỀN TRẮNG KÍNH MỜ + VIỀN XANH) */
+        .briefing-panel { background: var(--panel-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 2px solid var(--mint); border-radius: 8px; padding: 16px 18px; width: 100%; max-width: 330px; text-align: left; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); }
+        .briefing-title { color: var(--mint) !important; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(0, 0, 0, 0.15); padding-bottom: 8px; letter-spacing: 1.5px; }
+        .briefing-target { color: var(--text-dark); font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; line-height: 1.6; font-weight: 600; }
         .briefing-target b { color: var(--mint); font-weight: bold; }
 
         .action-group { width: 100%; max-width: 330px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .start-action-box { width: 100%; background: rgba(5, 12, 22, 0.85); backdrop-filter: blur(8px); border: 2px solid #ffffff; padding: 14px; border-radius: 8px; color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); text-align: center; transition: 0.2s; }
-        .start-action-box:active { background: #fff; color: #000; transform: scale(0.98); }
+        .start-action-box { width: 100%; background: var(--panel-bg); backdrop-filter: blur(8px); border: 2px solid var(--mint); padding: 14px; border-radius: 8px; color: var(--text-dark); font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); text-align: center; transition: 0.2s; }
+        .start-action-box:active { background: var(--mint); color: #fff; transform: scale(0.98); }
 
         /* THANH TRẠNG THÁI TRÊN */
         .game-top-bar {
@@ -120,45 +117,45 @@
         #freeze-overlay.active { display: flex; }
         .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: var(--mint); letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px var(--mint); }
 
-        /* BẢNG KẾT QUẢ TỪNG BÀI - ĐỘ TRONG SUỐT VỪA PHẢI */
-        #result-overlay { position: absolute; inset: 0; background: rgba(2, 8, 15, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 8px; border-radius: 12px; padding: 12px; }
+        /* BẢNG KẾT QUẢ TỪNG BÀI - PHONG CÁCH NỀN TRẮNG SÁNG */
+        #result-overlay { position: absolute; inset: 0; background: rgba(1, 6, 11, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 8px; border-radius: 12px; padding: 12px; }
         #result-overlay.active { display: flex; }
-        .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: var(--mint); letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(56,239,125,0.4); }
+        .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #ffffff; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(56,239,125,0.6); }
         
-        .prestige-panel { width: 92%; max-width: 310px; background: rgba(5, 12, 25, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+        .prestige-panel { width: 92%; max-width: 310px; background: var(--panel-bg); backdrop-filter: blur(8px); border: 1.5px solid var(--mint); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .prestige-total-box { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; padding-top: 2px; width: 100%; }
-        .prestige-total-label { color: #fff; font-size: 12px; font-weight: 900; letter-spacing: 1px; flex: 1; text-align: left; }
+        .prestige-total-label { color: var(--text-dark); font-size: 13px; font-weight: 900; letter-spacing: 1px; flex: 1; text-align: left; }
         .prestige-total-num { font-size: 26px; color: var(--mint); font-weight: 900; line-height: 1; text-align: right; min-width: 80px; }
 
-        .bio-metrics-box { width: 92%; max-width: 310px; background: rgba(5, 12, 25, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(56, 239, 125, 0.3); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
-        .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 8px; margin-bottom: 4px; width: 100%; }
+        .bio-metrics-box { width: 92%; max-width: 310px; background: var(--panel-bg); backdrop-filter: blur(8px); border: 1.5px solid var(--mint); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(0,0,0,0.15); padding-bottom: 8px; margin-bottom: 4px; width: 100%; }
         .metric-card-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .metric-label { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: bold; flex: 1; text-align: left;}
+        .metric-label { color: var(--text-dark); font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: bold; flex: 1; text-align: left;}
         .metric-val { color: var(--mint); font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: bold; text-align: right; }
 
-        .rank-icon-img { width: 22px; height: 22px; vertical-align: middle; margin-right: 6px; filter: drop-shadow(0 0 3px rgba(56,239,125,0.4)); }
+        .rank-icon-img { width: 22px; height: 22px; vertical-align: middle; margin-right: 6px; filter: drop-shadow(0 0 2px rgba(0,0,0,0.2)); }
 
         .result-btn-row { display: flex; gap: 10px; width: 88%; max-width: 280px; margin-top: 10px; }
-        .result-action-btn { flex: 1; padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; backdrop-filter: blur(6px); }
-        #btn-replay { background: rgba(255, 51, 102, 0.15); border: 1px solid #ff3366; color: #ff3366; }
-        #btn-replay:active { background: #ff3366; color: #fff; }
-        #btn-next { background: rgba(255, 255, 255, 0.15); border: 1px solid #fff; color: #fff; }
-        #btn-next:active { background: #fff; color: #000; }
+        .result-action-btn { flex: 1; padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; backdrop-filter: blur(6px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        #btn-replay { background: rgba(211, 47, 47, 0.1); border: 1.5px solid var(--crimson); color: var(--crimson); }
+        #btn-replay:active { background: var(--crimson); color: #fff; }
+        #btn-next { background: rgba(15, 138, 68, 0.1); border: 1.5px solid var(--mint); color: var(--mint); }
+        #btn-next:active { background: var(--mint); color: #fff; }
 
         /* BẢNG TỔNG KẾT CUỐI CÙNG */
-        #final-summary-overlay { position: absolute; inset: 0; background: rgba(1, 6, 11, 0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 12px; }
+        #final-summary-overlay { position: absolute; inset: 0; background: rgba(1, 6, 11, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 12px; }
         #final-summary-overlay.active { display: flex; }
-        .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: var(--mint); font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px var(--mint); }
+        .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #ffffff; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px var(--mint); }
         
-        .stat-box { width: 92%; max-width: 310px; background: rgba(5, 12, 25, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 14px; border-radius: 8px; }
-        .stat-line { display: flex; justify-content: space-between; margin-bottom: 6px; font-family: 'Share Tech Mono', monospace; font-size: 13px; color: #ffffff; width: 100%; font-weight: bold; }
-        .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
+        .stat-box { width: 92%; max-width: 310px; background: var(--panel-bg); backdrop-filter: blur(8px); border: 1.5px solid var(--mint); padding: 12px 14px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .stat-line { display: flex; justify-content: space-between; margin-bottom: 6px; font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--text-dark); width: 100%; font-weight: bold; }
+        .stat-line span:first-child { text-align: left; flex: 1; color: var(--text-dark); }
         .stat-line span:last-child { text-align: right; min-width: 100px; color: var(--mint); }
 
-        .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: rgba(56, 239, 125, 0.2); backdrop-filter: blur(8px); border: 1.5px solid var(--mint); border-radius: 8px; color: var(--mint); font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 5px; }
-        .final-btn-exit:hover { background: var(--mint); color: #000; }
+        .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: var(--panel-bg); backdrop-filter: blur(8px); border: 1.5px solid var(--mint); border-radius: 8px; color: var(--mint); font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .final-btn-exit:hover { background: var(--mint); color: #fff; }
 
-        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: var(--mint); font-style: italic; text-align: center; margin-top: 6px; line-height: 1.4; font-weight: 600; text-shadow: 0 0 10px rgba(56,239,125,0.4); max-width: 310px; }
+        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: var(--mint); font-style: italic; text-align: center; margin-top: 6px; line-height: 1.4; font-weight: 600; text-shadow: 0 0 8px rgba(56,239,125,0.3); max-width: 310px; }
 
         .game-container { display: none; width: 100%; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .game-container.active { display: flex; }
@@ -302,10 +299,10 @@
             <div id="final-summary-overlay">
                 <div class="final-header">TỔNG KẾT THỦY LUÂN</div>
                 <div class="stat-box">
-                    <div class="stat-line"><span>BÀI 1:</span> <span class="stat-val" id="sum-score-1" style="color:#38ef7d;">0</span></div>
-                    <div class="stat-line"><span>BÀI 2:</span> <span class="stat-val" id="sum-score-2" style="color:#38ef7d;">0</span></div>
-                    <div class="stat-line" style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.3);">
-                        <span style="font-weight: 900; color: #fff;">TỔNG ĐIỂM DATA:</span> <span class="stat-val" id="sum-score-total" style="font-weight:900; color:#38ef7d; font-size:16px;">0</span>
+                    <div class="stat-line"><span>BÀI 1:</span> <span class="stat-val" id="sum-score-1" style="color:#0f8a44;">0</span></div>
+                    <div class="stat-line"><span>BÀI 2:</span> <span class="stat-val" id="sum-score-2" style="color:#0f8a44;">0</span></div>
+                    <div class="stat-line" style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(0,0,0,0.2);">
+                        <span style="font-weight: 900; color: var(--text-dark);">TỔNG ĐIỂM DATA:</span> <span class="stat-val" id="sum-score-total" style="font-weight:900; color:#0f8a44; font-size:16px;">0</span>
                     </div>
                 </div>
 
@@ -330,20 +327,20 @@
     <script>
         const ALL_SHAPES = {
             'lightning': '<svg class="shape-svg" style="color: #ffd700;" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-            'circle': '<svg class="shape-svg" style="color: #00e5ff;" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>',
-            'triangle': '<svg class="shape-svg" style="color: #38ef7d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20 12 2"/></svg>',
-            'square': '<svg class="shape-svg" style="color: #ff3399;" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>',
-            'star': '<svg class="shape-svg" style="color: #ff9900;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>',
-            'diamond': '<svg class="shape-svg" style="color: #bf00ff;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 12 12 22 2 12 12 2"/></svg>'
+            'circle': '<svg class="shape-svg" style="color: #00839f;" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>',
+            'triangle': '<svg class="shape-svg" style="color: #0f8a44;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20 12 2"/></svg>',
+            'square': '<svg class="shape-svg" style="color: #c70066;" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>',
+            'star': '<svg class="shape-svg" style="color: #b37400;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>',
+            'diamond': '<svg class="shape-svg" style="color: #7b1fa2;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 12 12 22 2 12 12 2"/></svg>'
         };
 
         const ALL_SHAPES_SMALL = {
             'lightning': '<svg class="shape-svg-small" style="color: #ffd700;" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-            'circle': '<svg class="shape-svg-small" style="color: #00e5ff;" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>',
-            'triangle': '<svg class="shape-svg-small" style="color: #38ef7d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20 12 2"/></svg>',
-            'square': '<svg class="shape-svg-small" style="color: #ff3399;" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>',
-            'star': '<svg class="shape-svg-small" style="color: #ff9900;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>',
-            'diamond': '<svg class="shape-svg-small" style="color: #bf00ff;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 12 12 22 2 12 12 2"/></svg>'
+            'circle': '<svg class="shape-svg-small" style="color: #00839f;" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>',
+            'triangle': '<svg class="shape-svg-small" style="color: #0f8a44;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20 12 2"/></svg>',
+            'square': '<svg class="shape-svg-small" style="color: #c70066;" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>',
+            'star': '<svg class="shape-svg-small" style="color: #b37400;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>',
+            'diamond': '<svg class="shape-svg-small" style="color: #7b1fa2;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 12 12 22 2 12 12 2"/></svg>'
         };
 
         const BASE_SYMBOLS = ['lightning', 'circle', 'triangle', 'square'];
@@ -467,7 +464,6 @@
             currentLevel = 1; highestCompletedLevel = 1; winsInCurrentLevel = 0;
             extractionTimes = []; nextHpMilestone = 1000;
 
-            // KHI Ở MÀN HÌNH CHỜ/MỞ ĐẦU -> HIỆN LẠI ẢNH NỀN
             document.getElementById('sanctum-bg').classList.remove('playing-mode');
 
             let playArea = document.getElementById('play-area');
@@ -481,9 +477,9 @@
             
             let bTitle = "", bTarget = "";
             if (id === '1') {
-                bTitle = "BÀI 1"; bTarget = "GHI NHỚ VỊ TRÍ<br><br>Hệ thống sẽ làm sáng một cụm các điểm ảnh trong chớp mắt.<br><br><span style='color:#38ef7d; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và bấm lại chính xác các vị trí đó. Bấm sai sẽ hiển thị gợi ý vị trí đúng.";
+                bTitle = "BÀI 1"; bTarget = "GHI NHỚ VỊ TRÍ<br><br>Hệ thống sẽ làm sáng một cụm các điểm ảnh trong chớp mắt.<br><br><span style='color:#0f8a44; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và bấm lại chính xác các vị trí đó. Bấm sai sẽ hiển thị gợi ý vị trí đúng.";
             } else if (id === '2') {
-                bTitle = "BÀI 2"; bTarget = "GIẢI MÃ LƯỢNG TỬ<br><br>Hệ thống xuất ra một chuỗi ký hiệu hình học ngẫu nhiên.<br><br><span style='color:#38ef7d; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và gõ lại đúng thứ tự chuỗi ký hiệu.";
+                bTitle = "BÀI 2"; bTarget = "GIẢI MÃ LƯỢNG TỬ<br><br>Hệ thống xuất ra một chuỗi ký hiệu hình học ngẫu nhiên.<br><br><span style='color:#0f8a44; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và gõ lại đúng thứ tự chuỗi ký hiệu.";
             }
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
@@ -508,7 +504,6 @@
             initAudio(); playSound('coin');
             document.getElementById('start-prompt-overlay').classList.add('hidden'); 
             
-            // KHI BẮT ĐẦU CHƠI -> ẨN HẲN ẢNH NỀN ĐỂ TẬP TRUNG TỐI ĐA
             document.getElementById('sanctum-bg').classList.add('playing-mode');
 
             playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
@@ -736,7 +731,6 @@
             isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
             aScore += pendingScore; pendingScore = 0; 
 
-            // KHI KẾT THÚC BÀI CHƠI -> HIỆN LẠI ẢNH NỀN Ở BẢNG KẾT QUẢ
             document.getElementById('sanctum-bg').classList.remove('playing-mode');
 
             let currentHits = (cGame === '1') ? hitsCountG1 : hitsCountG2;
@@ -784,11 +778,10 @@
         function proceedNextStage() { playSound('coin'); document.getElementById('result-overlay').classList.remove('active'); openArena('2'); }
 
         function showFinalSummary() {
-            // HIỆN LẠI ẢNH NỀN Ở BẢNG TỔNG KẾT CUỐI CÙNG
             document.getElementById('sanctum-bg').classList.remove('playing-mode');
             playSound('coin'); document.getElementById('result-overlay').classList.remove('active');
             let totalSessionScore = sessionScoreG1 + sessionScoreG2;
-            let avgExtractionMs = extractionTimes.length > 0 ? Math.round(extractionTimes.length > 0 ? extractionTimes.reduce((a,b)=>a+b, 0) / extractionTimes.length : 0) : 0;
+            let avgExtractionMs = extractionTimes.length > 0 ? Math.round(extractionTimes.reduce((a,b)=>a+b, 0) / extractionTimes.length) : 0;
 
             document.getElementById('sum-score-1').innerText = sessionScoreG1;
             document.getElementById('sum-score-2').innerText = sessionScoreG2;
