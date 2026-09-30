@@ -776,7 +776,7 @@
             typingTimeouts = [];
         }
 
-        // HÀM AI PHÂN TÍCH ĐỘNG: ĐỌC TRỰC TIẾP CÁC CHỈ SỐ THẬT TRÊN BẢNG HIỆN TẠI (NẾU TRỐNG TUYỆT ĐỐI KHÔNG PHÂN TÍCH)
+        // HÀM AI PHÂN TÍCH: QUY HOẠCH TUYỆT ĐỐI - CHỈ ĐỌC DỮ LIỆU ĐANG HIỂN THỊ TRONG NHẬT KÝ (historyData[currentHistoryIndex])
         function openAiAnalysis() {
             playSound('warp-out');
             document.getElementById('ai-modal').classList.add('active');
@@ -788,41 +788,26 @@
             sciEl.innerHTML = ""; marEl.innerHTML = ""; advEl.innerHTML = "";
             clearAllTyping();
 
-            // KIỂM TRA TRỰC TIẾP CÁC GIÁ TRỊ THỰC TẾ TRÊN BẢNG CHÍNH
-            const physKeys = [
-                { key: 'kdrive_live_hr' }, { key: 'kdrive_live_weight' }, 
-                { key: 'kdrive_live_sleep' }, { key: 'kdrive_live_fat' }, 
-                { key: 'kdrive_live_water' }, { key: 'kdrive_live_steps' }
-            ];
-            let realActivePhys = physKeys.filter(m => parseFloat(localStorage.getItem(m.key)) > 0).length;
-
-            let thuy = parseFloat(localStorage.getItem('thuy_luan_score')) || 0;
-            let hoa = parseFloat(localStorage.getItem('hoa_luan_score')) || 0;
-            let phong = parseFloat(localStorage.getItem('phong_luan_score')) || 0;
-            
-            let realCognitive = 0;
-            if (thuy > 0) realCognitive++;
-            if (hoa > 0) realCognitive++;
-            if (phong > 0) realCognitive++;
-
-            let realTotal = realActivePhys + realCognitive;
+            // Lấy chính xác dữ liệu của ngày đang hiển thị trong Modal Nhật Ký
+            let currentDayData = historyData[currentHistoryIndex];
 
             let sciText = "";
             let martialText = "";
             let adviceText = "";
 
-            if (realTotal === 0) {
-                sciText = "HỆ THỐNG CHƯA CÓ ĐIỂM SỐ - LÕI CHƯA KÍCH HOẠT. Bảng thông tin đang ở trạng thái trống, không có dữ liệu sinh lý hay trí lực thực tế được ghi nhận.";
-                martialText = "\"Kiếm chưa tuốt khỏi vỏ, tâm chưa hướng về chiến trận.\" Lõi năng lượng đang ở trạng thái ngủ đông, chiến binh chưa thực hiện bài test hay cập nhật chỉ số nào.";
-                adviceText = "Hãy tiến hành cập nhật các chỉ số sinh lý hoặc hoàn thành các bài test để kích hoạt hệ thống lượng tử.";
-            } else if (realTotal >= 9) {
-                sciText = "Toàn bộ tham số sinh lý và tần số thần kinh vận hành ở mức tối ưu. Nhịp tim tĩnh ổn định, dung lượng trao đổi chất đạt đỉnh. Hệ thống thần kinh phản hồi cực nhạy với các kích thích phản xạ.";
+            // Nếu ngày đó trống hoặc không có đèn nào sáng (sciLamps === 0)
+            if (!currentDayData || currentDayData.sciLamps === 0) {
+                sciText = "HỆ THỐNG CHƯA CÓ ĐIỂM SỐ - LÕI CHƯA KÍCH HOẠT. Bảng nhật ký của ngày này đang hiển thị trống, không có dữ liệu sinh lý hay trí lực nào được ghi nhận.";
+                martialText = "\"Kiếm chưa tuốt khỏi vỏ, tâm chưa hướng về chiến trận.\" Lõi năng lượng của mốc thời gian này đang trống rỗng, chiến binh chưa thực hiện bài test nào.";
+                adviceText = "Hãy tiến hành cập nhật chỉ số hoặc hoàn thành các bài tập để kích hoạt hệ thống lượng tử.";
+            } else if (currentDayData.sciLamps >= 9) {
+                sciText = "Toàn bộ tham số sinh lý và tần số thần kinh hiển thị trong nhật ký vận hành ở mức tối ưu. Nhịp tim tĩnh ổn định, dung lượng trao đổi chất đạt đỉnh.";
                 martialText = "\"Nước chảy đá mòn, vạn vật quy về một thể.\" Thân và tâm đồng điệu, phản xạ tự sinh từ bản năng thuần khiết mà không cần toan tính.";
                 adviceText = "Giữ vững tần số sinh học này. Kỷ luật đã chuyển hóa thành bản năng, hãy duy trì trạng thái vô ngã.";
             } else {
-                sciText = `Phát hiện điểm mù sinh lý: Đã kích hoạt ${realTotal}/9 chỉ số nền tảng. Sự thiếu hụt một số phân hệ làm gia tăng áp lực lên hệ thần kinh giao cảm, cản trở tốc độ dẫn truyền tín hiệu.`;
+                sciText = `Phát hiện điểm mù qua bảng nhật ký: Đã ghi nhận ${currentDayData.sciLamps}/9 đèn tín hiệu. Sự thiếu hụt các phân hệ làm gia tăng áp lực lên hệ thần kinh giao cảm.`;
                 martialText = "\"Nước trong hồ không có gió ắt thành nước đọng.\" Thân thể thiếu sự rèn luyện đồng bộ thì khí huyết trì trệ, tâm trí ắt sinh chướng ngại.";
-                adviceText = "Hiệu chỉnh ngay biên độ vận động, tập trung khai mở các phân hệ còn thiếu hụt trong ngày để thiết lập lại cân bằng lượng tử.";
+                adviceText = "Hiệu chỉnh ngay biên độ vận động, tập trung khai mở các phân hệ còn thiếu hụt trên bảng theo dõi để thiết lập lại cân bằng.";
             }
 
             function typeText(text, el, speed, callback) {
@@ -963,7 +948,7 @@
 
                 if(bar) { 
                     bar.className = 'sub-bar-fill'; 
-                    // Đánh giá lại trực tiếp theo giá trị thật, không bị kẹt trạng thái cũ
+                    // Đánh giá trực tiếp theo giá trị thật: Đạt -> Vàng (achieved), Chưa đạt -> Tím (failed)
                     if(val > 0) { 
                         activeCount++; 
                         sciTotalPoints += pointsPerItem; 
@@ -976,10 +961,10 @@
                         } 
 
                         if (isMet) { 
-                            bar.classList.add('achieved'); // Màu Vàng (Đạt)
+                            bar.classList.add('achieved'); 
                             lockedDots[m.key] = 'achieved'; 
                         } else { 
-                            bar.classList.add('failed'); // Màu Tím (Chưa đạt)
+                            bar.classList.add('failed'); 
                             lockedDots[m.key] = 'failed'; 
                         } 
                     } else { 
