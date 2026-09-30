@@ -777,7 +777,7 @@
             typingTimeouts = [];
         }
 
-        // HÀM AI PHÂN TÍCH ĐỘNG: ĐỌC TRỰC TIẾP CÁC CHỈ SỐ THẬT TRÊN BẢNG HIỆN TẠI
+        // HÀM AI PHÂN TÍCH ĐỘNG: KIỂM TRA TRỰC TIẾP SCI (SCI: 0.0%) HOẶC TỔNG ĐÈN ĐANG HIỂN THỊ
         function openAiAnalysis() {
             playSound('warp-out');
             document.getElementById('ai-modal').classList.add('active');
@@ -789,39 +789,31 @@
             sciEl.innerHTML = ""; marEl.innerHTML = ""; advEl.innerHTML = "";
             clearAllTyping();
 
-            // Nội soi số lượng chỉ số thực tế đang lớn hơn 0 trên bảng chính
-            const physKeys = [
-                { key: 'kdrive_live_hr' }, { key: 'kdrive_live_weight' }, 
-                { key: 'kdrive_live_sleep' }, { key: 'kdrive_live_fat' }, 
-                { key: 'kdrive_live_water' }, { key: 'kdrive_live_steps' }
-            ];
-            let activePhysCount = physKeys.filter(m => parseFloat(localStorage.getItem(m.key)) > 0).length;
-
-            let thuyScore = parseFloat(localStorage.getItem('thuy_luan_score')) || 0;
-            let hoaScore = parseFloat(localStorage.getItem('hoa_luan_score')) || 0;
-            let phongScore = parseFloat(localStorage.getItem('phong_luan_score')) || 0;
+            // Đọc trực tiếp số đèn đang sáng thực tế từ bảng chính
+            let lockedDots = JSON.parse(localStorage.getItem('kdrive_locked_dots') || '{}');
+            let activeCount = 0;
             
-            let cognitiveCount = 0;
-            if (thuyScore > 0) cognitiveCount++;
-            if (hoaScore > 0) cognitiveCount++;
-            if (phongScore > 0) cognitiveCount++;
-
-            let totalActive = activePhysCount + cognitiveCount;
+            const physKeys = ['kdrive_live_hr', 'kdrive_live_weight', 'kdrive_live_sleep', 'kdrive_live_fat', 'kdrive_live_water', 'kdrive_live_steps'];
+            physKeys.forEach(k => { if(lockedDots[k]) activeCount++; });
+            if(lockedDots['thuy_luan']) activeCount++;
+            if(lockedDots['hoa_luan']) activeCount++;
+            if(lockedDots['phong_luan']) activeCount++;
 
             let sciText = "";
             let martialText = "";
             let adviceText = "";
 
-            if (totalActive === 0) {
-                sciText = "HỆ THỐNG CHƯA CÓ ĐIỂM SỐ - LÕI CHƯA KÍCH HOẠT. Bảng thông tin hiển thị trống, không có dữ liệu sinh lý hay trí lực thực tế được ghi nhận.";
-                martialText = "\"Kiếm chưa tuốt khỏi vỏ, tâm chưa hướng về chiến trận.\" Lõi năng lượng đang ở trạng thái ngủ đông, chiến binh chưa thực hiện bài test hay cập nhật chỉ số nào.";
+            // Nếu chưa có bất kỳ đèn nào sáng (activeCount === 0), TỪ CHỐI PHÂN TÍCH
+            if (activeCount === 0) {
+                sciText = "HỆ THỐNG CHƯA CÓ ĐIỂM SỐ - LÕI CHƯA KÍCH HOẠT. Bảng thông tin đang ở trạng thái trống, không có dữ liệu sinh lý hay trí lực được ghi nhận để phân tích.";
+                martialText = "\"Kiếm chưa tuốt khỏi vỏ, tâm chưa hướng về chiến trận.\" Lõi năng lượng đang ngủ đông, chiến binh chưa thực hiện bài test nào.";
                 adviceText = "Hãy tiến hành cập nhật các chỉ số sinh lý hoặc hoàn thành các bài test để kích hoạt hệ thống lượng tử.";
-            } else if (totalActive >= 9) {
+            } else if (activeCount >= 9) {
                 sciText = "Toàn bộ tham số sinh lý và tần số thần kinh vận hành ở mức tối ưu. Nhịp tim tĩnh ổn định, dung lượng trao đổi chất đạt đỉnh. Hệ thống thần kinh phản hồi cực nhạy với các kích thích phản xạ.";
                 martialText = "\"Nước chảy đá mòn, vạn vật quy về một thể.\" Thân và tâm đồng điệu, phản xạ tự sinh từ bản năng thuần khiết mà không cần toan tính.";
                 adviceText = "Giữ vững tần số sinh học này. Kỷ luật đã chuyển hóa thành bản năng, hãy duy trì trạng thái vô ngã.";
             } else {
-                sciText = `Phát hiện điểm mù sinh lý: Đã kích hoạt ${totalActive}/9 chỉ số nền tảng. Sự thiếu hụt một số phân hệ làm gia tăng áp lực lên hệ thần kinh giao cảm, cản trở tốc độ dẫn truyền tín hiệu.`;
+                sciText = `Phát hiện điểm mù sinh lý: Đã kích hoạt ${activeCount}/9 chỉ số nền tảng. Sự thiếu hụt một số phân hệ làm gia tăng áp lực lên hệ thần kinh giao cảm, cản trở tốc độ dẫn truyền tín hiệu.`;
                 martialText = "\"Nước trong hồ không có gió ắt thành nước đọng.\" Thân thể thiếu sự rèn luyện đồng bộ thì khí huyết trì trệ, tâm trí ắt sinh chướng ngại.";
                 adviceText = "Hiệu chỉnh ngay biên độ vận động, tập trung khai mở các phân hệ còn thiếu hụt trong ngày để thiết lập lại cân bằng lượng tử.";
             }
@@ -976,7 +968,6 @@
                             isMet = true; 
                         } 
 
-                        // Tách bạch rõ 2 việc: Đạt chuẩn -> Vàng (achieved), Chưa đạt chuẩn -> Tím (failed)
                         if (isMet || savedState === 'achieved') { 
                             bar.classList.add('achieved'); 
                             lockedDots[m.key] = 'achieved'; 
