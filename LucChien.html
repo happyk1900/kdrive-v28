@@ -261,6 +261,19 @@
         .val-fail { color: #9c27b0; font-weight: bold; }
         .val-norm { color: #00e5ff; font-weight: bold; }
 
+        /* HIỆU ỨNG ÁNH SÁNG LƯỚT QUÉT QUA CHỮ */
+        .sweep-text {
+            background: linear-gradient(90deg, #9c27b0 0%, #ff2a2a 20%, #ff007f 50%, #ff2a2a 80%, #9c27b0 100%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shineSweep 2.5s linear infinite;
+        }
+        @keyframes shineSweep {
+            to { background-position: 200% center; }
+        }
+
         .ai-trigger-btn { 
             border: 1px solid var(--gold); color: var(--gold); text-align: center; 
             padding: 10px; font-family: 'Share Tech Mono', monospace; font-weight: bold; 
@@ -412,13 +425,14 @@
         <div class="blip blip-3"></div>
     </div>
 
-    <!-- MODAL NHẬT KÝ TÍCH HỢP TỰ ĐỘNG BẮT LỖI -->
+    <!-- MODAL NHẬT KÝ -->
     <div class="cyber-modal" id="history-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box" style="padding: 16px; padding-top: 45px;">
                 <button class="btn-back-cyber" style="position: absolute; top: 12px; left: 12px; z-index: 10;" onclick="closeHistoryModal()">⟨</button>
 
-                <div class="modal-title" id="history-date-title" style="margin-bottom: 12px;">NGÀY --/--/----</div>
+                <!-- Đổi chữ NGÀY thành màu vàng theo yêu cầu -->
+                <div class="modal-title" id="history-date-title" style="margin-bottom: 12px; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5);">NGÀY --/--/----</div>
                 
                 <div class="modal-text-container" style="padding: 12px; font-family: 'Share Tech Mono', monospace; background: rgba(5,10,15,0.9);">
                     
@@ -430,7 +444,8 @@
                         </div>
                         <div id="hist-sci-missing-box" style="display: none; flex-direction: column; gap: 6px; margin-top: 6px; padding: 8px; background: rgba(255,42,42,0.1); border-left: 2px solid #ff2a2a; border-radius: 4px;">
                             <div style="font-family: 'Space Grotesk', sans-serif; font-size: 12px; color: #ff2a2a; font-style: italic;" id="hist-sci-missing-list">Thiếu tín hiệu đèn: --</div>
-                            <div style="font-family: 'Share Tech Mono', monospace; font-size: 13.5px; color: #9c27b0; font-weight: bold; text-align: right;">CHƯA ĐẠT VÔ NGÃ</div>
+                            <!-- Thêm hiệu ứng sweep-text vào chữ CHƯA ĐẠT VÔ NGÃ -->
+                            <div class="sweep-text" style="font-family: 'Share Tech Mono', monospace; font-size: 14.5px; font-weight: bold; text-align: right;">CHƯA ĐẠT VÔ NGÃ</div>
                         </div>
                         <div id="hist-sci-pass-box" style="display: none; flex-direction: column; margin-top: 6px; padding: 8px;">
                             <div style="font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #ffd700; font-weight: bold; text-align: right; text-shadow: 0 0 8px rgba(255,215,0,0.5);">ĐẠT VÔ NGÃ</div>
@@ -491,7 +506,12 @@
                     <div class="modal-text-container" style="background: #120508; border-left: 3.5px solid #ff2a2a; border-color: rgba(255,42,42,0.3);">
                         <span style="color: #ff2a2a; font-family: 'Share Tech Mono', monospace; font-weight: bold; font-size: 15px; display: block; margin-bottom: 6px;">[ĐÚC KẾT VÕ ĐẠO]</span>
                         <span id="ai-text-martial" style="font-family: 'Space Grotesk', sans-serif; color: #ffffff; line-height: 1.6;"></span>
-                        <span id="ai-text-advice" style="font-family: 'Space Grotesk', sans-serif; color: #ff007f; font-weight: bold; line-height: 1.6; display: block; margin-top: 10px;"></span>
+                        
+                        <!-- Tách riêng thẻ span để Lời khuyên 2 màu chuẩn yêu cầu -->
+                        <div style="margin-top: 10px; display: block;">
+                            <span style="font-family: 'Space Grotesk', sans-serif; color: #ff007f; font-weight: bold; line-height: 1.6;">LỜI KHUYÊN HÔM NAY: </span>
+                            <span id="ai-text-advice" style="font-family: 'Space Grotesk', sans-serif; color: #ffffff; line-height: 1.6;"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -696,6 +716,10 @@
                 if (failedPhys.length > 0) {
                     warningHTML += `<br><span style="color: #ffaa00; font-family: 'Space Grotesk', sans-serif; font-size: 11px; margin-top: 5px; display: block; font-style: normal;">*Ghi chú: Các chỉ số màu đỏ ở Phần II đã có tín hiệu nhưng chưa đạt yêu cầu cốt lõi.</span>`;
                 }
+                
+                // Hiệu ứng ánh sáng lướt qua được gán vào phần kết luận này
+                warningHTML += `<div class="sweep-text" style="font-family: 'Share Tech Mono', monospace; font-size: 14.5px; font-weight: bold; text-align: right; margin-top: 10px;">CHƯA ĐẠT VÔ NGÃ</div>`;
+                
                 document.getElementById('hist-sci-missing-list').innerHTML = warningHTML;
             }
 
@@ -730,42 +754,62 @@
             } else { cogWarnEl.style.display = 'none'; }
         }
 
-        let aiTypingTimer = null;
+        // TẠO MẢNG LƯU TRỮ TIMEOUT ĐỂ XỬ LÝ LỖI TREO KHI GÕ CHỮ
+        let typingTimeouts = [];
+        function clearAllTyping() {
+            typingTimeouts.forEach(clearTimeout);
+            typingTimeouts = [];
+        }
+
         function openAiAnalysis() {
             playSound('warp-out');
             document.getElementById('ai-modal').classList.add('active');
             
             let sciText = "Cảnh báo điểm mù não bộ (Brain Fog)! Cân nặng và lượng mỡ đều hụt, kết hợp với việc thiếu bài tập phản xạ cho thấy quá trình trao đổi chất đang bị đình trệ. Mặc dù lượng nước đạt mức tối ưu giúp dung lượng máu duy trì, nhưng nhịp tim tĩnh (80 BPM) phản ánh sự căng thẳng của hệ thần kinh giao cảm. Sự mất cân bằng này làm giảm tốc độ dẫn truyền của các khớp thần kinh, khiến tốc độ thích ứng ở phân hệ Phán Đoán chỉ đạt mức trung bình. Cơ thể đang rơi vào trạng thái ì sinh lý.";
             let martialText = "\"Nước trong hồ dù đầy nhưng không có gió thổi, ắt thành nước đọng.\" Hôm qua, chiến binh đã giữ được sự tĩnh tại nhưng hoàn toàn bỏ quên ngọn lửa bùng nổ của phản xạ. Kiếm pháp không vung ra, trần cấu ắt bám víu (mỡ cơ thể tăng).";
-            let adviceText = "LỜI KHUYÊN HÔM NAY: Khai mở phản xạ cường độ cao ngay trong buổi sáng để đốt cháy tĩnh lặng, ép nhịp tim bứt phá giới hạn và xua tan điểm mù tâm trí.";
+            
+            // Lời khuyên giờ chỉ chứa phần nội dung màu trắng
+            let adviceText = "Khai mở phản xạ cường độ cao ngay trong buổi sáng để đốt cháy tĩnh lặng, ép nhịp tim bứt phá giới hạn và xua tan điểm mù tâm trí.";
 
             let sciEl = document.getElementById('ai-text-science');
             let marEl = document.getElementById('ai-text-martial');
             let advEl = document.getElementById('ai-text-advice');
             
             sciEl.innerHTML = ""; marEl.innerHTML = ""; advEl.innerHTML = "";
-            clearTimeout(aiTypingTimer);
+            clearAllTyping(); // Xóa sạch bộ nhớ tạm vòng lặp gõ chữ trước đó
 
             function typeText(text, el, speed, callback) {
                 let i = 0;
                 function type() {
-                    if (i < text.length) { el.innerHTML += text.charAt(i); i++; aiTypingTimer = setTimeout(type, speed); } 
+                    if (i < text.length) { 
+                        el.innerHTML += text.charAt(i); 
+                        i++; 
+                        let t = setTimeout(type, speed); 
+                        typingTimeouts.push(t);
+                    } 
                     else if (callback) { callback(); }
                 }
                 type();
             }
             
             typeText(sciText, sciEl, 15, () => { 
-                setTimeout(() => { 
+                let t1 = setTimeout(() => { 
                     typeText(martialText, marEl, 15, () => {
-                        setTimeout(() => {
+                        let t2 = setTimeout(() => {
                             typeText(adviceText, advEl, 15);
                         }, 300);
+                        typingTimeouts.push(t2);
                     }); 
                 }, 400); 
+                typingTimeouts.push(t1);
             });
         }
-        function closeAiModal() { playSound('warp-out'); clearTimeout(aiTypingTimer); document.getElementById('ai-modal').classList.remove('active'); }
+        
+        function closeAiModal() { 
+            playSound('warp-out'); 
+            clearAllTyping(); // Dừng hoàn toàn hiệu ứng gõ khi bấm Thoát, giải quyết lỗi treo
+            document.getElementById('ai-modal').classList.remove('active'); 
+        }
 
         // CÁC HÀM CŨ
         function showRadarModal() { playSound('coin'); if(navigator.vibrate) navigator.vibrate([30, 30]); isGyroFrozen = true; document.getElementById('radar-modal').classList.add('active'); }
@@ -819,4 +863,3 @@
     </script>
 </body>
 </html>
-
