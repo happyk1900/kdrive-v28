@@ -553,7 +553,7 @@
         }
         setInterval(updateMidnightTimer, 1000); updateMidnightTimer();
 
-        // ------------------ LOGIC LƯU LỊCH SỬ (SNAPSHOT CỐ ĐỊNH XUYÊN SUỐT NGÀY) ------------------
+        // ------------------ LOGIC LƯU LỊCH SỬ (CHỐT SỔ LÚC 12:00 ĐÊM) ------------------
         function saveDailySnapshot() {
             let hist = JSON.parse(localStorage.getItem('kdrive_history') || '[]');
             let todayStr = new Date().toDateString();
@@ -626,7 +626,37 @@
             localStorage.setItem('kdrive_last_date', today);
         }
 
-        // ------------------ LOGIC UI NHẬT KÝ & AI PHÂN TÍCH MỚI ------------------
+        // ------------------ QUẢN LÝ ĐIỂM SỐ CAO NHẤT TRONG NGÀY (PEAK SCORE) ------------------
+        function saveBestScoreToday(baseKey, currentTotal, b1, b2) {
+            let todayStr = new Date().toDateString();
+            let dateKey = baseKey + '_score_date';
+            let storedDate = localStorage.getItem(dateKey);
+
+            if (storedDate !== todayStr) {
+                // Sang ngày mới, reset mốc đỉnh trong ngày để ghi nhận điểm mới
+                localStorage.setItem(dateKey, todayStr);
+                localStorage.setItem(baseKey + '_score', currentTotal);
+                localStorage.setItem(baseKey + '_bai1_score', b1);
+                localStorage.setItem(baseKey + '_bai2_score', b2);
+            } else {
+                let bestToday = parseFloat(localStorage.getItem(baseKey + '_score')) || 0;
+                if (currentTotal > bestToday) {
+                    localStorage.setItem(baseKey + '_score', currentTotal);
+                    localStorage.setItem(baseKey + '_bai1_score', b1);
+                    localStorage.setItem(baseKey + '_bai2_score', b2);
+                }
+            }
+            
+            // Cập nhật kỷ lục mọi thời đại (Best Score)
+            let bestKey = baseKey + '_best_score';
+            let globalBest = parseFloat(localStorage.getItem(bestKey)) || 0;
+            let currentBest = parseFloat(localStorage.getItem(baseKey + '_score')) || 0;
+            if (currentBest > globalBest) {
+                localStorage.setItem(bestKey, currentBest);
+            }
+        }
+
+        // ------------------ LOGIC UI NHẬT KÝ & A.I MỚI ------------------
         let currentHistoryIndex = 0;
         let historyData = [];
 
@@ -775,7 +805,7 @@
             typingTimeouts = [];
         }
 
-        // NÚT ẤN BOO A.I MỚI HOÀN TOÀN: CHỈ ĐỌC DUY NHẤT TỪ BẢNG NHẬT KÝ ĐANG HIỂN THỊ
+        // NÚT ẤN BOO A.I MỚI: CHỈ ĐỌC DUY NHẤT TỪ BẢNG NHẬT KÝ Đang HIỂN THỊ
         function openAiAnalysis() {
             playSound('warp-out');
             document.getElementById('ai-modal').classList.add('active');
@@ -787,7 +817,6 @@
             sciEl.innerHTML = ""; marEl.innerHTML = ""; advEl.innerHTML = "";
             clearAllTyping();
 
-            // Nội soi hoàn toàn dựa trên dữ liệu nhật ký của ngày đang xem (historyData[currentHistoryIndex])
             let currentDayData = historyData[currentHistoryIndex];
 
             let sciText = "";
@@ -906,7 +935,72 @@
             isGyroFrozen = false; 
         }
 
-        function openScoreModal(baseKey, titleName) { playSound('coin'); document.getElementById('score-modal-title').innerText = titleName; let b1 = parseFloat(localStorage.getItem(baseKey + '_bai1_score')) || 0; let b2 = parseFloat(localStorage.getItem(baseKey + '_bai2_score')) || 0; let total = parseFloat(localStorage.getItem(baseKey + '_score')) || (b1 + b2); let bestKey = baseKey + '_best_score'; let bestScore = parseFloat(localStorage.getItem(bestKey)) || 0; if (total > bestScore) { bestScore = total; localStorage.setItem(bestKey, bestScore); } let rankName = "TRUNG BÌNH"; let feedback = "Nhịp độ ổn định, tiếp tục phát huy."; let hasDataToday = (total > 0); let htmlContent = ''; if (baseKey === 'thuy_luan') { let metric1Val = hasDataToday ? "345 ms" : "---"; let metric2Val = hasDataToday ? "95.0%" : "---"; if (total >= 2000) { rankName = "GIỎI"; feedback = "Tốc độ trích xuất không gian nhạy bén, phản xạ linh hoạt."; } else if (total >= 1000) { rankName = "TRUNG BÌNH"; feedback = "Khả năng mã hóa thị giác đạt mức ổn định."; } else { rankName = "KÉM"; feedback = "Trí nhớ ngắn hạn cần được kích hoạt thêm."; } if (!hasDataToday) rankName = "CHƯA TẬP"; htmlContent = `<div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 1:</span> <span style="color: #ffd700;">${b1}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 2:</span> <span style="color: #ffd700;">${b2}</span></div><div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 4px; font-weight: bold;"><span>TỔNG ĐIỂM DATA:</span> <span style="color: #ffb700; font-size: 15px;">${total}</span></div></div><div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Tốc độ trích xuất:</span> <span style="color: #00e5ff; font-weight: bold;">${metric1Val}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>Độ chính xác:</span> <span style="color: #00e5ff; font-weight: bold;">${metric2Val}</span></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 6px; margin-bottom: 6px;"><span>CẤP ĐỘ:</span> <span style="color: #38ef7d; font-weight: bold;">${rankName}</span></div><div style="color: #ffb700; font-style: italic; font-size: 12.5px; line-height: 1.4;">"${hasDataToday ? feedback : "Hãy bắt đầu bài tập hôm nay."}"</div></div>`; } else if (baseKey === 'hoa_luan') { let msVal = hasDataToday ? ((localStorage.getItem('hoa_luan_avg_ms') || "523") + " ms") : "---"; let phatLuc1 = hasDataToday ? ((localStorage.getItem('hoa_luan_p1') || "7.1") + " lần / s") : "---"; let phatLuc2 = hasDataToday ? ((localStorage.getItem('hoa_luan_p2') || "14.3") + " lần / s") : "---"; if (total >= 6000) { rankName = "XUẤT SẮC"; feedback = "Tốc độ chớp nhoáng, khả năng đồng bộ tay - mắt cực kỳ xuất sắc."; } else if (total >= 3000) { rankName = "GIỎI"; feedback = "Tốc độ phản ứng vững vàng, đáp ứng tốt cường độ cao."; } else if (total >= 1000) { rankName = "TRUNG BÌNH"; feedback = "Phản xạ cơ bản ổn định."; } else { rankName = "KÉM"; feedback = "Cần rèn luyện thêm tốc độ phản xạ."; } if (!hasDataToday) rankName = "CHƯA TẬP"; htmlContent = `<div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 1:</span> <span style="color: #ffd700;">${b1}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 2:</span> <span style="color: #ffd700;">${b2}</span></div><div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 4px; font-weight: bold;"><span>TỔNG ĐIỂM DATA:</span> <span style="color: #ffb700; font-size: 15px;">${total}</span></div></div><div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Tốc độ phản ứng:</span> <span style="color: #00e5ff; font-weight: bold;">${msVal}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Phát lực một tay:</span> <span style="color: #00e5ff; font-weight: bold;">${phatLuc1}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>Phát lực hai tay:</span> <span style="color: #00e5ff; font-weight: bold;">${phatLuc2}</span></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 6px; margin-bottom: 6px;"><span>CẤP ĐỘ:</span> <span style="color: #38ef7d; font-weight: bold;">${rankName}</span></div><div style="color: #ffb700; font-style: italic; font-size: 12.5px; line-height: 1.4;">"${hasDataToday ? feedback : "Hãy bắt đầu bài tập hôm nay."}"</div></div>`; } else if (baseKey === 'phong_luan') { let metric1Val = hasDataToday ? ((localStorage.getItem('phong_luan_max_focus') || "4.5") + "s") : "---"; let metric2Val = hasDataToday ? ((localStorage.getItem('phong_luan_avg_ms') || "410") + " ms") : "---"; if (total >= 6000) { rankName = "XUẤT SẮC"; feedback = "Tốc độ bắt dính quỹ đạo và phán đoán không gian sắc bén."; } else if (total >= 4000) { rankName = "GIỎI"; feedback = "Cảm giác không gian tốt, bám sát quỹ đạo ổn định."; } else if (total >= 2000) { rankName = "TRUNG BÌNH"; feedback = "Quỹ đạo bám dính ở mức khá."; } else { rankName = "KÉM"; feedback = "Chưa làm chủ được quỹ đạo di chuyển."; } if (!hasDataToday) rankName = "CHƯA TẬP"; htmlContent = `<div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 1:</span> <span style="color: #ffd700;">${b1}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 2:</span> <span style="color: #ffd700;">${b2}</span></div><div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 4px; font-weight: bold;"><span>TỔNG ĐIỂM DATA:</span> <span style="color: #ffb700; font-size: 15px;">${total}</span></div></div><div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Chuỗi bám dính Max:</span> <span style="color: #00e5ff; font-weight: bold;">${metric1Val}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>Tốc độ thích ứng:</span> <span style="color: #00e5ff; font-weight: bold;">${metric2Val}</span></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 6px; margin-bottom: 6px;"><span>CẤP ĐỘ:</span> <span style="color: #38ef7d; font-weight: bold;">${rankName}</span></div><div style="color: #ffb700; font-style: italic; font-size: 12.5px; line-height: 1.4;">"${hasDataToday ? feedback : "Hãy bắt đầu bài tập hôm nay."}"</div></div>`; } htmlContent += `<div style="background: rgba(30,10,10,0.9); border: 1px solid rgba(255,51,51,0.4); border-radius: 6px; padding: 8px 10px; text-align: center;"><span style="color: #ff3366; font-weight: bold; font-size: 11px; display: block; margin-bottom: 2px;">KỶ LỤC CAO NHẤT (BEST SCORE)</span><span style="color: #ffd700; font-size: 16px; font-weight: 900;">${bestScore} DATA</span></div>`; document.getElementById('score-modal-content').innerHTML = htmlContent; document.getElementById('score-detail-modal').classList.add('active'); }
+        function openScoreModal(baseKey, titleName) { 
+            playSound('coin'); 
+            document.getElementById('score-modal-title').innerText = titleName; 
+            
+            let b1 = parseFloat(localStorage.getItem(baseKey + '_bai1_score')) || 0; 
+            let b2 = parseFloat(localStorage.getItem(baseKey + '_bai2_score')) || 0; 
+            let total = parseFloat(localStorage.getItem(baseKey + '_score')) || (b1 + b2); 
+            
+            // Cập nhật mốc điểm cao nhất trong ngày
+            saveBestScoreToday(baseKey, total, b1, b2);
+            
+            // Lấy lại điểm chuẩn cao nhất sau khi đã so sánh
+            total = parseFloat(localStorage.getItem(baseKey + '_score')) || total;
+            b1 = parseFloat(localStorage.getItem(baseKey + '_bai1_score')) || b1;
+            b2 = parseFloat(localStorage.getItem(baseKey + '_bai2_score')) || b2;
+
+            let bestKey = baseKey + '_best_score'; 
+            let bestScore = parseFloat(localStorage.getItem(bestKey)) || 0; 
+            if (total > bestScore) { 
+                bestScore = total; 
+                localStorage.setItem(bestKey, bestScore); 
+            } 
+
+            let rankName = "TRUNG BÌNH"; 
+            let feedback = "Nhịp độ ổn định, tiếp tục phát huy."; 
+            let hasDataToday = (total > 0); 
+            let htmlContent = ''; 
+
+            if (baseKey === 'thuy_luan') { 
+                let metric1Val = hasDataToday ? "345 ms" : "---"; 
+                let metric2Val = hasDataToday ? "95.0%" : "---"; 
+                if (total >= 2000) { rankName = "GIỎI"; feedback = "Tốc độ trích xuất không gian nhạy bén, phản xạ linh hoạt."; } 
+                else if (total >= 1000) { rankName = "TRUNG BÌNH"; feedback = "Khả năng mã hóa thị giác đạt mức ổn định."; } 
+                else { rankName = "KÉM"; feedback = "Trí nhớ ngắn hạn cần được kích hoạt thêm."; } 
+                if (!hasDataToday) rankName = "CHƯA TẬP"; 
+                
+                htmlContent = `<div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 1:</span> <span style="color: #ffd700;">${b1}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 2:</span> <span style="color: #ffd700;">${b2}</span></div><div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 4px; font-weight: bold;"><span>TỔNG ĐIỂM DATA:</span> <span style="color: #ffb700; font-size: 15px;">${total}</span></div></div><div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Tốc độ trích xuất:</span> <span style="color: #00e5ff; font-weight: bold;">${metric1Val}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>Độ chính xác:</span> <span style="color: #00e5ff; font-weight: bold;">${metric2Val}</span></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 6px; margin-bottom: 6px;"><span>CẤP ĐỘ:</span> <span style="color: #38ef7d; font-weight: bold;">${rankName}</span></div><div style="color: #ffb700; font-style: italic; font-size: 12.5px; line-height: 1.4;">"${hasDataToday ? feedback : "Hãy bắt đầu bài tập hôm nay."}"</div></div>`; 
+            } else if (baseKey === 'hoa_luan') { 
+                let msVal = hasDataToday ? ((localStorage.getItem('hoa_luan_avg_ms') || "523") + " ms") : "---"; 
+                let phatLuc1 = hasDataToday ? ((localStorage.getItem('hoa_luan_p1') || "7.1") + " lần / s") : "---"; 
+                let phatLuc2 = hasDataToday ? ((localStorage.getItem('hoa_luan_p2') || "14.3") + " lần / s") : "---"; 
+                if (total >= 6000) { rankName = "XUẤT SẮC"; feedback = "Tốc độ chớp nhoáng, khả năng đồng bộ tay - mắt cực kỳ xuất sắc."; } 
+                else if (total >= 3000) { rankName = "GIỎI"; feedback = "Tốc độ phản ứng vững vàng, đáp ứng tốt cường độ cao."; } 
+                else if (total >= 1000) { rankName = "TRUNG BÌNH"; feedback = "Phản xạ cơ bản ổn định."; } 
+                else { rankName = "KÉM"; feedback = "Cần rèn luyện thêm tốc độ phản xạ."; } 
+                if (!hasDataToday) rankName = "CHƯA TẬP"; 
+                
+                htmlContent = `<div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 1:</span> <span style="color: #ffd700;">${b1}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 2:</span> <span style="color: #ffd700;">${b2}</span></div><div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 4px; font-weight: bold;"><span>TỔNG ĐIỂM DATA:</span> <span style="color: #ffb700; font-size: 15px;">${total}</span></div></div><div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Tốc độ phản ứng:</span> <span style="color: #00e5ff; font-weight: bold;">${msVal}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Phát lực một tay:</span> <span style="color: #00e5ff; font-weight: bold;">${phatLuc1}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>Phát lực hai tay:</span> <span style="color: #00e5ff; font-weight: bold;">${phatLuc2}</span></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 6px; margin-bottom: 6px;"><span>CẤP ĐỘ:</span> <span style="color: #38ef7d; font-weight: bold;">${rankName}</span></div><div style="color: #ffb700; font-style: italic; font-size: 12.5px; line-height: 1.4;">"${hasDataToday ? feedback : "Hãy bắt đầu bài tập hôm nay."}"</div></div>`; 
+            } else if (baseKey === 'phong_luan') { 
+                let metric1Val = hasDataToday ? ((localStorage.getItem('phong_luan_max_focus') || "4.5") + "s") : "---"; 
+                let metric2Val = hasDataToday ? ((localStorage.getItem('phong_luan_avg_ms') || "410") + " ms") : "---"; 
+                if (total >= 6000) { rankName = "XUẤT SẮC"; feedback = "Tốc độ bắt dính quỹ đạo và phán đoán không gian sắc bén."; } 
+                else if (total >= 4000) { rankName = "GIỎI"; feedback = "Cảm giác không gian tốt, bám sát quỹ đạo ổn định."; } 
+                else if (total >= 2000) { rankName = "TRUNG BÌNH"; feedback = "Quỹ đạo bám dính ở mức khá."; } 
+                else { rankName = "KÉM"; feedback = "Chưa làm chủ được quỹ đạo di chuyển."; } 
+                if (!hasDataToday) rankName = "CHƯA TẬP"; 
+                
+                htmlContent = `<div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 1:</span> <span style="color: #ffd700;">${b1}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>BÀI 2:</span> <span style="color: #ffd700;">${b2}</span></div><div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 4px; font-weight: bold;"><span>TỔNG ĐIỂM DATA:</span> <span style="color: #ffb700; font-size: 15px;">${total}</span></div></div><div style="background: rgba(20,5,5,0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Chuỗi bám dính Max:</span> <span style="color: #00e5ff; font-weight: bold;">${metric1Val}</span></div><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>Tốc độ thích ứng:</span> <span style="color: #00e5ff; font-weight: bold;">${metric2Val}</span></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 6px; margin-bottom: 6px;"><span>CẤP ĐỘ:</span> <span style="color: #38ef7d; font-weight: bold;">${rankName}</span></div><div style="color: #ffb700; font-style: italic; font-size: 12.5px; line-height: 1.4;">"${hasDataToday ? feedback : "Hãy bắt đầu bài tập hôm nay."}"</div></div>`; 
+            } 
+
+            htmlContent += `<div style="background: rgba(30,10,10,0.9); border: 1px solid rgba(255,51,51,0.4); border-radius: 6px; padding: 8px 10px; text-align: center;"><span style="color: #ff3366; font-weight: bold; font-size: 11px; display: block; margin-bottom: 2px;">KỶ LỤC CAO NHẤT (BEST SCORE)</span><span style="color: #ffd700; font-size: 16px; font-weight: 900;">${bestScore} DATA</span></div>`; 
+            
+            document.getElementById('score-modal-content').innerHTML = htmlContent; 
+            document.getElementById('score-detail-modal').classList.add('active'); 
+        }
+
         function closeScoreModal() { playSound('warp-out'); document.getElementById('score-detail-modal').classList.remove('active'); }
         function showVoNgaModal() { playSound('coin'); if(navigator.vibrate) navigator.vibrate(30); document.getElementById('vonga-modal').classList.add('active'); }
         function closeVoNgaModal() { playSound('warp-out'); document.getElementById('vonga-modal').classList.remove('active'); }
@@ -930,7 +1024,7 @@
             }
             let lockedDots = JSON.parse(localStorage.getItem('kdrive_locked_dots') || '{}');
 
-            // 1. HỆ SỨC MẠNH (LINH HOẠT - CẬP NHẬT THEO THỰC TẾ)
+            // 1. HỆ SỨC MẠNH (LINH HOẠT)
             const physMetrics = [ 
                 { id: 'bar-hr', key: 'kdrive_live_hr', tgt: 'kdrive_target_hr', inv: false }, 
                 { id: 'bar-weight', key: 'kdrive_live_weight', tgt: 'kdrive_target_weight', inv: false }, 
@@ -968,7 +1062,7 @@
             else if (physAchievedCount < 6) dotSucManh.className = 'live-dot dot-yellow'; 
             else dotSucManh.className = 'live-dot dot-green';
 
-            // 2. HỆ TRÍ LỰC (KHÓA CHẾT ĐÈN TRONG NGÀY: ĐÃ CHƠI LÀ GIỮ NGUYÊN TRẠNG THÁI HOÀN THÀNH)
+            // 2. HỆ TRÍ LỰC (KHÓA CHẾT ĐÈN TRONG NGÀY)
             function syncCognitiveLocked(baseKey, bar1Id, bar2Id, dotId) { 
                 let total = parseFloat(localStorage.getItem(baseKey + '_score')) || 0; 
                 let isAlreadyDone = lockedDots[baseKey] === true;
@@ -978,7 +1072,7 @@
                 let b2 = document.getElementById(bar2Id);
 
                 if (total > 0 || isAlreadyDone) {
-                    lockedDots[baseKey] = true; // Khóa chết vĩnh viễn trong ngày
+                    lockedDots[baseKey] = true; 
                     if(b1) b1.style.width = '100%';
                     if(b2) b2.style.width = '100%';
                     if(dot) dot.className = 'live-dot dot-green';
