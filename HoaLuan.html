@@ -14,52 +14,79 @@
             --bg-obsidian: #0d0202;
             --cyan: #00e5ff;
             --mint: #38ef7d;    
-            --neon-pink: #ff00ff; 
-            --amber: #ffaa00;   
+            --neon-orange: #ff6600; 
+            --amber: #ffb700;   
             --crimson: #ff3333;
+            --text-dark: #fff5f0;
+            --accent-orange: #ff8800; 
+            --panel-bg: rgba(25, 8, 5, 0.65); /* Kính mờ cam đỏ huyền bí, nhìn thấu ảnh nền */
+            --panel-border: rgba(255, 183, 0, 0.55); /* Viền cam vàng rực rỡ */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; }
 
-        #sanctum-bg { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; background: radial-gradient(circle at 50% 30%, #2b0505 0%, #0a0101 80%); }
+        /* ẢNH NỀN HỎA LUÂN HIỆN MỜ CHẬM RÃI (2.5 GIÂY) */
+        #sanctum-bg { 
+            position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; 
+            background: url('https://github.com/happyk1900/Kai-Ripe/blob/main/nen%20hoa%20luan.png?raw=true') no-repeat center center; 
+            background-size: cover; 
+            opacity: 0;
+            transition: opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        #sanctum-bg.loaded { opacity: 1; }
+        #sanctum-bg.playing-mode { opacity: 0; pointer-events: none; transition: opacity 2.0s cubic-bezier(0.25, 1, 0.5, 1); }
+
+        /* MA TRẬN HẠT LƯỢNG TỬ LẤP LÁNH CHO HỎA LUÂN (CAM - TRẮNG) */
         #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
-        .dust-particle { position: absolute; border-radius: 50%; opacity: 0.5; animation: floatDust linear infinite; }
-        .dust-small { width: 1.5px; height: 1.5px; background: var(--crimson); box-shadow: 0 0 5px var(--crimson); }
-        @keyframes floatDust { 0% { transform: translateY(100vh); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.3; } 100% { transform: translateY(-20vh); opacity: 0; } }
+        .quantum-sparkle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 8px #ffffff, 0 0 15px #ffb700; opacity: 0; animation: sparkleFloat linear infinite; }
+        @keyframes sparkleFloat { 
+            0% { transform: translateY(105vh) scale(0.3); opacity: 0; } 
+            20% { opacity: 0.8; } 
+            50% { transform: translateY(50vh) translateX(15px) scale(1); opacity: 0.6; filter: brightness(1.5); } 
+            80% { opacity: 0.8; } 
+            100% { transform: translateY(-10vh) translateX(-15px) scale(0.2); opacity: 0; } 
+        }
 
         #task-arena { position: fixed; inset: 0; background: transparent; z-index: 120; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
-        .play-area { width: 100%; max-width: 360px; height: 100vh; height: 100dvh; background: transparent; position: relative; overflow: hidden; margin: 0 auto; transition: all 0.4s ease; }
-        .play-area.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important; max-width: none !important; margin: 0 !important; z-index: 9990 !important; }
+        .play-area { width: 100%; max-width: 360px; height: 100vh; height: 100dvh; background: transparent; position: relative; overflow: hidden; margin: 0 auto; transition: all 1.8s cubic-bezier(0.25, 1, 0.5, 1); }
+        .play-area.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important; max-width: none !important; margin: 0 !important; z-index: 9990 !important; background: var(--bg-obsidian) !important; }
 
-        .laser-beam-horizontal { position: fixed; top: 50%; left: 0; width: 100vw; height: 2px; background: #ffb700; box-shadow: 0 0 20px var(--crimson), 0 0 40px #ff6600; z-index: 99999; transform: scaleX(0); transform-origin: center; animation: laserShoot 0.3s forwards ease-out; pointer-events: none; }
+        .laser-beam-horizontal { position: fixed; top: 50%; left: 0; width: 100vw; height: 2px; background: #ffb700; box-shadow: 0 0 20px var(--crimson), 0 0 40px #ff6600; z-index: 99999; transform: scaleX(0); transform-origin: center; animation: laserShoot 1.0s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: none; }
         @keyframes laserShoot { 100% { transform: scaleX(1); height: 4px; } }
-        .laser-beam-horizontal.expand { animation: laserExpand 0.5s forwards cubic-bezier(0.7, 0, 1, 1); }
+        .laser-beam-horizontal.expand { animation: laserExpand 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         @keyframes laserExpand { 100% { height: 100vh; top: 0; opacity: 0; } }
 
-        #start-prompt-overlay { position: absolute; inset: 0; background: transparent; z-index: 110; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px 40px 15px; gap: 14px; transition: opacity 0.3s ease; }
-        #start-prompt-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none !important; display: none; }
+        /* POPUP BAY LÊN CHẬM RÃI (1.8 GIÂY) */
+        @keyframes cinematicPopupSuperSlow {
+            0% { opacity: 0; transform: translateY(90px) scale(0.90); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
 
-        .briefing-panel { background: rgba(25, 5, 5, 0.95); border: 2px solid #ff6600; border-radius: 8px; padding: 16px 18px; width: 100%; max-width: 330px; text-align: left; box-shadow: 0 0 20px rgba(255, 102, 0, 0.2); }
-        .briefing-title { color: var(--crimson) !important; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(255, 255, 255, 0.2); padding-bottom: 8px; letter-spacing: 1.5px; text-shadow: 0 0 8px rgba(255, 51, 51, 0.5); }
-        .briefing-target { color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; line-height: 1.6; font-weight: 500; }
-        .briefing-target b { color: #ffb700; font-weight: bold; }
+        #start-prompt-overlay { position: absolute; inset: 0; background: transparent; z-index: 110; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px 40px 15px; gap: 14px; opacity: 0; visibility: hidden; transition: opacity 1.5s ease; }
+        #start-prompt-overlay.active { opacity: 1; visibility: visible; }
+        #start-prompt-overlay > * { animation: cinematicPopupSuperSlow 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; opacity: 0; }
+
+        .briefing-panel { background: var(--panel-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px 26px; width: 100%; max-width: 330px; text-align: left; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); }
+        .briefing-title { color: var(--amber) !important; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(255, 255, 255, 0.2); padding-bottom: 8px; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(255,183,0,0.6); }
+        .briefing-target { color: #fff5f0; font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; line-height: 1.7; font-weight: 600; }
+        .briefing-target b { color: var(--amber); font-weight: bold; }
 
         .action-group { width: 100%; max-width: 330px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .start-action-box { width: 100%; background: rgba(255, 255, 255, 0.1); border: 2px solid #ffffff; padding: 14px; border-radius: 8px; color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 15px rgba(255, 255, 255, 0.15); text-align: center; transition: 0.2s; }
-        .start-action-box:active { background: #fff; color: #000; transform: scale(0.98); }
+        .start-action-box { width: 100%; background: var(--panel-bg); backdrop-filter: blur(16px); border: 1.5px solid var(--panel-border); padding: 14px; border-radius: 12px; color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 10px 25px rgba(255, 183, 0, 0.2); text-align: center; transition: 0.4s; }
+        .start-action-box:active { background: var(--amber); color: #0d0202; transform: scale(0.98); }
 
         /* THANH TRẠNG THÁI TRÊN */
         .game-top-bar {
             position: fixed; top: max(20px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; transition: opacity 0.3s;
+            display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; opacity: 0; transition: opacity 1.5s ease;
         }
-        .game-top-bar.hidden { opacity: 0; pointer-events: none !important; }
+        .game-top-bar.visible { opacity: 1; }
 
         .health-container { display: flex; gap: 4px; align-items: center; }
-        .health-bar { width: 14px; height: 6px; background: rgba(255,255,255,0.1); transform: skewX(-20deg); transition: all 0.3s ease; }
-        .health-bar.green.active { background: var(--mint); box-shadow: 0 0 6px var(--mint); }
-        .health-bar.pink.active { background: var(--neon-pink); box-shadow: 0 0 6px var(--neon-pink); }
+        .health-bar { width: 14px; height: 6px; background: rgba(255,255,255,0.15); transform: skewX(-20deg); transition: all 0.3s ease; }
+        .health-bar.green.active { background: var(--mint); box-shadow: 0 0 8px var(--mint); }
+        .health-bar.pink.active { background: var(--neon-pink); box-shadow: 0 0 8px var(--neon-pink); }
 
         .data-score-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; position: relative; }
         .data-score { font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; color: #fff; display: flex; align-items: center; }
@@ -67,7 +94,6 @@
 
         #hp-notification-area { position: absolute; top: 140%; left: 50%; transform: translateX(-50%); width: 220px; text-align: center; }
 
-        /* HIỆU ỨNG TRỢT HỆ SỐ NHÂN (X2, X3...) GIỐNG THÔNG BÁO NĂNG LƯỢNG */
         .tier-pop-notification {
             position: absolute; top: 180%; left: 50%; transform: translateX(-50%);
             font-family: 'Share Tech Mono', monospace; font-size: 24px; font-weight: 900;
@@ -82,88 +108,98 @@
             100% { opacity: 0; transform: translate(-50%, -15px) scale(1); }
         }
 
-        /* THANH ĐIỀU HƯỚNG DƯỚI (Nâng cao hơn viền đáy để thon gọn, cân đối) */
+        /* THANH ĐIỀU HƯỚNG DƯỚI (Nút Skip ở giữa để qua lại Bài 1 và Bài 2) */
         .game-bottom-bar {
             position: fixed; bottom: max(25px, calc(env(safe-area-inset-bottom) + 10px)); left: 0; width: 100vw;
-            border-top: 1px solid rgba(255, 51, 51, 0.3); padding: 15px 20px 0 20px;
+            border-top: 1px solid rgba(255, 183, 0, 0.4); padding: 15px 20px 0 20px;
             display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; z-index: 10000; pointer-events: auto;
-            background: linear-gradient(0deg, rgba(20,4,4,0.95) 0%, transparent 100%); transition: opacity 0.3s;
+            background: linear-gradient(0deg, rgba(20,4,4,0.95) 0%, transparent 100%); opacity: 0; transition: opacity 1.5s ease;
         }
-        .game-bottom-bar.hidden { opacity: 0; pointer-events: none !important; }
+        .game-bottom-bar.visible { opacity: 1; }
 
         .btn-action {
             width: 44px; height: 44px; background: rgba(20, 4, 4, 0.8); 
-            border: 1px solid var(--crimson); border-radius: 10px;
+            border: 1px solid rgba(255, 183, 0, 0.7); border-radius: 12px;
             display: flex; justify-content: center; align-items: center; cursor: pointer;
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .btn-action:active { transform: scale(0.9); }
         
-        .btn-back { justify-self: start; color: var(--crimson); font-family: 'Share Tech Mono', monospace; font-size: 24px; font-weight: bold; box-shadow: 0 0 10px rgba(255, 51, 51, 0.2); padding-bottom: 2px; padding-right: 2px; }
-        .btn-back:active { background: rgba(255, 51, 51, 0.25); box-shadow: 0 0 20px rgba(255, 51, 51, 0.6); }
+        .btn-back { justify-self: start; color: var(--amber); font-family: 'Share Tech Mono', monospace; font-size: 24px; font-weight: bold; box-shadow: 0 0 10px rgba(255,183,0,0.3); padding-bottom: 2px; padding-right: 2px; }
+        .btn-back:active { background: rgba(255, 183, 0, 0.25); box-shadow: 0 0 20px rgba(255, 183, 0, 0.6); }
 
-        .btn-skip { justify-self: center; border-color: rgba(255, 183, 0, 0.6); color: #ffb700; font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: bold; box-shadow: 0 0 10px rgba(255, 183, 0, 0.2); }
+        .btn-skip { justify-self: center; border-color: rgba(255, 183, 0, 0.7); color: var(--amber); font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: bold; box-shadow: 0 0 10px rgba(255,183,0,0.3); }
         .btn-skip:active { background: rgba(255, 183, 0, 0.25); box-shadow: 0 0 20px rgba(255, 183, 0, 0.6); }
 
-        .btn-pause { justify-self: end; border-color: rgba(255, 170, 0, 0.5); box-shadow: 0 0 10px rgba(255, 170, 0, 0.15); }
+        .btn-pause { justify-self: end; border-color: rgba(255, 170, 0, 0.6); box-shadow: 0 0 10px rgba(255, 170, 0, 0.2); }
         .btn-pause::before, .btn-pause::after { content: ''; width: 4px; height: 16px; background: var(--amber); margin: 0 3px; border-radius: 2px; box-shadow: 0 0 5px var(--amber); }
-        .btn-pause:active { background: rgba(255, 170, 0, 0.2); box-shadow: 0 0 20px rgba(255, 170, 0, 0.5); }
+        .btn-pause:active { background: rgba(255, 170, 0, 0.3); box-shadow: 0 0 20px rgba(255, 170, 0, 0.6); }
 
-        #pause-menu-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; backdrop-filter: blur(5px); }
+        #pause-menu-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; backdrop-filter: blur(10px); }
         #pause-menu-overlay.active { opacity: 1; pointer-events: auto; }
-        .pause-box { width: 85%; max-width: 300px; background: rgba(25, 5, 5, 0.95); border: 1px solid rgba(255,51,51,0.5); border-radius: 12px; padding: 25px 20px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
-        .pause-title { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: var(--crimson); margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
-        .pause-btn { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
+        .pause-box { width: 85%; max-width: 300px; background: rgba(25, 5, 5, 0.95); border: 1px solid rgba(255,183,0,0.6); border-radius: 14px; padding: 25px 20px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,0.8); animation: cinematicPopupSuperSlow 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .pause-title { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: var(--amber); margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
+        .pause-btn { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 10px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
         .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         .pause-btn.exit { background: rgba(255, 51, 51, 0.2); border: 1px solid var(--crimson); color: var(--crimson); margin-bottom: 0; }
 
-        #freeze-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 200000; display: none; align-items: center; justify-content: center; }
+        /* KHOẢNH KHẮC KẾT THÚC: CHỮ ĐEN RƠI XUỐNG VỚI VIỀN CAM VÀNG PHÁT SÁNG TRÊN ẢNH NỀN HỎA LUÂN */
+        #freeze-overlay { position: fixed; inset: 0; background: transparent; z-index: 200000; display: none; align-items: center; justify-content: center; pointer-events: none; }
         #freeze-overlay.active { display: flex; }
-        .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 40px; font-weight: 900; color: var(--crimson); letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 20px var(--crimson); }
+        @keyframes textFallSlow {
+            0% { opacity: 0; transform: translateY(-70px) scale(1.1); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 46px; font-weight: 900; color: #0d0202; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 15px rgba(255, 255, 255, 0.95), 0 0 5px rgba(255, 255, 255, 0.8), 2px 2px 0px rgba(255,183,0,0.9); background: transparent; padding: 0; border: none; box-shadow: none; animation: textFallSlow 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 
-        #result-overlay { position: absolute; inset: 0; background: rgba(20, 4, 4, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999999; gap: 8px; border-radius: 12px; padding: 12px; }
-        #result-overlay.active { display: flex; }
-        .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: var(--crimson); letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,51,51,0.5); }
-        .prestige-panel { width: 92%; max-width: 310px; background: rgba(30, 8, 8, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+        /* BẢNG KẾT QUẢ TỪNG BÀI - KÍNH MỜ CAM ĐỎ, TRỰC QUAN (BAY LÊN CHẬM RÃI 1.8 GIÂY) */
+        #result-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 12px; padding: 12px; opacity: 0; transition: opacity 1.2s ease; }
+        #result-overlay.active { display: flex; opacity: 1; }
+        #result-overlay.active > * { animation: cinematicPopupSuperSlow 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards; opacity: 0; }
+
+        .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #ffffff; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 15px rgba(255,183,0,0.8); }
+        .prestige-panel { width: 92%; max-width: 310px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); }
         .prestige-row { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; width: 100%; }
-        .prestige-label { color: #ffffff; letter-spacing: 1px; flex: 1; text-align: left; text-transform: uppercase; font-weight: bold; }
+        .prestige-label { color: #fff5f0; letter-spacing: 1px; flex: 1; text-align: left; text-transform: uppercase; font-weight: bold; }
         .prestige-val-gold { color: #ffb700; font-weight: bold; font-size: 13px; text-align: right; min-width: 80px; }
         .prestige-val-pink { color: var(--crimson); font-weight: bold; font-size: 13px; text-align: right; min-width: 80px; }
-        .prestige-total-box { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; padding-top: 2px; width: 100%; border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 2px; }
+        .prestige-total-box { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; padding-top: 4px; width: 100%; border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 2px; }
         .prestige-total-label { color: #fff; font-size: 12px; font-weight: 900; letter-spacing: 1px; flex: 1; text-align: left; }
         .prestige-total-num { font-size: 26px; color: #ffb700; font-weight: 900; line-height: 1; text-align: right; min-width: 80px; }
 
-        .bio-metrics-box { width: 92%; max-width: 310px; background: rgba(30, 8, 8, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+        .bio-metrics-box { width: 92%; max-width: 310px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
         .metric-card-row { display: flex; flex-direction: column; gap: 4px; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 8px; margin-bottom: 4px; width: 100%; }
+        .metric-card-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .metric-top-line { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; width: 100%; }
-        .metric-top-line span:first-child { color: #ffffff; text-align: left; flex: 1; font-weight: bold; }
+        .metric-top-line span:first-child { color: #fff5f0; text-align: left; flex: 1; font-weight: bold; }
         .metric-top-line span:last-child { color: #ffb700; text-align: right; min-width: 100px; font-weight: bold; }
         .metric-bot-line { display: flex; justify-content: flex-start; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: bold; color: #ffb700; width: 100%; }
 
         .rank-icon-img { width: 22px; height: 22px; vertical-align: middle; margin-right: 6px; filter: drop-shadow(0 0 3px rgba(255,255,255,0.3)); }
 
-        .result-btn-row { display: flex; gap: 10px; width: 88%; max-width: 280px; margin-top: 10px; }
-        .result-action-btn { flex: 1; padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; }
-        #btn-replay { background: transparent; border: 1px solid #ffb700; color: #ffb700; }
+        .result-btn-row { display: flex; gap: 10px; width: 92%; max-width: 310px; margin-top: 10px; }
+        .result-action-btn { flex: 1; padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; border-radius: 12px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; backdrop-filter: blur(8px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        #btn-replay { background: var(--panel-bg); border: 1.5px solid #ffb700; color: #ffb700; }
         #btn-replay:active { background: #ffb700; color: #fff; }
-        #btn-next { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
-        #btn-next:active { background: #fff; color: #000; }
+        #btn-next { background: var(--panel-bg); border: 1.5px solid var(--amber); color: var(--amber); }
+        #btn-next:active { background: var(--amber); color: #000; }
 
-        /* BÁO CÁO TỔNG HỢP CUỐI CÙNG */
-        #final-summary-overlay { position: absolute; inset: 0; background: var(--bg-obsidian); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999999; gap: 8px; padding: 12px; }
-        #final-summary-overlay.active { display: flex; }
-        .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: var(--crimson); font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px var(--crimson); }
-        
-        .stat-box { width: 92%; max-width: 310px; background: rgba(30, 8, 8, 0.95); border: 1px solid rgba(255, 255, 255, 0.2); padding: 10px 14px; border-radius: 8px; }
-        .stat-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #ffffff; width: 100%; font-weight: bold; }
-        .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
-        .stat-line span:last-child { text-align: right; min-width: 100px; color: #ffb700; }
+        /* BÁO CÁO TỔNG HỢP CUỐI CÙNG (BAY LÊN CHẬM RÃI 1.8 GIÂY) */
+        #final-summary-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 12px; opacity: 0; transition: opacity 1.2s ease; }
+        #final-summary-overlay.active { display: flex; opacity: 1; }
+        #final-summary-overlay.active > * { animation: cinematicPopupSuperSlow 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards; opacity: 0; }
 
-        .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: rgba(255, 51, 51, 0.2); border: 1.5px solid var(--crimson); border-radius: 8px; color: var(--crimson); font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 5px; }
-        .final-btn-exit:hover { background: #ff3366; color: #fff; }
+        .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #ffffff; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,183,0,0.8); }
+        .stat-box { width: 92%; max-width: 310px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); padding: 22px; border-radius: 18px; box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
+        .stat-line { display: flex; justify-content: space-between; margin-bottom: 6px; font-family: 'Share Tech Mono', monospace; font-size: 13px; color: #fff5f0; width: 100%; font-weight: bold; }
+        .stat-line span:first-child { text-align: left; flex: 1; color: #fff5f0; }
+        .stat-line span:last-child { text-align: right; min-width: 100px; color: var(--amber); }
 
-        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: #ffb700; font-style: italic; text-align: center; margin-top: 6px; line-height: 1.4; font-weight: 600; text-shadow: 0 0 10px rgba(255,183,0,0.4); max-width: 310px; }
+        .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: var(--panel-bg); backdrop-filter: blur(8px); border: 1.5px solid var(--amber); border-radius: 12px; color: var(--amber); font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 5px; box-shadow: 0 8px 20px rgba(255,183,0,0.2); }
+        .final-btn-exit:hover { background: var(--amber); color: #0d0202; }
+
+        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: var(--amber); font-style: italic; text-align: center; margin-top: 6px; line-height: 1.4; font-weight: 600; max-width: 310px; text-shadow: 0 0 10px rgba(255,183,0,0.3); }
 
         .orb { position: absolute; border-radius: 50%; cursor: crosshair; display: flex; justify-content: center; align-items: center; }
         .orb-fire { width: 56px; height: 56px; background: radial-gradient(circle, #ffdf70 10%, #ffb700 40%, #ff3333 80%); box-shadow: 0 0 18px #ff3333; z-index: 10; }
@@ -176,7 +212,6 @@
         .blackout-bg.active { opacity: 1; pointer-events: auto; }
 
         .burst-container { position: fixed; width: 100vw; height: 100dvh; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 99999; pointer-events: none; }
-        
         .burst-orb-wrapper { position: relative; width: 92px; height: 92px; display: flex; align-items: center; justify-content: center; }
         .stage1-energy-core { width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle, #ffffff 0%, #ffdf70 30%, #ff3333 70%, #cc0000 100%); box-shadow: 0 0 35px #ff3333, 0 0 70px #ffb700; cursor: pointer; pointer-events: auto; position: relative; z-index: 100005; outline: none; display: flex; align-items: center; justify-content: center; text-align: center; }
         
@@ -214,7 +249,7 @@
         .floating-cps { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-family: 'Share Tech Mono', monospace; font-size: 34px; font-weight: 900; color: #ffb700; text-shadow: 0 0 20px #ff3333; pointer-events: none; z-index: 100005; white-space: nowrap; width: 100%; text-align: center; animation: popCps 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes popCps { 0% { opacity: 0; transform: translate(-50%, -30%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -80%) scale(1.3); } }
 
-        .status-notification { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 900; color: #00ffcc; text-align: center; text-shadow: 0 0 10px #00ffcc; z-index: 999999; pointer-events: none; white-space: nowrap; animation: topAlertAnim 1.2s ease-out forwards; }
+        .status-notification { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 900; color: #ffb700; text-align: center; text-shadow: 0 0 10px #ffb700; z-index: 999999; pointer-events: none; white-space: nowrap; animation: topAlertAnim 1.2s ease-out forwards; }
         @keyframes topAlertAnim { 0% { opacity: 0; transform: translate(-50%, -10px); } 15% { opacity: 1; transform: translate(-50%, 0); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -15px); } }
 
     </style>
@@ -228,7 +263,7 @@
         <div class="play-area" id="play-area">
 
             <!-- TẦNG TRÊN: HIỂN THỊ MÁU VÀ ĐIỂM -->
-            <div id="game-top-bar" class="game-top-bar hidden">
+            <div id="game-top-bar" class="game-top-bar">
                 <!-- 5 Máu Xanh Gốc bên trái -->
                 <div class="health-container">
                     <div class="health-bar green active" id="hp-g-1"></div>
@@ -238,13 +273,13 @@
                     <div class="health-bar green active" id="hp-g-5"></div>
                 </div>
 
-                <!-- Điểm DATA ở giữa (Đã bỏ X1 cố định, nhường chỗ cho hiệu ứng trồi ra khi lên X2+) -->
+                <!-- Điểm DATA ở giữa -->
                 <div class="data-score-wrap">
                     <div class="data-score">DATA: <span id="boo-points">0</span></div>
                     <div id="hp-notification-area"></div>
                 </div>
 
-                <!-- 5 Máu Hồng Thưởng bên phải -->
+                <!-- 5 Máu Đỏ Thưởng bên phải -->
                 <div class="health-container">
                     <div class="health-bar pink" id="hp-p-1"></div>
                     <div class="health-bar pink" id="hp-p-2"></div>
@@ -254,15 +289,15 @@
                 </div>
             </div>
 
-            <!-- TẦNG DƯỚI: ĐIỀU HƯỚNG CẮT NGANG (Thế chân vạc 3 nút, lơ lửng cân đối cách đáy) -->
-            <div id="game-bottom-bar" class="game-bottom-bar hidden">
+            <!-- TẦNG DƯỚI: ĐIỀU HƯỚNG CẮT NGANG (Nút Skip ở giữa để qua lại Bài 1 và Bài 2) -->
+            <div id="game-bottom-bar" class="game-bottom-bar">
                 <button class="btn-action btn-back" onclick="confirmExitToLobby()">⟨</button>
-                <button class="btn-action btn-skip" id="btn-skip-stage" onclick="skipToNextStage()" title="Chuyển bài nhanh">⏭</button>
+                <button class="btn-action btn-skip" id="btn-skip-stage" onclick="skipToNextStage()" title="Chuyển bài">⏭</button>
                 <button class="btn-action btn-pause" onclick="pauseGame()"></button>
             </div>
 
             <!-- SẢNH CHỜ -->
-            <div id="start-prompt-overlay" class="hidden">
+            <div id="start-prompt-overlay">
                 <div class="briefing-panel">
                     <div class="briefing-title" id="briefing-title"></div>
                     <div class="briefing-target" id="briefing-target"></div>
@@ -296,7 +331,6 @@
                         <span class="prestige-label">TỐC ĐỘ TAY:</span>
                         <span class="prestige-val-pink" id="res-pink-display">0</span>
                     </div>
-                    <div style="width: 100%; height: 1px; background: dashed rgba(255,255,255,0.2); margin: 2px 0;"></div>
                     <div class="prestige-total-box">
                         <span class="prestige-total-label">ĐIỂM DATA:</span>
                         <span class="prestige-total-num" id="final-score-display">0</span>
@@ -315,7 +349,7 @@
                     </div>
                     <div class="metric-card-row">
                         <div class="metric-top-line">
-                            <span>Tốc độ tay (7s)</span>
+                            <span>Tốc độ tay</span>
                             <span id="bio-cps-val">0 lần / giây</span>
                         </div>
                         <div class="metric-bot-line">
@@ -330,7 +364,7 @@
                 </div>
             </div>
 
-            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG VỚI ĐÁNH GIÁ CHUYÊN SÂU KHOA HỌC -->
+            <!-- BÁO CÁO TỔNG HỢP CUỐI CÙNG -->
             <div id="final-summary-overlay">
                 <div class="final-header">TỔNG KẾT HỎA LUÂN</div>
                 
@@ -338,11 +372,11 @@
                     <div class="stat-line"><span>BÀI 1:</span> <span class="stat-val" id="sum-score-1">0</span></div>
                     <div class="stat-line"><span>BÀI 2:</span> <span class="stat-val" id="sum-score-2">0</span></div>
                     <div class="stat-line" style="margin-top:4px; padding-top:4px; border-top:1px dashed rgba(255,255,255,0.3);">
-                        <span style="font-weight: 900; color: #fff;">TỔNG ĐIỂM DATA:</span> <span class="stat-val" id="sum-score-total" style="font-weight:900; color:#ffb700; font-size:15px;">0</span>
+                        <span style="font-weight: 900; color: #fff5f0;">TỔNG ĐIỂM DATA:</span> <span class="stat-val" id="sum-score-total" style="font-weight:900; color:#ffb700; font-size:15px;">0</span>
                     </div>
                 </div>
 
-                <div class="bio-metrics-box" style="padding: 10px 14px; gap: 6px;">
+                <div class="bio-metrics-box" style="padding: 14px; gap: 8px;">
                     <div class="metric-card-row" style="padding-bottom: 6px; margin-bottom: 2px;">
                         <div class="metric-top-line">
                             <span>Tốc độ trung bình</span>
@@ -469,7 +503,27 @@
         }
         function triggerVibration(pattern) { try { if (navigator.vibrate) { navigator.vibrate(pattern); } } catch(e) {} }
 
-        window.onload = () => { openArena('1'); };
+        window.onload = () => { 
+            openArena('1'); 
+            initSparkleParticles();
+        };
+
+        function initSparkleParticles() {
+            let container = document.getElementById('dust-container');
+            if(!container) return;
+            for(let i=0; i<35; i++) {
+                let p = document.createElement('div');
+                p.className = 'quantum-sparkle';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = Math.random() * 100 + 'vh';
+                let size = Math.random() * 3 + 2;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.animationDuration = (Math.random() * 6 + 4) + 's';
+                p.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(p);
+            }
+        }
 
         function updateHpDisplay() {
             let hp = Math.min(10, Math.max(0, stabilityHP));
@@ -487,6 +541,10 @@
             isPausedForStart = true; bestCps = 0; reactionTimes = [];
             nextBurstMilestone = 500; burstCount = 0; lastAnnouncedTier = 1;
 
+            let bg = document.getElementById('sanctum-bg');
+            bg.classList.remove('playing-mode');
+            setTimeout(() => bg.classList.add('loaded'), 150);
+
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
             playArea.querySelectorAll('.orb, .child-projectile, .core-reactor, .blackout-bg, .beam, .explosion, .floating-ms, .floating-cps, .burst-btn-diagonal').forEach(o => o.remove());
@@ -498,28 +556,41 @@
             
             let bTitle = "", bTarget = "";
             if (id === '1') {
-                bTitle = "BÀI 1"; bTarget = "ĐO LƯỜNG PHẢN XẠ<br><br>Chạm để triệt tiêu mọi tụ điểm năng lượng xuất hiện.<br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Không bỏ lỡ hạt nào!";
+                bTitle = "BÀI 1"; bTarget = "ĐO LƯỜNG PHẢN XẠ<br><br>Chạm để triệt tiêu mọi tụ điểm năng lượng xuất hiện.<br><span style='color:var(--amber); font-weight:bold;'>MỤC TIÊU:</span> Không bỏ lỡ hạt nào!";
             } else if (id === '2') {
-                bTitle = "BÀI 2"; bTarget = "PHẢN XẠ CHỌN LỌC<br><br>Nhận diện Hạt Vàng/Đỏ giữa ma trận nhiễu.<br><span style='color:#ffb700; font-weight:bold;'>MỤC TIÊU:</span> Xuất hiện ngẫu nhiên tuần tự, tối đa 3-4 hạt trên sân. Bấm diệt Hạt Vàng/Đỏ. Bỏ qua hạt khác!";
+                bTitle = "BÀI 2"; bTarget = "PHẢN XẠ CHỌN LỌC<br><br>Nhận diện Hạt Vàng/Đỏ giữa ma trận nhiễu.<br><span style='color:var(--amber); font-weight:bold;'>MỤC TIÊU:</span> Xuất hiện ngẫu nhiên tuần tự, tối đa 3-4 hạt trên sân. Bấm diệt Hạt Vàng/Đỏ. Bỏ qua hạt khác!";
             }
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
-            document.getElementById('game-top-bar').classList.add('hidden');
-            document.getElementById('game-bottom-bar').classList.add('hidden');
-            document.getElementById('start-prompt-overlay').classList.remove('hidden');
+            document.getElementById('game-top-bar').classList.remove('visible');
+            document.getElementById('game-bottom-bar').classList.remove('visible');
+            
+            let promptOverlay = document.getElementById('start-prompt-overlay');
+            promptOverlay.classList.remove('active');
+            setTimeout(() => {
+                promptOverlay.classList.remove('hidden');
+                setTimeout(() => promptOverlay.classList.add('active'), 200);
+            }, 500);
         }
 
         function triggerStartGame() {
             initAudio(); playSound('coin');
-            document.getElementById('start-prompt-overlay').classList.add('hidden'); 
+            let promptOverlay = document.getElementById('start-prompt-overlay');
+            promptOverlay.classList.remove('active');
+            setTimeout(() => promptOverlay.classList.add('hidden'), 1200);
+            
+            let bg = document.getElementById('sanctum-bg');
+            bg.classList.remove('loaded');
+            bg.classList.add('playing-mode');
+
             playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
-            setTimeout(() => { let playArea = document.getElementById('play-area'); playArea.classList.add('fullscreen-mode'); laser.classList.add('expand'); playSound('boom', 0.8); triggerVibration([200, 100, 300]); }, 300);
+            setTimeout(() => { let playArea = document.getElementById('play-area'); playArea.classList.add('fullscreen-mode'); laser.classList.add('expand'); playSound('boom', 0.8); triggerVibration([200, 100, 300]); }, 600);
             setTimeout(() => { 
                 laser.remove(); isPausedForStart = false; 
-                document.getElementById('game-top-bar').classList.remove('hidden'); 
-                document.getElementById('game-bottom-bar').classList.remove('hidden'); 
+                document.getElementById('game-top-bar').classList.add('visible'); 
+                document.getElementById('game-bottom-bar').classList.add('visible'); 
                 startArena(); 
-            }, 800);
+            }, 1500);
         }
 
         function pauseGame() { if(!isPlaying || isPausedForStart) return; playSound('error'); isPausedForStart = true; clearTimeout(spawnTimer); if(burstTimer) clearTimeout(burstTimer); document.getElementById('pause-menu-overlay').classList.add('active'); }
@@ -528,6 +599,7 @@
         function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
         function closeArena() { window.location.href = 'LucChien.html'; }
 
+        /* NÚT CHUYỂN BÀI QUA LẠI GIỮA BÀI 1 VÀ BÀI 2 */
         function skipToNextStage() {
             playSound('coin');
             isPlaying = false; isPausedForStart = true; clearTimeout(spawnTimer); if(burstTimer) clearTimeout(burstTimer);
@@ -541,7 +613,7 @@
             } else {
                 sessionScoreG2 = Math.round(aScore); 
                 localStorage.setItem('hoa_luan_bai2_score', sessionScoreG2);
-                showFinalSummary();
+                openArena('1');
             }
         }
 
@@ -572,7 +644,7 @@
 
             if (currentTier > lastAnnouncedTier) {
                 lastAnnouncedTier = currentTier;
-                showTierPopAlert(currentTier); // Trồi ra hiệu ứng chữ X2, X3... rồi biến mất
+                showTierPopAlert(currentTier);
                 playSound('ready', 1.5);
             }
 
@@ -777,6 +849,10 @@
 
         function finishGame() {
             isPlaying = false; isPausedForStart = true; clearTimeout(spawnTimer); if(burstTimer) clearTimeout(burstTimer);
+
+            let bg = document.getElementById('sanctum-bg');
+            bg.classList.remove('playing-mode');
+            setTimeout(() => bg.classList.add('loaded'), 400); // Đợi ảnh nền sáng rõ trước
             
             let avgMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
             if (aScore < 1000) {
@@ -789,40 +865,45 @@
             else if(cGame === '2') { sessionScoreG2 = Math.round(aScore); localStorage.setItem('hoa_luan_bai2_score', sessionScoreG2); }
             localStorage.setItem('hoa_luan_score', sessionScoreG1 + sessionScoreG2);
 
-            document.getElementById('game-top-bar').classList.add('hidden');
-            document.getElementById('game-bottom-bar').classList.add('hidden');
+            document.getElementById('game-top-bar').classList.remove('visible');
+            document.getElementById('game-bottom-bar').classList.remove('visible');
             let playArea = document.getElementById('play-area'); playArea.classList.remove('fullscreen-mode');
             playArea.querySelectorAll('.orb, .child-projectile, .core-reactor, .blackout-bg, .beam, .explosion, .floating-ms, .floating-cps, .float-score, .burst-btn-diagonal').forEach(o => o.remove());
 
-            playSound('error'); 
+            playSound('error'); document.getElementById('freeze-overlay').classList.add('active');
 
-            let romanName = (cGame === '1') ? 'KẾT QUẢ BÀI 1' : 'KẾT QUẢ BÀI 2';
-            document.getElementById('stage-badge-title').innerText = romanName;
+            // Chờ chữ KẾT THÚC rơi xuống thong thả rồi mới hiện bảng kết quả
+            setTimeout(() => {
+                document.getElementById('freeze-overlay').classList.remove('active');
+                
+                let romanName = (cGame === '1') ? 'KẾT QUẢ BÀI 1' : 'KẾT QUẢ BÀI 2';
+                document.getElementById('stage-badge-title').innerText = romanName;
 
-            document.getElementById('res-gold-display').innerText = Math.round(reflexScore);
-            document.getElementById('res-pink-display').innerText = Math.round(burstScore);
-            document.getElementById('final-score-display').innerText = Math.round(aScore);
-            
-            document.getElementById('bio-avg-val').innerText = (aScore > 0 && avgMs > 0) ? avgMs + " mili-giây" : "Chưa đủ Data";
-            document.getElementById('bio-cps-val').innerText = (aScore > 0 && bestCps > 0) ? bestCps + " lần / giây" : "Chưa đủ Data";
+                document.getElementById('res-gold-display').innerText = Math.round(reflexScore);
+                document.getElementById('res-pink-display').innerText = Math.round(burstScore);
+                document.getElementById('final-score-display').innerText = Math.round(aScore);
+                
+                document.getElementById('bio-avg-val').innerText = (aScore > 0 && avgMs > 0) ? avgMs + " mili-giây" : "Chưa đủ Data";
+                document.getElementById('bio-cps-val').innerText = (aScore > 0 && bestCps > 0) ? bestCps + " lần / giây" : "Chưa đủ Data";
 
-            let reflexRankName = getReflexRankByMs(avgMs);
-            let burstRankName = getBurstRankByCps(bestCps);
+                let reflexRankName = getReflexRankByMs(avgMs);
+                let burstRankName = getBurstRankByCps(bestCps);
 
-            document.getElementById('bio-rank-badge-1').innerHTML = getRankHTML(reflexRankName);
-            document.getElementById('bio-rank-badge-2').innerHTML = getRankHTML(burstRankName);
+                document.getElementById('bio-rank-badge-1').innerHTML = getRankHTML(reflexRankName);
+                document.getElementById('bio-rank-badge-2').innerHTML = getRankHTML(burstRankName);
 
-            let btnNext = document.getElementById('btn-next');
-            if (cGame === '1') { 
-                btnNext.innerText = "BÀI 2"; 
-                btnNext.onclick = proceedNextStage; 
-            } else { 
-                btnNext.innerText = "TỔNG KẾT"; 
-                btnNext.onclick = showFinalSummary; 
-            }
+                let btnNext = document.getElementById('btn-next');
+                if (cGame === '1') { 
+                    btnNext.innerText = "BÀI 2"; 
+                    btnNext.onclick = proceedNextStage; 
+                } else { 
+                    btnNext.innerText = "TỔNG KẾT"; 
+                    btnNext.onclick = showFinalSummary; 
+                }
 
-            document.getElementById('result-overlay').classList.add('active');
-            playSound('coin');
+                document.getElementById('result-overlay').classList.add('active');
+                playSound('coin');
+            }, 1800);
         }
 
         function retryCurrentStage() { 
@@ -840,6 +921,10 @@
         }
 
         function showFinalSummary() {
+            let bg = document.getElementById('sanctum-bg');
+            bg.classList.remove('playing-mode');
+            setTimeout(() => bg.classList.add('loaded'), 400);
+
             playSound('coin'); 
             document.getElementById('result-overlay').classList.remove('active');
             let totalSessionScore = sessionScoreG1 + sessionScoreG2;
