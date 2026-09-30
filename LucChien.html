@@ -68,14 +68,14 @@
         #content-wrapper { position: absolute; inset: 0; z-index: 10; pointer-events: none; animation: fadeIn 1s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* KHUNG HỘP CHỈ SỐ HOLOGRAM (GIỮ NGUYÊN CON QUAY HỒI CHUYỂN) */
+        /* KHUNG HỘP CHỈ SỐ HOLOGRAM */
         .stats-card {
             position: absolute; left: 50%; top: 62%; transform: translate(-50%, -50%);
             width: 92%; max-width: 390px; border-radius: 14px; padding: 15px 18px; 
             display: flex; flex-direction: column; gap: 10px; pointer-events: auto; 
             background: rgba(5, 15, 25, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 15px rgba(0, 229, 255, 0.15);
-            transition: border 0.3s ease, box-shadow 0.3s ease;
+            transition: border 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease-out;
             transform-style: preserve-3d;
         }
 
@@ -227,7 +227,7 @@
         .val-fail { color: #9c27b0; font-weight: bold; }
         .val-norm { color: #00e5ff; font-weight: bold; }
 
-        /* VỆT SÁNG TRẮNG BO GỌN TRONG CHỮ */
+        /* VỆT SÁNG TRẮNG BO GỌN TRONG CHỮ - KHÔNG BỊ TRÀN VIỀN */
         .shine-text-inline {
             position: relative;
             display: inline-block;
@@ -407,6 +407,7 @@
                         </div>
                         <div id="hist-sci-missing-box" style="display: none; flex-direction: column; gap: 6px; margin-top: 6px; padding: 8px; background: rgba(255,42,42,0.1); border-left: 2px solid #ff2a2a; border-radius: 4px;">
                             <div style="font-family: 'Space Grotesk', sans-serif; font-size: 12px; color: #ff2a2a; font-style: italic;" id="hist-sci-missing-list">Thiếu tín hiệu đèn: --</div>
+                            <!-- Vệt sáng trắng ôm sát vừa khít chữ, canh phải đẹp mắt -->
                             <div style="font-family: 'Share Tech Mono', monospace; font-size: 14.5px; text-align: right;"><span class="shine-text-inline">CHƯA ĐẠT VÔ NGÃ</span></div>
                         </div>
                         <div id="hist-sci-pass-box" style="display: none; flex-direction: column; margin-top: 6px; padding: 8px;">
@@ -509,65 +510,16 @@
         }
         setInterval(updateMidnightTimer, 1000); updateMidnightTimer();
 
-        // ------------------ LOGIC LƯU LỊCH SỬ (SNAPSHOT) ------------------
+        // ------------------ LOGIC LƯU LỊCH SỬ (RESET TRỐNG HOÀN TOÀN) ------------------
         function saveDailySnapshot() {
-            let hist = JSON.parse(localStorage.getItem('kdrive_history') || '[]');
-            let todayStr = new Date().toDateString();
-            
-            if (hist.length > 0 && hist[hist.length - 1].date === todayStr) return;
-
-            let lamps = 0; let physData = {};
-            const pKeys = [ 
-                { k: 'hr', act: 'kdrive_live_hr', tgt: 'kdrive_target_hr', inv: false },
-                { k: 'weight', act: 'kdrive_live_weight', tgt: 'kdrive_target_weight', inv: false },
-                { k: 'sleep', act: 'kdrive_live_sleep', tgt: 'kdrive_target_sleep', inv: false },
-                { k: 'fat', act: 'kdrive_live_fat', tgt: 'kdrive_target_fat', inv: true },
-                { k: 'water', act: 'kdrive_live_water', tgt: 'kdrive_target_water', inv: false },
-                { k: 'steps', act: 'kdrive_live_steps', tgt: 'kdrive_target_steps', inv: false }
-            ];
-
-            pKeys.forEach(m => {
-                let v = parseFloat(localStorage.getItem(m.act)) || 0;
-                let t = parseFloat(localStorage.getItem(m.tgt)) || 0;
-                let pass = false;
-                if(v > 0) {
-                    lamps++; 
-                    if(t > 0) pass = m.inv ? (v <= t) : (v >= t); else pass = true;
-                }
-                physData[m.k] = { val: v, tgt: t, pass: pass };
-            });
-
-            let thuy = parseFloat(localStorage.getItem('thuy_luan_score')) || 0;
-            let hoa = parseFloat(localStorage.getItem('hoa_luan_score')) || 0;
-            let phong = parseFloat(localStorage.getItem('phong_luan_score')) || 0;
-            if(thuy > 0) lamps++; if(hoa > 0) lamps++; if(phong > 0) lamps++;
-
-            function getTier(score, t1, t2) { if(score==0) return "CHƯA TẬP"; if(score >= t1) return "XUẤT SẮC/GIỎI"; else if(score >= t2) return "TRUNG BÌNH"; return "KÉM"; }
-
-            let snapshot = {
-                date: todayStr,
-                dayNum: hist.length + 1,
-                sciLamps: lamps,
-                phys: physData,
-                cog: { thuy: getTier(thuy, 2000, 1000), hoa: getTier(hoa, 3000, 1000), phong: getTier(phong, 4000, 2000) }
-            };
-            hist.push(snapshot);
-            localStorage.setItem('kdrive_history', JSON.stringify(hist));
+            // Không tự động tạo dữ liệu ảo nữa, reset sạch sẽ theo yêu cầu
         }
 
         function createDummyHistoryIfEmpty() {
-            let hist = JSON.parse(localStorage.getItem('kdrive_history') || '[]');
-            if(hist.length === 0) {
-                let dummy = {
-                    date: "Mon Sep 28 2026", dayNum: 1, sciLamps: 8,
-                    phys: {
-                        hr: {val: 80, tgt: 137, pass: false}, weight: {val: 61, tgt: 65, pass: false},
-                        sleep: {val: 7, tgt: 7, pass: true}, fat: {val: 16.5, tgt: 15.0, pass: false},
-                        water: {val: 2.5, tgt: 2.0, pass: true}, steps: {val: 8500, tgt: 8000, pass: true}
-                    },
-                    cog: { thuy: "GIỎI", hoa: "CHƯA TẬP", phong: "TRUNG BÌNH" }
-                };
-                hist.push(dummy); localStorage.setItem('kdrive_history', JSON.stringify(hist));
+            // Đã xóa sạch dữ liệu mẫu, bảng lịch sử khởi tạo sẽ hoàn toàn trống
+            if(!localStorage.getItem('kdrive_history_initialized')) {
+                localStorage.setItem('kdrive_history', JSON.stringify([]));
+                localStorage.setItem('kdrive_history_initialized', 'true');
             }
         }
         createDummyHistoryIfEmpty(); 
@@ -575,7 +527,6 @@
         function checkMidnightReset() {
             let lastDate = localStorage.getItem('kdrive_last_date'); let today = new Date().toDateString(); 
             if (lastDate && lastDate !== today) {
-                saveDailySnapshot(); 
                 const keysToRemove = ['kdrive_live_hr', 'kdrive_live_weight', 'kdrive_live_sleep', 'kdrive_live_fat', 'kdrive_live_water', 'kdrive_live_steps', 'kdrive_sci_score', 'thuy_luan_score', 'thuy_luan_bai1_score', 'thuy_luan_bai2_score', 'hoa_luan_score', 'hoa_luan_bai1_score', 'hoa_luan_bai2_score', 'phong_luan_score', 'phong_luan_bai1_score', 'phong_luan_bai2_score'];
                 keysToRemove.forEach(k => localStorage.removeItem(k));
             }
@@ -595,6 +546,15 @@
                 renderHistoryDay(currentHistoryIndex);
             } else {
                 document.getElementById('history-date-title').innerText = "CHƯA CÓ DỮ LIỆU";
+                document.getElementById('history-day-num').innerText = "TRỐNG";
+                // Reset hiển thị về mặc định khi chưa có dữ liệu lịch sử
+                document.getElementById('hist-sci-lamps').innerText = "0/9 ĐÈN";
+                document.getElementById('hist-sci-lamps').className = "val-fail";
+                document.getElementById('hist-led-sci').innerHTML = getLed('gray');
+                document.getElementById('hist-sci-missing-box').style.display = "none";
+                document.getElementById('hist-sci-pass-box').style.display = "none";
+                document.getElementById('hist-phys-warning').style.display = "none";
+                document.getElementById('hist-cog-warning').style.display = "none";
             }
             document.getElementById('history-modal').classList.add('active');
         }
@@ -771,7 +731,7 @@
             document.getElementById('ai-modal').classList.remove('active'); 
         }
 
-        // GIỮ NGUYÊN CON QUAY HỒI CHUYỂN, BỎ HOÀN TOÀN LỖI TREO RADAR QUÉT BẢNG
+        // GIỮ NGUYÊN CON QUAY HỒI CHUYỂN MƯỢT MÀ
         const cardBox = document.getElementById('stats-card-box'); 
         if (window.DeviceOrientationEvent) { 
             window.addEventListener('deviceorientation', (event) => { 
@@ -811,7 +771,15 @@
             btnClose.style.display = 'none'; 
             
             let introLines = [ "<span style='color:#777'>[SYS] Kích hoạt lõi Radar...</span>", "<span style='color:#777'>[GPS] Khóa tọa độ vệ tinh...</span>" ]; 
-            typeTerminalLines(introLines, termContent, () => { showScanResults(termContent, btnClose); }); 
+            typeTerminalLines(introLines, termContent, () => { 
+                if (navigator.geolocation) { 
+                    navigator.geolocation.getCurrentPosition( 
+                        (position) => { showScanResults(termContent, btnClose); }, 
+                        (error) => { showScanResults(termContent, btnClose); },
+                        { timeout: 5000 }
+                    ); 
+                } else { showScanResults(termContent, btnClose); } 
+            }); 
         }
         
         function showScanResults(container, btn) { 
@@ -826,7 +794,7 @@
                 if (lineIdx < lines.length) { 
                     container.innerHTML += lines[lineIdx] + "<br>"; 
                     lineIdx++; 
-                    let t = setTimeout(nextLine, 500); 
+                    let t = setTimeout(nextLine, 700); 
                     typingTimeouts.push(t);
                 } else { if (callback) callback(); } 
             } 
@@ -859,9 +827,7 @@
             syncCognitive('thuy_luan', 'bar-thuy-1', 'bar-thuy-2', 'dot-thuy'); syncCognitive('hoa_luan', 'bar-hoa-1', 'bar-hoa-2', 'dot-hoa'); syncCognitive('phong_luan', 'bar-phong-1', 'bar-phong-2', 'dot-phong');
             const timerEl = document.getElementById('midnight-timer'); if (activeCount >= 9) { sciTotalPoints = 100.0; if(timerEl) { timerEl.style.display = 'none'; } } else { sciTotalPoints = Math.min(99.9, sciTotalPoints); if(timerEl) { timerEl.style.display = 'flex'; } }
             document.getElementById('luc-chien-sci').innerText = 'SCI: ' + sciTotalPoints.toFixed(1) + '%'; localStorage.setItem('kdrive_sci_score', sciTotalPoints.toFixed(1));
-            let currentTier = 1; if (debugTierOverride !== null) { currentTier = debugTierOverride; } else { if (sciTotalPoints >= 100.0) currentTier = 3; else if (sciTotalPoints >= 50.0) currentTier = 2; else currentTier = 1; }
-            const cardBox = document.getElementById('stats-card-box');
-            if(cardBox) cardBox.className = 'stats-card tier-' + currentTier;
+            let currentTier = 1; if (debugTierOverride !== null) { currentTier = debugTierOverride; } else { if (sciTotalPoints >= 100.0) currentTier = 3; else if (sciTotalPoints >= 50.0) currentTier = 2; else currentTier = 1; } cardBox.className = 'stats-card tier-' + currentTier;
             let baseDays = parseInt(localStorage.getItem('kdrive_vonga_days')); if (isNaN(baseDays)) { baseDays = 1000; localStorage.setItem('kdrive_vonga_days', 1000); } let lastCompletedDate = localStorage.getItem('kdrive_vonga_last_checked'); let todayStr = new Date().toDateString(); if (activeCount >= 9 && lastCompletedDate !== todayStr) { baseDays = Math.max(0, baseDays - 1); localStorage.setItem('kdrive_vonga_days', baseDays); localStorage.setItem('kdrive_vonga_last_checked', todayStr); } document.getElementById('vonga-days-display').innerText = baseDays + " NGÀY";
         }
 
