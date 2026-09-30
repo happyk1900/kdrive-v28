@@ -75,7 +75,7 @@
             display: flex; flex-direction: column; gap: 10px; pointer-events: auto; 
             background: rgba(5, 15, 25, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 15px rgba(0, 229, 255, 0.15);
-            transition: border 0.3s ease, box-shadow 0.3s ease;
+            transition: border 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease-out;
             transform-style: preserve-3d;
         }
 
@@ -168,6 +168,13 @@
         .dot-yellow { background-color: var(--amber); box-shadow: 0 0 8px var(--amber), 0 0 12px var(--amber); animation: pulseYellow 1.5s infinite ease-in-out; }
         .dot-green { background-color: var(--mint); box-shadow: 0 0 8px var(--mint), 0 0 12px var(--mint); animation: pulseGreen 1.5s infinite ease-in-out; }
         
+        .dot-cyan { background-color: var(--cyan) !important; box-shadow: 0 0 12px var(--cyan), 0 0 20px var(--cyan) !important; animation: none; }
+        @keyframes waterfallAnim { 0% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.4); } 100% { opacity: 0.1; transform: scale(0.8); } }
+        .waterfall-1 { animation: waterfallAnim 1.2s infinite 0.0s ease-in-out !important; }
+        .waterfall-2 { animation: waterfallAnim 1.2s infinite 0.3s ease-in-out !important; }
+        .waterfall-3 { animation: waterfallAnim 1.2s infinite 0.6s ease-in-out !important; }
+        .waterfall-4 { animation: waterfallAnim 1.2s infinite 0.9s ease-in-out !important; }
+
         @keyframes pulseRed { 0%, 100% { transform: scale(0.8); opacity: 0.6; } 50% { transform: scale(1.2); opacity: 1; } }
         @keyframes pulseYellow { 0%, 100% { transform: scale(0.8); opacity: 0.6; } 50% { transform: scale(1.2); opacity: 1; } }
         @keyframes pulseGreen { 0%, 100% { transform: scale(0.8); opacity: 0.6; } 50% { transform: scale(1.2); opacity: 1; } }
@@ -490,7 +497,7 @@
         </div>
     </div>
 
-    <!-- MODAL AI PHÂN TÍCH -->
+    <!-- MODAL AI PHÂN TÍCH ĐỘNG -->
     <div class="cyber-modal" id="ai-modal">
         <div class="cyber-led-wrapper">
             <div class="modal-box" style="padding-top: 45px; border-color: rgba(255,215,0,0.7); background: rgba(20, 10, 0, 0.95);">
@@ -597,7 +604,6 @@
         function createDummyHistoryIfEmpty() {
             let hist = JSON.parse(localStorage.getItem('kdrive_history') || '[]');
             if(hist.length === 0) {
-                // Khởi tạo mảng lịch sử trống sạch sẽ, không tạo dữ liệu ảo
                 localStorage.setItem('kdrive_history', JSON.stringify([]));
             }
         }
@@ -607,7 +613,6 @@
             let lastDate = localStorage.getItem('kdrive_last_date'); 
             let today = new Date().toDateString(); 
             
-            // Xóa sạch dữ liệu tích lũy và mở khóa đèn khi sang ngày mới (0 giờ)
             if (lastDate && lastDate !== today) {
                 saveDailySnapshot(); 
                 const keysToRemove = [
@@ -615,14 +620,14 @@
                     'kdrive_sci_score', 'thuy_luan_score', 'thuy_luan_bai1_score', 'thuy_luan_bai2_score', 
                     'hoa_luan_score', 'hoa_luan_bai1_score', 'hoa_luan_bai2_score', 
                     'phong_luan_score', 'phong_luan_bai1_score', 'phong_luan_bai2_score',
-                    'kdrive_locked_today_date' // Reset mốc ngày khóa đèn
+                    'kdrive_locked_today_date'
                 ];
                 keysToRemove.forEach(k => localStorage.removeItem(k));
             }
             localStorage.setItem('kdrive_last_date', today);
         }
 
-        // ------------------ LOGIC UI NHẬT KÝ & AI ------------------
+        // ------------------ LOGIC UI NHẬT KÝ & AI PHÂN TÍCH ĐỘNG ------------------
         let currentHistoryIndex = 0;
         let historyData = [];
 
@@ -771,20 +776,44 @@
             typingTimeouts = [];
         }
 
+        // HÀM AI PHÂN TÍCH ĐỘNG DỰA TRÊN CHỈ SỐ THẬT Ở LOCALSTORAGE
         function openAiAnalysis() {
             playSound('warp-out');
             document.getElementById('ai-modal').classList.add('active');
             
-            let sciText = "Cảnh báo điểm mù não bộ (Brain Fog)! Cân nặng và lượng mỡ đều hụt, kết hợp với việc thiếu bài tập phản xạ cho thấy quá trình trao đổi chất đang bị đình trệ. Mặc dù lượng nước đạt mức tối ưu giúp dung lượng máu duy trì, nhưng nhịp tim tĩnh (80 BPM) phản ánh sự căng thẳng của hệ thần kinh giao cảm. Sự mất cân bằng này làm giảm tốc độ dẫn truyền của các khớp thần kinh, khiến tốc độ thích ứng ở phân hệ Phán Đoán chỉ đạt mức trung bình. Cơ thể đang rơi vào trạng thái ì sinh lý.";
-            let martialText = "\"Nước trong hồ dù đầy nhưng không có gió thổi, ắt thành nước đọng.\" Hôm qua, chiến binh đã giữ được sự tĩnh tại nhưng hoàn toàn bỏ quên ngọn lửa bùng nổ của phản xạ. Kiếm pháp không vung ra, trần cấu ắt bám víu (mỡ cơ thể tăng).";
-            let adviceText = "Khai mở phản xạ cường độ cao ngay trong buổi sáng để đốt cháy tĩnh lặng, ép nhịp tim bứt phá giới hạn và xua tan điểm mù tâm trí.";
-
             let sciEl = document.getElementById('ai-text-science');
             let marEl = document.getElementById('ai-text-martial');
             let advEl = document.getElementById('ai-text-advice');
             
             sciEl.innerHTML = ""; marEl.innerHTML = ""; advEl.innerHTML = "";
             clearAllTyping();
+
+            // Đọc dữ liệu thực tế hiện tại
+            let activeCount = 0;
+            let lockedDots = JSON.parse(localStorage.getItem('kdrive_locked_dots') || '{}');
+            const physKeys = ['kdrive_live_hr', 'kdrive_live_weight', 'kdrive_live_sleep', 'kdrive_live_fat', 'kdrive_live_water', 'kdrive_live_steps'];
+            physKeys.forEach(k => { if(lockedDots[k] || parseFloat(localStorage.getItem(k)) > 0) activeCount++; });
+            if(lockedDots['thuy_luan'] || parseFloat(localStorage.getItem('thuy_luan_score')) > 0) activeCount++;
+            if(lockedDots['hoa_luan'] || parseFloat(localStorage.getItem('hoa_luan_score')) > 0) activeCount++;
+            if(lockedDots['phong_luan'] || parseFloat(localStorage.getItem('phong_luan_score')) > 0) activeCount++;
+
+            let sciText = "";
+            let martialText = "";
+            let adviceText = "";
+
+            if (activeCount === 0) {
+                sciText = "Hệ thống đang ở trạng thái chờ tín hiệu sinh lý. Chưa có dữ liệu đầu vào hoặc các chỉ số đang ở mức trống. Cơ thể đang bảo toàn năng lượng nguyên thủy.";
+                martialText = "\"Bình minh chưa ló dạng, kiếm chưa khỏi vỏ.\" Chưa có dữ liệu rèn luyện nghĩa là chiến binh chưa giương cung xuất trận.";
+                adviceText = "Khởi động ngay các bài tập nền tảng để thắp sáng các đèn tín hiệu lượng tử.";
+            } else if (activeCount >= 9) {
+                sciText = "Toàn bộ tham số sinh lý và tần số thần kinh vận hành ở mức tối ưu. Nhịp tim tĩnh ổn định, dung lượng trao đổi chất đạt đỉnh. Hệ thống thần kinh phản hồi cực nhạy với các kích thích phản xạ.";
+                martialText = "\"Nước chảy đá mòn, vạn vật quy về một thể.\" Thân và tâm đồng điệu, phản xạ tự sinh từ bản năng thuần khiết mà không cần toan tính.";
+                adviceText = "Giữ vững tần số sinh học này. Kỷ luật đã chuyển hóa thành bản năng, hãy duy trì trạng thái vô ngã.";
+            } else {
+                sciText = `Phát hiện điểm mù sinh lý: Đã kích hoạt ${activeCount}/9 chỉ số nền tảng. Sự thiếu hụt một số phân hệ làm gia tăng áp lực lên hệ thần kinh giao cảm, cản trở tốc độ dẫn truyền tín hiệu.`;
+                martialText = "\"Nước trong hồ không có gió ắt thành nước đọng.\" Thân thể thiếu sự rèn luyện đồng bộ thì khí huyết trì trệ, tâm trí ắt sinh chướng ngại.";
+                adviceText = "Hiệu chỉnh ngay biên độ vận động, tập trung khai mở các phân hệ còn thiếu hụt trong ngày để thiết lập lại cân bằng lượng tử.";
+            }
 
             function typeText(text, el, speed, callback) {
                 let i = 0;
@@ -900,11 +929,9 @@
             if(isWaterfallActive) return; 
             let activeCount = 0; let sciTotalPoints = 0; const pointsPerItem = 11.1;
             
-            // LOGIC KHÓA CHẾT 9 ĐÈN TRONG NGÀY (Lưu trạng thái vào localStorage để không bị mất khi thoát test giữa chừng)
             let todayStr = new Date().toDateString();
             let lockedDate = localStorage.getItem('kdrive_locked_today_date');
             if (lockedDate !== todayStr) {
-                // Nếu sang ngày mới, xóa cache khóa cũ
                 localStorage.removeItem('kdrive_locked_dots');
                 localStorage.setItem('kdrive_locked_today_date', todayStr);
             }
@@ -916,8 +943,6 @@
                 let val = parseFloat(localStorage.getItem(m.key)) || 0; 
                 let target = parseFloat(localStorage.getItem(m.tgt)) || 0; 
                 let bar = document.getElementById(m.id); 
-                
-                // Kiểm tra xem đèn này đã được khóa sáng trước đó trong ngày chưa
                 let isAlreadyAchieved = lockedDots[m.key] === true;
 
                 if(bar) { 
@@ -933,7 +958,7 @@
                         } 
                         if (isMet || isAlreadyAchieved) { 
                             bar.classList.add('achieved'); 
-                            lockedDots[m.key] = true; // Khóa chết trạng thái đạt
+                            lockedDots[m.key] = true; 
                         } else { 
                             bar.classList.add('failed'); 
                         } 
@@ -971,7 +996,7 @@
                     dot.className = 'live-dot dot-green'; 
                     activeCount++; 
                     sciTotalPoints += pointsPerItem; 
-                    lockedDots[baseKey] = true; // Khóa chết phân hệ trí lực trong ngày
+                    lockedDots[baseKey] = true; 
                 } 
             }
 
@@ -979,7 +1004,6 @@
             syncCognitive('hoa_luan', 'bar-hoa-1', 'bar-hoa-2', 'dot-hoa'); 
             syncCognitive('phong_luan', 'bar-phong-1', 'bar-phong-2', 'dot-phong');
 
-            // Lưu lại trạng thái khóa đèn vào localStorage
             localStorage.setItem('kdrive_locked_dots', JSON.stringify(lockedDots));
 
             const timerEl = document.getElementById('midnight-timer'); 
