@@ -140,7 +140,7 @@
 
         .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 26px; color: #ffffff; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 15px rgba(255,51,102,0.8); }
         
-        .prestige-panel { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .prestige-panel { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); }
         .prestige-total-box { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; padding-top: 2px; width: 100%; }
         .prestige-total-label { color: #ffffff; font-size: 14px; font-weight: 900; letter-spacing: 1px; flex: 1; text-align: left; }
         .prestige-total-num { font-size: 28px; color: var(--accent-red); font-weight: 900; line-height: 1; text-align: right; min-width: 90px; text-shadow: 0 0 10px rgba(255,51,102,0.6); }
@@ -508,9 +508,11 @@
             
             let bTitle = "", bTarget = "";
             if (id === '1') {
-                bTitle = "BÀI 1"; bTarget = "GIỮ VỮNG QUỸ ĐẠO<br><br>Hệ thống thả một luồng gió.<br><br><span style='color:var(--accent-red); font-weight:bold;'>MỤC TIÊU:</span> Rê ngón tay bám sát điểm sáng. Dưới 2000 điểm tốc độ thong thả, sau đó tăng dần. Tuột quá 2 giây mất năng lượng!";
+                bTitle = "BÀI 1 — GIỮ VỮNG QUỸ ĐẠO"; 
+                bTarget = "Tập luyện mỗi ngày giúp bạn cải thiện khả năng phán đoán, rèn luyện sự khéo léo để bám sát và làm chủ quỹ đạo di chuyển[span_1](start_span)[span_1](end_span).<br><br><span style='color:var(--accent-red); font-weight:bold;'>MỤC TIÊU:</span> Rê ngón tay bám sát điểm sáng. Giữ nhịp liên tục[span_2](start_span)[span_2](end_span)!";
             } else if (id === '2') {
-                bTitle = "BÀI 2"; bTarget = "PHÁN ĐOÁN TÀNG HÌNH<br><br>Mục tiêu di chuyển và tàng hình ngẫu nhiên.<br><br><span style='color:var(--accent-red); font-weight:bold;'>MỤC TIÊU:</span> Chạm trúng mục tiêu khi hiện. Bỏ lỡ sẽ trừ năng lượng. Nhấp nhả thoải mái!";
+                bTitle = "BÀI 2 — PHÁN ĐOÁN VỊ TRÍ"; 
+                bTarget = "Tập luyện mỗi ngày giúp bạn cải thiện khả năng phán đoán, nâng cao khả năng dự đoán mục tiêu khi di chuyển và ẩn hiện[span_3](start_span)[span_3](end_span).<br><br><span style='color:var(--accent-red); font-weight:bold;'>MỤC TIÊU:</span> Chạm trúng mục tiêu khi xuất hiện[span_4](start_span)[span_4](end_span)!";
             } 
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
@@ -834,19 +836,21 @@
             vid.classList.remove('playing-mode');
             setTimeout(() => vid.classList.add('loaded'), 400);
 
+            // KIỂM TRA ĐIỀU KIỆN TỐI THIỂU 1000 DATA ĐỂ XÁC NHẬN HOÀN THÀNH
             if(cGame === '1') { 
-                sessionScoreG1 = Math.floor(aScore); 
+                sessionScoreG1 = (aScore >= 1000) ? Math.floor(aScore) : 0; 
                 finalMaxFocusSec = Math.round((maxFocusFrames / 60) * 10) / 10;
                 localStorage.setItem('phong_luan_bai1_score', sessionScoreG1);
             }
             if(cGame === '2') { 
-                sessionScoreG2 = Math.floor(aScore); 
+                sessionScoreG2 = (aScore >= 1000) ? Math.floor(aScore) : 0; 
                 finalAvgSlashMs = reactionTimesG2.length > 0 ? Math.round(reactionTimesG2.reduce((a,b)=>a+b, 0) / reactionTimesG2.length) : 0;
                 if (aScore < 1000) finalAvgSlashMs = 1500;
                 localStorage.setItem('phong_luan_bai2_score', sessionScoreG2);
             }
 
-            localStorage.setItem('phong_luan_score', sessionScoreG1 + sessionScoreG2);
+            let totalValidScore = sessionScoreG1 + sessionScoreG2;
+            localStorage.setItem('phong_luan_score', totalValidScore);
 
             document.getElementById('game-top-bar').classList.remove('visible');
             document.getElementById('game-bottom-bar').classList.remove('visible');
@@ -864,17 +868,17 @@
                 
                 let romanName = (cGame === '1') ? 'KẾT QUẢ BÀI 1' : 'KẾT QUẢ BÀI 2';
                 document.getElementById('stage-badge-title').innerText = romanName;
-                document.getElementById('final-score-display').innerText = Math.floor(aScore);
+                document.getElementById('final-score-display').innerText = (cGame === '1') ? sessionScoreG1 : sessionScoreG2;
 
                 if(cGame === '1') {
                     document.getElementById('result-metric-name').innerText = "Chuỗi bám dính Max";
                     document.getElementById('result-metric-val').innerText = finalMaxFocusSec + "s";
                 } else {
                     document.getElementById('result-metric-name').innerText = "Tốc độ phản ứng trung bình";
-                    document.getElementById('result-metric-val').innerText = (aScore > 0 && finalAvgSlashMs > 0) ? finalAvgSlashMs + " ms" : "Chưa đủ Data";
+                    document.getElementById('result-metric-val').innerText = (sessionScoreG2 > 0 && finalAvgSlashMs > 0) ? finalAvgSlashMs + " ms" : "Chưa đủ Data";
                 }
 
-                let stageRankObj = getRankByPhongLuanScore(Math.floor(aScore));
+                let stageRankObj = getRankByPhongLuanScore( (cGame === '1') ? sessionScoreG1 : sessionScoreG2 );
                 document.getElementById('stage-rank-display').innerHTML = getRankHTML(stageRankObj.name);
 
                 let btnNext = document.getElementById('btn-next');
@@ -910,8 +914,7 @@
             document.getElementById('final-focus').innerText = finalMaxFocusSec + "s";
             document.getElementById('final-slash').innerText = finalAvgSlashMs > 0 ? finalAvgSlashMs + " ms" : "Không đạt";
 
-            let highestScore = Math.max(sessionScoreG1, sessionScoreG2);
-            let finalRankObj = getRankByPhongLuanScore(highestScore);
+            let finalRankObj = getRankByPhongLuanScore(totalSessionScore);
             
             document.getElementById('sum-rank-title').innerHTML = getRankHTML(finalRankObj.name);
             document.getElementById('master-feedback-text').innerText = finalRankObj.feedback;
