@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#010a15">
     <title>K-Drive - Phong Luân</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
@@ -17,27 +17,24 @@
             --neon-red: #ff3366; 
             --amber: #ffaa00;   
             --crimson: #ff3366;
-            --text-dark: #f0f4f8;
-            --accent-red: #ff4d6d; 
-            --panel-bg: rgba(5, 12, 22, 0.65); /* Kính mờ đen huyền bí, nhìn thấu ảnh nền */
-            --panel-border: rgba(255, 51, 102, 0.55); /* Viền đỏ rực đặc trưng Phong Luân */
+            --text-light: #ffffff;
+            --accent-red: #ff3366; 
+            --panel-bg: rgba(5, 12, 22, 0.88); 
+            --panel-border: rgba(255, 51, 102, 0.7); 
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; }
 
-        /* ẢNH NỀN PHONG LUÂN HIỆN MỜ CHẬM RÃI (2.5 GIÂY) */
-        #sanctum-bg { 
+        /* VIDEO NỀN ĐỘNG PHONG LUÂN HIỆN MỜ CHẬM RÃI (3 GIÂY) CÓ ÂM THANH */
+        #sanctum-video { 
             position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; 
-            background: url('https://github.com/happyk1900/Kai-Ripe/blob/main/nen%20phong%20luan.png?raw=true') no-repeat center center; 
-            background-size: cover; 
-            opacity: 0;
-            transition: opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+            object-fit: cover; opacity: 0;
+            transition: opacity 3.0s cubic-bezier(0.25, 1, 0.5, 1);
         }
-        #sanctum-bg.loaded { opacity: 1; }
-        #sanctum-bg.playing-mode { opacity: 0; pointer-events: none; transition: opacity 2.0s cubic-bezier(0.25, 1, 0.5, 1); }
+        #sanctum-video.loaded { opacity: 1; }
+        #sanctum-video.playing-mode { opacity: 0; pointer-events: none; transition: opacity 2.0s cubic-bezier(0.25, 1, 0.5, 1); }
 
-        /* MA TRẬN HẠT LƯỢNG TỬ LẤP LÁNH CHO PHONG LUÂN (ĐỎ - TRẮNG) */
         #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
         .quantum-sparkle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 8px #ffffff, 0 0 15px #ff3366; opacity: 0; animation: sparkleFloat linear infinite; }
         @keyframes sparkleFloat { 
@@ -52,12 +49,11 @@
         .play-area { width: 100%; max-width: 380px; height: 100vh; height: 100dvh; background: transparent; position: relative; overflow: hidden; margin: 0 auto; transition: all 1.8s cubic-bezier(0.25, 1, 0.5, 1); }
         .play-area.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important; max-width: none !important; margin: 0 !important; z-index: 9990 !important; background: var(--bg-obsidian) !important; }
 
-        .laser-beam-horizontal { position: fixed; top: 50%; left: 0; width: 100vw; height: 2px; background: #ff3366; box-shadow: 0 0 20px #ff3366, 0 0 40px #ffffff; z-index: 99999; transform: scaleX(0); transform-origin: center; animation: laserShoot 1.0s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: none; }
+        .laser-beam-horizontal { position: fixed; top: 50%; left: 0; width: 100vw; height: 2px; background: #ff3366; box-shadow: 0 0 25px #ff3366, 0 0 50px #ffffff; z-index: 99999; transform: scaleX(0); transform-origin: center; animation: laserShoot 1.0s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: none; }
         @keyframes laserShoot { 100% { transform: scaleX(1); height: 4px; } }
         .laser-beam-horizontal.expand { animation: laserExpand 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         @keyframes laserExpand { 100% { height: 100vh; top: 0; opacity: 0; } }
 
-        /* POPUP BAY LÊN CHẬM RÃI (1.8 GIÂY) */
         @keyframes cinematicPopupSuperSlow {
             0% { opacity: 0; transform: translateY(90px) scale(0.90); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
@@ -67,14 +63,14 @@
         #start-prompt-overlay.active { opacity: 1; visibility: visible; }
         #start-prompt-overlay > * { animation: cinematicPopupSuperSlow 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; opacity: 0; }
 
-        .briefing-panel { background: var(--panel-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px 26px; width: 100%; max-width: 330px; text-align: left; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); }
-        .briefing-title { color: var(--accent-red) !important; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(255, 255, 255, 0.2); padding-bottom: 8px; letter-spacing: 1.5px; }
-        .briefing-target { color: #f0f4f8; font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; line-height: 1.7; font-weight: 600; }
+        .briefing-panel { background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px 26px; width: 100%; max-width: 340px; text-align: left; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); }
+        .briefing-title { color: var(--accent-red) !important; font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(255, 51, 102, 0.4); padding-bottom: 8px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,51,102,0.6); }
+        .briefing-target { color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 15px; line-height: 1.7; font-weight: 600; }
         .briefing-target b { color: var(--accent-red); font-weight: bold; }
 
-        .action-group { width: 100%; max-width: 330px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .start-action-box { width: 100%; background: var(--panel-bg); backdrop-filter: blur(16px); border: 1.5px solid var(--panel-border); padding: 14px; border-radius: 12px; color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 17px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 10px 25px rgba(255, 51, 102, 0.2); text-align: center; transition: 0.4s; }
-        .start-action-box:active { background: var(--accent-red); color: #fff; transform: scale(0.98); }
+        .action-group { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .start-action-box { width: 100%; background: var(--panel-bg); backdrop-filter: blur(16px); border: 1.5px solid var(--panel-border); padding: 15px; border-radius: 12px; color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 10px 25px rgba(255, 51, 102, 0.25); text-align: center; transition: 0.4s; text-shadow: 0 0 8px rgba(255,51,102,0.6); }
+        .start-action-box:active { background: var(--accent-red); color: #010a15; transform: scale(0.98); }
 
         .game-top-bar {
             position: fixed; top: max(20px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 15px 20px;
@@ -84,101 +80,102 @@
 
         .health-container { display: flex; gap: 4px; align-items: center; }
         .health-bar { width: 14px; height: 6px; background: rgba(255,255,255,0.15); transform: skewX(-20deg); transition: all 0.3s ease; }
-        .health-bar.cyan.active { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
-        .health-bar.pink.active { background: var(--neon-red); box-shadow: 0 0 8px var(--neon-red); }
+        .health-bar.cyan.active { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+        .health-bar.pink.active { background: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); }
 
-        .data-score { font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; color: #fff; display: flex; align-items: center; position: relative; }
-        .data-score span { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); font-size: 18px; margin-left: 5px; }
+        .data-score { font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; color: #fff; display: flex; align-items: center; position: relative; }
+        .data-score span { color: var(--cyan); text-shadow: 0 0 12px var(--cyan); font-size: 20px; margin-left: 6px; }
 
-        #hp-notification-area { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); width: 200px; text-align: center; }
+        #hp-notification-area { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); width: 220px; text-align: center; }
 
         .game-bottom-bar {
             position: fixed; bottom: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw;
-            border-top: 1px solid rgba(255, 51, 102, 0.4); padding: 15px 20px 0 20px;
-            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; z-index: 10000; pointer-events: auto;
+            border-top: 1px solid rgba(255, 51, 102, 0.5); padding: 15px 20px 0 20px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto;
             background: linear-gradient(0deg, rgba(1,10,21,0.95) 0%, transparent 100%); opacity: 0; transition: opacity 1.5s ease;
         }
         .game-bottom-bar.visible { opacity: 1; }
 
         .btn-action {
-            width: 44px; height: 44px; background: rgba(5, 12, 22, 0.8); 
-            border: 1px solid rgba(255, 51, 102, 0.7); border-radius: 12px;
+            width: 46px; height: 46px; background: rgba(5, 12, 22, 0.85); 
+            border: 1.5px solid rgba(255, 51, 102, 0.75); border-radius: 12px;
             display: flex; justify-content: center; align-items: center; cursor: pointer;
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .btn-action:active { transform: scale(0.9); }
         
-        .btn-back { justify-self: start; color: var(--accent-red); font-family: 'Share Tech Mono', monospace; font-size: 24px; font-weight: bold; box-shadow: 0 0 10px rgba(255,51,102,0.3); padding-bottom: 2px; padding-right: 2px; }
-        .btn-back:active { background: rgba(255, 51, 102, 0.25); box-shadow: 0 0 20px rgba(255, 51, 102, 0.6); }
+        .btn-back { color: var(--accent-red); font-family: 'Share Tech Mono', monospace; font-size: 26px; font-weight: bold; box-shadow: 0 0 12px rgba(255,51,102,0.4); padding-bottom: 2px; padding-right: 2px; }
+        .btn-back:active { background: rgba(255, 51, 102, 0.35); box-shadow: 0 0 20px rgba(255, 51, 102, 0.9); }
 
-        .btn-skip { justify-self: center; border-color: rgba(255, 51, 102, 0.7); color: var(--accent-red); font-family: 'Share Tech Mono', monospace; font-size: 20px; font-weight: bold; box-shadow: 0 0 10px rgba(255,51,102,0.3); }
-        .btn-skip:active { background: rgba(255, 51, 102, 0.25); box-shadow: 0 0 20px rgba(255, 51, 102, 0.6); }
+        .btn-skip { border-color: rgba(255, 51, 102, 0.75); color: var(--accent-red); font-family: 'Share Tech Mono', monospace; font-size: 22px; font-weight: bold; box-shadow: 0 0 12px rgba(255,51,102,0.4); }
+        .btn-skip:active { background: rgba(255, 51, 102, 0.35); box-shadow: 0 0 20px rgba(255, 51, 102, 0.9); }
 
-        .btn-pause { justify-self: end; border-color: rgba(255, 170, 0, 0.6); box-shadow: 0 0 10px rgba(255, 170, 0, 0.2); }
-        .btn-pause::before, .btn-pause::after { content: ''; width: 4px; height: 16px; background: var(--amber); margin: 0 3px; border-radius: 2px; box-shadow: 0 0 5px var(--amber); }
-        .btn-pause:active { background: rgba(255, 170, 0, 0.3); box-shadow: 0 0 20px rgba(255, 170, 0, 0.6); }
+        .btn-mute { border-color: rgba(255, 51, 102, 0.6); color: #ff3366; font-size: 20px; box-shadow: 0 0 12px rgba(255, 51, 102, 0.3); }
+        .btn-mute:active { background: rgba(255, 51, 102, 0.3); box-shadow: 0 0 20px rgba(255, 51, 102, 0.7); }
+
+        .btn-pause { border-color: rgba(255, 170, 0, 0.6); box-shadow: 0 0 12px rgba(255, 170, 0, 0.3); }
+        .btn-pause::before, .btn-pause::after { content: ''; width: 4px; height: 18px; background: var(--amber); margin: 0 3px; border-radius: 2px; box-shadow: 0 0 8px var(--amber); }
+        .btn-pause:active { background: rgba(255, 170, 0, 0.3); box-shadow: 0 0 20px rgba(255, 170, 0, 0.7); }
 
         #pause-menu-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; backdrop-filter: blur(10px); }
         #pause-menu-overlay.active { opacity: 1; pointer-events: auto; }
-        .pause-box { width: 85%; max-width: 300px; background: rgba(5, 12, 22, 0.95); border: 1px solid rgba(255,51,102,0.6); border-radius: 14px; padding: 25px 20px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,0.8); animation: cinematicPopupSuperSlow 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .pause-title { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: var(--accent-red); margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
-        .pause-btn { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 10px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
+        .pause-box { width: 85%; max-width: 320px; background: rgba(5, 12, 22, 0.95); border: 1.5px solid rgba(255,51,102,0.6); border-radius: 16px; padding: 25px 20px; text-align: center; box-shadow: 0 0 40px rgba(0,0,0,0.8); animation: cinematicPopupSuperSlow 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .pause-title { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: var(--accent-red); margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,51,102,0.6); }
+        .pause-btn { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
         .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         .pause-btn.exit { background: rgba(255, 51, 102, 0.2); border: 1px solid var(--crimson); color: var(--crimson); margin-bottom: 0; }
 
-        /* KHOẢNH KHẮC KẾT THÚC: CHỮ ĐEN RƠI XUỐNG VỚI VIỀN ĐỎ PHÁT SÁNG TRÊN ẢNH NỀN PHONG LUÂN */
         #freeze-overlay { position: fixed; inset: 0; background: transparent; z-index: 200000; display: none; align-items: center; justify-content: center; pointer-events: none; }
         #freeze-overlay.active { display: flex; }
         @keyframes textFallSlow {
             0% { opacity: 0; transform: translateY(-70px) scale(1.1); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 46px; font-weight: 900; color: #ffffff; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 20px rgba(255, 51, 102, 1), 0 0 10px rgba(0,0,0,0.9), 2px 2px 0px rgba(255,51,102,0.8); background: transparent; padding: 0; border: none; box-shadow: none; animation: textFallSlow 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 50px; font-weight: 900; color: #ffffff; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 20px #ff3366, 0 0 40px rgba(255,51,102,0.8), 2px 2px 0px rgba(0,0,0,0.9); background: transparent; padding: 0; border: none; box-shadow: none; animation: textFallSlow 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 
-        /* BẢNG KẾT QUẢ TỪNG BÀI - KÍNH MỜ ĐEN ĐỎ, TRỰC QUAN */
-        #result-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 12px; padding: 12px; opacity: 0; transition: opacity 1.2s ease; }
+        #result-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 14px; padding: 12px; opacity: 0; transition: opacity 1.2s ease; }
         #result-overlay.active { display: flex; opacity: 1; }
         #result-overlay.active > * { animation: cinematicPopupSuperSlow 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards; opacity: 0; }
 
-        .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #ffffff; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 15px rgba(255,51,102,0.8); }
+        .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 26px; color: #ffffff; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 15px rgba(255,51,102,0.8); }
         
-        .prestige-panel { width: 92%; max-width: 310px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
+        .prestige-panel { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         .prestige-total-box { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; padding-top: 2px; width: 100%; }
-        .prestige-total-label { color: #f0f4f8; font-size: 13px; font-weight: 900; letter-spacing: 1px; flex: 1; text-align: left; }
-        .prestige-total-num { font-size: 26px; color: var(--accent-red); font-weight: 900; line-height: 1; text-align: right; min-width: 80px; }
+        .prestige-total-label { color: #ffffff; font-size: 14px; font-weight: 900; letter-spacing: 1px; flex: 1; text-align: left; }
+        .prestige-total-num { font-size: 28px; color: var(--accent-red); font-weight: 900; line-height: 1; text-align: right; min-width: 90px; text-shadow: 0 0 10px rgba(255,51,102,0.6); }
 
-        .bio-metrics-box { width: 92%; max-width: 310px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
-        .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 8px; margin-bottom: 4px; width: 100%; }
+        .bio-metrics-box { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,51,102,0.4); padding-bottom: 10px; margin-bottom: 4px; width: 100%; }
         .metric-card-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .metric-label { color: #f0f4f8; font-family: 'Share Tech Mono', monospace; font-size: 12.5px; font-weight: bold; flex: 1; text-align: left;}
-        .metric-val { color: var(--accent-red); font-family: 'Share Tech Mono', monospace; font-size: 12.5px; font-weight: bold; text-align: right; }
+        .metric-label { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; flex: 1; text-align: left;}
+        .metric-val { color: var(--accent-red); font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; text-align: right; text-shadow: 0 0 8px rgba(255,51,102,0.5); }
 
-        .rank-icon-img { width: 22px; height: 22px; vertical-align: middle; margin-right: 6px; }
+        .rank-icon-img { width: 24px; height: 24px; vertical-align: middle; margin-right: 6px; filter: drop-shadow(0 0 3px rgba(255,255,255,0.3)); }
 
-        .result-btn-row { display: flex; gap: 10px; width: 92%; max-width: 310px; margin-top: 10px; }
-        .result-action-btn { flex: 1; padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; border-radius: 12px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; backdrop-filter: blur(8px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .result-btn-row { display: flex; gap: 10px; width: 92%; max-width: 340px; margin-top: 10px; }
+        .result-action-btn { flex: 1; padding: 14px; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; border-radius: 12px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; backdrop-filter: blur(8px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         #btn-replay { background: var(--panel-bg); border: 1.5px solid var(--crimson); color: var(--crimson); }
         #btn-replay:active { background: var(--crimson); color: #fff; }
         #btn-next { background: var(--panel-bg); border: 1.5px solid var(--accent-red); color: var(--accent-red); }
         #btn-next:active { background: var(--accent-red); color: #fff; }
 
         /* BẢNG TỔNG KẾT CUỐI CÙNG */
-        #final-summary-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 12px; opacity: 0; transition: opacity 1.2s ease; }
+        #final-summary-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 12px; padding: 12px; opacity: 0; transition: opacity 1.2s ease; }
         #final-summary-overlay.active { display: flex; opacity: 1; }
         #final-summary-overlay.active > * { animation: cinematicPopupSuperSlow 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards; opacity: 0; }
 
-        .final-header { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: #ffffff; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,51,102,0.8); }
+        .final-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #ffffff; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,51,102,0.8); }
         
-        .stat-box { width: 92%; max-width: 310px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); padding: 22px; border-radius: 18px; box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
-        .stat-line { display: flex; justify-content: space-between; margin-bottom: 6px; font-family: 'Share Tech Mono', monospace; font-size: 13px; color: #f0f4f8; width: 100%; font-weight: bold; }
-        .stat-line span:first-child { text-align: left; flex: 1; color: #f0f4f8; }
-        .stat-line span:last-child { text-align: right; min-width: 100px; color: var(--accent-red); }
+        .stat-box { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); padding: 24px; border-radius: 18px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .stat-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #ffffff; width: 100%; font-weight: bold; }
+        .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
+        .stat-line span:last-child { text-align: right; min-width: 100px; color: var(--accent-red); text-shadow: 0 0 8px rgba(255,51,102,0.4); }
 
-        .final-btn-exit { width: 92%; max-width: 310px; padding: 12px; background: var(--panel-bg); backdrop-filter: blur(8px); border: 1.5px solid var(--accent-red); border-radius: 12px; color: var(--accent-red); font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 5px; box-shadow: 0 8px 20px rgba(255,51,102,0.2); }
+        .final-btn-exit { width: 92%; max-width: 340px; padding: 14px; background: var(--panel-bg); backdrop-filter: blur(8px); border: 1.5px solid var(--accent-red); border-radius: 12px; color: var(--accent-red); font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 5px; box-shadow: 0 8px 20px rgba(255,51,102,0.3); text-shadow: 0 0 8px rgba(255,51,102,0.5); }
         .final-btn-exit:hover { background: var(--accent-red); color: #fff; }
 
-        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: var(--accent-red); font-style: italic; text-align: center; margin-top: 6px; line-height: 1.4; font-weight: 600; max-width: 310px; text-shadow: 0 0 10px rgba(255,51,102,0.3); }
+        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 14px; color: var(--accent-red); font-style: italic; text-align: center; margin-top: 8px; line-height: 1.5; font-weight: 600; max-width: 340px; text-shadow: 0 0 8px rgba(255,51,102,0.4); }
 
         /* KHU VỰC CHƠI GAME */
         #game-play-zone { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; overflow: hidden; z-index: 10; display: none;}
@@ -203,7 +200,11 @@
 </head>
 <body>
 
-    <div id="sanctum-bg"></div>
+    <!-- VIDEO NỀN ĐỘNG PHONG LUÂN CÓ ÂM THANH -->
+    <video id="sanctum-video" autoplay loop playsinline>
+        <source src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/video%20nen%20phong%20luan.mp4" type="video/mp4">
+    </video>
+
     <div id="dust-container"></div>
 
     <div id="task-arena">
@@ -211,7 +212,6 @@
 
             <!-- TẦNG TRÊN: HIỂN THỊ MÁU VÀ ĐIỂM -->
             <div id="game-top-bar" class="game-top-bar">
-                <!-- 5 Máu Cyan Gốc -->
                 <div class="health-container">
                     <div class="health-bar cyan active" id="hp-g-1"></div>
                     <div class="health-bar cyan active" id="hp-g-2"></div>
@@ -220,12 +220,10 @@
                     <div class="health-bar cyan active" id="hp-g-5"></div>
                 </div>
 
-                <!-- Điểm DATA ở giữa -->
                 <div class="data-score">DATA: <span id="boo-points">0</span>
                     <div id="hp-notification-area"></div>
                 </div>
 
-                <!-- 5 Máu Đỏ Thưởng -->
                 <div class="health-container">
                     <div class="health-bar pink" id="hp-p-1"></div>
                     <div class="health-bar pink" id="hp-p-2"></div>
@@ -235,10 +233,11 @@
                 </div>
             </div>
 
-            <!-- TẦNG DƯỚI: ĐIỀU HƯỚNG CẮT NGANG (Nút Skip ở giữa để qua lại Bài 1 và Bài 2) -->
+            <!-- THANH ĐIỀU HƯỚNG DƯỚI BỐ CỤC 4 NÚT (Back, Skip, Mute, Pause) -->
             <div id="game-bottom-bar" class="game-bottom-bar">
                 <button class="btn-action btn-back" onclick="confirmExitToLobby()">⟨</button>
                 <button class="btn-action btn-skip" id="btn-skip-stage" onclick="skipToNextStage()" title="Chuyển bài">⏭</button>
+                <button class="btn-action btn-mute" id="btn-mute" onclick="toggleVideoMute()" title="Bật/Tắt tiếng video">🔊</button>
                 <button class="btn-action btn-pause" onclick="pauseGame()"></button>
             </div>
 
@@ -359,9 +358,21 @@
             try {
                 if (!fxCtx) { fxCtx = new (window.AudioContext || window.webkitAudioContext)(); }
                 if (fxCtx && fxCtx.state === 'suspended') { fxCtx.resume(); }
+                let vid = document.getElementById('sanctum-video');
+                if (vid && !vid.dataset.userMuted) { vid.muted = false; vid.play().catch(e => {}); }
             } catch(e) {}
         }
         ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => { window.addEventListener(evt, initAudio, { passive: true }); });
+
+        function toggleVideoMute() {
+            let vid = document.getElementById('sanctum-video');
+            let muteBtn = document.getElementById('btn-mute');
+            if(!vid) return;
+            vid.muted = !vid.muted;
+            vid.dataset.userMuted = vid.muted ? 'true' : 'false';
+            muteBtn.innerHTML = vid.muted ? '🔇' : '🔊';
+            playSound('coin');
+        }
 
         function playSound(type, pitchMultiplier = 1) {
             try { 
@@ -482,9 +493,9 @@
             cancelAnimationFrame(loopRaf);
             clearAllTimeouts();
 
-            let bg = document.getElementById('sanctum-bg');
-            bg.classList.remove('playing-mode');
-            setTimeout(() => bg.classList.add('loaded'), 150);
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('playing-mode');
+            setTimeout(() => vid.classList.add('loaded'), 150);
 
             let playAreaWrap = document.getElementById('play-area');
             playAreaWrap.classList.remove('fullscreen-mode');
@@ -520,9 +531,9 @@
             promptOverlay.classList.remove('active');
             setTimeout(() => promptOverlay.classList.add('hidden'), 1200);
             
-            let bg = document.getElementById('sanctum-bg');
-            bg.classList.remove('loaded');
-            bg.classList.add('playing-mode');
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('loaded');
+            vid.classList.add('playing-mode');
 
             playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
             setTimeout(() => { let playAreaWrap = document.getElementById('play-area'); playAreaWrap.classList.add('fullscreen-mode'); laser.classList.add('expand'); }, 600);
@@ -570,7 +581,6 @@
         function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
         function closeArena() { window.location.href = 'LucChien.html'; }
 
-        /* NÚT CHUYỂN BÀI QUA LẠI GIỮA BÀI 1 VÀ BÀI 2 */
         function skipToNextStage() {
             playSound('coin');
             isPlaying = false; isPausedForStart = true; clearAllTimeouts(); cancelAnimationFrame(loopRaf);
@@ -820,9 +830,9 @@
             isPlaying = false; isPausedForStart = true;
             clearAllTimeouts(); cancelAnimationFrame(loopRaf);
 
-            let bg = document.getElementById('sanctum-bg');
-            bg.classList.remove('playing-mode');
-            setTimeout(() => bg.classList.add('loaded'), 400); // Đợi ảnh nền sáng rõ trước
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('playing-mode');
+            setTimeout(() => vid.classList.add('loaded'), 400);
 
             if(cGame === '1') { 
                 sessionScoreG1 = Math.floor(aScore); 
@@ -849,7 +859,6 @@
 
             playSound('error'); document.getElementById('freeze-overlay').classList.add('active');
 
-            // Chờ chữ KẾT THÚC rơi xuống thong thả rồi mới hiện bảng kết quả
             setTimeout(() => {
                 document.getElementById('freeze-overlay').classList.remove('active');
                 
@@ -887,9 +896,9 @@
         function proceedNextStage() { playSound('coin'); document.getElementById('result-overlay').classList.remove('active'); openArena('2'); }
 
         function showFinalSummary() {
-            let bg = document.getElementById('sanctum-bg');
-            bg.classList.remove('playing-mode');
-            setTimeout(() => bg.classList.add('loaded'), 400);
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('playing-mode');
+            setTimeout(() => vid.classList.add('loaded'), 400);
 
             playSound('coin'); document.getElementById('result-overlay').classList.remove('active');
             let totalSessionScore = sessionScoreG1 + sessionScoreG2;
