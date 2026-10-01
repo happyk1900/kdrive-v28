@@ -136,7 +136,7 @@
         /* TRUNG TÂM GỌN GÀNG */
         .arc-reactor { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; display: flex; justify-content: center; align-items: center; z-index: 25; }
 
-        /* NÚT TRÒN NĂNG LƯỢNG: MÀU ĐEN TUYỀN, NỔI KHỐI TRÒN Ở TRUNG TÂM KÈM HIỆU ỨNG SÓNG LAN RA */
+        /* NÚT TRÒN NĂNG LƯỢNG: NỔI KHỐI ĐEN Ở TRUNG TÂM KÈM HIỆU ỨNG SÓNG LAN RA */
         .energy-nexus-btn {
             width: 110px; height: 110px; border-radius: 50%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -207,12 +207,11 @@
         .pos-rec2 { top: 50%; right: 2%; transform: translateY(-50%); } 
         .pos-move { top: 78%; right: 2%; transform: translateY(-100%); } 
         
-        /* THANH HOLOGRAM THU GỌN - CÓ HIỆU ỨNG ÁNH SÁNG TRẮNG CHẠY LƯỚT QUA (ELECTRIC BORDER SWEEP) */
+        /* THANH TERMINAL: ÁNH SÁNG TRẮNG CHẠY LƯỚT QUA, CHẠM ĐỂ MỞ RỘNG */
         .live-radar-bar { 
             position: absolute; bottom: max(45px, calc(env(safe-area-inset-bottom) + 20px)); left: 50%; transform: translateX(-50%); z-index: 10; width: 92%; max-width: 390px; padding: 10px 14px; background: rgba(8, 12, 20, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 215, 0, 0.4); border-left: 4px solid var(--gold); font-family: var(--font-terminal); display: flex; align-items: flex-start; flex-direction: column; gap: 4px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); box-shadow: 0 5px 20px rgba(0,0,0,0.6); transition: all 0.3s ease; cursor: pointer; overflow: hidden;
         }
 
-        /* Hiệu ứng ánh sáng trắng lướt qua viền thanh Terminal */
         .live-radar-bar::before {
             content: '';
             position: absolute;
@@ -236,8 +235,9 @@
         .live-metrics { color: rgba(255,255,255,0.95); display: flex; gap: 4px; flex-direction: column; font-size: 12px; font-weight: 500; width: 100%; word-break: break-word; line-height: 1.4; margin-top: 4px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.2); position: relative; z-index: 2; }
         .live-radar-bar:not(.expanded) .live-metrics { display: none; }
 
-        .directive-item { display: block; background: rgba(255, 170, 0, 0.12); border-left: 2px solid var(--amber); padding: 5px 8px; width: 100%; color: #ffeb3b; text-transform: uppercase; font-size: 11.5px; letter-spacing: 0.5px; font-weight: bold; }
-        .directive-item.ok { background: rgba(0, 255, 157, 0.12); border-left-color: var(--mint); color: #00ff9d; }
+        /* PHÂN LOẠI MÀU SẮC: LỖI KẾT NỐI MÀU TÍM, MỆNH LỆNH "HÃY..." CHỮ TRẮNG */
+        .directive-item { display: block; background: rgba(156, 39, 176, 0.15); border-left: 2px solid var(--berry); padding: 5px 8px; width: 100%; color: #e1bee7; text-transform: uppercase; font-size: 11.5px; letter-spacing: 0.5px; font-weight: bold; }
+        .directive-item.action { background: rgba(255, 255, 255, 0.08); border-left-color: #ffffff; color: #ffffff; }
     </style>
 </head>
 <body>
@@ -376,7 +376,7 @@
             </div>
         </div>
 
-        <!-- THANH TERMINAL: CÓ ÁNH SÁNG TRẮNG CHẠY LƯỚT QUA, CHẠM ĐỂ MỞ RỘNG -->
+        <!-- THANH TERMINAL: ÁNH SÁNG TRẮNG CHẠY LƯỚT QUA, CHẠM ĐỂ MỞ RỘNG -->
         <div class="live-radar-bar" id="live-radar-bar" onclick="toggleRadarBar(event)">
             <div class="radar-header" id="live-pulse">TRẠM ĐIỀU PHỐI SẴN SÀNG</div>
             <div class="live-metrics" id="live-metrics">Chạm vào nút tròn năng lượng để trích xuất tín hiệu sinh trắc từ Samsung Health.</div>
@@ -491,7 +491,7 @@
                 radarPulse.innerText = 'CHẾ ĐỘ THỦ CÔNG'; 
                 radarPulse.style.color = 'var(--gold)'; 
                 document.getElementById('live-radar-bar').style.borderLeftColor = 'var(--gold)';
-                radarMetrics.innerHTML = '<span class="directive-item ok">ĐÃ MỞ KHÓA - CHẠM VÀO TỪNG CHỈ SỐ ĐỂ NHẬP TAY</span>'; 
+                radarMetrics.innerHTML = '<span class="directive-item action">ĐÃ MỞ KHÓA - CHẠM VÀO TỪNG CHỈ SỐ ĐỂ NHẬP TAY</span>'; 
                 updateDirectivesManually();
             } 
         }
@@ -561,10 +561,9 @@
             }
         }
 
-        /* ĐÁNH GIÁ VÀ TRẢ VỀ 3 LOẠI LỖI KẾT NỐI HOẶC MỆNH LỆNH TRỰC TIẾP */
-        function evaluateDirectives(vals, hasAppError = false) {
+        /* PHÂN LOẠI CHUẨN XÁC: LỖI KẾT NỐI MÀU TÍM, MỆNH LỆNH CÒN THIẾU MÀU TRẮNG, LOẠI BỎ CÁC CHỈ SỐ ĐÃ ĐẠT */
+        function evaluateDirectives(vals, hasAppError = false, hasScaleError = false, hasWatchError = false) {
             let directives = [];
-            let hasErrorOrMissing = false;
 
             let hr = parseFloat(vals.hr) || 0;
             let w = parseFloat(vals.weight) || 0;
@@ -576,58 +575,46 @@
             let tgtWeight = parseFloat(localStorage.getItem('kdrive_target_weight')) || 65;
             let tgtSleep = parseFloat(localStorage.getItem('kdrive_target_sleep')) || 7.0;
             let tgtSteps = parseInt(localStorage.getItem('kdrive_target_steps')) || 6000;
+            let tgtHr = parseFloat(localStorage.getItem('kdrive_target_hr')) || 137;
 
+            // 1. Kiểm tra các lỗi kết nối (Màu Tím)
             if (hasAppError) {
                 directives.push(`<span class="directive-item">LỖI KẾT NỐI - ỨNG DỤNG SAMSUNG HEALTH</span>`);
-                hasErrorOrMissing = true;
             }
-
-            if (w === 0) {
-                directives.push(`<span class="directive-item">LỖI KẾT NỐI - CÂN SINH TRẮC</span>`);
-                hasErrorOrMissing = true;
-            } else if (Math.abs(w - tgtWeight) > 3.0) {
-                directives.push(`<span class="directive-item">ĐIỀU CHỈNH CÂN NẶNG</span>`);
-                hasErrorOrMissing = true;
-            } else {
-                directives.push(`<span class="directive-item ok">CÂN NẶNG ĐẠT CHUẨN</span>`);
-            }
-
-            if (hr === 0) {
+            if (hasWatchError || hr === 0) {
                 directives.push(`<span class="directive-item">LỖI KẾT NỐI - ĐỒNG HỒ THÔNG MINH</span>`);
-                hasErrorOrMissing = true;
-            } else if (hr < 80) {
-                directives.push(`<span class="directive-item">HÃY TẬP THỂ DỤC</span>`);
-                hasErrorOrMissing = true;
-            } else {
-                directives.push(`<span class="directive-item ok">NHỊP TIM ĐẠT CHUẨN</span>`);
+            }
+            if (hasScaleError || w === 0) {
+                directives.push(`<span class="directive-item">LỖI KẾT NỐI - CÂN SINH TRẮC</span>`);
             }
 
-            if (sl < tgtSleep) {
-                directives.push(`<span class="directive-item">HÃY NGỦ BÙ</span>`);
-                hasErrorOrMissing = true;
-            } else {
-                directives.push(`<span class="directive-item ok">GIẤC NGỦ ĐẠT CHUẨN</span>`);
+            // 2. Kiểm tra các mục chưa đạt -> Ra mệnh lệnh hành động (Chữ Trắng)
+            if (hr > 0 && hr < tgtHr) {
+                directives.push(`<span class="directive-item action">HÃY TẬP THỂ DỤC</span>`);
             }
-
+            if (w > 0 && Math.abs(w - tgtWeight) > 3.0) {
+                directives.push(`<span class="directive-item action">ĐIỀU CHỈNH CÂN NẶNG</span>`);
+            }
+            if (sl > 0 && sl < tgtSleep) {
+                directives.push(`<span class="directive-item action">HÃY NGỦ BÙ</span>`);
+            }
             if (steps < tgtSteps) {
-                directives.push(`<span class="directive-item">HÃY ĐI BỘ</span>`);
-                hasErrorOrMissing = true;
-            } else {
-                directives.push(`<span class="directive-item ok">HOÀN THÀNH MỤC TIÊU BƯỚC CHÂN</span>`);
+                directives.push(`<span class="directive-item action">HÃY ĐI BỘ</span>`);
             }
-
             if (h2o > 0 && h2o < 50.0) {
-                directives.push(`<span class="directive-item">THIẾU NƯỚC</span>`);
-                hasErrorOrMissing = true;
+                directives.push(`<span class="directive-item action">THIẾU NƯỚC</span>`);
             }
 
+            // Trạng thái nút tròn trung tâm
             let nexusBtn = document.getElementById('energy-nexus-btn');
             nexusBtn.classList.remove('state-standby', 'state-optimal', 'state-warning');
 
-            let allSynced = (w > 0 && hr > 0 && sl > 0);
-            if (!allSynced || hasAppError) {
+            let hasErrors = hasAppError || hasWatchError || hasScaleError || hr === 0 || w === 0;
+            let hasUnmet = (hr > 0 && hr < tgtHr) || (w > 0 && Math.abs(w - tgtWeight) > 3.0) || (sl > 0 && sl < tgtSleep) || (steps < tgtSteps) || (h2o > 0 && h2o < 50.0);
+
+            if (hasErrors) {
                 nexusBtn.classList.add('state-warning');
-            } else if (hasErrorOrMissing) {
+            } else if (hasUnmet) {
                 nexusBtn.classList.add('state-warning');
             } else {
                 nexusBtn.classList.add('state-optimal');
@@ -640,11 +627,11 @@
             let keys = ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'];
             let vals = {};
             keys.forEach(k => { vals[k] = localStorage.getItem('kdrive_live_' + k) || '0'; });
-            let directives = evaluateDirectives(vals, false);
-            document.getElementById('live-metrics').innerHTML = directives.join('');
+            let directives = evaluateDirectives(vals, false, false, false);
+            document.getElementById('live-metrics').innerHTML = directives.length > 0 ? directives.join('') : '<span class="directive-item action">TRẠNG THÁI TỐI ƯU</span>';
         }
 
-        function syncUI(hasAppError = false) {
+        function syncUI(hasAppError = false, hasScaleError = false, hasWatchError = false) {
             let keys = ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'];
             let vals = {};
             keys.forEach(k => {
@@ -655,8 +642,8 @@
             let score = calculateCoreScore(vals.hr, vals.weight, vals.sleep, vals.fat, vals.water, vals.steps);
             localStorage.setItem('kdrive_sci_score', score.toFixed(1));
 
-            let directives = evaluateDirectives(vals, hasAppError);
-            document.getElementById('live-metrics').innerHTML = directives.join('');
+            let directives = evaluateDirectives(vals, hasAppError, hasScaleError, hasWatchError);
+            document.getElementById('live-metrics').innerHTML = directives.length > 0 ? directives.join('') : '<span class="directive-item action">TRẠNG THÁI TỐI ƯU</span>';
         }
 
         function calculateCoreScore(hr, w, sl, fat, h2o, steps) {
@@ -692,7 +679,7 @@
                 radarPulse.style.color = 'var(--gold)'; 
                 radarPulse.innerText = 'TRẠM ĐIỀU PHỐI ĐÃ TẢI DỮ LIỆU';
             }
-            syncUI(false); 
+            syncUI(false, false, false); 
         }
 
         function handlePanelClick(key) { if (currentMode === 'manual') { promptEdit(key); } }
@@ -717,7 +704,7 @@
             if (val !== '' && currentEditingKey) { 
                 localStorage.setItem('kdrive_live_' + currentEditingKey, val); 
             }
-            syncUI(false); 
+            syncUI(false, false, false); 
             closeManualModal(); 
         }
 
@@ -772,9 +759,12 @@
                 let resHR = await safeQuery('heartRate');
                 let listHR = resHR?.samples || resHR?.values || [];
                 let liveHR = null;
+                let hasWatchErr = false;
                 if (listHR.length > 0) {
                     listHR.sort((a, b) => new Date(b.endDate || b.endTime || b.startDate) - new Date(a.endDate || a.endTime || a.startDate));
                     liveHR = listHR[0].value;
+                } else {
+                    hasWatchErr = true;
                 }
 
                 const sleepStart = new Date(todayStart.getTime() - (6 * 60 * 60 * 1000));
@@ -786,13 +776,17 @@
                     liveSleepMins += m;
                 });
                 let liveSleep = liveSleepMins > 0 ? (liveSleepMins / 60).toFixed(1) : null;
+                if (liveSleepMins === 0) hasWatchErr = true;
 
                 let resWeight = await safeQuery('weight');
                 let listWeight = resWeight?.samples || resWeight?.values || [];
                 let liveWeight = null;
+                let hasScaleErr = false;
                 if (listWeight.length > 0) {
                     listWeight.sort((a, b) => new Date(b.endDate || b.endTime || b.startDate) - new Date(a.endDate || a.endTime || a.startDate));
                     liveWeight = parseFloat(listWeight[0].value).toFixed(1);
+                } else {
+                    hasScaleErr = true;
                 }
 
                 let resFat = await safeQuery('bodyFat');
@@ -801,6 +795,8 @@
                 if (listFat.length > 0) {
                     listFat.sort((a, b) => new Date(b.endDate || b.endTime || b.startDate) - new Date(a.endDate || a.endTime || a.startDate));
                     liveFat = parseFloat(listFat[0].value).toFixed(1);
+                } else {
+                    hasScaleErr = true;
                 }
 
                 let liveWater = null;
@@ -817,7 +813,7 @@
                 if(liveWater !== null) localStorage.setItem('kdrive_live_water', liveWater);
                 if(liveSteps > 0) localStorage.setItem('kdrive_live_steps', liveSteps);
 
-                syncUI(false); 
+                syncUI(false, hasScaleErr, hasWatchErr); 
 
                 radarBar.style.borderLeftColor = 'var(--gold)';
                 radarPulse.style.color = 'var(--gold)'; 
@@ -826,7 +822,7 @@
             } catch (error) {
                 console.error("Lỗi đồng bộ:", error);
                 ['hr', 'weight', 'sleep', 'fat', 'water', 'steps'].forEach(key => { localStorage.setItem('kdrive_live_'+key, '0'); });
-                syncUI(true); // Kích hoạt cờ lỗi kết nối app Samsung Health
+                syncUI(true, true, true); // Báo lỗi kết nối app
                 
                 radarBar.style.borderLeftColor = 'var(--crimson)';
                 radarPulse.style.color = 'var(--crimson)'; 
