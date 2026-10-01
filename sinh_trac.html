@@ -56,7 +56,33 @@
         .vignette { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 4; background: radial-gradient(circle at center, transparent 20%, #030406 85%); }
         @keyframes grid-scroll { 0% { background-position: 0 0; } 100% { background-position: 0 40px; } }
         
-        .edge-lighting { position: fixed; inset: 0; z-index: 999; pointer-events: none; transition: box-shadow 1s ease, border 1s ease; box-shadow: inset 0 0 0px transparent; border: 0px solid transparent; }
+        /* HIỆU ỨNG VIỀN MÀN HÌNH (THỞ XANH NGỌC HOẶC ĐỎ CẢNH BÁO KHI GIỮ 3 GIÂY) */
+        .edge-lighting { 
+            position: fixed; inset: 0; z-index: 99999; pointer-events: none; 
+            transition: box-shadow 0.5s ease, border 0.5s ease; 
+            box-shadow: inset 0 0 0px transparent; border: 0px solid transparent; 
+        }
+        .edge-lighting.charging {
+            border: 3px solid var(--crimson);
+            box-shadow: inset 0 0 30px var(--crimson), 0 0 20px var(--crimson);
+        }
+        .edge-lighting.breathing {
+            border: 2px solid var(--mint);
+            box-shadow: inset 0 0 25px rgba(0,255,157,0.4), 0 0 15px rgba(0,255,157,0.4);
+            animation: screen-breath 3s infinite ease-in-out;
+        }
+        @keyframes screen-breath {
+            0%, 100% { box-shadow: inset 0 0 15px rgba(0,255,157,0.2), 0 0 10px rgba(0,255,157,0.2); border-color: rgba(0,255,157,0.4); }
+            50% { box-shadow: inset 0 0 35px rgba(0,255,157,0.6), 0 0 25px rgba(0,255,157,0.6); border-color: rgba(0,255,157,0.9); }
+        }
+
+        /* THANH NĂNG LƯỢNG NHỎ THẲNG TẮP Ở ĐÁY MÀN HÌNH (KHI GIỮ 3 GIÂY) */
+        .power-surge-bar-wrap {
+            position: fixed; bottom: 0; left: 0; width: 100vw; height: 4px; background: rgba(255,255,255,0.1); z-index: 999999; display: none; overflow: hidden;
+        }
+        .power-surge-fill {
+            width: 0%; height: 100%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); transition: width linear;
+        }
 
         .top-nav {
             position: fixed; top: max(45px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 0 20px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 9999; pointer-events: none;
@@ -136,7 +162,7 @@
         /* TRUNG TÂM GỌN GÀNG */
         .arc-reactor { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; display: flex; justify-content: center; align-items: center; z-index: 25; }
 
-        /* NÚT TRÒN NĂNG LƯỢNG: CÓ CHỮ CHẠM Ở GIỮA VÀ HIỆU ỨNG RUNG */
+        /* NÚT TRÒN NĂNG LƯỢNG: CÓ CHỮ CHẠM VÀ HỖ TRỢ GIỮ 3 GIÂY */
         .energy-nexus-btn {
             width: 110px; height: 110px; border-radius: 50%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -146,14 +172,12 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 4px 10px rgba(255,255,255,0.15), inset 0 -4px 10px rgba(0,0,0,0.9);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .energy-nexus-btn:active { transform: scale(0.94); box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 2px 5px rgba(255,255,255,0.1); }
+        .energy-nexus-btn:active { transform: scale(0.94); }
 
-        /* CHỮ CHẠM Ở LÕI TRUNG TÂM */
         .nexus-touch-lbl {
             position: absolute; z-index: 5; font-family: var(--font-terminal); font-size: 13px; font-weight: bold; letter-spacing: 2px; color: rgba(255,255,255,0.85); text-transform: uppercase; text-shadow: 0 0 8px rgba(0,229,255,0.6); pointer-events: none;
         }
 
-        /* HIỆU ỨNG SÓNG LAN RA TỪ TÂM (RIPPLE WAVE) */
         .energy-nexus-btn::before, .energy-nexus-btn::after {
             content: '';
             position: absolute;
@@ -172,7 +196,6 @@
             100% { transform: scale(1.55); opacity: 0; }
         }
 
-        /* TRẠNG THÁI TÍN HIỆU & MÀU SÓNG LAN */
         .energy-nexus-btn.state-standby {
             border-color: rgba(255, 255, 255, 0.3);
             color: rgba(255, 255, 255, 0.5);
@@ -212,7 +235,7 @@
         .pos-rec2 { top: 50%; right: 2%; transform: translateY(-50%); } 
         .pos-move { top: 78%; right: 2%; transform: translateY(-100%); } 
         
-        /* THANH TERMINAL: ÁNH SÁNG TRẮNG CHẠY LƯỚT QUA, CHẠM ĐỂ MỞ RỘNG */
+        /* THANH TERMINAL */
         .live-radar-bar { 
             position: absolute; bottom: max(45px, calc(env(safe-area-inset-bottom) + 20px)); left: 50%; transform: translateX(-50%); z-index: 10; width: 92%; max-width: 390px; padding: 10px 14px; background: rgba(8, 12, 20, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 215, 0, 0.4); border-left: 4px solid var(--gold); font-family: var(--font-terminal); display: flex; align-items: flex-start; flex-direction: column; gap: 4px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); box-shadow: 0 5px 20px rgba(0,0,0,0.6); transition: all 0.3s ease; cursor: pointer; overflow: hidden;
         }
@@ -254,7 +277,14 @@
     <div id="dust-container"></div>
     <div class="tactical-grid-bg"><div class="grid-plane"></div></div>
     <div class="vignette"></div>
+    
+    <!-- HIỆU ỨNG VIỀN MÀN HÌNH -->
     <div class="edge-lighting" id="edge-lighting"></div>
+
+    <!-- THANH NĂNG LƯỢNG NHỎ THẲNG TẮP Ở ĐÁY MÀN HÌNH KHI GIỮ 3 GIÂY -->
+    <div class="power-surge-bar-wrap" id="surgeBarWrap">
+        <div class="power-surge-fill" id="surgeBarFill"></div>
+    </div>
 
     <div class="top-nav">
         <div class="nav-left-group">
@@ -353,8 +383,8 @@
     <div class="pwa-container" id="main-pwa">
         <div class="core-wrapper">
             <div class="arc-reactor">
-                <!-- NÚT TRÒN NĂNG LƯỢNG: CÓ CHỮ CHẠM, ĐỘ TRỄ NẠP NĂNG LƯỢNG, GẦM & RUNG MẠNH -->
-                <div class="energy-nexus-btn state-standby" id="energy-nexus-btn" onclick="handleCoreAction()" title="Chạm để trích xuất tín hiệu sinh trắc">
+                <!-- NÚT TRÒN NĂNG LƯỢNG: GIỮ 3 GIÂY ĐỂ NẠP NĂNG LƯỢNG -->
+                <div class="energy-nexus-btn state-standby" id="energy-nexus-btn" title="Giữ 3 giây để trích xuất tín hiệu sinh trắc">
                     <span class="nexus-touch-lbl">CHẠM</span>
                     <div class="nexus-core-glow"></div>
                 </div>
@@ -381,10 +411,10 @@
             </div>
         </div>
 
-        <!-- THANH TERMINAL: ÁNH SÁNG TRẮNG CHẠY LƯỚT QUA, CHẠM ĐỂ MỞ RỘNG -->
+        <!-- THANH TERMINAL -->
         <div class="live-radar-bar" id="live-radar-bar" onclick="playBeep(); toggleRadarBar(event)">
             <div class="radar-header" id="live-pulse">TRẠM ĐIỀU PHỐI SẴN SÀNG</div>
-            <div class="live-metrics" id="live-metrics">Chạm vào nút tròn năng lượng để trích xuất tín hiệu sinh trắc từ Samsung Health.</div>
+            <div class="live-metrics" id="live-metrics">Giữ nút tròn năng lượng trong 3 giây để trích xuất tín hiệu sinh trắc từ Samsung Health.</div>
         </div>
     </div>
 
@@ -406,7 +436,6 @@
             }
         }
 
-        // Âm thanh "tít tít" cho các nút bấm thông thường
         function playBeep() {
             try {
                 initAudio();
@@ -423,43 +452,156 @@
             } catch(e) {}
         }
 
-        // Âm thanh nạp năng lượng & gầm trầm vang cho lõi trung tâm
-        function playChargeAndBoom() {
+        // Âm thanh rú dâng cao dần (Ramp-up) trong 3 giây giữ
+        let chargeOsc = null;
+        let chargeGain = null;
+        function startChargeSound() {
             try {
                 initAudio();
                 let now = audioCtx.currentTime;
+                chargeOsc = audioCtx.createOscillator();
+                chargeGain = audioCtx.createGain();
+                chargeOsc.type = 'sawtooth';
+                chargeOsc.frequency.setValueAtTime(70, now);
+                chargeOsc.frequency.exponentialRampToValueAtTime(450, now + 3.0); // Rú to và cao dần
                 
-                // Tiếng điện áp quét lên (sweep up)
-                let osc1 = audioCtx.createOscillator();
-                let gain1 = audioCtx.createGain();
-                osc1.type = 'sawtooth';
-                osc1.frequency.setValueAtTime(80, now);
-                osc1.frequency.exponentialRampToValueAtTime(300, now + 0.6);
+                chargeGain.gain.setValueAtTime(0.05, now);
+                chargeGain.gain.linearRampToValueAtTime(0.25, now + 3.0);
                 
-                gain1.gain.setValueAtTime(0.15, now);
-                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-                
-                osc1.connect(gain1);
-                gain1.connect(audioCtx.destination);
-                osc1.start(now);
-                osc1.stop(now + 0.6);
-
-                // Tiếng nổ trầm uy lực (boom/gầm)
-                let osc2 = audioCtx.createOscillator();
-                let gain2 = audioCtx.createGain();
-                osc2.type = 'triangle';
-                osc2.frequency.setValueAtTime(180, now + 0.5);
-                osc2.frequency.exponentialRampToValueAtTime(35, now + 1.2);
-                
-                gain2.gain.setValueAtTime(0.35, now + 0.5);
-                gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
-                
-                osc2.connect(gain2);
-                gain2.connect(audioCtx.destination);
-                osc2.start(now + 0.5);
-                osc2.stop(now + 1.2);
+                chargeOsc.connect(chargeGain);
+                chargeGain.connect(audioCtx.destination);
+                chargeOsc.start(now);
             } catch(e) {}
         }
+
+        function stopChargeSound() {
+            try {
+                if (chargeOsc) {
+                    chargeOsc.stop();
+                    chargeOsc.disconnect();
+                    chargeOsc = null;
+                }
+            } catch(e) {}
+        }
+
+        // Tiếng nổ "bùm" trầm uy lực khi hoàn tất 3 giây
+        function playBoom() {
+            try {
+                initAudio();
+                let now = audioCtx.currentTime;
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampYToValueAtTime ? osc.frequency.exponentialRampToValueAtTime(25, now + 0.5) : osc.frequency.exponentialRampToValueAtTime(25, now + 0.5);
+                
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            } catch(e) {}
+        }
+
+        // LOGIC GIỮ 3 GIÂY (HOLD-TO-CHARGE)
+        let holdTimer = null;
+        let surgeInterval = null;
+        const nexusBtn = document.getElementById('energy-nexus-btn');
+        const surgeBarWrap = document.getElementById('surgeBarWrap');
+        const surgeBarFill = document.getElementById('surgeBarFill');
+        const edgeLighting = document.getElementById('edge-lighting');
+
+        function startHoldAction(e) {
+            e.preventDefault();
+            if(window.isScanning) return;
+
+            // Đổi viền sang đỏ báo hiệu đang nạp
+            edgeLighting.className = 'edge-lighting charging';
+            surgeBarWrap.style.display = 'block';
+            surgeBarFill.style.transition = 'none';
+            surgeBarFill.style.width = '0%';
+            
+            // Kích hoạt thanh năng lượng chạy đầy trong 3 giây
+            setTimeout(() => {
+                surgeBarFill.style.transition = 'width 3.0s linear';
+                surgeBarFill.style.width = '100%';
+            }, 50);
+
+            startChargeSound();
+
+            // Rung dồn dập tăng tốc liên tục trong 3 giây
+            let vibrateCount = 0;
+            surgeInterval = setInterval(() => {
+                if(navigator.vibrate) navigator.vibrate(80);
+                vibrateCount++;
+            }, 300);
+
+            // Hẹn giờ hoàn tất 3 giây
+            holdTimer = setTimeout(() => {
+                completeHoldAction();
+            }, 3000);
+        }
+
+        function cancelHoldAction() {
+            if(holdTimer) {
+                clearTimeout(holdTimer);
+                holdTimer = null;
+            }
+            if(surgeInterval) {
+                clearInterval(surgeInterval);
+                surgeInterval = null;
+            }
+            stopChargeSound();
+            surgeBarWrap.style.display = 'none';
+            surgeBarFill.style.width = '0%';
+            
+            // Trả viền về bình thường nếu chưa hoàn thành
+            let edge = document.getElementById('edge-lighting');
+            if(!edge.classList.contains('breathing')) {
+                edge.className = 'edge-lighting';
+            }
+        }
+
+        function completeHoldAction() {
+            cancelHoldAction();
+            playBoom();
+
+            // Rung mạnh kết thúc
+            if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+            // Kích hoạt viền màn hình thở xanh ngọc
+            edgeLighting.className = 'edge-lighting breathing';
+
+            const radarBar = document.getElementById('live-radar-bar');
+            const radarPulse = document.getElementById('live-pulse'); 
+            const radarMetrics = document.getElementById('live-metrics');
+            
+            radarBar.style.borderLeftColor = 'var(--cyan)';
+            radarPulse.style.color = 'var(--cyan)'; 
+            radarPulse.innerText = 'ĐÃ KÍCH HOẠT NĂNG LƯỢNG'; 
+            radarMetrics.innerHTML = 'Đang trích xuất dữ liệu sinh trắc từ Samsung Health...';
+
+            if (currentMode === 'auto') { 
+                triggerHealthConnectSync(); 
+            } else { 
+                radarPulse.innerText = 'CHẾ ĐỘ THỦ CÔNG'; 
+                radarPulse.style.color = 'var(--gold)'; 
+                radarBar.style.borderLeftColor = 'var(--gold)';
+                radarMetrics.innerHTML = '<span class="directive-item action">ĐÃ MỞ KHÓA - CHẠM VÀO TỪNG CHỈ SỐ ĐỂ NHẬP TAY</span>'; 
+                updateDirectivesManually();
+            }
+        }
+
+        // Gắn sự kiện nhấn & giữ (Hỗ trợ cả cảm ứng di động và chuột máy tính)
+        nexusBtn.addEventListener('mousedown', startHoldAction);
+        nexusBtn.addEventListener('mouseup', cancelHoldAction);
+        nexusBtn.addEventListener('mouseleave', cancelHoldAction);
+
+        nexusBtn.addEventListener('touchstart', startHoldAction, {passive: false});
+        nexusBtn.addEventListener('touchend', cancelHoldAction);
+        nexusBtn.addEventListener('touchcancel', cancelHoldAction);
 
         function checkMidnightReset() {
             let lastDate = localStorage.getItem('kdrive_last_date');
@@ -552,41 +694,6 @@
             };
             alert(infoMap[type]);
         }
-
-        /* LÕI TRUNG TÂM: CÓ ĐỘ TRỄ NẠP NĂNG LƯỢNG, RUNG MẠNH & ÂM THANH GẦM VANG */
-        function handleCoreAction() { 
-            if(window.isScanning) return;
-            
-            playChargeAndBoom();
-            
-            // Hiệu ứng rung dồn dập mô phỏng nguồn điện nạp
-            if(navigator.vibrate) {
-                navigator.vibrate([100, 50, 100, 50, 250]); 
-            }
-
-            const radarBar = document.getElementById('live-radar-bar');
-            const radarPulse = document.getElementById('live-pulse'); 
-            const radarMetrics = document.getElementById('live-metrics');
-            
-            radarBar.style.borderLeftColor = 'var(--cyan)';
-            radarPulse.style.color = 'var(--cyan)'; 
-            radarPulse.innerText = 'ĐANG NẠP TÍN HIỆU...'; 
-            radarMetrics.innerHTML = 'Đang kích hoạt cỗ máy năng lượng & quét hạ tầng...';
-
-            // Độ trễ 1.2 giây để tạo cảm giác "gầm và chạy thanh năng lượng" trước khi phản hồi thực sự
-            setTimeout(() => {
-                if (currentMode === 'auto') { 
-                    triggerHealthConnectSync(); 
-                } else { 
-                    radarPulse.innerText = 'CHẾ ĐỘ THỦ CÔNG'; 
-                    radarPulse.style.color = 'var(--gold)'; 
-                    radarBar.style.borderLeftColor = 'var(--gold)';
-                    radarMetrics.innerHTML = '<span class="directive-item action">ĐÃ MỞ KHÓA - CHẠM VÀO TỪNG CHỈ SỐ ĐỂ NHẬP TAY</span>'; 
-                    updateDirectivesManually();
-                    window.isScanning = false;
-                } 
-            }, 1200);
-        }
         
         function calculateTargets(year, height, currentWeight) { 
             let age = 2026 - parseInt(year); 
@@ -653,7 +760,6 @@
             }
         }
 
-        /* PHÂN LOẠI MÀU: LỖI KẾT NỐI MÀU TÍM, HÀNH ĐỘNG MÀU TRẮNG */
         function evaluateDirectives(vals, hasAppError = false, hasScaleError = false, hasWatchError = false) {
             let directives = [];
 
@@ -669,33 +775,15 @@
             let tgtSteps = parseInt(localStorage.getItem('kdrive_target_steps')) || 6000;
             let tgtHr = parseFloat(localStorage.getItem('kdrive_target_hr')) || 137;
 
-            // 1. Lỗi kết nối (Màu Tím)
-            if (hasAppError) {
-                directives.push(`<span class="directive-item">LỖI KẾT NỐI - ỨNG DỤNG SAMSUNG HEALTH</span>`);
-            }
-            if (hasWatchError || hr === 0) {
-                directives.push(`<span class="directive-item">LỖI KẾT NỐI - ĐỒNG HỒ THÔNG MINH</span>`);
-            }
-            if (hasScaleError || w === 0) {
-                directives.push(`<span class="directive-item">LỖI KẾT NỐI - CÂN SINH TRẮC</span>`);
-            }
+            if (hasAppError) directives.push(`<span class="directive-item">LỖI KẾT NỐI - ỨNG DỤNG SAMSUNG HEALTH</span>`);
+            if (hasWatchError || hr === 0) directives.push(`<span class="directive-item">LỖI KẾT NỐI - ĐỒNG HỒ THÔNG MINH</span>`);
+            if (hasScaleError || w === 0) directives.push(`<span class="directive-item">LỖI KẾT NỐI - CÂN SINH TRẮC</span>`);
 
-            // 2. Mệnh lệnh hành động (Chữ Trắng)
-            if (hr > 0 && hr < tgtHr) {
-                directives.push(`<span class="directive-item action">HÃY TẬP THỂ DỤC</span>`);
-            }
-            if (w > 0 && Math.abs(w - tgtWeight) > 3.0) {
-                directives.push(`<span class="directive-item action">ĐIỀU CHỈNH CÂN NẶNG</span>`);
-            }
-            if (sl > 0 && sl < tgtSleep) {
-                directives.push(`<span class="directive-item action">HÃY NGỦ BÙ</span>`);
-            }
-            if (steps < tgtSteps) {
-                directives.push(`<span class="directive-item action">HÃY ĐI BỘ</span>`);
-            }
-            if (h2o > 0 && h2o < 50.0) {
-                directives.push(`<span class="directive-item action">THIẾU NƯỚC</span>`);
-            }
+            if (hr > 0 && hr < tgtHr) directives.push(`<span class="directive-item action">HÃY TẬP THỂ DỤC</span>`);
+            if (w > 0 && Math.abs(w - tgtWeight) > 3.0) directives.push(`<span class="directive-item action">ĐIỀU CHỈNH CÂN NẶNG</span>`);
+            if (sl > 0 && sl < tgtSleep) directives.push(`<span class="directive-item action">HÃY NGỦ BÙ</span>`);
+            if (steps < tgtSteps) directives.push(`<span class="directive-item action">HÃY ĐI BỘ</span>`);
+            if (h2o > 0 && h2o < 50.0) directives.push(`<span class="directive-item action">THIẾU NƯỚC</span>`);
 
             let nexusBtn = document.getElementById('energy-nexus-btn');
             nexusBtn.classList.remove('state-standby', 'state-optimal', 'state-warning');
@@ -909,7 +997,6 @@
                 radarPulse.style.color = 'var(--crimson)'; 
                 radarPulse.innerText = 'LỖI ĐỒNG BỘ';
             }
-            window.isScanning = false;
         }
     </script>
 </body>
