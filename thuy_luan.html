@@ -90,10 +90,11 @@
 
         #hp-notification-area { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); width: 220px; text-align: center; }
 
+        /* THANH ĐIỀU HƯỚNG DƯỚI BỐ CỤC 4 NÚT (Back, Skip, Mute, Pause) */
         .game-bottom-bar {
             position: fixed; bottom: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw;
             border-top: 1px solid rgba(244, 143, 177, 0.5); padding: 15px 20px 0 20px;
-            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; z-index: 10000; pointer-events: auto;
+            display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto;
             background: linear-gradient(0deg, rgba(5,11,20,0.95) 0%, transparent 100%); opacity: 0; transition: opacity 1.5s ease;
         }
         .game-bottom-bar.visible { opacity: 1; }
@@ -107,13 +108,16 @@
         }
         .btn-action:active { transform: scale(0.9); }
         
-        .btn-back { justify-self: start; color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 26px; font-weight: bold; box-shadow: 0 0 12px rgba(244,143,177,0.4); padding-bottom: 2px; padding-right: 2px; }
+        .btn-back { color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 26px; font-weight: bold; box-shadow: 0 0 12px rgba(244,143,177,0.4); padding-bottom: 2px; padding-right: 2px; }
         .btn-back:active { background: rgba(244, 143, 177, 0.35); box-shadow: 0 0 20px rgba(244, 143, 177, 0.9); }
 
-        .btn-skip { justify-self: center; border-color: rgba(244, 143, 177, 0.75); color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 22px; font-weight: bold; box-shadow: 0 0 12px rgba(244,143,177,0.4); }
+        .btn-skip { border-color: rgba(244, 143, 177, 0.75); color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 22px; font-weight: bold; box-shadow: 0 0 12px rgba(244,143,177,0.4); }
         .btn-skip:active { background: rgba(244, 143, 177, 0.35); box-shadow: 0 0 20px rgba(244, 143, 177, 0.9); }
 
-        .btn-pause { justify-self: end; border-color: rgba(255, 183, 77, 0.6); box-shadow: 0 0 12px rgba(255, 183, 77, 0.3); }
+        .btn-mute { border-color: rgba(255, 183, 77, 0.6); color: #ffb74d; font-size: 20px; box-shadow: 0 0 12px rgba(255, 183, 77, 0.3); }
+        .btn-mute:active { background: rgba(255, 183, 77, 0.3); box-shadow: 0 0 20px rgba(255, 183, 77, 0.7); }
+
+        .btn-pause { border-color: rgba(255, 183, 77, 0.6); box-shadow: 0 0 12px rgba(255, 183, 77, 0.3); }
         .btn-pause::before, .btn-pause::after { content: ''; width: 4px; height: 18px; background: #ffb74d; margin: 0 3px; border-radius: 2px; box-shadow: 0 0 8px #ffb74d; }
         .btn-pause:active { background: rgba(255, 183, 77, 0.3); box-shadow: 0 0 20px rgba(255, 183, 77, 0.7); }
 
@@ -125,7 +129,7 @@
         .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         .pause-btn.exit { background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; color: #ff3366; margin-bottom: 0; }
 
-        /* KHOẢNH KHẮC KẾT THÚC: CHỮ HỒNG NEON SÁNG RỰC RỠ */
+        /* KHOẢNH KHẮC KẾT THÚC */
         #freeze-overlay { position: fixed; inset: 0; background: transparent; z-index: 200000; display: none; align-items: center; justify-content: center; pointer-events: none; }
         #freeze-overlay.active { display: flex; }
         @keyframes textFallSlow {
@@ -189,7 +193,6 @@
             100% { border-color: rgba(255, 255, 255, 0.4); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
         }
 
-        /* Ô Ô TRONG MA TRẬN KHI ẤN VÀO SẼ CHUYỂN SANG MÀU HỒNG NEON */
         .grid-cell { aspect-ratio: 1; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.15s ease; backdrop-filter: blur(6px); }
         .grid-cell.active-glow { background: rgba(244, 143, 177, 0.9); box-shadow: 0 0 22px #f48fb1; border-color: #fff; }
         .grid-cell.correct { background: rgba(244, 143, 177, 0.95); box-shadow: 0 0 18px #f48fb1; border-color: #fff; color: #fff;}
@@ -252,10 +255,11 @@
                 </div>
             </div>
 
-            <!-- THANH ĐIỀU HƯỚNG DƯỚI: NÚT SKIP CHUYỂN QUA LẠI BÀI 1 VÀ BÀI 2 -->
+            <!-- THANH ĐIỀU HƯỚNG DƯỚI BỐ CỤC 4 NÚT (Back, Skip, Mute, Pause) -->
             <div id="game-bottom-bar" class="game-bottom-bar">
                 <button class="btn-action btn-back" onclick="confirmExitToLobby()">⟨</button>
                 <button class="btn-action btn-skip" id="btn-skip-stage" onclick="skipToNextStage()" title="Chuyển bài">⏭</button>
+                <button class="btn-action btn-mute" id="btn-mute" onclick="toggleVideoMute()" title="Bật/Tắt tiếng video">🔊</button>
                 <button class="btn-action btn-pause" onclick="pauseGame()"></button>
             </div>
 
@@ -392,10 +396,20 @@
                 if (!fxCtx) { fxCtx = new (window.AudioContext || window.webkitAudioContext)(); }
                 if (fxCtx && fxCtx.state === 'suspended') { fxCtx.resume(); }
                 let vid = document.getElementById('sanctum-video');
-                if (vid) { vid.muted = false; vid.play().catch(e => {}); }
+                if (vid && !vid.dataset.userMuted) { vid.muted = false; vid.play().catch(e => {}); }
             } catch(e) {}
         }
         ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => { window.addEventListener(evt, initAudio, { passive: true }); });
+
+        function toggleVideoMute() {
+            let vid = document.getElementById('sanctum-video');
+            let muteBtn = document.getElementById('btn-mute');
+            if(!vid) return;
+            vid.muted = !vid.muted;
+            vid.dataset.userMuted = vid.muted ? 'true' : 'false';
+            muteBtn.innerHTML = vid.muted ? '🔇' : '🔊';
+            playSound('coin');
+        }
 
         function playSound(type, pitchMultiplier = 1) {
             try { 
