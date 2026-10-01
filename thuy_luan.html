@@ -26,16 +26,15 @@
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; }
 
-        /* ẢNH NỀN HIỆN MỜ CỰC KỲ CHẬM RÃI (2.5 GIÂY) */
-        #sanctum-bg { 
+        /* VIDEO NỀN ĐỘNG THỦY LUÂN HIỆN MỜ CHẬM RÃI (2.5 GIÂY) CÓ ÂM THANH */
+        #sanctum-video { 
             position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; 
-            background: url('https://github.com/happyk1900/Kai-Ripe/blob/main/nen%20thuy%20luan%20.png?raw=true') no-repeat center center; 
-            background-size: cover; 
+            object-fit: cover;
             opacity: 0;
             transition: opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
-        #sanctum-bg.loaded { opacity: 1; }
-        #sanctum-bg.playing-mode { opacity: 0; pointer-events: none; transition: opacity 2.0s cubic-bezier(0.25, 1, 0.5, 1); }
+        #sanctum-video.loaded { opacity: 1; }
+        #sanctum-video.playing-mode { opacity: 0; pointer-events: none; transition: opacity 2.0s cubic-bezier(0.25, 1, 0.5, 1); }
 
         #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
         .quantum-sparkle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 8px #ffffff, 0 0 15px #ffb6c1; opacity: 0; animation: sparkleFloat linear infinite; }
@@ -220,7 +219,11 @@
 </head>
 <body>
 
-    <div id="sanctum-bg"></div>
+    <!-- VIDEO NỀN ĐỘNG THỦY LUÂN CÓ ÂM THANH -->
+    <video id="sanctum-video" autoplay loop playsinline>
+        <source src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/video%20nen%20thuy%20luan.mp4" type="video/mp4">
+    </video>
+
     <div id="dust-container"></div>
 
     <div id="task-arena">
@@ -387,6 +390,8 @@
             try {
                 if (!fxCtx) { fxCtx = new (window.AudioContext || window.webkitAudioContext)(); }
                 if (fxCtx && fxCtx.state === 'suspended') { fxCtx.resume(); }
+                let vid = document.getElementById('sanctum-video');
+                if (vid) { vid.muted = false; vid.play().catch(e => {}); }
             } catch(e) {}
         }
         ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => { window.addEventListener(evt, initAudio, { passive: true }); });
@@ -498,9 +503,9 @@
             currentLevel = 1; highestCompletedLevel = 1; winsInCurrentLevel = 0;
             extractionTimes = []; nextHpMilestone = 1000;
 
-            let bg = document.getElementById('sanctum-bg');
-            bg.classList.remove('playing-mode');
-            setTimeout(() => bg.classList.add('loaded'), 150);
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('playing-mode');
+            setTimeout(() => vid.classList.add('loaded'), 150);
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
@@ -551,9 +556,9 @@
             promptOverlay.classList.remove('active');
             setTimeout(() => promptOverlay.classList.add('hidden'), 1200);
             
-            let bg = document.getElementById('sanctum-bg');
-            bg.classList.remove('loaded');
-            bg.classList.add('playing-mode');
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('loaded');
+            vid.classList.add('playing-mode'); // Ẩn video khi vào màn chơi chính
 
             playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
             setTimeout(() => { let playArea = document.getElementById('play-area'); playArea.classList.add('fullscreen-mode'); laser.classList.add('expand'); }, 600);
@@ -576,7 +581,7 @@
         function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
         function closeArena() { window.location.href = 'LucChien.html'; }
 
-        /* SỬA ĐÚNG LOGIC: NÚT SKIP CHỈ ĐỔI QUA LẠI GIỮA BÀI 1 VÀ BÀI 2 */
+        /* NÚT SKIP CHUYỂN QUA LẠI BÀI 1 VÀ BÀI 2 */
         function skipToNextStage() {
             playSound('coin');
             isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
@@ -585,11 +590,11 @@
             if (cGame === '1') {
                 sessionScoreG1 = Math.round(aScore); 
                 localStorage.setItem('thuy_luan_bai1_score', sessionScoreG1);
-                openArena('2'); // Chuyển sang Bài 2
+                openArena('2');
             } else {
                 sessionScoreG2 = Math.round(aScore); 
                 localStorage.setItem('thuy_luan_bai2_score', sessionScoreG2);
-                openArena('1'); // Quay lại Bài 1 (Đúng yêu cầu nút chuyển bài qua lại)
+                openArena('1');
             }
         }
 
@@ -781,9 +786,9 @@
             isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
             aScore += pendingScore; pendingScore = 0; 
 
-            let bg = document.getElementById('sanctum-bg');
-            bg.classList.remove('playing-mode');
-            setTimeout(() => bg.classList.add('loaded'), 400); // Đợi ảnh nền sáng rõ trước
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('playing-mode');
+            setTimeout(() => vid.classList.add('loaded'), 400); // Đợi video nền hiện rõ trước
 
             let currentHits = (cGame === '1') ? hitsCountG1 : hitsCountG2;
             let avgExtractionMs = extractionTimes.length > 0 ? Math.round(extractionTimes.reduce((a,b)=>a+b, 0) / extractionTimes.length) : 0;
@@ -803,7 +808,6 @@
 
             playSound('error'); document.getElementById('freeze-overlay').classList.add('active');
 
-            // Chờ chữ KẾT THÚC rơi xuống thong thả rồi mới hiện bảng kết quả
             setTimeout(() => {
                 document.getElementById('freeze-overlay').classList.remove('active');
                 
@@ -831,9 +835,9 @@
         function proceedNextStage() { playSound('coin'); document.getElementById('result-overlay').classList.remove('active'); openArena('2'); }
 
         function showFinalSummary() {
-            let bg = document.getElementById('sanctum-bg');
-            bg.classList.remove('playing-mode');
-            setTimeout(() => bg.classList.add('loaded'), 400);
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('playing-mode');
+            setTimeout(() => vid.classList.add('loaded'), 400);
 
             playSound('coin'); document.getElementById('result-overlay').classList.remove('active');
             let totalSessionScore = sessionScoreG1 + sessionScoreG2;
