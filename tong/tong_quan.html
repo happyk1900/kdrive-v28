@@ -62,11 +62,16 @@
         #start-prompt-overlay > * { animation: cinematicPopupSuperSlow 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; opacity: 0; }
 
         .briefing-panel { background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px 26px; width: 100%; max-width: 340px; text-align: left; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); }
+        
+        /* PHÔNG CHỮ TIÊU ĐỀ DÀY DẶN ĐỒNG BỘ */
         .briefing-title { color: #00e5ff !important; font-family: 'Chakra Petch', sans-serif; font-size: 21px; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(0, 229, 255, 0.4); padding-bottom: 8px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,229,255,0.6); }
+        
         .briefing-target { color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; line-height: 1.7; font-weight: 600; }
         .briefing-target b { color: #f48fb1; font-weight: bold; }
 
         .action-group { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        
+        /* NÚT BẮT ĐẦU MÀU XANH LÁ HẤP DẪN */
         .start-action-box { width: 100%; background: var(--mint); padding: 15px; border-radius: 12px; color: #000; font-family: 'Chakra Petch', sans-serif; font-size: 17px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 10px 25px rgba(0, 255, 157, 0.4); text-align: center; transition: 0.4s; }
         .start-action-box:active { transform: scale(0.96); filter: brightness(1.2); }
 
@@ -254,11 +259,11 @@
                         • <b>Thủy Luân</b> (Trí nhớ không gian)<br>
                         • <b>Hỏa Luân</b> (Phản xạ & tốc độ phát lực)<br>
                         • <b>Phong Luân</b> (Phán đoán & bám dính quỹ đạo)<br><br>
-                        Hệ thống sẽ tự động lưu trữ và tổng kết ở cuối chuỗi!
+                        Hệ thống sẽ ghi nhận và tự động tổng kết ở cuối chuỗi!
                     </div>
                 </div>
                 <div class="action-group">
-                    <div class="start-action-box" id="start-btn-box" onclick="triggerStartGame()">BẮT ĐẦU CHUỖI TEST</div>
+                    <div class="start-action-box" id="start-btn-box" onclick="handleStartBtn()">BẮT ĐẦU CHUỖI TEST</div>
                 </div>
             </div>
 
@@ -405,6 +410,7 @@
             } catch (e) {}
         }
 
+        let isFirstLoad = true;
         let cGame = '1'; 
         let aScore = 0;           
         let pendingScore = 0;     
@@ -429,6 +435,7 @@
 
         window.onload = () => { 
             let vid = document.getElementById('sanctum-video');
+            vid.src = '../Photo/video nen trang chu.mp4';
             setTimeout(() => vid.classList.add('loaded'), 150);
             initSparkleParticles();
             
@@ -505,6 +512,7 @@
 
             let vid = document.getElementById('sanctum-video');
             vid.classList.remove('playing-mode');
+            setTimeout(() => vid.classList.add('loaded'), 150);
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
@@ -521,7 +529,7 @@
                 bTarget = "Ép các tế bào thần kinh hoạt động hết công suất để bắt trọn từng vị trí chớp nhoáng.<br><br><span style='color:#f48fb1; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và bấm lại chính xác các vị trí đó.";
             } else if (id === '2') {
                 bTitle = "BÀI 2 — GHI NHỚ HÌNH ẢNH"; 
-                bTarget = "Rèn luyện khả năng nạp và giải mã chuỗi thông tin tốc độ cao.<br><br><span style='color:#f48fb1; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và gõ lại đúng thứ tự chuỗi ký hiệu xuất hiện.";
+                bTarget = "Rèn luyện khả năng nạp và giải mã chuỗi thông tin tốc độ cao. Khi não phải rướn lên xử lý, đó là lúc các liên kết thần kinh mới được hình thành.<br><br><span style='color:#f48fb1; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và gõ lại đúng thứ tự chuỗi ký hiệu xuất hiện.";
             }
 
             document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
@@ -539,8 +547,25 @@
             if (id === '2') buildG2Keyboard();
         }
 
+        // HÀM BẮT ĐẦU AN TOÀN ĐỂ KHÔNG BỊ JUMP GAME TRỰC TIẾP
+        function handleStartBtn() {
+            playSound('coin');
+            if (isFirstLoad) {
+                isFirstLoad = false;
+                let promptOverlay = document.getElementById('start-prompt-overlay');
+                promptOverlay.classList.remove('active');
+                let vid = document.getElementById('sanctum-video');
+                vid.src = '../Photo/video nen thuy luan.mp4';
+                vid.play().catch(e => {});
+                setTimeout(() => {
+                    openArena('1'); 
+                }, 500);
+                return;
+            }
+            triggerStartGame();
+        }
+
         function triggerStartGame() {
-            initAudio(); playSound('coin');
             let promptOverlay = document.getElementById('start-prompt-overlay');
             promptOverlay.classList.remove('active');
             setTimeout(() => promptOverlay.classList.add('hidden'), 1200);
@@ -572,6 +597,7 @@
         function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; if(cGame === '1') runGame1(); else runGame2(); }
         function confirmExitToLobby() { playSound('error'); window.location.href = '../LucChien_2.html'; }
 
+        /* NÚT SKIP CHUYỂN QUA LẠI BÀI 1 VÀ BÀI 2 */
         function skipToNextStage() {
             playSound('coin');
             isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
