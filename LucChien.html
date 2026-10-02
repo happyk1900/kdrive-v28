@@ -237,6 +237,7 @@
         
         .cyber-led-wrapper { position: relative; padding: 1.5px; overflow: hidden; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); width: 95vw; max-width: 420px; box-shadow: 0 0 35px rgba(0,229,255,0.3); z-index: 1; pointer-events: auto; }
         
+        /* Hiệu ứng Radar quét xoay tròn trực tiếp trên khung viền modal */
         .cyber-led-wrapper::before { 
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; 
             background: conic-gradient(from 0deg, transparent 60%, rgba(0,229,255,0.8) 100%); 
@@ -249,9 +250,10 @@
         
         .modal-text-container { background: #060a0f; border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 8px; padding: 16px; font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; color: #ffffff; line-height: 1.8; text-align: justify; box-shadow: inset 0 0 20px rgba(0,0,0,1); }
         
-        .modal-btn { width: 100%; padding: 13px; font-family: 'Share Tech Mono', monospace; font-size: 14.5px; font-weight: bold; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--cyan); color: var(--cyan); cursor: pointer; text-transform: uppercase; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 15px) 100%, 0 100%, 0 8px); text-align: center; transition: all 0.2s; margin-top: 20px; backdrop-filter: blur(4px); }
+        .modal-btn { width: 100%; padding: 13px; font-family: 'Share Tech Mono', monospace; font-size: 14.5px; font-weight: bold; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--cyan); color: var(--cyan); cursor: pointer; text-transform: uppercase; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); text-align: center; transition: all 0.2s; margin-top: 20px; backdrop-filter: blur(4px); }
         .modal-btn:active { transform: scale(0.96); background: rgba(0, 229, 255, 0.3); }
 
+        /* CUSTOM STYLES CHO LỊCH SỬ & AI */
         .hist-section { margin-bottom: 12px; }
         .hist-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: #00e5ff; border-bottom: 1px solid rgba(0,229,255,0.3); padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase; }
         
@@ -574,7 +576,7 @@
         }
         setInterval(updateMidnightTimer, 1000); updateMidnightTimer();
 
-        // ------------------ LOGIC LƯU LỊCH SỬ & CHỐT SỔ LÚC 12:00 ĐÊM ------------------
+        // ------------------ LOGIC LƯU LỊCH SỬ (CHỐT SỔ LÚC 12:00 ĐÊM) ------------------
         function saveDailySnapshot() {
             let hist = JSON.parse(localStorage.getItem('kdrive_history') || '[]');
             let todayStr = new Date().toDateString();
@@ -643,32 +645,22 @@
                     'kdrive_locked_dots'
                 ];
                 keysToRemove.forEach(k => localStorage.removeItem(k));
-                
-                // Đồng thời reset điểm peak score ngày mới về 0 cho 3 bài trí lực
-                ['thuy_luan', 'hoa_luan', 'phong_luan'].forEach(k => {
-                    localStorage.removeItem(k + '_score_date');
-                    localStorage.removeItem(k + '_score');
-                    localStorage.removeItem(k + '_bai1_score');
-                    localStorage.removeItem(k + '_bai2_score');
-                });
             }
             localStorage.setItem('kdrive_last_date', today);
         }
 
-        // ------------------ QUẢN LÝ ĐIỂM SỐ CAO NHẤT TRONG NGÀY (PEAK SCORE CHUẨN 100%) ------------------
+        // ------------------ QUẢN LÝ ĐIỂM SỐ CAO NHẤT TRONG NGÀY (PEAK SCORE) ------------------
         function saveBestScoreToday(baseKey, currentTotal, b1, b2) {
             let todayStr = new Date().toDateString();
             let dateKey = baseKey + '_score_date';
             let storedDate = localStorage.getItem(dateKey);
 
             if (storedDate !== todayStr) {
-                // Sang ngày mới: Ghi nhận điểm bài đầu tiên của ngày
                 localStorage.setItem(dateKey, todayStr);
                 localStorage.setItem(baseKey + '_score', currentTotal);
                 localStorage.setItem(baseKey + '_bai1_score', b1);
                 localStorage.setItem(baseKey + '_bai2_score', b2);
             } else {
-                // Trong cùng ngày: So sánh với kỷ lục hiện tại, CHỈ LƯU NẾU CAO HƠN
                 let bestToday = parseFloat(localStorage.getItem(baseKey + '_score')) || 0;
                 if (currentTotal > bestToday) {
                     localStorage.setItem(baseKey + '_score', currentTotal);
@@ -677,7 +669,6 @@
                 }
             }
             
-            // Cập nhật kỷ lục mọi thời đại (Best Score All-Time)
             let bestKey = baseKey + '_best_score';
             let globalBest = parseFloat(localStorage.getItem(bestKey)) || 0;
             let currentBest = parseFloat(localStorage.getItem(baseKey + '_score')) || 0;
@@ -853,17 +844,34 @@
             let adviceText = "";
 
             if (!currentDayData || currentDayData.sciLamps === 0) {
-                sciText = "HỆ THỐNG CHƯA CÓ ĐIỂM SỐ - LÕI CHƯA KÍCH HOẠT. Bảng nhật ký của ngày này đang trống, không có dữ liệu để phân tích.";
+                sciText = "Hệ thống chưa ghi nhận dữ liệu sinh trắc học và trí lực trên nhật ký vận hành. Không thể thiết lập mô hình lượng tử.";
                 martialText = "\"Kiếm chưa tuốt khỏi vỏ, tâm chưa hướng về chiến trận.\" Lõi năng lượng của ngày này chưa được khởi tạo.";
-                adviceText = "Hãy tiến hành hoàn thành bài tập hoặc nhập liệu để thắp sáng hệ thống.";
-            } else if (currentDayData.sciLamps >= 9) {
-                sciText = "Toàn bộ tham số sinh lý và tần số thần kinh trên bảng nhật ký vận hành ở mức tối ưu. Nhịp tim tĩnh ổn định, năng lượng đạt đỉnh.";
-                martialText = "\"Nước chảy đá mòn, vạn vật quy về một thể.\" Thân và tâm đồng điệu, phản xạ tự sinh từ bản năng hoàn hảo.";
-                adviceText = "Giữ vững tần số sinh học này. Kỷ luật đã chuyển hóa thành bản năng vô ngã.";
+                adviceText = "Hãy tiến hành đồng bộ cảm biến sinh trắc hoặc hoàn thành bài tập lực chiến để kích hoạt hệ thống.";
             } else {
-                sciText = `Phát hiện điểm mù qua bảng nhật ký: Đã ghi nhận ${currentDayData.sciLamps}/9 đèn tín hiệu. Sự thiếu hụt phân hệ tạo ra chướng ngại thần kinh.`;
-                martialText = "\"Nước trong hồ không có gió ắt thành nước đọng.\" Thân thể thiếu sự rèn luyện đồng bộ thì khí huyết trì trệ.";
-                adviceText = "Hiệu chỉnh ngay biên độ vận động, tập trung khai mở các phân hệ còn thiếu hụt trên bảng theo dõi.";
+                let hrObj = currentDayData.phys.hr;
+                let sleepObj = currentDayData.phys.sleep;
+                let stepsObj = currentDayData.phys.steps;
+                let waterObj = currentDayData.phys.water;
+
+                let issues = [];
+                if (hrObj && hrObj.val > 80) issues.push("nhịp tim tĩnh cao (trên 80 bpm)");
+                if (sleepObj && sleepObj.val < 7) issues.push("thâm hụt thời gian ngủ (dưới 7 giờ)");
+                if (stepsObj && stepsObj.val < 5000) issues.push("khối lượng vận động ngoại vi thấp");
+
+                sciText = `Phân tích thông số sinh lý thực tế: Ghi nhận ${currentDayData.sciLamps}/9 đèn tín hiệu kết nối. ` +
+                          (issues.length > 0 ? `Cơ thể đang biểu hiện các điểm nghẽn gồm: ${issues.join(", ")}. ` : `Các chỉ số sinh trắc học nằm trong ngưỡng an toàn. `) +
+                          (waterObj && waterObj.val >= waterObj.tgt ? `Đặc biệt, lượng nước tế bào đạt ${waterObj.val}%, đảm bảo độ dẫn truyền thần kinh ổn định.` : ``);
+
+                if (currentDayData.sciLamps >= 9 && issues.length === 0) {
+                    martialText = "\"Nước chảy đá mòn, vạn vật quy về một thể.\" Thân và tâm đồng điệu, phản xạ tự sinh từ bản năng hoàn hảo.";
+                    adviceText = "Giữ vững tần số sinh học này. Kỷ luật đã chuyển hóa thành bản năng vô ngã.";
+                } else if (currentDayData.sciLamps >= 6) {
+                    martialText = "\"Sông sâu tĩnh lặng, lúa chín cúi đầu.\" Nền tảng thể chất và tư duy vững vàng, sẵn sàng đối mặt với mọi biến số.";
+                    adviceText = "Duy trì nhịp độ vận động điều độ, bổ sung vi chất và nghỉ ngơi sâu để củng cố phong độ.";
+                } else {
+                    martialText = "\"Gió lốc qua rừng, cây non dễ gãy.\" Hệ thần kinh đang quá tải và thiếu hụt năng lượng cốt lõi, tránh xung trận cường độ cao.";
+                    adviceText = "Ưu tiên phục hồi thể lực, ngủ đủ giấc và kích hoạt lại các phân hệ trí lực để tái tạo cân bằng.";
+                }
             }
 
             function typeText(text, el, speed, callback) {
@@ -959,20 +967,6 @@
             typeTerminalLines(finalLines, container, () => { btn.style.display = 'block'; }, true); 
         }
         
-        function typeTerminalLines(lines, container, callback, append = false) { 
-            if (!append) container.innerHTML = ""; 
-            let lineIdx = 0; 
-            function nextLine() { 
-                if (lineIdx < lines.length) { 
-                    container.innerHTML += lines[lineIdx] + "<br>"; 
-                    lineIdx++; 
-                    let t = setTimeout(nextLine, 700); 
-                    typingTimeouts.push(t);
-                } else { if (callback) callback(); } 
-            } 
-            nextLine(); 
-        }
-        
         function closeTerminalModal() { 
             playSound('warp-out'); 
             clearAllTyping();
@@ -980,20 +974,16 @@
             isGyroFrozen = false; 
         }
 
-        // ------------------ HIỂN THỊ BẢNG ĐIỂM (CHỈ LẤY ĐIỂM CAO NHẤT TRONG NGÀY) ------------------
         function openScoreModal(baseKey, titleName) { 
             playSound('coin'); 
             document.getElementById('score-modal-title').innerText = titleName; 
             
-            // Lấy dữ liệu bài tập tạm thời
             let b1 = parseFloat(localStorage.getItem(baseKey + '_bai1_score')) || 0; 
             let b2 = parseFloat(localStorage.getItem(baseKey + '_bai2_score')) || 0; 
             let total = parseFloat(localStorage.getItem(baseKey + '_score')) || (b1 + b2); 
             
-            // GỌI HÀM LỌC VÀ CHỐT KỶ LỤC CAO NHẤT TRONG NGÀY (PEAK SCORE FILTER)
             saveBestScoreToday(baseKey, total, b1, b2);
             
-            // Đọc lại điểm số đã được chuẩn hóa cao nhất trong ngày
             total = parseFloat(localStorage.getItem(baseKey + '_score')) || total;
             b1 = parseFloat(localStorage.getItem(baseKey + '_bai1_score')) || b1;
             b2 = parseFloat(localStorage.getItem(baseKey + '_bai2_score')) || b2;
