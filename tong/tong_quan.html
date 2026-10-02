@@ -14,6 +14,11 @@
             --cyan: #00e5ff;
             --mint: #00ff9d;
             --gold: #ffd700;
+            --crimson: #ff3366;
+            --pink: #f48fb1;
+            --orange: #ff6600;
+            --amber: #ffb700;
+            
             --font-title: 'Chakra Petch', sans-serif;
             --font-display: 'Space Grotesk', sans-serif;
             --font-terminal: 'Share Tech Mono', monospace;
@@ -22,148 +27,455 @@
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: var(--font-display); color: #fff; }
 
-        /* VIDEO NỀN GỐC TỪ THƯ MỤC PHOTO */
-        #sanctum-video {
-            position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1;
-            object-fit: cover; opacity: 0; transition: opacity 2.5s ease;
-        }
+        /* VIDEO NỀN SÁNG RÕ, KHÔNG LÀM MỜ */
+        #sanctum-video { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; object-fit: cover; opacity: 0; transition: opacity 1.5s ease; }
         #sanctum-video.loaded { opacity: 1; }
 
-        #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
-        .quantum-sparkle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 8px #ffffff, 0 0 15px var(--cyan); opacity: 0; animation: sparkleFloat linear infinite; }
-        @keyframes sparkleFloat { 
-            0% { transform: translateY(105vh) scale(0.3); opacity: 0; } 
-            50% { transform: translateY(50vh) translateX(15px) scale(1); opacity: 0.6; } 
-            100% { transform: translateY(-10vh) translateX(-15px) scale(0.2); opacity: 0; } 
-        }
+        #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
+        .quantum-sparkle { position: absolute; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #fff, 0 0 15px var(--cyan); opacity: 0; animation: sparkleFloat linear infinite; }
+        @keyframes sparkleFloat { 0% { transform: translateY(105vh) scale(0.3); opacity: 0; } 50% { opacity: 0.6; } 100% { transform: translateY(-10vh) translateX(-15px) scale(0.2); opacity: 0; } }
 
+        /* GIAO DIỆN CHUNG: TOP BAR & BOTTOM BAR */
         .top-nav { position: fixed; top: max(35px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; z-index: 9999; }
-        .btn-back-cyber { width: 36px; height: 36px; background: rgba(5, 7, 10, 0.9); border: 1px solid rgba(0, 229, 255, 0.6); border-radius: 8px; color: var(--cyan); font-family: var(--font-terminal); font-size: 20px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .btn-back-cyber { width: 36px; height: 36px; background: rgba(5,7,10,0.9); border: 1px solid rgba(0,229,255,0.6); border-radius: 8px; color: var(--cyan); font-family: var(--font-terminal); font-size: 20px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         .btn-back-cyber:active { transform: scale(0.9); }
 
-        /* HỘP LỜI CHÀO GỌN GÀNG, NÉT DÀY */
-        .cyber-modal-custom { position: fixed; inset: 0; z-index: 300000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 16px; background: transparent; }
-        .cyber-led-wrapper { position: relative; padding: 1.5px; overflow: hidden; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); width: 90vw; max-width: 360px; box-shadow: 0 0 35px rgba(0,229,255,0.4); z-index: 10; }
-        
-        .modal-box { width: 100%; background: rgba(5, 9, 16, 0.96); padding: 22px 18px; text-align: left; position: relative; z-index: 1; display: flex; flex-direction: column; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); border: 1px solid rgba(0,229,255,0.6); }
-        .modal-title { font-family: var(--font-title); color: var(--cyan); font-size: 21px; font-weight: 800; margin-bottom: 16px; letter-spacing: 2px; text-transform: uppercase; text-align: center; text-shadow: 0 0 12px rgba(0,229,255,0.7); }
-        .desc-text { font-family: var(--font-display); font-size: 13.5px; color: #ffffff; line-height: 1.6; text-align: left; background: rgba(0,229,255,0.03); border: 1px solid rgba(0,229,255,0.2); border-radius: 6px; padding: 12px; margin-bottom: 16px; }
+        .game-top-bar { position: fixed; top: max(20px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; opacity: 0; transition: opacity 1.5s ease; visibility: hidden; }
+        .game-top-bar.visible { opacity: 1; visibility: visible; }
+        .health-container { display: flex; gap: 4px; align-items: center; }
+        .health-bar { width: 14px; height: 6px; background: rgba(255,255,255,0.15); transform: skewX(-20deg); transition: all 0.3s ease; }
+        .health-bar.sys-color.active { background: var(--sys-color, #00e5ff); box-shadow: 0 0 10px var(--sys-color, #00e5ff); }
+        .health-bar.dmg-color.active { background: var(--crimson); box-shadow: 0 0 10px var(--crimson); }
+        .data-score { font-family: var(--font-terminal); font-size: 15px; font-weight: bold; color: #fff; display: flex; align-items: center; position: relative; }
+        .data-score span { color: var(--sys-color, #00e5ff); text-shadow: 0 0 12px var(--sys-color, #00e5ff); font-size: 20px; margin-left: 6px; }
 
-        /* NÚT BẮT ĐẦU MÀU XANH LÁ HẤP DẪN */
-        .modal-btn { width: 100%; padding: 14px; font-family: var(--font-title); font-size: 15px; font-weight: 800; background: var(--mint); color: #000000; border: none; cursor: pointer; text-transform: uppercase; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); text-align: center; transition: all 0.2s; box-shadow: 0 0 15px rgba(0,255,157,0.6); letter-spacing: 1px; }
+        .game-bottom-bar { position: fixed; bottom: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; opacity: 0; transition: opacity 1.5s ease; visibility: hidden; border-top: 1px solid rgba(255,255,255,0.2); }
+        .game-bottom-bar.visible { opacity: 1; visibility: visible; }
+        .btn-action { width: 46px; height: 46px; background: rgba(10,15,25,0.85); border: 1.5px solid var(--sys-color, #00e5ff); border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(8px); color: var(--sys-color, #00e5ff); font-family: var(--font-terminal); font-weight: bold; font-size: 22px; transition: 0.2s; box-shadow: 0 0 12px rgba(255,255,255,0.1); }
+        .btn-action:active { transform: scale(0.9); }
+
+        /* MODALS & OVERLAYS */
+        .cyber-modal-custom { position: fixed; inset: 0; z-index: 300000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 16px; background: transparent; transition: opacity 0.5s; }
+        .cyber-modal-custom.hidden { opacity: 0; pointer-events: none; }
+        .cyber-led-wrapper { position: relative; padding: 1.5px; overflow: hidden; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); width: 92vw; max-width: 360px; box-shadow: 0 0 35px rgba(0,229,255,0.2); }
+        .modal-box { width: 100%; background: rgba(5, 9, 16, 0.94); padding: 22px 18px; text-align: left; position: relative; z-index: 1; display: flex; flex-direction: column; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); border: 1px solid var(--sys-color, #00e5ff); backdrop-filter: blur(10px); }
+        .modal-title { font-family: var(--font-title); color: var(--sys-color, #00e5ff); font-size: 21px; font-weight: 800; margin-bottom: 16px; letter-spacing: 2px; text-transform: uppercase; text-align: center; text-shadow: 0 0 10px var(--sys-color, #00e5ff); }
+        .desc-text { font-family: var(--font-display); font-size: 14px; color: #fff; line-height: 1.6; text-align: left; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 12px; margin-bottom: 16px; }
+        .modal-btn { width: 100%; padding: 14px; font-family: var(--font-title); font-size: 15px; font-weight: 800; background: var(--mint); color: #000; border: none; cursor: pointer; text-transform: uppercase; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); text-align: center; transition: all 0.2s; box-shadow: 0 0 15px rgba(0,255,157,0.5); letter-spacing: 1px; }
         .modal-btn:active { transform: scale(0.96); filter: brightness(1.2); }
+        .btn-alt { background: rgba(255,255,255,0.1); color: #fff; box-shadow: none; border: 1px solid #fff; }
 
-        #task-arena { position: fixed; inset: 0; display: none; z-index: 120; }
-        #task-arena.active { display: block; }
+        /* BẢNG ĐIỂM CHUNG DÙNG CHỮ RANK, KHÔNG ICON */
+        .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 10px; margin-bottom: 10px; width: 100%; }
+        .metric-card-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .metric-label { color: #fff; font-family: var(--font-terminal); font-size: 14px; font-weight: bold; flex: 1; text-align: left;}
+        .metric-val { color: var(--sys-color, #00e5ff); font-family: var(--font-terminal); font-size: 14px; font-weight: bold; text-align: right; text-shadow: 0 0 8px var(--sys-color, #00e5ff); }
+        .rank-text { font-family: var(--font-title); font-size: 16px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
 
-        #game-frame { position: fixed; inset: 0; width: 100vw; height: 100vh; border: none; background: transparent; }
-        .hidden { display: none !important; }
+        .btn-row { display: flex; gap: 10px; width: 100%; margin-top: 10px; }
+        .btn-half { flex: 1; padding: 12px; font-family: var(--font-title); font-size: 14px; font-weight: 800; border-radius: 8px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; border: 1.5px solid; background: transparent; }
+        .btn-replay { border-color: var(--crimson); color: var(--crimson); }
+        .btn-next { border-color: var(--sys-color, #00e5ff); color: var(--sys-color, #00e5ff); background: rgba(255,255,255,0.05); }
+        .btn-next:active { background: var(--sys-color, #00e5ff); color: #000; }
+
+        /* KHU VỰC CHƠI GAME DÙNG CHUNG */
+        #play-area { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; display: none; z-index: 100; }
+        #play-area.active { display: block; }
+        .game-layer { position: absolute; inset: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .game-layer.active { display: flex; }
+
+        /* --- CSS THỦY LUÂN --- */
+        .dynamic-grid { display: grid; gap: 6px; margin: 0 auto; transition: 0.3s; justify-content: center; align-content: center; border-radius: 12px; padding: 8px; }
+        .grid-cell { aspect-ratio: 1; background: rgba(15,23,42,0.6); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(6px); transition: 0.15s; }
+        .grid-cell.active-glow { background: rgba(244,143,177,0.9); box-shadow: 0 0 22px var(--pink); border-color: #fff; }
+        .grid-cell.correct { background: rgba(244,143,177,0.95); box-shadow: 0 0 18px var(--pink); color: #fff;}
+        .grid-cell.wrong { background: rgba(229,57,53,0.9); box-shadow: 0 0 15px var(--crimson); color: #fff;}
+        .sequence-display { min-height: 90px; max-height: 140px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-bottom: 25px; width: 95%; max-width: 350px; background: rgba(15,23,42,0.85); border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.4); padding: 10px; }
+        .input-area { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 85%; max-width: 250px;}
+        .btn-symbol { height: 58px; background: rgba(15,23,42,0.8); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.15s; }
+        .quantum-char { display: inline-flex; justify-content: center; align-items: center; width: 26px; height: 36px; }
+        .hidden-box { min-width: 26px; height: 36px; display: inline-flex; justify-content: center; align-items: center; border: 1.5px dashed rgba(255,255,255,0.5); border-radius: 6px; background: rgba(255,255,255,0.05); color: var(--pink); }
+
+        /* --- CSS HỎA LUÂN --- */
+        .orb { position: absolute; border-radius: 50%; cursor: crosshair; display: flex; justify-content: center; align-items: center; width: 56px; height: 56px; }
+        .orb-fire { background: radial-gradient(circle, #ffdf70 10%, #ffb700 40%, #ff3333 80%); box-shadow: 0 0 18px #ff3333; z-index: 10; }
+        .orb-ice { background: radial-gradient(circle, #fff, #00e5ff); box-shadow: 0 0 20px #00e5ff; z-index: 5; }
+        .orb-purple { background: radial-gradient(circle, #ff66cc, #8a2be2); box-shadow: 0 0 20px #8a2be2; z-index: 5; }
+        .orb-green { background: radial-gradient(circle, #bfff00, #00ff00); box-shadow: 0 0 20px #00ff00; z-index: 5; }
+
+        /* --- CSS PHONG LUÂN --- */
+        .wind-target { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: transform 0.1s ease, opacity 0.15s ease; } 
+        .t-track-mode { background: #fff; border: 2px solid var(--crimson); box-shadow: 0 0 20px #fff, 0 0 40px rgba(255,51,102,0.8); }
+        .t-track-mode.hovered { border-color: #fff; box-shadow: 0 0 30px #fff, 0 0 60px var(--crimson); transform: translate(-50%, -50%) scale(1.15); }
+        .style-slash { background: #fff; border: 2.5px solid var(--crimson); box-shadow: 0 0 25px var(--crimson), 0 0 50px rgba(255,255,255,0.8); transition: opacity 0.15s ease; }
+        #custom-cursor { position: absolute; width: 20px; height: 20px; border: 2px solid var(--crimson); border-radius: 50%; pointer-events: none; z-index: 100; display: none; box-shadow: 0 0 12px var(--crimson); transform: translate(-50%, -50%); }
+
+        .flashbang-red { position: fixed; inset: 0; background: rgba(255,51,102,0.4); z-index: 999999; pointer-events: none; animation: flashRed 0.4s forwards; }
+        @keyframes flashRed { 0% { opacity: 1; } 100% { opacity: 0; } }
+        .floating-ms { position: absolute; font-family: var(--font-terminal); font-size: 20px; font-weight: 900; pointer-events: none; z-index: 100000; transform: translate(-50%, -50%); animation: floatUpMs 0.8s ease-out forwards; }
+        .ms-fast { color: #00ffcc; text-shadow: 0 0 12px #00ffcc; }
+        .ms-slow { color: var(--crimson); text-shadow: 0 0 12px var(--crimson); }
+        @keyframes floatUpMs { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.8); } 20% { transform: translate(-50%, -60%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -100%) scale(1); } }
     </style>
 </head>
 <body>
 
-    <!-- VIDEO NỀN GỐC BAN ĐẦU DÙNG VIDEO TRANG CHỦ -->
-    <video id="sanctum-video" autoplay loop muted playsinline webkit-playsinline>
-        <source src="../Photo/video nen trang chu.mp4" type="video/mp4">
-    </video>
-
+    <video id="sanctum-video" autoplay loop muted playsinline webkit-playsinline></video>
     <div id="dust-container"></div>
 
     <div class="top-nav">
-        <button class="btn-back-cyber" onclick="returnToMain()">⟨</button>
+        <button class="btn-back-cyber" onclick="confirmExit()">⟨</button>
     </div>
 
-    <!-- HỘP LỜI CHÀO CHUỖI TEST TỔNG QUAN -->
-    <div class="cyber-modal-custom" id="step-welcome">
+    <!-- UI GAME CHUNG -->
+    <div id="game-top-bar" class="game-top-bar">
+        <div class="health-container" id="hp-g-box"></div>
+        <div class="data-score">DATA: <span id="boo-points">0</span></div>
+        <div class="health-container" id="hp-p-box"></div>
+    </div>
+    <div id="game-bottom-bar" class="game-bottom-bar">
+        <button class="btn-action" onclick="confirmExit()">⟨</button>
+        <button class="btn-action" onclick="skipStage()">⏭</button>
+        <button class="btn-action" onclick="pauseGame()">||</button>
+    </div>
+
+    <!-- CÁC LỚP CHƠI GAME ĐƯỢC ẨN/HIỆN ĐỘNG -->
+    <div id="play-area">
+        <!-- THỦY LUÂN -->
+        <div id="thuy-g1" class="game-layer"><div id="grid-1" class="dynamic-grid"></div></div>
+        <div id="thuy-g2" class="game-layer">
+            <div class="sequence-display" id="seq-area"></div>
+            <div class="input-area" id="input-area-2"></div>
+        </div>
+        <!-- HỎA LUÂN (Orbs sinh ra động ở play-area) -->
+        <div id="hoa-layer" class="game-layer"></div>
+        <!-- PHONG LUÂN -->
+        <div id="phong-layer" class="game-layer">
+            <div id="custom-cursor"></div>
+            <div id="game-target" class="wind-target" onpointerdown="handlePhongClick(event)"></div>
+        </div>
+    </div>
+
+    <!-- MODAL MỞ ĐẦU CHUỖI -->
+    <div class="cyber-modal-custom" id="modal-intro">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
                 <div class="modal-title">CHUỖI TEST TRÍ LỰC</div>
                 <div class="desc-text">
                     Chào mừng chiến binh đến với bài đánh giá thần kinh toàn diện qua 3 hệ thống trắc nghiệm liên hoàn:<br><br>
                     • <b>Thủy Luân</b> (Trí nhớ không gian)<br>
-                    • <b>Hỏa Luân</b> (Phản xạ & tốc độ phát lực)<br>
-                    • <b>Phong Luân</b> (Phán đoán & bám dính quỹ đạo)<br><br>
+                    • <b>Hỏa Luân</b> (Phản xạ & phát lực)<br>
+                    • <b>Phong Luân</b> (Phán đoán & bám dính)<br><br>
                     Hệ thống sẽ ghi nhận và tổng kết toàn bộ điểm số ở cuối chuỗi!
                 </div>
-                <button class="modal-btn" onclick="startFullPipeline()">BẮT ĐẦU</button>
+                <button class="modal-btn" onclick="startSystem('THUY')">BẮT ĐẦU</button>
             </div>
         </div>
     </div>
 
-    <!-- KHUNG ĐIỀU PHỐI CHUỖI TEST -->
-    <div id="task-arena">
-        <iframe id="game-frame" src=""></iframe>
+    <!-- MODAL BRIEFING TRƯỚC MỖI BÀI -->
+    <div class="cyber-modal-custom hidden" id="modal-briefing">
+        <div class="cyber-led-wrapper">
+            <div class="modal-box">
+                <div class="modal-title" id="briefing-title">TIÊU ĐỀ BÀI</div>
+                <div class="desc-text" id="briefing-target">Mục tiêu...</div>
+                <button class="modal-btn" onclick="runCurrentGame()">BẮT ĐẦU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL KẾT QUẢ TỪNG BÀI (DÙNG CHUNG) -->
+    <div class="cyber-modal-custom hidden" id="modal-stage-result">
+        <div class="cyber-led-wrapper">
+            <div class="modal-box">
+                <div class="modal-title" id="res-title">KẾT QUẢ BÀI 1</div>
+                
+                <div class="desc-text" style="background:transparent; border:none; padding:0;">
+                    <div class="metric-card-row">
+                        <span class="metric-label">ĐIỂM BÀI NÀY:</span>
+                        <span class="metric-val" id="res-score" style="font-size: 24px;">0</span>
+                    </div>
+                    <div class="metric-card-row">
+                        <span class="metric-label" id="res-metric-name">Chỉ số:</span>
+                        <span class="metric-val" id="res-metric-val">0</span>
+                    </div>
+                    <div class="metric-card-row" style="border:none;">
+                        <span class="metric-label">XẾP HẠNG:</span>
+                        <span class="metric-val" id="res-rank-text">KÉM</span>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-half btn-replay" onclick="retryCurrentGame()">TẬP LẠI</button>
+                    <button class="btn-half btn-next" id="btn-stage-next" onclick="nextGame()">BÀI 2</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TỔNG KẾT TỪNG HỆ HOẶC TOÀN DIỆN CUỐI CÙNG -->
+    <div class="cyber-modal-custom hidden" id="modal-summary">
+        <div class="cyber-led-wrapper">
+            <div class="modal-box">
+                <div class="modal-title" id="sum-title">TỔNG KẾT HỆ</div>
+                
+                <div class="desc-text" style="background:transparent; border:none; padding:0;">
+                    <div class="metric-card-row">
+                        <span class="metric-label">BÀI 1:</span>
+                        <span class="metric-val" id="sum-g1">0</span>
+                    </div>
+                    <div class="metric-card-row">
+                        <span class="metric-label">BÀI 2:</span>
+                        <span class="metric-val" id="sum-g2">0</span>
+                    </div>
+                    <div class="metric-card-row">
+                        <span class="metric-label" style="color:var(--gold);">TỔNG ĐIỂM DATA:</span>
+                        <span class="metric-val" id="sum-total" style="color:var(--gold); font-size:22px;">0</span>
+                    </div>
+                    <div class="metric-card-row" style="border:none; justify-content:center; padding-top:10px;">
+                        <span id="sum-rank-text" style="font-size: 18px;">KÉM</span>
+                    </div>
+                </div>
+
+                <button class="modal-btn" id="btn-sum-next" onclick="goToNextSystem()">BÀI TIẾP THEO</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Chuỗi 3 file game theo đúng thứ tự
-        const pipelineFiles = [
-            'Testthuy_luan.html',
-            'TestHoaLuan.html',
-            'TestPhongLuan.html'
-        ];
+        // --- HỆ THỐNG DATA TỔNG QUAN ---
+        const SVG_SHAPES = {
+            'lightning': '<svg style="width:20px;height:20px;color:#ffb74d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+            'circle': '<svg style="width:20px;height:20px;color:#f48fb1;" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>',
+            'triangle': '<svg style="width:20px;height:20px;color:#00ff9d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20 12 2"/></svg>',
+            'square': '<svg style="width:20px;height:20px;color:#ff3366;" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>'
+        };
+        const SYM_KEYS = Object.keys(SVG_SHAPES);
+
+        let activeSys = 'INTRO'; // THUY, HOA, PHONG
+        let cGame = 1; // 1 hoặc 2
+        let aScore = 0; let pendingScore = 0; let hp = 5;
+        let isPlaying = false; 
+
+        // Lưu trữ điểm các hệ
+        let scores = { THUY: [0,0], HOA: [0,0], PHONG: [0,0] };
         
-        let pipelineIndex = 0;
+        // Các biến logic game dùng chung
+        let timer1, timer2, raf1;
+        let reactTimes = [];
 
         window.onload = () => {
             let vid = document.getElementById('sanctum-video');
+            vid.src = '../Photo/video nen trang chu.mp4';
             setTimeout(() => vid.classList.add('loaded'), 200);
-            initSparkleParticles();
         };
 
-        function initSparkleParticles() {
-            let container = document.getElementById('dust-container');
-            if(!container) return;
-            for(let i=0; i<30; i++) {
-                let p = document.createElement('div');
-                p.className = 'quantum-sparkle';
-                p.style.left = Math.random() * 100 + 'vw';
-                p.style.top = Math.random() * 100 + 'vh';
-                let size = Math.random() * 3 + 2;
-                p.style.width = size + 'px'; p.style.height = size + 'px';
-                p.style.animationDuration = (Math.random() * 6 + 4) + 's';
-                container.appendChild(p);
+        function setSysTheme(sys) {
+            let r = document.documentElement;
+            if(sys === 'THUY') { r.style.setProperty('--sys-color', 'var(--pink)'); document.getElementById('sanctum-video').src = '../Photo/video nen thuy luan.mp4'; }
+            if(sys === 'HOA') { r.style.setProperty('--sys-color', 'var(--amber)'); document.getElementById('sanctum-video').src = '../Photo/video nen hoa luan.mp4'; }
+            if(sys === 'PHONG') { r.style.setProperty('--sys-color', 'var(--crimson)'); document.getElementById('sanctum-video').src = '../Photo/video nen phong luan.mp4'; }
+            document.getElementById('sanctum-video').play().catch(()=>{});
+        }
+
+        function getRank(sys, score) {
+            if(score < 1000) return { t: "KÉM", c: "var(--crimson)" };
+            if(score >= 6000) return { t: "THẦN ĐỒNG", c: "var(--gold)" };
+            if(score >= 4000) return { t: "XUẤT SẮC", c: "var(--mint)" };
+            if(score >= 2000) return { t: "GIỎI", c: "var(--cyan)" };
+            return { t: "TRUNG BÌNH", c: "#fff" };
+        }
+
+        function updateHP() {
+            let gBox = document.getElementById('hp-g-box'); gBox.innerHTML = '';
+            let pBox = document.getElementById('hp-p-box'); pBox.innerHTML = '';
+            let gC = Math.min(5, Math.max(0, hp));
+            let pC = Math.max(0, hp - 5);
+            for(let i=0; i<5; i++) {
+                let div = document.createElement('div'); div.className = `health-bar sys-color ${i<gC ? 'active':''}`; gBox.appendChild(div);
+                let div2 = document.createElement('div'); div2.className = `health-bar dmg-color ${i<pC ? 'active':''}`; pBox.appendChild(div2);
             }
         }
 
-        function startFullPipeline() {
-            pipelineIndex = 0;
-            localStorage.setItem('kdrive_in_flow', 'true');
-            document.getElementById('step-welcome').classList.add('hidden');
-            document.getElementById('task-arena').classList.add('active');
-            loadPipelineStep();
+        function loseLife() {
+            hp--; updateHP(); playSound('wrong');
+            let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(()=>flash.remove(), 400);
+            if(hp <= 0) finishGame();
         }
 
-        function loadPipelineStep() {
-            if (pipelineIndex >= pipelineFiles.length) {
-                returnToMain();
-                return;
-            }
+        function addScore(pts) {
+            aScore += pts; document.getElementById('boo-points').innerText = Math.floor(aScore);
+            if(aScore > 0 && aScore % 1000 < pts) { hp = Math.min(10, hp+1); updateHP(); }
+        }
 
-            let currentFile = pipelineFiles[pipelineIndex];
+        function hideAllModals() {
+            document.querySelectorAll('.cyber-modal-custom').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.game-layer').forEach(l => l.classList.remove('active'));
+        }
+
+        function startSystem(sysName) {
+            activeSys = sysName; cGame = 1;
+            setSysTheme(sysName);
+            hideAllModals();
+            showBriefing();
+        }
+
+        function showBriefing() {
+            hideAllModals();
+            aScore = 0; hp = 5; updateHP(); document.getElementById('boo-points').innerText = '0'; reactTimes = [];
+            document.getElementById('game-top-bar').classList.remove('visible');
+            document.getElementById('game-bottom-bar').classList.remove('visible');
+            document.getElementById('play-area').classList.remove('active');
+
+            let title = "", desc = "";
+            if(activeSys === 'THUY') { title = cGame===1 ? "BÀI 1: GHI NHỚ VỊ TRÍ" : "BÀI 2: GHI NHỚ HÌNH ẢNH"; desc = "Ghi nhớ và lặp lại chính xác các tín hiệu không gian."; }
+            if(activeSys === 'HOA') { title = cGame===1 ? "BÀI 1: ĐO LƯỜNG PHẢN XẠ" : "BÀI 2: PHẢN XẠ CHỌN LỌC"; desc = "Tiêu diệt hạt năng lượng nhanh nhất có thể. Bài 2 chỉ chọn Hạt Đỏ/Vàng."; }
+            if(active  === 'PHONG') { title = cGame===1 ? "BÀI 1: GIỮ QUỸ ĐẠO" : "BÀI 2: PHÁN ĐOÁN VỊ TRÍ"; desc = "Rê ngón tay bám sát hoặc chạm trúng mục tiêu xuất hiện chớp nhoáng."; }
             
-            // Cập nhật video nền tương ứng từ thư mục Photo gốc
-            let vid = document.getElementById('sanctum-video');
-            if (pipelineIndex === 0) vid.src = '../Photo/video nen thuy luan.mp4';
-            else if (pipelineIndex === 1) vid.src = '../Photo/video nen hoa luan.mp4';
-            else if (pipelineIndex === 2) vid.src = '../Photo/video nen phong luan.mp4';
-            vid.play().catch(e => {});
-
-            document.getElementById('game-frame').src = currentFile;
+            document.getElementById('briefing-title').innerText = title;
+            document.getElementById('briefing-target').innerText = desc;
+            document.getElementById('modal-briefing').classList.remove('hidden');
         }
 
-        // Lắng nghe tín hiệu hoàn thành từ từng bài test con để tự động chuyển sang bài tiếp theo
-        window.addEventListener('message', (event) => {
-            if (event.data && event.data.action === 'test_completed') {
-                pipelineIndex++;
-                loadPipelineStep();
+        function runCurrentGame() {
+            hideAllModals();
+            document.getElementById('game-top-bar').classList.add('visible');
+            document.getElementById('game-bottom-bar').classList.add('visible');
+            document.getElementById('play-area').classList.add('active');
+            isPlaying = true;
+
+            if(activeSys === 'THUY') { document.getElementById(cGame===1 ? 'thuy-g1':'thuy-g2').classList.add('active'); runThuy(); }
+            if(activeSys === 'HOA') { document.getElementById('hoa-layer').classList.add('active'); runHoa(); }
+            if(activeSys === 'PHONG') { document.getElementById('phong-layer').classList.add('active'); runPhong(); }
+        }
+
+        // --- THUY LUAN LOGIC (Tóm gọn) ---
+        let thuySeq = [], userSeq = [], canTap = false, thuyLvl = 1;
+        function runThuy() {
+            thuySeq=[]; userSeq=[]; canTap=false;
+            if(cGame===1) {
+                let grid = document.getElementById('grid-1'); grid.innerHTML='';
+                let size = thuyLvl===1 ? 3 : (thuyLvl===2 ? 5 : 7);
+                grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+                for(let i=0; i<size*size; i++) {
+                    let cell = document.createElement('div'); cell.className='grid-cell';
+                    cell.onclick = () => { if(canTap && !userSeq.includes(i)) { userSeq.push(i); if(thuySeq.includes(i)) { cell.classList.add('correct'); addScore(20); if(userSeq.length===thuySeq.length){ thuyLvl++; runThuy(); } } else { loseLife(); runThuy(); } } };
+                    grid.appendChild(cell);
+                }
+                let targetCount = Math.min(size*size-1, 2 + thuyLvl);
+                while(thuySeq.length < targetCount) { let r = Math.floor(Math.random()*(size*size)); if(!thuySeq.includes(r)) thuySeq.push(r); }
+                let cells = grid.children; thuySeq.forEach(i => cells[i].classList.add('active-glow'));
+                timer1 = setTimeout(()=>{ thuySeq.forEach(i => cells[i].classList.remove('active-glow')); canTap=true; }, 1000);
+            } else {
+                let seqArea = document.getElementById('seq-area');
+                let inArea = document.getElementById('input-area-2'); inArea.innerHTML='';
+                SYM_KEYS.forEach(k => {
+                    let b = document.createElement('div'); b.className='btn-symbol'; b.innerHTML=SVG_SHAPES[k];
+                    b.onclick = () => { if(canTap) { if(k === thuySeq[userSeq.length]) { userSeq.push(k); addScore(30); if(userSeq.length===thuySeq.length){ thuyLvl++; runThuy(); } } else { loseLife(); runThuy(); } } };
+                    inArea.appendChild(b);
+                });
+                let len = 3 + thuyLvl; for(let i=0; i<len; i++) thuySeq.push(SYM_KEYS[Math.floor(Math.random()*SYM_KEYS.length)]);
+                seqArea.innerHTML = thuySeq.map(k => `<div class="quantum-char">${SVG_SHAPES[k]}</div>`).join('');
+                timer1 = setTimeout(()=>{ seqArea.innerHTML = `<div class="hidden-box">?</div>`.repeat(len); canTap=true; }, 1200);
             }
-        });
-
-        function returnToMain() {
-            localStorage.removeItem('kdrive_in_flow');
-            window.location.href = '../LucChien_2.html';
         }
+
+        // --- HOA LUAN LOGIC (Tóm gọn) ---
+        function runHoa() {
+            let layer = document.getElementById('hoa-layer');
+            let ms = 1000 - (aScore/10); if(ms<400) ms=400;
+            let orb = document.createElement('div'); 
+            let isTarget = true;
+            if(cGame===2) { isTarget = Math.random()>0.5; orb.className = isTarget ? 'orb orb-fire' : 'orb orb-ice'; } 
+            else { orb.className = 'orb orb-fire'; }
+            
+            orb.style.left = (20 + Math.random()*280) + 'px'; orb.style.top = (100 + Math.random()*400) + 'px';
+            let startT = Date.now();
+            orb.onmousedown = orb.ontouchstart = (e) => { e.stopPropagation(); if(!isTarget) loseLife(); else { addScore(30); reactTimes.push(Date.now()-startT); } orb.remove(); runHoa(); };
+            layer.appendChild(orb);
+            timer1 = setTimeout(()=>{ if(orb.parentElement) { orb.remove(); if(isTarget) loseLife(); runHoa(); } }, ms);
+        }
+
+        // --- PHONG LUAN LOGIC (Tóm gọn) ---
+        let px=180, py=300, pAngle=0, isGhost=false;
+        function runPhong() {
+            let t = document.getElementById('game-target'); t.style.display='flex';
+            if(cGame===1) {
+                t.className = 'wind-target t-track-mode';
+                raf1 = requestAnimationFrame(phongLoop1);
+            } else {
+                t.className = 'wind-target style-slash';
+                phongLoop2();
+            }
+        }
+        function phongLoop1() {
+            if(!isPlaying) return;
+            pAngle += (Math.random()-0.5)*0.5; px += Math.cos(pAngle)*4; py += Math.sin(pAngle)*4;
+            if(px<30||px>330) pAngle = Math.PI - pAngle; if(py<100||py>600) pAngle = -pAngle;
+            let t = document.getElementById('game-target'); t.style.left=px+'px'; t.style.top=py+'px';
+            addScore(1); // Auto add score if playing
+            raf1 = requestAnimationFrame(phongLoop1);
+        }
+        function phongLoop2() {
+            let t = document.getElementById('game-target');
+            if(isGhost) { t.style.opacity='0'; px=50+Math.random()*260; py=100+Math.random()*400; t.style.left=px+'px'; t.style.top=py+'px'; }
+            else { t.style.opacity='1'; }
+            isGhost = !isGhost;
+            timer1 = setTimeout(phongLoop2, 800);
+        }
+        function handlePhongClick(e) { if(cGame===2 && !isGhost) { addScore(50); isGhost=true; document.getElementById('game-target').style.opacity='0'; } }
+
+        // --- ĐIỀU HƯỚNG & KẾT THÚC ---
+        function skipStage() { finishGame(); }
+        function retryCurrentGame() { showBriefing(); }
+
+        function finishGame() {
+            isPlaying = false; clearTimeout(timer1); clearTimeout(timer2); cancelAnimationFrame(raf1);
+            document.querySelectorAll('.orb').forEach(o=>o.remove()); document.getElementById('game-target').style.display='none';
+            
+            scores[activeSys][cGame-1] = Math.floor(aScore);
+            
+            let avg = reactTimes.length ? Math.round(reactTimes.reduce((a,b)=>a+b)/reactTimes.length) : 0;
+            let rankObj = getRank(activeSys, aScore);
+
+            document.getElementById('res-title').innerText = `KẾT QUẢ BÀI ${cGame}`;
+            document.getElementById('res-score').innerText = Math.floor(aScore);
+            document.getElementById('res-metric-name').innerText = activeSys==='HOA' ? "Tốc độ trung bình:" : "Thời gian bám dính:";
+            document.getElementById('res-metric-val').innerText = activeSys==='HOA' ? `${avg} ms` : `${Math.floor(aScore/60)} s`;
+            
+            let rText = document.getElementById('res-rank-text');
+            rText.innerText = rankObj.t; rText.style.color = rankObj.c;
+            
+            let btnNext = document.getElementById('btn-stage-next');
+            if(cGame === 1) { btnNext.innerText = "BÀI 2"; btnNext.onclick = nextGame; }
+            else { btnNext.innerText = "TỔNG KẾT HỆ"; btnNext.onclick = showSystemSummary; }
+
+            hideAllModals(); document.getElementById('modal-stage-result').classList.remove('hidden');
+        }
+
+        function nextGame() { cGame=2; showBriefing(); }
+
+        function showSystemSummary() {
+            hideAllModals();
+            let g1 = scores[activeSys][0]; let g2 = scores[activeSys][1]; let tot = g1+g2;
+            document.getElementById('sum-title').innerText = `TỔNG KẾT ${activeSys === 'THUY' ? 'THỦY LUÂN' : (activeSys === 'HOA' ? 'HỎA LUÂN' : 'PHONG LUÂN')}`;
+            document.getElementById('sum-g1').innerText = g1; document.getElementById('sum-g2').innerText = g2; document.getElementById('sum-total').innerText = tot;
+            
+            let rObj = getRank(activeSys, tot);
+            let rText = document.getElementById('sum-rank-text');
+            rText.innerText = `XẾP HẠNG: ${rObj.t}`; rText.style.color = rObj.c;
+
+            let btnNext = document.getElementById('btn-sum-next');
+            if(activeSys === 'THUY') { btnNext.innerText = "BÀI TIẾP THEO: HỎA LUÂN"; btnNext.onclick = () => startSystem('HOA'); }
+            else if(activeSys === 'HOA') { btnNext.innerText = "BÀI TIẾP THEO: PHONG LUÂN"; btnNext.onclick = () => startSystem('PHONG'); }
+            else { btnNext.innerText = "VỀ SẢNH CHÍNH"; btnNext.onclick = returnToMain; }
+
+            document.getElementById('modal-summary').classList.remove('hidden');
+        }
+
+        function playSound(type) { /* Sound logic */ }
+        function confirmExit() { returnToMain(); }
+        function returnToMain() { window.location.href = '../LucChien_2.html'; }
     </script>
 </body>
 </html>
