@@ -218,6 +218,7 @@
             100% { filter: brightness(1.35) drop-shadow(0 0 18px rgba(255, 215, 0, 0.9)); transform: scale(1.02); }
         }
 
+        /* RADAR TRƯỢT XUỐNG */
         .dragon-radar {
             position: fixed; bottom: 15vh; left: 50%; transform: translateX(-50%) scale(0.5);
             width: 120px; height: 120px; border-radius: 50%;
@@ -609,7 +610,27 @@
 
     <!-- MODAL SCORE & INFO -->
     <div class="cyber-modal" id="score-detail-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title" id="score-modal-title" style="color: var(--cyan);">BẢNG ĐIỂM KỶ LUẬT</div><div class="modal-text-container" id="score-modal-content" style="font-family: 'Share Tech Mono', monospace; font-size: 13.5px;">Đang tải...</div><button class="modal-btn" onclick="closeScoreModal()">ĐÓNG</button></div></div></div>
-    <div class="cyber-modal" id="radar-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title" style="color: var(--amber);">RADAR LƯỢNG TỬ</div><div class="modal-text-container">Hệ thống quét vùng an toàn.</div><button class="modal-btn" onclick="closeRadarModal()">ĐÓNG</button></div></div></div>
+    
+    <!-- MODAL RADAR QUÉT CHIẾN BINH -->
+    <div class="cyber-modal" id="radar-modal">
+        <div class="cyber-led-wrapper">
+            <div class="modal-box">
+                <div class="modal-title" style="color: var(--amber);">RADAR LƯỢNG TỬ</div>
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <div class="modal-text-container">
+                        <span style="color: var(--amber); font-family: 'Share Tech Mono', monospace; font-weight: bold; display: block; margin-bottom: 6px;">[XÁC THỰC BẢO MẬT]</span>
+                        Hệ thống đang quét các Chiến binh K-Drive trong vùng an toàn bán kính từ <span style="color: var(--neon-pink); font-weight: bold;">2.0 KM</span> đến <span style="color: #00e5ff; font-weight: bold;">9.0 KM</span>.
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                    <button class="modal-btn" style="border-color: var(--crimson); color: var(--crimson); margin-top:0;" onclick="closeRadarModal()">TỪ CHỐI</button>
+                    <button class="modal-btn" style="border-color: var(--mint); color: var(--mint); margin-top:0;" onclick="requestGpsPermission()">ĐỒNG Ý QUÉT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cyber-modal" id="terminal-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title" style="color: var(--cyan);">KẾT QUẢ RÀ QUÉT</div><div class="modal-text-container" id="terminal-content"></div><button class="modal-btn" id="btn-close-terminal" style="display: none; border-color: var(--cyan); color: var(--cyan);" onclick="closeTerminalModal()">ĐÓNG VÀ TRỞ VỀ</button></div></div></div>
     <div class="cyber-modal" id="sci-info-modal"><div class="cyber-led-wrapper"><div class="modal-box"><div class="modal-title">CÔNG THỨC KỶ LUẬT SCI</div><div class="modal-text-container">Gồm 9 chỉ số nền tảng, mỗi đèn sáng 11.1%.</div><button class="modal-btn" onclick="closeSciInfoModal()">ĐÃ HIỂU</button></div></div></div>
 
     <script>
@@ -642,18 +663,58 @@
         }
         setInterval(updateMidnightTimer, 1000); updateMidnightTimer();
 
-        function openHistoryModal() { playSound('coin'); document.getElementById('history-modal').classList.add('active'); }
-        function closeHistoryModal() { playSound('warp-out'); document.getElementById('history-modal').classList.remove('active'); }
+        function openHistoryModal() { playSound('coin'); isGyroFrozen = true; document.getElementById('history-modal').classList.add('active'); }
+        function closeHistoryModal() { playSound('warp-out'); isGyroFrozen = false; document.getElementById('history-modal').classList.remove('active'); }
         function openAiAnalysis() { document.getElementById('ai-modal').classList.add('active'); }
         function closeAiModal() { document.getElementById('ai-modal').classList.remove('active'); }
-        function showRadarModal() { document.getElementById('radar-modal').classList.add('active'); }
-        function closeRadarModal() { document.getElementById('radar-modal').classList.remove('active'); }
-        function openScoreModal(k, t) { document.getElementById('score-detail-modal').classList.add('active'); }
-        function closeScoreModal() { document.getElementById('score-detail-modal').classList.remove('active'); }
+        
+        function showRadarModal() { playSound('coin'); isGyroFrozen = true; document.getElementById('radar-modal').classList.add('active'); }
+        function closeRadarModal() { playSound('warp-out'); isGyroFrozen = false; document.getElementById('radar-modal').classList.remove('active'); }
+        function requestGpsPermission() { document.getElementById('radar-modal').classList.remove('active'); playSound('coin'); startQuantumScan(); }
+
+        function startQuantumScan() {
+            const termModal = document.getElementById('terminal-modal');
+            const termContent = document.getElementById('terminal-content');
+            const btnClose = document.getElementById('btn-close-terminal');
+            termModal.classList.add('active');
+            termContent.innerHTML = "<span style='color:#777'>[SYS] Đang khóa tọa độ vệ tinh GPS...</span><br><span style='color:var(--amber)'>[QUÉT] Rà soát bán kính 9.0 KM...</span><br><br><span style='color:var(--crimson); font-weight:bold;'>[KẾT QUẢ] KHÔNG CÓ TÍN HIỆU SỐNG TRONG VÙNG QUÉT.</span>";
+            btnClose.style.display = 'block';
+        }
+        function closeTerminalModal() { playSound('warp-out'); document.getElementById('terminal-modal').classList.remove('active'); isGyroFrozen = false; }
+
+        function openScoreModal(k, t) { playSound('coin'); document.getElementById('score-detail-modal').classList.add('active'); }
+        function closeScoreModal() { playSound('warp-out'); document.getElementById('score-detail-modal').classList.remove('active'); }
         function showVoNgaModal() { playSound('coin'); document.getElementById('vonga-modal').classList.add('active'); }
         function closeVoNgaModal() { playSound('warp-out'); document.getElementById('vonga-modal').classList.remove('active'); }
         function showSciInfoModal() { playSound('coin'); document.getElementById('sci-info-modal').classList.add('active'); }
         function closeSciInfoModal() { playSound('warp-out'); document.getElementById('sci-info-modal').classList.remove('active'); }
+
+        /* CẢM BIẾN GIA TỐC - KÉO TRƯỢT XUỐNG ĐỂ MỞ RADAR */
+        const cardBox = document.getElementById('stats-card-box'); 
+        const dRadar = document.getElementById('dragon-radar');
+        if (window.DeviceOrientationEvent) { 
+            window.addEventListener('deviceorientation', (event) => { 
+                if (isGyroFrozen) return; 
+                let tiltX = event.gamma; let tiltY = event.beta; 
+                if (tiltX !== null && tiltY !== null) { 
+                    let rotateY = Math.max(-10, Math.min(10, tiltX * 0.4)); 
+                    let rotateX = Math.max(-10, Math.min(10, -tiltY * 0.4)); 
+                    let baseBeta = 45; let boundedBeta = Math.max(0, Math.min(90, tiltY)); let moveY = 0; 
+                    if (boundedBeta < baseBeta) { 
+                        if(isGyroLocked) { moveY = 0; } 
+                        else { moveY = (boundedBeta - baseBeta) * 7; moveY = Math.max(-175, moveY); } 
+                    } else { 
+                        moveY = (boundedBeta - baseBeta) * 2; moveY = Math.min(50, moveY); 
+                    } 
+                    cardBox.style.transform = `translate(-50%, calc(-50% + ${moveY}px)) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`; 
+                    if (moveY <= -174 && !isGyroLocked) { 
+                        if(!dRadar.classList.contains('active')) { dRadar.classList.add('active'); } 
+                    } else { 
+                        if(dRadar.classList.contains('active')) { dRadar.classList.remove('active'); } 
+                    } 
+                } 
+            }, { passive: true }); 
+        }
 
         function playSound(type) {
             try {
