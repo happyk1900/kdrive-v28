@@ -19,6 +19,8 @@
             --orange: #ff6600;
             --amber: #ffb700;
             
+            --sys-color: #00e5ff; /* Biến đổi theo hệ */
+            
             --font-title: 'Chakra Petch', sans-serif;
             --font-display: 'Space Grotesk', sans-serif;
             --font-terminal: 'Share Tech Mono', monospace;
@@ -27,95 +29,114 @@
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: var(--font-display); color: #fff; }
 
-        /* VIDEO NỀN SÁNG RÕ, KHÔNG LÀM MỜ */
+        /* NỀN & HIỆU ỨNG */
         #sanctum-video { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; object-fit: cover; opacity: 0; transition: opacity 1.5s ease; }
         #sanctum-video.loaded { opacity: 1; }
+        #sanctum-video.playing-mode { opacity: 0.6; }
 
         #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
-        .quantum-sparkle { position: absolute; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #fff, 0 0 15px var(--cyan); opacity: 0; animation: sparkleFloat linear infinite; }
+        .quantum-sparkle { position: absolute; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #fff, 0 0 15px var(--sys-color); opacity: 0; animation: sparkleFloat linear infinite; }
         @keyframes sparkleFloat { 0% { transform: translateY(105vh) scale(0.3); opacity: 0; } 50% { opacity: 0.6; } 100% { transform: translateY(-10vh) translateX(-15px) scale(0.2); opacity: 0; } }
 
-        /* GIAO DIỆN CHUNG: TOP BAR & BOTTOM BAR */
+        .laser-beam-horizontal { position: fixed; top: 50%; left: 0; width: 100vw; height: 2px; background: var(--sys-color); box-shadow: 0 0 25px var(--sys-color), 0 0 50px #ffffff; z-index: 99999; transform: scaleX(0); transform-origin: center; animation: laserShoot 1.0s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: none; }
+        @keyframes laserShoot { 100% { transform: scaleX(1); height: 4px; } }
+        .laser-beam-horizontal.expand { animation: laserExpand 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        @keyframes laserExpand { 100% { height: 100vh; top: 0; opacity: 0; } }
+
+        .flashbang-red { position: fixed; inset: 0; background: rgba(255, 51, 102, 0.4); z-index: 999999; pointer-events: none; animation: flashRed 0.4s forwards; }
+        @keyframes flashRed { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* THANH ĐIỀU HƯỚNG TRÊN & DƯỚI */
         .top-nav { position: fixed; top: max(35px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; z-index: 9999; }
-        .btn-back-cyber { width: 36px; height: 36px; background: rgba(5,7,10,0.9); border: 1px solid rgba(0,229,255,0.6); border-radius: 8px; color: var(--cyan); font-family: var(--font-terminal); font-size: 20px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .btn-back-cyber { width: 36px; height: 36px; background: rgba(5,7,10,0.9); border: 1px solid var(--sys-color); border-radius: 8px; color: var(--sys-color); font-family: var(--font-terminal); font-size: 20px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s;}
         .btn-back-cyber:active { transform: scale(0.9); }
 
         .game-top-bar { position: fixed; top: max(20px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; opacity: 0; transition: opacity 1.5s ease; visibility: hidden; }
         .game-top-bar.visible { opacity: 1; visibility: visible; }
         .health-container { display: flex; gap: 4px; align-items: center; }
         .health-bar { width: 14px; height: 6px; background: rgba(255,255,255,0.15); transform: skewX(-20deg); transition: all 0.3s ease; }
-        .health-bar.sys-color.active { background: var(--sys-color, #00e5ff); box-shadow: 0 0 10px var(--sys-color, #00e5ff); }
-        .health-bar.dmg-color.active { background: var(--crimson); box-shadow: 0 0 10px var(--crimson); }
-        .data-score { font-family: var(--font-terminal); font-size: 15px; font-weight: bold; color: #fff; display: flex; align-items: center; position: relative; }
-        .data-score span { color: var(--sys-color, #00e5ff); text-shadow: 0 0 12px var(--sys-color, #00e5ff); font-size: 20px; margin-left: 6px; }
+        .health-bar.active-sys { background: var(--sys-color); box-shadow: 0 0 10px var(--sys-color); }
+        .health-bar.active-dmg { background: var(--crimson); box-shadow: 0 0 10px var(--crimson); }
+        
+        .data-score-wrap { display: flex; flex-direction: column; align-items: center; position: relative; }
+        .data-score { font-family: var(--font-terminal); font-size: 15px; font-weight: bold; color: #fff; display: flex; align-items: center; }
+        .data-score span { color: var(--sys-color); text-shadow: 0 0 12px var(--sys-color); font-size: 20px; margin-left: 6px; }
 
         .game-bottom-bar { position: fixed; bottom: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; opacity: 0; transition: opacity 1.5s ease; visibility: hidden; border-top: 1px solid rgba(255,255,255,0.2); }
         .game-bottom-bar.visible { opacity: 1; visibility: visible; }
-        .btn-action { width: 46px; height: 46px; background: rgba(10,15,25,0.85); border: 1.5px solid var(--sys-color, #00e5ff); border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(8px); color: var(--sys-color, #00e5ff); font-family: var(--font-terminal); font-weight: bold; font-size: 22px; transition: 0.2s; box-shadow: 0 0 12px rgba(255,255,255,0.1); }
+        .btn-action { width: 46px; height: 46px; background: rgba(10,15,25,0.85); border: 1.5px solid var(--sys-color); border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(8px); color: var(--sys-color); font-family: var(--font-terminal); font-weight: bold; font-size: 22px; transition: 0.2s; box-shadow: 0 0 12px rgba(255,255,255,0.1); }
         .btn-action:active { transform: scale(0.9); }
 
-        /* MODALS & OVERLAYS */
-        .cyber-modal-custom { position: fixed; inset: 0; z-index: 300000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 16px; background: transparent; transition: opacity 0.5s; }
-        .cyber-modal-custom.hidden { opacity: 0; pointer-events: none; }
-        .cyber-led-wrapper { position: relative; padding: 1.5px; overflow: hidden; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); width: 92vw; max-width: 360px; box-shadow: 0 0 35px rgba(0,229,255,0.2); }
-        .modal-box { width: 100%; background: rgba(5, 9, 16, 0.94); padding: 22px 18px; text-align: left; position: relative; z-index: 1; display: flex; flex-direction: column; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); border: 1px solid var(--sys-color, #00e5ff); backdrop-filter: blur(10px); }
-        .modal-title { font-family: var(--font-title); color: var(--sys-color, #00e5ff); font-size: 21px; font-weight: 800; margin-bottom: 16px; letter-spacing: 2px; text-transform: uppercase; text-align: center; text-shadow: 0 0 10px var(--sys-color, #00e5ff); }
+        /* MODALS & GIAO DIỆN CHUNG */
+        .cyber-modal-custom { position: fixed; inset: 0; z-index: 300000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 16px; background: rgba(2, 5, 10, 0.7); backdrop-filter: blur(8px); transition: opacity 0.5s ease; }
+        .cyber-modal-custom.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
+        .cyber-led-wrapper { position: relative; padding: 1.5px; overflow: hidden; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); width: 92vw; max-width: 380px; box-shadow: 0 0 35px rgba(0,229,255,0.2); transition: 0.3s; }
+        .modal-box { width: 100%; background: rgba(5, 9, 16, 0.96); padding: 22px 18px; text-align: left; position: relative; z-index: 1; display: flex; flex-direction: column; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); border: 1px solid var(--sys-color); }
+        
+        .modal-title { font-family: var(--font-title); color: var(--sys-color); font-size: 21px; font-weight: 800; margin-bottom: 16px; letter-spacing: 2px; text-transform: uppercase; text-align: center; text-shadow: 0 0 10px var(--sys-color); }
         .desc-text { font-family: var(--font-display); font-size: 14px; color: #fff; line-height: 1.6; text-align: left; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 12px; margin-bottom: 16px; }
+        
         .modal-btn { width: 100%; padding: 14px; font-family: var(--font-title); font-size: 15px; font-weight: 800; background: var(--mint); color: #000; border: none; cursor: pointer; text-transform: uppercase; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); text-align: center; transition: all 0.2s; box-shadow: 0 0 15px rgba(0,255,157,0.5); letter-spacing: 1px; }
         .modal-btn:active { transform: scale(0.96); filter: brightness(1.2); }
-        .btn-alt { background: rgba(255,255,255,0.1); color: #fff; box-shadow: none; border: 1px solid #fff; }
 
-        /* BẢNG ĐIỂM CHUNG DÙNG CHỮ RANK, KHÔNG ICON */
         .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 10px; margin-bottom: 10px; width: 100%; }
         .metric-card-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .metric-label { color: #fff; font-family: var(--font-terminal); font-size: 14px; font-weight: bold; flex: 1; text-align: left;}
-        .metric-val { color: var(--sys-color, #00e5ff); font-family: var(--font-terminal); font-size: 14px; font-weight: bold; text-align: right; text-shadow: 0 0 8px var(--sys-color, #00e5ff); }
+        .metric-val { color: var(--sys-color); font-family: var(--font-terminal); font-size: 14px; font-weight: bold; text-align: right; text-shadow: 0 0 8px var(--sys-color); }
         .rank-text { font-family: var(--font-title); font-size: 16px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
 
         .btn-row { display: flex; gap: 10px; width: 100%; margin-top: 10px; }
         .btn-half { flex: 1; padding: 12px; font-family: var(--font-title); font-size: 14px; font-weight: 800; border-radius: 8px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; border: 1.5px solid; background: transparent; }
         .btn-replay { border-color: var(--crimson); color: var(--crimson); }
-        .btn-next { border-color: var(--sys-color, #00e5ff); color: var(--sys-color, #00e5ff); background: rgba(255,255,255,0.05); }
-        .btn-next:active { background: var(--sys-color, #00e5ff); color: #000; }
+        .btn-next { border-color: var(--sys-color); color: var(--sys-color); background: rgba(255,255,255,0.05); }
+        .btn-next:active { background: var(--sys-color); color: #000; }
 
-        /* KHU VỰC CHƠI GAME DÙNG CHUNG */
+        /* KHU VỰC GAME CHUNG */
         #play-area { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; display: none; z-index: 100; }
         #play-area.active { display: block; }
-        .game-layer { position: absolute; inset: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .game-layer.active { display: flex; }
 
-        /* --- CSS THỦY LUÂN --- */
+        /* 1. CSS THỦY LUÂN */
+        #thuy-layer { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        #thuy-layer.active { display: flex; }
         .dynamic-grid { display: grid; gap: 6px; margin: 0 auto; transition: 0.3s; justify-content: center; align-content: center; border-radius: 12px; padding: 8px; }
         .grid-cell { aspect-ratio: 1; background: rgba(15,23,42,0.6); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(6px); transition: 0.15s; }
         .grid-cell.active-glow { background: rgba(244,143,177,0.9); box-shadow: 0 0 22px var(--pink); border-color: #fff; }
         .grid-cell.correct { background: rgba(244,143,177,0.95); box-shadow: 0 0 18px var(--pink); color: #fff;}
         .grid-cell.wrong { background: rgba(229,57,53,0.9); box-shadow: 0 0 15px var(--crimson); color: #fff;}
+        .grid-cell.reveal-hint { background: rgba(255, 183, 77, 0.7); box-shadow: 0 0 15px #ffd700; border-color: #fff; }
+
         .sequence-display { min-height: 90px; max-height: 140px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-bottom: 25px; width: 95%; max-width: 350px; background: rgba(15,23,42,0.85); border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.4); padding: 10px; }
         .input-area { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 85%; max-width: 250px;}
         .btn-symbol { height: 58px; background: rgba(15,23,42,0.8); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.15s; }
+        .btn-symbol:active { background: rgba(244, 143, 177, 0.4); transform: scale(0.96); }
         .quantum-char { display: inline-flex; justify-content: center; align-items: center; width: 26px; height: 36px; }
         .hidden-box { min-width: 26px; height: 36px; display: inline-flex; justify-content: center; align-items: center; border: 1.5px dashed rgba(255,255,255,0.5); border-radius: 6px; background: rgba(255,255,255,0.05); color: var(--pink); }
 
-        /* --- CSS HỎA LUÂN --- */
+        /* 2. CSS HỎA LUÂN */
+        #hoa-layer { position: absolute; inset: 0; display: none; }
+        #hoa-layer.active { display: block; }
         .orb { position: absolute; border-radius: 50%; cursor: crosshair; display: flex; justify-content: center; align-items: center; width: 56px; height: 56px; }
         .orb-fire { background: radial-gradient(circle, #ffdf70 10%, #ffb700 40%, #ff3333 80%); box-shadow: 0 0 18px #ff3333; z-index: 10; }
         .orb-ice { background: radial-gradient(circle, #fff, #00e5ff); box-shadow: 0 0 20px #00e5ff; z-index: 5; }
         .orb-purple { background: radial-gradient(circle, #ff66cc, #8a2be2); box-shadow: 0 0 20px #8a2be2; z-index: 5; }
         .orb-green { background: radial-gradient(circle, #bfff00, #00ff00); box-shadow: 0 0 20px #00ff00; z-index: 5; }
 
-        /* --- CSS PHONG LUÂN --- */
-        .wind-target { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: transform 0.1s ease, opacity 0.15s ease; } 
-        .t-track-mode { background: #fff; border: 2px solid var(--crimson); box-shadow: 0 0 20px #fff, 0 0 40px rgba(255,51,102,0.8); }
-        .t-track-mode.hovered { border-color: #fff; box-shadow: 0 0 30px #fff, 0 0 60px var(--crimson); transform: translate(-50%, -50%) scale(1.15); }
-        .style-slash { background: #fff; border: 2.5px solid var(--crimson); box-shadow: 0 0 25px var(--crimson), 0 0 50px rgba(255,255,255,0.8); transition: opacity 0.15s ease; }
-        #custom-cursor { position: absolute; width: 20px; height: 20px; border: 2px solid var(--crimson); border-radius: 50%; pointer-events: none; z-index: 100; display: none; box-shadow: 0 0 12px var(--crimson); transform: translate(-50%, -50%); }
-
-        .flashbang-red { position: fixed; inset: 0; background: rgba(255,51,102,0.4); z-index: 999999; pointer-events: none; animation: flashRed 0.4s forwards; }
-        @keyframes flashRed { 0% { opacity: 1; } 100% { opacity: 0; } }
         .floating-ms { position: absolute; font-family: var(--font-terminal); font-size: 20px; font-weight: 900; pointer-events: none; z-index: 100000; transform: translate(-50%, -50%); animation: floatUpMs 0.8s ease-out forwards; }
         .ms-fast { color: #00ffcc; text-shadow: 0 0 12px #00ffcc; }
         .ms-slow { color: var(--crimson); text-shadow: 0 0 12px var(--crimson); }
         @keyframes floatUpMs { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.8); } 20% { transform: translate(-50%, -60%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -100%) scale(1); } }
+
+        /* 3. CSS PHONG LUÂN */
+        #phong-layer { position: absolute; inset: 0; display: none; overflow: hidden; }
+        #phong-layer.active { display: block; }
+        .wind-target { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: transform 0.1s ease, opacity 0.15s ease; } 
+        .t-track-mode { background: #fff; border: 2px solid var(--crimson); box-shadow: 0 0 20px #fff, 0 0 40px rgba(255,51,102,0.8); }
+        .t-track-mode.hovered { border-color: #fff; box-shadow: 0 0 30px #fff, 0 0 60px var(--crimson); transform: translate(-50%, -50%) scale(1.15); }
+        .style-slash { background: #fff; border: 2.5px solid var(--crimson); box-shadow: 0 0 25px var(--crimson), 0 0 50px rgba(255,255,255,0.8); }
+        #custom-cursor { position: absolute; width: 20px; height: 20px; border: 2px solid var(--crimson); border-radius: 50%; pointer-events: none; z-index: 100; display: none; box-shadow: 0 0 12px var(--crimson); transform: translate(-50%, -50%); }
+        #warning-bar-container { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); width: 200px; height: 4px; background: rgba(255, 255, 255, 0.2); border-radius: 2px; overflow: hidden; display: none; z-index: 130;}
+        #warning-progress { width: 0%; height: 100%; background: var(--crimson); transition: width 0.1s linear; }
+
     </style>
 </head>
 <body>
@@ -124,39 +145,47 @@
     <div id="dust-container"></div>
 
     <div class="top-nav">
-        <button class="btn-back-cyber" onclick="confirmExit()">⟨</button>
+        <button class="btn-back-cyber" onclick="confirmExitToLobby()">⟨</button>
     </div>
 
-    <!-- UI GAME CHUNG -->
+    <!-- UI GAME CHUNG CHỨA DATA VÀ MÁU -->
     <div id="game-top-bar" class="game-top-bar">
         <div class="health-container" id="hp-g-box"></div>
-        <div class="data-score">DATA: <span id="boo-points">0</span></div>
+        <div class="data-score-wrap">
+            <div class="data-score">DATA: <span id="boo-points">0</span></div>
+        </div>
         <div class="health-container" id="hp-p-box"></div>
     </div>
+    
     <div id="game-bottom-bar" class="game-bottom-bar">
-        <button class="btn-action" onclick="confirmExit()">⟨</button>
+        <button class="btn-action" onclick="confirmExitToLobby()">⟨</button>
         <button class="btn-action" onclick="skipStage()">⏭</button>
         <button class="btn-action" onclick="pauseGame()">||</button>
     </div>
 
-    <!-- CÁC LỚP CHƠI GAME ĐƯỢC ẨN/HIỆN ĐỘNG -->
+    <!-- KHU VỰC RENDER GAME (DOM) -->
     <div id="play-area">
-        <!-- THỦY LUÂN -->
-        <div id="thuy-g1" class="game-layer"><div id="grid-1" class="dynamic-grid"></div></div>
-        <div id="thuy-g2" class="game-layer">
-            <div class="sequence-display" id="seq-area"></div>
-            <div class="input-area" id="input-area-2"></div>
+        <!-- Lớp Thủy Luân -->
+        <div id="thuy-layer">
+            <div id="grid-1" class="dynamic-grid" style="display:none;"></div>
+            <div id="thuy-g2" style="display:none; flex-direction:column; align-items:center; width:100%;">
+                <div class="sequence-display" id="seq-area"></div>
+                <div class="input-area" id="input-area-2"></div>
+            </div>
         </div>
-        <!-- HỎA LUÂN (Orbs sinh ra động ở play-area) -->
-        <div id="hoa-layer" class="game-layer"></div>
-        <!-- PHONG LUÂN -->
-        <div id="phong-layer" class="game-layer">
+
+        <!-- Lớp Hỏa Luân -->
+        <div id="hoa-layer"></div>
+
+        <!-- Lớp Phong Luân -->
+        <div id="phong-layer">
             <div id="custom-cursor"></div>
             <div id="game-target" class="wind-target" onpointerdown="handlePhongClick(event)"></div>
+            <div id="warning-bar-container"><div id="warning-progress"></div></div>
         </div>
     </div>
 
-    <!-- MODAL MỞ ĐẦU CHUỖI -->
+    <!-- MODAL 1: CHÀO MỪNG TRANG CHỦ -->
     <div class="cyber-modal-custom" id="modal-intro">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
@@ -164,7 +193,7 @@
                 <div class="desc-text">
                     Chào mừng chiến binh đến với bài đánh giá thần kinh toàn diện qua 3 hệ thống trắc nghiệm liên hoàn:<br><br>
                     • <b>Thủy Luân</b> (Trí nhớ không gian)<br>
-                    • <b>Hỏa Luân</b> (Phản xạ & phát lực)<br>
+                    • <b>Hỏa Luân</b> (Phản xạ & tốc độ phát lực)<br>
                     • <b>Phong Luân</b> (Phán đoán & bám dính)<br><br>
                     Hệ thống sẽ ghi nhận và tổng kết toàn bộ điểm số ở cuối chuỗi!
                 </div>
@@ -173,22 +202,22 @@
         </div>
     </div>
 
-    <!-- MODAL BRIEFING TRƯỚC MỖI BÀI -->
+    <!-- MODAL 2: BRIEFING TRƯỚC MỖI BÀI -->
     <div class="cyber-modal-custom hidden" id="modal-briefing">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
                 <div class="modal-title" id="briefing-title">TIÊU ĐỀ BÀI</div>
                 <div class="desc-text" id="briefing-target">Mục tiêu...</div>
-                <button class="modal-btn" onclick="runCurrentGame()">BẮT ĐẦU</button>
+                <button class="modal-btn" style="background: var(--sys-color);" onclick="runCurrentGame()">BẮT ĐẦU</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL KẾT QUẢ TỪNG BÀI (DÙNG CHUNG) -->
+    <!-- MODAL 3: KẾT QUẢ TỪNG BÀI 1 / BÀI 2 -->
     <div class="cyber-modal-custom hidden" id="modal-stage-result">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
-                <div class="modal-title" id="res-title">KẾT QUẢ BÀI 1</div>
+                <div class="modal-title" id="res-title" style="color:#fff; text-shadow:0 0 10px #fff;">KẾT QUẢ BÀI 1</div>
                 
                 <div class="desc-text" style="background:transparent; border:none; padding:0;">
                     <div class="metric-card-row">
@@ -201,25 +230,25 @@
                     </div>
                     <div class="metric-card-row" style="border:none;">
                         <span class="metric-label">XẾP HẠNG:</span>
-                        <span class="metric-val" id="res-rank-text">KÉM</span>
+                        <span class="metric-val rank-text" id="res-rank-text">KÉM</span>
                     </div>
                 </div>
 
                 <div class="btn-row">
                     <button class="btn-half btn-replay" onclick="retryCurrentGame()">TẬP LẠI</button>
-                    <button class="btn-half btn-next" id="btn-stage-next" onclick="nextGame()">BÀI 2</button>
+                    <button class="btn-half btn-next" id="btn-stage-next" onclick="nextStage()">BÀI 2</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL TỔNG KẾT TỪNG HỆ HOẶC TOÀN DIỆN CUỐI CÙNG -->
+    <!-- MODAL 4: TỔNG KẾT HỆ / TỔNG KẾT CUỐI CÙNG -->
     <div class="cyber-modal-custom hidden" id="modal-summary">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
                 <div class="modal-title" id="sum-title">TỔNG KẾT HỆ</div>
                 
-                <div class="desc-text" style="background:transparent; border:none; padding:0;">
+                <div class="desc-text" id="sum-content-box" style="background:transparent; border:none; padding:0;">
                     <div class="metric-card-row">
                         <span class="metric-label">BÀI 1:</span>
                         <span class="metric-val" id="sum-g1">0</span>
@@ -228,57 +257,88 @@
                         <span class="metric-label">BÀI 2:</span>
                         <span class="metric-val" id="sum-g2">0</span>
                     </div>
-                    <div class="metric-card-row">
+                    <div class="metric-card-row" style="border-top:1px dashed rgba(255,255,255,0.3); padding-top:10px;">
                         <span class="metric-label" style="color:var(--gold);">TỔNG ĐIỂM DATA:</span>
-                        <span class="metric-val" id="sum-total" style="color:var(--gold); font-size:22px;">0</span>
+                        <span class="metric-val" id="sum-total" style="color:var(--gold); font-size:22px; text-shadow:0 0 10px var(--gold);">0</span>
                     </div>
                     <div class="metric-card-row" style="border:none; justify-content:center; padding-top:10px;">
-                        <span id="sum-rank-text" style="font-size: 18px;">KÉM</span>
+                        <span class="rank-text" id="sum-rank-text" style="font-size: 18px;">KÉM</span>
                     </div>
                 </div>
 
-                <button class="modal-btn" id="btn-sum-next" onclick="goToNextSystem()">BÀI TIẾP THEO</button>
+                <button class="modal-btn" id="btn-sum-next" style="background: var(--sys-color);" onclick="goToNextSystem()">BÀI TIẾP THEO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: PAUSE -->
+    <div class="cyber-modal-custom hidden" id="modal-pause">
+        <div class="cyber-led-wrapper">
+            <div class="modal-box" style="border-color: var(--crimson);">
+                <div class="modal-title" style="color: var(--crimson);">TẠM DỪNG</div>
+                <button class="modal-btn btn-alt" style="margin-bottom:10px;" onclick="resumeGame()">TIẾP TỤC</button>
+                <button class="modal-btn" style="background:rgba(255,51,102,0.2); color:var(--crimson); border:1px solid var(--crimson);" onclick="confirmExitToLobby()">VỀ SẢNH CHỜ</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- HỆ THỐNG DATA TỔNG QUAN ---
+        // --- DATA & AUDIO ---
         const SVG_SHAPES = {
-            'lightning': '<svg style="width:20px;height:20px;color:#ffb74d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-            'circle': '<svg style="width:20px;height:20px;color:#f48fb1;" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>',
-            'triangle': '<svg style="width:20px;height:20px;color:#00ff9d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20 12 2"/></svg>',
-            'square': '<svg style="width:20px;height:20px;color:#ff3366;" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>'
+            'lightning': '<svg style="width:24px;height:24px;color:#ffb74d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+            'circle': '<svg style="width:24px;height:24px;color:#f48fb1;" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>',
+            'triangle': '<svg style="width:24px;height:24px;color:#00ff9d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20 12 2"/></svg>',
+            'square': '<svg style="width:24px;height:24px;color:#ff3366;" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>',
+            'star': '<svg style="width:24px;height:24px;color:#ffaa00;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>',
+            'diamond': '<svg style="width:24px;height:24px;color:#b026ff;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 12 12 22 2 12 12 2"/></svg>'
         };
         const SYM_KEYS = Object.keys(SVG_SHAPES);
 
-        let activeSys = 'INTRO'; // THUY, HOA, PHONG
-        let cGame = 1; // 1 hoặc 2
-        let aScore = 0; let pendingScore = 0; let hp = 5;
-        let isPlaying = false; 
+        let fxCtx = null;
+        function playSound(type, pitch=1) {
+            try { 
+                if(!fxCtx) fxCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if(fxCtx.state === 'suspended') fxCtx.resume();
+                let osc = fxCtx.createOscillator(); let gain = fxCtx.createGain(); 
+                osc.connect(gain); gain.connect(fxCtx.destination);
+                if(type === 'coin') { osc.type = 'sine'; osc.frequency.setValueAtTime(1500*pitch, fxCtx.currentTime); osc.frequency.setValueAtTime(2000*pitch, fxCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.2, fxCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.2); osc.start(); osc.stop(fxCtx.currentTime + 0.2); } 
+                else if(type === 'wrong') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, fxCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(50, fxCtx.currentTime + 0.3); gain.gain.setValueAtTime(0.5, fxCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.3); osc.start(); osc.stop(fxCtx.currentTime + 0.3); }
+            } catch(e) {}
+        }
 
-        // Lưu trữ điểm các hệ
-        let scores = { THUY: [0,0], HOA: [0,0], PHONG: [0,0] };
-        
-        // Các biến logic game dùng chung
-        let timer1, timer2, raf1;
-        let reactTimes = [];
+        // --- GLOBAL STATE ---
+        let Game = {
+            sys: 'INTRO', stage: 1, aScore: 0, hp: 5, isPlaying: false, isPaused: false,
+            scores: { THUY: [0,0], HOA: [0,0], PHONG: [0,0] },
+            metrics: { THUY: 0, HOA: 0, PHONG: 0 } // lưu ms hoặc timer
+        };
 
         window.onload = () => {
             let vid = document.getElementById('sanctum-video');
             vid.src = '../Photo/video nen trang chu.mp4';
             setTimeout(() => vid.classList.add('loaded'), 200);
+            initSparkleParticles();
         };
 
-        function setSysTheme(sys) {
-            let r = document.documentElement;
-            if(sys === 'THUY') { r.style.setProperty('--sys-color', 'var(--pink)'); document.getElementById('sanctum-video').src = '../Photo/video nen thuy luan.mp4'; }
-            if(sys === 'HOA') { r.style.setProperty('--sys-color', 'var(--amber)'); document.getElementById('sanctum-video').src = '../Photo/video nen hoa luan.mp4'; }
-            if(sys === 'PHONG') { r.style.setProperty('--sys-color', 'var(--crimson)'); document.getElementById('sanctum-video').src = '../Photo/video nen phong luan.mp4'; }
-            document.getElementById('sanctum-video').play().catch(()=>{});
+        function initSparkleParticles() {
+            let c = document.getElementById('dust-container');
+            for(let i=0; i<30; i++) {
+                let p = document.createElement('div'); p.className='quantum-sparkle';
+                p.style.left = Math.random()*100+'vw'; p.style.top = Math.random()*100+'vh';
+                let s = Math.random()*3+2; p.style.width=s+'px'; p.style.height=s+'px';
+                p.style.animationDuration = (Math.random()*6+4)+'s'; c.appendChild(p);
+            }
         }
 
-        function getRank(sys, score) {
+        function setSysTheme(sys) {
+            let r = document.documentElement; let vid = document.getElementById('sanctum-video');
+            if(sys === 'THUY') { r.style.setProperty('--sys-color', 'var(--pink)'); vid.src = '../Photo/video nen thuy luan.mp4'; }
+            if(sys === 'HOA') { r.style.setProperty('--sys-color', 'var(--amber)'); vid.src = '../Photo/video nen hoa luan.mp4'; }
+            if(sys === 'PHONG') { r.style.setProperty('--sys-color', 'var(--crimson)'); vid.src = '../Photo/video nen phong luan.mp4'; }
+            vid.play().catch(()=>{});
+        }
+
+        function getRankObj(score) {
             if(score < 1000) return { t: "KÉM", c: "var(--crimson)" };
             if(score >= 6000) return { t: "THẦN ĐỒNG", c: "var(--gold)" };
             if(score >= 4000) return { t: "XUẤT SẮC", c: "var(--mint)" };
@@ -289,193 +349,303 @@
         function updateHP() {
             let gBox = document.getElementById('hp-g-box'); gBox.innerHTML = '';
             let pBox = document.getElementById('hp-p-box'); pBox.innerHTML = '';
-            let gC = Math.min(5, Math.max(0, hp));
-            let pC = Math.max(0, hp - 5);
+            let gC = Math.min(5, Math.max(0, Game.hp));
+            let pC = Math.max(0, Game.hp - 5);
             for(let i=0; i<5; i++) {
-                let div = document.createElement('div'); div.className = `health-bar sys-color ${i<gC ? 'active':''}`; gBox.appendChild(div);
-                let div2 = document.createElement('div'); div2.className = `health-bar dmg-color ${i<pC ? 'active':''}`; pBox.appendChild(div2);
+                let d1 = document.createElement('div'); d1.className = `health-bar active-sys ${i<gC ? 'active':''}`; gBox.appendChild(d1);
+                let d2 = document.createElement('div'); d2.className = `health-bar active-dmg ${i<pC ? 'active':''}`; pBox.appendChild(d2);
             }
-        }
-
-        function loseLife() {
-            hp--; updateHP(); playSound('wrong');
-            let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(()=>flash.remove(), 400);
-            if(hp <= 0) finishGame();
         }
 
         function addScore(pts) {
-            aScore += pts; document.getElementById('boo-points').innerText = Math.floor(aScore);
-            if(aScore > 0 && aScore % 1000 < pts) { hp = Math.min(10, hp+1); updateHP(); }
+            Game.aScore += pts; document.getElementById('boo-points').innerText = Math.floor(Game.aScore);
+            if(Game.aScore > 0 && Game.aScore % 1000 < pts) { Game.hp = Math.min(10, Game.hp+1); updateHP(); }
         }
 
-        function hideAllModals() {
-            document.querySelectorAll('.cyber-modal-custom').forEach(m => m.classList.add('hidden'));
-            document.querySelectorAll('.game-layer').forEach(l => l.classList.remove('active'));
+        function loseLife() {
+            if(!Game.isPlaying || Game.isPaused) return;
+            Game.hp--; updateHP(); playSound('wrong');
+            let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(()=>flash.remove(), 400);
+            if(Game.hp <= 0) finishStage();
+            else {
+                // Restart current round based on system
+                if(Game.sys === 'THUY') { clearTimeout(thuyTimer); setTimeout(runThuy, 1000); }
+                if(Game.sys === 'HOA') { clearTimeout(hoaTimer); setTimeout(runHoa, 500); }
+            }
+        }
+
+        function hideAllModals() { document.querySelectorAll('.cyber-modal-custom').forEach(m => m.classList.add('hidden')); }
+        function hideAllLayers() {
+            document.getElementById('play-area').classList.remove('active');
+            document.getElementById('thuy-layer').classList.remove('active');
+            document.getElementById('grid-1').style.display = 'none';
+            document.getElementById('thuy-g2').style.display = 'none';
+            document.getElementById('hoa-layer').classList.remove('active');
+            document.getElementById('hoa-layer').innerHTML = '';
+            document.getElementById('phong-layer').classList.remove('active');
+            document.getElementById('custom-cursor').style.display = 'none';
+            document.getElementById('warning-bar-container').style.display = 'none';
         }
 
         function startSystem(sysName) {
-            activeSys = sysName; cGame = 1;
-            setSysTheme(sysName);
-            hideAllModals();
-            showBriefing();
+            Game.sys = sysName; Game.stage = 1; setSysTheme(sysName); showBriefing();
         }
 
         function showBriefing() {
-            hideAllModals();
-            aScore = 0; hp = 5; updateHP(); document.getElementById('boo-points').innerText = '0'; reactTimes = [];
+            hideAllModals(); hideAllLayers();
+            Game.aScore = 0; Game.hp = 5; updateHP(); document.getElementById('boo-points').innerText = '0';
             document.getElementById('game-top-bar').classList.remove('visible');
             document.getElementById('game-bottom-bar').classList.remove('visible');
-            document.getElementById('play-area').classList.remove('active');
 
-            let title = "", desc = "";
-            if(activeSys === 'THUY') { title = cGame===1 ? "BÀI 1: GHI NHỚ VỊ TRÍ" : "BÀI 2: GHI NHỚ HÌNH ẢNH"; desc = "Ghi nhớ và lặp lại chính xác các tín hiệu không gian."; }
-            if(activeSys === 'HOA') { title = cGame===1 ? "BÀI 1: ĐO LƯỜNG PHẢN XẠ" : "BÀI 2: PHẢN XẠ CHỌN LỌC"; desc = "Tiêu diệt hạt năng lượng nhanh nhất có thể. Bài 2 chỉ chọn Hạt Đỏ/Vàng."; }
-            if(active  === 'PHONG') { title = cGame===1 ? "BÀI 1: GIỮ QUỸ ĐẠO" : "BÀI 2: PHÁN ĐOÁN VỊ TRÍ"; desc = "Rê ngón tay bám sát hoặc chạm trúng mục tiêu xuất hiện chớp nhoáng."; }
+            let t = "", d = "";
+            if(Game.sys === 'THUY') { t = Game.stage===1 ? "BÀI 1: GHI NHỚ VỊ TRÍ" : "BÀI 2: GHI NHỚ HÌNH ẢNH"; d = "Ghi nhớ và lặp lại chính xác các tín hiệu không gian.<br><br><b>MỤC TIÊU:</b> Không được bỏ sót!"; }
+            if(Game.sys === 'HOA') { t = Game.stage===1 ? "BÀI 1: ĐO LƯỜNG PHẢN XẠ" : "BÀI 2: PHẢN XẠ CHỌN LỌC"; d = "Tiêu diệt hạt năng lượng xuất hiện chớp nhoáng.<br><br><b>MỤC TIÊU:</b> " + (Game.stage===1 ? "Bấm thật nhanh!" : "Chỉ bấm hạt Lửa/Vàng!"); }
+            if(Game.sys === 'PHONG') { t = Game.stage===1 ? "BÀI 1: GIỮ VỮNG QUỸ ĐẠO" : "BÀI 2: PHÁN ĐOÁN VỊ TRÍ"; d = "Rê ngón tay bám sát quỹ đạo hoặc chạm trúng mục tiêu ẩn hiện.<br><br><b>MỤC TIÊU:</b> Càng dính càng tốt!"; }
             
-            document.getElementById('briefing-title').innerText = title;
-            document.getElementById('briefing-target').innerText = desc;
-            document.getElementById('modal-briefing').classList.remove('hidden');
+            document.getElementById('briefing-title').innerText = t;
+            document.getElementById('briefing-target').innerHTML = d;
+            
+            let btn = document.querySelector('#modal-briefing .modal-btn');
+            btn.style.background = 'var(--sys-color)';
+            document.getElementById('sanctum-video').classList.remove('playing-mode');
+            
+            setTimeout(() => document.getElementById('modal-briefing').classList.remove('hidden'), 300);
         }
 
         function runCurrentGame() {
-            hideAllModals();
-            document.getElementById('game-top-bar').classList.add('visible');
-            document.getElementById('game-bottom-bar').classList.add('visible');
-            document.getElementById('play-area').classList.add('active');
-            isPlaying = true;
-
-            if(activeSys === 'THUY') { document.getElementById(cGame===1 ? 'thuy-g1':'thuy-g2').classList.add('active'); runThuy(); }
-            if(activeSys === 'HOA') { document.getElementById('hoa-layer').classList.add('active'); runHoa(); }
-            if(activeSys === 'PHONG') { document.getElementById('phong-layer').classList.add('active'); runPhong(); }
+            playSound('coin'); hideAllModals();
+            document.getElementById('sanctum-video').classList.add('playing-mode');
+            
+            // Laser Effect
+            let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
+            setTimeout(() => { laser.classList.add('expand'); }, 500);
+            
+            setTimeout(() => {
+                laser.remove();
+                document.getElementById('game-top-bar').classList.add('visible');
+                document.getElementById('game-bottom-bar').classList.add('visible');
+                document.getElementById('play-area').classList.add('active');
+                Game.isPlaying = true; Game.isPaused = false;
+                
+                if(Game.sys === 'THUY') {
+                    document.getElementById('thuy-layer').classList.add('active');
+                    if(Game.stage===1) document.getElementById('grid-1').style.display = 'grid';
+                    else document.getElementById('thuy-g2').style.display = 'flex';
+                    thuyLvl = 1; runThuy();
+                }
+                if(Game.sys === 'HOA') { document.getElementById('hoa-layer').classList.add('active'); runHoa(); }
+                if(Game.sys === 'PHONG') {
+                    document.getElementById('phong-layer').classList.add('active');
+                    initPhong();
+                }
+            }, 1200);
         }
 
-        // --- THUY LUAN LOGIC (Tóm gọn) ---
-        let thuySeq = [], userSeq = [], canTap = false, thuyLvl = 1;
+        function pauseGame() { if(!Game.isPlaying || Game.isPaused) return; Game.isPaused = true; playSound('wrong'); document.getElementById('modal-pause').classList.remove('hidden'); }
+        function resumeGame() { Game.isPaused = false; playSound('coin'); document.getElementById('modal-pause').classList.add('hidden'); if(Game.sys==='THUY') runThuy(); if(Game.sys==='HOA') runHoa(); if(Game.sys==='PHONG') loopRaf = requestAnimationFrame(phongLoop); }
+        function skipStage() { finishStage(); }
+        function retryCurrentGame() { showBriefing(); }
+        function confirmExitToLobby() { window.location.href = '../LucChien_2.html'; }
+
+        // --- THỦY LUÂN LOGIC ---
+        let thuyTimer, thuySeq=[], thuyUser=[], canTap=false, thuyLvl=1, thuyTimeArr=[];
+        let cueTime = 0;
+        function getGridConfig(l) {
+            if(l>=4) return {s:9, t:81, css:'repeat(9,1fr)', d:'330px'};
+            if(l===3) return {s:7, t:49, css:'repeat(7,1fr)', d:'320px'};
+            if(l===2) return {s:5, t:25, css:'repeat(5,1fr)', d:'280px'};
+            return {s:3, t:9, css:'repeat(3,1fr)', d:'240px'};
+        }
         function runThuy() {
-            thuySeq=[]; userSeq=[]; canTap=false;
-            if(cGame===1) {
+            if(!Game.isPlaying || Game.isPaused) return;
+            thuySeq=[]; thuyUser=[]; canTap=false;
+            if(Game.stage===1) {
                 let grid = document.getElementById('grid-1'); grid.innerHTML='';
-                let size = thuyLvl===1 ? 3 : (thuyLvl===2 ? 5 : 7);
-                grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-                for(let i=0; i<size*size; i++) {
+                let cfg = getGridConfig(thuyLvl);
+                grid.style.gridTemplateColumns = cfg.css; grid.style.gridTemplateRows = cfg.css;
+                grid.style.width = cfg.d; grid.style.height = cfg.d;
+                for(let i=0; i<cfg.t; i++) {
                     let cell = document.createElement('div'); cell.className='grid-cell';
-                    cell.onclick = () => { if(canTap && !userSeq.includes(i)) { userSeq.push(i); if(thuySeq.includes(i)) { cell.classList.add('correct'); addScore(20); if(userSeq.length===thuySeq.length){ thuyLvl++; runThuy(); } } else { loseLife(); runThuy(); } } };
+                    cell.onclick = () => {
+                        if(canTap && !thuyUser.includes(i)) {
+                            if(thuyUser.length===0) thuyTimeArr.push(Date.now() - cueTime);
+                            thuyUser.push(i);
+                            if(thuySeq.includes(i)) {
+                                cell.classList.add('correct'); addScore(20); playSound('coin');
+                                if(thuyUser.length===thuySeq.length) { canTap=false; thuyLvl++; setTimeout(runThuy, 800); }
+                            } else { cell.classList.add('wrong'); loseLife(); }
+                        }
+                    };
                     grid.appendChild(cell);
                 }
-                let targetCount = Math.min(size*size-1, 2 + thuyLvl);
-                while(thuySeq.length < targetCount) { let r = Math.floor(Math.random()*(size*size)); if(!thuySeq.includes(r)) thuySeq.push(r); }
+                let count = Math.min(cfg.t-1, 2+thuyLvl);
+                while(thuySeq.length < count) { let r = Math.floor(Math.random()*cfg.t); if(!thuySeq.includes(r)) thuySeq.push(r); }
                 let cells = grid.children; thuySeq.forEach(i => cells[i].classList.add('active-glow'));
-                timer1 = setTimeout(()=>{ thuySeq.forEach(i => cells[i].classList.remove('active-glow')); canTap=true; }, 1000);
+                thuyTimer = setTimeout(()=>{ thuySeq.forEach(i => cells[i].classList.remove('active-glow')); cueTime=Date.now(); canTap=true; }, Math.max(500, 1500 - thuyLvl*100));
             } else {
-                let seqArea = document.getElementById('seq-area');
                 let inArea = document.getElementById('input-area-2'); inArea.innerHTML='';
                 SYM_KEYS.forEach(k => {
                     let b = document.createElement('div'); b.className='btn-symbol'; b.innerHTML=SVG_SHAPES[k];
-                    b.onclick = () => { if(canTap) { if(k === thuySeq[userSeq.length]) { userSeq.push(k); addScore(30); if(userSeq.length===thuySeq.length){ thuyLvl++; runThuy(); } } else { loseLife(); runThuy(); } } };
+                    b.onclick = () => {
+                        if(canTap) {
+                            if(thuyUser.length===0) thuyTimeArr.push(Date.now() - cueTime);
+                            if(k === thuySeq[thuyUser.length]) {
+                                thuyUser.push(k); addScore(30); playSound('coin');
+                                let sa = document.getElementById('seq-area');
+                                sa.innerHTML = thuyUser.map(x=>`<div class="quantum-char">${SVG_SHAPES[x]}</div>`).join('') + `<div class="hidden-box">?</div>`.repeat(thuySeq.length - thuyUser.length);
+                                if(thuyUser.length===thuySeq.length) { canTap=false; thuyLvl++; setTimeout(runThuy, 800); }
+                            } else { loseLife(); }
+                        }
+                    };
                     inArea.appendChild(b);
                 });
                 let len = 3 + thuyLvl; for(let i=0; i<len; i++) thuySeq.push(SYM_KEYS[Math.floor(Math.random()*SYM_KEYS.length)]);
-                seqArea.innerHTML = thuySeq.map(k => `<div class="quantum-char">${SVG_SHAPES[k]}</div>`).join('');
-                timer1 = setTimeout(()=>{ seqArea.innerHTML = `<div class="hidden-box">?</div>`.repeat(len); canTap=true; }, 1200);
+                let sa = document.getElementById('seq-area');
+                sa.innerHTML = thuySeq.map(k=>`<div class="quantum-char">${SVG_SHAPES[k]}</div>`).join('');
+                thuyTimer = setTimeout(()=>{ sa.innerHTML = `<div class="hidden-box">?</div>`.repeat(len); cueTime=Date.now(); canTap=true; }, Math.max(800, 2000 - thuyLvl*100));
             }
         }
 
-        // --- HOA LUAN LOGIC (Tóm gọn) ---
+        // --- HỎA LUÂN LOGIC ---
+        let hoaTimer, hoaTimes=[];
         function runHoa() {
+            if(!Game.isPlaying || Game.isPaused) return;
             let layer = document.getElementById('hoa-layer');
-            let ms = 1000 - (aScore/10); if(ms<400) ms=400;
+            let ms = Game.aScore < 2000 ? 1000 : Math.max(400, 1000 - (Game.aScore-2000)*0.1);
             let orb = document.createElement('div'); 
             let isTarget = true;
-            if(cGame===2) { isTarget = Math.random()>0.5; orb.className = isTarget ? 'orb orb-fire' : 'orb orb-ice'; } 
+            if(Game.stage===2) { isTarget = Math.random()>0.5; orb.className = isTarget ? 'orb orb-fire' : 'orb orb-ice'; } 
             else { orb.className = 'orb orb-fire'; }
             
-            orb.style.left = (20 + Math.random()*280) + 'px'; orb.style.top = (100 + Math.random()*400) + 'px';
+            let w = window.innerWidth-60; let h = window.innerHeight-200;
+            orb.style.left = (30 + Math.random()*w) + 'px'; orb.style.top = (100 + Math.random()*h) + 'px';
             let startT = Date.now();
-            orb.onmousedown = orb.ontouchstart = (e) => { e.stopPropagation(); if(!isTarget) loseLife(); else { addScore(30); reactTimes.push(Date.now()-startT); } orb.remove(); runHoa(); };
+            let clicked = false;
+            orb.onmousedown = orb.ontouchstart = (e) => { 
+                e.stopPropagation(); if(clicked) return; clicked=true;
+                if(!isTarget) loseLife(); 
+                else { 
+                    let rt = Date.now()-startT; hoaTimes.push(rt); addScore(30); playSound('coin'); 
+                    let f = document.createElement('div'); f.className='floating-ms ms-fast'; f.innerHTML=rt+'ms'; f.style.left=orb.style.left; f.style.top=orb.style.top; layer.appendChild(f); setTimeout(()=>f.remove(),800);
+                } 
+                orb.remove(); clearTimeout(hoaTimer); runHoa(); 
+            };
             layer.appendChild(orb);
-            timer1 = setTimeout(()=>{ if(orb.parentElement) { orb.remove(); if(isTarget) loseLife(); runHoa(); } }, ms);
+            hoaTimer = setTimeout(()=>{ if(orb.parentElement && !clicked) { orb.remove(); if(isTarget) loseLife(); runHoa(); } }, isTarget ? ms : ms+300);
         }
 
-        // --- PHONG LUAN LOGIC (Tóm gọn) ---
-        let px=180, py=300, pAngle=0, isGhost=false;
-        function runPhong() {
+        // --- PHONG LUÂN LOGIC ---
+        let loopRaf, px=180, py=300, pAng=0, isGhost=false, mx=180, my=300, missFrames=0, pTargetTime=0, pTimes=[];
+        function initPhong() {
             let t = document.getElementById('game-target'); t.style.display='flex';
-            if(cGame===1) {
-                t.className = 'wind-target t-track-mode';
-                raf1 = requestAnimationFrame(phongLoop1);
-            } else {
-                t.className = 'wind-target style-slash';
-                phongLoop2();
-            }
+            px = window.innerWidth/2; py = window.innerHeight/2;
+            if(Game.stage===1) { t.className='wind-target t-track-mode'; document.getElementById('custom-cursor').style.display='block'; document.getElementById('warning-bar-container').style.display='block'; }
+            else { t.className='wind-target style-slash'; document.getElementById('custom-cursor').style.display='none'; document.getElementById('warning-bar-container').style.display='none'; isGhost=true; scheduleGhost(); }
+            loopRaf = requestAnimationFrame(phongLoop);
         }
-        function phongLoop1() {
-            if(!isPlaying) return;
-            pAngle += (Math.random()-0.5)*0.5; px += Math.cos(pAngle)*4; py += Math.sin(pAngle)*4;
-            if(px<30||px>330) pAngle = Math.PI - pAngle; if(py<100||py>600) pAngle = -pAngle;
-            let t = document.getElementById('game-target'); t.style.left=px+'px'; t.style.top=py+'px';
-            addScore(1); // Auto add score if playing
-            raf1 = requestAnimationFrame(phongLoop1);
+        function scheduleGhost() {
+            if(!Game.isPlaying || Game.isPaused || Game.sys!=='PHONG' || Game.stage!==2) return;
+            isGhost = !isGhost; let t = document.getElementById('game-target');
+            if(!isGhost) { t.style.opacity='1'; pTargetTime=Date.now(); } else { t.style.opacity='0'; px = 50+Math.random()*(window.innerWidth-100); py = 100+Math.random()*(window.innerHeight-250); }
+            setTimeout(scheduleGhost, isGhost ? 600 : 900);
         }
-        function phongLoop2() {
+        function handlePhongClick(e) { 
+            if(Game.stage===2 && !isGhost) { 
+                addScore(50); playSound('coin'); isGhost=true; document.getElementById('game-target').style.opacity='0'; 
+                pTimes.push(Date.now() - pTargetTime);
+            } 
+        }
+        document.getElementById('play-area').addEventListener('touchmove', (e) => { if(Game.sys==='PHONG' && Game.stage===1){ mx=e.touches[0].clientX; my=e.touches[0].clientY; let c=document.getElementById('custom-cursor'); c.style.left=mx+'px'; c.style.top=my+'px'; } }, {passive:true});
+        function phongLoop() {
+            if(!Game.isPlaying || Game.isPaused) return;
             let t = document.getElementById('game-target');
-            if(isGhost) { t.style.opacity='0'; px=50+Math.random()*260; py=100+Math.random()*400; t.style.left=px+'px'; t.style.top=py+'px'; }
-            else { t.style.opacity='1'; }
-            isGhost = !isGhost;
-            timer1 = setTimeout(phongLoop2, 800);
+            let speed = Game.aScore < 2000 ? 2 : 2 + (Game.aScore-2000)*0.001;
+            pAng += (Math.random()-0.5)*0.4; px += Math.cos(pAng)*speed; py += Math.sin(pAng)*speed;
+            if(px<30||px>window.innerWidth-30) pAng = Math.PI - pAng; if(py<100||py>window.innerHeight-100) pAng = -pAng;
+            t.style.left=px+'px'; t.style.top=py+'px';
+
+            if(Game.stage===1) {
+                if(Math.hypot(mx-px, my-py) < 65) { addScore(1); t.classList.add('hovered'); missFrames=0; document.getElementById('warning-progress').style.width='0%'; }
+                else { t.classList.remove('hovered'); missFrames++; document.getElementById('warning-progress').style.width = Math.min(100, (missFrames/120)*100)+'%'; if(missFrames>120) { loseLife(); missFrames=0; } }
+            }
+            loopRaf = requestAnimationFrame(phongLoop);
         }
-        function handlePhongClick(e) { if(cGame===2 && !isGhost) { addScore(50); isGhost=true; document.getElementById('game-target').style.opacity='0'; } }
 
-        // --- ĐIỀU HƯỚNG & KẾT THÚC ---
-        function skipStage() { finishGame(); }
-        function retryCurrentGame() { showBriefing(); }
+        // --- ĐIỀU HƯỚNG ---
+        function finishStage() {
+            Game.isPlaying = false;
+            clearTimeout(thuyTimer); clearTimeout(hoaTimer); cancelAnimationFrame(loopRaf); hideAllLayers();
+            document.getElementById('game-top-bar').classList.remove('visible'); document.getElementById('game-bottom-bar').classList.remove('visible');
+            
+            Game.scores[Game.sys][Game.stage-1] = Math.floor(Game.aScore);
+            
+            let metVal = 0, metName = "";
+            if(Game.sys==='THUY') { metName = "Thời gian trích xuất:"; metVal = thuyTimeArr.length ? Math.round(thuyTimeArr.reduce((a,b)=>a+b)/thuyTimeArr.length) + " ms" : "---"; Game.metrics.THUY = metVal; }
+            if(Game.sys==='HOA') { metName = "Tốc độ phản ứng:"; metVal = hoaTimes.length ? Math.round(hoaTimes.reduce((a,b)=>a+b)/hoaTimes.length) + " ms" : "---"; Game.metrics.HOA = metVal; }
+            if(Game.sys==='PHONG') { metName = Game.stage===1 ? "Sức bám dính:" : "Tốc độ chém:"; metVal = Game.stage===1 ? Math.floor(Game.aScore/60)+"s" : (pTimes.length ? Math.round(pTimes.reduce((a,b)=>a+b)/pTimes.length)+" ms" : "---"); Game.metrics.PHONG = metVal; }
 
-        function finishGame() {
-            isPlaying = false; clearTimeout(timer1); clearTimeout(timer2); cancelAnimationFrame(raf1);
-            document.querySelectorAll('.orb').forEach(o=>o.remove()); document.getElementById('game-target').style.display='none';
+            document.getElementById('res-title').innerText = `KẾT QUẢ BÀI ${Game.stage}`;
+            document.getElementById('res-score').innerText = Math.floor(Game.aScore);
+            document.getElementById('res-metric-name').innerText = metName;
+            document.getElementById('res-metric-val').innerText = metVal;
             
-            scores[activeSys][cGame-1] = Math.floor(aScore);
-            
-            let avg = reactTimes.length ? Math.round(reactTimes.reduce((a,b)=>a+b)/reactTimes.length) : 0;
-            let rankObj = getRank(activeSys, aScore);
+            let rObj = getRankObj(Game.aScore);
+            document.getElementById('res-rank-text').innerText = rObj.t;
+            document.getElementById('res-rank-text').style.color = rObj.c;
 
-            document.getElementById('res-title').innerText = `KẾT QUẢ BÀI ${cGame}`;
-            document.getElementById('res-score').innerText = Math.floor(aScore);
-            document.getElementById('res-metric-name').innerText = activeSys==='HOA' ? "Tốc độ trung bình:" : "Thời gian bám dính:";
-            document.getElementById('res-metric-val').innerText = activeSys==='HOA' ? `${avg} ms` : `${Math.floor(aScore/60)} s`;
-            
-            let rText = document.getElementById('res-rank-text');
-            rText.innerText = rankObj.t; rText.style.color = rankObj.c;
-            
             let btnNext = document.getElementById('btn-stage-next');
-            if(cGame === 1) { btnNext.innerText = "BÀI 2"; btnNext.onclick = nextGame; }
-            else { btnNext.innerText = "TỔNG KẾT HỆ"; btnNext.onclick = showSystemSummary; }
+            if(Game.stage === 1) { btnNext.innerText = "BÀI 2"; }
+            else { btnNext.innerText = "TỔNG KẾT HỆ"; }
 
-            hideAllModals(); document.getElementById('modal-stage-result').classList.remove('hidden');
+            document.getElementById('modal-stage-result').classList.remove('hidden');
         }
 
-        function nextGame() { cGame=2; showBriefing(); }
+        function nextStage() {
+            if(Game.stage === 1) { Game.stage = 2; showBriefing(); }
+            else { showSystemSummary(); }
+        }
 
         function showSystemSummary() {
             hideAllModals();
-            let g1 = scores[activeSys][0]; let g2 = scores[activeSys][1]; let tot = g1+g2;
-            document.getElementById('sum-title').innerText = `TỔNG KẾT ${activeSys === 'THUY' ? 'THỦY LUÂN' : (activeSys === 'HOA' ? 'HỎA LUÂN' : 'PHONG LUÂN')}`;
+            let g1 = Game.scores[Game.sys][0]; let g2 = Game.scores[Game.sys][1]; let tot = g1+g2;
+            
+            let titleStr = Game.sys === 'THUY' ? 'THỦY LUÂN' : (Game.sys === 'HOA' ? 'HỎA LUÂN' : 'PHONG LUÂN');
+            document.getElementById('sum-title').innerText = `TỔNG KẾT ${titleStr}`;
             document.getElementById('sum-g1').innerText = g1; document.getElementById('sum-g2').innerText = g2; document.getElementById('sum-total').innerText = tot;
             
-            let rObj = getRank(activeSys, tot);
-            let rText = document.getElementById('sum-rank-text');
-            rText.innerText = `XẾP HẠNG: ${rObj.t}`; rText.style.color = rObj.c;
+            let rObj = getRankObj(tot);
+            document.getElementById('sum-rank-text').innerText = `XẾP HẠNG: ${rObj.t}`;
+            document.getElementById('sum-rank-text').style.color = rObj.c;
 
             let btnNext = document.getElementById('btn-sum-next');
-            if(activeSys === 'THUY') { btnNext.innerText = "BÀI TIẾP THEO: HỎA LUÂN"; btnNext.onclick = () => startSystem('HOA'); }
-            else if(activeSys === 'HOA') { btnNext.innerText = "BÀI TIẾP THEO: PHONG LUÂN"; btnNext.onclick = () => startSystem('PHONG'); }
-            else { btnNext.innerText = "VỀ SẢNH CHÍNH"; btnNext.onclick = returnToMain; }
+            if(Game.sys === 'THUY') { btnNext.innerText = "BÀI TIẾP THEO: HỎA LUÂN"; }
+            else if(Game.sys === 'HOA') { btnNext.innerText = "BÀI TIẾP THEO: PHONG LUÂN"; }
+            else { 
+                // NẾU LÀ PHONG LUÂN THÌ SHOW BẢNG GRAND TOTAL
+                document.getElementById('sum-title').innerText = "CHIẾN LỰC TOÀN DIỆN";
+                let grandTotal = Game.scores.THUY[0]+Game.scores.THUY[1] + Game.scores.HOA[0]+Game.scores.HOA[1] + Game.scores.PHONG[0]+Game.scores.PHONG[1];
+                let gObj = getRankObj(grandTotal/3); // Tính rank trung bình
+                
+                let html = `
+                    <div class="metric-card-row"><span class="metric-label">HỆ TRÍ NHỚ:</span><span class="metric-val" style="color:var(--pink);">${Game.scores.THUY[0]+Game.scores.THUY[1]}</span></div>
+                    <div class="metric-card-row"><span class="metric-label">HỆ PHẢN XẠ:</span><span class="metric-val" style="color:var(--amber);">${Game.scores.HOA[0]+Game.scores.HOA[1]}</span></div>
+                    <div class="metric-card-row"><span class="metric-label">HỆ PHÁN ĐOÁN:</span><span class="metric-val" style="color:var(--crimson);">${Game.scores.PHONG[0]+Game.scores.PHONG[1]}</span></div>
+                    <div class="metric-card-row" style="border-top:1px dashed rgba(255,255,255,0.3); padding-top:10px;"><span class="metric-label" style="color:var(--gold);">TỔNG ĐIỂM CHIẾN BINH:</span><span class="metric-val" style="color:var(--gold); font-size:22px; text-shadow:0 0 10px var(--gold);">${grandTotal}</span></div>
+                    <div class="metric-card-row" style="border:none; justify-content:center; padding-top:10px;"><span class="rank-text" style="font-size: 20px; color:${gObj.c};">XẾP HẠNG: ${gObj.t}</span></div>
+                `;
+                document.getElementById('sum-content-box').innerHTML = html;
+                btnNext.innerText = "VỀ SẢNH CHÍNH"; 
+                btnNext.style.background = "var(--gold)";
+            }
 
             document.getElementById('modal-summary').classList.remove('hidden');
         }
 
-        function playSound(type) { /* Sound logic */ }
-        function confirmExit() { returnToMain(); }
-        function returnToMain() { window.location.href = '../LucChien_2.html'; }
+        function goToNextSystem() {
+            if(Game.sys === 'THUY') { startSystem('HOA'); }
+            else if(Game.sys === 'HOA') { startSystem('PHONG'); }
+            else { window.location.href = '../LucChien_2.html'; } // XONG PHONG -> VỀ SẢNH
+        }
     </script>
 </body>
 </html>
