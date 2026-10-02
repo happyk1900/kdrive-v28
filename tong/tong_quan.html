@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#030406">
-    <title>K-Drive - Trạm Điều Phối Trí Lực</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800&family=Space+Grotesk:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>K-Drive - Test Nhanh Trí Lực Toàn Diện</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800&family=Space+Grotesk:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -19,115 +19,147 @@
             --font-terminal: 'Share Tech Mono', monospace;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: var(--font-display); color: #fff; }
 
-        body {
-            background-color: var(--bg-obsidian); color: #ffffff;
-            font-family: var(--font-display); overflow: hidden;
-            position: fixed; inset: 0; width: 100vw; height: 100vh;
-            display: flex; justify-content: center; align-items: center;
-        }
-
-        #bg-video {
+        /* VIDEO NỀN GỐC TỪ THƯ MỤC PHOTO */
+        #sanctum-video {
             position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1;
-            object-fit: cover; opacity: 0; transition: opacity 2s ease;
+            object-fit: cover; opacity: 0; transition: opacity 2.5s ease;
         }
-        #bg-video.loaded { opacity: 1; }
+        #sanctum-video.loaded { opacity: 1; }
 
-        .tactical-grid-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none; overflow: hidden; }
-        .grid-plane { position: absolute; width: 200vw; height: 200vh; left: -50vw; top: 0%; background-image: linear-gradient(rgba(0, 229, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.04) 1px, transparent 1px); background-size: 40px 40px; transform: rotateX(75deg); animation: grid-scroll 10s linear infinite; }
-        .vignette { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 4; background: radial-gradient(circle at center, transparent 30%, #030406 95%); }
-        @keyframes grid-scroll { 0% { background-position: 0 0; } 100% { background-position: 0 40px; } }
+        #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+        .quantum-sparkle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 8px #ffffff, 0 0 15px var(--cyan); opacity: 0; animation: sparkleFloat linear infinite; }
+        @keyframes sparkleFloat { 
+            0% { transform: translateY(105vh) scale(0.3); opacity: 0; } 
+            50% { transform: translateY(50vh) translateX(15px) scale(1); opacity: 0.6; } 
+            100% { transform: translateY(-10vh) translateX(-15px) scale(0.2); opacity: 0; } 
+        }
 
         .top-nav { position: fixed; top: max(35px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; z-index: 9999; }
         .btn-back-cyber { width: 36px; height: 36px; background: rgba(5, 7, 10, 0.9); border: 1px solid rgba(0, 229, 255, 0.6); border-radius: 8px; color: var(--cyan); font-family: var(--font-terminal); font-size: 20px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         .btn-back-cyber:active { transform: scale(0.9); }
 
-        /* HỘP LỜI CHÀO GỌN GÀNG, NÉT DÀY SẮC NÉT, KHÔNG LỚP MỜ ĐEN PHỒNG CỀNH */
+        /* HỘP LỜI CHÀO GỌN GÀNG, NÉT DÀY */
         .cyber-modal-custom { position: fixed; inset: 0; z-index: 300000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 16px; background: transparent; }
         .cyber-led-wrapper { position: relative; padding: 1.5px; overflow: hidden; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); width: 90vw; max-width: 360px; box-shadow: 0 0 35px rgba(0,229,255,0.4); z-index: 10; }
         
         .modal-box { width: 100%; background: rgba(5, 9, 16, 0.96); padding: 22px 18px; text-align: left; position: relative; z-index: 1; display: flex; flex-direction: column; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); border: 1px solid rgba(0,229,255,0.6); }
-        
-        /* TIÊU ĐỀ NÉT DÀY, MẠNH MẼ, PHÁT SÁNG */
         .modal-title { font-family: var(--font-title); color: var(--cyan); font-size: 21px; font-weight: 800; margin-bottom: 16px; letter-spacing: 2px; text-transform: uppercase; text-align: center; text-shadow: 0 0 12px rgba(0,229,255,0.7); }
-        
         .desc-text { font-family: var(--font-display); font-size: 13.5px; color: #ffffff; line-height: 1.6; text-align: left; background: rgba(0,229,255,0.03); border: 1px solid rgba(0,229,255,0.2); border-radius: 6px; padding: 12px; margin-bottom: 16px; }
 
         /* NÚT BẮT ĐẦU MÀU XANH LÁ HẤP DẪN */
         .modal-btn { width: 100%; padding: 14px; font-family: var(--font-title); font-size: 15px; font-weight: 800; background: var(--mint); color: #000000; border: none; cursor: pointer; text-transform: uppercase; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); text-align: center; transition: all 0.2s; box-shadow: 0 0 15px rgba(0,255,157,0.6); letter-spacing: 1px; }
         .modal-btn:active { transform: scale(0.96); filter: brightness(1.2); }
 
-        #test-frame { position: fixed; inset: 0; width: 100vw; height: 100vh; border: none; z-index: 200; display: none; background: #000; }
+        #task-arena { position: fixed; inset: 0; display: none; z-index: 120; }
+        #task-arena.active { display: block; }
+
+        /* KHUNG CHỨA NỘI DUNG GAME NHÚNG HOẶC ĐIỀU PHỐI TRỰC TIẾP */
+        #game-frame { position: fixed; inset: 0; width: 100vw; height: 100vh; border: none; background: transparent; }
+
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <video id="bg-video" autoplay loop muted playsinline webkit-playsinline>
-        <source src="../Photo/video nen trang chu.mp4" type="video/mp4">
+    <!-- VIDEO NỀN GỐC THAY ĐỔI THEO TỪNG BÀI TEST -->
+    <video id="sanctum-video" autoplay loop muted playsinline webkit-playsinline>
+        <source src="../Photo/video nen thuy luan.mp4" type="video/mp4">
     </video>
 
-    <div class="tactical-grid-bg"><div class="grid-plane"></div></div>
-    <div class="vignette"></div>
+    <div id="dust-container"></div>
 
     <div class="top-nav">
         <button class="btn-back-cyber" onclick="returnToMain()">⟨</button>
     </div>
 
-    <!-- HỘP LỜI CHÀO GỌN GÀNG, NÉT DÀY -->
+    <!-- HỘP LỜI CHÀO CHUỖI TEST TỔNG QUAN -->
     <div class="cyber-modal-custom" id="step-welcome">
         <div class="cyber-led-wrapper">
             <div class="modal-box">
                 <div class="modal-title">CHUỖI TEST TRÍ LỰC</div>
                 <div class="desc-text">
-                    Chào mừng chiến binh đến với bài đánh giá thần kinh toàn diện qua các hệ thống trắc nghiệm liên hoàn.<br><br>
-                    • Đánh giá tốc độ trích xuất không gian<br>
-                    • Đo lường năng lực phản xạ & phán đoán<br><br>
-                    Hệ thống sẽ ghi nhận và tổng kết toàn bộ điểm số ngay sau khi hoàn thành!
+                    Chào mừng chiến binh đến với bài đánh giá thần kinh toàn diện qua 3 hệ thống trắc nghiệm liên hoàn:<br><br>
+                    • <b>Thủy Luân</b> (Trí nhớ không gian)<br>
+                    • <b>Hỏa Luân</b> (Phản xạ & tốc độ phát lực)<br>
+                    • <b>Phong Luân</b> (Phán đoán & bám dính quỹ đạo)<br><br>
+                    Hệ thống sẽ ghi nhận và tổng kết toàn bộ điểm số ở cuối chuỗi!
                 </div>
-                <button class="modal-btn" onclick="startFlow()">BẮT ĐẦU</button>
+                <button class="modal-btn" onclick="startFullPipeline()">BẮT ĐẦU</button>
             </div>
         </div>
     </div>
 
-    <iframe id="test-frame" src=""></iframe>
+    <!-- KHUNG ĐIỀU PHỐI CHUỖI TEST -->
+    <div id="task-arena">
+        <iframe id="game-frame" src=""></iframe>
+    </div>
 
     <script>
-        const testPipeline = [
-            'Testthuy_luan.html' // Bài Trí Nhớ (Thủy Luân)
+        // Danh sách 3 file test liên hoàn
+        const pipelineFiles = [
+            'Testthuy_luan.html',
+            'TestHoaLuan.html',
+            'TestPhongLuan.html'
         ];
         
-        let currentTestIndex = 0;
+        let pipelineIndex = 0;
 
         window.onload = () => {
-            let vid = document.getElementById('bg-video');
+            let vid = document.getElementById('sanctum-video');
             setTimeout(() => vid.classList.add('loaded'), 200);
+            initSparkleParticles();
         };
 
-        function startFlow() {
-            currentTestIndex = 0;
-            localStorage.setItem('kdrive_in_flow', 'true');
-            document.getElementById('step-welcome').classList.add('hidden');
-            loadNextTestInFrame();
+        function initSparkleParticles() {
+            let container = document.getElementById('dust-container');
+            if(!container) return;
+            for(let i=0; i<30; i++) {
+                let p = document.createElement('div');
+                p.className = 'quantum-sparkle';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = Math.random() * 100 + 'vh';
+                let size = Math.random() * 3 + 2;
+                p.style.width = size + 'px'; p.style.height = size + 'px';
+                p.style.animationDuration = (Math.random() * 6 + 4) + 's';
+                container.appendChild(p);
+            }
         }
 
-        function loadNextTestInFrame() {
-            if (currentTestIndex >= testPipeline.length) {
+        function startFullPipeline() {
+            pipelineIndex = 0;
+            localStorage.setItem('kdrive_in_flow', 'true');
+            document.getElementById('step-welcome').classList.add('hidden');
+            document.getElementById('task-arena').classList.add('active');
+            loadPipelineStep();
+        }
+
+        function loadPipelineStep() {
+            if (pipelineIndex >= pipelineFiles.length) {
+                // Đã hoàn tất cả 3 bài -> Quay về sảnh chính
                 returnToMain();
                 return;
             }
 
-            let targetUrl = testPipeline[currentTestIndex];
-            let frame = document.getElementById('test-frame');
-            frame.style.display = 'block';
-            frame.src = targetUrl;
+            let currentFile = pipelineFiles[pipelineIndex];
+            
+            // Đổi video nền tương ứng theo bài test
+            let vid = document.getElementById('sanctum-video');
+            if (pipelineIndex === 0) vid.src = '../Photo/video nen thuy luan.mp4';
+            else if (pipelineIndex === 1) vid.src = '../Photo/video nen hoa luan.mp4';
+            else if (pipelineIndex === 2) vid.src = '../Photo/video nen phong luan.mp4';
+            vid.play().catch(e => {});
+
+            document.getElementById('game-frame').src = currentFile;
         }
 
-        // Lắng nghe tín hiệu hoàn thành từ file test con để quay về sảnh mượt mà
+        // Lắng nghe tín hiệu hoàn thành từ các bài test con để tự động sang bài tiếp theo
         window.addEventListener('message', (event) => {
             if (event.data && event.data.action === 'test_completed') {
-                returnToMain();
+                pipelineIndex++;
+                loadPipelineStep();
             }
         });
 
