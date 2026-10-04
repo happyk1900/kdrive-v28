@@ -223,6 +223,11 @@
     <!-- VIỀN ĐỎ CHỚP NHÁY BÁO ĐỘNG TOÀN MÀN HÌNH -->
     <div id="screen-red-border"></div>
 
+    <!-- THẺ AUDIO CHỨA FILE MP3 BÁO ĐỘNG -->
+    <audio id="alarm-audio" loop preload="auto">
+        <source src="baodong.mp3" type="audio/mpeg">
+    </audio>
+
     <div id="dust-container"></div>
 
     <div id="task-arena">
@@ -362,8 +367,7 @@
         }
 
         let fxCtx = null;
-        let alarmBuffer = null;
-        let alarmSourceNode = null;
+        let isScoreBelow1000 = false; // Biến cờ ghi nhận trạng thái báo động ngay khi chốt điểm
 
         function initAudio() { 
             try {
@@ -374,67 +378,6 @@
             } catch(e) {}
         }
         ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => { window.addEventListener(evt, initAudio, { passive: true }); });
-
-        // NẠP VÀ GIẢI MÃ FILE MP3 BẰNG WEB AUDIO API (VƯỢT MỌI RÀO CẢN ANDROID WEBVIEW)
-        async function loadAlarmAudio() {
-            try {
-                if (!fxCtx) { fxCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-                let response = await fetch('baodong.mp3');
-                let arrayBuffer = await response.arrayBuffer();
-                alarmBuffer = await fxCtx.decodeAudioData(arrayBuffer);
-            } catch (e) {
-                console.log("Không tải được file mp3 báo động, dùng âm thanh dự phòng.");
-            }
-        }
-
-        function startAlarmLoop() {
-            stopAlarmLoop();
-            try {
-                if (!fxCtx) { fxCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-                if (fxCtx.state === 'suspended') { fxCtx.resume(); }
-
-                if (alarmBuffer) {
-                    // Phát lặp lại file MP3 đã giải mã
-                    alarmSourceNode = fxCtx.createBufferSource();
-                    alarmSourceNode.buffer = alarmBuffer;
-                    alarmSourceNode.loop = true;
-                    alarmSourceNode.connect(fxCtx.destination);
-                    alarmSourceNode.start(0);
-                } else {
-                    // Dự phòng phát tiếng beep gắt nếu buffer chưa sẵn sàng
-                    playFallbackAlarmBeep();
-                    window.alarmInterval = setInterval(playFallbackAlarmBeep, 300);
-                }
-            } catch(e) {}
-        }
-
-        function stopAlarmLoop() {
-            try {
-                if (alarmSourceNode) {
-                    alarmSourceNode.stop();
-                    alarmSourceNode.disconnect();
-                    alarmSourceNode = null;
-                }
-                if (window.alarmInterval) {
-                    clearInterval(window.alarmInterval);
-                    window.alarmInterval = null;
-                }
-            } catch(e) {}
-        }
-
-        function playFallbackAlarmBeep() {
-            try {
-                if (!fxCtx) return;
-                const osc = fxCtx.createOscillator();
-                const gain = fxCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(1400, fxCtx.currentTime);
-                gain.gain.setValueAtTime(0.8, fxCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.15);
-                osc.start();
-                osc.stop(fxCtx.currentTime + 0.15);
-            } catch(e) {}
-        }
 
         function toggleVideoMute() {
             let vid = document.getElementById('sanctum-video');
@@ -484,7 +427,6 @@
         window.onload = () => { 
             openArena(); 
             initSparkleParticles();
-            loadAlarmAudio(); // Tải trước file mp3 vào bộ nhớ đệm
         };
 
         function initSparkleParticles() {
@@ -524,12 +466,13 @@
         }
 
         function openArena() {
-            stopAlarmLoop();
+            stopAlarm();
             document.getElementById('screen-red-border').classList.remove('active');
 
             aScore = 0; pendingScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
             currentLevel = 1; highestSequenceReached = 0; winsInCurrentLevel = 0; hitsCount = 0;
             bestSequenceLen = 0; bestSequenceTime = 0; nextHpMilestone = 1000;
+            isScoreBelow1000 = false;
 
             let vid = document.getElementById('sanctum-video');
             vid.classList.remove('playing-mode');
@@ -598,7 +541,7 @@
 
         function pauseGame() { if(!isPlaying || isPausedForStart) return; playSound('error'); isPausedForStart = true; clearTimeout(gameLogicTimer); document.getElementById('pause-menu-overlay').classList.add('active'); }
         function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; runGame(); }
-        function confirmExitToLobby() { stopAlarmLoop(); playSound('error'); window.location.href = '../LucChien_2.html'; }
+        function confirmExitToLobby() { stopAlarm(); playSound('error'); window.location.href = '../LucChien_2.html'; }
 
         function revealCorrectAnswersForGame() {
             let area = document.getElementById('seq-area');
@@ -740,16 +683,30 @@
             } else { playSound('wrong'); failSequence(); }
         }
 
+        // KHI KẾT THÚC TRÒ CHƠI: CHỐT NGAY ĐIỂM SỐ VÀ KIỂM TRA ĐIỀU KIỆN ĐỂ BẬT CỜ BÁO ĐỘNG
         function finishGame() {
             isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
             aScore += pendingScore; pendingScore = 0; 
             aScore += (stabilityHP * 15);
 
+            if (aScore < 200 || hitsCount < 3) {
+                aScore = 0; bestSequenceLen = 0; bestSequenceTime = 0;
+            }
+
+            let finalScore = Math.floor(aScore);
+            
+            // XÁC ĐỊNH NGAY LẬP TỨC ĐIỂM SỐ ĐÃ ĐỦ HAY CHƯA
+            if (finalScore < 1000) {
+                isScoreBelow1000 = true;
+            } else {
+                isScoreBelow1000 = false;
+            }
+
             let vid = document.getElementById('sanctum-video');
             vid.classList.remove('playing-mode');
             setTimeout(() => vid.classList.add('loaded'), 400);
 
-            localStorage.setItem('thuy_luan_score', Math.round(aScore));
+            localStorage.setItem('thuy_luan_score', finalScore);
 
             document.getElementById('game-top-bar').classList.remove('visible');
             document.getElementById('game-bottom-bar').classList.remove('visible');
@@ -760,7 +717,7 @@
             document.getElementById('freeze-overlay').classList.add('active');
         }
 
-        // KHI BẤM NÚT XEM KẾT QUẢ: KIỂM TRA ĐIỆN ÁP < 1000 DATA VÀ PHÁT BẰNG WEB AUDIO DECODE BUFFER
+        // KHI BẤM NÚT "XEM KẾT QUẢ": DỰA TRÊN CỜ ĐÃ CHỐT ĐỂ PHÁT ÂM THANH HOẶC DỪNG
         function showSummaryResults() {
             initAudio();
 
@@ -774,9 +731,8 @@
             let debugBox = document.getElementById('debug-stats-box');
             let redBorder = document.getElementById('screen-red-border');
 
-            // ĐIỀU KIỆN TUYỆT ĐỐI < 1000 DATA MỚI KÍCH HOẠT BÁO ĐỘNG VÀ PHÁT ÂM THANH
-            if (finalScore < 1000) {
-                ssdEl.innerText = "⚠️ BÁO ĐỘNG";
+            if (isScoreBelow1000) {
+                ssdEl.innerText = "⚠️️ BÁO ĐỘNG";
                 ssdEl.className = "metric-val red-alert-val";
                 
                 ramEl.innerText = "CHƯA ĐỦ DATA";
@@ -786,9 +742,16 @@
                 debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data để chấm điểm phần cứng! Yêu cầu đo lại ngay lập tức!`;
 
                 redBorder.classList.add('active');
-                startAlarmLoop(); // PHÁT FILE MP3 ĐÃ GIẢI MÃ BẰNG AUDIO CONTEXT
+                
+                // PHÁT FILE MP3 BÁO ĐỘNG NGAY LẬP TỨC KHI VỪA ẤM NÚT
+                let audioTag = document.getElementById('alarm-audio');
+                if(audioTag) {
+                    audioTag.volume = 1.0;
+                    audioTag.currentTime = 0;
+                    audioTag.play().catch(e => {});
+                }
             } else {
-                stopAlarmLoop(); // DỪNG HOÀN TOÀN NẾU ĐỦ ĐIỂM
+                stopAlarm();
                 redBorder.classList.remove('active');
 
                 ssdEl.className = "metric-val";
@@ -808,8 +771,16 @@
             playSound('coin');
         }
 
+        function stopAlarm() {
+            let audioTag = document.getElementById('alarm-audio');
+            if(audioTag) {
+                audioTag.pause();
+                audioTag.currentTime = 0;
+            }
+        }
+
         function goToHoaLuan() {
-            stopAlarmLoop();
+            stopAlarm();
             playSound('coin');
             window.location.href = 'TestHoaLuan.html';
         }
