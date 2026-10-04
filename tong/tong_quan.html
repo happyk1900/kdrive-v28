@@ -4,22 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#050b14">
-    <title>K-Drive - Trí Nhớ</title>
+    <title>K-Drive - Thủy Luân</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --bg-obsidian: #050b14;
-            --cyan: #00e5ff;
+            --cyan: #f48fb1;
             --mint: #ff3366;    
             --neon-pink: #f48fb1; 
             --amber: #ffb74d;   
             --crimson: #ff3366;
-            --gold: #ffd700;
             --text-light: #ffffff;
+            --accent-green: #f48fb1; 
             --panel-bg: rgba(6, 15, 30, 0.88); 
             --panel-border: rgba(244, 143, 177, 0.7);
         }
@@ -27,9 +26,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; }
 
+        /* VIDEO NỀN ĐỘNG THỦY LUÂN HIỆN MỜ CHẬM RÃI (2.5 GIÂY) CÓ ÂM THANH */
         #sanctum-video { 
             position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; 
-            object-fit: cover; opacity: 0; transition: opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
         #sanctum-video.loaded { opacity: 1; }
         #sanctum-video.playing-mode { opacity: 0; pointer-events: none; transition: opacity 2.0s cubic-bezier(0.25, 1, 0.5, 1); }
@@ -53,29 +55,24 @@
         .laser-beam-horizontal.expand { animation: laserExpand 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         @keyframes laserExpand { 100% { height: 100vh; top: 0; opacity: 0; } }
 
+        /* POPUP BAY LÊN CHẬM RÃI (1.8 GIÂY) */
         @keyframes cinematicPopupSuperSlow {
             0% { opacity: 0; transform: translateY(90px) scale(0.90); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        @keyframes pulse-btn {
-            0% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 10px currentColor, inset 0 0 5px currentColor; }
-            50% { transform: scale(1.03); filter: brightness(1.2); box-shadow: 0 0 25px currentColor, inset 0 0 10px currentColor; }
-            100% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 10px currentColor, inset 0 0 5px currentColor; }
-        }
-
-        #start-prompt-overlay { position: absolute; inset: 0; background: transparent; z-index: 110; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px 40px 15px; gap: 16px; opacity: 0; visibility: hidden; transition: opacity 0.5s ease; }
+        #start-prompt-overlay { position: absolute; inset: 0; background: transparent; z-index: 110; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px 40px 15px; gap: 16px; opacity: 0; visibility: hidden; transition: opacity 1.5s ease; }
         #start-prompt-overlay.active { opacity: 1; visibility: visible; }
-        #start-prompt-overlay > * { animation: cinematicPopupSuperSlow 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        #start-prompt-overlay > * { animation: cinematicPopupSuperSlow 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; opacity: 0; }
 
         .briefing-panel { background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px 26px; width: 100%; max-width: 340px; text-align: left; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); }
-        .briefing-title { color: #00e5ff !important; font-family: 'Chakra Petch', sans-serif; font-size: 24px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(0, 229, 255, 0.4); padding-bottom: 8px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,229,255,0.6); }
-        .briefing-target { color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 15px; line-height: 1.6; font-weight: 600; text-align: center; }
+        .briefing-title { color: #f48fb1 !important; font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(244, 143, 177, 0.4); padding-bottom: 8px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(244,143,177,0.6); }
+        .briefing-target { color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; line-height: 1.7; font-weight: 600; }
+        .briefing-target b { color: #f48fb1; font-weight: bold; }
 
         .action-group { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        
-        .start-action-box { width: 100%; background: var(--panel-bg); border: 1.5px solid #00ff9d; padding: 15px; border-radius: 12px; color: #00ff9d; font-family: 'Chakra Petch', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; animation: pulse-btn 1.5s infinite; }
-        .start-action-box:active { transform: scale(0.96); background: #00ff9d; color: #050b14; }
+        .start-action-box { width: 100%; background: var(--panel-bg); backdrop-filter: blur(16px); border: 1.5px solid var(--panel-border); padding: 15px; border-radius: 12px; color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 10px 25px rgba(244, 143, 177, 0.25); text-align: center; transition: 0.4s; text-shadow: 0 0 8px rgba(244,143,177,0.6); }
+        .start-action-box:active { background: #f48fb1; color: #050b14; transform: scale(0.98); }
 
         .game-top-bar {
             position: fixed; top: max(20px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 15px 20px;
@@ -90,69 +87,104 @@
 
         .data-score { font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; color: #fff; display: flex; align-items: center; position: relative; }
         .data-score span { color: #f48fb1; text-shadow: 0 0 12px #f48fb1; font-size: 20px; margin-left: 6px; }
+
         #hp-notification-area { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); width: 220px; text-align: center; }
 
+        /* THANH ĐIỀU HƯỚNG DƯỚI BỐ CỤC 4 NÚT (Back, Skip, Mute, Pause) */
         .game-bottom-bar {
-            position: fixed; bottom: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw; border-top: 1px solid rgba(244, 143, 177, 0.5); padding: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; background: linear-gradient(0deg, rgba(5,11,20,0.95) 0%, transparent 100%); opacity: 0; transition: opacity 1.5s ease;
+            position: fixed; bottom: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw;
+            border-top: 1px solid rgba(244, 143, 177, 0.5); padding: 15px 20px 0 20px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto;
+            background: linear-gradient(0deg, rgba(5,11,20,0.95) 0%, transparent 100%); opacity: 0; transition: opacity 1.5s ease;
         }
         .game-bottom-bar.visible { opacity: 1; }
 
-        .btn-action { width: 46px; height: 46px; background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(244, 143, 177, 0.75); border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(8px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-action {
+            width: 46px; height: 46px; background: rgba(15, 23, 42, 0.85); 
+            border: 1.5px solid rgba(244, 143, 177, 0.75); border-radius: 12px;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
         .btn-action:active { transform: scale(0.9); }
+        
         .btn-back { color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 26px; font-weight: bold; box-shadow: 0 0 12px rgba(244,143,177,0.4); padding-bottom: 2px; padding-right: 2px; }
+        .btn-back:active { background: rgba(244, 143, 177, 0.35); box-shadow: 0 0 20px rgba(244, 143, 177, 0.9); }
+
+        .btn-skip { border-color: rgba(244, 143, 177, 0.75); color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 22px; font-weight: bold; box-shadow: 0 0 12px rgba(244,143,177,0.4); }
+        .btn-skip:active { background: rgba(244, 143, 177, 0.35); box-shadow: 0 0 20px rgba(244, 143, 177, 0.9); }
+
         .btn-mute { border-color: rgba(255, 183, 77, 0.6); color: #ffb74d; font-size: 20px; box-shadow: 0 0 12px rgba(255, 183, 77, 0.3); }
+        .btn-mute:active { background: rgba(255, 183, 77, 0.3); box-shadow: 0 0 20px rgba(255, 183, 77, 0.7); }
+
         .btn-pause { border-color: rgba(255, 183, 77, 0.6); box-shadow: 0 0 12px rgba(255, 183, 77, 0.3); }
         .btn-pause::before, .btn-pause::after { content: ''; width: 4px; height: 18px; background: #ffb74d; margin: 0 3px; border-radius: 2px; box-shadow: 0 0 8px #ffb74d; }
+        .btn-pause:active { background: rgba(255, 183, 77, 0.3); box-shadow: 0 0 20px rgba(255, 183, 77, 0.7); }
 
         #pause-menu-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; backdrop-filter: blur(10px); }
         #pause-menu-overlay.active { opacity: 1; pointer-events: auto; }
-        .pause-box { width: 85%; max-width: 320px; background: rgba(5, 12, 25, 0.95); border: 1.5px solid rgba(244,143,177,0.6); border-radius: 16px; padding: 25px 20px; text-align: center; box-shadow: 0 0 40px rgba(0,0,0,0.8); animation: cinematicPopupSuperSlow 1.0s forwards; }
-        .pause-title { font-family: 'Chakra Petch', sans-serif; font-size: 24px; color: #f48fb1; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(244,143,177,0.6); }
-        .pause-btn { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; font-family: 'Chakra Petch', sans-serif; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
+        .pause-box { width: 85%; max-width: 320px; background: rgba(5, 12, 25, 0.95); border: 1.5px solid rgba(244,143,177,0.6); border-radius: 16px; padding: 25px 20px; text-align: center; box-shadow: 0 0 40px rgba(0,0,0,0.8); animation: cinematicPopupSuperSlow 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .pause-title { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #f48fb1; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(244,143,177,0.6); }
+        .pause-btn { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
         .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         .pause-btn.exit { background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; color: #ff3366; margin-bottom: 0; }
 
+        /* KHOẢNH KHẮC KẾT THÚC */
         #freeze-overlay { position: fixed; inset: 0; background: transparent; z-index: 200000; display: none; align-items: center; justify-content: center; pointer-events: none; }
         #freeze-overlay.active { display: flex; }
-        @keyframes textFallSlow { 0% { opacity: 0; transform: translateY(-70px) scale(1.1); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        .freeze-text { font-family: 'Chakra Petch', sans-serif; font-size: 50px; font-weight: 900; color: #ffffff; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 20px #f48fb1, 0 0 40px #ff3366, 2px 2px 0px rgba(0,0,0,0.9); animation: textFallSlow 1.4s forwards; }
+        @keyframes textFallSlow {
+            0% { opacity: 0; transform: translateY(-70px) scale(1.1); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 50px; font-weight: 900; color: #ffffff; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 20px #f48fb1, 0 0 40px #ff3366, 2px 2px 0px rgba(0,0,0,0.9); background: transparent; padding: 0; border: none; box-shadow: none; animation: textFallSlow 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 
-        /* BẢNG TỔNG KẾT CUỐI CÙNG - ĐƯỢC TÁI CẤU TRÚC CÂN ĐỐI */
-        #final-summary-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 10px; opacity: 0; transition: opacity 1.2s ease; }
-        #final-summary-overlay.active { display: flex; opacity: 1; }
-        #final-summary-overlay.active > * { animation: cinematicPopupSuperSlow 1.6s forwards; opacity: 0; }
+        /* BẢNG KẾT QUẢ TỪNG BÀI */
+        #result-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 14px; padding: 12px; opacity: 0; transition: opacity 1.2s ease; }
+        #result-overlay.active { display: flex; opacity: 1; }
+        #result-overlay.active > * { animation: cinematicPopupSuperSlow 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards; opacity: 0; }
 
-        .final-header { font-family: 'Chakra Petch', sans-serif; font-size: 24px; color: #ffffff; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 15px rgba(244,143,177,0.8); margin-bottom: 4px; }
+        .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 26px; color: #ffffff; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 15px rgba(244,143,177,0.8); }
         
-        /* Ô TỔNG ĐIỂM DATA ĐÃ ĐƯỢC THU NHỎ GỌN GÀNG */
-        .stat-box { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); padding: 12px 20px; border-radius: 14px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
-        .stat-line { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #ffffff; width: 100%; font-weight: bold; }
-        .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
-        .stat-line span:last-child { text-align: right; min-width: 80px; color: #f48fb1; text-shadow: 0 0 8px rgba(244,143,177,0.5); font-size: 20px;}
+        .prestige-panel { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .prestige-total-box { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; padding-top: 2px; width: 100%; }
+        .prestige-total-label { color: #ffffff; font-size: 14px; font-weight: 900; letter-spacing: 1px; flex: 1; text-align: left; }
+        .prestige-total-num { font-size: 28px; color: #f48fb1; font-weight: 900; line-height: 1; text-align: right; min-width: 90px; text-shadow: 0 0 10px rgba(244,143,177,0.6); }
 
-        /* KHUNG CHÍNH (THÔNG SỐ & NHẬN XÉT) ĐƯỢC MỞ RỘNG VÀ LÀM NỔI BẬT LÀM TÂM ĐIỂM */
-        .bio-metrics-box { width: 92%; max-width: 340px; background: rgba(5, 14, 28, 0.95); backdrop-filter: blur(22px); border: 2px solid rgba(0, 229, 255, 0.6); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 25px 50px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,229,255,0.1); }
-        .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(244, 143, 177, 0.3); padding-bottom: 8px; margin-bottom: 2px; width: 100%; }
+        .bio-metrics-box { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(244, 143, 177, 0.3); padding-bottom: 10px; margin-bottom: 4px; width: 100%; }
         .metric-card-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .metric-label { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 13.5px; font-weight: bold; flex: 1; text-align: left;}
-        .metric-val { color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 14.5px; font-weight: bold; text-align: right; text-shadow: 0 0 8px rgba(244,143,177,0.5); }
-        
-        .rank-text { font-family: 'Chakra Petch', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; }
+        .metric-label { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; flex: 1; text-align: left;}
+        .metric-val { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; text-align: right; text-shadow: 0 0 8px rgba(255,255,255,0.6); }
 
-        /* HỘP NHẬN XÉT NỔI BẬT: NỀN KHÁC BIỆT, CHỮ VÀNG CHANH SÁNG RỰC (#ffeb3b), DỄ ĐỌC VÀ CỰC KỲ BẮT MẮT */
-        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; color: #ffeb3b; font-style: normal; text-align: left; margin-top: 6px; line-height: 1.55; font-weight: 700; max-width: 340px; background: rgba(0, 0, 0, 0.5); border: 1.5px solid rgba(255, 235, 59, 0.4); padding: 14px; border-radius: 10px; text-shadow: 0 0 8px rgba(255, 235, 59, 0.3); box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+        .rank-icon-img { width: 24px; height: 24px; vertical-align: middle; margin-right: 6px; }
 
-        .result-btn-row { display: flex; gap: 10px; width: 92%; max-width: 340px; margin-top: 2px; }
-        .result-action-btn { flex: 1; padding: 13px; font-family: 'Chakra Petch', sans-serif; font-size: 15px; font-weight: 900; border-radius: 12px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; backdrop-filter: blur(8px); letter-spacing: 1px; }
+        .result-btn-row { display: flex; gap: 10px; width: 92%; max-width: 340px; margin-top: 10px; }
+        .result-action-btn { flex: 1; padding: 14px; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; border-radius: 12px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; backdrop-filter: blur(8px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        #btn-replay { background: var(--panel-bg); border: 1.5px solid #ff3366; color: #ff3366; }
+        #btn-replay:active { background: #ff3366; color: #fff; }
+        #btn-next { background: var(--panel-bg); border: 1.5px solid #f48fb1; color: #f48fb1; }
+        #btn-next:active { background: #f48fb1; color: #050b14; }
+
+        /* BẢNG TỔNG KẾT CUỐI CÙNG */
+        #final-summary-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 12px; padding: 12px; opacity: 0; transition: opacity 1.2s ease; }
+        #final-summary-overlay.active { display: flex; opacity: 1; }
+        #final-summary-overlay.active > * { animation: cinematicPopupSuperSlow 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards; opacity: 0; }
+
+        .final-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #ffffff; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 15px rgba(244,143,177,0.8); }
         
-        #btn-replay { background: var(--panel-bg); border: 1.5px solid #ff3366; color: #ff3366; animation: pulse-btn 1.5s infinite; }
-        #btn-replay:active { background: #ff3366; color: #fff; transform: scale(0.95); animation: none; }
-        
-        #btn-next { background: var(--panel-bg); border: 1.5px solid #00e5ff; color: #00e5ff; animation: pulse-btn 1.5s infinite; animation-delay: 0.2s; }
-        #btn-next:active { background: #00e5ff; color: #050b14; transform: scale(0.95); animation: none; }
+        .stat-box { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); padding: 24px; border-radius: 18px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .stat-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #ffffff; width: 100%; font-weight: bold; }
+        .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
+        .stat-line span:last-child { text-align: right; min-width: 100px; color: #f48fb1; text-shadow: 0 0 8px rgba(244,143,177,0.5); }
+
+        .final-btn-exit { width: 92%; max-width: 340px; padding: 14px; background: var(--panel-bg); backdrop-filter: blur(8px); border: 1.5px solid #f48fb1; border-radius: 12px; color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-align: center; margin-top: 5px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); text-shadow: 0 0 8px rgba(244,143,177,0.6); }
+        .final-btn-exit:hover { background: #f48fb1; color: #050b14; }
+
+        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; color: #ffffff; font-style: normal; text-align: left; margin-top: 8px; line-height: 1.6; font-weight: 600; max-width: 340px; text-shadow: 0 0 8px rgba(255,255,255,0.4); }
 
         .game-container { display: none; width: 100%; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .game-container.active { display: flex; }
+        .dynamic-grid { display: grid; gap: 6px; margin: 0 auto; transition: all 0.3s ease; justify-content: center; align-content: center; border-radius: 12px; padding: 8px; border: 2px solid transparent; touch-action: none; }
         
         .grid-ready-glow { animation: readyPulse 0.4s ease-out forwards; }
         @keyframes readyPulse {
@@ -160,6 +192,12 @@
             30% { border-color: rgba(255, 255, 255, 1); box-shadow: 0 0 30px rgba(244,143,177,0.8), inset 0 0 20px rgba(244,143,177,0.5); }
             100% { border-color: rgba(255, 255, 255, 0.4); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
         }
+
+        .grid-cell { aspect-ratio: 1; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.15s ease; backdrop-filter: blur(6px); }
+        .grid-cell.active-glow { background: rgba(244, 143, 177, 0.9); box-shadow: 0 0 22px #f48fb1; border-color: #fff; }
+        .grid-cell.correct { background: rgba(244, 143, 177, 0.95); box-shadow: 0 0 18px #f48fb1; border-color: #fff; color: #fff;}
+        .grid-cell.wrong { background: rgba(229, 57, 53, 0.9); box-shadow: 0 0 15px #e53935; border-color: #fff; color: #fff;}
+        .grid-cell.reveal-hint { background: rgba(255, 183, 77, 0.7) !important; box-shadow: 0 0 15px #ffd700 !important; border-color: #fff !important; }
 
         .sequence-display { min-height: 90px; max-height: 140px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-bottom: 25px; width: 95%; max-width: 350px; background: rgba(15, 23, 42, 0.85); border-radius: 12px; border: 1.5px solid rgba(255, 255, 255, 0.4); padding: 10px 15px; overflow-y: auto; scroll-behavior: smooth; }
         .sequence-display::-webkit-scrollbar { width: 4px; }
@@ -185,8 +223,9 @@
 </head>
 <body>
 
+    <!-- VIDEO NỀN ĐỘNG THỦY LUÂN CÓ ÂM THANH -->
     <video id="sanctum-video" autoplay loop playsinline>
-        <source src="../Photo/video nen thuy luan.mp4" type="video/mp4">
+        <source src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/video%20nen%20thuy%20luan.mp4" type="video/mp4">
     </video>
 
     <div id="dust-container"></div>
@@ -216,18 +255,18 @@
                 </div>
             </div>
 
+            <!-- THANH ĐIỀU HƯỚNG DƯỚI BỐ CỤC 4 NÚT (Back, Skip, Mute, Pause) -->
             <div id="game-bottom-bar" class="game-bottom-bar">
                 <button class="btn-action btn-back" onclick="confirmExitToLobby()">⟨</button>
+                <button class="btn-action btn-skip" id="btn-skip-stage" onclick="skipToNextStage()" title="Chuyển bài">⏭</button>
                 <button class="btn-action btn-mute" id="btn-mute" onclick="toggleVideoMute()" title="Bật/Tắt tiếng video">🔊</button>
                 <button class="btn-action btn-pause" onclick="pauseGame()"></button>
             </div>
 
             <div id="start-prompt-overlay">
                 <div id="briefing-panel" class="briefing-panel">
-                    <div class="briefing-title" id="briefing-title">KIỂM TRA TRÍ NHỚ</div>
-                    <div class="briefing-target" id="briefing-target">
-                        Ghi nhớ lại chuỗi hình ảnh và nhập lại nhanh.
-                    </div>
+                    <div class="briefing-title" id="briefing-title"></div>
+                    <div class="briefing-target" id="briefing-target"></div>
                 </div>
                 <div class="action-group">
                     <div class="start-action-box" onclick="triggerStartGame()">BẮT ĐẦU</div>
@@ -243,42 +282,65 @@
             </div>
 
             <div id="freeze-overlay"><div class="freeze-text">KẾT THÚC</div></div>
+
+            <div id="game-1-container" class="game-container">
+                <div id="grid-1" class="dynamic-grid"></div>
+            </div>
             
-            <div id="game-container" class="game-container">
+            <div id="game-2-container" class="game-container">
                 <div class="sequence-display" id="seq-area"></div>
                 <div class="input-area" id="input-area-2"></div>
             </div>
 
-            <div id="final-summary-overlay">
-                <div class="final-header">KẾT QUẢ TRÍ NHỚ</div>
-                
-                <!-- Ô TỔNG ĐIỂM DATA ĐÃ THU NHỎ GỌN GÀNG -->
-                <div class="stat-box">
-                    <div class="stat-line" style="justify-content: center;">
-                        <span style="font-weight: 900; color: #fff; font-size: 13px;">TỔNG ĐIỂM DATA:</span> 
-                        <span class="stat-val" id="sum-score-total" style="font-weight:900; color:#f48fb1; font-size:20px; margin-left:8px;">0</span>
+            <div id="result-overlay">
+                <div class="stage-badge-header" id="stage-badge-title">KẾT QUẢ BÀI 1</div>
+                <div class="prestige-panel">
+                    <div class="prestige-total-box" style="border-top:none; margin-top:0; padding-top:0;">
+                        <span class="prestige-total-label">TỔNG ĐIỂM BÀI NÀY:</span>
+                        <span class="prestige-total-num" id="final-score-display">0</span>
                     </div>
                 </div>
 
-                <!-- HỘP THÔNG SỐ VÀ NHẬN XÉT ĐƯỢC ĐẨY LÀM TÂM ĐIỂM CHÍNH -->
                 <div class="bio-metrics-box">
                     <div class="metric-card-row">
-                        <span class="metric-label">Tốc độ trích xuất</span>
+                        <span class="metric-label">Thời gian trích xuất</span>
+                        <span class="metric-val" id="bio-ms-val">Chưa đủ Data</span>
+                    </div>
+                    <div class="metric-card-row">
+                        <span class="metric-label">Đánh giá bộ nhớ</span>
+                        <span class="metric-val" id="bio-rank-badge-mem">RAM 512MB</span>
+                    </div>
+                </div>
+
+                <div class="result-btn-row">
+                    <button class="result-action-btn" id="btn-replay" onclick="retryCurrentStage()">TẬP LẠI</button>
+                    <button class="result-action-btn" id="btn-next" onclick="proceedNextStage()">BÀI 2</button>
+                </div>
+            </div>
+
+            <div id="final-summary-overlay">
+                <div class="final-header">TỔNG KẾT THỦY LUÂN</div>
+                <div class="stat-box">
+                    <div class="stat-line"><span>BÀI 1:</span> <span class="stat-val" id="sum-score-1" style="color:#f48fb1;">0</span></div>
+                    <div class="stat-line"><span>BÀI 2:</span> <span class="stat-val" id="sum-score-2" style="color:#f48fb1;">0</span></div>
+                    <div class="stat-line" style="margin-top:8px; padding-top:8px; border-top:1px dashed rgba(244,143,177,0.4);">
+                        <span style="font-weight: 900; color: #fff;">TỔNG ĐIỂM DATA:</span> <span class="stat-val" id="sum-score-total" style="font-weight:900; color:#f48fb1; font-size:18px;">0</span>
+                    </div>
+                </div>
+
+                <div class="bio-metrics-box" style="padding: 24px; gap: 12px;">
+                    <div class="metric-card-row">
+                        <span class="metric-label">Thời gian trích xuất</span>
                         <span class="metric-val" id="final-ms">Chưa đủ Data</span>
                     </div>
                     <div class="metric-card-row">
                         <span class="metric-label">Đánh giá bộ nhớ</span>
-                        <span class="rank-text" id="sum-rank-mem" style="text-shadow: 0 0 10px;">RAM</span>
+                        <span class="metric-val" id="sum-rank-mem">RAM 512MB</span>
                     </div>
-                    
-                    <!-- LỜI BÌNH NỔI BẬT: CHỮ VÀNG CHANH SÁNG RỰC TRÊN NỀN TỐI ĐẬM -->
                     <div class="master-feedback" id="master-feedback-text">Chờ đánh giá...</div>
                 </div>
 
-                <div class="result-btn-row">
-                    <button class="result-action-btn" id="btn-replay" onclick="openArena()">TẬP LẠI</button>
-                    <button class="result-action-btn" id="btn-next" onclick="goToHoaLuan()">CHUYỂN BÀI</button>
-                </div>
+                <button class="final-btn-exit" onclick="closeArena()">VỀ SẢNH CHÍNH</button>
             </div>
             
         </div>
@@ -306,40 +368,27 @@
         const BASE_SYMBOLS = ['lightning', 'circle', 'triangle', 'square'];
         const ADVANCED_SYMBOLS = ['lightning', 'circle', 'triangle', 'square', 'star', 'diamond'];
 
-        function getRankEvaluation(maxSeq, avgMs) {
-            let name = "RAM 512MB";
-            let color = "#ff3366";
-            let feedback = "🐌 Vừa mở vài hình lên đã tràn bộ nhớ, văng game luôn.";
+        // HỆ THỐNG 5 CẤP LINH VẬT & PHẦN CỨNG TƯƠNG TỨC
+        function getRAMByScore(score) {
+            if (score < 300) return "RAM 512MB";
+            if (score < 600) return "RAM 1GB";
+            if (score < 1000) return "RAM 2GB";
+            if (score < 1500) return "RAM 4GB";
+            return "RAM 8GB+";
+        }
 
-            if (maxSeq >= 15) {
-                name = "RAM 128GB";
-                color = "#ffd700";
-                feedback = "👽 Không một mảnh dữ liệu nhỏ nào có thể lọt qua hệ thống này. Dung lượng bộ nhớ thực sự ở mức khủng bố!";
-            } else if (maxSeq >= 12) {
-                name = "RAM 32GB";
-                color = "#00ff9d";
-                feedback = "🐘 Người ta có câu 'Loài voi không bao giờ quên', và bộ não của bạn cũng y hệt vậy! Khả năng chụp ảnh tâm trí cực gắt.";
-            } else if (maxSeq >= 9) {
-                name = "RAM 8GB";
-                color = "#00e5ff";
-                feedback = "🐬 Chạy đa nhiệm khá mượt, nảy số cũng ra gì và này nọ đấy.";
-            } else if (maxSeq >= 7) {
-                name = "RAM 4GB";
-                color = "#ffffff";
-                feedback = "🐢 Cố load được vài hình là bắt đầu ì à ì ạch, giật lag tung chảo rồi quên béng luôn mình đang làm gì.";
+        function getSSDByExtraction(avgMs) {
+            if (avgMs >= 1000) {
+                return { name: "Ốc sên", ssd: "SSD 120GB", icon: "🐌", desc: "Cố load được vài hình là bắt đầu ì à ì ạch, giặt lag tung chảo rồi quên béng luôn mình đang làm gì. Tốc độ xử lý rùa bò." };
+            } else if (avgMs >= 600) {
+                return { name: "Rùa bò", ssd: "SSD 256GB", icon: "🐢", desc: "Tốc độ load thông tin ở mức vừa phải, xử lý các tác vụ cơ bản ổn định nhưng bắt đầu có độ trễ khi dồn dập." };
+            } else if (avgMs >= 400) {
+                return { name: "Cá heo", ssd: "SSD 512GB", icon: "🐬", desc: "Tốc độ trích xuất nhanh nhạy, phản xạ không gian sắc bén, băng thông xử lý tốt trong các bài test phức tạp." };
+            } else if (avgMs >= 350) {
+                return { name: "Đại bàng", ssd: "SSD 1TB", icon: "🦅", desc: "Tốc độ xé gió, truy xuất dữ liệu thần tốc trong tích tắc, độ trễ cực thấp, phản xạ thị giác đạt hiệu suất cao." };
+            } else {
+                return { name: "Khủng long", ssd: "SSD 2TB Gen5", icon: "🦖", desc: "Đỉnh cao tuyệt đối! Băng thông vô hạn, trích xuất tri thức tức thì, tay nhanh hơn não là có thật!" };
             }
-
-            let speedFeedback = "";
-            if (avgMs > 0 && avgMs <= 600) speedFeedback = " Tốc độ xử lý cực nhanh. SSD ngon. Tay nhanh hơn não là có thật!";
-            else if (avgMs <= 1000) speedFeedback = " Tốc độ xử lý ổn định. Đạt mức SSD tiêu chuẩn, nói chung là tạm mượt.";
-            else if (avgMs <= 1500) speedFeedback = " Tốc độ xử lý hơi chậm. Lôi dữ liệu ra vẫn còn delay lắm nha.";
-            else speedFeedback = " Tốc độ xử lý quá chậm. Nảy số như rùa bò, vừa bấm vừa ngủ gật à?";
-
-            if (maxSeq < 4) {
-                speedFeedback = ""; 
-            }
-
-            return { name: name, color: color, feedback: feedback + speedFeedback };
         }
 
         let fxCtx = null;
@@ -378,15 +427,18 @@
             } catch (e) {}
         }
 
+        let cGame = '1'; 
         let aScore = 0;           
         let pendingScore = 0;     
         let stabilityHP = 5;      
         let isPlaying = false; 
         let isPausedForStart = true;
         
-        let hitsCount = 0; 
+        let sessionScoreG1 = 0, sessionScoreG2 = 0;
+        let hitsCountG1 = 0, hitsCountG2 = 0; 
+
         let currentLevel = 1; 
-        let highestSequenceReached = 0; 
+        let highestCompletedLevel = 1; 
         let winsInCurrentLevel = 0; 
         let canClick = false;
         let patternSeq = [];
@@ -394,11 +446,11 @@
         let gameLogicTimer;
 
         let cueHideTimestamp = 0;
-        let extractionTimes = [];
+        let extractionTimes = []; // Chỉ lưu trữ thời gian của các chuỗi trả lời đúng hoàn toàn
         let nextHpMilestone = 1000;
 
         window.onload = () => { 
-            openArena(); 
+            openArena('1'); 
             initSparkleParticles();
         };
 
@@ -419,15 +471,39 @@
             }
         }
 
-        function getSymbolCount(level) {
-            return 3 + level;                   
+        function getGridConfigByLevel(level) {
+            if (level >= 5) return { size: 12, total: 144, css: 'repeat(12, 1fr)', dim: '350px' }; 
+            if (level === 4) return { size: 9, total: 81, css: 'repeat(9, 1fr)', dim: '330px' };   
+            if (level === 3) return { size: 7, total: 49, css: 'repeat(7, 1fr)', dim: '320px' };   
+            if (level === 2) return { size: 5, total: 25, css: 'repeat(5, 1fr)', dim: '280px' };   
+            return { size: 3, total: 9,  css: 'repeat(3, 1fr)', dim: '240px' };                    
+        }
+
+        function getG2SymbolCount(level) {
+            if (level >= 5) return 18; 
+            if (level === 4) return 9;  
+            if (level === 3) return 7;  
+            if (level === 2) return 5;  
+            return 4;                   
         }
 
         function getAvailableSymbolsForLevel(level) {
-            return (level >= 3) ? ADVANCED_SYMBOLS : BASE_SYMBOLS;
+            return (level >= 4) ? ADVANCED_SYMBOLS : BASE_SYMBOLS;
         }
 
-        function buildKeyboard() {
+        function buildDynamicGrid() {
+            let container = document.getElementById('grid-1');
+            let config = getGridConfigByLevel(currentLevel);
+            container.innerHTML = ''; container.style.gridTemplateColumns = config.css; container.style.gridTemplateRows = config.css; 
+            container.style.width = config.dim; container.style.height = config.dim;
+            for(let i = 0; i < config.total; i++) {
+                let cell = document.createElement('div'); cell.className = 'grid-cell';
+                cell.onclick = () => handleGame1Click(i, cell);
+                container.appendChild(cell);
+            }
+        }
+
+        function buildG2Keyboard() {
             let area = document.getElementById('input-area-2'); area.innerHTML = '';
             let activeSymbols = getAvailableSymbolsForLevel(currentLevel);
             activeSymbols.forEach(key => {
@@ -438,9 +514,9 @@
             });
         }
 
-        function openArena() {
-            aScore = 0; pendingScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
-            currentLevel = 1; highestSequenceReached = 0; winsInCurrentLevel = 0; hitsCount = 0;
+        function openArena(id) {
+            cGame = id; aScore = 0; pendingScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
+            currentLevel = 1; highestCompletedLevel = 1; winsInCurrentLevel = 0;
             extractionTimes = []; nextHpMilestone = 1000;
 
             let vid = document.getElementById('sanctum-video');
@@ -449,12 +525,23 @@
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
-            document.getElementById('game-container').classList.remove('active');
+            document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
 
             updateHpDisplay(); document.getElementById('boo-points').innerText = "0";
-            document.getElementById('final-summary-overlay').classList.remove('active');
+            document.getElementById('result-overlay').classList.remove('active');
             document.getElementById('pause-menu-overlay').classList.remove('active');
+            document.getElementById('final-summary-overlay').classList.remove('active');
             
+            let bTitle = "", bTarget = "";
+            if (id === '1') {
+                bTitle = "BÀI 1 — GHI NHỚ VỊ TRÍ"; 
+                bTarget = "Ép các tế bào thần kinh hoạt động hết công suất để bắt trọn từng vị trí chớp nhoáng. Cảm giác căng thẳng, hơi khó chịu ban đầu chính là minh chứng cho thấy não bộ đang được kích hoạt và mở rộng giới hạn.<br><br><span style='color:#f48fb1; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và bấm lại chính xác các vị trí đó.";
+            } else if (id === '2') {
+                bTitle = "BÀI 2 — GHI NHỚ HÌNH ẢNH"; 
+                bTarget = "Rèn luyện khả năng nạp và giải mã chuỗi thông tin tốc độ cao. Khi não phải rướn lên xử lý, đó là lúc các liên kết thần kinh mới được hình thành, giúp tăng cường độ nhạy bén của tư duy.<br><br><span style='color:#f48fb1; font-weight:bold;'>MỤC TIÊU:</span> Nhớ và gõ lại đúng thứ tự chuỗi ký hiệu xuất hiện.";
+            }
+
+            document.getElementById('briefing-title').innerText = bTitle; document.getElementById('briefing-target').innerHTML = bTarget;
             document.getElementById('game-top-bar').classList.remove('visible');
             document.getElementById('game-bottom-bar').classList.remove('visible');
             
@@ -465,7 +552,7 @@
                 setTimeout(() => promptOverlay.classList.add('active'), 200);
             }, 500);
 
-            buildKeyboard();
+            if (id === '2') buildG2Keyboard();
         }
 
         function updateHpDisplay() {
@@ -492,26 +579,54 @@
             playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
             setTimeout(() => { let playArea = document.getElementById('play-area'); playArea.classList.add('fullscreen-mode'); laser.classList.add('expand'); }, 600);
             setTimeout(() => { 
-                if(laser && laser.parentElement) laser.remove(); 
-                isPausedForStart = false; 
+                laser.remove(); isPausedForStart = false; 
                 document.getElementById('game-top-bar').classList.add('visible'); 
                 document.getElementById('game-bottom-bar').classList.add('visible'); 
-                document.getElementById('game-container').classList.add('active'); 
-                startArena(); 
+                document.getElementById(`game-${cGame}-container`).classList.add('active'); startArena(); 
             }, 1500);
         }
 
         function startArena() { 
             isPlaying = true;
-            hitsCount = 0; 
-            runGame(); 
+            if(cGame === '1') { hitsCountG1 = 0; runGame1(); } 
+            else if(cGame === '2') { hitsCountG2 = 0; runGame2(); } 
         }
 
         function pauseGame() { if(!isPlaying || isPausedForStart) return; playSound('error'); isPausedForStart = true; clearTimeout(gameLogicTimer); document.getElementById('pause-menu-overlay').classList.add('active'); }
-        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; runGame(); }
-        function confirmExitToLobby() { playSound('error'); window.location.href = '../LucChien_2.html'; }
+        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; if(cGame === '1') runGame1(); else runGame2(); }
+        function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
+        function closeArena() { window.location.href = 'LucChien.html'; }
 
-        function revealCorrectAnswersForGame() {
+        /* NÚT SKIP CHUYỂN QUA LẠI BÀI 1 VÀ BÀI 2 */
+        function skipToNextStage() {
+            playSound('coin');
+            isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
+            aScore += pendingScore; pendingScore = 0; 
+
+            if (cGame === '1') {
+                sessionScoreG1 = Math.round(aScore); 
+                localStorage.setItem('thuy_luan_bai1_score', sessionScoreG1);
+                openArena('2');
+            } else {
+                sessionScoreG2 = Math.round(aScore); 
+                localStorage.setItem('thuy_luan_bai2_score', sessionScoreG2);
+                openArena('1');
+            }
+        }
+
+        function revealCorrectAnswersForGame1() {
+            let cells = document.getElementById('grid-1').children;
+            patternSeq.forEach(idx => {
+                if(cells[idx]) { cells[idx].classList.add('reveal-hint'); }
+            });
+            setTimeout(() => {
+                patternSeq.forEach(idx => {
+                    if(cells[idx]) { cells[idx].classList.remove('reveal-hint'); }
+                });
+            }, 900);
+        }
+
+        function revealCorrectAnswersForGame2() {
             let area = document.getElementById('seq-area');
             area.innerHTML = patternSeq.map(key => `<div class="quantum-char" style="opacity:0.7;">${ALL_SHAPES_SMALL[key]}</div>`).join('');
         }
@@ -526,8 +641,10 @@
 
             winsInCurrentLevel = 0; 
             currentLevel = Math.max(1, currentLevel - 1); 
-            buildKeyboard(); 
-            revealCorrectAnswersForGame();
+            if(cGame === '2') buildG2Keyboard(); 
+            
+            if (cGame === '1') { revealCorrectAnswersForGame1(); } 
+            else { revealCorrectAnswersForGame2(); }
 
             let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 400);
             
@@ -536,7 +653,7 @@
             } else { 
                 clearTimeout(gameLogicTimer); 
                 let delay = 1000;
-                setTimeout(() => { runGame(); }, delay); 
+                setTimeout(() => { if (cGame === '1') runGame1(); else runGame2(); }, delay); 
             }
         }
 
@@ -548,11 +665,15 @@
             setTimeout(() => alertBox.remove(), 1200);
         }
 
-        function processCorrectTap() { 
-            hitsCount++;
+        function processCorrectTap(currentSeqLength) { 
+            if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
+
             playSound('coin', 1); 
             
-            let basePointPerItem = 15 + currentLevel * 5;
+            let basePointPerItem = 15;
+            if (currentLevel === 2) basePointPerItem = 20;
+            else if (currentLevel === 3) basePointPerItem = 25;
+            else if (currentLevel >= 4) basePointPerItem = 30;
 
             pendingScore += basePointPerItem; 
             document.getElementById('boo-points').innerText = Math.round(aScore + pendingScore);
@@ -568,29 +689,37 @@
 
         function checkLevelUp() { 
             winsInCurrentLevel++;
-            let requiredWins = 1; 
+            let requiredWins = (currentLevel < highestCompletedLevel) ? 1 : 2; 
 
             if (winsInCurrentLevel >= requiredWins) { 
                 winsInCurrentLevel = 0; 
+                
+                if (currentLevel > highestCompletedLevel) { 
+                    highestCompletedLevel = currentLevel; 
+                }
                 aScore += pendingScore + (currentLevel * 40); 
                 pendingScore = 0;
                 document.getElementById('boo-points').innerText = Math.round(aScore);
 
                 currentLevel++;
-                buildKeyboard(); 
+                if(cGame === '2') buildG2Keyboard(); 
 
                 let alertBox = document.createElement('div');
                 alertBox.className = 'matrix-expand-alert';
-                let count = getSymbolCount(currentLevel);
-                alertBox.innerHTML = `ĐỘ KHÓ: ${count} HÌNH`;
-                
+                if(cGame === '1') {
+                    let cfg = getGridConfigByLevel(currentLevel);
+                    alertBox.innerHTML = `MA TRẬN ${cfg.size}X${cfg.size}`;
+                } else {
+                    let count = getG2SymbolCount(currentLevel);
+                    alertBox.innerHTML = `ĐỘ KHÓ: ${count} HÌNH`;
+                }
                 document.body.appendChild(alertBox);
                 playSound('ready');
                 setTimeout(() => alertBox.remove(), 1200);
 
-                setTimeout(() => { runGame(); }, 1200);
+                setTimeout(() => { if(cGame === '1') runGame1(); else runGame2(); }, 1200);
             } else {
-                setTimeout(() => { runGame(); }, 600);
+                setTimeout(() => { if(cGame === '1') runGame1(); else runGame2(); }, 600);
             }
         }
 
@@ -601,12 +730,48 @@
             playSound('ready');
         }
 
-        function runGame() {
-            if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; 
+        function runGame1() {
+            if(!isPlaying || isPausedForStart) return; buildDynamicGrid(); patternSeq = []; userSeq = []; canClick = false; 
+            let config = getGridConfigByLevel(currentLevel); 
+            let count = Math.min(3 + currentLevel * 2, Math.floor(config.total * 0.6)); 
             
-            let count = getSymbolCount(currentLevel);
-            highestSequenceReached = Math.max(highestSequenceReached, count);
+            while(patternSeq.length < count) { let r = Math.floor(Math.random() * config.total); if(!patternSeq.includes(r)) patternSeq.push(r); }
+            let cells = document.getElementById('grid-1').children; patternSeq.forEach(idx => { if(cells[idx]) cells[idx].classList.add('active-glow'); });
+            
+            gameLogicTimer = setTimeout(() => {
+                if(!isPlaying || isPausedForStart) return; 
+                patternSeq.forEach(idx => { if(cells[idx]) cells[idx].classList.remove('active-glow'); }); 
+                triggerReadyCue(document.getElementById('grid-1'));
+                cueHideTimestamp = Date.now(); 
+                canClick = true; 
+            }, Math.max(500, 1500 - (currentLevel * 100)));
+        }
 
+        function handleGame1Click(idx, cellEl) {
+            if(!canClick || !isPlaying || isPausedForStart || userSeq.includes(idx)) return; 
+            
+            // Lưu lại thời gian phản hồi cho ký tự đầu tiên
+            if (userSeq.length === 0) {
+                window.currentAttemptStart = Date.now();
+            }
+
+            userSeq.push(idx); 
+            if (patternSeq.includes(idx)) { 
+                cellEl.classList.add('correct'); 
+                processCorrectTap(userSeq.length); 
+                if(userSeq.length === patternSeq.length) { 
+                    canClick = false; 
+                    // CHỈ GHI NHẬN THỜI GIAN KHI HOÀN THÀNH ĐÚNG HOÀN TOÀN
+                    let msTime = Date.now() - window.currentAttemptStart;
+                    if (msTime > 0 && msTime < 10000) { extractionTimes.push(msTime); }
+                    checkLevelUp(); 
+                } 
+            } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
+        }
+
+        function runGame2() {
+            if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; 
+            let count = getG2SymbolCount(currentLevel);
             let availableSymbols = getAvailableSymbolsForLevel(currentLevel);
             
             for(let i=0; i<count; i++) { patternSeq.push(availableSymbols[Math.floor(Math.random() * availableSymbols.length)]); }
@@ -618,14 +783,19 @@
             gameLogicTimer = setTimeout(() => {
                 if(!isPlaying || isPausedForStart) return; 
                 area.innerHTML = `<div class="hidden-box">?</div>`.repeat(patternSeq.length); 
-                triggerReadyCue(area); cueHideTimestamp = Date.now(); canClick = true; 
+                triggerReadyCue(area); 
+                cueHideTimestamp = Date.now(); 
+                canClick = true; 
             }, Math.max(800, 2200 - (currentLevel * 100)));
         }
         
         function addToUserSeq(key) {
             if(!canClick || !isPlaying || isPausedForStart) return;
 
-            if (userSeq.length === 0) { let msTime = Date.now() - cueHideTimestamp; extractionTimes.push(msTime); }
+            // Lưu lại thời gian phản hồi cho ký tự đầu tiên
+            if (userSeq.length === 0) {
+                window.currentAttemptStart = Date.now();
+            }
 
             if(key === patternSeq[userSeq.length]) {
                 userSeq.push(key); 
@@ -635,7 +805,13 @@
                 area.innerHTML = html; area.scrollTop = area.scrollHeight;
                 
                 processCorrectTap(patternSeq.length); 
-                if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); }
+                if(userSeq.length === patternSeq.length) { 
+                    canClick = false; 
+                    // CHỈ GHI NHẬN THỜI GIAN KHI HOÀN THÀNH ĐÚNG HOÀN TOÀN
+                    let msTime = Date.now() - window.currentAttemptStart;
+                    if (msTime > 0 && msTime < 10000) { extractionTimes.push(msTime); }
+                    checkLevelUp(); 
+                }
             } else { playSound('wrong'); failSequence(); }
         }
 
@@ -647,42 +823,83 @@
             vid.classList.remove('playing-mode');
             setTimeout(() => vid.classList.add('loaded'), 400);
 
+            let currentHits = (cGame === '1') ? hitsCountG1 : hitsCountG2;
             let avgExtractionMs = extractionTimes.length > 0 ? Math.round(extractionTimes.reduce((a,b)=>a+b, 0) / extractionTimes.length) : 0;
 
-            if (aScore < 200 || hitsCount < 3) {
-                aScore = 0; avgExtractionMs = 2500; highestSequenceReached = 0;
+            if (aScore < 200 || currentHits < 3) {
+                aScore = 0; highestCompletedLevel = 1; avgExtractionMs = 2500;
             }
 
-            localStorage.setItem('thuy_luan_score', Math.round(aScore));
+            if(cGame === '1') { sessionScoreG1 = Math.round(aScore); localStorage.setItem('thuy_luan_bai1_score', sessionScoreG1); }
+            if(cGame === '2') { sessionScoreG2 = Math.round(aScore); localStorage.setItem('thuy_luan_bai2_score', sessionScoreG2); }
+            localStorage.setItem('thuy_luan_score', sessionScoreG1 + sessionScoreG2);
 
             document.getElementById('game-top-bar').classList.remove('visible');
             document.getElementById('game-bottom-bar').classList.remove('visible');
             let playArea = document.getElementById('play-area'); playArea.classList.remove('fullscreen-mode');
-            document.getElementById('game-container').classList.remove('active');
+            document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
 
             playSound('error'); document.getElementById('freeze-overlay').classList.add('active');
 
             setTimeout(() => {
                 document.getElementById('freeze-overlay').classList.remove('active');
                 
-                document.getElementById('sum-score-total').innerText = Math.floor(aScore);
-                document.getElementById('final-ms').innerText = (aScore > 0 && avgExtractionMs > 0 && avgExtractionMs < 2500) ? avgExtractionMs + " ms" : "Chưa đủ Data";
+                let romanName = (cGame === '1') ? 'KẾT QUẢ BÀI 1' : 'KẾT QUẢ BÀI 2';
+                document.getElementById('stage-badge-title').innerText = romanName;
+                document.getElementById('final-score-display').innerText = Math.floor(aScore);
                 
-                let memRankObj = getRankEvaluation(highestSequenceReached, avgExtractionMs);
+                // Hiển thị ms và RAM tương ứng
+                let msText = (aScore > 0 && avgExtractionMs > 0 && avgExtractionMs < 2500) ? avgExtractionMs + " ms" : "Chưa đủ Data";
+                document.getElementById('bio-ms-val').innerText = msText;
                 
-                let badgeRankMem = document.getElementById('sum-rank-mem');
-                badgeRankMem.innerHTML = `<span style="color: ${memRankObj.color}; text-shadow: 0 0 10px ${memRankObj.color};">${memRankObj.name}</span>`;
+                let ramText = getRAMByScore(Math.floor(aScore));
+                document.getElementById('bio-rank-badge-mem').innerText = ramText;
 
-                document.getElementById('master-feedback-text').innerText = memRankObj.feedback;
+                let btnNext = document.getElementById('btn-next');
+                if (cGame === '1') { 
+                    btnNext.innerText = "BÀI 2"; btnNext.onclick = proceedNextStage; btnNext.style.display = "block";
+                } else { 
+                    btnNext.innerText = "TỔNG KẾT"; btnNext.onclick = showFinalSummary; 
+                }
 
-                document.getElementById('final-summary-overlay').classList.add('active');
+                document.getElementById('result-overlay').classList.add('active');
                 playSound('coin');
             }, 1800);
         }
 
-        function goToHoaLuan() {
-            playSound('coin');
-            window.location.href = 'TestHoaLuan.html';
+        function retryCurrentStage() { playSound('katana'); document.getElementById('result-overlay').classList.remove('active'); openArena(cGame); }
+        function proceedNextStage() { playSound('coin'); document.getElementById('result-overlay').classList.remove('active'); openArena('2'); }
+
+        function showFinalSummary() {
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('playing-mode');
+            setTimeout(() => vid.classList.add('loaded'), 400);
+
+            playSound('coin'); document.getElementById('result-overlay').classList.remove('active');
+            let totalSessionScore = sessionScoreG1 + sessionScoreG2;
+            let avgExtractionMs = extractionTimes.length > 0 ? Math.round(extractionTimes.reduce((a,b)=>a+b, 0) / extractionTimes.length) : 0;
+
+            document.getElementById('sum-score-1').innerText = sessionScoreG1;
+            document.getElementById('sum-score-2').innerText = sessionScoreG2;
+            document.getElementById('sum-score-total').innerText = totalSessionScore;
+            
+            let msText = (avgExtractionMs > 0 && avgExtractionMs < 2500 && totalSessionScore > 0) ? avgExtractionMs + ' ms' : 'Không đạt';
+            document.getElementById('final-ms').innerText = msText;
+            
+            let highestScore = Math.max(sessionScoreG1, sessionScoreG2);
+            let ramText = getRAMByScore(highestScore);
+            document.getElementById('sum-rank-mem').innerText = ramText;
+
+            let feedbackEl = document.getElementById('master-feedback-text');
+            if (totalSessionScore < 200 || avgExtractionMs <= 0 || avgExtractionMs >= 2500) {
+                feedbackEl.innerHTML = `<span style="color: #ffffff;">🐌 <b>[Ổn định hệ thống]:</b> Chưa đạt ngưỡng dữ liệu tối thiểu. Cần rèn luyện phản xạ thêm!</span>`;
+            } else {
+                let ssdInfo = getSSDByExtraction(avgExtractionMs);
+                // Đổi màu chữ toàn bộ phần nhận xét sang MÀU TRẮNG SÁNG (#ffffff)
+                feedbackEl.innerHTML = `<span style="color: #ffffff;">${ssdInfo.icon} <b>[${ssdInfo.name.toUpperCase()} // ${ssdInfo.ssd}]:</b> ${ssdInfo.desc}</span>`;
+            }
+
+            document.getElementById('final-summary-overlay').classList.add('active');
         }
     </script>
 </body>
