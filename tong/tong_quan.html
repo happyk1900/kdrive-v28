@@ -168,10 +168,7 @@
 
         .metric-val.red-alert-val { color: #ff3366 !important; text-shadow: 0 0 10px rgba(255,51,102,0.6); animation: redAlertBlink 1.2s infinite ease-in-out; }
 
-        /* MẶC ĐỊNH HỘP NHẬN XÉT BÌNH THƯỜNG (XANH) */
         .debug-feedback { font-family: 'Share Tech Mono', monospace; font-size: 12.5px; color: #ffffff; text-align: left; background: rgba(0, 229, 255, 0.08); border: 1.5px solid rgba(0, 229, 255, 0.4); padding: 10px 12px; border-radius: 8px; line-height: 1.5; text-shadow: 0 0 6px rgba(255,255,255,0.4); }
-
-        /* KHI BÁO ĐỘNG ĐỎ MỚI ĐỔI THÀNH MÀU ĐỎ */
         .debug-feedback.red-alert-box { color: #ff3366 !important; background: rgba(255, 51, 102, 0.12) !important; border: 1.5px solid rgba(255, 51, 102, 0.7) !important; text-shadow: 0 0 6px rgba(255,51,102,0.5) !important; }
 
         .result-btn-row { display: flex; gap: 10px; width: 92%; max-width: 340px; margin-top: 5px; }
@@ -384,20 +381,26 @@
 
         function playAlarmBeep() {
             try {
-                if (!fxCtx || fxCtx.state !== 'running') return;
+                if (!fxCtx) {
+                    fxCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (fxCtx.state === 'suspended') {
+                    fxCtx.resume();
+                }
                 const osc = fxCtx.createOscillator();
                 const gain = fxCtx.createGain();
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(1050, fxCtx.currentTime);
-                gain.gain.setValueAtTime(0.35, fxCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.12);
+                osc.frequency.setValueAtTime(1100, fxCtx.currentTime);
+                gain.gain.setValueAtTime(0.4, fxCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.15);
                 osc.start();
-                osc.stop(fxCtx.currentTime + 0.12);
+                osc.stop(fxCtx.currentTime + 0.15);
             } catch(e) {}
         }
 
         function startAlarmLoop() {
             stopAlarmLoop();
+            playAlarmBeep(); // Phát ngay lập tức tiếng đầu tiên
             alarmInterval = setInterval(() => {
                 playAlarmBeep();
             }, 250);
@@ -734,7 +737,6 @@
                 let debugBox = document.getElementById('debug-stats-box');
                 let redBorder = document.getElementById('screen-red-border');
 
-                // PHÂN ĐỊNH RẠCH RÒI: DƯỚI 1000 DATA LÀ BÁO ĐỘNG ĐỎ, TRÊN 1000 DATA LÀ BÌNH THƯỜNG
                 if (finalScore < 1000) {
                     ssdEl.innerText = "⚠️ BÁO ĐỘNG";
                     ssdEl.className = "metric-val red-alert-val";
@@ -742,20 +744,17 @@
                     ramEl.innerText = "CHƯA ĐỦ DATA";
                     ramEl.className = "metric-val red-alert-val";
 
-                    // HỘP NHẬN XÉT ĐỔI THÀNH MÀU ĐỎ KHI BÁO ĐỘNG
                     debugBox.className = "debug-feedback red-alert-box";
                     debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data để chấm điểm phần cứng! Yêu cầu đo lại ngay lập tức!`;
 
                     redBorder.classList.add('active');
-                    startAlarmLoop();
+                    startAlarmLoop(); // Kích hoạt ngay lập tức âm thanh tít tít tít báo động
                 } else {
                     stopAlarmLoop();
                     redBorder.classList.remove('active');
 
                     ssdEl.className = "metric-val";
                     ramEl.className = "metric-val";
-
-                    // TRẢ HỘP NHẬN XÉT VỀ MÀU XANH BÌNH THƯỜNG
                     debugBox.className = "debug-feedback";
 
                     let ramText = (bestSequenceLen === 0) ? "RAM 512MB" : getRAMBySequence(bestSequenceLen);
