@@ -128,7 +128,7 @@
         .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
         .stat-line span:last-child { text-align: right; min-width: 80px; color: #f48fb1; text-shadow: 0 0 8px rgba(244,143,177,0.5); font-size: 20px;}
 
-        /* KHUNG THÔNG SỐ TINH GỌN VÀ Ô NHẬN XÉT CHI TIẾT CHUỖI DÀI NHẤT */
+        /* KHUNG THÔNG SỐ TINH GỌN VÀ Ô NHẬN XÉT CHI TIẾT */
         .bio-metrics-box { width: 92%; max-width: 340px; background: rgba(5, 14, 28, 0.95); backdrop-filter: blur(22px); border: 2px solid rgba(0, 229, 255, 0.6); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,229,255,0.1); }
         
         .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(244, 143, 177, 0.3); padding-bottom: 8px; margin-bottom: 0; width: 100%; }
@@ -256,14 +256,13 @@
                     </div>
                 </div>
 
-                <!-- 2 THÔNG SỐ PHẦN CỨNG VÀ Ô HIỂN THỊ CHI TIẾT CHUỖI DÀI NHẤT -->
                 <div class="bio-metrics-box">
                     <div class="metric-card-row">
                         <span class="metric-label">Tốc độ</span>
                         <span class="metric-val" id="sum-rank-ssd">SSD 512GB</span>
                     </div>
                     <div class="metric-card-row">
-                        <span class="metric-label">Bộ nhớ</span>
+                        <span class="metric-label">Bộ nhớ (RAM)</span>
                         <span class="metric-val" id="sum-rank-ram">RAM 4GB</span>
                     </div>
                     
@@ -304,20 +303,22 @@
         const BASE_SYMBOLS = ['lightning', 'circle', 'triangle', 'square'];
         const ADVANCED_SYMBOLS = ['lightning', 'circle', 'triangle', 'square', 'star', 'diamond'];
 
-        function getRAMByScore(score) {
-            if (score < 300) return "RAM 512MB";
-            if (score < 600) return "RAM 1GB";
-            if (score < 1000) return "RAM 2GB";
-            if (score < 1500) return "RAM 4GB";
-            return "RAM 8GB+";
+        // ĐÁNH GIÁ RAM DỰA TRỰC TIẾP TRÊN SỐ LƯỢNG HÌNH DÀI NHẤT (MAX SEQUENCE LENGTH)
+        function getRAMBySequence(maxSeq) {
+            if (maxSeq >= 12) return "RAM 32GB";
+            if (maxSeq >= 10) return "RAM 16GB";
+            if (maxSeq >= 8)  return "RAM 8GB";
+            if (maxSeq >= 6)  return "RAM 4GB";
+            if (maxSeq >= 5)  return "RAM 2GB";
+            if (maxSeq >= 4)  return "RAM 1GB";
+            return "RAM 512MB";
         }
 
-        // ĐÁNH GIÁ TỐC ĐỘ SSD DỰA TRÊN TỔNG THỜI GIAN HOÀN THÀNH CHUỖI DÀI NHẤT
+        // ĐÁNH GIÁ SSD DỰA TRÊN SỐ LƯỢNG HÌNH VÀ TỔNG THỜI GIAN HOÀN THÀNH
         function getSSDByMaxSequenceTime(maxLen, totalMs) {
-            // Nếu chuỗi rất dài (ví dụ >= 7 hình) mà hoàn thành nhanh -> SSD khủng
-            if (maxLen >= 8 && totalMs < 3500) return "SSD 2TB";
-            if (maxLen >= 6 && totalMs < 4500) return "SSD 1TB";
-            if (maxLen >= 5 && totalMs < 6000) return "SSD 512GB";
+            if (maxLen >= 9 && totalMs < 2500) return "SSD 2TB";
+            if (maxLen >= 7 && totalMs < 3500) return "SSD 1TB";
+            if (maxLen >= 5 && totalMs < 5000) return "SSD 512GB";
             if (maxLen >= 4) return "SSD 256GB";
             return "SSD 120GB";
         }
@@ -374,8 +375,8 @@
         let gameLogicTimer;
 
         let cueHideTimestamp = 0;
-        let bestSequenceLen = 0;   // Lưu độ dài chuỗi đúng dài nhất
-        let bestSequenceTime = 0;  // Lưu tổng thời gian (ms) của chuỗi dài nhất đó
+        let bestSequenceLen = 0;   
+        let bestSequenceTime = 0;  
         let nextHpMilestone = 1000;
 
         window.onload = () => { 
@@ -621,7 +622,6 @@
                 if(userSeq.length === patternSeq.length) { 
                     canClick = false; 
                     
-                    // CHỈ LẤY CHUỖI DÀI NHẤT ĐỂ XẾP LOẠI
                     let attemptTime = Date.now() - window.currentAttemptStart;
                     if (patternSeq.length >= bestSequenceLen) {
                         bestSequenceLen = patternSeq.length;
@@ -659,14 +659,14 @@
                 
                 document.getElementById('sum-score-total').innerText = Math.floor(aScore);
                 
-                let finalScore = Math.floor(aScore);
-                let ramText = getRAMByScore(finalScore);
+                // XẾP HẠNG RAM DỰA TRÊN SỐ LƯỢNG HÌNH DÀI NHẤT (MAX SEQUENCE)
+                let ramText = (bestSequenceLen === 0) ? "RAM 512MB" : getRAMBySequence(bestSequenceLen);
                 document.getElementById('sum-rank-ram').innerText = ramText;
 
-                let ssdText = (finalScore < 200 || bestSequenceLen === 0) ? "SSD 120GB" : getSSDByMaxSequenceTime(bestSequenceLen, bestSequenceTime);
+                // XẾP HẠNG SSD DỰA TRÊN SỐ LƯỢNG HÌNH VÀ THỜI GIAN HOÀN THÀNH
+                let ssdText = (bestSequenceLen === 0) ? "SSD 120GB" : getSSDByMaxSequenceTime(bestSequenceLen, bestSequenceTime);
                 document.getElementById('sum-rank-ssd').innerText = ssdText;
 
-                // HIỂN THỊ THÔNG TIN CHI TIẾT CHUỖI DÀI NHẤT VÀO Ô NHẬN XÉT
                 let debugBox = document.getElementById('debug-stats-box');
                 debugBox.innerHTML = `Chuỗi dài nhất: <b>${bestSequenceLen} hình</b><br>Thời gian hoàn thành: <b>${bestSequenceTime} ms</b>`;
 
