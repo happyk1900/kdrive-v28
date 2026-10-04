@@ -76,7 +76,6 @@
             100% { opacity: 0.7; transform: scale(1); filter: brightness(1); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         }
 
-        /* NHẤP NHÁY CHỈ RIÊNG CHO CHỮ BÁO ĐỘNG */
         @keyframes redAlertBlink {
             0% { opacity: 0.3; }
             50% { opacity: 1; text-shadow: 0 0 12px #ff3366, 0 0 20px #ff0000; }
@@ -167,10 +166,13 @@
         .metric-label { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; flex: 1; text-align: left;}
         .metric-val { color: #ffffff; font-family: 'Chakra Petch', sans-serif; font-size: 18px; font-weight: 900; text-align: right; text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px #00e5ff; }
 
-        /* MÀU ĐỎ TĨNH (KHÔNG NHẬP NHÙA NHẤP NHÁY NỮA ĐỂ CHỐNG GIẬT LAG) */
         .metric-val.red-alert-val { color: #ff3366 !important; text-shadow: 0 0 10px rgba(255,51,102,0.6); animation: redAlertBlink 1.2s infinite ease-in-out; }
 
-        .debug-feedback { font-family: 'Share Tech Mono', monospace; font-size: 12.5px; color: #ff3366; text-align: left; background: rgba(255, 51, 102, 0.12); border: 1.5px solid rgba(255, 51, 102, 0.7); padding: 10px 12px; border-radius: 8px; line-height: 1.5; text-shadow: 0 0 6px rgba(255,51,102,0.5); }
+        /* MẶC ĐỊNH HỘP NHẬN XÉT BÌNH THƯỜNG (XANH) */
+        .debug-feedback { font-family: 'Share Tech Mono', monospace; font-size: 12.5px; color: #ffffff; text-align: left; background: rgba(0, 229, 255, 0.08); border: 1.5px solid rgba(0, 229, 255, 0.4); padding: 10px 12px; border-radius: 8px; line-height: 1.5; text-shadow: 0 0 6px rgba(255,255,255,0.4); }
+
+        /* KHI BÁO ĐỘNG ĐỎ MỚI ĐỔI THÀNH MÀU ĐỎ */
+        .debug-feedback.red-alert-box { color: #ff3366 !important; background: rgba(255, 51, 102, 0.12) !important; border: 1.5px solid rgba(255, 51, 102, 0.7) !important; text-shadow: 0 0 6px rgba(255,51,102,0.5) !important; }
 
         .result-btn-row { display: flex; gap: 10px; width: 92%; max-width: 340px; margin-top: 5px; }
         .result-action-btn { flex: 1; padding: 13px; font-family: 'Chakra Petch', sans-serif; font-size: 15px; font-weight: 900; border-radius: 12px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; backdrop-filter: blur(8px); letter-spacing: 1px; }
@@ -302,7 +304,6 @@
                         <span class="metric-val" id="sum-rank-ram">RAM 4GB</span>
                     </div>
                     
-                    <!-- Ô NHẬN XÉT SẠCH SẼ, BỎ CHỮ TRÙNG LẶP -->
                     <div class="debug-feedback" id="debug-stats-box">
                         Chuỗi dài nhất: Đang tính toán...<br>
                         Thời gian hoàn thành: 0 ms
@@ -310,7 +311,6 @@
                 </div>
 
                 <div class="result-btn-row">
-                    <!-- ĐỔI CHỮ TẬP LẠI THÀNH ĐO LẠI -->
                     <button class="result-action-btn" id="btn-replay" onclick="openArena()">ĐO LẠI</button>
                     <button class="result-action-btn" id="btn-next" onclick="goToHoaLuan()">CHUYỂN BÀI</button>
                 </div>
@@ -388,11 +388,11 @@
                 const osc = fxCtx.createOscillator();
                 const gain = fxCtx.createGain();
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(950, fxCtx.currentTime);
-                gain.gain.setValueAtTime(0.4, fxCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.15);
+                osc.frequency.setValueAtTime(1050, fxCtx.currentTime);
+                gain.gain.setValueAtTime(0.35, fxCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.12);
                 osc.start();
-                osc.stop(fxCtx.currentTime + 0.15);
+                osc.stop(fxCtx.currentTime + 0.12);
             } catch(e) {}
         }
 
@@ -400,7 +400,7 @@
             stopAlarmLoop();
             alarmInterval = setInterval(() => {
                 playAlarmBeep();
-            }, 300);
+            }, 250);
         }
 
         function stopAlarmLoop() {
@@ -734,6 +734,7 @@
                 let debugBox = document.getElementById('debug-stats-box');
                 let redBorder = document.getElementById('screen-red-border');
 
+                // PHÂN ĐỊNH RẠCH RÒI: DƯỚI 1000 DATA LÀ BÁO ĐỘNG ĐỎ, TRÊN 1000 DATA LÀ BÌNH THƯỜNG
                 if (finalScore < 1000) {
                     ssdEl.innerText = "⚠️ BÁO ĐỘNG";
                     ssdEl.className = "metric-val red-alert-val";
@@ -741,7 +742,8 @@
                     ramEl.innerText = "CHƯA ĐỦ DATA";
                     ramEl.className = "metric-val red-alert-val";
 
-                    // BỎ CHỮ "BÁO ĐỘNG ĐỎ:" TRONG HỘP NHẬN XÉT ĐỂ TRÁNH TRÙNG LẶP
+                    // HỘP NHẬN XÉT ĐỔI THÀNH MÀU ĐỎ KHI BÁO ĐỘNG
+                    debugBox.className = "debug-feedback red-alert-box";
                     debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data để chấm điểm phần cứng! Yêu cầu đo lại ngay lập tức!`;
 
                     redBorder.classList.add('active');
@@ -752,6 +754,9 @@
 
                     ssdEl.className = "metric-val";
                     ramEl.className = "metric-val";
+
+                    // TRẢ HỘP NHẬN XÉT VỀ MÀU XANH BÌNH THƯỜNG
+                    debugBox.className = "debug-feedback";
 
                     let ramText = (bestSequenceLen === 0) ? "RAM 512MB" : getRAMBySequence(bestSequenceLen);
                     ramEl.innerText = ramText;
