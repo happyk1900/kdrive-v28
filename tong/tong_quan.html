@@ -128,7 +128,7 @@
         .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
         .stat-line span:last-child { text-align: right; min-width: 80px; color: #f48fb1; text-shadow: 0 0 8px rgba(244,143,177,0.5); font-size: 20px;}
 
-        /* KHUNG THÔNG SỐ PHẦN CỨNG VÀ Ô NHẬN XÉT CHI TIẾT SỐ LIỆU */
+        /* KHUNG THÔNG SỐ TINH GỌN VÀ Ô NHẬN XÉT CHI TIẾT CHUỖI DÀI NHẤT */
         .bio-metrics-box { width: 92%; max-width: 340px; background: rgba(5, 14, 28, 0.95); backdrop-filter: blur(22px); border: 2px solid rgba(0, 229, 255, 0.6); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,229,255,0.1); }
         
         .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(244, 143, 177, 0.3); padding-bottom: 8px; margin-bottom: 0; width: 100%; }
@@ -137,7 +137,6 @@
         .metric-label { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 13.5px; font-weight: bold; flex: 1; text-align: left;}
         .metric-val { color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 14.5px; font-weight: bold; text-align: right; text-shadow: 0 0 8px rgba(244,143,177,0.5); }
 
-        /* Ô NHẬN XÉT SỐ LIỆU THỰC TẾ (MS VÀ TỔNG HÌNH ĐÃ GIẢI) */
         .debug-feedback { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: #ffffff; text-align: left; background: rgba(0, 0, 0, 0.6); border: 1.5px solid rgba(0, 229, 255, 0.4); padding: 10px 12px; border-radius: 8px; line-height: 1.5; text-shadow: 0 0 6px rgba(255,255,255,0.4); }
 
         .result-btn-row { display: flex; gap: 10px; width: 92%; max-width: 340px; margin-top: 5px; }
@@ -257,7 +256,7 @@
                     </div>
                 </div>
 
-                <!-- 2 THÔNG SỐ PHẦN CỨNG GỌN GÀNG KÈM Ô NHẬN XÉT SỐ LIỆU THỰC TẾ -->
+                <!-- 2 THÔNG SỐ PHẦN CỨNG VÀ Ô HIỂN THỊ CHI TIẾT CHUỖI DÀI NHẤT -->
                 <div class="bio-metrics-box">
                     <div class="metric-card-row">
                         <span class="metric-label">Tốc độ</span>
@@ -268,10 +267,9 @@
                         <span class="metric-val" id="sum-rank-ram">RAM 4GB</span>
                     </div>
                     
-                    <!-- Ô NHẬN XÉT SỐ LIỆU CHI TIẾT ĐỂ KIỂM TRA ĐỘ CHÍNH XÁC -->
                     <div class="debug-feedback" id="debug-stats-box">
-                        Tốc độ trích xuất: Đang tính toán...<br>
-                        Chuỗi đúng: 0 / Tổng số
+                        Chuỗi dài nhất: Đang tính toán...<br>
+                        Thời gian hoàn thành: 0 ms
                     </div>
                 </div>
 
@@ -314,13 +312,14 @@
             return "RAM 8GB+";
         }
 
-        // HỆ THỐNG MỐC SSD ĐÃ ĐƯỢC CHUẨN HÓA LẠI THEO ĐÚNG TIÊU CHUẨN THỰC TẾ
-        function getSSDByExtraction(avgMs) {
-            if (avgMs >= 1000) return "SSD 120GB";
-            if (avgMs >= 600) return "SSD 256GB";
-            if (avgMs >= 450) return "SSD 512GB";
-            if (avgMs >= 350) return "SSD 1TB";
-            return "SSD 2TB";
+        // ĐÁNH GIÁ TỐC ĐỘ SSD DỰA TRÊN TỔNG THỜI GIAN HOÀN THÀNH CHUỖI DÀI NHẤT
+        function getSSDByMaxSequenceTime(maxLen, totalMs) {
+            // Nếu chuỗi rất dài (ví dụ >= 7 hình) mà hoàn thành nhanh -> SSD khủng
+            if (maxLen >= 8 && totalMs < 3500) return "SSD 2TB";
+            if (maxLen >= 6 && totalMs < 4500) return "SSD 1TB";
+            if (maxLen >= 5 && totalMs < 6000) return "SSD 512GB";
+            if (maxLen >= 4) return "SSD 256GB";
+            return "SSD 120GB";
         }
 
         let fxCtx = null;
@@ -366,7 +365,6 @@
         let isPausedForStart = true;
         
         let hitsCount = 0; 
-        let totalAttemptsCount = 0; // Biến đếm tổng số lần thử để thống kê số hình đã giải
         let currentLevel = 1; 
         let highestSequenceReached = 0; 
         let winsInCurrentLevel = 0; 
@@ -376,7 +374,8 @@
         let gameLogicTimer;
 
         let cueHideTimestamp = 0;
-        let extractionTimes = []; 
+        let bestSequenceLen = 0;   // Lưu độ dài chuỗi đúng dài nhất
+        let bestSequenceTime = 0;  // Lưu tổng thời gian (ms) của chuỗi dài nhất đó
         let nextHpMilestone = 1000;
 
         window.onload = () => { 
@@ -422,8 +421,8 @@
 
         function openArena() {
             aScore = 0; pendingScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
-            currentLevel = 1; highestSequenceReached = 0; winsInCurrentLevel = 0; hitsCount = 0; totalAttemptsCount = 0;
-            extractionTimes = []; nextHpMilestone = 1000;
+            currentLevel = 1; highestSequenceReached = 0; winsInCurrentLevel = 0; hitsCount = 0;
+            bestSequenceLen = 0; bestSequenceTime = 0; nextHpMilestone = 1000;
 
             let vid = document.getElementById('sanctum-video');
             vid.classList.remove('playing-mode');
@@ -485,7 +484,7 @@
 
         function startArena() { 
             isPlaying = true;
-            hitsCount = 0; totalAttemptsCount = 0;
+            hitsCount = 0; 
             runGame(); 
         }
 
@@ -550,7 +549,6 @@
 
         function checkLevelUp() { 
             winsInCurrentLevel++;
-            totalAttemptsCount++; // Ghi nhận hoàn thành 1 lượt chuỗi
             let requiredWins = 1; 
 
             if (winsInCurrentLevel >= requiredWins) { 
@@ -622,9 +620,14 @@
                 processCorrectTap(patternSeq.length); 
                 if(userSeq.length === patternSeq.length) { 
                     canClick = false; 
-                    let totalMs = Date.now() - window.currentAttemptStart;
-                    let avgPerChar = Math.round(totalMs / patternSeq.length);
-                    if (avgPerChar > 0 && avgPerChar < 10000) { extractionTimes.push(avgPerChar); }
+                    
+                    // CHỈ LẤY CHUỖI DÀI NHẤT ĐỂ XẾP LOẠI
+                    let attemptTime = Date.now() - window.currentAttemptStart;
+                    if (patternSeq.length >= bestSequenceLen) {
+                        bestSequenceLen = patternSeq.length;
+                        bestSequenceTime = attemptTime;
+                    }
+
                     checkLevelUp(); 
                 }
             } else { playSound('wrong'); failSequence(); }
@@ -638,10 +641,8 @@
             vid.classList.remove('playing-mode');
             setTimeout(() => vid.classList.add('loaded'), 400);
 
-            let avgExtractionMs = extractionTimes.length > 0 ? Math.round(extractionTimes.reduce((a,b)=>a+b, 0) / extractionTimes.length) : 0;
-
             if (aScore < 200 || hitsCount < 3) {
-                aScore = 0; avgExtractionMs = 2500; highestSequenceReached = 0;
+                aScore = 0; bestSequenceLen = 0; bestSequenceTime = 0;
             }
 
             localStorage.setItem('thuy_luan_score', Math.round(aScore));
@@ -662,13 +663,12 @@
                 let ramText = getRAMByScore(finalScore);
                 document.getElementById('sum-rank-ram').innerText = ramText;
 
-                let ssdText = (finalScore < 200 || avgExtractionMs <= 0 || avgExtractionMs >= 2500) ? "SSD 120GB" : getSSDByExtraction(avgExtractionMs);
+                let ssdText = (finalScore < 200 || bestSequenceLen === 0) ? "SSD 120GB" : getSSDByMaxSequenceTime(bestSequenceLen, bestSequenceTime);
                 document.getElementById('sum-rank-ssd').innerText = ssdText;
 
-                // HIỂN THỊ SỐ LIỆU CHI TIẾT VÀO Ô NHẬN XÉT ĐỂ KIỂM TRA
-                let totalSolved = totalAttemptsCount; 
+                // HIỂN THỊ THÔNG TIN CHI TIẾT CHUỖI DÀI NHẤT VÀO Ô NHẬN XÉT
                 let debugBox = document.getElementById('debug-stats-box');
-                debugBox.innerHTML = `Tốc độ trung bình: <b>${avgExtractionMs} ms/ký tự</b><br>Đã giải mã thành công: <b>${totalSolved} chuỗi</b>`;
+                debugBox.innerHTML = `Chuỗi dài nhất: <b>${bestSequenceLen} hình</b><br>Thời gian hoàn thành: <b>${bestSequenceTime} ms</b>`;
 
                 document.getElementById('final-summary-overlay').classList.add('active');
                 playSound('coin');
