@@ -223,11 +223,6 @@
     <!-- VIỀN ĐỎ CHỚP NHÁY BÁO ĐỘNG TOÀN MÀN HÌNH -->
     <div id="screen-red-border"></div>
 
-    <!-- THẺ AUDIO LIÊN KẾT TRỰC TIẾP VỚI FILE MP3 BÁO ĐỘNG (ĐẶT CHUNG THƯ MỤC) -->
-    <audio id="alarm-audio" loop preload="auto">
-        <source src="baodong.mp3" type="audio/mpeg">
-    </audio>
-
     <div id="dust-container"></div>
 
     <div id="task-arena">
@@ -367,6 +362,8 @@
         }
 
         let fxCtx = null;
+        let alarmBuffer = null;
+        let alarmSourceNode = null;
 
         function initAudio() { 
             try {
@@ -378,6 +375,67 @@
         }
         ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => { window.addEventListener(evt, initAudio, { passive: true }); });
 
+        // NẠP VÀ GIẢI MÃ FILE MP3 BẰNG WEB AUDIO API (VƯỢT MỌI RÀO CẢN ANDROID WEBVIEW)
+        async function loadAlarmAudio() {
+            try {
+                if (!fxCtx) { fxCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+                let response = await fetch('baodong.mp3');
+                let arrayBuffer = await response.arrayBuffer();
+                alarmBuffer = await fxCtx.decodeAudioData(arrayBuffer);
+            } catch (e) {
+                console.log("Không tải được file mp3 báo động, dùng âm thanh dự phòng.");
+            }
+        }
+
+        function startAlarmLoop() {
+            stopAlarmLoop();
+            try {
+                if (!fxCtx) { fxCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+                if (fxCtx.state === 'suspended') { fxCtx.resume(); }
+
+                if (alarmBuffer) {
+                    // Phát lặp lại file MP3 đã giải mã
+                    alarmSourceNode = fxCtx.createBufferSource();
+                    alarmSourceNode.buffer = alarmBuffer;
+                    alarmSourceNode.loop = true;
+                    alarmSourceNode.connect(fxCtx.destination);
+                    alarmSourceNode.start(0);
+                } else {
+                    // Dự phòng phát tiếng beep gắt nếu buffer chưa sẵn sàng
+                    playFallbackAlarmBeep();
+                    window.alarmInterval = setInterval(playFallbackAlarmBeep, 300);
+                }
+            } catch(e) {}
+        }
+
+        function stopAlarmLoop() {
+            try {
+                if (alarmSourceNode) {
+                    alarmSourceNode.stop();
+                    alarmSourceNode.disconnect();
+                    alarmSourceNode = null;
+                }
+                if (window.alarmInterval) {
+                    clearInterval(window.alarmInterval);
+                    window.alarmInterval = null;
+                }
+            } catch(e) {}
+        }
+
+        function playFallbackAlarmBeep() {
+            try {
+                if (!fxCtx) return;
+                const osc = fxCtx.createOscillator();
+                const gain = fxCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(1400, fxCtx.currentTime);
+                gain.gain.setValueAtTime(0.8, fxCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.15);
+                osc.start();
+                osc.stop(fxCtx.currentTime + 0.15);
+            } catch(e) {}
+        }
+
         function toggleVideoMute() {
             let vid = document.getElementById('sanctum-video');
             let muteBtn = document.getElementById('btn-mute');
@@ -386,24 +444,6 @@
             vid.dataset.userMuted = vid.muted ? 'true' : 'false';
             muteBtn.innerHTML = vid.muted ? '🔇' : '🔊';
             playSound('coin');
-        }
-
-        // HÀM GỌI PHÁT FILE MP3 BÁO ĐỘNG
-        function startAlarmLoop() {
-            let audioTag = document.getElementById('alarm-audio');
-            if(audioTag) {
-                audioTag.volume = 1.0;
-                audioTag.currentTime = 0;
-                audioTag.play().catch(err => {});
-            }
-        }
-
-        function stopAlarmLoop() {
-            let audioTag = document.getElementById('alarm-audio');
-            if(audioTag) {
-                audioTag.pause();
-                audioTag.currentTime = 0;
-            }
         }
 
         function playSound(type, pitchMultiplier = 1) {
@@ -444,6 +484,7 @@
         window.onload = () => { 
             openArena(); 
             initSparkleParticles();
+            loadAlarmAudio(); // Tải trước file mp3 vào bộ nhớ đệm
         };
 
         function initSparkleParticles() {
@@ -719,7 +760,7 @@
             document.getElementById('freeze-overlay').classList.add('active');
         }
 
-        // KHI BẤM NÚT XEM KẾT QUẢ: KIỂM TRA ĐIỀU KIỆN VÀ PHÁT FILE BÁO ĐỘNG MP3
+        // KHI BẤM NÚT XEM KẾT QUẢ: KIỂM TRA ĐIỆN ÁP < 1000 DATA VÀ PHÁT BẰNG WEB AUDIO DECODE BUFFER
         function showSummaryResults() {
             initAudio();
 
@@ -733,7 +774,7 @@
             let debugBox = document.getElementById('debug-stats-box');
             let redBorder = document.getElementById('screen-red-border');
 
-            // ĐIỀU KIỆN CHÍNH XÁC < 1000 DATA ĐỂ BẬT ÂM THANH BÁO ĐỘNG
+            // ĐIỀU KIỆN TUYỆT ĐỐI < 1000 DATA MỚI KÍCH HOẠT BÁO ĐỘNG VÀ PHÁT ÂM THANH
             if (finalScore < 1000) {
                 ssdEl.innerText = "⚠️ BÁO ĐỘNG";
                 ssdEl.className = "metric-val red-alert-val";
@@ -745,7 +786,7 @@
                 debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data để chấm điểm phần cứng! Yêu cầu đo lại ngay lập tức!`;
 
                 redBorder.classList.add('active');
-                startAlarmLoop(); // PHÁT FILE MP3 BÁO ĐỘNG
+                startAlarmLoop(); // PHÁT FILE MP3 ĐÃ GIẢI MÃ BẰNG AUDIO CONTEXT
             } else {
                 stopAlarmLoop(); // DỪNG HOÀN TOÀN NẾU ĐỦ ĐIỂM
                 redBorder.classList.remove('active');
