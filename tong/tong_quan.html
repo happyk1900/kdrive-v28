@@ -45,7 +45,7 @@
             100% { transform: translateY(-10vh) translateX(-15px) scale(0.2); opacity: 0; } 
         }
 
-        /* KHU VỨC HIỆU ỨNG ICON BAY LÊN NGHỆ THUẬT */
+        /* HIỆU ỨNG ICON BAY LÊN NGHỆ THUẬT TRONG MODAL */
         #floating-icons-container { position: absolute; inset: 0; pointer-events: none; z-index: 999999; overflow: hidden; }
         .floating-science-icon {
             position: absolute;
@@ -123,7 +123,7 @@
             position: absolute;
             bottom: -15px;
             right: -8px;
-            font-size: 20px;
+            font-size: 18px;
             animation: fingerBounce 1.2s infinite ease-in-out;
             filter: drop-shadow(0 0 8px #00e5ff);
             z-index: 10;
@@ -279,6 +279,7 @@
         <source src="../Photo/video nen thuy luan.mp4" type="video/mp4">
     </video>
 
+    <!-- TRỎ ĐÚNG THƯ MỤC PHOTO CHO PIXEL DREAM CIRCUIT -->
     <audio id="decode-audio" loop preload="auto">
         <source src="../Photo/Pixel Dream Circuit.mp3" type="audio/mpeg">
     </audio>
@@ -379,6 +380,7 @@
                     </div>
                 </div>
 
+                <!-- NÚT GIẢI MÃ TỐI GIẢN (CHỈ CÓ MỘT TỪ "GIẢI MÃ") -->
                 <div style="display: flex; flex-direction: column; align-items: center; margin: 2px 0; width: 92%; max-width: 340px;">
                     <div onclick="toggleThuyLuanModal()" style="display: flex; flex-direction: column; align-items: center; cursor: pointer;">
                         <div class="super-click-btn" style="width: 55px; height: 55px;">
@@ -412,7 +414,6 @@
     <!-- MODAL TRÌNH CHIẾU 3 TRƯỜNG PHÁI KÈM HIỆN ICON KHOA HỌC / THẦN KINH BAY LÊN -->
     <div id="thuy-luan-modal" onclick="nextCinematicSlide()" style="position: fixed; inset: 0; background: rgba(5, 11, 20, 0.96); z-index: 9999999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 25px; backdrop-filter: blur(15px); cursor: pointer;">
         
-        <!-- LAYER CHỨA HIỆU ỨNG ICON BAY LÊN -->
         <div id="floating-icons-container"></div>
 
         <div id="cinematic-text-container" style="width: 100%; max-width: 350px; min-height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 14px; transition: opacity 0.5s ease, transform 0.5s ease; opacity: 0; transform: translateY(12px);">
@@ -502,7 +503,7 @@
             } catch (e) {}
         }
 
-        // ĐỊNH NGHĨA 3 SLIDE TRƯỜNG PHÁI & CÁC ICON KHOA HỌC / THẦN KINH TƯƠNG ƯNG
+        // 3 SLIDE TRƯỜNG PHÁI VÀ ICON TƯƠNG ƯNG
         const cinematicSlides = [
             {
                 title: "GIẢI MÃ – KHOA HỌC THẦN KINH",
@@ -542,17 +543,15 @@
             } catch(e) {}
         }
 
-        // HIỆU ỨNG TẠO VÀ BẮN CÁC ICON KHOA HỌC / THẦN KINH BAY LÊN NGHỆ THUẬT
         function spawnFloatingIcons(iconList) {
             let container = document.getElementById('floating-icons-container');
             if(!container) return;
-            container.innerHTML = ''; // Xóa icon cũ
+            container.innerHTML = '';
 
             iconList.forEach((emoji, index) => {
                 let el = document.createElement('div');
                 el.className = 'floating-science-icon';
                 el.innerHTML = emoji;
-                // Phân bổ vị trí ngẫu nhiên theo chiều ngang
                 let randomX = Math.random() * 260 - 130; 
                 el.style.left = `calc(50% + ${randomX}px)`;
                 el.style.bottom = '35vh';
@@ -590,9 +589,21 @@
 
                     if(sanctumVideo) sanctumVideo.muted = true;
                     if(decodeAudio) {
-                        decodeAudio.volume = 0.8;
+                        // HIỆU ỨNG FADE-IN: KHỞI ĐỘNG ÂM LƯỢNG TỪ 0 VÀ TĂNG DẦN LÊN 35% ĐỂ TRÁNH GIẬT MÌNH
+                        decodeAudio.volume = 0;
                         decodeAudio.currentTime = 0;
                         decodeAudio.play().catch(e => console.log("Audio play blocked by browser:", e));
+
+                        let vol = 0;
+                        let fadeInterval = setInterval(() => {
+                            vol += 0.05;
+                            if (vol >= 0.35) {
+                                decodeAudio.volume = 0.35;
+                                clearInterval(fadeInterval);
+                            } else {
+                                decodeAudio.volume = vol;
+                            }
+                        }, 100);
                     }
                 }
             }
@@ -614,9 +625,7 @@
                 container.style.opacity = '1';
                 container.style.transform = 'translateY(0px)';
 
-                // Kích hoạt hiệu ứng icon bay lên tương ứng với slide hiện tại
                 spawnFloatingIcons(slide.icons);
-
                 playBooDialog(slide.title + ". " + slide.content);
             }, 250);
         }
