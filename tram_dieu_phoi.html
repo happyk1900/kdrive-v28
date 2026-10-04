@@ -19,7 +19,7 @@
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Space Grotesk', sans-serif; color: #fff; }
+        body, html { width: 100%; height: 100%; overflow-x: hidden; background-color: #000; font-family: 'Space Grotesk', sans-serif; color: #fff; }
 
         video::-webkit-media-controls { display: none !important; }
 
@@ -31,23 +31,23 @@
         }
 
         .overlay {
-            position: fixed; inset: 0; background: radial-gradient(circle, rgba(2,6,12,0.4) 0%, rgba(2,6,12,0.85) 100%);
+            position: fixed; inset: 0; background: radial-gradient(circle, rgba(2,6,12,0.4) 0%, rgba(2,6,12,0.88) 100%);
             z-index: 1; pointer-events: none;
         }
 
         #content-wrapper { 
-            position: absolute; inset: 0; z-index: 10; display: flex; justify-content: center; align-items: center; 
-            animation: fadeIn 1s ease-out forwards; 
+            position: absolute; inset: 0; z-index: 10; display: flex; justify-content: center; align-items: center; padding: 20px 0;
+            overflow-y: auto;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* KHUNG TRẠM ĐIỀU PHỐI GỌN GÀNG, SẮC LẸM */
+        /* KHUNG TRẠM ĐIỀU PHỐI CHÍNH */
         .command-station {
-            width: 90%; max-width: 390px;
-            background: rgba(5, 15, 25, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            width: 90%; max-width: 420px;
+            background: rgba(5, 15, 25, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(0, 229, 255, 0.5); border-radius: 14px;
-            padding: 20px 18px; display: flex; flex-direction: column; gap: 12px;
+            padding: 20px 16px; display: flex; flex-direction: column; gap: 12px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 15px rgba(0, 229, 255, 0.15);
+            margin: auto;
         }
 
         .station-title {
@@ -56,22 +56,22 @@
             text-shadow: 0 0 15px rgba(0,229,255,0.8);
         }
 
-        .protocol-row {
+        /* GIAO DIỆN TỪNG PROTOCOL CÓ CÔNG TẮC BÊN PHẢI */
+        .protocol-box {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(0, 229, 255, 0.35);
             border-radius: 8px;
             padding: 12px 14px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-decoration: none;
-            transition: all 0.2s ease;
+            flex-direction: column;
+            transition: all 0.3s ease;
         }
 
-        .protocol-row:hover {
-            background: rgba(0, 229, 255, 0.1);
-            border-color: var(--cyan);
-            box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+        .protocol-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
         }
 
         .protocol-name {
@@ -83,28 +83,55 @@
             text-transform: uppercase;
         }
 
-        .protocol-row.p4 .protocol-name {
+        .protocol-box.p4 .protocol-name {
             color: var(--neon-pink);
         }
 
-        .action-btn {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 10px;
-            font-weight: bold;
-            color: var(--mint);
-            background: rgba(0, 255, 157, 0.1);
-            border: 1px solid var(--mint);
-            padding: 5px 10px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            white-space: nowrap;
+        /* CÔNG TẮC BẬT/TẮT BÊN PHẢI */
+        .cyber-toggle { 
+            position: relative; width: 44px; height: 22px; background: rgba(255,255,255,0.15); border-radius: 11px; cursor: pointer; transition: background 0.3s; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0; 
+        }
+        .cyber-toggle::after { 
+            content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: transform 0.3s, background 0.3s; box-shadow: 0 0 6px rgba(0,0,0,0.5); 
+        }
+        .cyber-toggle.active { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,229,255,0.6); }
+        .cyber-toggle.active::after { transform: translateX(22px); background: #000; }
+
+        /* PHẦN NỘI DUNG MÔ TẢ TRƯỢT XUỐNG (DROPDOWN PANEL) */
+        .dropdown-panel { 
+            max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; opacity: 0; 
+        }
+        .dropdown-panel.open { max-height: 600px; opacity: 1; margin-top: 12px; border-top: 1px dashed rgba(0,229,255,0.3); padding-top: 10px; }
+        
+        .dropdown-desc { 
+            font-family: 'Space Grotesk', sans-serif; font-size: 12px; color: #b0c4de; line-height: 1.6; text-align: justify; margin-bottom: 12px; 
         }
 
-        .protocol-row.p4 .action-btn {
-            color: var(--gold);
-            border-color: var(--gold);
-            background: rgba(255, 215, 0, 0.1);
+        /* CÁC NÚT KÍCH HOẠT BÊN TRONG MÔ TẢ */
+        .action-group {
+            display: flex; flex-direction: column; gap: 6px;
+        }
+
+        .action-btn-inner {
+            background: rgba(0, 229, 255, 0.08);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            padding: 8px 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            transition: 0.2s;
+        }
+
+        .action-btn-inner:hover {
+            background: rgba(0, 229, 255, 0.25);
+            box-shadow: 0 0 10px rgba(0,229,255,0.5);
         }
 
         .close-station-btn {
@@ -135,7 +162,7 @@
 </head>
 <body>
 
-    <!-- VIDEO NỀN ĐỒNG BỘ CHUẨN XÁC 100% NHƯ TRANG LỰC CHIẾN -->
+    <!-- VIDEO NỀN ĐỒNG BỘ CHUẨN XÁC -->
     <video id="bg-video" autoplay loop muted playsinline webkit-playsinline>
         <source src="Photo/video nen trang chu.mp4" type="video/mp4">
     </video>
@@ -146,28 +173,71 @@
             <div class="station-title">TRẠM ĐIỀU PHỐI</div>
 
             <!-- PROTOCOL 01 -->
-            <a href="test_cau_hinh_nao.html" class="protocol-row" onclick="playSound('coin')">
-                <span class="protocol-name">1. KIỂM TRA CẤU HÌNH NÃO</span>
-                <span class="action-btn">TRUY CẬP</span>
-            </a>
+            <div class="protocol-box">
+                <div class="protocol-header" onclick="toggleDropdown('panel-1', 'toggle-1')">
+                    <span class="protocol-name">1. KIỂM TRA CẤU HÌNH NÃO</span>
+                    <div class="cyber-toggle" id="toggle-1"></div>
+                </div>
+                <div class="dropdown-panel" id="panel-1">
+                    <div class="dropdown-desc">
+                        Số hóa năng lực tư duy thành thông số máy tính để chỉ rõ điểm nghẽn hiệu suất.
+                    </div>
+                    <div class="action-group">
+                        <a href="test_ram.html" class="action-btn-inner" onclick="playSound('coin')">CHẠY TEST RAM & SSD</a>
+                        <a href="test_cpu.html" class="action-btn-inner" onclick="playSound('coin')">CHẠY TEST CPU</a>
+                        <a href="test_gpu.html" class="action-btn-inner" onclick="playSound('coin')">CHẠY TEST GPU & MAINBOARD</a>
+                    </div>
+                </div>
+            </div>
 
             <!-- PROTOCOL 02 -->
-            <a href="ket_noi_sinh_hoc.html" class="protocol-row" onclick="playSound('coin')">
-                <span class="protocol-name">2. NÂNG CẤP TOÀN DIỆN</span>
-                <span class="action-btn">KẾT NỐI</span>
-            </a>
+            <div class="protocol-box">
+                <div class="protocol-header" onclick="toggleDropdown('panel-2', 'toggle-2')">
+                    <span class="protocol-name">2. NÂNG CẤP TOÀN DIỆN</span>
+                    <div class="cyber-toggle" id="toggle-2"></div>
+                </div>
+                <div class="dropdown-panel" id="panel-2">
+                    <div class="dropdown-desc">
+                        Cân bằng hoàn hảo, đạt cảnh giới thân tâm đồng nhất. Giám sát qua đồng hồ thông minh (24/7) và cân thông minh (sáng).<br>
+                        <em style="color: #ff5555; font-size: 10.5px;">* 2-3 ngày đầu có thể chậm do AI tương thích sinh học nhịp độc bản.</em>
+                    </div>
+                    <div class="action-group">
+                        <a href="ket_noi_sinh_hoc.html" class="action-btn-inner" style="border-color: var(--gold); color: var(--gold);" onclick="playSound('coin')">[ KẾT NỐI HỆ THỐNG ]</a>
+                    </div>
+                </div>
+            </div>
 
             <!-- PROTOCOL 03 -->
-            <a href="hieu_suat_gio_g.html" class="protocol-row" onclick="playSound('coin')">
-                <span class="protocol-name">3. HIỆU SUẤT GIỜ G</span>
-                <span class="action-btn">LÊN LỊCH</span>
-            </a>
+            <div class="protocol-box">
+                <div class="protocol-header" onclick="toggleDropdown('panel-3', 'toggle-3')">
+                    <span class="protocol-name">3. HIỆU SUẤT GIỜ G</span>
+                    <div class="cyber-toggle" id="toggle-3"></div>
+                </div>
+                <div class="dropdown-panel" id="panel-3">
+                    <div class="dropdown-desc">
+                        Xóa sạch rủi ro phong độ trước các mốc sự kiện cốt tử (kỳ thi, thi đấu, sự kiện lớn). Ép buộc ngủ đủ giấc, tập đúng giờ.
+                    </div>
+                    <div class="action-group">
+                        <a href="hieu_suat_gio_g.html" class="action-btn-inner" style="border-color: var(--mint); color: var(--mint);" onclick="playSound('coin')">[ LÊN LỊCH CHIẾN ĐẤU ]</a>
+                    </div>
+                </div>
+            </div>
 
             <!-- PROTOCOL 04 -->
-            <a href="trang_thai_toi_thuong.html" class="protocol-row p4" onclick="playSound('coin')">
-                <span class="protocol-name">4. TRẠNG THÁI TỐI THƯỢNG</span>
-                <span class="action-btn">KIỂM ĐỊNH</span>
-            </a>
+            <div class="protocol-box p4">
+                <div class="protocol-header" onclick="toggleDropdown('panel-4', 'toggle-4')">
+                    <span class="protocol-name">4. TRẠNG THÁI TỐI THƯỢNG</span>
+                    <div class="cyber-toggle" id="toggle-4"></div>
+                </div>
+                <div class="dropdown-panel" id="panel-4">
+                    <div class="dropdown-desc">
+                        Ép xung toàn bộ giới hạn sinh học khi thể lực và trí lực đạt sự cân bằng tuyệt đối. Khóa tự động mở khi 12 đèn tín hiệu chuyển sắc vàng.
+                    </div>
+                    <div class="action-group">
+                        <a href="trang_thai_toi_thuong.html" class="action-btn-inner" style="border-color: var(--gold); color: var(--gold);" onclick="playSound('coin')">[ KIỂM ĐỊNH TIẾN TRÌNH ]</a>
+                    </div>
+                </div>
+            </div>
 
             <!-- NÚT ĐÓNG TRẠM -->
             <a href="index.html" class="close-station-btn" onclick="playSound('warp-out')">ĐÓNG TRẠM ĐIỀU PHỐI</a>
@@ -175,6 +245,22 @@
     </div>
 
     <script>
+        function toggleDropdown(panelId, toggleId) {
+            playSound('coin');
+            const panel = document.getElementById(panelId);
+            const toggle = document.getElementById(toggleId);
+            const isOpen = panel.classList.contains('open');
+
+            // Đóng tất cả các panel khác trước
+            document.querySelectorAll('.dropdown-panel').forEach(p => p.classList.remove('open'));
+            document.querySelectorAll('.cyber-toggle').forEach(t => t.classList.remove('active'));
+
+            if (!isOpen) {
+                panel.classList.add('open');
+                toggle.classList.add('active');
+            }
+        }
+
         function playSound(type) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
