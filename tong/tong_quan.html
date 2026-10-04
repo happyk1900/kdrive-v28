@@ -384,7 +384,7 @@
             playSound('coin');
         }
 
-        // HÀM PHÁT ÂM THANH BÁO ĐỘNG GẮN LIỀN TRỰC TIẾP ĐIỀU KIỆN
+        // HÀM PHÁT ÂM THANH BÁO ĐỘNG
         function playAlarmBeep() {
             try {
                 if (!fxCtx) {
@@ -396,8 +396,8 @@
                 const osc = fxCtx.createOscillator();
                 const gain = fxCtx.createGain();
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(1200, fxCtx.currentTime);
-                gain.gain.setValueAtTime(0.5, fxCtx.currentTime);
+                osc.frequency.setValueAtTime(1400, fxCtx.currentTime);
+                gain.gain.setValueAtTime(0.7, fxCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.15);
                 osc.start();
                 osc.stop(fxCtx.currentTime + 0.15);
@@ -715,14 +715,11 @@
         function finishGame() {
             isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
             aScore += pendingScore; pendingScore = 0; 
+            aScore += (stabilityHP * 15); // Cộng thêm điểm thưởng sinh tồn
 
             let vid = document.getElementById('sanctum-video');
             vid.classList.remove('playing-mode');
             setTimeout(() => vid.classList.add('loaded'), 400);
-
-            if (aScore < 200 || hitsCount < 3) {
-                aScore = 0; bestSequenceLen = 0; bestSequenceTime = 0;
-            }
 
             localStorage.setItem('thuy_luan_score', Math.round(aScore));
 
@@ -735,7 +732,7 @@
             document.getElementById('freeze-overlay').classList.add('active');
         }
 
-        // GẮN TRỰC TIẾP ÂM THANH BÁO ĐỘNG VÀO ĐIỀU KIỆN HIỂN THỊ ICON BÁO ĐỘNG
+        // KHI BẤM NÚT XEM KẾT QUẢ: ĐIỀU KIỆN CHÍNH XÁC < 1000 DATA MỚI GỌI HÀM BÁO ĐỘNG
         function showSummaryResults() {
             try {
                 if (!fxCtx) {
@@ -756,7 +753,7 @@
             let debugBox = document.getElementById('debug-stats-box');
             let redBorder = document.getElementById('screen-red-border');
 
-            // ĐIỀU KIỆN BÁO ĐỘNG ĐỎ KHI DƯỚI 1000 DATA
+            // ĐIỀU KIỆN TUYỆT ĐỐI: CHỈ KHI DƯỚI 1000 DATA THÌ CỜ BÁO ĐỘNG VÀ ÂM THANH MỚI ĐƯỢC BẬT
             if (finalScore < 1000) {
                 ssdEl.innerText = "⚠️ BÁO ĐỘNG";
                 ssdEl.className = "metric-val red-alert-val";
@@ -767,11 +764,10 @@
                 debugBox.className = "debug-feedback red-alert-box";
                 debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data để chấm điểm phần cứng! Yêu cầu đo lại ngay lập tức!`;
 
-                // Bật viền đỏ chớp nháy và KÍCH HOẠT LẬP TỨC ÂM THANH BÁO ĐỘNG KHI ICON/BÁO ĐỘNG HIỆN LÊN
                 redBorder.classList.add('active');
-                startAlarmLoop(); 
+                startAlarmLoop(); // KÊU TÍT TÍT TÍT KHI VÀ CHỈ KHI ĐIỂM < 1000
             } else {
-                stopAlarmLoop();
+                stopAlarmLoop(); // KHÔNG BAO GIỜ KÊU NẾU TRÊN 1000 DATA
                 redBorder.classList.remove('active');
 
                 ssdEl.className = "metric-val";
