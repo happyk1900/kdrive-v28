@@ -142,10 +142,13 @@
         .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         .pause-btn.exit { background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; color: #ff3366; margin-bottom: 0; }
 
-        #freeze-overlay { position: fixed; inset: 0; background: transparent; z-index: 200000; display: none; align-items: center; justify-content: center; pointer-events: none; }
+        /* NÚT KẾT THÚC KHI HẾT MÁU HOẶC MUỒN XEM KẾT QUẢ */
+        #freeze-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200000; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
         #freeze-overlay.active { display: flex; }
-        @keyframes textFallSlow { 0% { opacity: 0; transform: translateY(-70px) scale(1.1); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        .freeze-text { font-family: 'Chakra Petch', sans-serif; font-size: 50px; font-weight: 900; color: #ffffff; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 20px #f48fb1, 0 0 40px #ff3366, 2px 2px 0px rgba(0,0,0,0.9); animation: textFallSlow 1.4s forwards; }
+        .freeze-text { font-family: 'Chakra Petch', sans-serif; font-size: 42px; font-weight: 900; color: #ffffff; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 20px #ff3366; }
+        
+        .btn-finish-trigger { background: var(--panel-bg); border: 2px solid #00ff9d; color: #00ff9d; padding: 16px 32px; border-radius: 14px; font-family: 'Chakra Petch', sans-serif; font-size: 20px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; animation: pulse-btn 1.5s infinite; }
+        .btn-finish-trigger:active { background: #00ff9d; color: #050b14; transform: scale(0.95); }
 
         #final-summary-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 10px; padding: 10px; opacity: 0; transition: opacity 1.2s ease; }
         #final-summary-overlay.active { display: flex; opacity: 1; }
@@ -274,7 +277,11 @@
                 </div>
             </div>
 
-            <div id="freeze-overlay"><div class="freeze-text">KẾT THÚC</div></div>
+            <!-- MÀN HÌNH CHỜ KẾT THÚC CÓ NÚT BẤM CHỦ ĐỘNG UNLOCK ÂM THANH -->
+            <div id="freeze-overlay">
+                <div class="freeze-text">KẾT THÚC</div>
+                <button class="btn-finish-trigger" onclick="showSummaryResults()">XEM KẾT QUẢ</button>
+            </div>
             
             <div id="game-container" class="game-container">
                 <div class="sequence-display" id="seq-area"></div>
@@ -400,7 +407,7 @@
 
         function startAlarmLoop() {
             stopAlarmLoop();
-            playAlarmBeep(); // Phát ngay lập tức tiếng đầu tiên
+            playAlarmBeep(); 
             alarmInterval = setInterval(() => {
                 playAlarmBeep();
             }, 250);
@@ -508,6 +515,7 @@
             updateHpDisplay(); document.getElementById('boo-points').innerText = "0";
             document.getElementById('final-summary-overlay').classList.remove('active');
             document.getElementById('pause-menu-overlay').classList.remove('active');
+            document.getElementById('freeze-overlay').classList.remove('active');
             
             document.getElementById('game-top-bar').classList.remove('visible');
             document.getElementById('game-bottom-bar').classList.remove('visible');
@@ -724,50 +732,56 @@
             let playArea = document.getElementById('play-area'); playArea.classList.remove('fullscreen-mode');
             document.getElementById('game-container').classList.remove('active');
 
-            playSound('error'); document.getElementById('freeze-overlay').classList.add('active');
+            playSound('error'); 
+            
+            // HIỆN NÚT BẤM KẾT THÚC ĐỂ NGƯỜI DÙNG CHỦ ĐỘNG ẤM XEM KẾT QUẢ VÀ UNLOCK AUDIO
+            document.getElementById('freeze-overlay').classList.add('active');
+        }
 
-            setTimeout(() => {
-                document.getElementById('freeze-overlay').classList.remove('active');
+        // KHI NGƯỜI DÙNG BẤM NÚT "XEM KẾT QUẢ"
+        function showSummaryResults() {
+            initAudio(); // Mở khóa AudioContext ngay khi click
+            document.getElementById('freeze-overlay').classList.remove('active');
+
+            let finalScore = Math.floor(aScore);
+            document.getElementById('sum-score-total').innerText = finalScore;
+            
+            let ssdEl = document.getElementById('sum-rank-ssd');
+            let ramEl = document.getElementById('sum-rank-ram');
+            let debugBox = document.getElementById('debug-stats-box');
+            let redBorder = document.getElementById('screen-red-border');
+
+            if (finalScore < 1000) {
+                ssdEl.innerText = "⚠️ BÁO ĐỘNG";
+                ssdEl.className = "metric-val red-alert-val";
                 
-                let finalScore = Math.floor(aScore);
-                document.getElementById('sum-score-total').innerText = finalScore;
-                
-                let ssdEl = document.getElementById('sum-rank-ssd');
-                let ramEl = document.getElementById('sum-rank-ram');
-                let debugBox = document.getElementById('debug-stats-box');
-                let redBorder = document.getElementById('screen-red-border');
+                ramEl.innerText = "CHƯA ĐỦ DATA";
+                ramEl.className = "metric-val red-alert-val";
 
-                if (finalScore < 1000) {
-                    ssdEl.innerText = "⚠️ BÁO ĐỘNG";
-                    ssdEl.className = "metric-val red-alert-val";
-                    
-                    ramEl.innerText = "CHƯA ĐỦ DATA";
-                    ramEl.className = "metric-val red-alert-val";
+                debugBox.className = "debug-feedback red-alert-box";
+                debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data để chấm điểm phần cứng! Yêu cầu đo lại ngay lập tức!`;
 
-                    debugBox.className = "debug-feedback red-alert-box";
-                    debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data để chấm điểm phần cứng! Yêu cầu đo lại ngay lập tức!`;
+                redBorder.classList.add('active');
+                startAlarmLoop(); // Kích hoạt âm thanh tít tít tít báo động
+            } else {
+                stopAlarmLoop();
+                redBorder.classList.remove('active');
 
-                    redBorder.classList.add('active');
-                    startAlarmLoop(); // Kích hoạt ngay lập tức âm thanh tít tít tít báo động
-                } else {
-                    stopAlarmLoop();
-                    redBorder.classList.remove('active');
+                ssdEl.className = "metric-val";
+                ramEl.className = "metric-val";
+                debugBox.className = "debug-feedback";
 
-                    ssdEl.className = "metric-val";
-                    ramEl.className = "metric-val";
-                    debugBox.className = "debug-feedback";
+                let ramText = (bestSequenceLen === 0) ? "RAM 512MB" : getRAMBySequence(bestSequenceLen);
+                ramEl.innerText = ramText;
 
-                    let ramText = (bestSequenceLen === 0) ? "RAM 512MB" : getRAMBySequence(bestSequenceLen);
-                    ramEl.innerText = ramText;
+                let ssdText = (bestSequenceLen === 0) ? "SSD 120GB" : getSSDByMaxSequenceTime(bestSequenceLen, bestSequenceTime);
+                ssdEl.innerText = ssdText;
 
-                    let ssdText = (bestSequenceLen === 0) ? "SSD 120GB" : getSSDByMaxSequenceTime(bestSequenceLen, bestSequenceTime);
-                    ssdEl.innerText = ssdText;
+                debugBox.innerHTML = `Chuỗi dài nhất: <b>${bestSequenceLen} hình</b><br>Thời gian hoàn thành: <b>${bestSequenceTime} ms</b>`;
+            }
 
-                    debugBox.innerHTML = `Chuỗi dài nhất: <b>${bestSequenceLen} hình</b><br>Thời gian hoàn thành: <b>${bestSequenceTime} ms</b>`;
-                }
-
-                document.getElementById('final-summary-overlay').classList.add('active');
-            }, 1800);
+            document.getElementById('final-summary-overlay').classList.add('active');
+            playSound('coin');
         }
 
         function goToHoaLuan() {
