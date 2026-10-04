@@ -223,9 +223,9 @@
     <!-- VIỀN ĐỎ CHỚP NHÁY BÁO ĐỘNG TOÀN MÀN HÌNH -->
     <div id="screen-red-border"></div>
 
-    <!-- THẺ AUDIO PHÁT TÍT TÍT BÁO ĐỘNG TRỰC TIẾP (DỰ PHÒNG NẾU AUDIO CONTEXT BỊ CHẶN) -->
+    <!-- THẺ AUDIO LIÊN KẾT TRỰC TIẾP VỚI FILE MP3 BÁO ĐỘNG (ĐẶT CHUNG THƯ MỤC) -->
     <audio id="alarm-audio" loop preload="auto">
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJ_u7_8..." type="audio/wav">
+        <source src="baodong.mp3" type="audio/mpeg">
     </audio>
 
     <div id="dust-container"></div>
@@ -367,7 +367,6 @@
         }
 
         let fxCtx = null;
-        let alarmInterval = null;
 
         function initAudio() { 
             try {
@@ -389,47 +388,17 @@
             playSound('coin');
         }
 
-        // HÀM PHÁT ÂM THANH BÁO ĐỘNG KẾT HỢP WEB AUDIO VÀ THẺ AUDIO THỰC TẾ
-        function playAlarmBeep() {
-            try {
-                if (!fxCtx) {
-                    fxCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (fxCtx.state === 'suspended') {
-                    fxCtx.resume();
-                }
-                const osc = fxCtx.createOscillator();
-                const gain = fxCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(1400, fxCtx.currentTime);
-                gain.gain.setValueAtTime(0.8, fxCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.15);
-                osc.start();
-                osc.stop(fxCtx.currentTime + 0.15);
-            } catch(e) {}
-        }
-
+        // HÀM GỌI PHÁT FILE MP3 BÁO ĐỘNG
         function startAlarmLoop() {
-            stopAlarmLoop();
-            
-            // Kích hoạt thẻ audio dự phòng
             let audioTag = document.getElementById('alarm-audio');
             if(audioTag) {
                 audioTag.volume = 1.0;
+                audioTag.currentTime = 0;
                 audioTag.play().catch(err => {});
             }
-
-            playAlarmBeep(); 
-            alarmInterval = setInterval(() => {
-                playAlarmBeep();
-            }, 250);
         }
 
         function stopAlarmLoop() {
-            if (alarmInterval) {
-                clearInterval(alarmInterval);
-                alarmInterval = null;
-            }
             let audioTag = document.getElementById('alarm-audio');
             if(audioTag) {
                 audioTag.pause();
@@ -750,16 +719,9 @@
             document.getElementById('freeze-overlay').classList.add('active');
         }
 
-        // KIỂM TRA ĐIỀU KIỆN ĐỂ KÍCH HOẠT ÂM THANH NGAY KHI BẤM XEM KẾT QUẢ
+        // KHI BẤM NÚT XEM KẾT QUẢ: KIỂM TRA ĐIỀU KIỆN VÀ PHÁT FILE BÁO ĐỘNG MP3
         function showSummaryResults() {
-            try {
-                if (!fxCtx) {
-                    fxCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (fxCtx.state === 'suspended') {
-                    fxCtx.resume();
-                }
-            } catch(e) {}
+            initAudio();
 
             document.getElementById('freeze-overlay').classList.remove('active');
 
@@ -771,7 +733,7 @@
             let debugBox = document.getElementById('debug-stats-box');
             let redBorder = document.getElementById('screen-red-border');
 
-            // ĐIỀU KIỆN TUYỆT ĐỐI < 1000 DATA MỚI KÊU BÁO ĐỘNG
+            // ĐIỀU KIỆN CHÍNH XÁC < 1000 DATA ĐỂ BẬT ÂM THANH BÁO ĐỘNG
             if (finalScore < 1000) {
                 ssdEl.innerText = "⚠️ BÁO ĐỘNG";
                 ssdEl.className = "metric-val red-alert-val";
@@ -783,7 +745,7 @@
                 debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data để chấm điểm phần cứng! Yêu cầu đo lại ngay lập tức!`;
 
                 redBorder.classList.add('active');
-                startAlarmLoop(); // KÍCH HOẠT LẬP TỨC ÂM THANH BÁO ĐỘNG TÍT TÍT TÍT
+                startAlarmLoop(); // PHÁT FILE MP3 BÁO ĐỘNG
             } else {
                 stopAlarmLoop(); // DỪNG HOÀN TOÀN NẾU ĐỦ ĐIỂM
                 redBorder.classList.remove('active');
