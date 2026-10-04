@@ -28,12 +28,13 @@
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; }
 
-        /* VIDEO NỀN ĐỘNG HIỆN ĐẠI DUY TRÌ MỜ ẢO XUYÊN SUỐT QUÁ TRÌNH CHƠI */
+        /* VIDEO NỀN CHỈ DÙNG CHO SẢNH VÀ KHI BẬT BẢNG GIẢI MÃ, TRONG KHI CHƠI SẼ ẨN ĐỂ TẬP TRUNG */
         #sanctum-video { 
             position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; 
-            object-fit: cover; opacity: 0.45; transition: opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+            object-fit: cover; opacity: 0; transition: opacity 2.0s ease; pointer-events: none;
         }
-        #sanctum-video.loaded { opacity: 0.55; }
+        #sanctum-video.loaded { opacity: 0.6; }
+        #sanctum-video.hidden-mode { opacity: 0 !important; }
 
         #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
         .quantum-sparkle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 8px #ffffff, 0 0 15px #f48fb1; opacity: 0; animation: sparkleFloat linear infinite; }
@@ -62,7 +63,7 @@
 
         #task-arena { position: fixed; inset: 0; background: transparent; z-index: 120; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
         .play-area { width: 100%; max-width: 380px; height: 100vh; height: 100dvh; background: transparent; position: relative; overflow: hidden; margin: 0 auto; transition: all 1.8s cubic-bezier(0.25, 1, 0.5, 1); }
-        .play-area.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important; max-width: none !important; margin: 0 !important; z-index: 9990 !important; background: rgba(5, 11, 20, 0.65) !important; backdrop-filter: blur(4px); }
+        .play-area.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important; max-width: none !important; margin: 0 !important; z-index: 9990 !important; background: var(--bg-obsidian) !important; }
 
         .laser-beam-horizontal { position: fixed; top: 50%; left: 0; width: 100vw; height: 2px; background: #f48fb1; box-shadow: 0 0 25px #f48fb1, 0 0 50px #ffffff; z-index: 99999; transform: scaleX(0); transform-origin: center; animation: laserShoot 1.0s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: none; }
         @keyframes laserShoot { 100% { transform: scaleX(1); height: 4px; } }
@@ -177,9 +178,7 @@
         .btn-action:active { transform: scale(0.9); }
         .btn-back { color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 24px; font-weight: bold; box-shadow: 0 0 12px rgba(244,143,177,0.4); padding-bottom: 2px; padding-right: 2px; }
         
-        /* NÚT CHUYỂN BÀI GIỐNG HỆT HỎA LUẬN */
         .btn-next-lesson { border-color: rgba(255, 183, 77, 0.7); color: #ffb74d; font-size: 18px; box-shadow: 0 0 12px rgba(255, 183, 77, 0.3); }
-        
         .btn-mute { border-color: rgba(0, 229, 255, 0.7); color: #00e5ff; font-size: 18px; box-shadow: 0 0 12px rgba(0, 229, 255, 0.3); }
         .btn-pause { border-color: rgba(255, 51, 102, 0.7); box-shadow: 0 0 12px rgba(255, 51, 102, 0.3); }
         .btn-pause::before, .btn-pause::after { content: ''; width: 3.5px; height: 16px; background: #ff3366; margin: 0 2.5px; border-radius: 2px; box-shadow: 0 0 8px #ff3366; }
@@ -279,6 +278,7 @@
 </head>
 <body>
 
+    <!-- VIDEO NỀN CHỈ HIỆN KHI Ở SẢNH, KHI VÀO CHƠI SẼ ẨN ĐI ĐỂ TẬP TRUNG -->
     <video id="sanctum-video" autoplay loop playsinline>
         <source src="../Photo/video nen thuy luan.mp4" type="video/mp4">
     </video>
@@ -321,7 +321,7 @@
                 </div>
             </div>
 
-            <!-- THANH ĐIỀU HƯỚNG DƯỚI ĐÁY: 4 NÚT CHUẨN XÁC GIỐNG HỎA LUẬN (<, ⏭️, Loa, ||) -->
+            <!-- THANH ĐIỀU HƯỚNG DƯỚI ĐÁY: 4 NÚT CHUẨN XÁC GIỐNG HỎA LUẬN -->
             <div id="game-bottom-bar" class="game-bottom-bar">
                 <button class="btn-action btn-back" onclick="confirmExitToLobby()" title="Quay lại">⟨</button>
                 <button class="btn-action btn-next-lesson" onclick="goToHoaLuan()" title="Chuyển sang Hỏa Luận">⏭</button>
@@ -417,8 +417,8 @@
         </div>
     </div>
 
-    <!-- MODAL TRÌNH CHIẾU 3 TRƯỜNG PHÁI -->
-    <div id="thuy-luan-modal" onclick="nextCinematicSlide()" style="position: fixed; inset: 0; background: rgba(5, 11, 20, 0.94); z-index: 9999999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 25px; backdrop-filter: blur(15px); cursor: pointer;">
+    <!-- MODAL TRÌNH CHIẾU 3 TRƯỜNG PHÁI KÈM HIỆN VIDEO NỀN MỜ VÀ HẠT LƯỢNG TỬ -->
+    <div id="thuy-luan-modal" onclick="nextCinematicSlide()" style="position: fixed; inset: 0; background: rgba(5, 11, 20, 0.88); z-index: 9999999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 25px; backdrop-filter: blur(12px); cursor: pointer;">
         
         <div id="floating-icons-container"></div>
 
@@ -485,7 +485,6 @@
         }
         ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => { window.addEventListener(evt, initAudio, { passive: true }); });
 
-        // NÚT LOA MASTER: TẮT/BẬT ÂM THANH TOÀN HỆ THỐNG (VIDEO NỀN + NHẠC PIXEL)
         function toggleMasterMute() {
             let vid = document.getElementById('sanctum-video');
             let decodeAudio = document.getElementById('decode-audio');
@@ -516,7 +515,6 @@
             } catch (e) {}
         }
 
-        // 3 SLIDE TRƯỜNG PHÁI
         const cinematicSlides = [
             {
                 title: "GIẢI MÃ – KHOA HỌC THẦN KINH",
@@ -584,6 +582,7 @@
 
             if (modal) {
                 if (modal.style.display === 'flex') {
+                    // ĐÓNG MODAL: Ẩn video nền, tắt nhạc giải mã
                     modal.style.display = 'none';
                     if(booContainer) booContainer.classList.remove('active');
                     window.speechSynthesis.cancel();
@@ -592,16 +591,21 @@
                         decodeAudio.pause();
                         decodeAudio.currentTime = 0;
                     }
-                    if(sanctumVideo && !isMasterMuted) {
-                        sanctumVideo.muted = false;
+                    if(sanctumVideo) {
+                        sanctumVideo.classList.add('hidden-mode');
                     }
                 } else {
+                    // MỞ MODAL: Hiện video nền mờ, bật nhạc Pixel Dream Circuit êm dịu
                     modal.style.display = 'flex';
                     if(booContainer) booContainer.classList.add('active');
                     currentSlideIndex = 0;
                     renderCinematicSlide();
 
-                    if(sanctumVideo) sanctumVideo.muted = true;
+                    if(sanctumVideo) {
+                        sanctumVideo.classList.remove('hidden-mode');
+                        sanctumVideo.muted = true;
+                        sanctumVideo.play().catch(e => {});
+                    }
                     if(decodeAudio) {
                         decodeAudio.muted = isMasterMuted;
                         decodeAudio.volume = 0;
@@ -661,8 +665,8 @@
                     decodeAudio.pause();
                     decodeAudio.currentTime = 0;
                 }
-                if(sanctumVideo && !isMasterMuted) {
-                    sanctumVideo.muted = false;
+                if(sanctumVideo) {
+                    sanctumVideo.classList.add('hidden-mode');
                 }
             } else {
                 renderCinematicSlide();
@@ -714,8 +718,9 @@
             bestSequenceLen = 0; bestSequenceTime = 0; nextHpMilestone = 1000;
             isScoreBelow1000 = false;
 
+            // KHI Ở SẢNH: CHO HIỆN VIDEO NỀN MỜ ẢO SANG TRỌNG
             let vid = document.getElementById('sanctum-video');
-            vid.classList.remove('playing-mode');
+            vid.classList.remove('hidden-mode');
             setTimeout(() => vid.classList.add('loaded'), 150);
 
             let playArea = document.getElementById('play-area');
@@ -757,9 +762,10 @@
             promptOverlay.classList.remove('active');
             setTimeout(() => promptOverlay.classList.add('hidden'), 1200);
             
+            // KHI BẮT ĐẦU CHƠI: ẨN HOÀN TOÀN VIDEO NỀN ĐỂ MÀN HÌNH TỐI TẬP TRUNG TUYỆT ĐỐI
             let vid = document.getElementById('sanctum-video');
             vid.classList.remove('loaded');
-            vid.classList.add('playing-mode');
+            vid.classList.add('hidden-mode');
 
             playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
             setTimeout(() => { let playArea = document.getElementById('play-area'); playArea.classList.add('fullscreen-mode'); laser.classList.add('expand'); }, 600);
@@ -925,8 +931,9 @@
             let finalScore = Math.floor(aScore);
             if (finalScore < 1000) { isScoreBelow1000 = true; } else { isScoreBelow1000 = false; }
 
+            // KHI KẾT THÚC VÀ HIỆN BẢNG TỔNG KẾT: CHO HIỆN LẠI VIDEO NỀN MỜ ẢO SANG TRỌNG
             let vid = document.getElementById('sanctum-video');
-            vid.classList.remove('playing-mode');
+            vid.classList.remove('hidden-mode');
             setTimeout(() => vid.classList.add('loaded'), 400);
 
             localStorage.setItem('thuy_luan_score', finalScore);
