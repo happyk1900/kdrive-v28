@@ -142,7 +142,6 @@
         .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         .pause-btn.exit { background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; color: #ff3366; margin-bottom: 0; }
 
-        /* NÚT KẾT THÚC KHI HẾT MÁU HOẶC MUỒN XEM KẾT QUẢ */
         #freeze-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200000; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
         #freeze-overlay.active { display: flex; }
         .freeze-text { font-family: 'Chakra Petch', sans-serif; font-size: 42px; font-weight: 900; color: #ffffff; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 20px #ff3366; }
@@ -277,7 +276,7 @@
                 </div>
             </div>
 
-            <!-- MÀN HÌNH CHỜ KẾT THÚC CÓ NÚT BẤM CHỦ ĐỘNG UNLOCK ÂM THANH -->
+            <!-- MÀN HÌNH NÚT BẤM KẾT THÚC CHỦ ĐỘNG -->
             <div id="freeze-overlay">
                 <div class="freeze-text">KẾT THÚC</div>
                 <button class="btn-finish-trigger" onclick="showSummaryResults()">XEM KẾT QUẢ</button>
@@ -386,6 +385,7 @@
             playSound('coin');
         }
 
+        // HÀM PHÁT ÂM THANH BÁO ĐỘNG ÉP BUỘC RESUME CONTEXT
         function playAlarmBeep() {
             try {
                 if (!fxCtx) {
@@ -397,11 +397,11 @@
                 const osc = fxCtx.createOscillator();
                 const gain = fxCtx.createGain();
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(1100, fxCtx.currentTime);
-                gain.gain.setValueAtTime(0.4, fxCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.15);
+                osc.frequency.setValueAtTime(1200, fxCtx.currentTime); // Tăng tần số cho đanh thép
+                gain.gain.setValueAtTime(0.5, fxCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.12);
                 osc.start();
-                osc.stop(fxCtx.currentTime + 0.15);
+                osc.stop(fxCtx.currentTime + 0.12);
             } catch(e) {}
         }
 
@@ -733,14 +733,20 @@
             document.getElementById('game-container').classList.remove('active');
 
             playSound('error'); 
-            
-            // HIỆN NÚT BẤM KẾT THÚC ĐỂ NGƯỜI DÙNG CHỦ ĐỘNG ẤM XEM KẾT QUẢ VÀ UNLOCK AUDIO
             document.getElementById('freeze-overlay').classList.add('active');
         }
 
-        // KHI NGƯỜI DÙNG BẤM NÚT "XEM KẾT QUẢ"
+        // KHI NGƯỜI DÙNG BẤM "XEM KẾT QUẢ" - BẮT BUỘC UNLOCK AUDIO CONTEXT TẠI ĐÂY
         function showSummaryResults() {
-            initAudio(); // Mở khóa AudioContext ngay khi click
+            try {
+                if (!fxCtx) {
+                    fxCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (fxCtx.state === 'suspended') {
+                    fxCtx.resume();
+                }
+            } catch(e) {}
+
             document.getElementById('freeze-overlay').classList.remove('active');
 
             let finalScore = Math.floor(aScore);
@@ -762,7 +768,7 @@
                 debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data để chấm điểm phần cứng! Yêu cầu đo lại ngay lập tức!`;
 
                 redBorder.classList.add('active');
-                startAlarmLoop(); // Kích hoạt âm thanh tít tít tít báo động
+                startAlarmLoop(); // KÍCH HOẠT ÂM THANH BÁO ĐỘNG NGAY LẬP TỨC
             } else {
                 stopAlarmLoop();
                 redBorder.classList.remove('active');
