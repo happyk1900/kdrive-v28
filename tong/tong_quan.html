@@ -76,13 +76,13 @@
             100% { opacity: 0.7; transform: scale(1); filter: brightness(1); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         }
 
+        /* NHẤP NHÁY CHỈ RIÊNG CHO CHỮ BÁO ĐỘNG */
         @keyframes redAlertBlink {
-            0% { color: #ff3366; opacity: 0.4; text-shadow: 0 0 2px rgba(255,51,102,0.2); transform: scale(1); }
-            50% { color: #ffffff; opacity: 1; text-shadow: 0 0 20px #ff3366, 0 0 35px #ff0000, 0 0 50px #ff3366; transform: scale(1.04); }
-            100% { color: #ff3366; opacity: 0.4; text-shadow: 0 0 2px rgba(255,51,102,0.2); transform: scale(1); }
+            0% { opacity: 0.3; }
+            50% { opacity: 1; text-shadow: 0 0 12px #ff3366, 0 0 20px #ff0000; }
+            100% { opacity: 0.3; }
         }
 
-        /* KHUNG VIỀN ĐỎ RỰC CHỚP NHÁY TOÀN MÀN HÌNH KHI BÁO ĐỘNG ĐỎ */
         #screen-red-border {
             position: fixed; inset: 0; border: 6px solid transparent; pointer-events: none; z-index: 999999; opacity: 0; transition: opacity 0.3s;
         }
@@ -165,21 +165,21 @@
         .metric-card-row:last-child { border-bottom: none; padding-bottom: 0; }
         
         .metric-label { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; flex: 1; text-align: left;}
-        .metric-val { color: #ffffff; font-family: 'Chakra Petch', sans-serif; font-size: 18px; font-weight: 900; text-align: right; text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px #00e5ff; animation: hardwareBlink 1.8s infinite ease-in-out; }
+        .metric-val { color: #ffffff; font-family: 'Chakra Petch', sans-serif; font-size: 18px; font-weight: 900; text-align: right; text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px #00e5ff; }
 
-        .metric-val.red-alert-val { color: #ff3366 !important; animation: redAlertBlink 0.8s infinite ease-in-out !important; }
+        /* MÀU ĐỎ TĨNH (KHÔNG NHẬP NHÙA NHẤP NHÁY NỮA ĐỂ CHỐNG GIẬT LAG) */
+        .metric-val.red-alert-val { color: #ff3366 !important; text-shadow: 0 0 10px rgba(255,51,102,0.6); animation: redAlertBlink 1.2s infinite ease-in-out; }
 
         .debug-feedback { font-family: 'Share Tech Mono', monospace; font-size: 12.5px; color: #ff3366; text-align: left; background: rgba(255, 51, 102, 0.12); border: 1.5px solid rgba(255, 51, 102, 0.7); padding: 10px 12px; border-radius: 8px; line-height: 1.5; text-shadow: 0 0 6px rgba(255,51,102,0.5); }
-        .debug-feedback.red-alert-box { animation: redAlertBlink 1.2s infinite ease-in-out; }
 
         .result-btn-row { display: flex; gap: 10px; width: 92%; max-width: 340px; margin-top: 5px; }
         .result-action-btn { flex: 1; padding: 13px; font-family: 'Chakra Petch', sans-serif; font-size: 15px; font-weight: 900; border-radius: 12px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; backdrop-filter: blur(8px); letter-spacing: 1px; }
         
-        #btn-replay { background: var(--panel-bg); border: 1.5px solid #ff3366; color: #ff3366; animation: pulse-btn 1.5s infinite; }
-        #btn-replay:active { background: #ff3366; color: #fff; transform: scale(0.95); animation: none; }
+        #btn-replay { background: var(--panel-bg); border: 1.5px solid #ff3366; color: #ff3366; }
+        #btn-replay:active { background: #ff3366; color: #fff; transform: scale(0.95); }
         
-        #btn-next { background: var(--panel-bg); border: 1.5px solid #00e5ff; color: #00e5ff; animation: pulse-btn 1.5s infinite; animation-delay: 0.2s; }
-        #btn-next:active { background: #00e5ff; color: #050b14; transform: scale(0.95); animation: none; }
+        #btn-next { background: var(--panel-bg); border: 1.5px solid #00e5ff; color: #00e5ff; }
+        #btn-next:active { background: #00e5ff; color: #050b14; transform: scale(0.95); }
 
         .game-container { display: none; width: 100%; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .game-container.active { display: flex; }
@@ -219,7 +219,7 @@
         <source src="../Photo/video nen thuy luan.mp4" type="video/mp4">
     </video>
 
-    <!-- VIỀN ĐỎ RỰC CHỚP NHÁY TOÀN MÀN HÌNH -->
+    <!-- VIỀN ĐỎ CHỚP NHÁY BÁO ĐỘNG TOÀN MÀN HÌNH -->
     <div id="screen-red-border"></div>
 
     <div id="dust-container"></div>
@@ -302,6 +302,7 @@
                         <span class="metric-val" id="sum-rank-ram">RAM 4GB</span>
                     </div>
                     
+                    <!-- Ô NHẬN XÉT SẠCH SẼ, BỎ CHỮ TRÙNG LẶP -->
                     <div class="debug-feedback" id="debug-stats-box">
                         Chuỗi dài nhất: Đang tính toán...<br>
                         Thời gian hoàn thành: 0 ms
@@ -309,7 +310,8 @@
                 </div>
 
                 <div class="result-btn-row">
-                    <button class="result-action-btn" id="btn-replay" onclick="openArena()">TẬP LẠI</button>
+                    <!-- ĐỔI CHỮ TẬP LẠI THÀNH ĐO LẠI -->
+                    <button class="result-action-btn" id="btn-replay" onclick="openArena()">ĐO LẠI</button>
                     <button class="result-action-btn" id="btn-next" onclick="goToHoaLuan()">CHUYỂN BÀI</button>
                 </div>
             </div>
@@ -358,7 +360,7 @@
         }
 
         let fxCtx = null;
-        let alarmInterval = null; // Biến giữ chuỗi âm thanh báo động tít tít tít
+        let alarmInterval = null;
 
         function initAudio() { 
             try {
@@ -386,7 +388,7 @@
                 const osc = fxCtx.createOscillator();
                 const gain = fxCtx.createGain();
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(950, fxCtx.currentTime); // Âm thanh tít cao độ cảnh báo
+                osc.frequency.setValueAtTime(950, fxCtx.currentTime);
                 gain.gain.setValueAtTime(0.4, fxCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, fxCtx.currentTime + 0.15);
                 osc.start();
@@ -398,7 +400,7 @@
             stopAlarmLoop();
             alarmInterval = setInterval(() => {
                 playAlarmBeep();
-            }, 300); // Tít tít tít liên tục mỗi 300ms
+            }, 300);
         }
 
         function stopAlarmLoop() {
@@ -732,7 +734,6 @@
                 let debugBox = document.getElementById('debug-stats-box');
                 let redBorder = document.getElementById('screen-red-border');
 
-                // KÍCH HOẠT BÁO ĐỘNG ĐỎ KHI DƯỚI 1000 DATA
                 if (finalScore < 1000) {
                     ssdEl.innerText = "⚠️ BÁO ĐỘNG";
                     ssdEl.className = "metric-val red-alert-val";
@@ -740,10 +741,9 @@
                     ramEl.innerText = "CHƯA ĐỦ DATA";
                     ramEl.className = "metric-val red-alert-val";
 
-                    debugBox.className = "debug-feedback red-alert-box";
-                    debugBox.innerHTML = `🚨 <b>BÁO ĐỘNG ĐỎ:</b> Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data để chấm điểm phần cứng! <b>Yêu cầu đo lại ngay lập tức!</b>`;
+                    // BỎ CHỮ "BÁO ĐỘNG ĐỎ:" TRONG HỘP NHẬN XÉT ĐỂ TRÁNH TRÙNG LẶP
+                    debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data để chấm điểm phần cứng! Yêu cầu đo lại ngay lập tức!`;
 
-                    // Bật viền đỏ rực và âm thanh tít tít tít báo động
                     redBorder.classList.add('active');
                     startAlarmLoop();
                 } else {
@@ -752,7 +752,6 @@
 
                     ssdEl.className = "metric-val";
                     ramEl.className = "metric-val";
-                    debugBox.className = "debug-feedback";
 
                     let ramText = (bestSequenceLen === 0) ? "RAM 512MB" : getRAMBySequence(bestSequenceLen);
                     ramEl.innerText = ramText;
