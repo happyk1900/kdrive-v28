@@ -87,7 +87,6 @@
         }
         .game-top-bar.visible { opacity: 1; }
 
-        /* HAI THANH NĂNG LƯỢNG HAI BÊN ĐỐI XỨNG */
         .health-container { display: flex; gap: 3px; align-items: center; }
         .health-bar { width: 11px; height: 6px; background: rgba(255,255,255,0.15); transform: skewX(-20deg); transition: all 0.3s ease; }
         .health-bar.active { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
@@ -273,7 +272,7 @@
                     <div id="hp-notification-area"></div>
                 </div>
 
-                <!-- Thanh phải: 5 hạt -->
+                <!-- Thanh phải: 5 hạt (ban đầu tắt) -->
                 <div class="health-container">
                     <div class="health-bar" id="hp-6"></div>
                     <div class="health-bar" id="hp-7"></div>
@@ -330,12 +329,12 @@
                     </div>
                     <div class="metric-card-row">
                         <span class="metric-label">Đa luồng</span>
-                        <span class="metric-val" id="sum-rank-thread">Bật Nhanh</span>
+                        <span class="metric-val" id="sum-rank-thread">Đơn Tốc</span>
                     </div>
                     
                     <div class="debug-feedback" id="debug-stats-box">
-                        Tốc độ phản xạ: <b>0 ms</b><br>
-                        Tốc độ đa luồng: <b>0 lần / giây</b>
+                        Tốc độ phản xạ: <b id="res-ms">0 ms</b><br>
+                        Tốc độ đa luồng: <b id="res-cps">0 lần / giây</b>
                     </div>
                 </div>
 
@@ -362,21 +361,12 @@
 
         function getCpuEvaluation(avgMs, totalScore) {
             if (totalScore < 1000 || avgMs > 600 || avgMs === 0) {
-                return { 
-                    name: "Pentium", 
-                    feedback: "Bộ phản xạ của bạn đang dưới mức bình thường, không đủ 1000 dữ liệu! Yêu cầu đo lại ngay lập tức!<br><br><span style='color: #ffd700; font-weight: 700;'>Nếu bạn không vượt qua được, cũng đừng quá lo lắng, chúng ta có phương pháp tập luyện giúp phục hồi phản xạ của bạn. Hãy cứ ấn tiếp tục để kiểm tra tiếp.</span>" 
-                };
+                return { name: "Pentium" };
             }
-            let successText = "Tuyệt vời! Bạn đã hoàn thành xuất sắc bài kiểm tra phản xạ. Tốc độ xử lý tín hiệu đang vận hành rất ổn định. Hãy cứ ấn tiếp tục để khám phá phần kiểm tra tiếp theo.";
-            if (avgMs <= 300) {
-                return { name: "Lượng Tử AI", feedback: "Đang chạy Chip Lượng Tử AI. Tốc độ xử lý song song vượt mọi giới hạn vật lý!<br><br><span style='color: #ffd700; font-weight: 700;'>" + successText + "</span>" };
-            } else if (avgMs <= 400) {
-                return { name: "Core i9", feedback: "Đang chạy Chip Core i9. Xung nhịp khủng, phản xạ cực gắt, không có độ trễ.<br><br><span style='color: #ffd700; font-weight: 700;'>" + successText + "</span>" };
-            } else if (avgMs <= 500) {
-                return { name: "Core i7", feedback: "Đang chạy Chip Core i7. Tốc độ xử lý luồng dữ liệu mượt mà, nhanh nhạy.<br><br><span style='color: #ffd700; font-weight: 700;'>" + successText + "</span>" };
-            } else {
-                return { name: "Core i3", feedback: "Đang chạy Chip Core i3. Tốc độ xử lý thông tin cơ bản, thỉnh thoảng bị trễ.<br><br><span style='color: #ffd700; font-weight: 700;'>" + successText + "</span>" };
-            }
+            if (avgMs <= 300) return { name: "Lượng Tử AI" };
+            if (avgMs <= 400) return { name: "Core i9" };
+            if (avgMs <= 500) return { name: "Core i7" };
+            return { name: "Core i3" };
         }
 
         function getThreadRanking(cps) {
@@ -388,7 +378,7 @@
 
         let aScore = 0; let burstScore = 0; let successfulHitsCount = 0; 
         let hitsCountG2 = 0; 
-        let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, stabilityHP = 5; 
+        let isPlaying = false; let isPausedForStart = true; let spawnTimer, burstTimer, energyCount = 5; 
         let bestCpsG2 = 0; 
         let reactionTimes = []; 
         let nextHpMilestone = 1000; 
@@ -470,10 +460,10 @@
         }
 
         function updateHpDisplay() {
-            let hp = Math.min(10, Math.max(0, stabilityHP));
-            for(let i=1; i<=10; i++) {
-                let bar = document.getElementById('hp-'+i);
-                if(bar) bar.classList.toggle('active', i <= hp);
+            let count = Math.min(10, Math.max(0, energyCount));
+            for(let i = 1; i <= 10; i++) {
+                let bar = document.getElementById('hp-' + i);
+                if(bar) bar.classList.toggle('active', i <= count);
             }
         }
 
@@ -489,7 +479,7 @@
         }
 
         function openArena() {
-            aScore = 0; burstScore = 0; successfulHitsCount = 0; isPlaying = false; stabilityHP = 5; 
+            aScore = 0; burstScore = 0; successfulHitsCount = 0; isPlaying = false; energyCount = 5; 
             isPausedForStart = true; reactionTimes = [];
             nextHpMilestone = 1000; nextBurstMilestone = 500; lastAnnouncedTier = 1;
 
@@ -574,9 +564,10 @@
 
             document.getElementById('boo-points').innerText = Math.round(aScore); playSound('coin', 1);
 
+            // Kiểm tra mốc 1000 điểm để cộng thêm 1 hạt năng lượng vàng
             if (aScore >= nextHpMilestone) {
                 nextHpMilestone += 1000;
-                stabilityHP = Math.min(10, stabilityHP + 1);
+                energyCount = Math.min(10, energyCount + 1);
                 updateHpDisplay();
                 showHpRewardAlert();
             }
@@ -587,8 +578,9 @@
                 playSound('ready', 1.5);
             }
 
+            // Kiểm tra mốc 500 điểm để kích hoạt bạo pháp
             if (aScore >= nextBurstMilestone && !document.querySelector('.burst-container')) {
-                nextBurstMilestone += 1000;
+                nextBurstMilestone += 500;
                 burstCount++;
                 forceBurstMode();
             }
@@ -596,11 +588,11 @@
 
         function loseFullLife() { 
             if(isPausedForStart) return; 
-            stabilityHP -= 1; 
+            energyCount -= 1; 
             updateHpDisplay(); 
             playSound('boom'); 
             triggerVibration([150, 50, 150]); 
-            if(stabilityHP <= 0) { 
+            if(energyCount <= 0) { 
                 finishGame(); 
             } else {
                 clearTimeout(spawnTimer);
@@ -761,8 +753,8 @@
                 document.getElementById('sum-rank-cpu').innerText = cpuEvalObj.name;
                 document.getElementById('sum-rank-thread').innerText = threadRank;
 
-                let debugBox = document.getElementById('debug-stats-box');
-                debugBox.innerHTML = `Tốc độ phản xạ: <b>${avgReactionMs} ms</b><br>Tốc độ đa luồng: <b>${bestCpsG2} lần / giây</b><br><br><span style="color: #ffd700; font-weight: 700;">${cpuEvalObj.feedback}</span>`;
+                document.getElementById('res-ms').innerText = (aScore > 0 && avgReactionMs > 0) ? avgReactionMs + " ms" : "0 ms";
+                document.getElementById('res-cps').innerText = (aScore > 0 && bestCpsG2 > 0) ? bestCpsG2 + " lần / giây" : "0 lần / giây";
 
                 document.getElementById('final-summary-overlay').classList.add('active');
                 playSound('coin');
