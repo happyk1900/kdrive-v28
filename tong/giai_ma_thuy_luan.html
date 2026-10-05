@@ -8,32 +8,83 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: #050b14; font-family: 'Space Grotesk', sans-serif; }
 
-        /* VIDEO NỀN SÁNG 100% */
-        #bg-video {
-            position: fixed; inset: 0; width: 100vw; height: 100dvh; object-fit: cover; z-index: 1; opacity: 1.0;
+        /* HẠT LƯỢNG TỬ BAY LƠ LỬNG XUYÊN SUỐT */
+        #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+        .quantum-sparkle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 8px #00e5ff, 0 0 15px #0088ff; opacity: 0; animation: sparkleFloat linear infinite; }
+        @keyframes sparkleFloat { 
+            0% { transform: translateY(105vh) scale(0.3); opacity: 0; } 
+            20% { opacity: 0.8; } 
+            50% { transform: translateY(50vh) translateX(15px) scale(1); opacity: 0.6; filter: brightness(1.5); } 
+            80% { opacity: 0.8; } 
+            100% { transform: translateY(-10vh) translateX(-15px) scale(0.2); opacity: 0; } 
         }
 
-        .decoder-container {
-            position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 0 20px 30px 20px;
+        /* MÀN HÌNH MỞ ĐẦU TRIẾT LÝ THỦY LUÂN */
+        #gateway-screen {
+            position: fixed; inset: 0; background: radial-gradient(circle at center, #0a192f 0%, #050b14 100%);
+            z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 30px; text-align: center; transition: opacity 0.8s ease; cursor: pointer;
         }
+        #gateway-screen.fade-out { opacity: 0; pointer-events: none; }
+
+        .gateway-card {
+            width: 100%; max-width: 360px; background: rgba(5, 15, 30, 0.85);
+            backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border: 2px solid rgba(0, 229, 255, 0.5); border-radius: 24px; padding: 30px 22px;
+            display: flex; flex-direction: column; align-items: center; box-shadow: 0 0 40px rgba(0, 229, 255, 0.25);
+        }
+
+        .water-icon-btn {
+            width: 80px; height: 80px; border-radius: 50%; background: rgba(0, 229, 255, 0.2);
+            border: 3px solid #00e5ff; display: flex; justify-content: center; align-items: center;
+            overflow: hidden; box-shadow: 0 0 25px rgba(0, 229, 255, 0.6); margin-bottom: 20px;
+            animation: waterPulse 2s infinite ease-in-out;
+        }
+        @keyframes waterPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(0,229,255,0.5); }
+            50% { transform: scale(1.08); box-shadow: 0 0 35px rgba(0,229,255,0.9); }
+        }
+        .water-icon-btn img { width: 100%; height: 100%; object-fit: cover; }
+
+        .gateway-quote {
+            font-family: 'Playfair Display', serif; font-style: italic; font-size: 16px; color: #ffd700;
+            line-height: 1.6; margin-bottom: 15px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        .gateway-author {
+            font-family: 'Chakra Petch', sans-serif; font-size: 13px; color: #00e5ff; font-weight: 900;
+            letter-spacing: 2px; text-transform: uppercase; margin-bottom: 25px;
+        }
+        .gateway-hint {
+            font-family: 'Chakra Petch', sans-serif; font-size: 11.5px; color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 2px; animation: textBlink 2s infinite ease-in-out;
+        }
+        @keyframes textBlink { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        /* VIDEO NỀN SÁNG 100% (HIỆN SAU KHI BẤM CỔNG CHÀO) */
+        #bg-video {
+            position: fixed; inset: 0; width: 100vw; height: 100dvh; object-fit: cover; z-index: 1; opacity: 1.0;
+            display: none;
+        }
+        #bg-video.active { display: block; }
+
+        .decoder-container {
+            position: fixed; inset: 0; z-index: 10; display: none; flex-direction: column; align-items: center; justify-content: flex-end; padding: 0 20px 30px 20px;
+        }
+        .decoder-container.active { display: flex; }
 
         .decoder-card {
             width: 100%; max-width: 360px; min-height: 245px;
-            background: rgba(5, 11, 20, 0.78);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1.5px solid rgba(0, 229, 255, 0.4);
-            border-radius: 20px;
-            padding: 20px 18px 12px 18px;
+            background: rgba(5, 11, 20, 0.78); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1.5px solid rgba(0, 229, 255, 0.4); border-radius: 20px; padding: 20px 18px 12px 18px;
             display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(0, 229, 255, 0.15);
-            margin-bottom: 12px;
-            position: relative;
+            margin-bottom: 12px; position: relative;
         }
 
         .slide-title {
@@ -44,8 +95,7 @@
 
         .slide-content {
             font-size: 13px; color: #ffffff; line-height: 1.5; font-weight: 600;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
-            min-height: 110px; display: block; text-align: left; width: 100%;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9); min-height: 110px; display: block; text-align: left; width: 100%;
             word-break: break-word;
         }
 
@@ -89,6 +139,22 @@
 </head>
 <body>
 
+    <!-- HẠT LƯỢNG TỬ BAY XUYÊN SUỐT -->
+    <div id="dust-container"></div>
+
+    <!-- MÀN HÌNH MỞ ĐẦU TRIẾT LÝ THỦY LUÂN -->
+    <div id="gateway-screen" onclick="enterMainDecoder()">
+        <div class="gateway-card">
+            <div class="water-icon-btn">
+                <img src="../../Photo/A THUY.png" alt="Thủy Luân">
+            </div>
+            <div class="gateway-quote">"Tâm như nước biến hóa vô hình, tĩnh lặng soi chiếu vạn vật."</div>
+            <div class="gateway-author">— Miyamoto Musashi</div>
+            <div class="gateway-hint">[ CHẠM ĐỂ KHỞI ĐỘNG GIẢI MÃ ]</div>
+        </div>
+    </div>
+
+    <!-- VIDEO NỀN SÁNG 100% -->
     <video id="bg-video" autoplay loop muted playsinline>
         <source src="../../Photo/Video giai ma thuy luan.mp4" type="video/mp4">
     </video>
@@ -97,13 +163,13 @@
         <source src="../../Photo/Pixel Dream Circuit.mp3" type="audio/mpeg">
     </audio>
 
-    <div class="decoder-container">
+    <div id="main-decoder" class="decoder-container">
         <div id="slide-box" class="decoder-card">
             <div id="slide-title" class="slide-title"></div>
             <div id="slide-content" class="slide-content"></div>
             <div class="slide-nav-row">
                 <button class="nav-btn" onclick="prevSlide(event)">⟨ QUAY LẠI</button>
-                <span id="slide-counter" class="slide-indicator">1 / 4</span>
+                <span id="slide-counter" class="slide-indicator">1 / 3</span>
                 <button class="nav-btn" onclick="nextSlide(event)">TIẾP ⟩</button>
             </div>
         </div>
@@ -115,6 +181,7 @@
     </div>
 
     <script>
+        // 3 SLIDE SAU KHI VÀO THẾ GIỚI VIDEO CHÚ HEO
         const slides = [
             {
                 title: "GIẢI MÃ KHOA HỌC THẦN KINH",
@@ -125,10 +192,6 @@
                 content: "Ánh xạ sinh học giúp <span class='highlight-cyan'>xếp hạng chính xác năng lực trí nhớ</span> và bóc tách từng vùng xử lý. Qua đó thấy rõ dung lượng RAM và tốc độ SSD, chỉ ra <span class='highlight-pink'>chính xác điểm nghẽn (bottleneck)</span> đang kìm hãm tư duy."
             },
             {
-                title: "GIẢI MÃ TRIẾT LÝ VÕ HỌC",
-                content: "\"<span class='highlight-gold'>Tâm như nước biến hóa vô hình, tĩnh lặng soi chiếu vạn vật.</span>\" — Miyamoto Musashi.<br>Tâm thức tĩnh lặng tuyệt đối giúp ghi nhận, xử lý và phản xạ thông tin linh hoạt như dòng nước."
-            },
-            {
                 title: "K-DRIVE VÀ TỐI ƯU HIỆU SUẤT",
                 content: "Thói quen lướt <span class='highlight-pink'>video ngắn liên tục (TikTok, Reels)</span> làm phân mảnh bộ nhớ đệm. Mô-đun này chẩn đoán điểm nghẽn; để tập luyện nâng cấp toàn diện, hãy truy cập <span class='highlight-mint'>NÂNG CẤP TOÀN DIỆN</span>."
             }
@@ -137,18 +200,34 @@
         let currentIndex = 0;
         let isAudioInitialized = false;
 
+        function initSparkleParticles() {
+            let container = document.getElementById('dust-container');
+            if(!container) return;
+            for(let i=0; i<40; i++) {
+                let p = document.createElement('div');
+                p.className = 'quantum-sparkle';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = Math.random() * 100 + 'vh';
+                let size = Math.random() * 3 + 2;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.animationDuration = (Math.random() * 6 + 4) + 's';
+                p.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(p);
+            }
+        }
+
         function renderSlide() {
             document.getElementById('slide-title').innerText = slides[currentIndex].title;
             document.getElementById('slide-content').innerHTML = slides[currentIndex].content;
             document.getElementById('slide-counter').innerText = (currentIndex + 1) + " / " + slides.length;
         }
 
-        function startSmoothAudio() {
-            if (isAudioInitialized) return;
-            isAudioInitialized = true;
-
+        function enterMainDecoder() {
+            // Kích hoạt âm thanh mượt mà từ cú chạm mở đầu
             let music = document.getElementById('bg-music');
-            if (music) {
+            if (music && !isAudioInitialized) {
+                isAudioInitialized = true;
                 music.volume = 0.0;
                 music.play().then(() => {
                     let vol = 0.0;
@@ -162,39 +241,43 @@
                     }, 150);
                 }).catch(e => {});
             }
+
+            // Chuyển cảnh mờ dần màn hình cổng chào sang video chú heo
+            let gateway = document.getElementById('gateway-screen');
+            gateway.classList.add('fade-out');
+
+            setTimeout(() => {
+                gateway.style.display = 'none';
+                document.getElementById('bg-video').classList.add('active');
+                document.getElementById('main-decoder').classList.add('active');
+                renderSlide();
+            }, 800);
         }
 
         function nextSlide(event) {
             event.stopPropagation();
-            startSmoothAudio();
             currentIndex = (currentIndex + 1) % slides.length;
             renderSlide();
         }
 
         function prevSlide(event) {
             event.stopPropagation();
-            startSmoothAudio();
             currentIndex = (currentIndex - 1 + slides.length) % slides.length;
             renderSlide();
         }
 
         function goToNextTest(event) {
             event.stopPropagation();
-            startSmoothAudio();
             window.location.href = '../TestHoaLuan.html';
         }
 
         function replayDecoder(event) {
             event.stopPropagation();
-            startSmoothAudio();
             window.location.href = '../tong_quan.html';
         }
 
         window.onload = () => {
-            renderSlide();
-            ['touchstart', 'mousedown', 'keydown'].forEach(evt => {
-                window.addEventListener(evt, startSmoothAudio, { once: true, passive: true });
-            });
+            initSparkleParticles();
         };
     </script>
 </body>
