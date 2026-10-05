@@ -82,11 +82,12 @@
         .start-action-box:active { transform: scale(0.96); background: var(--amber); color: #0d0202; }
 
         .game-top-bar {
-            position: fixed; top: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 10px 12px;
+            position: fixed; top: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 10px 15px;
             display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; opacity: 0; transition: opacity 1.5s ease;
         }
         .game-top-bar.visible { opacity: 1; }
 
+        /* HAI THANH NĂNG LƯỢNG HAI BÊN ĐỐI XỨNG */
         .health-container { display: flex; gap: 3px; align-items: center; }
         .health-bar { width: 11px; height: 6px; background: rgba(255,255,255,0.15); transform: skewX(-20deg); transition: all 0.3s ease; }
         .health-bar.active { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
@@ -193,7 +194,6 @@
 
         .burst-container { position: fixed; width: 100vw; height: 100dvh; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 99999; pointer-events: none; }
         
-        /* BẠO PHÁP 1 NGÓN Ở CHÍNH GIỮA */
         .burst-btn-center {
             position: absolute; width: 120px; height: 120px; border-radius: 50%;
             background: radial-gradient(circle, #ffffff 0%, #ffdf70 35%, #ff3333 75%, #cc0000 100%);
@@ -256,25 +256,30 @@
     <div id="task-arena">
         <div class="play-area" id="play-area">
 
+            <!-- TẦNG TRÊN: 2 THANH NĂNG LƯỢNG HAI BÊN (MỖI BÊN 5 HẠT), Ô DATA Ở GIỮA -->
             <div id="game-top-bar" class="game-top-bar">
+                <!-- Thanh trái: 5 hạt -->
                 <div class="health-container">
                     <div class="health-bar active" id="hp-1"></div>
                     <div class="health-bar active" id="hp-2"></div>
                     <div class="health-bar active" id="hp-3"></div>
                     <div class="health-bar active" id="hp-4"></div>
                     <div class="health-bar active" id="hp-5"></div>
+                </div>
+
+                <div class="data-score-wrap">
+                    <div class="data-score">DATA: <span id="boo-points">0</span></div>
+                    <div class="thread-status-sub" id="thread-sub-label">Đang đo tốc độ luồng</div>
+                    <div id="hp-notification-area"></div>
+                </div>
+
+                <!-- Thanh phải: 5 hạt -->
+                <div class="health-container">
                     <div class="health-bar" id="hp-6"></div>
                     <div class="health-bar" id="hp-7"></div>
                     <div class="health-bar" id="hp-8"></div>
                     <div class="health-bar" id="hp-9"></div>
                     <div class="health-bar" id="hp-10"></div>
-                </div>
-
-                <div class="data-score-wrap">
-                    <div class="data-score">DATA: <span id="boo-points">0</span></div>
-                    <!-- CHỈ HIỆN KHI VÀO GIAI ĐOẠN BẠO PHÁP -->
-                    <div class="thread-status-sub" id="thread-sub-label">Đang đo tốc độ luồng</div>
-                    <div id="hp-notification-area"></div>
                 </div>
             </div>
 
@@ -370,7 +375,7 @@
             } else if (avgMs <= 500) {
                 return { name: "Core i7", feedback: "Đang chạy Chip Core i7. Tốc độ xử lý luồng dữ liệu mượt mà, nhanh nhạy.<br><br><span style='color: #ffd700; font-weight: 700;'>" + successText + "</span>" };
             } else {
-                return { name: "Core i3", feedback: "Đang chạy Chip Core i3. Tốc độ xử thông tin cơ bản, thỉnh thoảng bị trễ.<br><br><span style='color: #ffd700; font-weight: 700;'>" + successText + "</span>" };
+                return { name: "Core i3", feedback: "Đang chạy Chip Core i3. Tốc độ xử lý thông tin cơ bản, thỉnh thoảng bị trễ.<br><br><span style='color: #ffd700; font-weight: 700;'>" + successText + "</span>" };
             }
         }
 
@@ -665,13 +670,11 @@
             let playArea = document.getElementById('play-area'); 
             let blackout = document.createElement('div'); blackout.className = 'blackout-bg active'; playArea.appendChild(blackout);
             
-            // HIỆN DÒNG CHỮ ĐANG ĐO TỐC ĐỘ LUỒNG KHI VÀO BẠO PHÁP
             let subLabel = document.getElementById('thread-sub-label');
             if(subLabel) subLabel.classList.add('visible');
 
             let burstContainer = document.createElement('div'); burstContainer.className = 'burst-container'; let burstClicks = 0; let duration = 7000; 
 
-            // CHỈ CÓ 1 NÚT BẠO PHÁP Ở CHÍNH GIỮA MÀN HÌNH (1 NGÓN)
             let bCenter = document.createElement('div'); bCenter.className = 'burst-btn-center';
             let svgCenter = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svgCenter.setAttribute("class", "circular-text-svg");
@@ -687,7 +690,6 @@
 
             burstTimer = setTimeout(() => {
                 burstContainer.remove(); 
-                // ẨN DÒNG CHỮ ĐO TỐC ĐỘ LUỒNG SAU KHI BẠO PHÁP XONG
                 if(subLabel) subLabel.classList.remove('visible');
                 fireBeam(burstClicks, blackout);
             }, duration);
