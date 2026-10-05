@@ -24,7 +24,15 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; transition: all 0.3s ease; }
+
+        /* VIỀN ĐỎ BAO TRỌN TOÀN BỘ MÀN HÌNH TRÌNH DUYỆT */
+        @keyframes fullScreenGlobalPulse {
+            0% { box-shadow: inset 0 0 30px rgba(255,51,51,0.5), 0 0 20px rgba(255,51,51,0.3); border: 4px solid rgba(255,51,51,0.6); }
+            50% { box-shadow: inset 0 0 90px rgba(255,51,51,0.95), 0 0 70px rgba(255,51,51,0.9); border: 6px solid rgba(255,51,51,1); }
+            100% { box-shadow: inset 0 0 30px rgba(255,51,51,0.5), 0 0 20px rgba(255,51,51,0.3); border: 4px solid rgba(255,51,51,0.6); }
+        }
+        body.global-warning-active { animation: fullScreenGlobalPulse 1.2s infinite ease-in-out !important; }
 
         #sanctum-video {
             position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1;
@@ -44,16 +52,8 @@
         }
 
         #task-arena { position: fixed; inset: 0; background: transparent; z-index: 120; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
-        
-        /* VIỀN ĐỎ TOÀN MÀN HÌNH KHI BÁO ĐỘNG */
-        @keyframes fullScreenRedPulse {
-            0% { box-shadow: inset 0 0 30px rgba(255,51,51,0.4), 0 0 20px rgba(255,51,51,0.2); border: 3px solid rgba(255,51,51,0.5); }
-            50% { box-shadow: inset 0 0 80px rgba(255,51,51,0.95), 0 0 60px rgba(255,51,51,0.85); border: 4px solid rgba(255,51,51,1); }
-            100% { box-shadow: inset 0 0 30px rgba(255,51,51,0.4), 0 0 20px rgba(255,51,51,0.2); border: 3px solid rgba(255,51,51,0.5); }
-        }
         .play-area { width: 100%; max-width: 360px; height: 100vh; height: 100dvh; background: transparent; position: relative; overflow: hidden; margin: 0 auto; transition: all 1.8s cubic-bezier(0.25, 1, 0.5, 1); }
         .play-area.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important; max-width: none !important; margin: 0 !important; z-index: 9990 !important; background: var(--bg-obsidian) !important; }
-        .play-area.screen-warning-active { animation: fullScreenRedPulse 1.2s infinite ease-in-out !important; }
 
         .laser-beam-horizontal { position: fixed; top: 50%; left: 0; width: 100vw; height: 2px; background: #ffb700; box-shadow: 0 0 25px var(--crimson), 0 0 50px #ff6600; z-index: 99999; transform: scaleX(0); transform-origin: center; animation: laserShoot 1.0s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: none; }
         @keyframes laserShoot { 100% { transform: scaleX(1); height: 4px; } }
@@ -77,7 +77,7 @@
             100% { opacity: 0.6; transform: scale(0.95); text-shadow: 0 0 4px rgba(255,183,0,0.4); }
         }
 
-        /* HIỆU ỨNG PHÓNG TO THU NHỎ RIÊNG CHO CHỮ CẢNH BÁO */
+        /* CHỈ CÓ CHỮ NÀY NHẤP NHÁY PHÓNG TO THU NHỎ */
         @keyframes textPulseScale {
             0% { transform: scale(1); filter: brightness(1); }
             50% { transform: scale(1.12); filter: brightness(1.4); text-shadow: 0 0 15px rgba(255,51,51,1); }
@@ -265,7 +265,7 @@
         @keyframes topAlertAnim { 0% { opacity: 0; transform: translate(-50%, -10px); } 15% { opacity: 1; transform: translate(-50%, 0); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -15px); } }
     </style>
 </head>
-<body>
+<body id="main-body-tag">
 
     <div id="dust-container"></div>
 
@@ -523,7 +523,7 @@
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
-            playArea.classList.remove('screen-warning-active');
+            document.getElementById('main-body-tag').classList.remove('global-warning-active');
             playArea.querySelectorAll('.orb, .child-projectile, .core-reactor, .blackout-bg, .beam, .explosion, .floating-ms, .floating-cps, .burst-btn-center').forEach(o => o.remove());
 
             let subLabel = document.getElementById('thread-sub-label');
@@ -766,9 +766,9 @@
             let playArea = document.getElementById('play-area'); playArea.classList.remove('fullscreen-mode');
             playArea.querySelectorAll('.orb, .child-projectile, .core-reactor, .blackout-bg, .beam, .explosion, .floating-ms, .floating-cps, .float-score, .burst-btn-center').forEach(o => o.remove());
 
-            // NẾU DƯỚI 1000 DATA THÌ KÍCH HOẠT VIỀN ĐỎ TOÀN MÀN HÌNH VÀ ÂM THANH BÁO ĐỘNG NGAY
+            // NẾU DƯỚI 1000 DATA THÌ KÍCH HOẠT VIỀN ĐỎ BAO TRỌN TOÀN MÀN HÌNH VÀ ÂM THANH BÁO ĐỘNG
             if (aScore < 1000) {
-                playArea.classList.add('screen-warning-active');
+                document.getElementById('main-body-tag').classList.add('global-warning-active');
                 playSound('alarm');
                 triggerVibration([300, 150, 300, 150, 300]);
             }
@@ -790,7 +790,6 @@
             let cpuEvalObj = getCpuEvaluation(avgReactionMs, aScore);
             let threadRank = (aScore > 0 && bestCpsG2 > 0) ? getThreadRanking(bestCpsG2) : "Đơn Tốc";
 
-            let playArea = document.getElementById('play-area');
             let cpuLabelTitle = document.getElementById('label-cpu-title');
             let threadLabelTitle = document.getElementById('label-thread-title');
             let cpuVal = document.getElementById('sum-rank-cpu');
@@ -798,22 +797,22 @@
             let debugBox = document.getElementById('debug-stats-box');
 
             if (isWarning) {
-                // VIỀN ĐỎ BAO TOÀN MÀN HÌNH NHẤP NHÁY
-                playArea.classList.add('screen-warning-active');
+                // VIỀN ĐỎ TOÀN MÀN HÌNH BÂY GIỜ ĐÃ BAO TRỌN 100% TRÌNH DUYỆT
+                document.getElementById('main-body-tag').classList.add('global-warning-active');
                 cpuLabelTitle.innerHTML = "Tốc độ";
                 threadLabelTitle.innerHTML = "Bộ nhớ";
                 
-                // CHỈ CÓ CHỮ NÀY NHẤP NHÁY PHÓNG TO THU NHỎ
+                // CHỈ CÓ HAI CHỮ NÀY NHẤP NHÁY PHÓNG TO THU NHỎ
                 cpuVal.innerHTML = `<span class="text-pulse-anim">△ BÁO ĐỘNG</span>`;
                 cpuVal.classList.add('warning-red');
                 
                 threadVal.innerHTML = `<span class="text-pulse-anim">CHƯA ĐỦ DATA</span>`;
                 threadVal.classList.add('warning-red');
                 
-                // BÊN DƯỚI CHỈ CÒN CÂU CẢNH BÁO, KHÔNG CÒN THÔNG SỐ THỜI GIAN
+                // RÚT GỌN BÊN DƯỚI CHỈ CÒN CÂU CẢNH BÁO
                 debugBox.innerHTML = `<span id="feedback-text-msg" style="color: #ff9999; font-weight: 700; text-shadow: 0 0 8px rgba(255,51,51,0.8);">Bộ nhớ phản xạ của bạn đang dưới mức bình thường, không đủ 1000 data! Yêu cầu đo lại ngay lập tức!</span>`;
             } else {
-                playArea.classList.remove('screen-warning-active');
+                document.getElementById('main-body-tag').classList.remove('global-warning-active');
                 cpuLabelTitle.innerHTML = "Vi xử lý";
                 threadLabelTitle.innerHTML = "Đa luồng";
                 cpuVal.innerHTML = cpuEvalObj.name;
