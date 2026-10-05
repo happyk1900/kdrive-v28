@@ -6,9 +6,10 @@
     <meta name="theme-color" content="#050b14">
     <title>K-Drive - Thủy Luân (Trí Nhớ)</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -17,6 +18,7 @@
             --mint: #ff3366;    
             --neon-pink: #f48fb1; 
             --amber: #ffb74d;   
+            --crimson: #ff3366;
             --gold: #ffd700;
             --text-light: #ffffff;
             --panel-bg: rgba(6, 15, 30, 0.88); 
@@ -26,13 +28,13 @@
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; }
 
-        /* VIDEO NỀN CHỈ HIỆN KHI MỞ BẢNG GIẢI MÃ (CÓ BLUR MỜ ẢO) */
+        /* VIDEO NỀN CHỈ DÙNG CHO SẢNH VÀ KHI BẬT BẢNG GIẢI MÃ, TRONG KHI CHƠI SẼ ẨN ĐỂ TẬP TRUNG */
         #sanctum-video { 
             position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; 
-            object-fit: cover; opacity: 0; transition: opacity 1.5s ease; pointer-events: none;
-            filter: brightness(0.6) blur(2px);
+            object-fit: cover; opacity: 0; transition: opacity 2.0s ease; pointer-events: none;
         }
-        #sanctum-video.active-blur { opacity: 0.75; }
+        #sanctum-video.loaded { opacity: 0.6; }
+        #sanctum-video.hidden-mode { opacity: 0 !important; }
 
         #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
         .quantum-sparkle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 8px #ffffff, 0 0 15px #f48fb1; opacity: 0; animation: sparkleFloat linear infinite; }
@@ -103,19 +105,37 @@
         }
 
         .super-click-btn {
-            width: 55px; height: 55px; border-radius: 50%;
-            background: rgba(0, 229, 255, 0.25); border: 3px solid #00e5ff;
-            display: flex; justify-content: center; align-items: center; overflow: hidden;
-            animation: waterButtonPulse 1.8s infinite ease-in-out; cursor: pointer; position: relative;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: rgba(0, 229, 255, 0.25);
+            border: 3px solid #00e5ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            animation: waterButtonPulse 1.8s infinite ease-in-out;
+            cursor: pointer;
+            position: relative;
         }
 
         .pointing-finger {
-            position: absolute; bottom: -12px; right: -6px; font-size: 18px;
-            animation: fingerBounce 1.2s infinite ease-in-out; filter: drop-shadow(0 0 8px #00e5ff); z-index: 10;
+            position: absolute;
+            bottom: -15px;
+            right: -8px;
+            font-size: 18px;
+            animation: fingerBounce 1.2s infinite ease-in-out;
+            filter: drop-shadow(0 0 8px #00e5ff);
+            z-index: 10;
         }
 
-        #screen-red-border { position: fixed; inset: 0; border: 6px solid transparent; pointer-events: none; z-index: 999999; opacity: 0; transition: opacity 0.3s; }
-        #screen-red-border.active { opacity: 1; animation: screenBorderPulse 0.6s infinite alternate ease-in-out; }
+        #screen-red-border {
+            position: fixed; inset: 0; border: 6px solid transparent; pointer-events: none; z-index: 999999; opacity: 0; transition: opacity 0.3s;
+        }
+        #screen-red-border.active {
+            opacity: 1;
+            animation: screenBorderPulse 0.6s infinite alternate ease-in-out;
+        }
         @keyframes screenBorderPulse {
             0% { border-color: rgba(255, 0, 0, 0.4); box-shadow: inset 0 0 30px rgba(255,0,0,0.3), 0 0 30px rgba(255,0,0,0.3); }
             100% { border-color: rgba(255, 51, 102, 1); box-shadow: inset 0 0 70px rgba(255,0,0,0.8), 0 0 70px rgba(255,0,0,0.8); }
@@ -125,7 +145,7 @@
         #start-prompt-overlay.active { opacity: 1; visibility: visible; }
         #start-prompt-overlay > * { animation: cinematicPopupSuperSlow 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
 
-        .briefing-panel { background: var(--panel-bg); backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px 26px; width: 100%; max-width: 340px; text-align: left; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); }
+        .briefing-panel { background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px 26px; width: 100%; max-width: 340px; text-align: left; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); }
         .briefing-title { color: #00e5ff !important; font-family: 'Chakra Petch', sans-serif; font-size: 24px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(0, 229, 255, 0.4); padding-bottom: 8px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,229,255,0.6); }
         .briefing-target { color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 15px; line-height: 1.6; font-weight: 700; text-align: center; animation: textBlinkGlow 2.0s infinite ease-in-out; }
 
@@ -133,7 +153,10 @@
         .start-action-box { width: 100%; background: var(--panel-bg); border: 1.5px solid #00ff9d; padding: 15px; border-radius: 12px; color: #00ff9d; font-family: 'Chakra Petch', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; animation: pulse-btn 1.5s infinite; }
         .start-action-box:active { transform: scale(0.96); background: #00ff9d; color: #050b14; }
 
-        .game-top-bar { position: fixed; top: max(20px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; opacity: 0; transition: opacity 1.5s ease; }
+        .game-top-bar {
+            position: fixed; top: max(20px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; opacity: 0; transition: opacity 1.5s ease;
+        }
         .game-top-bar.visible { opacity: 1; }
 
         .health-container { display: flex; gap: 4px; align-items: center; }
@@ -145,12 +168,16 @@
         .data-score span { color: #f48fb1; text-shadow: 0 0 12px #f48fb1; font-size: 20px; margin-left: 6px; }
         #hp-notification-area { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); width: 220px; text-align: center; }
 
-        .game-bottom-bar { position: fixed; bottom: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw; border-top: 1px solid rgba(244, 143, 177, 0.5); padding: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; background: linear-gradient(0deg, rgba(5,11,20,0.95) 0%, transparent 100%); opacity: 0; transition: opacity 1.5s ease; }
+        /* THANH ĐIỀU HƯỚNG DƯỚI ĐÁY: 4 NÚT CHUẨN XÁC GIỐNG HỎA LUẬN */
+        .game-bottom-bar {
+            position: fixed; bottom: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw; border-top: 1px solid rgba(244, 143, 177, 0.5); padding: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; background: linear-gradient(0deg, rgba(5,11,20,0.95) 0%, transparent 100%); opacity: 0; transition: opacity 1.5s ease;
+        }
         .game-bottom-bar.visible { opacity: 1; }
 
         .btn-action { width: 44px; height: 44px; background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(244, 143, 177, 0.75); border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(8px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .btn-action:active { transform: scale(0.9); }
         .btn-back { color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 24px; font-weight: bold; box-shadow: 0 0 12px rgba(244,143,177,0.4); padding-bottom: 2px; padding-right: 2px; }
+        
         .btn-next-lesson { border-color: rgba(255, 183, 77, 0.7); color: #ffb74d; font-size: 18px; box-shadow: 0 0 12px rgba(255, 183, 77, 0.3); }
         .btn-mute { border-color: rgba(0, 229, 255, 0.7); color: #00e5ff; font-size: 18px; box-shadow: 0 0 12px rgba(0, 229, 255, 0.3); }
         .btn-pause { border-color: rgba(255, 51, 102, 0.7); box-shadow: 0 0 12px rgba(255, 51, 102, 0.3); }
@@ -231,7 +258,7 @@
         .matrix-expand-alert { position: fixed; top: 100px; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 26px; font-weight: 900; color: #ffffff; text-align: center; text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 20px #f48fb1; z-index: 999999; pointer-events: none; white-space: nowrap; background: transparent; border: none; box-shadow: none; animation: topAlertAnim 1.2s ease-out forwards; }
         @keyframes topAlertAnim { 0% { opacity: 0; transform: translate(-50%, -10px); } 15% { opacity: 1; transform: translate(-50%, 0); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -15px); } }
 
-        /* MODULE BOO AI */
+        /* CSS MODULE BOO */
         #boo-module-container { position: fixed; top: 20px; right: 20px; pointer-events: none; z-index: 20000; opacity: 0; display: none; perspective: 600px; transition: opacity 0.5s ease; }
         #boo-module-container.active { display: block; opacity: 1; pointer-events: auto; }
         .boo-hologram { position: relative; width: 55px; height: 55px; cursor: pointer; display: flex; justify-content: center; align-items: center; pointer-events: auto; touch-action: none; animation: holoHover 3s ease-in-out infinite; transform-style: preserve-3d; }
@@ -251,20 +278,15 @@
 </head>
 <body>
 
-    <!-- VIDEO NỀN MỜ ẢO CHỈ DÙNG KHI MỞ BẢNG GIẢI MÃ -->
     <video id="sanctum-video" autoplay loop playsinline>
         <source src="../Photo/video nen thuy luan.mp4" type="video/mp4">
     </video>
 
-    <!-- NHẠC NỀN PIXEL DREAM CIRCUIT -->
-    <audio id="decode-audio" loop preload="auto">
-        <source src="../Photo/Pixel Dream Circuit.mp3" type="audio/mpeg">
-    </audio>
-
     <div id="screen-red-border"></div>
 
-    <audio id="alarm-audio" loop preload="auto">
-        <source src="../Photo/AM THANH BAO DONG.wav" type="audio/mpeg">
+    <!-- CẬP NHẬT TRỎ ĐÚNG FILE BÁO ĐỘNG MỚI: AM THANH BAO DONG 3 GIAY.mp3 (PHÁT 1 LẦN DUY NHẤT, KHÔNG LOOP) -->
+    <audio id="alarm-audio" preload="auto">
+        <source src="../Photo/AM THANH BAO DONG 3 GIAY.mp3" type="audio/mpeg">
     </audio>
 
     <div id="dust-container"></div>
@@ -294,12 +316,10 @@
                 </div>
             </div>
 
-            <!-- THANH ĐIỀU HƯỚNG DƯỚI ĐÁY -->
             <div id="game-bottom-bar" class="game-bottom-bar">
-                <button class="btn-action btn-back" onclick="confirmExitToLobby()" title="Quay lại">⟨</button>
-                <button class="btn-action btn-next-lesson" onclick="goToHoaLuan()" title="Chuyển sang Hỏa Luận">⏭</button>
-                <button class="btn-action btn-mute" id="btn-mute" onclick="toggleMasterMute()" title="Bật/Tắt âm thanh toàn hệ thống">🔊</button>
-                <button class="btn-action btn-pause" onclick="pauseGame()" title="Tạm dừng"></button>
+                <button class="btn-action btn-back" onclick="confirmExitToLobby()">⟨</button>
+                <button class="btn-action btn-mute" id="btn-mute" onclick="toggleVideoMute()" title="Bật/Tắt tiếng video">🔊</button>
+                <button class="btn-action btn-pause" onclick="pauseGame()"></button>
             </div>
 
             <div id="start-prompt-overlay">
@@ -359,7 +379,6 @@
                     </div>
                 </div>
 
-                <!-- NÚT GIẢI MÃ TỐI GIẢN -->
                 <div style="display: flex; flex-direction: column; align-items: center; margin: 2px 0; width: 92%; max-width: 340px;">
                     <div onclick="toggleThuyLuanModal()" style="display: flex; flex-direction: column; align-items: center; cursor: pointer;">
                         <div class="super-click-btn" style="width: 55px; height: 55px;">
@@ -390,18 +409,15 @@
         </div>
     </div>
 
-    <!-- MODAL TRÌNH CHIẾU 3 TRƯỜNG PHÁI (ĐÃ BỎ GẠCH, FONT MỀM MẠI, CÓ NÚT "ĐÃ HIỂU") -->
-    <div id="thuy-luan-modal" style="position: fixed; inset: 0; background: rgba(5, 11, 20, 0.90); z-index: 9999999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 25px; backdrop-filter: blur(14px);">
+    <!-- MODAL TRÌNH CHIẾU 3 TRƯỜNG PHÁI -->
+    <div id="thuy-luan-modal" onclick="nextCinematicSlide()" style="position: fixed; inset: 0; background: rgba(5, 11, 20, 0.96); z-index: 9999999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 25px; backdrop-filter: blur(15px); cursor: pointer;">
         
-        <div id="floating-icons-container"></div>
-
-        <div id="cinematic-text-container" style="width: 100%; max-width: 350px; min-height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 14px; transition: opacity 0.4s ease, transform 0.4s ease; opacity: 0; transform: translateY(10px);" onclick="nextCinematicSlide()">
+        <div id="cinematic-text-container" style="width: 100%; max-width: 350px; min-height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 14px; transition: opacity 0.5s ease, transform 0.5s ease; opacity: 0; transform: translateY(12px);">
             <!-- Nội dung slide động -->
         </div>
 
-        <!-- NÚT "ĐÃ HIỂU" TINH TẾ Ở CUỐI SLIDE TRÍÊT LÝ -->
-        <div id="understood-btn-container" style="display: none; margin-top: 25px; z-index: 10;">
-            <button onclick="closeThuyLuanModal()" style="background: rgba(0,229,255,0.15); border: 1.5px solid #00e5ff; color: #00e5ff; font-family: 'Chakra Petch', sans-serif; font-size: 13px; font-weight: 800; text-transform: uppercase; padding: 10px 24px; border-radius: 20px; cursor: pointer; letter-spacing: 2px; box-shadow: 0 0 15px rgba(0,229,255,0.4); transition: 0.2s;">ĐÃ HIỂU</button>
+        <div style="position: absolute; bottom: 35px; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.6); letter-spacing: 2px; animation: textBlinkGlow 2s infinite;">
+            [ CHẠM MÀN HÌNH ĐỂ ĐỌC TIẾP ➔ ]
         </div>
     </div>
 
@@ -447,34 +463,28 @@
 
         let fxCtx = null;
         let isScoreBelow1000 = false;
-        let isMasterMuted = false;
 
         function initAudio() { 
             try {
                 if (!fxCtx) { fxCtx = new (window.AudioContext || window.webkitAudioContext)(); }
                 if (fxCtx && fxCtx.state === 'suspended') { fxCtx.resume(); }
                 let vid = document.getElementById('sanctum-video');
-                if (vid && !vid.dataset.userMuted && !isMasterMuted) { vid.muted = false; vid.play().catch(e => {}); }
+                if (vid && !vid.dataset.userMuted) { vid.muted = false; vid.play().catch(e => {}); }
             } catch(e) {}
         }
         ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => { window.addEventListener(evt, initAudio, { passive: true }); });
 
-        function toggleMasterMute() {
+        function toggleVideoMute() {
             let vid = document.getElementById('sanctum-video');
-            let decodeAudio = document.getElementById('decode-audio');
             let muteBtn = document.getElementById('btn-mute');
-            
-            isMasterMuted = !isMasterMuted;
-
-            if (vid) { vid.muted = isMasterMuted; vid.dataset.userMuted = isMasterMuted ? 'true' : 'false'; }
-            if (decodeAudio) { decodeAudio.muted = isMasterMuted; }
-
-            muteBtn.innerHTML = isMasterMuted ? '🔇' : '🔊';
+            if(!vid) return;
+            vid.muted = !vid.muted;
+            vid.dataset.userMuted = vid.muted ? 'true' : 'false';
+            muteBtn.innerHTML = vid.muted ? '🔇' : '🔊';
             playSound('coin');
         }
 
         function playSound(type, pitchMultiplier = 1) {
-            if (isMasterMuted) return;
             try { 
                 if (fxCtx && fxCtx.state === 'suspended') fxCtx.resume();
                 if (!fxCtx) return;
@@ -489,22 +499,18 @@
             } catch (e) {}
         }
 
-        // 3 SLIDE ĐÃ BỎ HẠT/GẠCH CHÉO, FONT MỀM MẠI SANG TRỌNG
         const cinematicSlides = [
             {
-                title: "GIẢI MÃ KHOA HỌC THẦN KINH",
-                content: "Bài test đánh giá trực tiếp <span style='color: #ffd700; font-weight: bold;'>Trí nhớ làm việc (Working Memory)</span> và <span style='color: #ffd700; font-weight: bold;'>Vòng lặp thị giác - không gian</span> do <span style='color: #ff3366; font-weight: bold;'>vỏ não trước trán</span> quản lý, chịu trách nhiệm lưu trữ và thao tác thông tin ngắn hạn.",
-                icons: ['🧠', '🧬', '⚡', '🔬', '💡']
+                title: "GIẢI MÃ – KHOA HỌC THẦN KINH",
+                content: "Bài test đánh giá trực tiếp <span style='color: #ffd700; font-weight: bold;'>Trí nhớ làm việc (Working Memory)</span> và <span style='color: #ffd700; font-weight: bold;'>Vòng lặp thị giác - không gian (Visuospatial Sketchpad)</span> do <span style='color: #ff3366; font-weight: bold;'>vỏ não trước trán (Prefrontal Cortex)</span> quản lý, chịu trách nhiệm lưu trữ và thao tác thông tin ngắn hạn."
             },
             {
-                title: "GIẢI MÃ NGÔN NGỮ MÁY TÍNH",
-                content: "Quy đổi sinh học sang kiến trúc hệ thống: Dung lượng <span style='color: #00ff9d; font-weight: bold;'>RAM</span> biểu thị khả năng lưu trữ tức thời của chuỗi thông tin ngắn hạn, còn tốc độ <span style='color: #00ff9d; font-weight: bold;'>SSD</span> tượng trưng cho tốc độ truy xuất dữ liệu từ kho chứa dài hạn ra bộ nhớ đệm.",
-                icons: ['💻', '💾', '🧮', '⚡', '🔋']
+                title: "GIẢI MÃ – NGÔN NGỮ MÁY TÍNH",
+                content: "Quy đổi sinh học sang kiến trúc hệ thống: Dung lượng <span style='color: #00ff9d; font-weight: bold;'>RAM</span> biểu thị khả năng lưu trữ tức thời của chuỗi thông tin ngắn hạn, còn tốc độ <span style='color: #00ff9d; font-weight: bold;'>SSD</span> tượng trưng cho tốc độ truy xuất dữ liệu từ kho chứa dài hạn ra bộ nhớ đệm để xử lý."
             },
             {
-                title: "GIẢI MÃ TRIẾT LÝ VÕ HỌC",
-                content: "THỦY LUÂN — NGŨ LUÂN THƯ<br><br><span style='color: #00e5ff; font-style: italic; font-size: 15px; font-weight: 500; line-height: 1.6;'>'Tâm như nước biến hóa vô hình, tĩnh lặng soi chiếu vạn vật.'</span><br><br><span style='color: #ffd700; font-weight: bold; font-size: 13px; letter-spacing: 1px;'>— MIYAMOTO MUSASHI</span>",
-                icons: ['💧', '⚔️', '🌸', '☯️', '📜']
+                title: "GIẢI MÃ – TRIẾT LÝ VÕ HỌC",
+                content: "THỦY LUÂN // NGŨ LUÂN THƯ<br><br><span style='color: #00e5ff; font-style: italic; font-size: 14.5px;'>'Tâm như nước biến hóa vô hình, tĩnh lặng soi chiếu vạn vật.'</span><br><br><span style='color: #ffd700; font-weight: bold; font-size: 13px;'>— MIYAMOTO MUSASHI</span>"
             }
         ];
 
@@ -512,7 +518,6 @@
         const holoBubble = document.getElementById('holo-bubble');
 
         function playBooDialog(text) {
-            if (isMasterMuted) return;
             window.speechSynthesis.cancel();
             let cleanText = text.replace(/<[^>]*>?/gm, '');
             if(holoBubble) {
@@ -530,119 +535,63 @@
             } catch(e) {}
         }
 
-        function spawnFloatingIcons(iconList) {
-            let container = document.getElementById('floating-icons-container');
-            if(!container) return;
-            container.innerHTML = '';
-
-            iconList.forEach((emoji, index) => {
-                let el = document.createElement('div');
-                el.className = 'floating-science-icon';
-                el.innerHTML = emoji;
-                let randomX = Math.random() * 260 - 130; 
-                el.style.left = `calc(50% + ${randomX}px)`;
-                el.style.bottom = '35vh';
-                el.style.animationDelay = `${index * 0.25}s`;
-                el.style.fontSize = `${Math.floor(Math.random() * 8) + 24}px`;
-                container.appendChild(el);
-            });
-        }
-
         function toggleThuyLuanModal() {
             playSound('coin');
             let modal = document.getElementById('thuy-luan-modal');
             let booContainer = document.getElementById('boo-module-container');
-            let decodeAudio = document.getElementById('decode-audio');
             let sanctumVideo = document.getElementById('sanctum-video');
 
             if (modal) {
-                modal.style.display = 'flex';
-                if(booContainer) booContainer.classList.add('active');
-                currentSlideIndex = 0;
-                renderCinematicSlide();
-
-                if(sanctumVideo) {
-                    sanctumVideo.classList.add('active-blur');
-                    sanctumVideo.muted = true;
-                    sanctumVideo.play().catch(e => {});
+                if (modal.style.display === 'flex') {
+                    modal.style.display = 'none';
+                    if(booContainer) booContainer.classList.remove('active');
+                    window.speechSynthesis.cancel();
+                    if(sanctumVideo && !sanctumVideo.dataset.userMuted) {
+                        sanctumVideo.muted = false;
+                    }
+                } else {
+                    modal.style.display = 'flex';
+                    if(booContainer) booContainer.classList.add('active');
+                    currentSlideIndex = 0;
+                    renderCinematicSlide();
                 }
-                if(decodeAudio) {
-                    decodeAudio.muted = isMasterMuted;
-                    decodeAudio.volume = 0;
-                    decodeAudio.currentTime = 0;
-                    decodeAudio.play().catch(e => console.log("Audio play blocked:", e));
-
-                    let vol = 0;
-                    let fadeInterval = setInterval(() => {
-                        vol += 0.03;
-                        if (vol >= 0.18) {
-                            decodeAudio.volume = 0.18;
-                            clearInterval(fadeInterval);
-                        } else {
-                            decodeAudio.volume = vol;
-                        }
-                    }, 100);
-                }
-            }
-        }
-
-        // HÀM ĐÓNG MODAL KHI BẤM NÚT "ĐÃ HIỂU": TẮT NHẠC GIẢI MÃ, TẮT VIDEO NỀN MỜ, TRẢ LẠI TRẠNG THÁI BÌNH THƯỜNG
-        function closeThuyLuanModal() {
-            playSound('coin');
-            let modal = document.getElementById('thuy-luan-modal');
-            let booContainer = document.getElementById('boo-module-container');
-            let decodeAudio = document.getElementById('decode-audio');
-            let sanctumVideo = document.getElementById('sanctum-video');
-
-            if(modal) modal.style.display = 'none';
-            if(booContainer) booContainer.classList.remove('active');
-            window.speechSynthesis.cancel();
-
-            if(decodeAudio) {
-                decodeAudio.pause();
-                decodeAudio.currentTime = 0;
-            }
-            if(sanctumVideo) {
-                sanctumVideo.classList.remove('active-blur');
-                sanctumVideo.pause();
-                sanctumVideo.currentTime = 0;
             }
         }
 
         function renderCinematicSlide() {
             let container = document.getElementById('cinematic-text-container');
-            let understoodBtn = document.getElementById('understood-btn-container');
             if (!container) return;
 
             container.style.opacity = '0';
-            container.style.transform = 'translateY(10px)';
+            container.style.transform = 'translateY(12px)';
 
             setTimeout(() => {
                 let slide = cinematicSlides[currentSlideIndex];
                 container.innerHTML = `
-                    <div style="font-family: 'Chakra Petch', sans-serif; font-size: 15px; font-weight: 800; color: #00e5ff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 12px rgba(0,229,255,0.7); margin-bottom: 6px;">${slide.title}</div>
-                    <div style="font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; font-weight: 500; color: #f1f5f9; line-height: 1.75; text-shadow: 0 0 8px rgba(255,255,255,0.35);">${slide.content}</div>
+                    <div style="font-family: 'Chakra Petch', sans-serif; font-size: 14px; font-weight: 900; color: #00e5ff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,229,255,0.6); margin-bottom: 4px;">// ${slide.title}</div>
+                    <div style="font-family: 'Space Grotesk', sans-serif; font-size: 14px; color: #ffffff; line-height: 1.7; text-shadow: 0 0 8px rgba(255,255,255,0.4);">${slide.content}</div>
                 `;
                 container.style.opacity = '1';
                 container.style.transform = 'translateY(0px)';
 
-                spawnFloatingIcons(slide.icons);
                 playBooDialog(slide.title + ". " + slide.content);
-
-                // HIỆN NÚT "ĐÃ HIỂU" Ở SLIDE CUỐI CÙNG (TRIẾT LÝ VÕ HỌC)
-                if (currentSlideIndex === cinematicSlides.length - 1) {
-                    if(understoodBtn) understoodBtn.style.display = 'block';
-                } else {
-                    if(understoodBtn) understoodBtn.style.display = 'none';
-                }
-            }, 200);
+            }, 250);
         }
 
         function nextCinematicSlide() {
             playSound('brake');
             currentSlideIndex++;
             if (currentSlideIndex >= cinematicSlides.length) {
-                closeThuyLuanModal();
+                let modal = document.getElementById('thuy-luan-modal');
+                let booContainer = document.getElementById('boo-module-container');
+                let sanctumVideo = document.getElementById('sanctum-video');
+
+                if (modal) modal.style.display = 'none';
+                if(booContainer) booContainer.classList.remove('active');
+                window.speechSynthesis.cancel();
+                if(sanctumVideo && !sanctumVideo.dataset.userMuted) {
+                    sanctumVideo.muted = false;
+                }
             } else {
                 renderCinematicSlide();
             }
@@ -693,6 +642,10 @@
             bestSequenceLen = 0; bestSequenceTime = 0; nextHpMilestone = 1000;
             isScoreBelow1000 = false;
 
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('playing-mode');
+            setTimeout(() => vid.classList.add('loaded'), 150);
+
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
             document.getElementById('game-container').classList.remove('active');
@@ -731,6 +684,10 @@
             let promptOverlay = document.getElementById('start-prompt-overlay');
             promptOverlay.classList.remove('active');
             setTimeout(() => promptOverlay.classList.add('hidden'), 1200);
+            
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('loaded');
+            vid.classList.add('playing-mode');
 
             playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
             setTimeout(() => { let playArea = document.getElementById('play-area'); playArea.classList.add('fullscreen-mode'); laser.classList.add('expand'); }, 600);
@@ -896,6 +853,10 @@
             let finalScore = Math.floor(aScore);
             if (finalScore < 1000) { isScoreBelow1000 = true; } else { isScoreBelow1000 = false; }
 
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('playing-mode');
+            setTimeout(() => vid.classList.add('loaded'), 400);
+
             localStorage.setItem('thuy_luan_score', finalScore);
 
             document.getElementById('game-top-bar').classList.remove('visible');
@@ -929,7 +890,12 @@
 
                 redBorder.classList.add('active');
                 let audioTag = document.getElementById('alarm-audio');
-                if(audioTag) { audioTag.volume = 1.0; audioTag.currentTime = 0; audioTag.play().catch(e => {}); }
+                if(audioTag) { 
+                    audioTag.volume = 1.0; 
+                    audioTag.currentTime = 0; 
+                    audioTag.loop = false; // Phát đúng 1 lần duy nhất, không lặp lại
+                    audioTag.play().catch(e => {}); 
+                }
             } else {
                 stopAlarm();
                 redBorder.classList.remove('active');
