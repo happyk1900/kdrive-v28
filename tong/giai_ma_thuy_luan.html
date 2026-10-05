@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#050b14">
+    <title>K-Drive - Giải Mã Thủy Luân</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #050b14; font-family: 'Space Grotesk', sans-serif; }
+
+        /* VIDEO NỀN PHÍA SAU */
+        #bg-video {
+            position: fixed; inset: 0; width: 100vw; height: 100dvh; object-fit: cover; z-index: 1; opacity: 0.65;
+        }
+
+        /* KHUNG TRUNG TÂM */
+        .decoder-container {
+            position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; cursor: pointer;
+        }
+
+        /* HỘP POPUP MÀU TRẮNG NỀN MỞ (GLASSMORPHISM) */
+        .decoder-card {
+            width: 100%; max-width: 360px; min-height: 260px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            border-radius: 20px;
+            padding: 28px 22px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.1);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            opacity: 0; transform: translateY(15px);
+        }
+        .decoder-card.active { opacity: 1; transform: translateY(0); }
+
+        .slide-title {
+            font-family: 'Chakra Petch', sans-serif; font-size: 18px; font-weight: 900; color: #00e5ff;
+            text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px;
+            text-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
+        }
+
+        .slide-content {
+            font-size: 14.5px; color: #ffffff; line-height: 1.7; font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        /* CÁC TỪ QUAN TRỌNG ĐỔI MÀU NỔI BẬT */
+        .highlight-cyan { color: #00e5ff; font-weight: 700; }
+        .highlight-pink { color: #ff3366; font-weight: 700; }
+        .highlight-gold { color: #ffd700; font-weight: 700; }
+        .highlight-mint { color: #00ff9d; font-weight: 700; }
+
+        /* HƯỚNG DẪN CHẠM DƯỚI ĐÁY */
+        .tap-instruction {
+            position: absolute; bottom: 35px; font-family: 'Chakra Petch', sans-serif;
+            font-size: 12px; color: rgba(255, 255, 255, 0.7); letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+            animation: textBlink 2s infinite ease-in-out;
+        }
+        @keyframes textBlink {
+            0%, 100% { opacity: 0.4; } 50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- VIDEO NỀN GIẢI MÃ -->
+    <video id="bg-video" autoplay loop muted playsinline>
+        <source src="../Photo/Video giai ma thuy luan.mp4" type="video/mp4">
+    </video>
+
+    <!-- NHẠC NỀN PIXEL DREAM CIRCUIT (PHÁT TỪ NHỎ LỚN DẦN) -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="../Photo/Pixel Dream Circuit.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="decoder-container" onclick="nextSlide()">
+        <div id="slide-box" class="decoder-card">
+            <!-- NỘI DUNG SLIDE SẼ ĐƯỢC RENDER BỞI JAVASCRIPT -->
+        </div>
+        <div class="tap-instruction">[ CHẠM MÀN HÌNH ĐỂ ĐỌC TIẾP ]</div>
+    </div>
+
+    <script>
+        const slides = [
+            {
+                title: "GIẢI MÃ KHOA HỌC THẦN KINH",
+                content: "Đánh giá trực tiếp <span class='highlight-gold'>Trí nhớ làm việc</span> và <span class='highlight-gold'>Vòng lặp thị giác - không gian</span> do <span class='highlight-pink'>vỏ não trước trán</span> quản lý để lưu trữ và thao tác thông tin ngắn hạn."
+            },
+            {
+                title: "GIẢI MÃ NGÔN NGỮ MÁY TÍNH",
+                content: "Ánh xạ sinh học: <span class='highlight-cyan'>RAM</span> là bộ nhớ đệm vỏ não trước trán, <span class='highlight-cyan'>SSD</span> là tốc độ hải mã truy xuất kho dài hạn. Mục đích để chỉ rõ <span class='highlight-pink'>điểm nghẽn sinh học</span> và biết cách nâng cấp."
+            },
+            {
+                title: "GIẢI MÃ TRIẾT LÝ VÕ HỌC",
+                content: "\"<span class='highlight-gold'>Tâm như nước biến hóa vô hình, tĩnh lặng soi chiếu vạn vật.</span>\" — Miyamoto Musashi.<br><br>Tâm thức phải tĩnh lặng, không xao động để ghi nhận và phản xạ thông tin linh hoạt, sắc bén như dòng nước chảy."
+            },
+            {
+                title: "K-DRIVE VÀ TỐI ƯU HIỆU SUẤT",
+                content: "Thói quen lướt <span class='highlight-pink'>video ngắn</span> làm phân mảnh bộ nhớ đệm. Mô-đun này chẩn đoán điểm nghẽn bộ nhớ; để tập luyện nâng cấp toàn diện, hãy truy cập mô-đun <span class='highlight-mint'>NÂNG CẤP TOÀN DIỆN</span>."
+            }
+        ];
+
+        let currentIndex = 0;
+        let isAudioInitialized = false;
+
+        function renderSlide() {
+            let box = document.getElementById('slide-box');
+            box.classList.remove('active');
+
+            setTimeout(() => {
+                let s = slides[currentIndex];
+                box.innerHTML = `
+                    <div class="slide-title">// ${s.title}</div>
+                    <div class="slide-content">${s.content}</div>
+                `;
+                box.classList.add('active');
+            }, 200);
+        }
+
+        function startSmoothAudio() {
+            if (isAudioInitialized) return;
+            isAudioInitialized = true;
+
+            let music = document.getElementById('bg-music');
+            if (music) {
+                music.volume = 0.0;
+                music.play().then(() => {
+                    // Fade-in âm lượng từ nhỏ lớn dần (tăng dần trong 3 giây)
+                    let vol = 0.0;
+                    let fadeInterval = setInterval(() => {
+                        vol += 0.05;
+                        if (vol >= 0.35) { // Âm lượng nền vừa phải, không giật mình
+                            vol = 0.35;
+                            clearInterval(fadeInterval);
+                        }
+                        music.volume = vol;
+                    }, 150);
+                }).catch(e => {});
+            }
+        }
+
+        function nextSlide() {
+            startSmoothAudio();
+            currentIndex++;
+            if (currentIndex >= slides.length) {
+                // Khi hết slide, có thể đóng hoặc quay về trang tổng quan
+                window.location.href = 'tong_quan.html';
+            } else {
+                renderSlide();
+            }
+        }
+
+        window.onload = () => {
+            renderSlide();
+            // Tự động kích hoạt âm thanh khi có tương tác đầu tiên bất kỳ
+            ['touchstart', 'mousedown', 'keydown'].forEach(evt => {
+                window.addEventListener(evt, startSmoothAudio, { once: true, passive: true });
+            });
+        };
+    </script>
+</body>
+</html>
