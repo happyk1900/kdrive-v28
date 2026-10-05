@@ -358,16 +358,22 @@
     </div>
 
     <script>
-        // TĂNG MẠNH GIÁ TRỊ ĐIỂM SỐ MỖI HẠT ĐỂ ĐIỂM DATA PHI NƯỚC ĐẠI LÊN 1000 CỰC KỲ NHANH
-        const TIER_POINTS = { 1: 150, 2: 200, 3: 250, 4: 350, 5: 500 };
+        // HẠ ĐIỂM SỐ MỖI HẠT VỀ MỨC CHUẨN TỪ 15 ĐẾN 60 ĐỂ ĐIỂM TĂNG TRƯỞNG TỰ NHIÊN, KHÔNG LÊN QUÁ NHANH
+        const TIER_POINTS = { 1: 15, 2: 15, 3: 30, 4: 45, 5: 60 };
 
-        // XẾP HẠNG CHIP DỰA TRÊN ĐỈNH CAO TỐC ĐỘ HẠT BIẾN MẤT (LIFESPAN) ĐÃ CHINH PHỤC
-        function getCpuEvaluation(maxTierReached, totalScore) {
-            if (totalScore < 1000) return { name: "Pentium" };
-            if (maxTierReached >= 5) return { name: "Core i9" };
-            if (maxTierReached === 4) return { name: "Core i7" };
-            if (maxTierReached === 3) return { name: "Core i5" };
-            if (maxTierReached === 2) return { name: "Core i3" };
+        // XẾP HẠNG CHIP KẾT HỢP GIỮA TỐC ĐỘ (MS) VÀ ĐỈNH CAO TỐC ĐỘ HẠT (LIFESPAN)
+        function getCpuEvaluation(avgMs, totalScore) {
+            if (totalScore < 1000 || avgMs === 0) return { name: "Pentium" };
+            
+            // Muốn đạt Core i9 đòi hỏi tốc độ trung bình thực tế phải dưới 330ms
+            if (avgMs <= 330) return { name: "Core i9" };
+            // Core i7: dưới 400ms
+            if (avgMs <= 400) return { name: "Core i7" };
+            // Core i5: dưới 480ms
+            if (avgMs <= 480) return { name: "Core i5" };
+            // Core i3: dưới 560ms
+            if (avgMs <= 560) return { name: "Core i3" };
+            
             return { name: "Pentium" };
         }
 
@@ -384,16 +390,15 @@
         let bestCpsG2 = 0; 
         let reactionTimes = []; 
         let nextHpMilestone = 1000; 
-        let burstTriggerCount = 1; 
+        let nextBurstMilestone = 1000; // Bạo pháp xuất hiện mỗi 1000 điểm DATA
         let lastAnnouncedTier = 1;
-        let maxTierReached = 1;
 
         // ĐỊNH NGHĨA 5 CẤP ĐỘ TỐC ĐỘ HẠT BIẾN MẤT (LIFESPAN): 700ms -> 600ms -> 500ms -> 400ms -> 300ms
         const speedTiersMapping = {
-            1: { lifespan: 700,  delay: 400, maxOrbs: 3 }, 
-            2: { lifespan: 600,  delay: 350, maxOrbs: 3 }, 
-            3: { lifespan: 500,  delay: 300, maxOrbs: 4 }, 
-            4: { lifespan: 400,  delay: 250, maxOrbs: 4 }, 
+            1: { lifespan: 700,  delay: 450, maxOrbs: 3 }, 
+            2: { lifespan: 600,  delay: 380, maxOrbs: 3 }, 
+            3: { lifespan: 500,  delay: 320, maxOrbs: 4 }, 
+            4: { lifespan: 400,  delay: 260, maxOrbs: 4 }, 
             5: { lifespan: 300,  delay: 200, maxOrbs: 4 }  
         };
 
@@ -485,7 +490,7 @@
         function openArena() {
             aScore = 0; burstScore = 0; successfulHitsCount = 0; isPlaying = false; energyCount = 5; 
             isPausedForStart = true; reactionTimes = [];
-            nextHpMilestone = 1000; burstTriggerCount = 1; lastAnnouncedTier = 1; maxTierReached = 1;
+            nextHpMilestone = 1000; nextBurstMilestone = 1000; lastAnnouncedTier = 1;
 
             let vid = document.getElementById('sanctum-video');
             vid.classList.remove('hidden-mode');
@@ -560,7 +565,6 @@
         function addScoreAndCheckMultiplier() {
             if(isPausedForStart) return;
             let currentTier = getCurrentSpeedTier();
-            if (currentTier > maxTierReached) maxTierReached = currentTier;
             let pointsToAdd = TIER_POINTS[currentTier];
 
             aScore += pointsToAdd; 
@@ -577,10 +581,9 @@
                 showHpRewardAlert();
             }
 
-            // Kích hoạt bạo pháp cứ mỗi 500 điểm
-            let expectedBurstCount = Math.floor(aScore / 500);
-            if (expectedBurstCount >= burstTriggerCount && !document.querySelector('.burst-container')) {
-                burstTriggerCount = expectedBurstCount + 1;
+            // Kích hoạt bạo pháp chuẩn xác mỗi 1000 điểm DATA
+            if (aScore >= nextBurstMilestone && !document.querySelector('.burst-container')) {
+                nextBurstMilestone += 1000;
                 forceBurstMode();
             }
 
@@ -614,7 +617,6 @@
             if(!isPlaying || isPausedForStart) return; 
             let playArea = document.getElementById('play-area');
             let tier = getCurrentSpeedTier();
-            if (tier > maxTierReached) maxTierReached = tier;
             let cfg = speedTiersMapping[tier];
             let currentOrbs = playArea.querySelectorAll('.orb').length;
 
@@ -710,7 +712,7 @@
                 beam.remove();
                 let explosion = document.createElement('div'); explosion.className = `explosion exp-t${tier}`; playArea.appendChild(explosion);
 
-                let currentBurstScore = clicks * 15;
+                let currentBurstScore = clicks * 3;
                 aScore += currentBurstScore;
                 document.getElementById('boo-points').innerText = Math.round(aScore);
                 playSound('boom', 0.5);
@@ -736,7 +738,6 @@
             if (aScore < 1000) {
                 aScore = 0;
                 bestCpsG2 = 0;
-                maxTierReached = 1;
             }
 
             let avgReactionMs = reactionTimes.length > 0 ? Math.round(reactionTimes.reduce((a,b)=>a+b, 0) / reactionTimes.length) : 0;
@@ -755,7 +756,7 @@
                 
                 document.getElementById('sum-score-total').innerText = Math.round(aScore);
                 
-                let cpuEvalObj = getCpuEvaluation(maxTierReached, aScore);
+                let cpuEvalObj = getCpuEvaluation(avgReactionMs, aScore);
                 let threadRank = (aScore > 0 && bestCpsG2 > 0) ? getThreadRanking(bestCpsG2) : "Đơn Tốc";
 
                 document.getElementById('sum-rank-cpu').innerText = cpuEvalObj.name;
