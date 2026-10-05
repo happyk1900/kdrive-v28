@@ -45,21 +45,6 @@
             100% { transform: translateY(-10vh) translateX(-15px) scale(0.2); opacity: 0; } 
         }
 
-        #floating-icons-container { position: absolute; inset: 0; pointer-events: none; z-index: 999999; overflow: hidden; }
-        .floating-science-icon {
-            position: absolute;
-            font-size: 24px;
-            opacity: 0;
-            animation: iconBurstUp 3.5s ease-out forwards;
-            filter: drop-shadow(0 0 10px rgba(0,229,255,0.8));
-        }
-        @keyframes iconBurstUp {
-            0% { transform: translateY(50px) scale(0.3) rotate(0deg); opacity: 0; }
-            20% { opacity: 1; transform: translateY(0px) scale(1.2) rotate(15deg); }
-            80% { opacity: 0.8; }
-            100% { transform: translateY(-180px) scale(0.8) rotate(-20deg); opacity: 0; }
-        }
-
         #task-arena { position: fixed; inset: 0; background: transparent; z-index: 120; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
         .play-area { width: 100%; max-width: 380px; height: 100vh; height: 100dvh; background: transparent; position: relative; overflow: hidden; margin: 0 auto; transition: all 1.8s cubic-bezier(0.25, 1, 0.5, 1); }
         .play-area.fullscreen-mode { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100dvh !important; max-width: none !important; margin: 0 !important; z-index: 9990 !important; background: var(--bg-obsidian) !important; }
@@ -388,7 +373,7 @@
     <div id="thuy-luan-modal" onclick="toggleThuyLuanModal()" style="position: fixed; inset: 0; background: rgba(5, 11, 20, 0.96); z-index: 9999999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 25px; backdrop-filter: blur(15px); cursor: pointer;">
         
         <div style="width: 100%; max-width: 350px; min-height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-            <!-- TRỐNG: Sẵn sàng để anh nhúng file HTML giải mã riêng -->
+            <!-- TRỐNG: Sẵn sàng để anh nhúng link HTML giải mã riêng -->
         </div>
 
         <div style="position: absolute; bottom: 35px; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.6); letter-spacing: 2px; animation: textBlinkGlow 2s infinite;">
@@ -421,8 +406,8 @@
         function getRAMBySequence(maxSeq) {
             if (maxSeq >= 10) return "RAM 32GB";
             if (maxSeq >= 8)  return "RAM 16GB";
-            if (maxSeq >= 7)  return "RAM 8GB";   // Đạt 7 hình lên RAM 8GB chuẩn xác
-            if (maxSeq >= 6)  return "RAM 4GB";   // 6 hình giữ nguyên RAM 4GB
+            if (maxSeq >= 7)  return "RAM 8GB";   
+            if (maxSeq >= 6)  return "RAM 4GB";   
             if (maxSeq >= 5)  return "RAM 2GB";
             if (maxSeq >= 4)  return "RAM 1GB";
             return "RAM 512MB";
@@ -791,12 +776,15 @@
                 debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 data! Yêu cầu đo lại ngay lập tức!`;
 
                 redBorder.classList.add('active');
+                
+                // KÍCH HOẠT PHÁT ÂM THANH BÁO ĐỘNG NGAY KHI BẤM XEM KẾT QUẢ
                 let audioTag = document.getElementById('alarm-audio');
                 if(audioTag) { 
+                    audioTag.pause();
+                    audioTag.currentTime = 0;
                     audioTag.volume = 1.0; 
-                    audioTag.currentTime = 0; 
-                    audioTag.loop = false; // Phát đúng 1 lần duy nhất, không lặp lại
-                    audioTag.play().catch(e => {}); 
+                    audioTag.loop = false;
+                    audioTag.play().catch(e => console.log("Audio play blocked:", e)); 
                 }
             } else {
                 stopAlarm();
