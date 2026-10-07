@@ -4,18 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#050b14">
-    <title>K-Drive - Giải Mã Trí Nhớ</title>
+    <title>K-Drive - Thử Thách Cá Vàng</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --bg-obsidian: #050b14;
-            --cyan: #00e5ff;
+            --cyan: #f48fb1;
+            --mint: #ff3366;    
             --neon-pink: #f48fb1; 
-            --gold: #ffd700;
+            --amber: #ffb74d;   
+            --crimson: #ff3366;
+            --text-light: #ffffff;
+            --accent-green: #f48fb1; 
             --panel-bg: rgba(6, 15, 30, 0.88); 
             --panel-border: rgba(244, 143, 177, 0.7);
         }
@@ -23,9 +26,17 @@
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-obsidian); font-family: 'Space Grotesk', sans-serif; }
 
-        /* HẠT LƯỢNG TỬ BAY LƠ LỬNG XUYÊN SUỐT */
-        #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 500; overflow: hidden; }
-        .quantum-sparkle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 8px #00e5ff, 0 0 15px #0088ff; opacity: 0; animation: sparkleFloat linear infinite; }
+        #sanctum-video { 
+            position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; 
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        #sanctum-video.loaded { opacity: 1; }
+        #sanctum-video.playing-mode { opacity: 0; pointer-events: none; transition: opacity 2.0s cubic-bezier(0.25, 1, 0.5, 1); }
+
+        #dust-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+        .quantum-sparkle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 8px #ffffff, 0 0 15px #f48fb1; opacity: 0; animation: sparkleFloat linear infinite; }
         @keyframes sparkleFloat { 
             0% { transform: translateY(105vh) scale(0.3); opacity: 0; } 
             20% { opacity: 0.8; } 
@@ -33,14 +44,6 @@
             80% { opacity: 0.8; } 
             100% { transform: translateY(-10vh) translateX(-15px) scale(0.2); opacity: 0; } 
         }
-
-        /* VIDEO NỀN TEST THỦY LUÂN CHÍNH */
-        #sanctum-video { 
-            position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; 
-            object-fit: cover; opacity: 0; transition: opacity 2.0s ease; pointer-events: none;
-        }
-        #sanctum-video.loaded { opacity: 0.6; }
-        #sanctum-video.hidden-mode { opacity: 0 !important; }
 
         #task-arena { position: fixed; inset: 0; background: transparent; z-index: 120; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
         .play-area { width: 100%; max-width: 380px; height: 100vh; height: 100dvh; background: transparent; position: relative; overflow: hidden; margin: 0 auto; transition: all 1.8s cubic-bezier(0.25, 1, 0.5, 1); }
@@ -56,44 +59,22 @@
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        @keyframes pulse-btn {
-            0% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 10px currentColor, inset 0 0 5px currentColor; }
-            50% { transform: scale(1.03); filter: brightness(1.2); box-shadow: 0 0 25px currentColor, inset 0 0 10px currentColor; }
-            100% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 10px currentColor, inset 0 0 5px currentColor; }
-        }
+        #start-prompt-overlay { position: absolute; inset: 0; background: transparent; z-index: 110; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px 40px 15px; gap: 16px; opacity: 0; visibility: hidden; transition: opacity 1.5s ease; }
+        #start-prompt-overlay.active { opacity: 1; visibility: visible; }
+        #start-prompt-overlay > * { animation: cinematicPopupSuperSlow 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; opacity: 0; }
 
-        @keyframes textBlinkGlow {
-            0% { opacity: 0.6; transform: scale(0.95); text-shadow: 0 0 4px rgba(0,255,157,0.4); }
-            50% { opacity: 1; transform: scale(1.08); text-shadow: 0 0 15px rgba(0,255,157,0.9), 0 0 25px #00e5ff; }
-            100% { opacity: 0.6; transform: scale(0.95); text-shadow: 0 0 4px rgba(0,255,157,0.4); }
-        }
-
-        @keyframes redAlertBlink {
-            0% { opacity: 0.3; }
-            50% { opacity: 1; text-shadow: 0 0 12px #ff3366, 0 0 20px #ff0000; }
-            100% { opacity: 0.3; }
-        }
-
-        #screen-red-border { position: fixed; inset: 0; border: 6px solid transparent; pointer-events: none; z-index: 999999; opacity: 0; transition: opacity 0.3s; }
-        #screen-red-border.active { opacity: 1; animation: screenBorderPulse 0.6s infinite alternate ease-in-out; }
-        @keyframes screenBorderPulse {
-            0% { border-color: rgba(255, 0, 0, 0.4); box-shadow: inset 0 0 30px rgba(255,0,0,0.3), 0 0 30px rgba(255,0,0,0.3); }
-            100% { border-color: rgba(255, 51, 102, 1); box-shadow: inset 0 0 70px rgba(255,0,0,0.8), 0 0 70px rgba(255,0,0,0.8); }
-        }
-
-        #start-prompt-overlay { position: absolute; inset: 0; background: transparent; z-index: 110; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px 40px 15px; gap: 16px; opacity: 1; transition: opacity 0.5s ease; }
-        #start-prompt-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        #start-prompt-overlay > * { animation: cinematicPopupSuperSlow 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-        .briefing-panel { background: var(--panel-bg); backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px 26px; width: 100%; max-width: 340px; text-align: left; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); }
-        .briefing-title { color: #00e5ff !important; font-family: 'Chakra Petch', sans-serif; font-size: 24px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(0, 229, 255, 0.4); padding-bottom: 8px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,229,255,0.6); }
-        .briefing-target { color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 15px; line-height: 1.6; font-weight: 700; text-align: center; animation: textBlinkGlow 2.0s infinite ease-in-out; }
+        .briefing-panel { background: var(--panel-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 22px 26px; width: 100%; max-width: 340px; text-align: left; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); }
+        .briefing-title { color: #f48fb1 !important; font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; text-align: center; border-bottom: 1px dashed rgba(244, 143, 177, 0.4); padding-bottom: 8px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(244,143,177,0.6); }
+        .briefing-target { color: #ffffff; font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; line-height: 1.7; font-weight: 600; text-align: center; }
 
         .action-group { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .start-action-box { width: 100%; background: var(--panel-bg); border: 1.5px solid #00ff9d; padding: 15px; border-radius: 12px; color: #00ff9d; font-family: 'Chakra Petch', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; animation: pulse-btn 1.5s infinite; }
-        .start-action-box:active { transform: scale(0.96); background: #00ff9d; color: #050b14; }
+        .start-action-box { width: 100%; background: var(--panel-bg); backdrop-filter: blur(16px); border: 1.5px solid var(--panel-border); padding: 15px; border-radius: 12px; color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 10px 25px rgba(244, 143, 177, 0.25); text-align: center; transition: 0.4s; text-shadow: 0 0 8px rgba(244,143,177,0.6); }
+        .start-action-box:active { background: #f48fb1; color: #050b14; transform: scale(0.98); }
 
-        .game-top-bar { position: fixed; top: max(20px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; opacity: 0; transition: opacity 1.5s ease; }
+        .game-top-bar {
+            position: fixed; top: max(20px, env(safe-area-inset-top)); left: 0; width: 100vw; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; opacity: 0; transition: opacity 1.5s ease;
+        }
         .game-top-bar.visible { opacity: 1; }
 
         .health-container { display: flex; gap: 4px; align-items: center; }
@@ -103,68 +84,99 @@
 
         .data-score { font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; color: #fff; display: flex; align-items: center; position: relative; }
         .data-score span { color: #f48fb1; text-shadow: 0 0 12px #f48fb1; font-size: 20px; margin-left: 6px; }
+
         #hp-notification-area { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); width: 220px; text-align: center; }
 
-        .game-bottom-bar { position: fixed; bottom: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw; border-top: 1px solid rgba(244, 143, 177, 0.5); padding: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto; background: linear-gradient(0deg, rgba(5,11,20,0.95) 0%, transparent 100%); opacity: 0; transition: opacity 1.5s ease; }
+        .game-bottom-bar {
+            position: fixed; bottom: max(15px, env(safe-area-inset-top)); left: 0; width: 100vw;
+            border-top: 1px solid rgba(244, 143, 177, 0.5); padding: 15px 20px 0 20px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 10000; pointer-events: auto;
+            background: linear-gradient(0deg, rgba(5,11,20,0.95) 0%, transparent 100%); opacity: 0; transition: opacity 1.5s ease;
+        }
         .game-bottom-bar.visible { opacity: 1; }
 
-        .btn-action { width: 44px; height: 44px; background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(244, 143, 177, 0.75); border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(8px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-action {
+            width: 46px; height: 46px; background: rgba(15, 23, 42, 0.85); 
+            border: 1.5px solid rgba(244, 143, 177, 0.75); border-radius: 12px;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
         .btn-action:active { transform: scale(0.9); }
-        .btn-back { color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 24px; font-weight: bold; box-shadow: 0 0 12px rgba(244,143,177,0.4); padding-bottom: 2px; padding-right: 2px; }
-        .btn-next-lesson { border-color: rgba(255, 183, 77, 0.7); color: #ffb74d; font-size: 18px; box-shadow: 0 0 12px rgba(255, 183, 77, 0.3); }
-        .btn-mute { border-color: rgba(0, 229, 255, 0.7); color: #00e5ff; font-size: 18px; box-shadow: 0 0 12px rgba(0, 229, 255, 0.3); }
-        .btn-pause { border-color: rgba(255, 51, 102, 0.7); box-shadow: 0 0 12px rgba(255, 51, 102, 0.3); }
-        .btn-pause::before, .btn-pause::after { content: ''; width: 3.5px; height: 16px; background: #ff3366; margin: 0 2.5px; border-radius: 2px; box-shadow: 0 0 8px #ff3366; }
+        
+        .btn-back { color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 26px; font-weight: bold; box-shadow: 0 0 12px rgba(244,143,177,0.4); padding-bottom: 2px; padding-right: 2px; }
+        .btn-skip { border-color: rgba(244, 143, 177, 0.75); color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 22px; font-weight: bold; box-shadow: 0 0 12px rgba(244,143,177,0.4); }
+        .btn-mute { border-color: rgba(255, 183, 77, 0.6); color: #ffb74d; font-size: 20px; box-shadow: 0 0 12px rgba(255, 183, 77, 0.3); }
+        .btn-pause { border-color: rgba(255, 183, 77, 0.6); box-shadow: 0 0 12px rgba(255, 183, 77, 0.3); }
+        .btn-pause::before, .btn-pause::after { content: ''; width: 4px; height: 18px; background: #ffb74d; margin: 0 3px; border-radius: 2px; box-shadow: 0 0 8px #ffb74d; }
 
         #pause-menu-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; backdrop-filter: blur(10px); }
         #pause-menu-overlay.active { opacity: 1; pointer-events: auto; }
-        .pause-box { width: 85%; max-width: 320px; background: rgba(5, 12, 25, 0.95); border: 1.5px solid rgba(244,143,177,0.6); border-radius: 16px; padding: 25px 20px; text-align: center; box-shadow: 0 0 40px rgba(0,0,0,0.8); animation: cinematicPopupSuperSlow 1.0s forwards; }
-        .pause-title { font-family: 'Chakra Petch', sans-serif; font-size: 24px; color: #f48fb1; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(244,143,177,0.6); }
-        .pause-btn { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; font-family: 'Chakra Petch', sans-serif; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
+        .pause-box { width: 85%; max-width: 320px; background: rgba(5, 12, 25, 0.95); border: 1.5px solid rgba(244,143,177,0.6); border-radius: 16px; padding: 25px 20px; text-align: center; box-shadow: 0 0 40px rgba(0,0,0,0.8); animation: cinematicPopupSuperSlow 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .pause-title { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #f48fb1; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(244,143,177,0.6); }
+        .pause-btn { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
         .pause-btn.resume { background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; }
         .pause-btn.exit { background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; color: #ff3366; margin-bottom: 0; }
 
-        #freeze-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200000; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
+        #freeze-overlay { position: fixed; inset: 0; background: transparent; z-index: 200000; display: none; align-items: center; justify-content: center; pointer-events: none; }
         #freeze-overlay.active { display: flex; }
-        .freeze-text { font-family: 'Chakra Petch', sans-serif; font-size: 42px; font-weight: 900; color: #ffffff; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 20px #ff3366; }
-        
-        .btn-finish-trigger { background: var(--panel-bg); border: 2px solid #00ff9d; color: #00ff9d; padding: 16px 32px; border-radius: 14px; font-family: 'Chakra Petch', sans-serif; font-size: 20px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; animation: pulse-btn 1.5s infinite; }
-        .btn-finish-trigger:active { background: #00ff9d; color: #050b14; transform: scale(0.95); }
+        @keyframes textFallSlow {
+            0% { opacity: 0; transform: translateY(-70px) scale(1.1); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .freeze-text { font-family: 'Share Tech Mono', monospace; font-size: 50px; font-weight: 900; color: #ffffff; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 20px #f48fb1, 0 0 40px #ff3366; animation: textFallSlow 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 
-        #final-summary-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 4px; padding: 6px; opacity: 0; transition: opacity 1.2s ease; overflow-y: auto; }
-        #final-summary-overlay.active { display: flex; opacity: 1; }
-        #final-summary-overlay.active > * { animation: cinematicPopupSuperSlow 1.6s forwards; opacity: 0; }
-
-        .final-header { font-family: 'Chakra Petch', sans-serif; font-size: 18px; color: #ffffff; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 15px rgba(244,143,177,0.8); margin-bottom: 2px; }
+        /* MÀN HÌNH ĐẾM NGƯỢC 3 GIÂY & EASTER EGG CÁ VÀNG */
+        #countdown-overlay { position: absolute; inset: 0; background: rgba(5,11,20,0.9); z-index: 150000; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+        #countdown-overlay.active { display: flex; }
+        .countdown-number { font-family: 'Share Tech Mono', monospace; font-size: 72px; font-weight: 900; color: #f48fb1; text-shadow: 0 0 30px #f48fb1; animation: pulseCount 0.9s infinite alternate; }
+        @keyframes pulseCount { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.15); opacity: 1; } }
         
-        .stat-box { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); padding: 6px 14px; border-radius: 10px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
-        .stat-line { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #ffffff; width: 100%; font-weight: bold; }
-        .stat-line span:first-child { text-align: left; flex: 1; color: #ffffff; }
-        .stat-line span:last-child { text-align: right; min-width: 80px; color: #f48fb1; text-shadow: 0 0 8px rgba(244,143,177,0.5); font-size: 15px;}
+        .golden-fish-banner { display: none; width: 280px; height: 52px; background: rgba(255, 183, 77, 0.15); border: 2px dashed #ffb74d; border-radius: 12px; align-items: center; justify-content: center; gap: 10px; animation: fishFadeInOut 2.5s ease forwards; box-shadow: 0 0 20px rgba(255,183,77,0.4); }
+        .golden-fish-banner.active { display: flex; }
+        @keyframes fishFadeInOut { 0% { opacity: 0; transform: scale(0.9); } 20% { opacity: 1; transform: scale(1); } 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.9); } }
+        .golden-fish-text { font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: bold; color: #ffb74d; letter-spacing: 1px; }
 
-        .bio-metrics-box { width: 92%; max-width: 340px; background: rgba(5, 14, 28, 0.95); backdrop-filter: blur(22px); border: 2px solid rgba(0, 229, 255, 0.6); border-radius: 12px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 25px 50px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,229,255,0.1); }
-        
-        .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(244, 143, 177, 0.3); padding-bottom: 5px; margin-bottom: 0; width: 100%; }
-        .metric-card-row:last-child { border-bottom: none; padding-bottom: 0; }
-        
-        .metric-label { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 11.5px; font-weight: bold; flex: 1; text-align: left;}
-        .metric-val { color: #ffffff; font-family: 'Chakra Petch', sans-serif; font-size: 14px; font-weight: 900; text-align: right; text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px #00e5ff; }
-        .metric-val.red-alert-val { color: #ff3366 !important; text-shadow: 0 0 10px rgba(255,51,102,0.6); animation: redAlertBlink 1.2s infinite ease-in-out; }
+        #result-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; gap: 14px; padding: 12px; opacity: 0; transition: opacity 1.2s ease; }
+        #result-overlay.active { display: flex; opacity: 1; }
+        #result-overlay.active > * { animation: cinematicPopupSuperSlow 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards; opacity: 0; }
 
-        .debug-feedback { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #ffffff; text-align: left; background: rgba(0, 229, 255, 0.08); border: 1.5px solid rgba(0, 229, 255, 0.4); padding: 6px 8px; border-radius: 6px; line-height: 1.3; text-shadow: 0 0 6px rgba(255,255,255,0.4); }
-        .debug-feedback.red-alert-box { color: #ff3366 !important; background: rgba(255, 51, 102, 0.12) !important; border: 1.5px solid rgba(255, 51, 102, 0.7) !important; text-shadow: 0 0 6px rgba(255,51,102,0.5) !important; }
-
-        .result-btn-row { display: flex; gap: 8px; width: 92%; max-width: 340px; margin-top: 6px; }
-        .result-action-btn { flex: 1; padding: 9px; font-family: 'Chakra Petch', sans-serif; font-size: 13px; font-weight: 900; border-radius: 10px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; backdrop-filter: blur(8px); letter-spacing: 1px; }
+        .stage-badge-header { font-family: 'Share Tech Mono', monospace; font-size: 26px; color: #ffffff; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 15px rgba(244,143,177,0.8); }
         
+        .prestige-panel { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .prestige-total-box { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono', monospace; width: 100%; }
+        .prestige-total-label { color: #ffffff; font-size: 14px; font-weight: 900; flex: 1; text-align: left; }
+        .prestige-total-num { font-size: 28px; color: #f48fb1; font-weight: 900; text-align: right; min-width: 90px; text-shadow: 0 0 10px rgba(244,143,177,0.6); }
+
+        .bio-metrics-box { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .metric-card-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(244, 143, 177, 0.3); padding-bottom: 10px; margin-bottom: 4px; width: 100%; }
+        .metric-card-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .metric-label { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; flex: 1; text-align: left;}
+        .metric-val { color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; text-align: right; text-shadow: 0 0 8px rgba(244,143,177,0.5); }
+
+        .rank-icon-img { width: 24px; height: 24px; vertical-align: middle; margin-right: 6px; }
+
+        .result-btn-row { display: flex; gap: 10px; width: 92%; max-width: 340px; margin-top: 10px; }
+        .result-action-btn { flex: 1; padding: 14px; font-family: 'Share Tech Mono', monospace; font-size: 15px; font-weight: bold; border-radius: 12px; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.2s; backdrop-filter: blur(8px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         #btn-replay { background: var(--panel-bg); border: 1.5px solid #ff3366; color: #ff3366; }
-        #btn-replay:active { background: #ff3366; color: #fff; transform: scale(0.95); }
-        
-        #btn-next { background: var(--panel-bg); border: 1.5px solid #00e5ff; color: #00e5ff; }
-        #btn-next:active { background: #00e5ff; color: #050b14; transform: scale(0.95); }
+        #btn-next { background: var(--panel-bg); border: 1.5px solid #f48fb1; color: #f48fb1; }
+
+        #final-summary-overlay { position: absolute; inset: 0; background: transparent; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; gap: 12px; padding: 12px; opacity: 0; transition: opacity 1.2s ease; }
+        #final-summary-overlay.active { display: flex; opacity: 1; }
+        #final-summary-overlay.active > * { animation: cinematicPopupSuperSlow 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards; opacity: 0; }
+
+        .final-header { font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #ffffff; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 15px rgba(244,143,177,0.8); }
+        .stat-box { width: 92%; max-width: 340px; background: var(--panel-bg); backdrop-filter: blur(22px); border: 1.5px solid var(--panel-border); padding: 24px; border-radius: 18px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .stat-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #ffffff; width: 100%; font-weight: bold; }
+        .stat-line span:first-child { text-align: left; flex: 1; }
+        .stat-line span:last-child { text-align: right; min-width: 100px; color: #f48fb1; }
+
+        .final-btn-exit { width: 92%; max-width: 340px; padding: 14px; background: var(--panel-bg); backdrop-filter: blur(8px); border: 1.5px solid #f48fb1; border-radius: 12px; color: #f48fb1; font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; text-align: center; margin-top: 5px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); text-shadow: 0 0 8px rgba(244,143,177,0.6); }
+        .master-feedback { font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; color: #f48fb1; text-align: center; margin-top: 4px; line-height: 1.5; font-weight: 600; max-width: 340px; }
 
         .game-container { display: none; width: 100%; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .game-container.active { display: flex; }
+        .dynamic-grid { display: grid; gap: 6px; margin: 0 auto; justify-content: center; align-content: center; border-radius: 12px; padding: 8px; }
         
         .grid-ready-glow { animation: readyPulse 0.4s ease-out forwards; }
         @keyframes readyPulse {
@@ -173,10 +185,14 @@
             100% { border-color: rgba(255, 255, 255, 0.4); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
         }
 
-        .sequence-display { min-height: 85px; max-height: 130px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-bottom: 20px; width: 95%; max-width: 350px; background: rgba(15, 23, 42, 0.85); border-radius: 12px; border: 1.5px solid rgba(255, 255, 255, 0.4); padding: 10px 15px; overflow-y: auto; scroll-behavior: smooth; }
-        .sequence-display::-webkit-scrollbar { width: 4px; }
-        .sequence-display::-webkit-scrollbar-thumb { background: #f48fb1; border-radius: 2px; }
+        .grid-cell { aspect-ratio: 1; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.15s ease; backdrop-filter: blur(6px); }
+        .grid-cell.active-glow { background: rgba(244, 143, 177, 0.9); box-shadow: 0 0 22px #f48fb1; border-color: #fff; }
+        .grid-cell.correct { background: rgba(244, 143, 177, 0.95); box-shadow: 0 0 18px #f48fb1; border-color: #fff; color: #fff;}
+        .grid-cell.wrong { background: rgba(229, 57, 53, 0.9); box-shadow: 0 0 15px #e53935; border-color: #fff; color: #fff;}
+        .grid-cell.reveal-hint { background: rgba(255, 183, 77, 0.7) !important; box-shadow: 0 0 15px #ffd700 !important; }
 
+        .sequence-display { min-height: 90px; max-height: 140px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-bottom: 25px; width: 95%; max-width: 350px; background: rgba(15, 23, 42, 0.85); border-radius: 12px; border: 1.5px solid rgba(255, 255, 255, 0.4); padding: 10px 15px; overflow-y: auto; }
+        
         .input-area { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 85%; max-width: 250px;}
         .btn-symbol { padding: 0; height: 58px; display: flex; justify-content: center; align-items: center; background: rgba(15, 23, 42, 0.8); border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 10px; cursor: pointer; transition: 0.15s; }
         .btn-symbol:active { background: rgba(244, 143, 177, 0.4); transform: scale(0.96); }
@@ -188,25 +204,17 @@
         .shape-svg-small { width: 20px; height: 20px; display: block; filter: drop-shadow(0 0 2px rgba(0,0,0,0.15)); }
 
         .status-notification { font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: 900; color: #f48fb1; text-shadow: 0 0 10px rgba(244,143,177,0.6); animation: topAlertAnim 1.2s ease-out forwards; }
-        .matrix-expand-alert { position: fixed; top: 100px; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 26px; font-weight: 900; color: #ffffff; text-align: center; text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 20px #f48fb1; z-index: 999999; pointer-events: none; white-space: nowrap; background: transparent; border: none; box-shadow: none; animation: topAlertAnim 1.2s ease-out forwards; }
+        .matrix-expand-alert { position: fixed; top: 100px; left: 50%; transform: translateX(-50%); font-family: 'Share Tech Mono', monospace; font-size: 26px; font-weight: 900; color: #ffffff; text-align: center; text-shadow: 0 0 15px rgba(255, 255, 255, 0.8); z-index: 999999; pointer-events: none; white-space: nowrap; animation: topAlertAnim 1.2s ease-out forwards; }
         @keyframes topAlertAnim { 0% { opacity: 0; transform: translate(-50%, -10px); } 15% { opacity: 1; transform: translate(-50%, 0); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -15px); } }
     </style>
 </head>
 <body>
 
-    <!-- HẠT LƯỢNG TỬ BAY XUYÊN SUỐT -->
-    <div id="dust-container"></div>
-
-    <!-- VIDEO NỀN TEST THỦY LUÂN -->
     <video id="sanctum-video" autoplay loop playsinline>
-        <source src="../Photo/video nen thuy luan.mp4" type="video/mp4">
+        <source src="https://github.com/happyk1900/Kai-Ripe/raw/refs/heads/main/video%20nen%20thuy%20luan.mp4" type="video/mp4">
     </video>
 
-    <div id="screen-red-border"></div>
-
-    <audio id="alarm-audio" preload="auto">
-        <source src="../Photo/am thanh can bao.mp3" type="audio/mpeg">
-    </audio>
+    <div id="dust-container"></div>
 
     <div id="task-arena">
         <div class="play-area" id="play-area">
@@ -234,85 +242,100 @@
             </div>
 
             <div id="game-bottom-bar" class="game-bottom-bar">
-                <button class="btn-action btn-back" onclick="confirmExitToLobby()" title="Quay lại trạm điều phối">⟨</button>
-                <button class="btn-action btn-next-lesson" onclick="goToHoaLuan()" title="Chuyển sang Hỏa Luận">⏭</button>
-                <button class="btn-action btn-mute" id="btn-mute" onclick="toggleVideoMute()" title="Bật/Tắt tiếng video">🔊</button>
+                <button class="btn-action btn-back" onclick="confirmExitToLobby()">⟨</button>
+                <button class="btn-action btn-skip" id="btn-skip-stage" onclick="skipToNextStage()" title="Chuyển bài">⏭</button>
+                <button class="btn-action btn-mute" id="btn-mute" onclick="toggleVideoMute()" title="Bật/Tắt tiếng">🔊</button>
                 <button class="btn-action btn-pause" onclick="pauseGame()"></button>
             </div>
 
-            <!-- VÀO THẲNG BÀI KIỂM TRA TRÍ NHỚ -->
+            <!-- MÀN HÌNH CHỜ MỚI -->
             <div id="start-prompt-overlay">
                 <div id="briefing-panel" class="briefing-panel">
-                    <div class="briefing-title" id="briefing-title">GIẢI MÃ TRÍ NHỚ</div>
-                    <div class="briefing-target" id="briefing-target">
-                        Ghi nhớ lại chuỗi hình ảnh và nhập lại.
-                    </div>
+                    <div class="briefing-title" id="briefing-title">THỬ THÁCH CÁ VÀNG</div>
+                    <div class="briefing-target" id="briefing-target">Nhìn kỹ biểu tượng rồi nhập lại cho đúng nha sếp.</div>
                 </div>
                 <div class="action-group">
-                    <div class="start-action-box" onclick="triggerStartGame()">BẮT ĐẦU</div>
+                    <div class="start-action-box" onclick="triggerStartGame()">VÀO VIỆC LUÔN</div>
                 </div>
+            </div>
+
+            <!-- MÀN HÌNH ĐẾM NGƯỢC 3 GIÂY & EASTER EGG CÁ VÀNG -->
+            <div id="countdown-overlay">
+                <div class="golden-fish-banner" id="golden-fish-banner">
+                    <span style="font-size: 22px;">🐟</span>
+                    <span class="golden-fish-text">CÁ VÀNG XUẤT HIỆN! [1/10.000]</span>
+                </div>
+                <div class="countdown-number" id="countdown-num">3</div>
             </div>
 
             <div id="pause-menu-overlay">
                 <div class="pause-box">
                     <div class="pause-title">TẠM DỪNG</div>
                     <button class="pause-btn resume" onclick="resumeGame()">TIẾP TỤC</button>
-                    <button class="pause-btn exit" onclick="confirmExitToLobby()">VỀ TRẠM ĐIỀU PHỐI</button>
+                    <button class="pause-btn exit" onclick="confirmExitToLobby()">VỀ SẢNH CHỜ</button>
                 </div>
             </div>
 
-            <div id="freeze-overlay">
-                <div class="freeze-text">KẾT THÚC</div>
-                <button class="btn-finish-trigger" onclick="showSummaryResults()">XEM KẾT QUẢ</button>
+            <div id="freeze-overlay"><div class="freeze-text">KẾT THÚC</div></div>
+
+            <div id="game-1-container" class="game-container">
+                <div id="grid-1" class="dynamic-grid"></div>
             </div>
             
-            <div id="game-container" class="game-container">
+            <div id="game-2-container" class="game-container">
                 <div class="sequence-display" id="seq-area"></div>
                 <div class="input-area" id="input-area-2"></div>
             </div>
 
-            <!-- BẢNG TỔNG KẾT KẾT QUẢ TRÍ NHỚ -->
-            <div id="final-summary-overlay">
-                <div class="final-header">KẾT QUẢ TRÍ NHỚ</div>
-                
-                <div class="stat-box">
-                    <div class="stat-line" style="justify-content: center;">
-                        <span style="font-weight: 900; color: #fff; font-size: 11.5px;">TỔNG ĐIỂM DATA:</span> 
-                        <span class="stat-val" id="sum-score-total" style="font-weight:900; color:#f48fb1; font-size:15px; margin-left:5px;">0</span>
+            <div id="result-overlay">
+                <div class="stage-badge-header" id="stage-badge-title">KẾT QUẢ BÀI 1</div>
+                <div class="prestige-panel">
+                    <div class="prestige-total-box">
+                        <span class="prestige-total-label">TỔNG ĐIỂM BÀI NÀY:</span>
+                        <span class="prestige-total-num" id="final-score-display">0</span>
                     </div>
                 </div>
 
                 <div class="bio-metrics-box">
                     <div class="metric-card-row">
-                        <span class="metric-label">Tốc độ</span>
-                        <span class="metric-val" id="sum-rank-ssd">SSD 512GB</span>
+                        <span class="metric-label">Thời gian trích xuất</span>
+                        <span class="metric-val" id="bio-ms-val">Chưa đủ Data</span>
                     </div>
                     <div class="metric-card-row">
-                        <span class="metric-label">Bộ nhớ</span>
-                        <span class="metric-val" id="sum-rank-ram">RAM 4GB</span>
-                    </div>
-                    
-                    <div class="debug-feedback" id="debug-stats-box">
-                        Chuỗi dài nhất: Đang tính toán...<br>
-                        Thời gian hoàn thành: 0 ms
+                        <span class="metric-label">Trí nhớ không gian</span>
+                        <span class="metric-val" id="bio-rank-badge-mem">KÉM</span>
                     </div>
                 </div>
 
-                <!-- ICON GIỌT NƯỚC & CHỮ GIẢI MÃ NHẤP NHÁY PHỒNG XUỐNG -->
-                <div style="display: flex; flex-direction: column; align-items: center; margin: 4px 0; width: 92%; max-width: 340px;">
-                    <div onclick="event.stopPropagation(); window.location.href='GIAI MA/giai_ma_thuy_luan.html'" style="display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 500; position: relative;">
-                        <div class="super-click-btn" style="width: 70px; height: 70px;">
-                            <img src="../Photo/A THUY.png" alt="The Book of Water" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                        </div>
-                        <span style="font-family: 'Chakra Petch', sans-serif; font-size: 13px; font-weight: 900; color: #00ff9d; margin-top: 4px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 12px rgba(0,255,157,0.9); animation: textBlinkGlow 1.8s infinite ease-in-out;">GIẢI MÃ</span>
-                    </div>
-                </div>
-
-                <!-- HAI NÚT ĐO LẠI VÀ TIẾP TỤC -->
                 <div class="result-btn-row">
-                    <button class="result-action-btn" id="btn-replay" onclick="openArena()">ĐO LẠI</button>
-                    <button class="result-action-btn" id="btn-next" onclick="goToHoaLuan()">TIẾP TỤC</button>
+                    <button class="result-action-btn" id="btn-replay" onclick="retryCurrentStage()">TẬP LẠI</button>
+                    <button class="result-action-btn" id="btn-next" onclick="proceedNextStage()">BÀI 2</button>
                 </div>
+            </div>
+
+            <div id="final-summary-overlay">
+                <div class="final-header">KẾT QUẢ TRÍ NHỚ</div>
+                <div class="stat-box">
+                    <div class="stat-line"><span>BÀI 1:</span> <span id="sum-score-1">0</span></div>
+                    <div class="stat-line"><span>BÀI 2:</span> <span id="sum-score-2">0</span></div>
+                    <div class="stat-line" style="margin-top:8px; padding-top:8px; border-top:1px dashed rgba(244,143,177,0.4);">
+                        <span style="font-weight: 900; color: #fff;">TỔNG ĐIỂM DATA:</span> <span id="sum-score-total" style="font-weight:900; color:#f48fb1; font-size:18px;">0</span>
+                    </div>
+                </div>
+
+                <div class="bio-metrics-box" style="padding: 20px; gap: 10px;">
+                    <div class="metric-card-row">
+                        <span class="metric-label">Thời gian trích xuất</span>
+                        <span class="metric-val" id="final-ms">Chưa đủ Data</span>
+                    </div>
+                    <div class="metric-card-row">
+                        <span class="metric-label">Bộ nhớ (RAM / SSD)</span>
+                        <span class="metric-val" id="sum-rank-mem">KÉM</span>
+                    </div>
+                    <div class="master-feedback" id="master-feedback-text">Chờ đánh giá...</div>
+                </div>
+
+                <button class="final-btn-exit" onclick="closeArena()">VỀ SẢNH CHÍNH</button>
             </div>
             
         </div>
@@ -322,62 +345,54 @@
         const ALL_SHAPES = {
             'lightning': '<svg class="shape-svg" style="color: #ffb74d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
             'circle': '<svg class="shape-svg" style="color: #f48fb1;" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>',
-            'triangle': '<svg class="shape-svg" style="color: #00ff9d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20 12 2"/></svg>',
-            'square': '<svg class="shape-svg" style="color: #ff3366;" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>',
+            'triangle': '<svg class="shape-svg" style="color: #ff3366;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20 12 2"/></svg>',
+            'square': '<svg class="shape-svg" style="color: #f48fb1;" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>',
             'star': '<svg class="shape-svg" style="color: #ffaa00;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>',
-            'diamond': '<svg class="shape-svg" style="color: #b026ff;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 12 12 22 2 12 12 2"/></svg>'
+            'diamond': '<svg class="shape-svg" style="color: #b026ff;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 12 12 22 2 12 12 2"/></svg>',
+            'fish': '<svg class="shape-svg" style="color: #ffb74d;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c2.3 0 4.4-.8 6-2.1l3.7 3.7 1.4-1.4-3.7-3.7C21.2 16.4 22 14.3 22 12c0-5.5-4.5-10-10-10zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z"/></svg>'
         };
 
         const ALL_SHAPES_SMALL = {
             'lightning': '<svg class="shape-svg-small" style="color: #ffb74d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
             'circle': '<svg class="shape-svg-small" style="color: #f48fb1;" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>',
-            'triangle': '<svg class="shape-svg-small" style="color: #00ff9d;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20 12 2"/></svg>',
-            'square': '<svg class="shape-svg-small" style="color: #ff3366;" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>',
+            'triangle': '<svg class="shape-svg-small" style="color: #ff3366;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 20 2 20 12 2"/></svg>',
+            'square': '<svg class="shape-svg-small" style="color: #f48fb1;" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>',
             'star': '<svg class="shape-svg-small" style="color: #ffaa00;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>',
-            'diamond': '<svg class="shape-svg-small" style="color: #b026ff;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 12 12 22 2 12 12 2"/></svg>'
+            'diamond': '<svg class="shape-svg-small" style="color: #b026ff;" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 22 12 12 22 2 12 12 2"/></svg>',
+            'fish': '<svg class="shape-svg-small" style="color: #ffb74d;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c2.3 0 4.4-.8 6-2.1l3.7 3.7 1.4-1.4-3.7-3.7C21.2 16.4 22 14.3 22 12c0-5.5-4.5-10-10-10zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z"/></svg>'
         };
 
         const BASE_SYMBOLS = ['lightning', 'circle', 'triangle', 'square'];
         const ADVANCED_SYMBOLS = ['lightning', 'circle', 'triangle', 'square', 'star', 'diamond'];
 
-        function getRAMBySequence(maxSeq) {
-            if (maxSeq >= 10) return "RAM 32GB";
-            if (maxSeq >= 8)  return "RAM 16GB";
-            if (maxSeq >= 7)  return "RAM 8GB";   
-            if (maxSeq >= 6)  return "RAM 4GB";   
-            if (maxSeq >= 5)  return "RAM 2GB";
-            if (maxSeq >= 4)  return "RAM 1GB";
-            return "RAM 512MB";
+        const RANK_ICONS = {
+            'Kém': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%201%20(1).png?raw=true',
+            'Trung Bình': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%202%20(1).png?raw=true',
+            'Giỏi': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%203%20(1).png?raw=true',
+            'Xuất Sắc': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%204%20(1).png?raw=true',
+            'Thần Đồng': 'https://github.com/happyk1900/-m-thanh-app/blob/main/Cap%205%20(1).png?raw=true'
+        };
+
+        function getRankByStructure(score) {
+            if (score < 1000) {
+                return { 
+                    name: "Kém", 
+                    feedback: "Bộ nhớ của sếp hình như đang đi du lịch đâu đó rồi, chưa gom đủ 1000 dữ liệu đâu nha! Nhưng mà không sao cả, cá vàng mấy chốc mà hóa rồng. Hệ thống có sẵn vài bài tập giúp phục hồi lại trí nhớ, cứ thong thả ấn tiếp tục để kiểm tra tiếp nhé!" 
+                };
+            } else {
+                return { 
+                    name: "Xuất Sắc", 
+                    feedback: "Quá dữ dội! Hệ thống ghi nhận não bộ của sếp hôm nay chạy mượt mà vượt ngưỡng 1000 dữ liệu. Kiểu này thì cá vàng hóa rồng thực sự rồi chứ chẳng đùa! Giữ vững phong độ này để càn quét các trạm tiếp theo nha sếp ơi!" 
+                };
+            }
         }
 
-        function getSSDByMaxSequenceTime(maxLen, totalMs) {
-            if (maxLen >= 9 && totalMs < 2000) return "SSD 2TB";
-            if (maxLen >= 7 && totalMs < 3000) return "SSD 1TB";
-            if (maxLen >= 6 && totalMs < 4000) return "SSD 512GB";
-            if (maxLen >= 5) return "SSD 256GB";
-            return "SSD 120GB";
+        function getRankHTML(rankName) {
+            let iconUrl = RANK_ICONS[rankName] || RANK_ICONS['Kém'];
+            return `<img src="${iconUrl}" class="rank-icon-img" alt="Rank"> <span style="vertical-align: middle;">${rankName.toUpperCase()}</span>`;
         }
 
         let fxCtx = null;
-        let isScoreBelow1000 = false;
-        let isPlaying = false;
-        let isPausedForStart = true;
-        let currentLevel = 1;
-        let highestSequenceReached = 0;
-        let winsInCurrentLevel = 0;
-        let hitsCount = 0;
-        let bestSequenceLen = 0;
-        let bestSequenceTime = 0;
-        let nextHpMilestone = 1000;
-        let aScore = 0;
-        let pendingScore = 0;
-        let stabilityHP = 5;
-        let patternSeq = [];
-        let userSeq = [];
-        let canClick = false;
-        let gameLogicTimer = null;
-        let cueHideTimestamp = 0;
-
         function initAudio() { 
             try {
                 if (!fxCtx) { fxCtx = new (window.AudioContext || window.webkitAudioContext)(); }
@@ -407,21 +422,44 @@
                 
                 if(type === 'katana') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(1200 * pitchMultiplier, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.3); gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3); osc.start(); osc.stop(ctx.currentTime + 0.3); } 
                 else if(type === 'error') { osc.type = 'square'; osc.frequency.setValueAtTime(100, ctx.currentTime); gain.gain.setValueAtTime(0.4, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4); osc.start(); osc.stop(ctx.currentTime + 0.4); } 
-                else if(type === 'coin') { osc.type = 'sine'; osc.frequency.setValueAtTime(1500 * pitchMultiplier, ctx.currentTime); osc.frequency.setValueAtTime(2000 * pitchMultiplier, ctx.currentTime + 0.1); gain.gain.setValueAtTime(0.2, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2); osc.start(); osc.stop(ctx.currentTime + 0.2); } 
+                else if(type === 'coin') { osc.type = 'sine'; osc.frequency.setValueAtTime(1500 * pitchMultiplier, ctx.currentTime); gain.gain.setValueAtTime(2000 * pitchMultiplier, ctx.currentTime + 0.1); gain.gain.setValueAtTime(0.2, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2); osc.start(); osc.stop(ctx.currentTime + 0.2); } 
                 else if(type === 'ready') { osc.type = 'sine'; osc.frequency.setValueAtTime(1800, ctx.currentTime); gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15); osc.start(); osc.stop(ctx.currentTime + 0.15); }
                 else if(type === 'wrong') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.3); gain.gain.setValueAtTime(0.5, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3); osc.start(); osc.stop(ctx.currentTime + 0.3); }
             } catch (e) {}
         }
 
+        let cGame = '1'; 
+        let aScore = 0;           
+        let pendingScore = 0;     
+        let stabilityHP = 5;      
+        let isPlaying = false; 
+        let isPausedForStart = true;
+        
+        let sessionScoreG1 = 0, sessionScoreG2 = 0;
+        let hitsCountG1 = 0, hitsCountG2 = 0; 
+
+        let currentLevel = 1; 
+        let highestCompletedLevel = 1; 
+        let winsInCurrentLevel = 0; 
+        let canClick = false;
+        let patternSeq = [];
+        let userSeq = [];
+        let gameLogicTimer;
+
+        let cueHideTimestamp = 0;
+        let extractionTimes = [];
+        let nextHpMilestone = 1000;
+        let goldenFishActiveThisRound = false;
+
         window.onload = () => { 
+            openArena('1'); 
             initSparkleParticles();
-            openArena();
         };
 
         function initSparkleParticles() {
             let container = document.getElementById('dust-container');
             if(!container) return;
-            for(let i=0; i<40; i++) {
+            for(let i=0; i<35; i++) {
                 let p = document.createElement('div');
                 p.className = 'quantum-sparkle';
                 p.style.left = Math.random() * 100 + 'vw';
@@ -435,10 +473,43 @@
             }
         }
 
-        function getSymbolCount(level) { return 3 + level; }
-        function getAvailableSymbolsForLevel(level) { return (level >= 3) ? ADVANCED_SYMBOLS : BASE_SYMBOLS; }
+        function getGridConfigByLevel(level) {
+            if (level >= 5) return { size: 12, total: 144, css: 'repeat(12, 1fr)', dim: '350px' }; 
+            if (level === 4) return { size: 9, total: 81, css: 'repeat(9, 1fr)', dim: '330px' };   
+            if (level === 3) return { size: 7, total: 49, css: 'repeat(7, 1fr)', dim: '320px' };   
+            if (level === 2) return { size: 5, total: 25, css: 'repeat(5, 1fr)', dim: '280px' };   
+            return { size: 3, total: 9,  css: 'repeat(3, 1fr)', dim: '240px' };                    
+        }
 
-        function buildKeyboard() {
+        function getG2SymbolCount(level) {
+            if (level >= 5) return 18; 
+            if (level === 4) return 9;  
+            if (level === 3) return 7;  
+            if (level === 2) return 5;  
+            return 4;                   
+        }
+
+        function getAvailableSymbolsForLevel(level) {
+            let symbols = (level >= 4) ? [...ADVANCED_SYMBOLS] : [...BASE_SYMBOLS];
+            if (goldenFishActiveThisRound && !symbols.includes('fish')) {
+                symbols.push('fish');
+            }
+            return symbols;
+        }
+
+        function buildDynamicGrid() {
+            let container = document.getElementById('grid-1');
+            let config = getGridConfigByLevel(currentLevel);
+            container.innerHTML = ''; container.style.gridTemplateColumns = config.css; container.style.gridTemplateRows = config.css; 
+            container.style.width = config.dim; container.style.height = config.dim;
+            for(let i = 0; i < config.total; i++) {
+                let cell = document.createElement('div'); cell.className = 'grid-cell';
+                cell.onclick = () => handleGame1Click(i, cell);
+                container.appendChild(cell);
+            }
+        }
+
+        function buildG2Keyboard() {
             let area = document.getElementById('input-area-2'); area.innerHTML = '';
             let activeSymbols = getAvailableSymbolsForLevel(currentLevel);
             activeSymbols.forEach(key => {
@@ -449,36 +520,35 @@
             });
         }
 
-        function openArena() {
-            stopAlarm();
-            document.getElementById('screen-red-border').classList.remove('active');
-
-            aScore = 0; pendingScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
-            currentLevel = 1; highestSequenceReached = 0; winsInCurrentLevel = 0; hitsCount = 0;
-            bestSequenceLen = 0; bestSequenceTime = 0; nextHpMilestone = 1000;
-            isScoreBelow1000 = false;
+        function openArena(id) {
+            cGame = id; aScore = 0; pendingScore = 0; stabilityHP = 5; isPlaying = false; isPausedForStart = true;
+            currentLevel = 1; highestCompletedLevel = 1; winsInCurrentLevel = 0;
+            extractionTimes = []; nextHpMilestone = 1000; goldenFishActiveThisRound = false;
 
             let vid = document.getElementById('sanctum-video');
-            vid.classList.remove('hidden-mode');
+            vid.classList.remove('playing-mode');
             setTimeout(() => vid.classList.add('loaded'), 150);
 
             let playArea = document.getElementById('play-area');
             playArea.classList.remove('fullscreen-mode');
-            document.getElementById('game-container').classList.remove('active');
+            document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
 
             updateHpDisplay(); document.getElementById('boo-points').innerText = "0";
-            document.getElementById('final-summary-overlay').classList.remove('active');
+            document.getElementById('result-overlay').classList.remove('active');
             document.getElementById('pause-menu-overlay').classList.remove('active');
-            document.getElementById('freeze-overlay').classList.remove('active');
+            document.getElementById('final-summary-overlay').classList.remove('active');
             
             document.getElementById('game-top-bar').classList.remove('visible');
             document.getElementById('game-bottom-bar').classList.remove('visible');
             
             let promptOverlay = document.getElementById('start-prompt-overlay');
-            promptOverlay.classList.remove('hidden');
-            promptOverlay.style.opacity = '1';
+            promptOverlay.classList.remove('active');
+            setTimeout(() => {
+                promptOverlay.classList.remove('hidden');
+                setTimeout(() => promptOverlay.classList.add('active'), 200);
+            }, 500);
 
-            buildKeyboard();
+            if (id === '2') buildG2Keyboard();
         }
 
         function updateHpDisplay() {
@@ -495,56 +565,113 @@
         function triggerStartGame() {
             initAudio(); playSound('coin');
             let promptOverlay = document.getElementById('start-prompt-overlay');
-            promptOverlay.classList.add('hidden');
+            promptOverlay.classList.remove('active');
+            setTimeout(() => promptOverlay.classList.add('hidden'), 800);
             
             let vid = document.getElementById('sanctum-video');
             vid.classList.remove('loaded');
-            vid.classList.add('hidden-mode');
+            vid.classList.add('playing-mode');
 
-            playSound('katana', 0.6); let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
-            setTimeout(() => { let playArea = document.getElementById('play-area'); playArea.classList.add('fullscreen-mode'); laser.classList.add('expand'); }, 600);
+            playSound('katana', 0.6); 
+            let laser = document.createElement('div'); laser.className = 'laser-beam-horizontal'; document.body.appendChild(laser);
+            
             setTimeout(() => { 
-                if(laser && laser.parentElement) laser.remove(); 
-                isPausedForStart = false; 
-                document.getElementById('game-top-bar').classList.add('visible'); 
-                document.getElementById('game-bottom-bar').classList.add('visible'); 
-                document.getElementById('game-container').classList.add('active'); 
-                startArena(); 
+                let playArea = document.getElementById('play-area'); playArea.classList.add('fullscreen-mode'); laser.classList.add('expand'); 
+            }, 600);
+
+            setTimeout(() => { 
+                laser.remove(); 
+                runCountdownSequence(); 
             }, 1500);
+        }
+
+        function runCountdownSequence() {
+            let overlay = document.getElementById('countdown-overlay');
+            let numEl = document.getElementById('countdown-num');
+            let fishBanner = document.getElementById('golden-fish-banner');
+            
+            // Tỷ lệ 1/10.000 xuất hiện cá vàng
+            goldenFishActiveThisRound = (Math.floor(Math.random() * 10000) === 0);
+            if (goldenFishActiveThisRound) {
+                fishBanner.classList.add('active');
+            } else {
+                fishBanner.classList.remove('active');
+            }
+
+            overlay.classList.add('active');
+            let count = 3;
+            numEl.innerText = count;
+            playSound('ready');
+
+            let timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    numEl.innerText = count;
+                    playSound('ready');
+                } else {
+                    clearInterval(timer);
+                    overlay.classList.remove('active');
+                    isPausedForStart = false; 
+                    document.getElementById('game-top-bar').classList.add('visible'); 
+                    document.getElementById('game-bottom-bar').classList.add('visible'); 
+                    document.getElementById(`game-${cGame}-container`).classList.add('active'); 
+                    startArena();
+                }
+            }, 1000);
         }
 
         function startArena() { 
             isPlaying = true;
-            hitsCount = 0; 
-            runGame(); 
+            if(cGame === '1') { hitsCountG1 = 0; runGame1(); } 
+            else if(cGame === '2') { hitsCountG2 = 0; runGame2(); } 
         }
 
         function pauseGame() { if(!isPlaying || isPausedForStart) return; playSound('error'); isPausedForStart = true; clearTimeout(gameLogicTimer); document.getElementById('pause-menu-overlay').classList.add('active'); }
-        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; runGame(); }
-        
-        function confirmExitToLobby() { 
-            stopAlarm(); 
-            playSound('error'); 
-            window.location.href = 'tram_dieu_phoi.html'; 
+        function resumeGame() { playSound('coin'); document.getElementById('pause-menu-overlay').classList.remove('active'); isPausedForStart = false; if(cGame === '1') runGame1(); else runGame2(); }
+        function confirmExitToLobby() { playSound('error'); window.location.href = 'LucChien.html'; }
+        function closeArena() { window.location.href = 'LucChien.html'; }
+
+        function skipToNextStage() {
+            playSound('coin');
+            isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
+            aScore += pendingScore; pendingScore = 0; 
+
+            if (cGame === '1') {
+                sessionScoreG1 = Math.round(aScore); 
+                localStorage.setItem('thuy_luan_bai1_score', sessionScoreG1);
+                openArena('2');
+            } else {
+                sessionScoreG2 = Math.round(aScore); 
+                localStorage.setItem('thuy_luan_bai2_score', sessionScoreG2);
+                openArena('1');
+            }
         }
 
-        function revealCorrectAnswersForGame() {
+        function revealCorrectAnswersForGame1() {
+            let cells = document.getElementById('grid-1').children;
+            patternSeq.forEach(idx => { if(cells[idx]) { cells[idx].classList.add('reveal-hint'); } });
+            setTimeout(() => {
+                patternSeq.forEach(idx => { if(cells[idx]) { cells[idx].classList.remove('reveal-hint'); } });
+            }, 900);
+        }
+
+        function revealCorrectAnswersForGame2() {
             let area = document.getElementById('seq-area');
             area.innerHTML = patternSeq.map(key => `<div class="quantum-char" style="opacity:0.7;">${ALL_SHAPES_SMALL[key]}</div>`).join('');
         }
 
         function failSequence() { 
             if(!isPlaying || isPausedForStart) return; canClick = false; 
-            stabilityHP -= 1; 
-            updateHpDisplay(); 
-            
+            stabilityHP -= 1; updateHpDisplay(); 
             pendingScore = 0;
             document.getElementById('boo-points').innerText = Math.round(aScore);
 
             winsInCurrentLevel = 0; 
             currentLevel = Math.max(1, currentLevel - 1); 
-            buildKeyboard(); 
-            revealCorrectAnswersForGame();
+            if(cGame === '2') buildG2Keyboard(); 
+            
+            if (cGame === '1') { revealCorrectAnswersForGame1(); } 
+            else { revealCorrectAnswersForGame2(); }
 
             let flash = document.createElement('div'); flash.className = 'flashbang-red'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 400);
             
@@ -552,8 +679,7 @@
                 setTimeout(finishGame, 1000); 
             } else { 
                 clearTimeout(gameLogicTimer); 
-                let delay = 1000;
-                setTimeout(() => { runGame(); }, delay); 
+                setTimeout(() => { if (cGame === '1') runGame1(); else runGame2(); }, 1000); 
             }
         }
 
@@ -565,10 +691,15 @@
             setTimeout(() => alertBox.remove(), 1200);
         }
 
-        function processCorrectTap() { 
-            hitsCount++;
+        function processCorrectTap(currentSeqLength) { 
+            if (cGame === '1') hitsCountG1++; else if (cGame === '2') hitsCountG2++;
             playSound('coin', 1); 
-            let basePointPerItem = 15 + currentLevel * 5;
+            
+            let basePointPerItem = 15;
+            if (currentLevel === 2) basePointPerItem = 20;
+            else if (currentLevel === 3) basePointPerItem = 25;
+            else if (currentLevel >= 4) basePointPerItem = 30;
+
             pendingScore += basePointPerItem; 
             document.getElementById('boo-points').innerText = Math.round(aScore + pendingScore);
 
@@ -583,28 +714,34 @@
 
         function checkLevelUp() { 
             winsInCurrentLevel++;
-            let requiredWins = 1; 
+            let requiredWins = (currentLevel < highestCompletedLevel) ? 1 : 2; 
+
             if (winsInCurrentLevel >= requiredWins) { 
                 winsInCurrentLevel = 0; 
+                if (currentLevel > highestCompletedLevel) { highestCompletedLevel = currentLevel; }
                 aScore += pendingScore + (currentLevel * 40); 
                 pendingScore = 0;
                 document.getElementById('boo-points').innerText = Math.round(aScore);
 
                 currentLevel++;
-                buildKeyboard(); 
+                if(cGame === '2') buildG2Keyboard(); 
 
                 let alertBox = document.createElement('div');
                 alertBox.className = 'matrix-expand-alert';
-                let count = getSymbolCount(currentLevel);
-                alertBox.innerHTML = `ĐỘ KHÓ: ${count} HÌNH`;
-                
+                if(cGame === '1') {
+                    let cfg = getGridConfigByLevel(currentLevel);
+                    alertBox.innerHTML = `MA TRẬN ${cfg.size}X${cfg.size}`;
+                } else {
+                    let count = getG2SymbolCount(currentLevel);
+                    alertBox.innerHTML = `ĐỘ KHÓ: ${count} HÌNH`;
+                }
                 document.body.appendChild(alertBox);
                 playSound('ready');
                 setTimeout(() => alertBox.remove(), 1200);
 
-                setTimeout(() => { runGame(); }, 1200);
+                setTimeout(() => { if(cGame === '1') runGame1(); else runGame2(); }, 1200);
             } else {
-                setTimeout(() => { runGame(); }, 600);
+                setTimeout(() => { if(cGame === '1') runGame1(); else runGame2(); }, 600);
             }
         }
 
@@ -615,13 +752,44 @@
             playSound('ready');
         }
 
-        function runGame() {
+        function runGame1() {
+            if(!isPlaying || isPausedForStart) return; buildDynamicGrid(); patternSeq = []; userSeq = []; canClick = false; 
+            let config = getGridConfigByLevel(currentLevel); 
+            let count = Math.min(3 + currentLevel * 2, Math.floor(config.total * 0.6)); 
+            
+            while(patternSeq.length < count) { let r = Math.floor(Math.random() * config.total); if(!patternSeq.includes(r)) patternSeq.push(r); }
+            let cells = document.getElementById('grid-1').children; patternSeq.forEach(idx => { if(cells[idx]) cells[idx].classList.add('active-glow'); });
+            
+            gameLogicTimer = setTimeout(() => {
+                if(!isPlaying || isPausedForStart) return; 
+                patternSeq.forEach(idx => { if(cells[idx]) cells[idx].classList.remove('active-glow'); }); 
+                triggerReadyCue(document.getElementById('grid-1'));
+                cueHideTimestamp = Date.now(); 
+                canClick = true; 
+            }, Math.max(500, 1500 - (currentLevel * 100)));
+        }
+
+        function handleGame1Click(idx, cellEl) {
+            if(!canClick || !isPlaying || isPausedForStart || userSeq.includes(idx)) return; 
+            if (userSeq.length === 0) { extractionTimes.push(Date.now() - cueHideTimestamp); }
+
+            userSeq.push(idx); 
+            if (patternSeq.includes(idx)) { 
+                cellEl.classList.add('correct'); 
+                processCorrectTap(userSeq.length); 
+                if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); } 
+            } else { cellEl.classList.add('wrong'); playSound('wrong'); failSequence(); }
+        }
+
+        function runGame2() {
             if(!isPlaying || isPausedForStart) return; patternSeq = []; userSeq = []; canClick = false; 
-            let count = getSymbolCount(currentLevel);
-            highestSequenceReached = Math.max(highestSequenceReached, count);
+            let count = getG2SymbolCount(currentLevel);
             let availableSymbols = getAvailableSymbolsForLevel(currentLevel);
             
             for(let i=0; i<count; i++) { patternSeq.push(availableSymbols[Math.floor(Math.random() * availableSymbols.length)]); }
+            if (goldenFishActiveThisRound && !patternSeq.includes('fish')) {
+                patternSeq[Math.floor(Math.random() * patternSeq.length)] = 'fish';
+            }
             
             let area = document.getElementById('seq-area'); 
             area.innerHTML = patternSeq.map(key => `<div class="quantum-char">${ALL_SHAPES_SMALL[key]}</div>`).join('');
@@ -636,7 +804,7 @@
         
         function addToUserSeq(key) {
             if(!canClick || !isPlaying || isPausedForStart) return;
-            if (userSeq.length === 0) { window.currentAttemptStart = Date.now(); }
+            if (userSeq.length === 0) { extractionTimes.push(Date.now() - cueHideTimestamp); }
 
             if(key === patternSeq[userSeq.length]) {
                 userSeq.push(key); 
@@ -646,105 +814,79 @@
                 area.innerHTML = html; area.scrollTop = area.scrollHeight;
                 
                 processCorrectTap(patternSeq.length); 
-                if(userSeq.length === patternSeq.length) { 
-                    canClick = false; 
-                    let attemptTime = Date.now() - window.currentAttemptStart;
-                    if (patternSeq.length >= bestSequenceLen) {
-                        bestSequenceLen = patternSeq.length;
-                        bestSequenceTime = attemptTime;
-                    }
-                    checkLevelUp(); 
-                }
+                if(userSeq.length === patternSeq.length) { canClick = false; checkLevelUp(); }
             } else { playSound('wrong'); failSequence(); }
         }
 
         function finishGame() {
             isPlaying = false; isPausedForStart = true; clearTimeout(gameLogicTimer);
             aScore += pendingScore; pendingScore = 0; 
-            aScore += (stabilityHP * 15);
-
-            if (aScore < 200 || hitsCount < 3) {
-                aScore = 0; bestSequenceLen = 0; bestSequenceTime = 0;
-            }
-
-            let finalScore = Math.floor(aScore);
-            if (finalScore < 1000) { isScoreBelow1000 = true; } else { isScoreBelow1000 = false; }
 
             let vid = document.getElementById('sanctum-video');
-            vid.classList.remove('hidden-mode');
+            vid.classList.remove('playing-mode');
             setTimeout(() => vid.classList.add('loaded'), 400);
 
-            localStorage.setItem('thuy_luan_score', finalScore);
+            let currentHits = (cGame === '1') ? hitsCountG1 : hitsCountG2;
+            let avgExtractionMs = extractionTimes.length > 0 ? Math.round(extractionTimes.reduce((a,b)=>a+b, 0) / extractionTimes.length) : 0;
+
+            if (aScore < 200 || currentHits < 3) {
+                aScore = 0; highestCompletedLevel = 1; avgExtractionMs = 2500;
+            }
+
+            if(cGame === '1') { sessionScoreG1 = Math.round(aScore); localStorage.setItem('thuy_luan_bai1_score', sessionScoreG1); }
+            if(cGame === '2') { sessionScoreG2 = Math.round(aScore); localStorage.setItem('thuy_luan_bai2_score', sessionScoreG2); }
+            localStorage.setItem('thuy_luan_score', sessionScoreG1 + sessionScoreG2);
 
             document.getElementById('game-top-bar').classList.remove('visible');
             document.getElementById('game-bottom-bar').classList.remove('visible');
             let playArea = document.getElementById('play-area'); playArea.classList.remove('fullscreen-mode');
-            document.getElementById('game-container').classList.remove('active');
+            document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
 
-            playSound('error'); 
-            document.getElementById('freeze-overlay').classList.add('active');
+            playSound('error'); document.getElementById('freeze-overlay').classList.add('active');
+
+            setTimeout(() => {
+                document.getElementById('freeze-overlay').classList.remove('active');
+                document.getElementById('stage-badge-title').innerText = (cGame === '1') ? 'KẾT QUẢ BÀI 1' : 'KẾT QUẢ BÀI 2';
+                document.getElementById('final-score-display').innerText = Math.floor(aScore);
+                document.getElementById('bio-ms-val').innerText = (aScore > 0 && avgExtractionMs > 0 && avgExtractionMs < 2500) ? avgExtractionMs + " ms" : "Chưa đủ Data";
+                
+                let memRankObj = getRankByStructure(Math.floor(aScore));
+                document.getElementById('bio-rank-badge-mem').innerHTML = getRankHTML(memRankObj.name);
+
+                let btnNext = document.getElementById('btn-next');
+                if (cGame === '1') { 
+                    btnNext.innerText = "BÀI 2"; btnNext.onclick = proceedNextStage; btnNext.style.display = "block";
+                } else { 
+                    btnNext.innerText = "TỔNG KẾT"; btnNext.onclick = showFinalSummary; 
+                }
+
+                document.getElementById('result-overlay').classList.add('active');
+                playSound('coin');
+            }, 1800);
         }
 
-        function showSummaryResults() {
-            initAudio();
-            document.getElementById('freeze-overlay').classList.remove('active');
+        function retryCurrentStage() { playSound('katana'); document.getElementById('result-overlay').classList.remove('active'); openArena(cGame); }
+        function proceedNextStage() { playSound('coin'); document.getElementById('result-overlay').classList.remove('active'); openArena('2'); }
 
-            let finalScore = Math.floor(aScore);
-            document.getElementById('sum-score-total').innerText = finalScore;
+        function showFinalSummary() {
+            let vid = document.getElementById('sanctum-video');
+            vid.classList.remove('playing-mode');
+            setTimeout(() => vid.classList.add('loaded'), 400);
+
+            playSound('coin'); document.getElementById('result-overlay').classList.remove('active');
+            let totalSessionScore = sessionScoreG1 + sessionScoreG2;
+            let avgExtractionMs = extractionTimes.length > 0 ? Math.round(extractionTimes.reduce((a,b)=>a+b, 0) / extractionTimes.length) : 0;
+
+            document.getElementById('sum-score-1').innerText = sessionScoreG1;
+            document.getElementById('sum-score-2').innerText = sessionScoreG2;
+            document.getElementById('sum-score-total').innerText = totalSessionScore;
+            document.getElementById('final-ms').innerText = (avgExtractionMs > 0 && avgExtractionMs < 2500 && totalSessionScore > 0) ? avgExtractionMs + ' ms' : 'Không đạt';
             
-            let ssdEl = document.getElementById('sum-rank-ssd');
-            let ramEl = document.getElementById('sum-rank-ram');
-            let debugBox = document.getElementById('debug-stats-box');
-            let redBorder = document.getElementById('screen-red-border');
-
-            if (isScoreBelow1000) {
-                ssdEl.innerText = "⚠ BÁO ĐỘNG";
-                ssdEl.className = "metric-val red-alert-val";
-                ramEl.innerText = "CHƯA ĐỦ DATA";
-                ramEl.className = "metric-val red-alert-val";
-                debugBox.className = "debug-feedback red-alert-box";
-                debugBox.innerHTML = `Bộ nhớ trí não của bạn đang dưới mức bình thường, không đủ 1000 dữ liệu! Yêu cầu đo lại ngay lập tức!<br><br><span style="color: #ffd700; font-weight: 700;">Nếu bạn không vượt qua được, cũng đừng quá lo lắng, chúng ta có phương pháp tập luyện giúp phục hồi trí nhớ của bạn. Hãy cứ ấn tiếp tục để kiểm tra tiếp.</span>`;
-
-                redBorder.classList.add('active');
-                
-                let audioTag = document.getElementById('alarm-audio');
-                if(audioTag) { 
-                    audioTag.pause();
-                    audioTag.currentTime = 0;
-                    audioTag.volume = 1.0; 
-                    audioTag.loop = false;
-                    audioTag.play().catch(e => console.log("Audio play blocked:", e)); 
-                }
-            } else {
-                stopAlarm();
-                redBorder.classList.remove('active');
-
-                ssdEl.className = "metric-val";
-                ramEl.className = "metric-val";
-                debugBox.className = "debug-feedback";
-
-                let ramText = (bestSequenceLen === 0) ? "RAM 512MB" : getRAMBySequence(bestSequenceLen);
-                ramEl.innerText = ramText;
-
-                let ssdText = (bestSequenceLen === 0) ? "SSD 120GB" : getSSDByMaxSequenceTime(bestSequenceLen, bestSequenceTime);
-                ssdEl.innerText = ssdText;
-
-                debugBox.innerHTML = `Chuỗi dài nhất: <b>${bestSequenceLen} hình</b><br>Thời gian hoàn thành: <b>${bestSequenceTime} ms</b><br><br><span style="color: #ffd700; font-weight: 700;">Tuyệt vời! Bạn đã hoàn thành xuất sắc bài kiểm tra trí nhớ. Năng lực lưu trữ và tốc độ truy xuất đang vận hành rất ổn định. Hãy ấn tiếp tục để khám phá phần kiểm tra tiếp theo.</span>`;
-            }
+            let finalRankObj = getRankByStructure(totalSessionScore);
+            document.getElementById('sum-rank-mem').innerHTML = getRankHTML(finalRankObj.name);
+            document.getElementById('master-feedback-text').innerText = finalRankObj.feedback;
 
             document.getElementById('final-summary-overlay').classList.add('active');
-            playSound('coin');
-        }
-
-        function stopAlarm() {
-            let audioTag = document.getElementById('alarm-audio');
-            if(audioTag) { audioTag.pause(); audioTag.currentTime = 0; }
-        }
-
-        function goToHoaLuan() {
-            stopAlarm();
-            playSound('coin');
-            window.location.href = 'TestHoaLuan.html';
         }
     </script>
 </body>
