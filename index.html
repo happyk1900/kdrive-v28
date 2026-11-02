@@ -136,7 +136,7 @@
                 </div>
             </div>
 
-            <!-- TÊN & TIÊU ĐỀ K-DRIVE (PHI Y TẾ) -->
+            <!-- TÊN & TIÊU ĐỀ K-DRIVE -->
             <div class="flex flex-col items-center mb-1">
                 <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
                     Đỗ Đức Anh (Kai Ripe)
@@ -148,10 +148,11 @@
                     <span>K-Drive - Sức khỏe (phi y tế) 🩺</span>
                 </div>
 
-                <!-- KHU VỰC HIỆN NÚT FOUNDER DASHBOARD KHI ĐĂNG NHẬP ĐÚNG TÀI KHOẢN ANH -->
-                <div id="founderButtonContainer" class="mt-2 hidden">
-                    <button onclick="openFounderTaskModal()" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 text-slate-950 font-bold text-xs tracking-wider uppercase shadow-lg animate-pulse flex items-center gap-1.5">
-                        <span>⚡ Founder Dashboard (List Công Việc)</span>
+                <!-- KHU VỰC HIỆN NÚT PHÂN QUYỀN (SAU KHI ĐĂNG NHẬP) -->
+                <div id="roleButtonContainer" class="mt-2.5 hidden">
+                    <!-- Sẽ tự đổi tên và nội dung bấm tùy theo là Shareholder hay Founder -->
+                    <button id="roleActionButton" onclick="handleRoleAction()" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 text-slate-950 font-bold text-xs tracking-wider uppercase shadow-lg animate-pulse flex items-center gap-1.5">
+                        <span id="roleButtonText">--</span>
                     </button>
                 </div>
             </div>
@@ -209,7 +210,7 @@
             </div>
         </section>
 
-        <!-- BUTTON 3: CỔ ĐÔNG ĐĂNG NHẬP -->
+        <!-- BUTTON 3: CỔ ĐÔNG & FOUNDER ĐĂNG NHẬP -->
         <section class="mb-2.5">
             <div onclick="openShareholderLoginModal()" class="link-card p-3.5 flex items-center justify-between gap-3 cursor-pointer group border border-cyan-500/40 bg-slate-900/80">
                 <div class="flex items-center gap-3 flex-1 min-w-0">
@@ -218,10 +219,10 @@
                     </div>
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-2 mb-0.5">
-                            <span class="text-xs font-bold truncate text-cyan-200">CỔ ĐÔNG ĐĂNG NHẬP (PORTAL)</span>
+                            <span class="text-xs font-bold truncate text-cyan-200">ĐĂNG NHẬP HỆ THỐNG (PORTAL)</span>
                             <span class="font-mono-tech text-[8px] font-bold px-2 py-0.5 rounded-full border bg-cyan-500/20 border-cyan-400/50 text-cyan-300 shrink-0">LOGIN</span>
                         </div>
-                        <p class="text-[11px] text-slate-300 truncate">Kiểm tra dòng tiền, cổ phần và tiến độ dự án</p>
+                        <p class="text-[11px] text-slate-300 truncate">Dành cho Cổ đông và Founder quản trị</p>
                     </div>
                 </div>
             </div>
@@ -277,79 +278,98 @@
         </div>
     </div>
 
-    <!-- SHAREHOLDER & FOUNDER LOGIN MODAL -->
+    <!-- LOGIN PORTAL MODAL -->
     <div id="shareholderLoginModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="bio-shell w-full max-w-[360px] p-5 text-center relative border border-cyan-500/60 max-h-[90vh] overflow-y-auto">
             <button onclick="closeShareholderLoginModal()" class="absolute top-3 right-3 w-6 h-6 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-400">✕</button>
             <h3 class="text-xs font-bold text-cyan-300 font-cyber mb-3">CỔ ĐÔNG & FOUNDER ĐĂNG NHẬP</h3>
             
             <div id="shareholderLoginForm" class="space-y-3 text-left">
-                <p class="text-xs text-slate-300">Nhập tài khoản (SĐT hoặc Founder):</p>
-                <input type="text" id="shUsername" placeholder="SĐT cổ đông hoặc 'founder'..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none font-mono-tech">
-                <p class="text-xs text-slate-300">Mật khẩu truy cập:</p>
-                <input type="password" id="shPassword" placeholder="Mật khẩu tài khoản..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none font-mono-tech">
-                <button onclick="loginShareholder()" class="w-full py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs">Đăng Nhập Ngay</button>
-            </div>
-
-            <div id="shareholderPortal" class="space-y-3 text-left hidden">
-                <div class="p-2.5 rounded-xl bg-cyan-950/60 border border-cyan-500/40 text-xs text-cyan-300 font-bold text-center">
-                    ✓ Chào mừng Cổ đông: <span id="shNameDisplay" class="text-white">--</span>
-                </div>
-                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-2 text-xs font-mono-tech">
-                    <div class="flex justify-between"><span class="text-slate-400">Vốn đã góp:</span><span id="shAmountDisplay" class="text-amber-300 font-bold">50.000.000 VNĐ</span></div>
-                    <div class="flex justify-between"><span class="text-slate-400">Tỷ lệ cổ phần:</span><span id="shShareDisplay" class="text-cyan-300 font-bold">2.0%</span></div>
-                    <div class="flex justify-between"><span class="text-slate-400">Trạng thái mộc đỏ:</span><span class="text-emerald-300 font-bold">Đã phát hành (3-5 ngày)</span></div>
-                </div>
-                <div class="p-3 rounded-xl bg-slate-950 border border-amber-500/40 space-y-1.5 text-xs">
-                    <div class="font-bold text-amber-300">📊 Kiểm Tra Dòng Tiền & Giải Ngân:</div>
-                    <p class="text-slate-300 text-[11px] leading-relaxed">Toàn bộ dòng tiền 500 triệu VNĐ góp vốn được công khai minh bạch: Giải ngân phát triển sản phẩm, chạy ads 30 video demo, và chuẩn bị chia cổ tức ngay khi lên top trending.</p>
-                </div>
-                <button onclick="logoutShareholder()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs">Đăng xuất</button>
+                <p class="text-xs text-slate-300">Tài khoản đăng nhập:</p>
+                <input type="text" id="shUsername" placeholder="Nhập SĐT cổ đông hoặc 'founder'..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none font-mono-tech">
+                <p class="text-xs text-slate-300">Mật khẩu:</p>
+                <input type="password" id="shPassword" placeholder="Nhập mật khẩu..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none font-mono-tech">
+                <button onclick="loginSystemUser()" class="w-full py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs">Đăng Nhập Hệ Thống</button>
             </div>
         </div>
     </div>
 
-    <!-- FOUNDER TASK MANAGEMENT MODAL (LIST CÔNG VIỆC CỦA RIÊNG ANH) -->
-    <div id="founderTaskModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bio-shell w-full max-w-[420px] p-5 text-left relative border border-amber-400/60 max-h-[90vh] flex flex-col">
+    <!-- SHAREHOLDER PORTAL MODAL (GIAO DIỆN CỔ ĐÔNG: XEM % NẮM GIỮ & DUYỆT 30 VIDEO) -->
+    <div id="shareholderPortalModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bio-shell w-full max-w-[420px] p-5 text-left relative border border-cyan-500/60 max-h-[90vh] flex flex-col">
             <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
-                <h3 class="text-xs font-bold text-amber-300 font-cyber">⚡ FOUNDER TASK LIST (ĐỖ ĐỨC ANH)</h3>
-                <button onclick="closeFounderTaskModal()" class="w-6 h-6 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-400">✕</button>
+                <h3 class="text-xs font-bold text-cyan-300 font-cyber">📊 PORTAL CỔ ĐÔNG (SHAREHOLDER)</h3>
+                <button onclick="closeShareholderPortalModal()" class="w-6 h-6 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-400">✕</button>
             </div>
-            
+
             <div class="space-y-3 text-xs text-slate-300 overflow-y-auto pr-1 flex-1 leading-relaxed">
-                <p class="text-[11px] text-slate-400">Danh sách các đầu việc chiến lược để vận hành và phát triển dự án K-Drive:</p>
-                
-                <div class="space-y-2">
-                    <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-cyan-400/40">
-                        <input type="checkbox" checked class="w-4 h-4 rounded text-cyan-500 focus:ring-0">
-                        <span class="text-white line-through opacity-80">Hoàn thiện mã nguồn trang Bio Link & Tích hợp cổng thanh toán ACB 8617</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-cyan-400/40">
-                        <input type="checkbox" class="w-4 h-4 rounded text-cyan-500 focus:ring-0">
-                        <span class="text-white font-medium">Sản xuất và quay dựng chuỗi 30 video demo thực chiến</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-cyan-400/40">
-                        <input type="checkbox" class="w-4 h-4 rounded text-cyan-500 focus:ring-0">
-                        <span class="text-white font-medium">Chạy quảng cáo phủ sóng 30 video trên đa kênh (YouTube, TikTok, FB, Insta)</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-cyan-400/40">
-                        <input type="checkbox" class="w-4 h-4 rounded text-cyan-500 focus:ring-0">
-                        <span class="text-white font-medium">Hoàn tất kiểm thử và đưa ứng dụng lên kho (Android hoặc iOS)</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-cyan-400/40">
-                        <input type="checkbox" class="w-4 h-4 rounded text-cyan-500 focus:ring-0">
-                        <span class="text-white font-medium">Tổ chức họp cổ đông bỏ phiếu phát hành ứng dụng lên Store</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-cyan-400/40">
-                        <input type="checkbox" class="w-4 h-4 rounded text-cyan-500 focus:ring-0">
-                        <span class="text-white font-medium">Hoàn thiện thủ tục thành lập công ty & Gửi hồ sơ mộc đỏ cho cổ đông</span>
-                    </label>
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 font-mono-tech">
+                    <div class="flex justify-between"><span class="text-slate-400">Tên cổ đông:</span><span id="portalName" class="text-white font-bold">--</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">Phần trăm nắm giữ:</span><span id="portalShare" class="text-cyan-300 font-bold">2.0%</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">Vốn thực góp:</span><span id="portalAmount" class="text-amber-300 font-bold">50.000.000 VNĐ</span></div>
+                </div>
+
+                <!-- KHU VỰC BIỂU QUYẾT DUYỆT 30 VIDEO DEMO -->
+                <div class="p-3.5 rounded-xl bg-slate-950 border border-amber-500/40 space-y-2">
+                    <div class="font-bold text-amber-300 flex items-center justify-between">
+                        <span>🗳️ Biểu Quyết Duyệt Video Demo:</span>
+                        <span id="voteStatusBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300">Đang chờ >50% duyệt</span>
+                    </div>
+                    <p class="text-[11px] text-slate-300">Founder đã đăng tải video demo thực chiến đầu tiên. Cổ đông tiến hành xem xét và bỏ phiếu đồng thuận:</p>
+                    
+                    <div id="videoPreviewBox" class="w-full h-36 rounded-lg bg-black border border-slate-800 flex items-center justify-center text-slate-400 text-xs">
+                        [ Video Demo #01 đang chờ duyệt ]
+                    </div>
+
+                    <div class="flex gap-2 pt-1">
+                        <button onclick="castVote(true)" class="flex-1 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500">✓ Đồng ý phát hành (>50%)</button>
+                        <button onclick="castVote(false)" class="px-3 py-2 rounded-xl bg-rose-600/30 border border-rose-500/40 text-rose-300 text-xs">✗ Cần chỉnh sửa</button>
+                    </div>
                 </div>
             </div>
 
             <div class="pt-3 border-t border-slate-800 mt-3 text-center">
-                <button onclick="closeFounderTaskModal()" class="px-5 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs">Đóng Bảng Công Việc</button>
+                <button onclick="closeShareholderPortalModal()" class="px-5 py-2 rounded-xl bg-slate-800 text-xs text-slate-300">Đóng Portal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOUNDER DASHBOARD MODAL (GIAO DIỆN FOUNDER: QUẢN TRỊ 30 VIDEO & CÔNG VIỆC) -->
+    <div id="founderDashboardModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bio-shell w-full max-w-[420px] p-5 text-left relative border border-amber-400/60 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
+                <h3 class="text-xs font-bold text-amber-300 font-cyber">⚡ FOUNDER DASHBOARD (QUẢN TRỊ)</h3>
+                <button onclick="closeFounderDashboardModal()" class="w-6 h-6 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-400">✕</button>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-300 overflow-y-auto pr-1 flex-1 leading-relaxed">
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+                    <div class="font-bold text-white">Chức vụ: Founder & Tổng Giám Đốc</div>
+                    <div class="text-[11px] text-amber-300 font-mono-tech">Room cổ phần điều hành: 80% (Quản lý cốt lõi)</div>
+                </div>
+
+                <!-- TẢI LÊN VIDEO DEMO ĐỂ CỔ ĐÔNG DUYỆT -->
+                <div class="p-3.5 rounded-xl bg-slate-950 border border-cyan-500/40 space-y-2">
+                    <div class="font-bold text-cyan-300">📤 Đăng Tải Video Demo (Chuỗi 30 Video):</div>
+                    <p class="text-[11px] text-slate-300">Tải lên video demo thực chiến để cổ đông tiến hành biểu quyết (>50% đồng ý mới chính thức phát hành):</p>
+                    <input type="file" id="founderVideoFile" accept="video/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-cyan-500 file:text-slate-950 cursor-pointer">
+                    <button onclick="uploadFounderVideo()" class="w-full py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs">Tải Lên Cho Cổ Đông Duyệt</button>
+                </div>
+
+                <!-- LIST CÔNG VIỆC CẦN GIẢI QUYẾT -->
+                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                    <div class="font-bold text-amber-300">📋 List Công Việc Cần Giải Quyết:</div>
+                    <div class="space-y-1.5 text-[11px]">
+                        <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded text-amber-500"> <span>Hoàn thiện hạ tầng Bio Link & Ký hợp đồng online</span></label>
+                        <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-amber-500"> <span>Sản xuất chuỗi 30 video demo thực chiến</span></label>
+                        <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-amber-500"> <span>Chạy quảng cáo đa kênh (YouTube, TikTok, FB, Insta)</span></label>
+                        <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-amber-500"> <span>Đưa ứng dụng hoàn thiện lên kho (Android/iOS)</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-800 mt-3 text-center">
+                <button onclick="closeFounderDashboardModal()" class="px-5 py-2 rounded-xl bg-slate-800 text-xs text-slate-300">Đóng Dashboard</button>
             </div>
         </div>
     </div>
@@ -408,37 +428,6 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-cyan-400/50 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 <span class="text-[11px] text-slate-400">Chưa có ảnh/video. Admin hãy đăng nhập để tải lên!</span>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5">
-                    <div class="font-bold text-cyan-300 text-xs">📊 2. Định Giá, Gọi Vốn & Cam Kết</div>
-                    
-                    <div class="space-y-2">
-                        <div class="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-                            <span class="text-amber-300 font-bold">Định giá & Gọi vốn:</span> Định giá dự án 100.000 USD (~2,5 tỷ VNĐ). Phát hành tối đa 20% cổ phần (= 500 triệu VNĐ) cho cổ đông tiên phong.
-                        </div>
-                        <div class="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-                            <span class="text-cyan-300 font-bold">Mục đích & Doanh thu:</span> Phát triển sản phẩm, đưa lên Android/iOS, chạy ads chuỗi 30 video. Lên <b>top trending</b> là chia cổ tức ngay cho cổ đông.
-                        </div>
-                        <div class="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-                            <span class="text-amber-300 font-bold">Cam kết hành động:</span> Sản xuất đủ 30 video demo, chạy quảng cáo chuyên sâu, đăng tải đồng loạt trên mọi kênh mạng xã hội (YouTube, TikTok, Facebook, Instagram,...). Xây dựng ứng dụng hoàn chỉnh lên 1 trong 2 kho (Android hoặc iOS).
-                        </div>
-                        <div class="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-                            <span class="text-rose-400 font-bold">Cam kết hoàn vốn (60 ngày):</span> Nếu sau 60 ngày không đưa được ứng dụng lên kho, hoàn trả 100% vốn ban đầu cho nhà đầu tư.
-                        </div>
-                        <div class="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-                            <span class="text-cyan-300 font-bold">Biểu quyết cổ đông:</span> Trước khi phát hành, họp và bỏ phiếu trực tiếp tại trang web này. Trên 50% đồng ý mới chính thức đăng store.
-                        </div>
-                        <div class="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-                            <span class="text-amber-300 font-bold">Hoàn vốn lợi nhuận:</span> Tăng trưởng tối đa 7% (đầu tư 1 đồng, nhận 7 đồng là kết thúc hợp đồng để tái đầu tư).
-                        </div>
-                        <div class="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-                            <span class="text-purple-300 font-bold">Đặc quyền độc bản:</span> Sở hữu ưu đãi, icon độc quyền, huy hiệu danh giá và vật phẩm giới hạn (Limited Edition).
-                        </div>
-                        <div class="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-                            <span class="text-emerald-300 font-bold">Cam kết pháp lý:</span> Hồ sơ đóng mộc đỏ công ty gửi trao tận tay trong 3-5 ngày.
                         </div>
                     </div>
                 </div>
@@ -566,11 +555,16 @@
             { name: "Lê Hoàng C", amount: "20.000.000 VNĐ", share: "0.8%", billUrl: "" }
         ];
 
-        const shareholderAccounts = {
-            "0901234567": { name: "Nguyễn Văn A", amount: "50.000.000 VNĐ", share: "2.0%", pass: "123456" },
-            "0987654321": { name: "Trần Thị B", amount: "30.000.000 VNĐ", share: "1.2%", pass: "123456" },
-            "founder": { name: "Đỗ Đức Anh (Founder)", amount: "Founder Hub", share: "Control", pass: "admin123" }
+        // TÀI KHOẢN PHÂN QUYỀN: CỔ ĐÔNG VS FOUNDER
+        const systemAccounts = {
+            "0901234567": { role: "shareholder", name: "Nguyễn Văn A", amount: "50.000.000 VNĐ", share: "2.0%", pass: "123456" },
+            "0987654321": { role: "shareholder", name: "Trần Thị B", amount: "30.000.000 VNĐ", share: "1.2%", pass: "123456" },
+            "founder": { role: "founder", name: "Đỗ Đức Anh (Founder)", amount: "80%", share: "Control Hub", pass: "admin123" }
         };
+
+        let currentLoggedUser = null;
+        let voteCountYes = 0;
+        let totalShareholderVotes = 3; // Giả lập tổng số cổ đông
 
         let subscriberCount = parseInt(localStorage.getItem('kdrive_sub_count') || '18');
         document.getElementById('subscriberCountBadge').textContent = `${subscriberCount} người`;
@@ -690,7 +684,7 @@
             document.getElementById('docModal').classList.add('hidden');
         }
 
-        // LOGIN PORTAL LOGIC (PHÂN QUYỀN CỔ ĐÔNG & FOUNDER)
+        // HỆ THỐNG ĐĂNG NHẬP PHÂN QUYỀN
         function openShareholderLoginModal() {
             document.getElementById('shareholderLoginModal').classList.remove('hidden');
             document.getElementById('shareholderLoginModal').classList.add('flex');
@@ -700,36 +694,76 @@
             document.getElementById('shareholderLoginModal').classList.add('hidden');
         }
 
-        function loginShareholder() {
+        function loginSystemUser() {
             const user = document.getElementById('shUsername').value.trim().toLowerCase();
             const pass = document.getElementById('shPassword').value.trim();
 
-            if (shareholderAccounts[user] && shareholderAccounts[user].pass === pass) {
+            if (systemAccounts[user] && systemAccounts[user].pass === pass) {
+                currentLoggedUser = systemAccounts[user];
                 closeShareholderLoginModal();
-                if (user === 'founder') {
-                    // Nếu là tài khoản Founder của anh -> hiện nút Founder Dashboard ngay dưới avatar
-                    document.getElementById('founderButtonContainer').classList.remove('hidden');
-                    alert('Đăng nhập tài khoản Founder thành công! Nút quản lý công việc đã xuất hiện dưới avatar.');
+                
+                const container = document.getElementById('roleButtonContainer');
+                const btnText = document.getElementById('roleButtonText');
+                container.classList.remove('hidden');
+
+                if (currentLoggedUser.role === 'founder') {
+                    btnText.textContent = "⚡ Founder Dashboard";
                 } else {
-                    // Nếu là tài khoản cổ đông thường
-                    const acc = shareholderAccounts[user];
-                    document.getElementById('shNameDisplay').textContent = acc.name;
-                    document.getElementById('shAmountDisplay').textContent = acc.amount;
-                    document.getElementById('shShareDisplay').textContent = acc.share;
-                    alert(`Đăng nhập thành công tài khoản cổ đông: ${acc.name}`);
+                    btnText.textContent = "📊 Shareholder Portal";
                 }
+                alert(`Đăng nhập thành công với quyền: ${currentLoggedUser.name}`);
             } else {
-                alert('Tài khoản hoặc mật khẩu không chính xác!\n- Đăng nhập Founder: Nhập "founder", Mật khẩu: "admin123"\n- Đăng nhập Cổ đông: Nhập SĐT "0901234567", Mật khẩu: "123456"');
+                alert('Tài khoản hoặc mật khẩu không chính xác!\n- Cổ đông: 0901234567 / 123456\n- Founder: founder / admin123');
             }
         }
 
-        function openFounderTaskModal() {
-            document.getElementById('founderTaskModal').classList.remove('hidden');
-            document.getElementById('founderTaskModal').classList.add('flex');
+        function handleRoleAction() {
+            if (!currentLoggedUser) return;
+            if (currentLoggedUser.role === 'founder') {
+                document.getElementById('founderDashboardModal').classList.remove('hidden');
+                document.getElementById('founderDashboardModal').classList.add('flex');
+            } else {
+                document.getElementById('portalName').textContent = currentLoggedUser.name;
+                document.getElementById('portalShare').textContent = currentLoggedUser.share;
+                document.getElementById('portalAmount').textContent = currentLoggedUser.amount;
+                document.getElementById('shareholderPortalModal').classList.remove('hidden');
+                document.getElementById('shareholderPortalModal').classList.add('flex');
+            }
         }
-        function closeFounderTaskModal() {
-            document.getElementById('founderTaskModal').classList.remove('flex');
-            document.getElementById('founderTaskModal').classList.add('hidden');
+
+        function closeShareholderPortalModal() {
+            document.getElementById('shareholderPortalModal').classList.remove('flex');
+            document.getElementById('shareholderPortalModal').classList.add('hidden');
+        }
+
+        function closeFounderDashboardModal() {
+            document.getElementById('founderDashboardModal').classList.remove('flex');
+            document.getElementById('founderDashboardModal').classList.add('hidden');
+        }
+
+        // CỔ ĐÔNG BỎ PHIẾU DUYỆT VIDEO
+        function castVote(isAgree) {
+            if (isAgree) {
+                voteCountYes++;
+                alert(`Đã ghi nhận vote ĐỒNG Ý! Tổng số phiếu: ${voteCountYes}/${totalShareholderVotes} (Cần >50% để chính thức phát hành).`);
+                if (voteCountYes >= 2) {
+                    document.getElementById('voteStatusBadge').textContent = "✓ Đã đủ >50% Đồng Ý (Chính thức đăng tải)";
+                    document.getElementById('voteStatusBadge').className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold";
+                }
+            } else {
+                alert('Đã ghi nhận ý kiến cần chỉnh sửa video từ cổ đông.');
+            }
+        }
+
+        // FOUNDER TẢI LÊN VIDEO CHO CỔ ĐÔNG DUYỆT
+        function uploadFounderVideo() {
+            const fileInput = document.getElementById('founderVideoFile');
+            if (fileInput.files.length > 0) {
+                alert('Đã tải lên video demo thành công! Cổ đông có thể vào Portal để xem và tiến hành bỏ phiếu duyệt.');
+                closeFounderDashboardModal();
+            } else {
+                alert('Vui lòng chọn tệp video trước khi tải lên!');
+            }
         }
 
         // OTP & CONTRACT SIGNING LOGIC
