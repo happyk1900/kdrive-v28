@@ -929,7 +929,40 @@
             </div>
         </div>
     </div>
+<!-- MODAL THÔNG BÁO MẬT KHẨU VIP (CÓ NÚT SAO CHÉP & TỰ ĐIỀN ĐĂNG NHẬP) -->
+    <div id="vipPassSuccessModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md hidden items-center justify-center p-4 z-[80]">
+        <div class="bio-shell w-full max-w-[390px] p-5 text-center relative border border-amber-400/80 shadow-[0_0_35px_rgba(251,191,36,0.35)]">
+            <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-2xl animate-bounce">
+                🎉
+            </div>
+            <h3 class="text-sm font-bold text-amber-300 font-mono-tech tracking-wide uppercase mb-1">KÝ HỢP ĐỒNG THÀNH CÔNG!</h3>
+            <p class="text-xs text-slate-300 mb-3">Chào mừng <b id="vipModalName" class="text-white">--</b> đã chính thức trở thành Cổ đông Tiên phong K-Drive.</p>
 
+            <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/50 space-y-2 mb-3">
+                <div class="text-[10px] text-slate-400 font-mono-tech uppercase">Mật khẩu Phòng Chiếu VIP của bạn:</div>
+                <div class="flex items-center justify-center gap-2">
+                    <span id="vipModalPass" class="text-xl font-extrabold font-mono-tech text-amber-300 tracking-wider select-all">--</span>
+                </div>
+                <p class="text-[10px] text-cyan-300 font-mono-tech">Đã kích hoạt cho SĐT: <span id="vipModalPhone" class="font-bold">--</span></p>
+            </div>
+
+            <div class="space-y-2">
+                <!-- NÚT 1 CHẠM SAO CHÉP -->
+                <button onclick="copyVipPass()" class="w-full py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs font-mono-tech flex items-center justify-center gap-2 hover:bg-amber-400 transition-all active:scale-95 shadow-md">
+                    <span>📋</span> <span>Sao Chép Mật Khẩu</span>
+                </button>
+
+                <!-- NÚT CHUYỂN THẲNG VÀO PHÒNG CHIẾU (TỰ ĐIỀN SĐT & PASS) -->
+                <button onclick="goToVipLogin()" class="w-full py-2.5 rounded-xl bg-purple-600/30 border border-purple-400/60 text-purple-200 font-bold text-xs font-mono-tech flex items-center justify-center gap-2 hover:bg-purple-600/50 transition-all active:scale-95">
+                    <span>🎬</span> <span>Đăng Nhập Phòng Chiếu Ngay</span>
+                </button>
+            </div>
+
+            <button onclick="closeVipPassModal()" class="mt-3 text-[11px] text-slate-400 font-mono-tech hover:underline">
+                Đóng thông báo
+            </button>
+        </div>
+    </div>
     <!-- REFLEX GAME MODAL -->
     <div id="gameModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="bio-shell w-full max-w-[380px] p-5 text-center relative border border-purple-500/50">
@@ -1915,6 +1948,52 @@
         }
 
         // KÝ HỢP ĐỒNG & LƯU CHỮ KÝ VỀ GOOGLE SHEET
+        // BIẾN LƯU TẠM THÔNG TIN MẬT KHẨU VỪA CẤP
+        let currentAssignedVipPass = "";
+        let currentAssignedVipPhone = "";
+
+        // HIỂN THỊ MODAL BÁO MẬT KHẨU VIP KÈM NÚT SAO CHÉP
+        function showVipPassModal(name, phone, pass) {
+            currentAssignedVipPass = pass;
+            currentAssignedVipPhone = phone;
+            document.getElementById('vipModalName').textContent = name;
+            document.getElementById('vipModalPhone').textContent = phone;
+            document.getElementById('vipModalPass').textContent = pass;
+            const modal = document.getElementById('vipPassSuccessModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        // 1 CHẠM SAO CHÉP MẬT KHẨU VIP
+        function copyVipPass() {
+            if (currentAssignedVipPass) {
+                copyText(currentAssignedVipPass);
+            }
+        }
+
+        // TỰ ĐỘNG ĐIỀN SĐT & MẬT KHẨU VÀO PHÒNG CHIẾU VIP
+        function goToVipLogin() {
+            closeVipPassModal();
+            openShareholderLoginModal();
+            if (currentAssignedVipPhone) {
+                document.getElementById('shUser').value = currentAssignedVipPhone;
+            }
+            if (currentAssignedVipPass) {
+                document.getElementById('shPass').value = currentAssignedVipPass;
+            }
+        }
+
+        function closeVipPassModal() {
+            const modal = document.getElementById('vipPassSuccessModal');
+            if (modal) {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+        }
+
+        // KÝ HỢP ĐỒNG & MỞ BẢNG SAO CHÉP MẬT KHẨU
         async function submitSignature() {
             const name = document.getElementById('contractInvName').value.trim();
             const phone = document.getElementById('contractInvPhone').value.trim();
@@ -1958,8 +2037,9 @@
                     document.getElementById('displayInvEmail').textContent = email || 'Chưa cung cấp';
                     document.getElementById('displayInvCccd').textContent = cccd;
 
-                    alert(`🎉 Chúc mừng ${name}! Bạn đã ký hợp đồng thành công.\n\n🔑 MẬT KHẨU PHÒNG CHIẾU VIP CỦA BẠN LÀ:\n👉 ${result.password}\n\n(Hệ thống đã kích hoạt cho SĐT: ${phone}. Bạn có thể đăng nhập Phòng Chiếu ngay bây giờ!)`);
+                    // Đóng hợp đồng và mở bảng thông báo VIP có nút sao chép
                     closeContract();
+                    showVipPassModal(name, phone, result.password);
                 } else {
                     alert(`⚠️ Không thể lưu: ${result.message}`);
                     if (submitBtn) {
@@ -1979,13 +2059,41 @@
             if (phone) alert(`Đã tiếp nhận yêu cầu hoàn tiền cho SĐT: ${phone}.`);
         }
 
+        // HÀM SAO CHÉP CHUẨN ĐA THIẾT BỊ (HỖ TRỢ TỐT CẢ IPHONE & ANDROID)
         function copyText(text) {
-            navigator.clipboard.writeText(text);
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(`Đã sao chép: ${text}`);
+                }).catch(() => fallbackCopyText(text));
+            } else {
+                fallbackCopyText(text);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast(`Đã sao chép: ${text}`);
+            } catch (err) {
+                alert(`Mật khẩu của bạn: ${text}`);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showToast(text) {
             const toast = document.getElementById('toast');
             if (toast) {
-                toast.textContent = `Đã sao chép: ${text}`;
+                toast.textContent = text;
                 toast.style.opacity = '1';
-                setTimeout(() => toast.style.opacity = '0', 2000);
+                setTimeout(() => toast.style.opacity = '0', 2500);
             }
         }
 
