@@ -834,7 +834,7 @@
                             <button onclick="requestRefund24h()" class="text-[10px] text-rose-400 hover:underline font-mono-tech">Yêu cầu hoàn tiền 24h</button>
                         </div>
                         <div class="flex gap-2">
-                            <input type="text" id="otpInput" placeholder="Mã OTP 6 ký tự (VD: K#9-X8)..." class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-amber-400 focus:outline-none font-mono-tech tracking-wider uppercase">
+                            <input type="text" id="otpInput" placeholder="Mã OTP 8 ký tự (VD: K#9-X8)..." class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-amber-400 focus:outline-none font-mono-tech tracking-wider uppercase">
                             <button onclick="verifyOtpAndSign()" class="px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shrink-0 font-mono-tech">Mở Hợp Đồng</button>
                         </div>
                     </div>
@@ -1479,23 +1479,79 @@
             } else {
                 alert('Vui lòng điền đầy đủ số điện thoại và mật khẩu mới!');
             }
+      // DANH SÁCH 100 MẬT KHẨU PHÒNG CHIẾU VIP (ĐỒNG BỘ VỚI 100 MÃ OTP)
+        const masterVipPassList = [
+            "Kp#91@vX8", "Tp$74#mL2", "Wk!83*bQ9", "Zq#62&yR4", "Lm$15*tV7", "Px#49@rN3", "Rt$88#mC1", "Vn!27&qD5", "Bh#63@zK8", "Nd$92*tP4",
+            "Gh$34@kW7", "Qs#58*mN2", "Tv!19&bL6", "Yk#72@rP8", "Bx$43*tQ1", "Mj!66&zD9", "Wp#81@nC4", "Lk$25*rM7", "Fd!93&tV2", "Pn#57@bK8",
+            "Ck$48*yL3", "Vr!75&mP6", "Tq#12@bN9", "Xm$86*rT4", "Np!39&zK7", "Lw#64@tV1", "Rb$27*mC8", "Pd!91&nL5", "Ms#53@kQ2", "Gk$78*bT6",
+            "Vw!65&zM3", "Zp#29@rK8", "Tf$84*tL1", "Lm!47&bN5", "Kq#93@mP2", "Xb$18*yD7", "Rv!72&nC4", "Pk#36@tQ9", "Nd$51*bW8", "Tz!87&mL3",
+            "Bv#42@kP7", "Ws$69*tN1", "Qf!14&rC5", "Lp#83@bT9", "Ym$27*zK4", "Rt!58&mL2", "Kd#96@nQ8", "Vx$31*tP5", "Mb!74&bW3", "Pq#19@mR6",
+            "Zk$82*yT5", "Dp!46&rL9", "Tv#73@mK1", "Qx$95*bN4", "Lf!28&tP7", "Nq#61@zW3", "Km$37*rD8", "Vb!84&nC2", "Ts#16@kL5", "Rw$59*mP7",
+            "Lx!93&bT1", "Kd#54@mC6", "Wp$28*yK9", "Tz!71&rN4", "Rb#45@bL8", "Vf$89*tP2", "Qk!32&mD7", "Nm#67@zW5", "Pp$14*kR3", "Ls!85&nC9",
+            "Ty$76*bW4", "Xk!23&rL8", "Mq#88@tP1", "Vp$41*mC5", "Ld!69&zK7", "Tn#95@bN2", "Kb$34*rT9", "Wf!78&mP3", "Rs#12@kL6", "Qv$57*tD4",
+            "Wk!49&mC8", "Pt#82@bT3", "Lz$17*rK6", "Vx!63&tP9", "Kd#35@nL2", "Tp$94*zW7", "Rm!58&bC1", "Qf#26@kM4", "Nb$71*tP8", "Vs!43&rD5",
+            "Zn$68*bT2", "Lq!91&mP5", "Tb#37@kC9", "Wf$84*rL3", "Kx!52&zW8", "Vp#19@bT4", "Rd$73*mN6", "Ms!46&tK1", "Tk#85@rP7", "Qz$24*bM9",
+            "123456", "admin8617" // Mật mã quản trị / thử nghiệm
+        ];
+
+        // LẤY DANH SÁCH TÀI KHOẢN ĐÃ KÍCH HOẠT TỪ BỘ NHỚ
+        function getActivatedVipAccounts() {
+            return JSON.parse(localStorage.getItem('kdrive_activated_vip_accounts') || '{}');
         }
 
+        // HÀM ĐĂNG NHẬP PHÒNG CHIẾU VIP (KIỂM TRA SĐT & MẬT KHẨU DÙNG 1 LẦN)
         function loginShareholderAccount() {
-            const user = document.getElementById('shUser').value.trim();
+            const phone = document.getElementById('shUser').value.trim();
             const pass = document.getElementById('shPass').value.trim();
 
-            if (shareholderAccounts[user] && shareholderAccounts[user].pass === pass) {
-                const acc = shareholderAccounts[user];
-                document.getElementById('shDisplayName').textContent = acc.name;
-                document.getElementById('shDisplayAmount').textContent = acc.amount;
-                document.getElementById('shDisplayShare').textContent = acc.share;
-                document.getElementById('shLoginForm').classList.add('hidden');
-                document.getElementById('shAccountDashboard').classList.remove('hidden');
-                alert(`Đăng nhập thành công tài khoản cổ đông: ${acc.name}`);
-            } else {
-                alert('Tài khoản hoặc mật khẩu không chính xác!\n(Mẫu thử SĐT: 0901234567, Mật khẩu: 123456)');
+            if (!phone || !pass) {
+                alert('Vui lòng nhập đầy đủ Số điện thoại và Mật khẩu VIP!');
+                return;
             }
+
+            // Kiểm tra định dạng số điện thoại cơ bản
+            if (phone.length < 9) {
+                alert('Số điện thoại không hợp lệ!');
+                return;
+            }
+
+            const activatedAccounts = getActivatedVipAccounts();
+
+            // Trường hợp 1: Mật khẩu này đã được kích hoạt trước đó
+            if (activatedAccounts[pass]) {
+                if (activatedAccounts[pass] !== phone) {
+                    alert('⚠️ Mật khẩu VIP này đã được kích hoạt bởi một số điện thoại khác và không thể dùng lại!');
+                    return;
+                }
+            } 
+            // Trường hợp 2: Lần đầu tiên đăng nhập với mật khẩu này
+            else {
+                if (!masterVipPassList.includes(pass)) {
+                    alert('Mật khẩu VIP không chính xác hoặc chưa được cấp phép!');
+                    return;
+                }
+                // Khóa mật khẩu này vào số điện thoại của khách (cơ chế dùng 1 lần)
+                if (pass !== "123456" && pass !== "admin8617") {
+                    activatedAccounts[pass] = phone;
+                    localStorage.setItem('kdrive_activated_vip_accounts', JSON.stringify(activatedAccounts));
+                }
+            }
+
+            // Tìm thông tin cổ đông nếu đã có trong danh sách
+            let matchedSh = shareholdersData.find(s => s.phone.replace(/\D/g, '') === phone.replace(/\D/g, ''));
+            let displayName = matchedSh ? matchedSh.name : `Cổ đông VIP (${phone.slice(-4)})`;
+            let displayAmount = matchedSh ? matchedSh.amount : "Đã hoàn tất góp vốn";
+            let displayShare = matchedSh ? matchedSh.share : "Cổ phần Tiên phong";
+
+            // Hiển thị giao diện Dashboard Phòng Chiếu VIP
+            document.getElementById('shDisplayName').textContent = displayName;
+            document.getElementById('shDisplayAmount').textContent = displayAmount;
+            document.getElementById('shDisplayShare').textContent = displayShare;
+            document.getElementById('shLoginForm').classList.add('hidden');
+            document.getElementById('shAccountDashboard').classList.remove('hidden');
+
+            alert(`Chào mừng ${displayName} đã đăng nhập thành công vào Phòng Chiếu VIP!`);
+        }
         }
 
         function logoutShareholderAccount() {
@@ -1716,17 +1772,78 @@
             }
         }
 
-        const validOtpList = ["K#9-X8", "T$2-P7", "V!4-M5", "K-Drive.86", "Telepathy.68", "8617"];
+        // DANH SÁCH 100 MÃ TOKEN BẢO MẬT CAO (HÀNG NGHÌN TỶ KHẢ NĂNG)
+        const masterOtpList = [
+            "X9NF-7K2M", "B4TQ-8W5P", "M7YD-2R9C", "H3VZ-6J1K", "Q8XP-4L7N", "C2GW-9T3S", "F6LK-1M8Z", "V9RD-5Q2Y", "J4NB-8P6T", "W1SX-7K4M",
+            "K8MZ-3T7W", "Y5PC-9R1B", "T2XQ-6K8V", "N7WD-4M2S", "R1FB-8T5Z", "G9KP-2N7L", "D4VM-7Q1C", "S8TZ-3K9P", "L2WN-6R4B", "P5XD-1M8T",
+            "Z7FB-4Q9K", "A3MW-8N2T", "V6TK-1R7S", "K9PD-5L3W", "M2QB-7T8C", "T8VN-4K1Z", "B1XD-9M6P", "N5RZ-2W8T", "Q4KP-7T3S", "L8FB-1M9K",
+            "C9TM-5W2R", "W2KB-8Q7P", "R7XD-3N1V", "F4PZ-6M8T", "K1VB-9T2S", "M8RN-5K7W", "T3FB-1Q9L", "V9KP-4M2C", "B6TZ-8N5W", "N2XD-7K1P",
+            "P8MB-2T6V", "Q5VN-9K3S", "L1FB-7W8T", "K4XD-3M1R", "Y9PZ-6T2K", "T2NB-8Q5W", "W7KM-1R9C", "M3VB-5T7P", "D8RZ-2K4S", "B5TN-9M1L",
+            "H2XD-8K6M", "S7FB-4T1W", "K9VN-3R8C", "R4PZ-7M2S", "M1TB-9K5L", "T6KD-2W7P", "B8RN-4M1Q", "V3FB-8T6S", "L9XD-1K7W", "W4PZ-5M2R",
+            "K7TN-3M9B", "N2VB-8T4K", "Q6XD-1W5S", "F9PZ-7K2R", "T4MB-5N8C", "M1RN-9T3W", "B8FB-2K7L", "V5KD-6M1P", "L3TZ-8R4S", "P9VN-2T5W",
+            "D2XD-7K8M", "T8PZ-4M1S", "K5FB-9W2R", "W1RN-6T7L", "M4KD-8K3C", "B9TZ-2N5P", "R6MB-7T1W", "V2VN-5K8S", "L7FB-1M4Q", "K3XD-9T6R",
+            "S8PZ-3M7K", "T4VN-8K2W", "M9FB-5T1S", "B2KD-7R6P", "K6RN-1M9L", "V1XD-8T4C", "W7TZ-3K5W", "L5MB-9N2S", "Q3FB-6T8R", "N8PZ-2M7K",
+            "K2VN-7T4M", "M8XD-1K6W", "T5FB-9M3S", "B3RN-6T8L", "R9KD-2W7C", "V4PZ-8K1P", "L6TZ-5M9R", "W1FB-4T2S", "K7MB-8N6W", "P2XD-3M5K",
+            "8617" // Mã dự phòng riêng của Founder
+        ];
+
+        // KIỂM TRA VÀ KHÓA CHẶN BRUTE-FORCE (QUÁ 5 LẦN SAI SẼ KHÓA 15 PHÚT)
+        function checkBruteForceLock() {
+            const lockUntil = localStorage.getItem('kdrive_otp_lock_until');
+            if (lockUntil && Date.now() < parseInt(lockUntil)) {
+                const remainingMinutes = Math.ceil((parseInt(lockUntil) - Date.now()) / 60000);
+                alert(`⚠️ Bạn đã nhập sai quá nhiều lần! Vui lòng thử lại sau ${remainingMinutes} phút nữa.`);
+                return true;
+            }
+            return false;
+        }
+
+        function registerFailedAttempt() {
+            let fails = parseInt(localStorage.getItem('kdrive_otp_fails') || '0') + 1;
+            if (fails >= 5) {
+                const lockTime = Date.now() + 15 * 60 * 1000; // Khóa 15 phút
+                localStorage.setItem('kdrive_otp_lock_until', lockTime.toString());
+                localStorage.setItem('kdrive_otp_fails', '0');
+                alert('⚠️ Bạn đã nhập sai 5 lần! Hệ thống tạm thời khóa chức năng xác thực này trong 15 phút để bảo vệ tài khoản.');
+            } else {
+                localStorage.setItem('kdrive_otp_fails', fails.toString());
+                alert(`Mã OTP không chính xác! Bạn còn ${5 - fails} lần thử trước khi bị khóa.`);
+            }
+        }
 
         function verifyOtpAndSign() {
-            const val = document.getElementById('otpInput').value.trim();
-            if (validOtpList.includes(val)) {
+            if (checkBruteForceLock()) return;
+
+            const inputEl = document.getElementById('otpInput');
+            const val = inputEl.value.trim().toUpperCase();
+            const usedOtps = JSON.parse(localStorage.getItem('kdrive_used_otps') || '[]');
+
+            if (!val) {
+                alert('Vui lòng nhập mã OTP!');
+                return;
+            }
+
+            if (usedOtps.includes(val)) {
+                alert('⚠️ Mã OTP này đã được sử dụng để ký hợp đồng trước đó và đã hết hiệu lực!');
+                return;
+            }
+
+            if (masterOtpList.includes(val)) {
+                // Nhập đúng: Reset số lần sai và ghi nhận mã đã dùng
+                localStorage.removeItem('kdrive_otp_fails');
+                if (val !== "8617") {
+                    usedOtps.push(val);
+                    localStorage.setItem('kdrive_used_otps', JSON.stringify(usedOtps));
+                }
+
                 closeDocModal();
                 document.getElementById('contractModal').classList.remove('hidden');
                 document.getElementById('contractModal').classList.add('flex');
                 initSignaturePad();
             } else {
-                alert('Mã OTP 6 ký tự bảo mật không chính xác!');
+                registerFailedAttempt();
+            }
+        }
             }
         }
 
