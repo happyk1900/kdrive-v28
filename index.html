@@ -448,7 +448,6 @@
         </div>
 
     </main>
-
     <!-- MODAL DANH SÁCH CỔ ĐÔNG & BILL CHUYỂN KHOẢN -->
     <div id="shareholdersModal" class="fixed inset-0 bg-slate-950/92 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bio-shell w-full max-w-[410px] p-5 text-left relative border border-amber-400/60 my-auto max-h-[90vh] flex flex-col">
@@ -456,6 +455,76 @@
                 <h3 class="text-xs font-bold text-amber-300 font-mono-tech tracking-wide uppercase">💎 DANH SÁCH CỔ ĐÔNG TIÊN PHONG & BILL</h3>
                 <button onclick="closeShareholdersModal()" class="w-6 h-6 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white">✕</button>
             </div>
+            
+            <div class="space-y-3 text-xs text-slate-300 overflow-y-auto pr-1 flex-1 leading-relaxed font-medium">
+                <div class="flex items-center justify-between gap-2">
+                    <p class="text-slate-200 flex-1">Dưới đây là danh sách minh bạch các nhà đầu tư tiên phong đã hoàn tất góp vốn vào hệ sinh thái K-Drive:</p>
+                    <button onclick="toggleShareholderManager()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10px] font-mono-tech font-bold shrink-0 hover:bg-amber-500/30 transition-all">⚙️ Quản lý / Thêm</button>
+                </div>
+
+                <!-- KHUNG ĐĂNG NHẬP QUYỀN FOUNDER (MẬT KHẨU HOẶC VÂN TAY) -->
+                <div id="shAdminAuthBox" class="hidden p-3 rounded-xl bg-slate-900 border border-rose-500/50 space-y-2.5 font-mono-tech">
+                    <div class="text-[11px] text-rose-300 font-bold text-center">🔒 Mở khóa quyền Founder để Quản lý Cổ đông & Bill:</div>
+                    
+                    <button id="shBioLoginBtn" onclick="loginWithBiometric('shareholders')" class="hidden w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500/25 to-emerald-500/25 border border-cyan-400 text-cyan-300 font-bold text-xs flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+                        <span class="text-base">🫆</span> <span>Quét Vân Tay Founder (1 Chạm)</span>
+                    </button>
+
+                    <div class="flex gap-2">
+                        <input type="password" id="shAdminPassInput" placeholder="Hoặc nhập mật mã Founder..." class="flex-1 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+                        <button onclick="verifyShAdminPass()" class="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shrink-0">Mở khóa</button>
+                    </div>
+                </div>
+
+                <!-- FORM THÊM / CẬP NHẬT CỔ ĐÔNG & BILL -->
+                <div id="shManagerFormBox" class="hidden p-3.5 rounded-xl bg-slate-950 border border-amber-400/60 space-y-2.5 font-mono-tech">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+                        <span id="shFormTitle" class="text-[11px] font-bold text-amber-300 uppercase">➕ Thêm Cổ Đông & Bill Mới</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="registerBiometricKey()" class="px-2 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 text-[10px] hover:bg-cyan-500/30" title="Cài đặt mở khóa vân tay trên máy này">🫆 Cài vân tay</button>
+                            <button onclick="resetShForm()" class="text-[10px] text-slate-400 hover:text-white underline">Làm mới</button>
+                        </div>
+                    </div>
+                    <input type="hidden" id="shEditIndex" value="-1">
+                    <div class="space-y-2">
+                        <input type="text" id="shInputName" placeholder="Họ và tên cổ đông (VD: Nguyễn Văn A)..." class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="shInputPhone" placeholder="SĐT (VD: 0901234567)..." class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+                            <input type="text" id="shInputShare" placeholder="Cổ phần (VD: 0.4%)..." class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+                        </div>
+                        <input type="text" id="shInputAmount" placeholder="Số tiền góp (VD: 1.000.000 VNĐ)..." class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+                        
+                        <div class="space-y-1 pt-1">
+                            <label class="block text-[10px] text-cyan-300">📄 Tải ảnh Bill chuyển khoản từ máy hoặc dán Link ảnh:</label>
+                            <input type="file" id="shInputBillFile" accept="image/*" class="w-full text-[11px] text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-cyan-500 file:text-slate-950 cursor-pointer">
+                            <input type="text" id="shInputBillUrl" placeholder="Hoặc dán link ảnh Bill (https://...)..." class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none mt-1">
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-1">
+                        <button onclick="saveShareholderEntry()" class="flex-1 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs">💾 Lưu Cổ Đông & Bill</button>
+                        <button onclick="closeShManager()" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs">Ẩn</button>
+                    </div>
+                </div>
+                
+                <div id="shareholderListContainer" class="space-y-2">
+                    <!-- Danh sách cổ đông render từ JS -->
+                </div>
+            </div>
+
+            <!-- 2 NÚT TRUY CẬP PHÒNG CHIẾU VIP VÀ HỒ SƠ / HỢP ĐỒNG -->
+            <div class="pt-3 border-t border-slate-800 mt-2 grid grid-cols-2 gap-2 shrink-0">
+                <button onclick="closeShareholdersModal(); openShareholderLoginModal();" class="py-2.5 px-2 rounded-xl bg-purple-500/20 border border-purple-400/50 hover:bg-purple-500/30 text-purple-300 text-xs font-mono-tech font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md">
+                    <span>🎬</span> <span class="truncate">Phòng Chiếu VIP</span>
+                </button>
+                <button onclick="closeShareholdersModal(); openDocModal();" class="py-2.5 px-2 rounded-xl bg-amber-500/20 border border-amber-400/50 hover:bg-amber-500/30 text-amber-300 text-xs font-mono-tech font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md">
+                    <span>📜</span> <span class="truncate">Hồ Sơ & Hợp Đồng</span>
+                </button>
+            </div>
+            <div class="pt-2 text-center shrink-0">
+                <button onclick="closeShareholdersModal()" class="w-full py-1.5 rounded-xl bg-slate-800 text-xs text-slate-400 font-mono-tech hover:text-white">Đóng danh sách</button>
+            </div>
+        </div>
+    </div>
             
             <div class="space-y-3 text-xs text-slate-300 overflow-y-auto pr-1 flex-1 leading-relaxed font-medium">
                 <div class="flex items-center justify-between gap-2">
@@ -685,24 +754,72 @@
             </div>
         </div>
     </div>
-
     <!-- FOUNDER DASHBOARD MODAL (CÓ QUÉT VÂN TAY & LIÊN KẾT VÂN TAY) -->
     <div id="founderDashboardModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-        <div class="bio-shell w-full max-w-[390px] p-5 text-center relative border border-amber-400/60 max-h-[90vh] overflow-y-auto">
-            <button onclick="closeFounderDashboardModal()" class="absolute top-3 right-3 w-6 h-6 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-400">✕</button>
-            <h3 class="text-xs font-bold text-amber-300 font-mono-tech tracking-wide uppercase mb-3">⚡ FOUNDER DASHBOARD & GỌI VỐN</h3>
+        <div class="bio-shell w-full max-w-[390px] p-5 text-center relative border border-amber-400/60 max-h-[90vh] overflow-y-auto flex flex-col justify-between">
+            <button onclick="closeFounderDashboardModal()" class="absolute top-3 right-3 w-6 h-6 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white">✕</button>
+            <h3 class="text-xs font-bold text-amber-300 font-mono-tech tracking-wide uppercase mb-3 shrink-0">⚡ FOUNDER DASHBOARD & GỌI VỐN</h3>
             
-            <div id="founderLoginForm" class="space-y-3 text-left hidden">
-                <p class="text-xs text-rose-400 font-bold text-center">🔒 Mở khóa quyền Founder để thực hiện thao tác quản trị:</p>
-                
-                <button id="founderBioLoginBtn" onclick="loginWithBiometric('dashboard')" class="hidden w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500/25 to-emerald-500/25 border border-cyan-400 text-cyan-300 font-bold text-xs font-mono-tech flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
-                    <span class="text-base">🫆</span> <span>Quét Vân Tay Founder (1 Chạm)</span>
-                </button>
+            <div class="flex-1 overflow-y-auto space-y-3">
+                <div id="founderLoginForm" class="space-y-3 text-left hidden">
+                    <p class="text-xs text-rose-400 font-bold text-center">🔒 Mở khóa quyền Founder để thực hiện thao tác quản trị:</p>
+                    
+                    <button id="founderBioLoginBtn" onclick="loginWithBiometric('dashboard')" class="hidden w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500/25 to-emerald-500/25 border border-cyan-400 text-cyan-300 font-bold text-xs font-mono-tech flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+                        <span class="text-base">🫆</span> <span>Quét Vân Tay Founder (1 Chạm)</span>
+                    </button>
 
-                <input type="password" id="founderPassInput" placeholder="Hoặc nhập mật mã Founder..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-amber-400 focus:outline-none font-mono-tech">
-                <button onclick="verifyFounderLogin()" class="w-full py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs font-mono-tech">Xác Nhận Mật Mã</button>
-                <button onclick="showFounderPanelDirect()" class="w-full py-1.5 text-[11px] text-slate-400 hover:underline text-center font-mono-tech">Quay lại bảng thông tin</button>
+                    <input type="password" id="founderPassInput" placeholder="Hoặc nhập mật mã Founder..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-amber-400 focus:outline-none font-mono-tech">
+                    <button onclick="verifyFounderLogin()" class="w-full py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs font-mono-tech">Xác Nhận Mật Mã</button>
+                    <button onclick="showFounderPanelDirect()" class="w-full py-1.5 text-[11px] text-slate-400 hover:underline text-center font-mono-tech">Quay lại bảng thông tin</button>
+                </div>
+
+                <div id="founderControlPanel" class="space-y-3 text-xs text-slate-300 text-left">
+                    <div class="p-3 rounded-xl bg-slate-900 border border-amber-500/50 space-y-2 font-mono-tech">
+                        <div class="font-bold text-amber-300 text-center uppercase tracking-wide pb-1 border-b border-slate-800">💎 Định Giá & Cấu Trúc Gọi Vốn</div>
+                        <div class="flex justify-between"><span class="text-slate-400">Định giá công ty:</span><span class="text-emerald-300 font-bold">100.000 USD (~2.5 Tỷ VNĐ)</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Vòng gọi vốn này:</span><span class="text-cyan-300 font-bold">20% cổ phần</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Mức mua tối thiểu:</span><span class="text-amber-300 font-bold">1 triệu VNĐ = 0,4% cổ phần</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Founder nắm giữ:</span><span class="text-purple-300 font-bold">80% cổ phần</span></div>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-slate-950 border border-cyan-500/40 space-y-2">
+                        <div class="font-bold text-cyan-300 font-mono-tech">📤 Đăng Tải Video Demo (Chuỗi 30 Video):</div>
+                        <p class="text-[11px] text-slate-300">Tải lên video demo thực chiến để cổ đông duyệt (>50% đồng ý mới phát hành):</p>
+                        <input type="file" id="founderVideoFile" accept="video/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-cyan-500 file:text-slate-950 cursor-pointer">
+                        <button onclick="requireFounderAction(uploadFounderVideo)" class="w-full py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs font-mono-tech">Tải Lên Phòng Chiếu Cổ Đông</button>
+                        <div class="text-[10px] text-amber-300 font-mono-tech mt-1 text-center" id="voteStatusText">Trạng thái: Đang chờ upload video mới</div>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                        <div class="font-bold text-amber-300 font-mono-tech">📋 List Nhiệm Vụ & Công Việc Trọng Tâm:</div>
+                        <div class="space-y-1.5 text-[11px]">
+                            <label class="flex items-center gap-2"><input type="checkbox" checked onclick="requireFounderAction(function(){})" class="rounded text-amber-500"> <span>Hoàn thiện hạ tầng Bio Link & Ký hợp đồng online</span></label>
+                            <label class="flex items-center gap-2"><input type="checkbox" onclick="requireFounderAction(function(){})" class="rounded text-amber-500"> <span>Sản xuất chuỗi 30 video demo thực chiến</span></label>
+                            <label class="flex items-center gap-2"><input type="checkbox" onclick="requireFounderAction(function(){})" class="rounded text-amber-500"> <span>Chạy quảng cáo đa kênh (YouTube, TikTok, FB, Insta)</span></label>
+                            <label class="flex items-center gap-2"><input type="checkbox" onclick="requireFounderAction(function(){})" class="rounded text-amber-500"> <span>Đưa ứng dụng hoàn thiện lên kho (CH Play / App Store)</span></label>
+                        </div>
+                    </div>
+
+                    <div id="logoutFounderBtn" class="hidden space-y-2 pt-1">
+                        <button onclick="registerBiometricKey()" class="w-full py-2 rounded-xl bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 font-bold text-xs font-mono-tech flex items-center justify-center gap-1.5 hover:bg-cyan-500/30 transition-all">
+                            <span>🫆</span> <span id="bioRegisterBtnText">Liên kết vân tay trên thiết bị này</span>
+                        </button>
+                        <button onclick="logoutFounder()" class="w-full py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-mono-tech">Đăng xuất quyền Founder</button>
+                    </div>
+                </div>
             </div>
+
+            <!-- 2 NÚT TRUY CẬP PHÒNG CHIẾU VIP VÀ HỒ SƠ / HỢP ĐỒNG -->
+            <div class="pt-3 border-t border-slate-800 mt-2 grid grid-cols-2 gap-2 shrink-0">
+                <button onclick="closeFounderDashboardModal(); openShareholderLoginModal();" class="py-2.5 px-2 rounded-xl bg-purple-500/20 border border-purple-400/50 hover:bg-purple-500/30 text-purple-300 text-xs font-mono-tech font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md">
+                    <span>🎬</span> <span class="truncate">Phòng Chiếu VIP</span>
+                </button>
+                <button onclick="closeFounderDashboardModal(); openDocModal();" class="py-2.5 px-2 rounded-xl bg-amber-500/20 border border-amber-400/50 hover:bg-amber-500/30 text-amber-300 text-xs font-mono-tech font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md">
+                    <span>📜</span> <span class="truncate">Hồ Sơ & Hợp Đồng</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
             <div id="founderControlPanel" class="space-y-3 text-xs text-slate-300 text-left">
                 <div class="p-3 rounded-xl bg-slate-900 border border-amber-500/50 space-y-2 font-mono-tech">
