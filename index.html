@@ -571,12 +571,33 @@
                 <button onclick="backToLogin()" class="w-full text-center text-[11px] text-slate-400 hover:underline">Quay lại đăng nhập</button>
             </div>
 
-            <!-- FORM ĐỔI MẬT KHẨU -->
+            <!-- FORM ĐỔI MẬT KHẨU (CÓ CON MẮT & NHẬP LẠI 2 LẦN) -->
             <div id="shChangePassForm" class="space-y-3 text-left font-mono-tech text-xs hidden">
-                <p class="text-amber-300 text-center">Thiết lập mật khẩu mới cho tài khoản:</p>
-                <input type="text" id="shChangePhone" placeholder="Số điện thoại tài khoản..." class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-400 focus:outline-none">
-                <input type="password" id="shNewPass" placeholder="Mật khẩu mới..." class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-400 focus:outline-none">
-                <button onclick="submitNewPassword()" class="w-full py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold">Xác Nhận Đổi Mật Khẩu</button>
+                <p class="text-amber-300 text-center font-bold">Thiết lập mật khẩu mới (Đồng bộ Google Sheet):</p>
+                
+                <div>
+                    <input type="text" id="shChangePhone" placeholder="Số điện thoại tài khoản..." class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-400 focus:outline-none">
+                </div>
+
+                <!-- MẬT KHẨU CŨ -->
+                <div class="relative">
+                    <input type="password" id="shOldPass" placeholder="Mật khẩu VIP cũ (do Founder cấp)..." class="w-full pl-3.5 pr-10 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-400 focus:outline-none">
+                    <button type="button" onclick="togglePassVisibility('shOldPass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 text-sm focus:outline-none select-none" title="Xem/Ẩn mật khẩu">👁️</button>
+                </div>
+
+                <!-- MẬT KHẨU MỚI -->
+                <div class="relative">
+                    <input type="password" id="shNewPass" placeholder="Mật khẩu mới muốn đặt..." class="w-full pl-3.5 pr-10 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-400 focus:outline-none">
+                    <button type="button" onclick="togglePassVisibility('shNewPass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 text-sm focus:outline-none select-none" title="Xem/Ẩn mật khẩu">👁️</button>
+                </div>
+
+                <!-- NHẬP LẠI MẬT KHẨU MỚI -->
+                <div class="relative">
+                    <input type="password" id="shConfirmNewPass" placeholder="Nhập lại mật khẩu mới để xác nhận..." class="w-full pl-3.5 pr-10 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-amber-400 focus:outline-none">
+                    <button type="button" onclick="togglePassVisibility('shConfirmNewPass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 text-sm focus:outline-none select-none" title="Xem/Ẩn mật khẩu">👁️</button>
+                </div>
+
+                <button onclick="submitNewPassword()" class="w-full py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition-all active:scale-95">Xác Nhận Đổi Mật Khẩu</button>
                 <button onclick="backToLogin()" class="w-full text-center text-[11px] text-slate-400 hover:underline">Quay lại đăng nhập</button>
             </div>
 
@@ -1989,6 +2010,90 @@
 
         document.getElementById('sharePageBtn').addEventListener('click', () => { copyText(window.location.href); });
         window.onload = () => { renderLinks(); };
+   // 1. BẬT / TẮT CON MẮT ĐỂ XEM HOẶC ẨN MẬT KHẨU
+        function togglePassVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
+        // 2. HÀM ĐỔI MẬT KHẨU (KIỂM TRA 2 LẦN & GHI ĐÈ TRỰC TIẾP LÊN GOOGLE SHEET)
+        async function submitNewPassword() {
+            const phone = document.getElementById('shChangePhone').value.trim();
+            const oldPass = document.getElementById('shOldPass').value.trim();
+            const newPass = document.getElementById('shNewPass').value.trim();
+            const confirmPass = document.getElementById('shConfirmNewPass').value.trim();
+
+            if (!phone || !oldPass || !newPass || !confirmPass) {
+                alert('Vui lòng điền đầy đủ tất cả các ô thông tin!');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                alert('Mật khẩu mới phải có ít nhất 6 ký tự!');
+                return;
+            }
+
+            // Kiểm tra khớp 2 lần nhập
+            if (newPass !== confirmPass) {
+                alert('⚠️ Hai lần nhập mật khẩu mới không trùng khớp! Bạn vui lòng bấm vào con mắt 👁️ để kiểm tra lại ký tự.');
+                document.getElementById('shConfirmNewPass').focus();
+                return;
+            }
+
+            const changeBtn = event ? event.target : null;
+            if (changeBtn) {
+                changeBtn.disabled = true;
+                changeBtn.textContent = "Đang đồng bộ Google Sheet...";
+            }
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "change_password",
+                        phone: phone,
+                        oldPass: oldPass,
+                        newPass: newPass
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    // Cập nhật bộ nhớ trình duyệt
+                    const activatedAccounts = getActivatedVipAccounts();
+                    delete activatedAccounts[oldPass];
+                    activatedAccounts[newPass] = phone;
+                    localStorage.setItem('kdrive_activated_vip_accounts', JSON.stringify(activatedAccounts));
+
+                    alert('🎉 Đổi mật khẩu thành công và đã tự động ghi đè lên Google Sheet!\nTừ bây giờ bạn hãy dùng mật khẩu mới này để đăng nhập.');
+
+                    // Làm trống form và trở về màn hình đăng nhập
+                    document.getElementById('shChangePhone').value = '';
+                    document.getElementById('shOldPass').value = '';
+                    document.getElementById('shNewPass').value = '';
+                    document.getElementById('shConfirmNewPass').value = '';
+                    backToLogin();
+                } else {
+                    alert(`⚠️ Không thể đổi mật khẩu: ${result.message}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Lỗi kết nối với máy chủ Google Sheet. Vui lòng kiểm tra lại kết nối mạng!");
+            } finally {
+                if (changeBtn) {
+                    changeBtn.disabled = false;
+                    changeBtn.textContent = "Xác Nhận Đổi Mật Khẩu";
+                }
+            }
+        }
     </script>
 </body>
 </html>
