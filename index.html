@@ -297,311 +297,268 @@
                 </button>
             </div>
 <!-- ============================================================ -->
-            <!-- VÒNG XOAY NĂNG LƯỢNG CYBER CORE & MÀN HÌNH HUD 1 CHẠM        -->
+            <!-- QUỸ ĐẠO 6 VỆ TINH HEXAGON ORBIT & LÕI HOLOGRAM BUNG NỞ        -->
             <!-- ============================================================ -->
-            <div class="my-4 font-sans select-none">
-                <!-- VÙNG QUỸ ĐẠO RADAR 4 HƯỚNG -->
-                <div class="relative w-64 h-64 mx-auto flex items-center justify-center my-3">
-                    <!-- Vòng tròn quỹ đạo phát sáng -->
-                    <div class="absolute inset-2 rounded-full border border-cyan-500/20 border-dashed animate-[spin_40s_linear_infinite]"></div>
-                    <div class="absolute inset-8 rounded-full border border-amber-500/15"></div>
+            <style>
+                @keyframes hexOrbitSpin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes hexOrbitCounter {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(-360deg); }
+                }
+                .hex-arm-spin {
+                    position: absolute;
+                    inset: 0;
+                    animation: hexOrbitSpin 30s linear infinite;
+                }
+                .hex-counter-spin {
+                    animation: hexOrbitCounter 30s linear infinite;
+                }
+                .orbit-paused .hex-arm-spin,
+                .orbit-paused .hex-counter-spin {
+                    animation-play-state: paused !important;
+                }
+            </style>
+
+            <div class="my-2 font-sans select-none">
+                <!-- VÙNG QUỸ ĐẠO TRÒN 6 VỆ TINH (ĐƯỜNG KÍNH GỌN 210PX) -->
+                <div id="orbitSystemContainer" class="relative w-[210px] h-[210px] mx-auto my-1 flex items-center justify-center">
                     
-                    <!-- Lõi trung tâm K-DRIVE CORE -->
-                    <div class="z-10 w-16 h-16 rounded-full bg-slate-950 border border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.35)] flex flex-col items-center justify-center text-center p-1 cursor-default">
+                    <!-- LÕI TRUNG TÂM K-DRIVE (MẶC ĐỊNH) -->
+                    <div id="coreCenterBtn" onclick="toggleOrbitSystem()" class="z-10 w-14 h-14 rounded-full bg-slate-950 border border-cyan-400/60 shadow-[0_0_18px_rgba(6,182,212,0.45)] flex flex-col items-center justify-center text-center cursor-pointer active:scale-95 transition">
                         <span class="text-[9px] font-black tracking-widest text-cyan-300">K-DRIVE</span>
-                        <span class="text-[7px] text-amber-400 font-mono tracking-tighter">AI CORE</span>
+                        <span id="coreStatusText" class="text-[7px] text-amber-400 font-mono tracking-tighter">● ORBIT</span>
                     </div>
 
-                    <!-- ICON 1 (12H): VỊ THẾ NGÀNH -->
-                    <button type="button" onclick="activateRadarNode(0)" id="radarBtn0" class="radar-node active absolute top-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-slate-900 border-2 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)] flex flex-col items-center justify-center transition-all duration-300 active:scale-90 z-20">
-                        <span class="text-base leading-none">🚀</span>
-                        <span class="text-[7px] font-bold text-cyan-300 tracking-tighter mt-0.5">VỊ THẾ</span>
+                    <!-- MÀN HÌNH KÍNH HOLOGRAM BUNG NỞ TẠI TÂM (HIỆN KHI CHẠM ICON) -->
+                    <div id="coreHoloCard" class="absolute inset-1.5 z-40 rounded-2xl bg-slate-950/95 border border-cyan-400/80 shadow-[0_0_25px_rgba(6,182,212,0.6)] p-3 flex flex-col justify-between hidden backdrop-blur-md transition-all">
+                        <div>
+                            <div class="flex items-center justify-between pb-1 mb-1 border-b border-slate-800">
+                                <span id="holoNodeTag" class="text-[8px] font-mono font-bold text-cyan-300 px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30">NODE 01</span>
+                                <button type="button" onclick="closeHoloCard()" class="w-5 h-5 rounded-full bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center text-[10px]">✕</button>
+                            </div>
+                            <h4 id="holoNodeTitle" class="text-[11px] font-bold text-amber-400 leading-snug mb-1">Tiêu Đề</h4>
+                            <div id="holoNodeBody" class="text-[10px] text-slate-200 leading-relaxed space-y-1">Nội dung</div>
+                        </div>
+                        <button type="button" onclick="closeHoloCard()" class="w-full py-1 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 text-[9px] font-semibold tracking-wider uppercase mt-1">
+                            Thu Gọn ✕
+                        </button>
+                    </div>
+
+                    <!-- VÒNG TRÒN QUỸ ĐẠO NỀN MỜ -->
+                    <div class="absolute w-[168px] h-[168px] rounded-full border border-cyan-500/20 border-dashed pointer-events-none"></div>
+
+                    <!-- VỆ TINH 1: 🚀 VỊ THẾ (0s) -->
+                    <div class="hex-arm-spin" style="animation-delay: 0s;">
+                        <button type="button" onclick="openHoloNode(0)" class="hex-counter-spin absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900 border border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.5)] flex flex-col items-center justify-center active:scale-90 transition z-20" style="animation-delay: 0s;">
+                            <span class="text-xs leading-none">🚀</span>
+                            <span class="text-[7px] font-bold text-cyan-300 tracking-tighter mt-0.5">VỊ THẾ</span>
+                        </button>
+                    </div>
+
+                    <!-- VỆ TINH 2: 💎 ĐỊNH GIÁ (-5s) -->
+                    <div class="hex-arm-spin" style="animation-delay: -5s;">
+                        <button type="button" onclick="openHoloNode(1)" class="hex-counter-spin absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900 border border-amber-400/80 shadow-[0_0_10px_rgba(245,158,11,0.4)] flex flex-col items-center justify-center active:scale-90 transition z-20" style="animation-delay: -5s;">
+                            <span class="text-xs leading-none">💎</span>
+                            <span class="text-[7px] font-bold text-amber-300 tracking-tighter mt-0.5">ĐỊNH GIÁ</span>
+                        </button>
+                    </div>
+
+                    <!-- VỆ TINH 3: 🎨 CO-BUILD (-10s) -->
+                    <div class="hex-arm-spin" style="animation-delay: -10s;">
+                        <button type="button" onclick="openHoloNode(2)" class="hex-counter-spin absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900 border border-purple-400/80 shadow-[0_0_10px_rgba(168,85,247,0.4)] flex flex-col items-center justify-center active:scale-90 transition z-20" style="animation-delay: -10s;">
+                            <span class="text-xs leading-none">🎨</span>
+                            <span class="text-[7px] font-bold text-purple-300 tracking-tighter mt-0.5">CO-BUILD</span>
+                        </button>
+                    </div>
+
+                    <!-- VỆ TINH 4: 📈 1.5M USD (-15s) -->
+                    <div class="hex-arm-spin" style="animation-delay: -15s;">
+                        <button type="button" onclick="openHoloNode(3)" class="hex-counter-spin absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900 border border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.4)] flex flex-col items-center justify-center active:scale-90 transition z-20" style="animation-delay: -15s;">
+                            <span class="text-xs leading-none">📈</span>
+                            <span class="text-[7px] font-bold text-emerald-300 tracking-tighter mt-0.5">1.5M USD</span>
+                        </button>
+                    </div>
+
+                    <!-- VỆ TINH 5: 🧬 CÔNG NGHỆ (-20s) -->
+                    <div class="hex-arm-spin" style="animation-delay: -20s;">
+                        <button type="button" onclick="openHoloNode(4)" class="hex-counter-spin absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900 border border-cyan-400/80 shadow-[0_0_10px_rgba(6,182,212,0.4)] flex flex-col items-center justify-center active:scale-90 transition z-20" style="animation-delay: -20s;">
+                            <span class="text-xs leading-none">🧬</span>
+                            <span class="text-[7px] font-bold text-cyan-300 tracking-tighter mt-0.5">CÔNG NGHỆ</span>
+                        </button>
+                    </div>
+
+                    <!-- VỆ TINH 6: 📜 ĐIỀU LỆ (-25s) -->
+                    <div class="hex-arm-spin" style="animation-delay: -25s;">
+                        <button type="button" onclick="openHoloNode(5)" class="hex-counter-spin absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900 border border-amber-400/80 shadow-[0_0_10px_rgba(245,158,11,0.4)] flex flex-col items-center justify-center active:scale-90 transition z-20" style="animation-delay: -25s;">
+                            <span class="text-xs leading-none">📜</span>
+                            <span class="text-[7px] font-bold text-amber-300 tracking-tighter mt-0.5">ĐIỀU LỆ</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- DẢI LED CHẠY CHỮ (KÉO SÁT LÊN NGAY DƯỚI QUỸ ĐẠO) -->
+                <div class="my-2 py-1.5 px-2 rounded-lg bg-slate-950/80 border border-amber-500/30 overflow-hidden relative shadow-[0_0_12px_rgba(245,158,11,0.12)]">
+                    <div class="whitespace-nowrap animate-[marquee_18s_linear_infinite] flex items-center gap-4 text-[10px] font-bold text-amber-400 font-mono tracking-wider">
+                        <span>⚡ CÙNG CHÚNG TÔI CHINH PHỤC MỐC 100 SUBSCRIBER YOUTUBE ĐẦU TIÊN</span>
+                        <span>•</span>
+                        <span>ĐỒNG HÀNH XÂY DỰNG K-DRIVE - NỀN TẢNG TỐI ƯU HIỆU SUẤT CON NGƯỜI</span>
+                        <span>•</span>
+                        <span>⚡ CÙNG CHÚNG TÔI CHINH PHỤC MỐC 100 SUBSCRIBER YOUTUBE ĐẦU TIÊN</span>
+                    </div>
+                </div>
+
+                <!-- LƯỚI 2X2: 4 NÚT HÀNH ĐỘNG RÚT GỌN (CÂN XỨNG TUYỆT ĐỐI) -->
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <!-- NÚT 1: ĐĂNG KÝ (YOUTUBE) -->
+                    <a href="https://www.youtube.com/@Kai9999love" target="_blank" rel="noopener" class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-900/90 border border-red-500/40 hover:border-red-400 shadow-[0_0_12px_rgba(239,68,68,0.15)] active:scale-[0.98] transition">
+                        <div class="w-8 h-8 rounded-lg bg-red-600/20 border border-red-500/40 flex items-center justify-center shrink-0">
+                            <span class="text-base text-red-500">▶</span>
+                        </div>
+                        <div class="text-left overflow-hidden">
+                            <div class="text-[12px] font-black text-white leading-tight">ĐĂNG KÝ</div>
+                            <div class="text-[8.5px] text-slate-400 font-medium truncate mt-0.5">Ủng hộ hành động</div>
+                        </div>
+                    </a>
+
+                    <!-- NÚT 2: GÓP Ý (LỜI NÓI) -->
+                    <button type="button" onclick="if(window.openFeedbackModal) openFeedbackModal();" class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-900/90 border border-pink-500/40 hover:border-pink-400 shadow-[0_0_12px_rgba(236,72,153,0.15)] active:scale-[0.98] transition">
+                        <div class="w-8 h-8 rounded-lg bg-pink-600/20 border border-pink-500/40 flex items-center justify-center shrink-0">
+                            <span class="text-sm">💬</span>
+                        </div>
+                        <div class="text-left overflow-hidden">
+                            <div class="text-[12px] font-black text-white leading-tight">GÓP Ý</div>
+                            <div class="text-[8.5px] text-slate-400 font-medium truncate mt-0.5">Ủng hộ lời nói</div>
+                        </div>
                     </button>
 
-                    <!-- ICON 2 (3H): ĐỊNH GIÁ & CƠ CHẾ -->
-                    <button type="button" onclick="activateRadarNode(1)" id="radarBtn1" class="radar-node absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/90 border border-slate-700 shadow-md flex flex-col items-center justify-center transition-all duration-300 active:scale-90 z-20">
-                        <span class="text-base leading-none">💎</span>
-                        <span class="text-[7px] font-bold text-slate-300 tracking-tighter mt-0.5">ĐỊNH GIÁ</span>
+                    <!-- NÚT 3: GÓP VỐN (TÀI CHÍNH / BCC) -->
+                    <button type="button" onclick="if(window.openInvestModal) openInvestModal(); else if(window.openBccModal) openBccModal();" class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-900/90 border border-amber-500/40 hover:border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.15)] active:scale-[0.98] transition">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0">
+                            <span class="text-sm">💰</span>
+                        </div>
+                        <div class="text-left overflow-hidden">
+                            <div class="text-[12px] font-black text-amber-300 leading-tight">GÓP VỐN</div>
+                            <div class="text-[8.5px] text-amber-200/70 font-medium truncate mt-0.5">Ủng hộ tài chính</div>
+                        </div>
                     </button>
 
-                    <!-- ICON 3 (6H): ĐỒNG SÁNG TẠO -->
-                    <button type="button" onclick="activateRadarNode(2)" id="radarBtn2" class="radar-node absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-slate-900/90 border border-slate-700 shadow-md flex flex-col items-center justify-center transition-all duration-300 active:scale-90 z-20">
-                        <span class="text-base leading-none">🎨</span>
-                        <span class="text-[7px] font-bold text-slate-300 tracking-tighter mt-0.5">CO-BUILD</span>
-                    </button>
-
-                    <!-- ICON 4 (9H): TIỀM NĂNG TRIỆU ĐÔ -->
-                    <button type="button" onclick="activateRadarNode(3)" id="radarBtn3" class="radar-node absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/90 border border-slate-700 shadow-md flex flex-col items-center justify-center transition-all duration-300 active:scale-90 z-20">
-                        <span class="text-base leading-none">📈</span>
-                        <span class="text-[7px] font-bold text-slate-300 tracking-tighter mt-0.5">1.5M USD</span>
+                    <!-- NÚT 4: KIỂM DUYỆT (PHÒNG CHIẾU VIP) -->
+                    <button type="button" onclick="if(window.openVipModal) openVipModal(); else if(window.openScreeningModal) openScreeningModal();" class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-900/90 border border-purple-500/40 hover:border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.15)] active:scale-[0.98] transition">
+                        <div class="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-500/40 flex items-center justify-center shrink-0">
+                            <span class="text-sm">🎬</span>
+                        </div>
+                        <div class="text-left overflow-hidden">
+                            <div class="text-[12px] font-black text-purple-300 leading-tight">KIỂM DUYỆT</div>
+                            <div class="text-[8.5px] text-purple-200/70 font-medium truncate mt-0.5">Phòng chiếu VIP</div>
+                        </div>
                     </button>
                 </div>
 
-                <!-- MÀN HÌNH HUD HIỂN THỊ NỘI DUNG 1 CHẠM -->
-                <div class="p-3.5 rounded-2xl bg-gradient-to-b from-slate-900/95 via-slate-950 to-slate-950 border border-cyan-500/30 shadow-[0_0_25px_rgba(6,182,212,0.12)] text-left relative overflow-hidden transition-all duration-300" id="hudContainer">
-                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                        <span id="hudTag" class="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-                            NODE 01 // VỊ THẾ NGÀNH
-                        </span>
-                        <span class="text-[9px] text-slate-400 font-mono">CHẠM ICON ĐỂ ĐỔI</span>
+                <!-- HỘP THỨ 5: MINI GAME TEST PHẢN XẠ BỘ NÃO -->
+                <button type="button" onclick="if(window.openGameModal) openGameModal(); else if(window.openReactionGameModal) openReactionGameModal();" class="w-full py-2.5 px-3 rounded-xl bg-slate-900/90 border border-emerald-500/40 hover:border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] flex items-center justify-between active:scale-[0.99] transition">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-base text-emerald-400">⚡</span>
+                        <span class="text-[12px] font-black text-emerald-300 tracking-wide uppercase">TEST PHẢN XẠ BỘ NÃO</span>
                     </div>
-
-                    <h4 id="hudTitle" class="text-xs font-bold text-amber-400 mb-1.5 flex items-center gap-1.5">
-                        Ứng Dụng Sức Khỏe & Tối Ưu Hiệu Suất Con Người
-                    </h4>
-
-                    <div id="hudBody" class="text-[11px] text-slate-300 leading-relaxed space-y-1">
-                        <p>• <b>Dòng sản phẩm ưu tiên:</b> Thuộc nhóm ứng dụng sinh học & sức khỏe đang được Apple và Google ưu tiên hỗ trợ quảng bá mạnh nhất toàn cầu.</p>
-                        <p>• <b>Chi phí thấp:</b> CAC rẻ hơn game nhiều lần, người dùng tự tìm kiếm và lan tỏa tự nhiên theo nhu cầu chăm sóc sức khỏe thật.</p>
-                        <p>• <b>On-device AI:</b> AI cục bộ xử lý trực tiếp trên thiết bị, không tốn chi phí thuê máy chủ đám mây, tối ưu biên lợi nhuận ròng.</p>
-                    </div>
-                </div>
-
-                <!-- 2 NÚT TRA CỨU POP-UP CHI TIẾT (CHUẨN ICON MỚI, KHÔNG RỚT DÒNG) -->
-                <div class="grid grid-cols-2 gap-2 mt-2.5">
-                    <button type="button" onclick="openInfoPopup('tech')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-900/90 border border-cyan-500/40 hover:border-cyan-400 active:scale-[0.98] transition">
-                        <span class="text-sm">🧬</span>
-                        <span class="text-[11px] font-bold text-cyan-300">Công Nghệ Lõi</span>
-                        <span class="text-[10px] text-cyan-400">➔</span>
-                    </button>
-
-                    <button type="button" onclick="openInfoPopup('rules')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-900/90 border border-amber-500/40 hover:border-amber-400 active:scale-[0.98] transition">
-                        <span class="text-sm">📜</span>
-                        <span class="text-[11px] font-bold text-amber-300">Điều Lệ BCC</span>
-                        <span class="text-[10px] text-amber-400">➔</span>
-                    </button>
-                </div>
+                    <span class="text-[9px] font-mono font-bold text-emerald-400 px-2 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40">
+                        GAME ➔
+                    </span>
+                </button>
             </div>
 
-            <!-- POP-UP NỔI HIỂN THỊ CHI TIẾT KHI BẤM 2 NÚT DƯỚI CÙNG -->
-            <div id="infoModal" class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden" style="display: none;">
-                <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl relative space-y-4 font-sans">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                        <h3 id="infoModalTitle" class="text-xs font-bold text-amber-400 uppercase tracking-wide"></h3>
-                        <button type="button" onclick="closeInfoPopup()" class="w-7 h-7 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition">✕</button>
-                    </div>
-
-                    <div id="infoModalBody" class="text-xs text-slate-200 leading-relaxed max-h-[60vh] overflow-y-auto pr-1"></div>
-
-                    <button type="button" onclick="closeInfoPopup()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700">
-                        Đã hiểu & Đóng
-                    </button>
-                </div>
-            </div>
-
-            <!-- LOGIC ĐIỀU KHIỂN HUD VÀ POP-UP TOÀN DIỆN -->
+            <!-- DỮ LIỆU & LOGIC ĐIỀU KHIỂN HOLOGRAM TẠI TÂM -->
             <script>
-            // Dữ liệu 4 Node quỹ đạo Radar
-            const radarNodesData = [
+            let isSystemPaused = false;
+
+            const holoData = [
                 {
-                    tag: "NODE 01 // VỊ THẾ NGÀNH & LỢI THẾ CẠNH TRANH",
-                    title: "Ứng Dụng Sức Khỏe & Tối Ưu Hiệu Suất Con Người",
-                    body: `<p>• <b>Dòng sản phẩm ưu tiên:</b> Thuộc nhóm ứng dụng sinh học & sức khỏe đang được Apple và Google ưu tiên hỗ trợ quảng bá mạnh nhất toàn cầu.</p>
-                           <p>• <b>Chi phí thấp:</b> CAC rẻ hơn game nhiều lần, người dùng tự tìm kiếm và lan tỏa tự nhiên theo nhu cầu chăm sóc sức khỏe thật.</p>
-                           <p>• <b>On-device AI:</b> AI cục bộ xử lý trực tiếp trên thiết bị, không tốn chi phí thuê máy chủ đám mây, tối ưu biên lợi nhuận ròng.</p>`
+                    tag: "NODE 01 // VỊ THẾ NGÀNH",
+                    title: "Dòng Sản Phẩm Ưu Tiên Toàn Cầu",
+                    body: `<p>• <b>Ưu tiên Big Tech:</b> Dòng app sức khỏe & hiệu suất con người được Apple, Google ưu tiên đẩy mạnh nhất hiện nay.</p>
+                           <p>• <b>Tối ưu chi phí:</b> CAC rẻ hơn game nhiều lần, AI chạy trực tiếp trên máy (On-device) triệt tiêu chi phí máy chủ đám mây.</p>`
                 },
                 {
-                    tag: "NODE 02 // QUY MÔ ĐỊNH GIÁ & CƠ CHẾ DÒNG TIỀN",
-                    title: "Định Giá 2,5 Tỷ VNĐ • Quỹ Chia 30% Lợi Nhuận",
-                    body: `<p>• <b>Định giá tham chiếu:</b> 100.000 USD (~2,5 Tỷ VNĐ). Room BCC mở tối đa 20% (500 Triệu / 500 Suất). Founder giữ quyền chi phối 80%.</p>
-                           <p>• <b>Cơ chế ưu đãi:</b> Dành hẳn <b>30% Lợi nhuận ròng</b> toàn dự án đưa vào Quỹ chia tiền định kỳ hàng tháng cho đối tác.</p>
-                           <p>• <b>Quy chuẩn 1 Suất:</b> <b>1.000.000 VNĐ = đúng 0,04% Lợi nhuận ròng</b> + 1 Phiếu biểu quyết (chọn 5 gói trong luồng hợp đồng).</p>`
+                    tag: "NODE 02 // ĐỊNH GIÁ & CƠ CHẾ",
+                    title: "Định Giá 2,5 Tỷ • Quỹ Chia 30% Dòng Tiền",
+                    body: `<p>• <b>Định giá:</b> 100.000 USD (~2,5 Tỷ VNĐ) • Room mở 20% (500 Triệu / 500 Suất).</p>
+                           <p>• <b>Chia tiền thực tế:</b> Trích <b>30% Lợi nhuận ròng</b> chia đều hàng tháng. <b>1 Suất (1M) = hưởng chuẩn 0,04% LN ròng</b>.</p>`
                 },
                 {
-                    tag: "NODE 03 // ĐẶC QUYỀN ĐỒNG HÀNH (CO-BUILDER)",
-                    title: "Cùng Thiết Kế Ứng Dụng & Cầm Trịch Truyền Thông",
-                    body: `<p>• <b>Đồng thiết kế:</b> Trực tiếp góp ý hoàn thiện giao diện UI/UX và các bài tập rèn phản xạ não bộ cùng Founder Đỗ Đức Anh.</p>
-                           <p>• <b>Duyệt truyền thông:</b> Vào Phòng Chiếu xem và bỏ phiếu duyệt chuỗi 30 video marketing demo (>50% đồng thuận mới chính thức công chiếu).</p>
-                           <p>• <b>Tiên phong VIP:</b> Cấp tài khoản trải nghiệm trọn đời bản K-Drive Alpha/Beta và minh bạch chứng từ pháp lý BCC.</p>`
+                    tag: "NODE 03 // CO-BUILDER",
+                    title: "Cùng Thiết Kế & Cầm Trịch Truyền Thông",
+                    body: `<p>• <b>Quyền biểu quyết:</b> Vào Phòng Chiếu xem và bỏ phiếu duyệt chuỗi 30 video marketing trước khi phát hành.</p>
+                           <p>• <b>Đồng thiết kế:</b> Cùng Founder hoàn thiện UI/UX, bài tập não bộ và sở hữu tài khoản Beta VIP trọn đời.</p>`
                 },
                 {
-                    tag: "NODE 04 // TIỀM NĂNG THỊ TRƯỜNG & MỤC TIÊU TRIỆU ĐÔ",
-                    title: "Mục Tiêu 10 Triệu Lượt Tải Toàn Cầu",
-                    body: `<p>• <b>Mô phỏng doanh thu:</b> 5% chuyển đổi gói 2,99$/tháng = <b>1,5 Triệu USD/tháng (~39 Tỷ VNĐ)</b> doanh thu gộp.</p>
-                           <p>• <b>Dòng tiền 1 Suất (1 Triệu):</b> Nhận về <b>~15.600.000 VNĐ/tháng</b> khi app viral toàn cầu.</p>
-                           <p class="text-amber-300 font-semibold">• <b>Thành bại do chính bạn:</b> Duyệt video chuẩn = dòng tiền bùng nổ; duyệt cẩu thả = 0 đồng.</p>`
+                    tag: "NODE 04 // MỤC TIÊU 1.5M USD",
+                    title: "Chinh Phục 10 Triệu Lượt Tải",
+                    body: `<p>• <b>Mục tiêu 10M lượt tải:</b> 5% đóng thuê bao 2,99$/tháng tạo doanh thu gộp <b>1,5 Triệu USD/tháng (~39 Tỷ VNĐ)</b>.</p>
+                           <p>• <b>Dòng tiền 1 Suất (1M):</b> Nhận về <b>~15,6 Triệu VNĐ/tháng</b> khi app viral toàn cầu.</p>`
+                },
+                {
+                    tag: "NODE 05 // CÔNG NGHỆ SINH HỌC",
+                    title: "AI On-Device & Kết Nối Đa Nguồn",
+                    body: `<p>• <b>AI On-device:</b> Xử lý trực tiếp trên chip điện thoại, bảo mật sức khỏe 100%, không phụ thuộc server đám mây.</p>
+                           <p>• <b>Đồng bộ tự động:</b> Kết nối nhịp tim, giấc ngủ từ smartwatch & cân thông minh để cá nhân hóa bài rèn phản xạ tư duy.</p>`
+                },
+                {
+                    tag: "NODE 06 // ĐIỀU LỆ PHÁP LÝ",
+                    title: "Hợp Đồng BCC Minh Bạch Cùng Founder",
+                    body: `<p>• <b>Hợp đồng chuẩn chỉ:</b> Ký Hợp đồng Hợp tác Kinh doanh (BCC) trực tiếp cùng Founder Đỗ Đức Anh.</p>
+                           <p>• <b>Minh bạch dòng tiền:</b> 100% vốn giải ngân có chứng từ cho máy chủ và truyền thông. Không cam kết lãi ảo.</p>`
                 }
             ];
 
-            // Hàm chuyển đổi nội dung HUD chỉ với 1 lần chạm
-            window.activateRadarNode = function(index) {
-                for (let i = 0; i < 4; i++) {
-                    const btn = document.getElementById('radarBtn' + i);
-                    if (!btn) continue;
-                    if (i === index) {
-                        btn.classList.add('border-cyan-400', 'shadow-[0_0_15px_rgba(6,182,212,0.6)]');
-                        btn.classList.remove('border-slate-700', 'shadow-md');
-                        const label = btn.querySelector('span:last-child');
-                        if (label) {
-                            label.classList.add('text-cyan-300');
-                            label.classList.remove('text-slate-300');
-                        }
-                    } else {
-                        btn.classList.remove('border-cyan-400', 'shadow-[0_0_15px_rgba(6,182,212,0.6)]');
-                        btn.classList.add('border-slate-700', 'shadow-md');
-                        const label = btn.querySelector('span:last-child');
-                        if (label) {
-                            label.classList.remove('text-cyan-300');
-                            label.classList.add('text-slate-300');
-                        }
-                    }
+            function toggleOrbitSystem() {
+                const sys = document.getElementById('orbitSystemContainer');
+                const st = document.getElementById('coreStatusText');
+                if (!sys) return;
+                isSystemPaused = !isSystemPaused;
+                if (isSystemPaused) {
+                    sys.classList.add('orbit-paused');
+                    if (st) { st.innerText = '⏸ DỪNG'; st.classList.replace('text-amber-400', 'text-cyan-400'); }
+                } else {
+                    sys.classList.remove('orbit-paused');
+                    if (st) { st.innerText = '● ORBIT'; st.classList.replace('text-cyan-400', 'text-amber-400'); }
                 }
+            }
 
-                const data = radarNodesData[index];
-                const tagEl = document.getElementById('hudTag');
-                const titleEl = document.getElementById('hudTitle');
-                const bodyEl = document.getElementById('hudBody');
+            window.openHoloNode = function(index) {
+                const sys = document.getElementById('orbitSystemContainer');
+                const card = document.getElementById('coreHoloCard');
+                const centerBtn = document.getElementById('coreCenterBtn');
+                if (sys) sys.classList.add('orbit-paused');
 
-                if (tagEl) tagEl.innerText = data.tag;
-                if (titleEl) titleEl.innerText = data.title;
-                if (bodyEl) bodyEl.innerHTML = data.body;
+                const data = holoData[index];
+                document.getElementById('holoNodeTag').innerText = data.tag;
+                document.getElementById('holoNodeTitle').innerText = data.title;
+                document.getElementById('holoNodeBody').innerHTML = data.body;
+
+                if (centerBtn) centerBtn.classList.add('hidden');
+                if (card) card.classList.remove('hidden');
             };
 
-            // Dữ liệu chi tiết cho 2 nút Pop-up dưới chân
-            window.infoContents = {
-                tech: {
-                    title: "🧬 CÔNG NGHỆ SINH HỌC & AI ON-DEVICE",
-                    html: `<p class="mb-2">K-Drive là nền tảng theo dõi phục hồi thể trạng kết hợp kích hoạt kỷ luật não bộ ứng dụng AI on-device:</p>
-                           <ul class="space-y-2 pl-1">
-                               <li>• <b>Tự động thấu hiểu:</b> Đồng bộ dữ liệu nhịp tim, giấc ngủ và khối lượng từ đồng hồ và cân thông minh theo thời gian thực.</li>
-                               <li>• <b>AI On-device:</b> Thuật toán chạy trực tiếp trên chip điện thoại, bảo mật tuyệt đối chỉ số sức khỏe và triệt tiêu chi phí máy chủ đám mây.</li>
-                               <li>• <b>Kích hoạt phản xạ não bộ:</b> Bài tập rèn luyện tư duy, trí nhớ và kiểm soát xung động, duy trì phong độ làm việc đỉnh cao.</li>
-                           </ul>`
-                },
-                rules: {
-                    title: "📜 ĐIỀU LỆ HỢP TÁC & PHÁP LÝ BCC",
-                    html: `<ul class="space-y-2 pl-1">
-                               <li>• <b>Định giá tham chiếu:</b> 100.000 USD (~2,5 Tỷ VNĐ).</li>
-                               <li>• <b>Hạn mức huy động (Room BCC):</b> Tối đa <b>20%</b> (tương đương 500.000.000 VNĐ / 500 Suất). Founder giữ 80% vốn kiểm soát.</li>
-                               <li>• <b>Quỹ phân phối ưu đãi:</b> Trích cố định <b>30% Lợi nhuận ròng</b> toàn dự án hàng tháng chia cho đối tác BCC.</li>
-                               <li>• <b>Quy chuẩn 1 Suất:</b> 1.000.000 VNĐ = <b>đúng 0,04% Lợi nhuận ròng</b> toàn dự án + 1 Phiếu biểu quyết.</li>
-                               <li>• <b>Cam kết minh bạch:</b> Ký kết Hợp đồng BCC trực tiếp cùng Founder Đỗ Đức Anh, minh bạch chứng từ giải ngân truyền thông và máy chủ.</li>
-                           </ul>`
-                }
-            };
+            window.closeHoloCard = function() {
+                const sys = document.getElementById('orbitSystemContainer');
+                const card = document.getElementById('coreHoloCard');
+                const centerBtn = document.getElementById('coreCenterBtn');
+                const st = document.getElementById('coreStatusText');
 
-            window.openInfoPopup = function(key) {
-                const item = window.infoContents[key];
-                if (!item) return;
-                const modal = document.getElementById('infoModal');
-                const title = document.getElementById('infoModalTitle');
-                const body = document.getElementById('infoModalBody');
-                if (title) title.innerText = item.title;
-                if (body) body.innerHTML = item.html;
-                if (modal) {
-                    modal.style.display = 'flex';
-                    modal.classList.remove('hidden');
+                if (card) card.classList.add('hidden');
+                if (centerBtn) centerBtn.classList.remove('hidden');
+                if (sys) {
+                    sys.classList.remove('orbit-paused');
+                    isSystemPaused = false;
                 }
-            };
-
-            window.closeInfoPopup = function() {
-                const modal = document.getElementById('infoModal');
-                if (modal) {
-                    modal.style.display = 'none';
-                    modal.classList.add('hidden');
+                if (st) {
+                    st.innerText = '● ORBIT';
+                    st.classList.replace('text-cyan-400', 'text-amber-400');
                 }
             };
             </script>
-
-        <!-- DẢI LED CHẠY CHỮ NGANG -->
-        <section class="mb-3.5">
-            <div class="led-ticker-bar py-3 px-2">
-                <div class="led-ticker-text text-xs font-bold text-white font-mono-tech tracking-wide">
-                    🚀 CÙNG TÔI CHINH PHỤC MỐC 100 SUBSCRIBER YOUTUBE ĐẦU TIÊN ĐỂ SẢN XUẤT CHUỖI VIDEO MARKETING QUẢNG CÁO ỨNG DỤNG K-DRIVE! ⚡
-                </div>
-            </div>
-        </section>
-
-        <!-- 5 NÚT BẤM HÀNH ĐỘNG CHÍNH (NHÃN BÊN PHẢI) -->
-        <!-- NÚT 1: ỦNG HỘ HÀNH ĐỘNG (YOUTUBE) -->
-        <section class="mb-2.5 relative">
-            <a href="https://www.youtube.com/@Kai9999love" target="_blank" rel="noopener noreferrer" class="btn-cyan-glow p-3.5 flex items-center justify-between gap-3 cursor-pointer group block">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <div class="w-10 h-10 rounded-xl bg-slate-950 border border-cyan-400/40 flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-400" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center justify-between gap-2 mb-0.5">
-                            <span class="text-xs font-bold truncate glow-cyan">ỦNG HỘ HÀNH ĐỘNG</span>
-                            <span class="font-mono-tech text-[8px] font-bold px-2 py-0.5 rounded-full border bg-cyan-400/20 border-cyan-400/50 text-cyan-200 shrink-0">ĐĂNG KÝ</span>
-                        </div>
-                        <p class="text-[11px] text-amber-300 truncate">👉 +100 member sản xuất 1 video quảng cáo.</p>
-                    </div>
-                </div>
-            </a>
-        </section>
-
-        <!-- NÚT 2: ỦNG HỘ LỜI NÓI (GÓP Ý TRỰC TIẾP QUA ZALO FOUNDER) -->
-        <section class="mb-2.5">
-            <a href="https://zalo.me/0772719999" target="_blank" rel="noopener noreferrer" class="btn-rose-glow p-3.5 flex items-center justify-between gap-3 cursor-pointer group block">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <div class="w-10 h-10 rounded-xl bg-slate-950 border border-rose-400/40 flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center justify-between gap-2 mb-0.5">
-                            <span class="text-xs font-bold truncate text-rose-200">ỦNG HỘ LỜI NÓI</span>
-                            <span class="font-mono-tech text-[8px] font-bold px-2 py-0.5 rounded-full border bg-rose-500/20 border-rose-400/50 text-rose-300 shrink-0">GÓP Ý</span>
-                        </div>
-                        <p class="text-[11px] text-slate-200 truncate">💡 Hãy cho tôi ý kiến của bạn.</p>
-                    </div>
-                </div>
-            </a>
-        </section>
-
-        <!-- NÚT 3: ỦNG HỘ TÀI CHÍNH (GÓP VỐN) + NGÓN TAY CHỈ -->
-        <section class="mb-2.5 relative">
-            <div onclick="openDocModal()" class="btn-gold-glow p-3.5 flex items-center justify-between gap-3 cursor-pointer group">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <div class="w-10 h-10 rounded-xl bg-slate-950 border border-amber-400/40 flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center justify-between gap-2 mb-0.5">
-                            <span class="text-xs font-bold truncate glow-gold">ỦNG HỘ TÀI CHÍNH</span>
-                            <span class="font-mono-tech text-[8px] font-bold px-2 py-0.5 rounded-full border bg-amber-400/20 border-amber-400/50 text-amber-200 shrink-0">GÓP VỐN</span>
-                        </div>
-                        <p class="text-[11px] text-slate-300 truncate">💎 Đồng hành từ 1 Triệu – Hợp tác phân chia lợi nhuận mộc đỏ.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- NÚT 4: PHÒNG CHIẾU VIP (KIỂM DUYỆT) -->
-        <section class="mb-2.5">
-            <div onclick="openShareholderLoginModal()" class="btn-purple-glow p-3.5 flex items-center justify-between gap-3 cursor-pointer group">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <div class="w-10 h-10 rounded-xl bg-slate-950 border border-purple-400/40 flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-300 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center justify-between gap-2 mb-0.5">
-                            <span class="text-xs font-bold truncate text-purple-200">PHÒNG CHIẾU VIP</span>
-                            <span class="font-mono-tech text-[8px] font-bold px-2 py-0.5 rounded-full border bg-purple-500/20 border-purple-400/50 text-purple-300 shrink-0">KIỂM DUYỆT</span>
-                        </div>
-                        <p class="text-[11px] text-amber-300 truncate">🔒 Đăng nhập biểu quyết thước phim độc quyền.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- NÚT 5: GAME PHẢN XẠ (XANH LÁ EMERALD) -->
-        <section class="mb-3.5">
-            <div onclick="openReflexGame()" class="btn-emerald-glow p-3.5 flex items-center justify-between gap-3 cursor-pointer group">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <div class="w-10 h-10 rounded-xl bg-slate-950 border border-emerald-400/40 flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-300 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center justify-between gap-2 mb-0.5">
-                            <span class="text-xs font-bold truncate text-emerald-200">TEST PHẢN XẠ NÃO BỘ</span>
-                            <span class="font-mono-tech text-[8px] font-bold px-2 py-0.5 rounded-full border bg-emerald-500/20 border-emerald-400/50 text-emerald-300 shrink-0">GAME</span>
-                        </div>
-                        <p class="text-[11px] text-slate-300 truncate">⚡ Thử thách tốc độ thần kinh phản xạ.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- HỆ SINH THÁI LIÊN KẾT (3 ICON TRÊN 1 DÒNG NGANG) -->
         <section class="mb-3">
