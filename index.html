@@ -609,15 +609,16 @@
                     <div><b>Mức góp vốn:</b> <span id="shDisplayAmount" class="text-emerald-300">--</span></div>
                     <div><b>Tỷ lệ cổ phần:</b> <span id="shDisplayShare" class="text-cyan-300">--</span></div>
                 </div>
-                <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-                    <div class="font-bold text-purple-300">🎬 Phòng Chiếu VIP (Duyệt Video Marketing):</div>
-                    <p class="text-[11px] text-slate-400">Danh sách các thước phim quảng cáo thực chiến đang chờ hội đồng biểu quyết trước khi phát hành:</p>
-                    <div class="p-2 rounded bg-slate-900 border border-slate-800 text-[11px] flex items-center justify-between">
-                        <span>Video #01: K-Drive Neural Demo</span>
-                        <div class="flex gap-1">
-                            <button onclick="alert('Đã vote ĐỒNG Ý duyệt video!')" class="px-2 py-1 rounded bg-emerald-600 text-white font-bold text-[10px]">Đồng Ý</button>
-                            <button onclick="alert('Đã gửi ý kiến góp ý chỉnh sửa!')" class="px-2 py-1 rounded bg-rose-600 text-white font-bold text-[10px]">Góp Ý</button>
-                        </div>
+               <div class="p-3 rounded-xl bg-slate-950 border border-purple-500/50 space-y-2 font-mono-tech">
+                    <div class="font-bold text-purple-300 flex items-center justify-between text-xs">
+                        <span>🎬 PHÒNG CHIẾU VIP (KIỂM DUYỆT VIDEO)</span>
+                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/40">Trực Tiếp</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Các thước phim quảng cáo thực chiến đang chờ hội đồng biểu quyết trước khi phát hành:</p>
+                    
+                    <!-- KHUNG HIỂN THỊ DANH SÁCH & TRÌNH PHÁT VIDEO DYNAMIC -->
+                    <div id="vipVideoListContainer" class="space-y-3 pt-1">
+                        <!-- Video Player sẽ được render tự động vào đây -->
                     </div>
                 </div>
                 <button onclick="logoutShareholderAccount()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs">Đăng xuất tài khoản</button>
@@ -740,7 +741,10 @@
                     <div class="p-3.5 rounded-xl bg-slate-950 border border-cyan-500/40 space-y-2">
                         <div class="font-bold text-cyan-300 font-mono-tech">📤 Đăng Tải Video Demo (Chuỗi 30 Video):</div>
                         <p class="text-[11px] text-slate-300">Tải lên video demo thực chiến để cổ đông duyệt (>50% đồng ý mới phát hành):</p>
-                        <input type="file" id="founderVideoFile" accept="video/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-cyan-500 file:text-slate-950 cursor-pointer">
+                        <input type="text" id="founderVideoTitle" placeholder="Tiêu đề (VD: Video #01: K-Drive Neural Demo)..." class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none font-mono-tech">
+                        <input type="text" id="founderVideoUrl" placeholder="Dán link YouTube (Unlisted) / Drive / Link MP4..." class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none font-mono-tech">
+                        <div class="text-[10px] text-slate-400">Hoặc chọn file video trực tiếp từ máy:</div>
+                        <input type="file" id="founderVideoFile" accept="video/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-cyan-500 file:text-slate-950 cursor-pointer">
                         <button onclick="requireFounderAction(uploadFounderVideo)" class="w-full py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs font-mono-tech">Tải Lên Phòng Chiếu Cổ Đông</button>
                         <div class="text-[10px] text-amber-300 font-mono-tech mt-1 text-center" id="voteStatusText">Trạng thái: Đang chờ upload video mới</div>
                     </div>
@@ -1814,15 +1818,163 @@
             }
         }
 
-        function uploadFounderVideo() {
-            const fileInput = document.getElementById('founderVideoFile');
-            if (fileInput.files.length > 0) {
-                alert('Đã tải lên video demo thành công! Hệ thống đã gửi thông báo đến tài khoản của toàn bộ cổ đông.');
-                document.getElementById('voteStatusText').textContent = "Trạng thái: Video #01 đang chờ cổ đông biểu quyết (>50%)";
-                closeFounderDashboardModal();
-            } else {
-                alert('Vui lòng chọn tệp video trước khi tải lên!');
+    // ==========================================
+        // HỆ THỐNG PHÒNG CHIẾU VIP & BIỂU QUYẾT VIDEO
+        // ==========================================
+        const defaultVipVideos = [
+            {
+                id: 1,
+                title: "Video #01: K-Drive Neural Demo (Thần Kinh & AI)",
+                url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                fileBlobUrl: "",
+                votesYes: 18,
+                votesNo: 2
             }
+        ];
+
+        let vipVideosData = JSON.parse(localStorage.getItem('kdrive_vip_videos')) || defaultVipVideos;
+
+        function saveVipVideos() {
+            localStorage.setItem('kdrive_vip_videos', JSON.stringify(vipVideosData));
+            renderVipVideos();
+        }
+
+        // TỰ ĐỘNG CHUYỂN LINK YOUTUBE SANG TRÌNH PHÁT NHÚNG
+        function getYouTubeEmbedUrl(url) {
+            if (!url) return '';
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? 'https://www.youtube.com/embed/' + match[2] : '';
+        }
+
+        // HIỂN THỊ VIDEO PLAYER & BẢNG BIỂU QUYẾT VÀO PHÒNG CHIẾU
+        function renderVipVideos() {
+            const container = document.getElementById('vipVideoListContainer');
+            if (!container) return;
+
+            if (vipVideosData.length === 0) {
+                container.innerHTML = `<div class="p-3 text-center text-slate-400 font-mono-tech text-xs">Hiện chưa có video nào được đăng tải.</div>`;
+                return;
+            }
+
+            container.innerHTML = vipVideosData.map((vid, idx) => {
+                const totalVotes = (vid.votesYes || 0) + (vid.votesNo || 0);
+                const percentYes = totalVotes > 0 ? Math.round((vid.votesYes / totalVotes) * 100) : 0;
+                
+                let playerHtml = '';
+                const ytEmbed = getYouTubeEmbedUrl(vid.url);
+                if (ytEmbed) {
+                    playerHtml = `
+                        <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-700 bg-black shadow-lg">
+                            <iframe src="${ytEmbed}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    `;
+                } else if (vid.fileBlobUrl || (vid.url && vid.url.endsWith('.mp4'))) {
+                    playerHtml = `
+                        <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-700 bg-black shadow-lg">
+                            <video src="${vid.fileBlobUrl || vid.url}" controls class="w-full h-full object-contain"></video>
+                        </div>
+                    `;
+                } else if (vid.url) {
+                    playerHtml = `
+                        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                            <a href="${vid.url}" target="_blank" class="text-cyan-300 font-bold text-xs underline">▶ Mở xem video demo tại đây ➔</a>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="p-3 rounded-xl bg-slate-900/90 border border-purple-500/40 space-y-2 font-mono-tech">
+                        <div class="font-bold text-amber-300 text-xs">${vid.title}</div>
+                        ${playerHtml}
+                        <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1">
+                            <span>Tiến độ vote: <b class="text-emerald-300">${vid.votesYes || 0} Đồng ý</b> / <b class="text-rose-400">${vid.votesNo || 0} Góp ý</b></span>
+                            <span class="text-cyan-300 font-bold">${percentYes}% Đồng ý</span>
+                        </div>
+                        <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-cyan-400 to-emerald-400 h-1.5 rounded-full" style="width: ${percentYes}%"></div>
+                        </div>
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="voteVideo(${idx}, 'yes')" class="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all shadow">
+                                <span>👍</span> <span>Đồng Ý</span>
+                            </button>
+                            <button onclick="voteVideo(${idx}, 'feedback')" class="flex-1 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all shadow">
+                                <span>💬</span> <span>Góp Ý</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // HÀM ĐĂNG TẢI VIDEO TỪ FOUNDER DASHBOARD
+        function uploadFounderVideo() {
+            const titleInput = document.getElementById('founderVideoTitle');
+            const urlInput = document.getElementById('founderVideoUrl');
+            const fileInput = document.getElementById('founderVideoFile');
+
+            const title = (titleInput && titleInput.value.trim()) || `Video #${vipVideosData.length + 1}: K-Drive Demo`;
+            const url = urlInput ? urlInput.value.trim() : '';
+            const file = fileInput && fileInput.files ? fileInput.files[0] : null;
+
+            if (!url && !file) {
+                alert('Vui lòng dán link video (YouTube/Drive) HOẶC chọn tệp video từ máy!');
+                return;
+            }
+
+            let fileBlobUrl = '';
+            if (file) {
+                fileBlobUrl = URL.createObjectURL(file);
+            }
+
+            const newVideo = {
+                id: Date.now(),
+                title: title,
+                url: url,
+                fileBlobUrl: fileBlobUrl,
+                votesYes: 1,
+                votesNo: 0
+            };
+
+            vipVideosData.unshift(newVideo);
+            saveVipVideos();
+
+            if (titleInput) titleInput.value = '';
+            if (urlInput) urlInput.value = '';
+            if (fileInput) fileInput.value = '';
+
+            const statusText = document.getElementById('voteStatusText');
+            if (statusText) statusText.textContent = `Trạng thái: Đã đưa "${title}" vào Phòng Chiếu VIP!`;
+
+            alert(`🎉 Đã đưa "${title}" lên Phòng Chiếu VIP thành công!`);
+            closeFounderDashboardModal();
+            renderVipVideos();
+        }
+        // HÀM XỬ LÝ BIỂU QUYẾT CHO CỔ ĐÔNG
+        function voteVideo(index, type) {
+            const vid = vipVideosData[index];
+            if (!vid) return;
+
+            if (type === 'yes') {
+                vid.votesYes = (vid.votesYes || 0) + 1;
+                saveVipVideos();
+                alert(`Đã ghi nhận biểu quyết: ĐỒNG Ý duyệt "${vid.title}"!`);
+            } else {
+                const feedback = prompt(`Nhập ý kiến góp ý của bạn cho "${vid.title}":`);
+                if (feedback) {
+                    vid.votesNo = (vid.votesNo || 0) + 1;
+                    saveVipVideos();
+                    alert(`Đã gửi góp ý tới Founder: "${feedback}". Cảm ơn đóng góp quý báu của bạn!`);
+                }
+            }
+        }
+
+        // TỰ ĐỘNG KHỞI TẠO KHUNG VIDEO KHI MỞ TRANG
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', renderVipVideos);
+        } else {
+            renderVipVideos();
+        }
         }
 
         // DANH SÁCH 100 MÃ TOKEN BẢO MẬT CAO
