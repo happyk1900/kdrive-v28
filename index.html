@@ -2666,54 +2666,120 @@ const packageData = {
     }
 };
 
-// HÀM CHỌN GÓI: CẬP NHẬT VIỀN, HỘP ĐẶC QUYỀN VÀ MÃ VIETQR
-window.selectPackage = function(amount, btn) {
-    // 1. Chuyển viền sáng cho nút được bấm
-    const allBoxes = document.querySelectorAll('.package-btn');
-    allBoxes.forEach(b => {
-        b.style.borderColor = '#1e293b';
-        b.style.borderWidth = '1px';
-        b.style.boxShadow = 'none';
-    });
-    if (btn) {
-        btn.style.borderColor = '#f59e0b';
-        btn.style.borderWidth = '2px';
-        btn.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.35)';
-    }
-
-    // 2. Bung đặc quyền tương ứng vào chiếc Hộp packageDetailsBox
-    const pInfo = packageData[amount];
-    const detailsBox = document.getElementById('packageDetailsBox');
-    if (detailsBox && pInfo) {
-        detailsBox.innerHTML = `
-            <div class="flex items-center justify-between pb-1.5 border-b border-slate-800">
-                <span class="text-amber-300 font-bold text-[11px]">✨ ĐẶC QUYỀN ${pInfo.title}</span>
-                <span class="text-emerald-300 font-bold text-[11px]">${pInfo.share} LỢI NHUẬN</span>
-            </div>
-            <div class="text-cyan-300 text-[10px] font-semibold">🗳️ Quyền biểu quyết: ${pInfo.votes}</div>
-            <div class="space-y-1 pt-1 text-[11px] text-slate-300">
-                ${pInfo.perks.map(perk => `<div class="flex items-start gap-1.5"><span class="text-amber-400">✔</span><span>${perk}</span></div>`).join('')}
-            </div>
-        `;
-    }
-
-    // 3. Cập nhật số tiền hiển thị
-    const amtText = document.getElementById('displaySelectedAmount');
-    if (amtText) {
-        amtText.innerText = Number(amount).toLocaleString('vi-VN') + ' VNĐ';
-    }
-
-    // 4. Tự động đổi mã VietQR khóa cứng số tiền
-    const qrImg = document.getElementById('vietQrImg');
-    if (qrImg) {
-        qrImg.src = 'https://img.vietqr.io/image/ACB-8617-compact2.png?amount=' + amount + '&addInfo=KDRIVE&accountName=DO%20DUC%20ANH';
+// HÀM CHỌN GÓI & ĐIỀU KHIỂN LUỒNG 5 GÓI HỢP TÁC + VIETQR ACB 8617 + OTP
+window.openPackageSelectionModal = function() {
+    closeDocModal();
+    const modal = document.getElementById('packageSelectionModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
 };
 
+window.closePackageSelectionModal = function() {
+    const modal = document.getElementById('packageSelectionModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+};
+
+window.openPackagePopup = function(amount) {
+    closePackageSelectionModal();
+    const pInfo = packageData[amount] || packageData[1000000];
+
+    const titleEl = document.getElementById('popPackageTitle');
+    const shareEl = document.getElementById('popPackageShare');
+    const votesEl = document.getElementById('popPackageVotes');
+    const perksEl = document.getElementById('popPackagePerks');
+    const amtEl = document.getElementById('popDisplayAmount');
+    const qrImg = document.getElementById('popVietQrImg');
+
+    if (titleEl) titleEl.textContent = pInfo.title;
+    if (shareEl) shareEl.textContent = pInfo.share + ' Lợi nhuận';
+    if (votesEl) votesEl.textContent = pInfo.votes;
+    if (perksEl) {
+        perksEl.innerHTML = pInfo.perks.map(perk => 
+            `<div class="flex items-start gap-1.5"><span class="text-amber-400">✔</span><span>${perk}</span></div>`
+        ).join('');
+    }
+    if (amtEl) amtEl.textContent = Number(amount).toLocaleString('vi-VN') + ' VNĐ';
+    if (qrImg) {
+        qrImg.src = `https://img.vietqr.io/image/ACB-8617-compact2.png?amount=${amount}&addInfo=KDRIVE&accountName=DO%20DUC%20ANH`;
+    }
+
+    const popModal = document.getElementById('packagePopupModal');
+    if (popModal) {
+        popModal.classList.remove('hidden');
+        popModal.classList.add('flex');
+    }
+};
+
+window.closePackagePopup = function() {
+    const popModal = document.getElementById('packagePopupModal');
+    if (popModal) {
+        popModal.classList.remove('flex');
+        popModal.classList.add('hidden');
+    }
+};
+
+window.backToPackageSelection = function() {
+    closePackagePopup();
+    openPackageSelectionModal();
+};
+
+window.requestRefundOtp = function() {
+    requestRefund24h();
+};
+
+// CẬP NHẬT NÚT GÓP Ý VIDEO TRONG PHÒNG CHIẾU VIP NHẢY THẲNG SANG ZALO 0772719999
+window.voteVideo = function(index, type) {
+    const vid = vipVideosData[index];
+    if (!vid) return;
+
+    if (type === 'yes') {
+        vid.votesYes = (vid.votesYes || 0) + 1;
+        saveVipVideos();
+        alert(`✅ Đã ghi nhận biểu quyết: ĐỒNG Ý duyệt "${vid.title}"!`);
+    } else {
+        vid.votesNo = (vid.votesNo || 0) + 1;
+        saveVipVideos();
+        window.open('https://zalo.me/0772719999', '_blank');
+    }
+};
+
+// KẾT NỐI CHUẨN 3 NÚT TÍNH NĂNG TRANG CHỦ VỚI HỆ THỐNG GỐC
+window.handleGopVonClick = function() {
+    openDocModal();
+};
+
+window.handleKiemDuyetClick = function() {
+    openShareholderLoginModal();
+};
+
+// Tách riêng hàm bấm màn hình trong Game và hàm mở Modal Game ngoài trang chủ
+const triggerReflexScreenTap = handleGameClick;
+window.handleGameClick = function() {
+    const gm = document.getElementById('gameModal');
+    if (gm && gm.classList.contains('hidden')) {
+        openReflexGame();
+    } else {
+        triggerReflexScreenTap();
+    }
+};
+
+// ĐẢM BẢO XÁC THỰC OTP MỞ HỢP ĐỒNG ĐÓNG LUÔN BẢNG QR
+const originalVerifyOtpAndSign = verifyOtpAndSign;
+window.verifyOtpAndSign = function() {
+    closePackagePopup();
+    originalVerifyOtpAndSign();
+};
+</script>
+
     <!-- ======================================================== -->
-    <!-- POP-UP 1: BẢNG NỔI CHỌN 5 GÓI HỢP TÁC (CHÍNH GIỮA MÀN HÌNH) -->
+    <!-- POP-UP 1: BẢNG NỔI CHỌN 5 GÓI HỢP TÁC (ĐÃ ĐƯA RA NGOÀI SCRIPT) -->
     <!-- ======================================================== -->
-    <div id="packageSelectionModal" class="fixed inset-0 z-[90] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md font-sans">
+    <div id="packageSelectionModal" onclick="if(event.target === this) closePackageSelectionModal()" class="fixed inset-0 z-[90] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md font-sans">
         <div class="relative w-full max-w-sm bg-slate-900 border border-amber-400/80 rounded-2xl p-5 shadow-2xl space-y-3.5">
             
             <button onclick="closePackageSelectionModal()" type="button" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold">
@@ -2770,10 +2836,10 @@ window.selectPackage = function(amount, btn) {
         </div>
     </div>
 
-   <!-- ======================================================== -->
-    <!-- BƯỚC 3: POP-UP ĐẶC QUYỀN + MÃ QR ACB + Ô NHẬP MÃ OTP -->
     <!-- ======================================================== -->
-    <div id="packagePopupModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md font-sans">
+    <!-- POP-UP 2: ĐẶC QUYỀN + MÃ VIETQR ACB 8617 + Ô NHẬP MÃ OTP -->
+    <!-- ======================================================== -->
+    <div id="packagePopupModal" onclick="if(event.target === this) closePackagePopup()" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md font-sans">
         <div class="relative w-full max-w-sm bg-slate-900 border-2 border-amber-400 rounded-2xl p-4 sm:p-5 shadow-2xl space-y-3 max-h-[92vh] overflow-y-auto">
             
             <button onclick="closePackagePopup()" type="button" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold">
@@ -2793,9 +2859,7 @@ window.selectPackage = function(amount, btn) {
             <!-- DANH SÁCH ĐẶC QUYỀN -->
             <div class="space-y-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-200 leading-relaxed">
                 <div class="text-[11px] text-amber-300 font-bold uppercase">✨ ĐẶC QUYỀN CỦA BẠN:</div>
-                <div id="popPackagePerks" class="space-y-1.5">
-                    <!-- Tự động nạp qua script -->
-                </div>
+                <div id="popPackagePerks" class="space-y-1.5"></div>
             </div>
 
             <!-- MÃ VIETQR ACB KHÓA TIỀN -->
@@ -2841,15 +2905,13 @@ window.selectPackage = function(amount, btn) {
             </button>
         </div>
     </div>
-</script>
-<!-- ============================================================ -->
-    <!-- POP-UP MODAL: KẾ HOẠCH & LỘ TRÌNH PHÁT TRIỂN K-DRIVE         -->
-    <!-- (CHỮ TO RÕ - HIỂN THỊ TRỰC TIẾP TIỂU SỬ & LỜI MỜI THƯỞNG TRÀ) -->
+
+    <!-- ============================================================ -->
+    <!-- POP-UP 3: KẾ HOẠCH & LỘ TRÌNH PHÁT TRIỂN K-DRIVE             -->
     <!-- ============================================================ -->
     <div id="roadmapModal" onclick="if(event.target === this) closeRoadmapModal()" style="display: none; position: fixed; inset: 0; z-index: 999999; background: rgba(2, 6, 23, 0.88); backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 14px; box-sizing: border-box; font-family: sans-serif;">
         <div style="background: #020617; border: 2px solid rgba(245, 158, 11, 0.85); width: 100%; max-width: 360px; max-height: 88vh; border-radius: 18px; padding: 18px 14px; box-shadow: 0 0 35px rgba(245, 158, 11, 0.35); position: relative; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
             
-            <!-- THANH TIÊU ĐỀ POP-UP & NÚT ĐÓNG X -->
             <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid #1e293b; flex-shrink: 0;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="font-size: 16px;">🌍</span>
@@ -2858,43 +2920,37 @@ window.selectPackage = function(amount, btn) {
                 <button type="button" onclick="closeRoadmapModal()" style="width: 30px; height: 30px; border-radius: 9999px; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; outline: none; touch-action: manipulation;">✕</button>
             </div>
 
-            <!-- VÙNG CUỘN NỘI DUNG (CHỮ TO RÕ, ĐỌC THOẢI MÁI) -->
             <div style="overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 14px; font-size: 13px; line-height: 1.65; color: #f1f5f9;">
                 
-                <!-- PHẦN 1: SẢN PHẨM & CÔNG NGHỆ -->
+                <!-- PHẦN 1 -->
                 <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(6, 182, 212, 0.45); border-radius: 14px; padding: 14px;">
                     <div style="color: #67e8f9; font-weight: 900; font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                         <span>🧬</span> 01 // SẢN PHẨM & CÔNG NGHỆ
                     </div>
-                    
                     <div style="color: #fcd34d; font-weight: bold; font-size: 13.5px; margin-bottom: 4px;">K-Drive là gì?</div>
                     <p style="margin: 0 0 10px 0; color: #e2e8f0;">
                         K-Drive là nền tảng chăm sóc sức khỏe thông minh, ứng dụng AI để giúp mỗi người theo dõi thể trạng, cải thiện thói quen sống và rèn luyện sức khỏe mỗi ngày.
                     </p>
-
                     <div style="color: #fcd34d; font-weight: bold; font-size: 13.5px; margin-bottom: 6px;">Những trải nghiệm chính:</div>
                     <ul style="margin: 0 0 10px 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: #e2e8f0;">
                         <li><b>Theo dõi sức khỏe:</b> Kết nối đồng hồ thông minh, cân thông minh để theo dõi nhịp tim, giấc ngủ, cân nặng và các chỉ số cơ thể.</li>
                         <li><b>Chăm sóc cá nhân hóa:</b> AI phân tích dữ liệu và đưa ra những gợi ý phù hợp với tình trạng của từng người.</li>
                         <li><b>Rèn luyện trí não:</b> Kết hợp các trò chơi và bài tập thực tế giúp rèn luyện trí nhớ, phản xạ, khả năng phán đoán và sự tập trung.</li>
                     </ul>
-
                     <div style="background: rgba(6, 182, 212, 0.15); border-left: 3px solid #22d3ee; padding: 6px 10px; border-radius: 6px; font-size: 12px; color: #a5f3fc; line-height: 1.5;">
                         ✅ <b>Đã thử nghiệm:</b> K-Drive đã được thử nghiệm và vận hành mượt mà trên hệ sinh thái thiết bị Samsung, bao gồm <b>Galaxy S25 Ultra</b> và <b>Galaxy Watch</b>.
                     </div>
                 </div>
 
-                <!-- PHẦN 2: GIAI ĐOẠN KHỞI ĐỘNG & 100 CO-BUILDERS -->
+                <!-- PHẦN 2 -->
                 <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(245, 158, 11, 0.45); border-radius: 14px; padding: 14px;">
                     <div style="color: #fbbf24; font-weight: 900; font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                         <span>💎</span> 02 // GIAI ĐOẠN KHỞI ĐỘNG & 100 CO-BUILDERS
                     </div>
-
                     <div style="color: #fcd34d; font-weight: bold; font-size: 13.5px; margin-bottom: 4px;">K-Drive đang ở đâu?</div>
                     <p style="margin: 0 0 10px 0; color: #e2e8f0;">
                         Dự án đang trong giai đoạn Pre-Seed (tiền hạt giống), mở cơ hội để <b>100 người đồng hành đầu tiên</b> cùng tham gia xây dựng và phát triển sản phẩm.
                     </p>
-
                     <div style="color: #fcd34d; font-weight: bold; font-size: 13.5px; margin-bottom: 6px;">Cơ hội dành cho người đồng hành:</div>
                     <ul style="margin: 0 0 10px 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: #e2e8f0;">
                         <li>Tham gia đóng góp nguồn lực cho giai đoạn phát triển ban đầu.</li>
@@ -2902,20 +2958,17 @@ window.selectPackage = function(amount, btn) {
                         <li>Đóng góp ý kiến, đề xuất tính năng và cùng hoàn thiện sản phẩm.</li>
                         <li>Tham gia cộng đồng Co-builder, theo dõi tiến độ và đồng hành trong các quyết định phát triển nội dung truyền thông.</li>
                     </ul>
-
                     <div style="background: rgba(245, 158, 11, 0.15); border-left: 3px solid #fbbf24; padding: 6px 10px; border-radius: 6px; font-size: 12px; color: #fef08a;">
                         🎯 <b>Mục tiêu:</b> Xây dựng cộng đồng 100 người đồng hành đầu tiên, cùng K-Drive đưa sản phẩm đến gần hơn với người dùng.
                     </div>
                 </div>
 
-                <!-- PHẦN 3: LỘ TRÌNH TRIỂN KHAI -->
+                <!-- PHẦN 3 -->
                 <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(16, 185, 129, 0.45); border-radius: 14px; padding: 14px;">
                     <div style="color: #34d399; font-weight: 900; font-size: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
                         <span>🚀</span> 03 // LỘ TRÌNH TRIỂN KHAI
                     </div>
-                    
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <!-- BƯỚC 1 -->
                         <div style="display: flex; gap: 10px; align-items: flex-start;">
                             <span style="background: #064e3b; color: #6ee7b7; font-size: 10.5px; font-weight: 900; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px;">BƯỚC 1</span>
                             <div>
@@ -2923,8 +2976,6 @@ window.selectPackage = function(amount, btn) {
                                 <span style="color: #e2e8f0;">Đạt 100 người đăng ký kênh YouTube K-Drive, hình thành cộng đồng đầu tiên cùng theo dõi và ủng hộ dự án.</span>
                             </div>
                         </div>
-
-                        <!-- BƯỚC 2 -->
                         <div style="display: flex; gap: 10px; align-items: flex-start;">
                             <span style="background: #064e3b; color: #6ee7b7; font-size: 10.5px; font-weight: 900; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px;">BƯỚC 2</span>
                             <div>
@@ -2932,8 +2983,6 @@ window.selectPackage = function(amount, btn) {
                                 <span style="color: #e2e8f0;">Hoàn thiện video giới thiệu sản phẩm, đưa vào Phòng Chiếu VIP để 100 Co-builder trải nghiệm, xem trước và đóng góp ý kiến trước khi công bố rộng rãi.</span>
                             </div>
                         </div>
-
-                        <!-- BƯỚC 3 -->
                         <div style="display: flex; gap: 10px; align-items: flex-start;">
                             <span style="background: #064e3b; color: #6ee7b7; font-size: 10.5px; font-weight: 900; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px;">BƯỚC 3</span>
                             <div>
@@ -2942,475 +2991,59 @@ window.selectPackage = function(amount, btn) {
                             </div>
                         </div>
                     </div>
-
                     <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(16, 185, 129, 0.4); text-align: center; color: #a7f3d0; font-size: 12.5px; font-weight: bold; line-height: 1.5;">
                         ✨ Cùng K-Drive xây dựng một nền tảng chăm sóc sức khỏe thông minh, bắt đầu từ 100 người đồng hành đầu tiên!
                     </div>
                 </div>
 
-                <!-- PHẦN 4: TIỂU SỬ FOUNDER (HIỂN THỊ TRỰC TIẾP, KHÔNG CẦN BẤM MỞ) -->
+                <!-- PHẦN 4: TIỂU SỬ FOUNDER -->
                 <div style="background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(245, 158, 11, 0.6); border-radius: 14px; padding: 14px;">
                     <div style="color: #fbbf24; font-weight: 900; font-size: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
                         <span>👤</span> TIỂU SỬ FOUNDER ĐỖ ĐỨC ANH (KAI RIPE)
                     </div>
-                    
                     <div style="font-size: 12.5px; color: #fde68a; font-weight: bold; margin-bottom: 8px;">
                         Đỗ Đức Anh (Kai Ripe) – Nhà sáng lập Telepathy Company & K-Drive
                     </div>
-
                     <div style="display: flex; flex-direction: column; gap: 8px; color: #e2e8f0; font-size: 12.5px;">
                         <p style="margin: 0;">• <b>Âm nhạc & Nghệ thuật:</b> Sinh trưởng trong gia đình có truyền thống nghệ thuật (Mazano Fashion), từng theo học Học viện Âm nhạc Quốc gia, hoạt động với vai trò DJ và quản lý TopU Beer Lounge.</p>
                         <p style="margin: 0;">• <b>Kinh doanh & Quản trị:</b> Từng đảm nhiệm vị trí Quản lý khu vực miền Nam tại Royaltea Việt Nam, tích lũy nhiều trải nghiệm thực tế về quản lý con người, hành vi khách hàng và dòng tiền.</p>
                         <p style="margin: 0;">• <b>Bước ngoặt nghiên cứu:</b> Giai đoạn Covid-19 dành thời gian chuyên sâu nghiên cứu thần kinh học, tâm lý hành vi số đông, hội chứng FOMO và sự suy giảm tập trung ở người trẻ; đồng thời trực tiếp làm việc thực tế từ lái xe dịch vụ đến quy trình đón khách Nội Bài.</p>
                         <p style="margin: 0;">• <b>Khởi đầu K-Drive:</b> Quyết định đầu tư 1 tỷ đồng vốn tự thân để phát triển K-Drive – kết hợp AI và khoa học thần kinh nhằm giúp người dùng giảm trì hoãn, cải thiện sự tỉnh táo và duy trì phong độ mỗi ngày.</p>
                     </div>
-
                     <div style="margin-top: 10px; padding: 8px 10px; background: rgba(2, 6, 23, 0.8); border-radius: 8px; border: 1px dashed rgba(245, 158, 11, 0.4); font-size: 12px; color: #fef08a; line-height: 1.5;">
                         🎯 <b>Triết lý phát triển:</b> "Đôi khi con người không thiếu năng lực hay mục tiêu, mà chỉ thiếu một chút động lực để bắt đầu và duy trì hành động. K-Drive ra đời để biến điều đó thành giải pháp công nghệ thiết thực mỗi ngày."
                     </div>
                 </div>
 
-                <!-- PHẦN 5: LỜI MỜI THƯỞNG TRÀ & TRẢI NGHIỆM TRỰC TIẾP -->
+                <!-- PHẦN 5: LỜI MỜI THƯỞNG TRÀ -->
                 <div style="background: rgba(245, 158, 11, 0.12); border: 2px solid #f59e0b; border-radius: 14px; padding: 14px; text-align: left; box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);">
                     <div style="color: #fcd34d; font-weight: 900; font-size: 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
                         <span>🍵</span> LỜI MỜI THƯỞNG TRÀ & TRẢI NGHIỆM TRỰC TIẾP
                     </div>
-                    
                     <p style="margin: 0 0 10px 0; color: #fef08a; font-size: 12.5px; line-height: 1.6;">
                         "Trân trọng kính mời các nhà đầu tư, đối tác và anh em Co-builder ghé thăm, cùng Founder thưởng trà, đàm đạo về công nghệ và trực tiếp cầm máy trải nghiệm bản K-Drive trên tay."
                     </p>
-
                     <div style="font-size: 12px; color: #ffffff; margin-bottom: 12px; line-height: 1.5; background: rgba(0,0,0,0.4); padding: 8px 10px; border-radius: 8px;">
                         📍 <b>Địa chỉ:</b> Tòa nhà chung cư Happy Star, Khu đô thị Việt Hưng, Quận Long Biên, Hà Nội.
                     </div>
-
-                    <!-- NÚT MỞ GOOGLE MAPS TO RÕ, DỄ BẤM -->
                     <a href="https://maps.google.com/?q=Chung+cư+Happy+Star+Việt+Hưng+Long+Biên+Hà+Nội" target="_blank" rel="noopener" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 42px; border-radius: 10px; background: #f59e0b; color: #020617; font-weight: 900; font-size: 13px; text-decoration: none; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); box-sizing: border-box;">
                         <span>📍</span> MỞ ĐỊNH VỊ GOOGLE MAPS ➔
                     </a>
                 </div>
 
             </div>
-
-            <!-- NÚT ĐÓNG TIỆN LỢI Ở ĐÁY HỘP -->
-            <button type="button" onclick="closeRoadmapModal()" style="width: 100%; height: 40px; border-radius: 12px; background: #0f172a; border: 1px solid rgba(245, 158, 11, 0.6); color: #fcd34d; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-top: 12px; cursor: pointer; flex-shrink: 0; outline: none;">
-                ĐÃ HIỂU LỘ TRÌNH & ĐÓNG ✕
-            </button>
         </div>
     </div>
 
-    <!-- JAVASCRIPT ĐIỀU KHIỂN POP-UP LỘ TRÌNH -->
     <script>
     window.openRoadmapModal = function() {
         const m = document.getElementById('roadmapModal');
         if (m) m.style.display = 'flex';
     };
-
     window.closeRoadmapModal = function() {
         const m = document.getElementById('roadmapModal');
         if (m) m.style.display = 'none';
     };
-    </script>
-<!-- ============================================================ -->
-    <!-- BỘ BA TÍNH NĂNG TOÀN DIỆN: GÓI BCC + PHÒNG VIP + GAME NÃO BỘ -->
-    <!-- (TỰ ĐỘNG BẮT SỰ KIỆN TOÀN CỤC - KHÔNG LO XUNG ĐỘT)          -->
-    <!-- ============================================================ -->
-
-    <!-- 1. CỬA SỔ CHỌN GÓI ĐỒNG HÀNH BCC -->
-    <div id="kdrivePackageModal" onclick="if(event.target === this) closeKdrivePackageModal()" style="display: none; position: fixed; inset: 0; z-index: 9999999; background: rgba(2, 6, 23, 0.92); backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 14px; box-sizing: border-box; font-family: sans-serif;">
-        <div style="background: #020617; border: 2px solid rgba(245, 158, 11, 0.9); width: 100%; max-width: 350px; border-radius: 18px; padding: 18px 14px; box-shadow: 0 0 35px rgba(245, 158, 11, 0.4); position: relative; box-sizing: border-box; max-height: 88vh; overflow-y: auto;">
-            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 12px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 16px;">💰</span>
-                    <h3 style="color: #fcd34d; font-size: 13.5px; font-weight: 900; margin: 0; text-transform: uppercase;">CHỌN GÓI ĐỒNG HÀNH BCC</h3>
-                </div>
-                <button type="button" onclick="closeKdrivePackageModal()" style="width: 28px; height: 28px; border-radius: 9999px; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; cursor: pointer;">✕</button>
-            </div>
-
-            <!-- DANH SÁCH 3 GÓI -->
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
-                <div onclick="kdriveSelectPkg(1)" id="kPkg1" style="border: 1.5px solid #f59e0b; background: rgba(245, 158, 11, 0.15); padding: 10px 12px; border-radius: 12px; cursor: pointer;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <b style="color: #fcd34d; font-size: 13px;">GÓI 01 SUẤT TIÊN PHONG</b>
-                        <span style="color: #fbbf24; font-weight: 900; font-size: 13px;">1.000.000 đ</span>
-                    </div>
-                    <div style="color: #fde68a; font-size: 10.5px; margin-top: 3px;">• Hưởng 0,04% Lợi nhuận ròng dự án + 1 Phiếu biểu quyết</div>
-                </div>
-
-                <div onclick="kdriveSelectPkg(5)" id="kPkg5" style="border: 1px solid #334155; background: #0f172a; padding: 10px 12px; border-radius: 12px; cursor: pointer;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <b style="color: #e2e8f0; font-size: 13px;">GÓI 05 SUẤT CO-BUILDER</b>
-                        <span style="color: #cbd5e1; font-weight: 900; font-size: 13px;">5.000.000 đ</span>
-                    </div>
-                    <div style="color: #94a3b8; font-size: 10.5px; margin-top: 3px;">• Hưởng 0,20% Lợi nhuận ròng + 5 Phiếu biểu quyết VIP</div>
-                </div>
-
-                <div onclick="kdriveSelectPkg(10)" id="kPkg10" style="border: 1px solid #334155; background: #0f172a; padding: 10px 12px; border-radius: 12px; cursor: pointer;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <b style="color: #e2e8f0; font-size: 13px;">GÓI 10 SUẤT CHIẾN LƯỢC</b>
-                        <span style="color: #cbd5e1; font-weight: 900; font-size: 13px;">10.000.000 đ</span>
-                    </div>
-                    <div style="color: #94a3b8; font-size: 10.5px; margin-top: 3px;">• Hưởng 0,40% Lợi nhuận ròng + 10 Phiếu + Cố vấn Founder</div>
-                </div>
-            </div>
-
-            <!-- FORM ĐĂNG KÝ -->
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
-                <input type="text" id="kInvestorName" placeholder="Họ và tên của bạn..." style="width: 100%; height: 38px; border-radius: 8px; background: #0b1329; border: 1px solid #334155; color: #f8fafc; padding: 0 10px; font-size: 12px; box-sizing: border-box; outline: none;">
-                <input type="tel" id="kInvestorPhone" placeholder="Số điện thoại nhận hợp đồng..." style="width: 100%; height: 38px; border-radius: 8px; background: #0b1329; border: 1px solid #334155; color: #f8fafc; padding: 0 10px; font-size: 12px; box-sizing: border-box; outline: none;">
-            </div>
-
-            <button type="button" onclick="kdriveConfirmBcc()" style="width: 100%; height: 42px; border-radius: 10px; background: #f59e0b; color: #020617; font-size: 12.5px; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);">
-                XÁC NHẬN GÓP VỐN & KÝ BCC ➔
-            </button>
-            <div style="text-align: center; margin-top: 8px; font-size: 10px; color: #94a3b8;">
-                * Hợp đồng BCC trực tiếp cùng Founder Đỗ Đức Anh • Hotline: 0772719999
-            </div>
-        </div>
-    </div>
-
-
-    <!-- 2. CỬA SỔ ĐĂNG NHẬP PHÒNG CHIẾU VIP -->
-    <div id="kdriveVipLoginModal" onclick="if(event.target === this) closeKdriveVipLoginModal()" style="display: none; position: fixed; inset: 0; z-index: 9999999; background: rgba(2, 6, 23, 0.92); backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 14px; box-sizing: border-box; font-family: sans-serif;">
-        <div style="background: #020617; border: 2px solid rgba(168, 85, 247, 0.9); width: 100%; max-width: 340px; border-radius: 18px; padding: 18px 14px; box-shadow: 0 0 35px rgba(168, 85, 247, 0.35); position: relative; box-sizing: border-box;">
-            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 12px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 16px;">🎬</span>
-                    <h3 style="color: #d8b4fe; font-size: 13.5px; font-weight: 900; margin: 0; text-transform: uppercase;">PHÒNG CHIẾU VIP // ĐĂNG NHẬP</h3>
-                </div>
-                <button type="button" onclick="closeKdriveVipLoginModal()" style="width: 28px; height: 28px; border-radius: 9999px; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; cursor: pointer;">✕</button>
-            </div>
-
-            <p style="color: #cbd5e1; font-size: 11.5px; line-height: 1.5; margin: 0 0 12px 0;">
-                Khu vực kiểm duyệt video dành riêng cho 100 Co-builder đồng hành. Vui lòng nhập số điện thoại và mật khẩu do Founder cấp.
-            </p>
-
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
-                <input type="tel" id="kVipPhone" placeholder="Số điện thoại Co-builder..." style="width: 100%; height: 38px; border-radius: 8px; background: #0b1329; border: 1px solid #475569; color: #f8fafc; padding: 0 10px; font-size: 12px; box-sizing: border-box; outline: none;">
-                <input type="password" id="kVipPass" placeholder="Mật khẩu truy cập..." style="width: 100%; height: 38px; border-radius: 8px; background: #0b1329; border: 1px solid #475569; color: #f8fafc; padding: 0 10px; font-size: 12px; box-sizing: border-box; outline: none;">
-            </div>
-
-            <button type="button" onclick="kdriveVipLoginSubmit()" style="width: 100%; height: 40px; border-radius: 10px; background: #9333ea; color: #ffffff; font-size: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; box-shadow: 0 0 15px rgba(147, 51, 234, 0.4); margin-bottom: 8px;">
-                TRUY CẬP PHÒNG CHIẾU ➔
-            </button>
-
-            <a href="https://zalo.me/0772719999" target="_blank" rel="noopener" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; height: 34px; border-radius: 8px; background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.5); color: #38bdf8; font-size: 11px; font-weight: bold; text-decoration: none;">
-                💬 Chưa có tài khoản? Nhắn Founder qua Zalo
-            </a>
-        </div>
-    </div>
-
-
-    <!-- 3. CỬA SỔ PHÒNG CHIẾU VIP (ĐÃ ĐĂNG NHẬP) -->
-    <div id="kdriveVipScreeningModal" onclick="if(event.target === this) closeKdriveVipScreeningModal()" style="display: none; position: fixed; inset: 0; z-index: 9999999; background: rgba(2, 6, 23, 0.94); backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 14px; box-sizing: border-box; font-family: sans-serif;">
-        <div style="background: #020617; border: 2px solid rgba(168, 85, 247, 0.9); width: 100%; max-width: 350px; border-radius: 18px; padding: 18px 14px; box-shadow: 0 0 35px rgba(168, 85, 247, 0.4); position: relative; box-sizing: border-box; max-height: 90vh; overflow-y: auto;">
-            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 10px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="font-size: 15px;">🎬</span>
-                    <span style="color: #d8b4fe; font-size: 12.5px; font-weight: 900; text-transform: uppercase;">PHÒNG CHIẾU VIP // CO-BUILDER</span>
-                </div>
-                <button type="button" onclick="closeKdriveVipScreeningModal()" style="width: 28px; height: 28px; border-radius: 9999px; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; cursor: pointer;">✕</button>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(147, 51, 234, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); padding: 5px 10px; border-radius: 8px; margin-bottom: 10px; font-size: 10.5px;">
-                <span id="kVipUserTag" style="color: #e9d5ff; font-weight: bold;">👑 Co-builder: Đã kết nối</span>
-                <span onclick="kdriveVipLogout()" style="color: #f87171; cursor: pointer; text-decoration: underline;">Đăng xuất</span>
-            </div>
-
-            <!-- KHUNG VIDEO DEMO -->
-            <div style="width: 100%; height: 180px; border-radius: 12px; background: #000000; border: 1px solid #334155; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
-                <iframe id="kVipIframe" style="width: 100%; height: 100%; border: none;" src="https://www.youtube.com/embed?listType=user_uploads&list=Kai9999love" title="K-Drive Video Demo" allowfullscreen></iframe>
-            </div>
-            <div style="color: #fcd34d; font-size: 11px; font-weight: bold; margin-bottom: 10px;">
-                📹 Video Demo 01: Giới thiệu K-Drive & Khoa học não bộ
-            </div>
-
-            <!-- 2 NÚT HÀNH ĐỘNG -->
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <button type="button" onclick="kdriveVoteApprove()" style="width: 100%; height: 40px; border-radius: 10px; background: #16a34a; color: #ffffff; font-size: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; box-shadow: 0 0 15px rgba(22, 163, 74, 0.4);">
-                    👍 ĐỒNG Ý BIỂU QUYẾT XUẤT BẢN
-                </button>
-
-                <!-- NHẢY SANG ZALO 0772719999 CỦA ANH ĐỖ ĐỨC ANH -->
-                <a href="https://zalo.me/0772719999" target="_blank" rel="noopener" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 40px; border-radius: 10px; background: #0284c7; color: #ffffff; font-size: 12px; font-weight: 900; text-decoration: none; box-shadow: 0 0 15px rgba(2, 132, 199, 0.4); box-sizing: border-box;">
-                    💬 GÓP Ý TRỰC TIẾP QUA ZALO ➔
-                </a>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- 4. CỬA SỔ MINI GAME TEST PHẢN XẠ BỘ NÃO (HỎA LUÂN) -->
-    <div id="kdriveGameModal" onclick="if(event.target === this) closeKdriveGameModal()" style="display: none; position: fixed; inset: 0; z-index: 9999999; background: rgba(2, 6, 23, 0.94); backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 14px; box-sizing: border-box; font-family: sans-serif;">
-        <div style="background: #020617; border: 2px solid rgba(16, 185, 129, 0.9); width: 100%; max-width: 340px; border-radius: 18px; padding: 18px 14px; box-shadow: 0 0 35px rgba(16, 185, 129, 0.35); position: relative; box-sizing: border-box; text-align: center;">
-            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 10px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="font-size: 16px;">⚡</span>
-                    <span style="color: #34d399; font-size: 12.5px; font-weight: 900; text-transform: uppercase;">TEST PHẢN XẠ BỘ NÃO (HỎA LUÂN)</span>
-                </div>
-                <button type="button" onclick="closeKdriveGameModal()" style="width: 28px; height: 28px; border-radius: 9999px; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; cursor: pointer;">✕</button>
-            </div>
-
-            <p style="color: #cbd5e1; font-size: 11px; margin: 0 0 10px 0;">
-                Khi màn hình đổi sang <b>MÀU XANH LÁ</b>, hãy chạm ngón tay càng nhanh càng tốt!
-            </p>
-
-            <div id="kGameBox" onclick="kdriveGameBoxTap()" style="width: 100%; height: 160px; border-radius: 14px; background: #ef4444; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: background 0.15s; margin-bottom: 10px; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); padding: 10px; box-sizing: border-box;">
-                <span id="kGamePrompt" style="color: #ffffff; font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px;">BẤM ĐỂ BẮT ĐẦU</span>
-                <span id="kGameSub" style="color: rgba(255,255,255,0.85); font-size: 10.5px; margin-top: 4px;">Chạm vào đây</span>
-            </div>
-
-            <div id="kGameResult" style="display: none; background: #0f172a; border: 1px solid #10b981; border-radius: 10px; padding: 10px; margin-bottom: 10px; text-align: left;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #94a3b8; font-size: 11px;">Tốc độ phản xạ:</span>
-                    <b id="kGameMs" style="color: #34d399; font-size: 16px;">-- ms</b>
-                </div>
-                <div id="kGameScore" style="color: #fcd34d; font-size: 11px; margin-top: 4px; font-weight: bold;">--</div>
-            </div>
-
-            <div style="display: flex; gap: 8px;">
-                <button type="button" onclick="kdriveResetGame()" style="flex: 1; height: 38px; border-radius: 8px; background: #1e293b; color: #34d399; border: 1px solid #10b981; font-size: 11.5px; font-weight: bold; cursor: pointer;">
-                    ↻ THỬ LẠI
-                </button>
-                <a href="hoa_luan.html" style="flex: 1; height: 38px; border-radius: 8px; background: #065f46; color: #a7f3d0; border: 1px solid #10b981; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                    BÀI TẬP ĐẦY ĐỦ ➔
-                </a>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- ============================================================ -->
-    <!-- SCRIPT ĐIỀU KHIỂN BẢO TOÀN (DÙNG WINDOW - KHÔNG SỢ SYNTAX ERROR) -->
-    <!-- ============================================================ -->
-    <script>
-    (function() {
-        // Biến cục bộ an toàn tuyệt đối
-        var selectedTier = 1;
-        var gameState = 'IDLE';
-        var gameStartTime = 0;
-        var gameTimer = null;
-
-        // 1. ĐIỀU KHIỂN CHỌN GÓI BCC
-        window.openKdrivePackageModal = function() {
-            // Tắt tất cả các modal hồ sơ BCC cũ nếu đang mở
-            var oldModals = ['docModal', 'bccModal', 'contractModal'];
-            for (var i = 0; i < oldModals.length; i++) {
-                var el = document.getElementById(oldModals[i]);
-                if (el) el.style.display = 'none';
-            }
-            var m = document.getElementById('kdrivePackageModal');
-            if (m) m.style.display = 'flex';
-        };
-
-        window.closeKdrivePackageModal = function() {
-            var m = document.getElementById('kdrivePackageModal');
-            if (m) m.style.display = 'none';
-        };
-
-        window.kdriveSelectPkg = function(tier) {
-            selectedTier = tier;
-            var tiers = [1, 5, 10];
-            for (var i = 0; i < tiers.length; i++) {
-                var t = tiers[i];
-                var box = document.getElementById('kPkg' + t);
-                if (box) {
-                    if (t === tier) {
-                        box.style.border = '1.5px solid #f59e0b';
-                        box.style.background = 'rgba(245, 158, 11, 0.18)';
-                    } else {
-                        box.style.border = '1px solid #334155';
-                        box.style.background = '#0f172a';
-                    }
-                }
-            }
-        };
-
-        window.kdriveConfirmBcc = function() {
-            var name = (document.getElementById('kInvestorName') || {}).value || '';
-            var phone = (document.getElementById('kInvestorPhone') || {}).value || '';
-            if (!phone || phone.length < 8) {
-                alert('Vui lòng nhập đúng số điện thoại để nhận hợp đồng!');
-                return;
-            }
-            var text = encodeURIComponent('Chào Founder Đỗ Đức Anh, tôi là ' + name + ' (SĐT: ' + phone + '). Tôi muốn đồng hành gói ' + selectedTier + ' Suất K-Drive (Hợp đồng BCC).');
-            window.location.href = 'https://zalo.me/0772719999?text=' + text;
-        };
-
-        // 2. ĐIỀU KHIỂN PHÒNG CHIẾU VIP
-        window.openKdriveVipModule = function() {
-            var logged = localStorage.getItem('kdrive_vip_user');
-            if (logged) {
-                var scr = document.getElementById('kdriveVipScreeningModal');
-                var tag = document.getElementById('kVipUserTag');
-                if (tag) tag.innerText = '👑 Co-builder: ' + logged;
-                if (scr) scr.style.display = 'flex';
-            } else {
-                var login = document.getElementById('kdriveVipLoginModal');
-                if (login) login.style.display = 'flex';
-            }
-        };
-
-        window.closeKdriveVipLoginModal = function() {
-            var el = document.getElementById('kdriveVipLoginModal');
-            if (el) el.style.display = 'none';
-        };
-
-        window.closeKdriveVipScreeningModal = function() {
-            var el = document.getElementById('kdriveVipScreeningModal');
-            if (el) el.style.display = 'none';
-        };
-
-        window.kdriveVipLoginSubmit = function() {
-            var phone = (document.getElementById('kVipPhone') || {}).value || '';
-            var pass = (document.getElementById('kVipPass') || {}).value || '';
-            if (!phone || phone.trim().length < 8) {
-                alert('Vui lòng nhập đúng số điện thoại!');
-                return;
-            }
-            if (!pass || pass.trim().length === 0) {
-                alert('Vui lòng nhập mật khẩu được cấp!');
-                return;
-            }
-            localStorage.setItem('kdrive_vip_user', phone.trim());
-            closeKdriveVipLoginModal();
-            openKdriveVipModule();
-        };
-
-        window.kdriveVipLogout = function() {
-            localStorage.removeItem('kdrive_vip_user');
-            closeKdriveVipScreeningModal();
-            alert('Đã đăng xuất tài khoản VIP.');
-        };
-
-        window.kdriveVoteApprove = function() {
-            alert('✅ Đã ghi nhận 01 Phiếu Biểu Quyết TÁN THÀNH xuất bản Video Demo 01 ra toàn cầu!');
-        };
-
-        // 3. ĐIỀU KHIỂN MINI GAME HỎA LUÂN
-        window.openKdriveGameModal = function() {
-            var m = document.getElementById('kdriveGameModal');
-            if (m) m.style.display = 'flex';
-            kdriveResetGame();
-        };
-
-        window.closeKdriveGameModal = function() {
-            var m = document.getElementById('kdriveGameModal');
-            if (m) m.style.display = 'none';
-            if (gameTimer) clearTimeout(gameTimer);
-            gameState = 'IDLE';
-        };
-
-        window.kdriveResetGame = function() {
-            if (gameTimer) clearTimeout(gameTimer);
-            gameState = 'IDLE';
-            var box = document.getElementById('kGameBox');
-            var p = document.getElementById('kGamePrompt');
-            var s = document.getElementById('kGameSub');
-            var r = document.getElementById('kGameResult');
-            if (box) {
-                box.style.background = '#ef4444';
-                box.style.border = 'none';
-            }
-            if (p) p.innerText = 'BẤM ĐỂ BẮT ĐẦU';
-            if (s) s.innerText = 'Chạm vào đây';
-            if (r) r.style.display = 'none';
-        };
-
-        window.kdriveGameBoxTap = function() {
-            var box = document.getElementById('kGameBox');
-            var p = document.getElementById('kGamePrompt');
-            var s = document.getElementById('kGameSub');
-            var r = document.getElementById('kGameResult');
-
-            if (gameState === 'IDLE') {
-                gameState = 'WAIT';
-                box.style.background = '#b91c1c';
-                p.innerText = 'CHỜ ĐÈN XANH...';
-                s.innerText = 'Đừng bấm vội!';
-                var delay = Math.floor(Math.random() * 2500) + 1500;
-                gameTimer = setTimeout(function() {
-                    gameState = 'READY';
-                    gameStartTime = Date.now();
-                    box.style.background = '#10b981';
-                    p.innerText = 'CHẠM NGAY!';
-                    s.innerText = 'Chạm nhanh nhất có thể!';
-                }, delay);
-            } else if (gameState === 'WAIT') {
-                clearTimeout(gameTimer);
-                gameState = 'IDLE';
-                box.style.background = '#eab308';
-                p.innerText = 'QUÁ VỘI VÀNG!';
-                s.innerText = 'Chưa có đèn xanh đã chạm. Thử lại!';
-            } else if (gameState === 'READY') {
-                var ms = Date.now() - gameStartTime;
-                gameState = 'DONE';
-                box.style.background = '#0f172a';
-                box.style.border = '2px solid #10b981';
-                p.innerText = ms + ' ms';
-                s.innerText = 'Chạm để thử lại';
-
-                if (r) {
-                    r.style.display = 'block';
-                    document.getElementById('kGameMs').innerText = ms + ' ms';
-                    var txt = '';
-                    if (ms < 240) {
-                        txt = '⚡ Phản xạ Thần tốc (Top 5% Thần kinh Thép)';
-                    } else if (ms <= 340) {
-                        txt = '🧠 Nhanh nhẹn & Tỉnh táo (Đạt chuẩn tối ưu)';
-                    } else {
-                        txt = '⚠️ Tín hiệu thần kinh mệt mỏi • Hãy rèn cùng K-Drive!';
-                    }
-                    document.getElementById('kGameScore').innerText = txt;
-                }
-            } else if (gameState === 'DONE') {
-                kdriveResetGame();
-            }
-        };
-
-        // GHI ĐÈ TRỰC TIẾP HÀM BẤM NÚT TRANG CHỦ
-        window.handleGopVonClick = function() {
-            var bcc = document.getElementById('docModal') || document.getElementById('bccModal') || document.getElementById('contractModal');
-            if (bcc) {
-                bcc.style.display = 'flex';
-                bcc.classList.remove('hidden');
-            } else {
-                openKdrivePackageModal();
-            }
-        };
-
-        window.handleKiemDuyetClick = function() {
-            openKdriveVipModule();
-        };
-
-        window.handleGameClick = function() {
-            openKdriveGameModal();
-        };
-
-        // BẮT SỰ KIỆN CLICK TOÀN CỤC THÔNG MINH (CHỐNG TREO 100%)
-        document.addEventListener('click', function(e) {
-            var t = e.target.closest('button, a, div');
-            if (!t) return;
-            var text = (t.innerText || '').toLowerCase();
-            
-            // Nếu bấm vào bất kỳ nút nào có chữ "tiếp tục chọn gói" hoặc "chọn gói"
-            if (text.indexOf('tiếp tục chọn gói') !== -1 || text.indexOf('tôi đã hiểu & tiếp tục') !== -1) {
-                e.preventDefault();
-                openKdrivePackageModal();
-            }
-            // Nếu bấm vào nút Phòng chiếu VIP ngoài trang chủ
-            else if (text.indexOf('phòng chiếu vip') !== -1 && t.tagName === 'BUTTON') {
-                e.preventDefault();
-                openKdriveVipModule();
-            }
-            // Nếu bấm vào nút Test phản xạ ngoài trang chủ
-            else if (text.indexOf('test phản xạ') !== -1 && t.tagName === 'BUTTON') {
-                e.preventDefault();
-                openKdriveGameModal();
-            }
-        }, true);
-
-    })();
     </script>
 </body>
 </html>
