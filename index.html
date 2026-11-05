@@ -370,7 +370,7 @@
                     <!-- VÒNG QUỸ ĐẠO ĐỨT NÉT -->
                     <div style="position: absolute; width: 146px; height: 146px; border-radius: 9999px; border: 1px dashed rgba(6,182,212,0.25); pointer-events: none;"></div>
 
-                    <!-- VỆ TINH 1: 📍 VỊ THẾ -->
+                   <!-- VỆ TINH 1: 📍 VỊ THẾ -->
                     <div class="hex-arm-spin" style="animation-delay: 0s;">
                         <button type="button" onclick="openHoloNode(0)" ontouchend="openHoloNode(0)" class="hex-counter-spin" style="animation-delay: 0s; top: -85px; left: -18px; background: #0f172a; border: 1px solid #22d3ee; box-shadow: 0 0 10px rgba(6,182,212,0.6); z-index: 30;">
                             <span style="font-size: 11px; line-height: 1;">📍</span>
@@ -419,28 +419,74 @@
                     </div>
                 </div>
 
-                <!-- DẢI CHỮ LED TERMINAL -->
-                <style>
-                    @keyframes marqueePassThroughClean {
-                        0% { transform: translateX(100%); }
-                        100% { transform: translateX(-100%); }
-                    }
-                    .marquee-pass-track {
-                        display: inline-block !important;
-                        white-space: nowrap !important;
-                        will-change: transform;
-                        animation: marqueePassThroughClean 11s linear infinite !important;
-                    }
-                </style>
-                <div style="margin: 2px 0 6px 0; padding: 5px 8px; border-radius: 8px; background: rgba(2, 6, 23, 0.95); border: 1px solid rgba(245, 158, 11, 0.35); overflow: hidden; position: relative; white-space: nowrap;">
-                    <div class="marquee-pass-track">
-                        <span style="font-size: 10.5px; font-weight: 900; color: #fbbf24; font-family: monospace; letter-spacing: 0.5px;">
-                            ⚡ 100 người tiên phong – Một ứng dụng sức khỏe, một hành trình vươn xa!
-                        </span>
+                <!-- MODAL HOLOGRAM 6 NODE -->
+                <div id="coreHoloCard" onclick="if(event.target === this) closeHoloCard()" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;">
+                    <div style="background: #020617; border: 2px solid rgba(6,182,212,0.85); width: 100%; max-width: 345px; border-radius: 18px; padding: 18px 16px; box-shadow: 0 0 35px rgba(6,182,212,0.5); position: relative; font-family: sans-serif; box-sizing: border-box;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid #1e293b;">
+                            <span id="holoNodeTag" style="font-size: 9.5px; font-family: monospace; font-weight: bold; color: #67e8f9; padding: 2.5px 8px; border-radius: 6px; background: rgba(8, 47, 73, 0.9); border: 1px solid rgba(6,182,212,0.5);">NODE</span>
+                            <button type="button" onclick="closeHoloCard()" style="width: 30px; height: 30px; border-radius: 9999px; background: #1e293b; color: #f1f5f9; border: 1px solid #475569; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; outline: none; touch-action: manipulation;">✕</button>
+                        </div>
+                        <h4 id="holoNodeTitle" style="font-size: 15.5px; font-weight: 900; color: #fcd34d; margin: 0 0 12px 0; line-height: 1.35; letter-spacing: 0.2px;"></h4>
+                        <div id="holoNodeBody" style="font-size: 13.5px; color: #f1f5f9; line-height: 1.65; max-height: 58vh; overflow-y: auto; padding-right: 4px;"></div>
                     </div>
                 </div>
 
                 <script>
+                let isSystemPaused = false;
+
+                const holoData = {
+                    0: {
+                        tag: "📍 NODE 01 // VỊ THẾ NGÀNH",
+                        title: "Ưu Tiên Hiển Thị Toàn Cầu",
+                        content: "<p style='margin: 0; line-height: 1.6;'>App sức khỏe được ưu tiên hiển thị hàng đầu trên App Store và Google Play với chi phí quảng cáo rẻ hơn game nhiều lần.</p>"
+                    },
+                    1: {
+                        tag: "💸 NODE 02 // ĐỊNH GIÁ & CƠ CHẾ",
+                        title: "Định Giá 2,5 Tỷ • Quỹ Chia 30%",
+                        content: "<p style='margin: 0; line-height: 1.6;'>Định giá K-Drive 2,5 tỷ, trích quỹ chia 30% lợi nhuận ròng hàng tháng cho đối tác.</p>"
+                    },
+                    2: {
+                        tag: "👥 NODE 03 // CO-BUILDER",
+                        title: "Đồng Sáng Tạo Cùng Founder",
+                        content: "<p style='margin: 0; line-height: 1.6;'>Đồng sáng tạo: Cùng Founder duyệt 30 video marketing và tinh chỉnh tính năng, giao diện.</p>"
+                    },
+                    3: {
+                        tag: "🚀 NODE 04 // MỤC TIÊU 1.5M USD",
+                        title: "Chinh Phục 10 Triệu Lượt Tải",
+                        content: "<p style='margin: 0; line-height: 1.6;'>Chinh phục 10 triệu lượt tải toàn cầu, hướng đến mốc 1 suất (1M) thu về trên 10 triệu/tháng.</p>"
+                    },
+                    4: {
+                        tag: "🧬 NODE 05 // CÔNG NGHỆ SINH HỌC",
+                        title: "AI On-Device Độc Quyền",
+                        content: "<p style='margin: 0; line-height: 1.6;'>AI On-device độc quyền xử lý trực tiếp trên thiết bị, bảo mật dữ liệu sinh học tuyệt đối 100%.</p>"
+                    },
+                    5: {
+                        tag: "👮 NODE 06 // ĐIỀU LỆ PHÁP LÝ",
+                        title: "Hợp Đồng BCC Minh Bạch",
+                        content: "<p style='margin: 0; line-height: 1.6;'>Hợp đồng BCC minh bạch trực tiếp cùng Founder, giải ngân thực tế, không cam kết lãi ảo.</p>"
+                    }
+                };
+
+                window.openHoloNode = function(id) {
+                    const data = holoData[id];
+                    if (!data) return;
+                    
+                    const tagEl = document.getElementById('holoNodeTag');
+                    const titleEl = document.getElementById('holoNodeTitle');
+                    const contentEl = document.getElementById('holoNodeBody');
+                    const modalEl = document.getElementById('coreHoloCard');
+                    
+                    if (tagEl) tagEl.innerText = data.tag;
+                    if (titleEl) titleEl.innerText = data.title;
+                    if (contentEl) contentEl.innerHTML = data.content;
+                    if (modalEl) modalEl.style.display = 'flex';
+                };
+
+                window.closeHoloCard = function() {
+                    const card = document.getElementById('coreHoloCard');
+                    if (card) card.style.display = 'none';
+                };
+                </script>
                 window.handleKDriveCoreClick = function(e) {
                     if (e && e.type === 'touchend') {
                         e.preventDefault();
