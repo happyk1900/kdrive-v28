@@ -1740,16 +1740,49 @@
             document.getElementById('shAccountDashboard').classList.add('hidden');
         }
 
-        function sendRecoveryEmail() {
-            const email = document.getElementById('shForgotEmail').value.trim();
-            if (email) {
-                alert(`Đã gửi liên kết khôi phục mật khẩu đến email: ${email}`);
-                backToLogin();
-            } else {
-                alert('Vui lòng nhập địa chỉ email của bạn!');
-            }
-        }
+       async function sendRecoveryEmail() {
+    const emailInput = document.getElementById('shForgotEmail');
+    const email = emailInput ? emailInput.value.trim() : '';
 
+    if (!email || !email.includes('@')) {
+        alert('Vui lòng nhập đúng địa chỉ Email đã đăng ký của bạn!');
+        return;
+    }
+
+    const btn = event ? event.target : null;
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Đang kiểm tra & gửi mail...";
+    }
+
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "forgot_password",
+                email: email
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.status === "success") {
+            alert(`✅ ${result.message || 'Mật khẩu VIP đã được gửi về hộp thư: ' + email}\nVui lòng kiểm tra cả mục Hộp thư đến và Thư rác (Spam).`);
+            emailInput.value = '';
+            backToLogin();
+        } else {
+            alert(`⚠️ Không thể khôi phục: ${result.message || 'Email này chưa được đăng ký trên hệ thống!'}`);
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Lỗi kết nối với máy chủ Google Sheet. Vui lòng thử lại sau!");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Gửi Yêu Cầu Khôi Phục";
+        }
+    }
+}
         // DANH SÁCH 100 MẬT KHẨU PHÒNG CHIẾU VIP (ĐỒNG BỘ VỚI 100 MÃ OTP)
         const masterVipPassList = [
             "Kp#91@vX8", "Tp$74#mL2", "Wk!83*bQ9", "Zq#62&yR4", "Lm$15*tV7", "Px#49@rN3", "Rt$88#mC1", "Vn!27&qD5", "Bh#63@zK8", "Nd$92*tP4",
