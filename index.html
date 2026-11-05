@@ -298,7 +298,7 @@
                 </button>
             </div>
 <!-- ============================================================ -->
-            <!-- QUỸ ĐẠO 6 VỆ TINH & 3 HÀNG HÀNH ĐỘNG ĐỘC LẬP (ZERO SCROLL)    -->
+            <!-- QUỸ ĐẠO 6 VỆ TINH (MẶC ĐỊNH ĐỨNG IM - CHẠM K-DRIVE ĐỔI MÀU XOAY) -->
             <!-- ============================================================ -->
             <style>
                 @keyframes hexOrbitSpin {
@@ -309,18 +309,16 @@
                     from { transform: rotate(0deg); }
                     to { transform: rotate(-360deg); }
                 }
-                @keyframes marqueeScrollReal {
-                    0% { transform: translateX(0%); }
-                    100% { transform: translateX(-50%); }
-                }
-                /* Thu hẹp tâm xoay về 0px để chống chặn cảm ứng trên màn hình cảm ứng */
+                /* Mặc định khi vừa vào: ĐỨNG IM HOÀN TOÀN (PAUSED) */
                 .hex-arm-spin {
                     position: absolute;
                     top: 50%;
                     left: 50%;
                     width: 0;
                     height: 0;
+                    pointer-events: none !important;
                     animation: hexOrbitSpin 26s linear infinite;
+                    animation-play-state: paused;
                 }
                 .hex-counter-spin {
                     position: absolute;
@@ -332,29 +330,26 @@
                     align-items: center;
                     justify-content: center;
                     cursor: pointer;
+                    pointer-events: auto !important;
                     touch-action: manipulation;
                     -webkit-tap-highlight-color: transparent;
                     animation: hexOrbitCounter 26s linear infinite;
+                    animation-play-state: paused;
                 }
-                .orbit-paused .hex-arm-spin,
-                .orbit-paused .hex-counter-spin {
-                    animation-play-state: paused !important;
-                }
-                .marquee-track-flow {
-                    display: inline-flex !important;
-                    width: max-content !important;
-                    animation: marqueeScrollReal 16s linear infinite !important;
+                /* CHỈ KHI KÍCH HOẠT MỚI XOAY */
+                .orbit-spinning .hex-arm-spin,
+                .orbit-spinning .hex-counter-spin {
+                    animation-play-state: running !important;
                 }
             </style>
 
             <div style="margin: 2px 0; font-family: sans-serif; user-select: none;">
-                <!-- VÙNG QUỸ ĐẠO 6 VỆ TINH (185PX GỌN GÀNG) -->
-                <div id="orbitSystemContainer" style="position: relative; width: 185px; height: 185px; margin: 2px auto; display: flex; align-items: center; justify-content: center;">
+                <!-- VÙNG QUỸ ĐẠO 6 VỆ TINH -->
+                <div id="orbitSystemContainer" style="position: relative; width: 185px; height: 185px; margin: 4px auto; display: flex; align-items: center; justify-content: center;">
                     
-                    <!-- LÕI TRUNG TÂM K-DRIVE -->
-                    <div id="coreCenterBtn" onclick="toggleOrbitSystem()" style="z-index: 10; width: 52px; height: 52px; border-radius: 9999px; background: #020617; border: 1px solid rgba(6,182,212,0.7); box-shadow: 0 0 15px rgba(6,182,212,0.45); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer;">
-                        <span style="font-size: 8.5px; font-weight: 900; letter-spacing: 1px; color: #67e8f9;">K-DRIVE</span>
-                        <span id="coreStatusText" style="font-size: 6.5px; color: #fbbf24; font-family: monospace;">● ORBIT</span>
+                    <!-- LÕI TRUNG TÂM K-DRIVE (CHỈ CÓ DUY NHẤT CHỮ K-DRIVE - CHẠM ĐỔI MÀU) -->
+                    <div id="coreCenterBtn" onclick="toggleOrbitSystem()" style="z-index: 10; width: 54px; height: 54px; border-radius: 9999px; background: #020617; border: 1.5px solid rgba(6,182,212,0.7); box-shadow: 0 0 15px rgba(6,182,212,0.45); display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: all 0.3s ease; touch-action: manipulation;">
+                        <span id="coreCenterText" style="font-size: 9px; font-weight: 900; letter-spacing: 1.2px; color: #67e8f9; transition: color 0.3s ease;">K-DRIVE</span>
                     </div>
 
                     <!-- VÒNG QUỸ ĐẠO ĐỨT NÉT -->
@@ -386,7 +381,7 @@
 
                     <!-- VỆ TINH 4: 📈 1.5M USD -->
                     <div class="hex-arm-spin" style="animation-delay: -13s;">
-                        <button type="button" onclick="openHoloNode(3)" ontouchend="openHoloNode(3)" class="hex-counter-spin" style="animation-delay: -13s; top: -85px; left: -18px; background: #0f172a; border: 1px solid rgba(16,185,129,0.9); box-shadow: 0 0 10px rgba(16,185,129,0.5); z-index: 30;">
+                        <button type="button" onclick="openHoloNode(3)" ontouchend="openHoloNode(3)" class="hex-counter-spin" style="animation-delay: -13s; top: -85px; left: -18px; background: #0f172a; border: 1px solid rgba(168,85,247,0.9); box-shadow: 0 0 10px rgba(168,85,247,0.5); z-index: 30;">
                             <span style="font-size: 11px; line-height: 1;">📈</span>
                             <span style="font-size: 6.5px; font-weight: bold; color: #6ee7b7; margin-top: 1px;">1.5M USD</span>
                         </button>
@@ -408,6 +403,35 @@
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <!-- JAVASCRIPT KÍCH HOẠT XOAY & ĐỔI MÀU NÚT TÂM K-DRIVE -->
+            <script>
+            var isOrbitSystemSpinning = false;
+
+            window.toggleOrbitSystem = function() {
+                var sys = document.getElementById('orbitSystemContainer');
+                var btn = document.getElementById('coreCenterBtn');
+                var txt = document.getElementById('coreCenterText');
+                if (!sys || !btn) return;
+
+                isOrbitSystemSpinning = !isOrbitSystemSpinning;
+
+                if (isOrbitSystemSpinning) {
+                    // KÍCH HOẠT XOAY: Đổi sang viền Vàng Kim Neon rực sáng
+                    sys.classList.add('orbit-spinning');
+                    btn.style.borderColor = '#fbbf24';
+                    btn.style.boxShadow = '0 0 22px rgba(245, 158, 11, 0.75)';
+                    if (txt) txt.style.color = '#fbbf24';
+                } else {
+                    // DỪNG LẠI TĨNH: Quay về màu Xanh Cyan nguyên bản
+                    sys.classList.remove('orbit-spinning');
+                    btn.style.borderColor = 'rgba(6, 182, 212, 0.7)';
+                    btn.style.boxShadow = '0 0 15px rgba(6, 182, 212, 0.45)';
+                    if (txt) txt.style.color = '#67e8f9';
+                }
+            };
+            </script>
 
                 <!-- DẢI CHỮ LED CHẠY NGANG (CHẠY CUỘN MƯỢT MÀ 100%) -->
                 <div style="margin: 3px 0 6px 0; padding: 4px 8px; border-radius: 8px; background: rgba(2, 6, 23, 0.95); border: 1px solid rgba(245, 158, 11, 0.35); overflow: hidden; position: relative;">
