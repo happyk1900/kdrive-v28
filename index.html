@@ -1738,51 +1738,54 @@
             return JSON.parse(localStorage.getItem('kdrive_activated_vip_accounts') || '{}');
         }
 
-        // ĐĂNG NHẬP PHÒNG CHIẾU VIP
-        function loginShareholderAccount() {
-            const phone = document.getElementById('shUser').value.trim();
-            const pass = document.getElementById('shPass').value.trim();
+        // ĐĂNG NHẬP PHÒNG CHIẾU VIP QUA GOOGLE SHEET
+        async function loginShareholderAccount() {
+            const phone = (document.getElementById('shUser')?.value || '').trim().replace(/\D/g, '');
+            const pass = (document.getElementById('shPass')?.value || '').trim();
 
             if (!phone || !pass) {
-                alert('Vui lòng nhập đầy đủ Số điện thoại và Mật khẩu VIP!');
+                alert('Vui lòng nhập đủ Số điện thoại và Mật khẩu VIP!');
                 return;
             }
 
-            if (phone.length < 9) {
-                alert('Số điện thoại không hợp lệ!');
-                return;
+            const btn = event ? event.target : null;
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = "Đang xác thực...";
             }
 
-            const activatedAccounts = getActivatedVipAccounts();
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "login_vip",
+                        phone: phone,
+                        pass: pass
+                    })
+                });
 
-            if (activatedAccounts[pass]) {
-                if (activatedAccounts[pass] !== phone) {
-                    alert('⚠️ Mật khẩu VIP này đã được kích hoạt bởi một số điện thoại khác và không thể dùng lại!');
-                    return;
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    const p = result.partner || {};
+                    document.getElementById('shDisplayName').textContent = p.name;
+                    document.getElementById('shDisplayAmount').textContent = p.amount;
+                    document.getElementById('shDisplayShare').textContent = p.share;
+
+                    document.getElementById('shLoginForm').classList.add('hidden');
+                    document.getElementById('shAccountDashboard').classList.remove('hidden');
+                } else {
+                    alert(result.message || 'Sai số điện thoại hoặc mật khẩu VIP!');
                 }
-            } else {
-                if (!masterVipPassList.includes(pass)) {
-                    alert('Mật khẩu VIP không chính xác hoặc chưa được cấp phép!');
-                    return;
-                }
-                if (pass !== "123456" && pass !== "admin8617") {
-                    activatedAccounts[pass] = phone;
-                    localStorage.setItem('kdrive_activated_vip_accounts', JSON.stringify(activatedAccounts));
+            } catch (err) {
+                console.error(err);
+                alert("Lỗi kết nối với Google Sheet!");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = "Đăng Nhập Phòng Chiếu";
                 }
             }
-
-            let matchedSh = shareholdersData.find(s => s.phone.replace(/\D/g, '') === phone.replace(/\D/g, ''));
-            let displayName = matchedSh ? matchedSh.name : `Đối tác VIP (${phone.slice(-4)})`;
-            let displayAmount = matchedSh ? matchedSh.amount : "Đã hoàn tất góp vốn";
-            let displayShare = matchedSh ? matchedSh.share : "Cổ phần Tiên phong";
-
-            document.getElementById('shDisplayName').textContent = displayName;
-            document.getElementById('shDisplayAmount').textContent = displayAmount;
-            document.getElementById('shDisplayShare').textContent = displayShare;
-            document.getElementById('shLoginForm').classList.add('hidden');
-            document.getElementById('shAccountDashboard').classList.remove('hidden');
-
-            alert(`Chào mừng ${displayName} đã đăng nhập thành công vào Phòng Chiếu VIP!`);
         }
 
         function logoutShareholderAccount() {
