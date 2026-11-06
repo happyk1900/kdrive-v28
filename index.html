@@ -732,23 +732,27 @@
             <h3 class="text-xs font-bold text-purple-300 font-mono-tech tracking-wide uppercase mb-3">🔒 ĐỐI TÁC LOGIN & PHÒNG CHIẾU VIP</h3>
             
             <div id="shLoginForm" class="space-y-3 text-left font-mono-tech text-xs">
-    <p class="text-slate-300 text-center">Đăng nhập bằng số điện thoại và mật khẩu do Founder cung cấp:</p>
-    
-    <input type="text" id="shUser" placeholder="Số điện thoại cá nhân..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 text-xs focus:border-cyan-400 focus:outline-none">
-    
-    <!-- Ô mật khẩu tích hợp sẵn nút con mắt ẩn/hiện -->
-    <div style="position: relative; width: 100%;">
-        <input type="password" id="shPass" placeholder="Mật khẩu bảo mật..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 text-xs focus:border-cyan-400 focus:outline-none" style="padding-right: 40px;">
-        <span onclick="toggleLoginPassword()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; color: #00f0ff;">👁️</span>
-    </div>
+                <!-- NÚT VÂN TAY FOUNDER 1 CHẠM (Ẩn đi nếu người ngoài vào) -->
+                <button id="vipBioLoginBtn" type="button" onclick="loginWithBiometric('vip_room')" class="hidden w-full py-2.5 mb-1 rounded-xl bg-gradient-to-r from-purple-600/40 to-cyan-500/30 border border-purple-400 text-purple-200 font-bold text-xs flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+                    <span class="text-base">🫆</span> <span>Founder 1 Chạm Tới Phòng Chiếu</span>
+                </button>
 
-    <button onclick="loginShareholderAccount()" class="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase transition-all shadow-lg shadow-purple-600/30">Đăng Nhập Phòng Chiếu</button>
+                <p class="text-slate-300 text-center">Đăng nhập bằng số điện thoại và mật khẩu do Founder cung cấp:</p>
+                
+                <input type="text" id="shUser" placeholder="Số điện thoại cá nhân..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 text-xs focus:border-cyan-400 focus:outline-none">
+                
+                <div style="position: relative; width: 100%;">
+                    <input type="password" id="shPass" placeholder="Mật khẩu bảo mật..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 text-xs focus:border-cyan-400 focus:outline-none" style="padding-right: 40px;">
+                    <span onclick="toggleLoginPassword()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; color: #00f0ff;">👁️</span>
+                </div>
 
-    <div class="flex justify-between text-[11px] pt-1">
-        <button onclick="showForgotPassword()" class="text-cyan-400 hover:underline">Quên mật khẩu?</button>
-        <button onclick="showChangePassword()" class="text-amber-300 hover:underline">Đổi mật khẩu mới</button>
-    </div>
-</div>
+                <button onclick="loginShareholderAccount()" class="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase transition-all shadow-lg shadow-purple-600/30">Đăng Nhập Phòng Chiếu</button>
+
+                <div class="flex justify-between text-[11px] pt-1">
+                    <button onclick="showForgotPassword()" class="text-cyan-400 hover:underline">Quên mật khẩu?</button>
+                    <button onclick="showChangePassword()" class="text-amber-300 hover:underline">Đổi mật khẩu mới</button>
+                </div>
+            </div>
 
             <!-- FORM QUÊN MẬT KHẨU -->
             <div id="shForgotForm" class="space-y-3 text-left font-mono-tech text-xs hidden">
@@ -1321,69 +1325,21 @@
             const hasBioRegistered = !!localStorage.getItem(BIO_CRED_STORAGE_KEY);
             const shBioBtn = document.getElementById('shBioLoginBtn');
             const founderBioBtn = document.getElementById('founderBioLoginBtn');
+            const vipBioBtn = document.getElementById('vipBioLoginBtn');
+            const contractBioBtn = document.getElementById('contractBioLoginBtn');
             const regText = document.getElementById('bioRegisterBtnText');
 
-            if (shBioBtn) {
-                if (hasBioRegistered) shBioBtn.classList.remove('hidden');
-                else shBioBtn.classList.add('hidden');
-            }
-            if (founderBioBtn) {
-                if (hasBioRegistered) founderBioBtn.classList.remove('hidden');
-                else founderBioBtn.classList.add('hidden');
-            }
-            if (regText) {
-                regText.textContent = hasBioRegistered ? 'Cập nhật lại vân tay thiết bị này' : 'Liên kết vân tay trên thiết bị này';
-            }
-        }
-
-        async function registerBiometricKey() {
-            if (!window.PublicKeyCredential) {
-                alert('Trình duyệt hoặc thiết bị hiện tại không hỗ trợ cảm biến vân tay WebAuthn!');
-                return;
-            }
-            try {
-                const challenge = new Uint8Array(32);
-                window.crypto.getRandomValues(challenge);
-                const userId = new Uint8Array(16);
-                window.crypto.getRandomValues(userId);
-
-                const publicKey = {
-                    challenge: challenge,
-                    rp: { name: "Telepathy K-Drive Hub" },
-                    user: {
-                        id: userId,
-                        name: "founder@telepathy.id.vn",
-                        displayName: "Founder Đỗ Đức Anh (Kai Ripe)"
-                    },
-                    pubKeyCredParams: [
-                        { type: "public-key", alg: -7 },
-                        { type: "public-key", alg: -257 }
-                    ],
-                    authenticatorSelection: {
-                        authenticatorAttachment: "platform",
-                        userVerification: "required"
-                    },
-                    timeout: 60000,
-                    attestation: "none"
-                };
-
-                const credential = await navigator.credentials.create({ publicKey });
-                if (credential && credential.rawId) {
-                    const credIdBase64 = bufferToBase64Url(credential.rawId);
-                    localStorage.setItem(BIO_CRED_STORAGE_KEY, credIdBase64);
-                    updateBiometricUIButtons();
-                    alert('🫆 Đã liên kết vân tay Founder thành công! Từ giờ anh có thể mở khóa Quản trị bằng 1 chạm vân tay.');
-                }
-            } catch (err) {
-                console.error("Biometric registration error:", err);
-                alert('Không thể đăng ký vân tay. Lưu ý: Tính năng vân tay yêu cầu chạy trên tên miền bảo mật https:// (như telepathy.id.vn) và thiết bị đã cài sẵn vân tay/FaceID.');
-            }
+            if (shBioBtn) shBioBtn.classList.toggle('hidden', !hasBioRegistered);
+            if (founderBioBtn) founderBioBtn.classList.toggle('hidden', !hasBioRegistered);
+            if (vipBioBtn) vipBioBtn.classList.toggle('hidden', !hasBioRegistered);
+            if (contractBioBtn) contractBioBtn.classList.toggle('hidden', !hasBioRegistered);
+            if (regText) regText.textContent = hasBioRegistered ? 'Cập nhật lại vân tay thiết bị này' : 'Liên kết vân tay trên thiết bị này';
         }
 
         async function loginWithBiometric(targetContext) {
             const savedCredId = localStorage.getItem(BIO_CRED_STORAGE_KEY);
             if (!savedCredId || !window.PublicKeyCredential) {
-                alert('Thiết bị này chưa được liên kết vân tay Founder. Vui lòng nhập mật mã một lần để cài đặt!');
+                alert('Thiết bị này chưa được liên kết vân tay Founder. Vui lòng vào Dashboard cài đặt vân tay một lần!');
                 return;
             }
             try {
@@ -1404,6 +1360,7 @@
                 const assertion = await navigator.credentials.get({ publicKey });
                 if (assertion) {
                     localStorage.setItem('kdrive_founder_logged', 'true');
+                    
                     if (targetContext === 'shareholders') {
                         document.getElementById('shAdminAuthBox').classList.add('hidden');
                         document.getElementById('shManagerFormBox').classList.remove('hidden');
@@ -1411,15 +1368,31 @@
                     } else if (targetContext === 'dashboard') {
                         showFounderPanelDirect();
                         document.getElementById('logoutFounderBtn').classList.remove('hidden');
+                    } else if (targetContext === 'vip_room') {
+                        // VÀO THẲNG PHÒNG CHIẾU VIP
+                        document.getElementById('shLoginForm').classList.add('hidden');
+                        document.getElementById('shAccountDashboard').classList.remove('hidden');
+                        document.getElementById('shDisplayName').textContent = 'Founder Đỗ Đức Anh';
+                        document.getElementById('shDisplayAmount').textContent = 'Quyền Quản Trị Tối Cao';
+                        document.getElementById('shDisplayShare').textContent = '100%';
+                    } else if (targetContext === 'contract') {
+                        // VÀO THẲNG HỢP ĐỒNG BỎ QUA OTP
+                        closePackagePopup();
+                        document.getElementById('contractModal').classList.remove('hidden');
+                        document.getElementById('contractModal').classList.add('flex');
+                        initSignaturePad();
                     }
+
                     const toast = document.getElementById('toast');
-                    toast.textContent = '🫆 Đã xác thực vân tay Founder!';
-                    toast.style.opacity = '1';
-                    setTimeout(() => toast.style.opacity = '0', 2200);
+                    if(toast) {
+                        toast.textContent = '🫆 Đã xác thực vân tay Founder!';
+                        toast.style.opacity = '1';
+                        setTimeout(() => toast.style.opacity = '0', 2200);
+                    }
                 }
             } catch (err) {
                 console.error("Biometric login error:", err);
-                alert('Xác thực vân tay bị hủy hoặc không khớp. Anh có thể thử lại hoặc dùng mật mã dự phòng.');
+                alert('Xác thực vân tay bị hủy hoặc không khớp. Vui lòng thử lại!');
             }
         }
 
@@ -2864,6 +2837,11 @@ window.verifyOtpAndSign = function() {
                 <button type="button" onclick="copyText('8617')" class="w-full py-2 rounded-xl bg-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition-all">Sao chép STK: 8617</button>
             </div>
             <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                <!-- NÚT VÂN TAY FOUNDER CHO HỢP ĐỒNG -->
+                <button id="contractBioLoginBtn" type="button" onclick="loginWithBiometric('contract')" class="hidden w-full py-2 mb-2 rounded-xl bg-gradient-to-r from-amber-500/25 to-emerald-500/25 border border-amber-400 text-amber-300 font-bold text-xs flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+                    <span class="text-base">🫆</span> <span>Founder Ký Trực Tiếp Bằng Vân Tay</span>
+                </button>
+
                 <div class="flex items-center justify-between text-xs">
                     <span class="text-slate-300 font-medium">Đã chuyển khoản? Nhập OTP:</span>
                     <button type="button" onclick="requestRefundOtp()" class="text-rose-400 hover:underline text-[11px]">Hoàn tiền 24h</button>
