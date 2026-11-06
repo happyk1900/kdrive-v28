@@ -467,25 +467,32 @@
                 }
             };
 
-            window.openHoloNode = function(id) {
-                const data = holoData[String(id)];
-                if (!data) return;
-                
-                const tagEl = document.getElementById('holoNodeTag');
-                const titleEl = document.getElementById('holoNodeTitle');
-                const contentEl = document.getElementById('holoNodeBody');
-                const modalEl = document.getElementById('coreHoloCard');
-                
-                if (tagEl) tagEl.innerText = data.tag;
-                if (titleEl) titleEl.innerText = data.title;
-                if (contentEl) contentEl.innerHTML = data.content;
-                if (modalEl) modalEl.style.display = 'flex';
-            };
+            let lastHoloOpen = 0;
 
-            window.closeHoloCard = function() {
-                const card = document.getElementById('coreHoloCard');
-                if (card) card.style.display = 'none';
-            };
+                window.openHoloNode = function(id) {
+                    if (window.event && window.event.type === 'touchend') {
+                        window.event.preventDefault();
+                    }
+                    lastHoloOpen = Date.now();
+                    const data = holoData[String(id)];
+                    if (!data) return;
+                    
+                    const tagEl = document.getElementById('holoNodeTag');
+                    const titleEl = document.getElementById('holoNodeTitle');
+                    const contentEl = document.getElementById('holoNodeBody');
+                    const modalEl = document.getElementById('coreHoloCard');
+                    
+                    if (tagEl) tagEl.innerText = data.tag;
+                    if (titleEl) titleEl.innerText = data.title;
+                    if (contentEl) contentEl.innerHTML = data.content;
+                    if (modalEl) modalEl.style.display = 'flex';
+                };
+
+                window.closeHoloCard = function() {
+                    if (Date.now() - lastHoloOpen < 500) return;
+                    const card = document.getElementById('coreHoloCard');
+                    if (card) card.style.display = 'none';
+                };
                     
                 window.handleKDriveCoreClick = function(e) {
                     if (e && e.type === 'touchend') {
