@@ -2173,21 +2173,26 @@
             closeFounderDashboardModal();
             renderVipVideos();
         }
-        // HÀM XỬ LÝ BIỂU QUYẾT CHO ĐỐI TÁC
+        // HÀM BIỂU QUYẾT TỰ CỘNG THEO ĐÚNG SỐ PHIẾU THỰC TẾ (3 PHIẾU, 7 PHIẾU...)
         function voteVideo(index, type) {
             const vid = vipVideosData[index];
             if (!vid) return;
 
+            // Quét số phiếu thực tế của tài khoản đang đăng nhập (VD: Trần Vy 7 phiếu)
+            const amountText = document.getElementById('shDisplayAmount')?.textContent || '';
+            const match = amountText.match(/(\d+)\s*phiếu/);
+            const userVotes = match ? parseInt(match[1]) : 1;
+
             if (type === 'yes') {
-                vid.votesYes = (vid.votesYes || 0) + 1;
+                vid.votesYes = (vid.votesYes || 0) + userVotes;
                 saveVipVideos();
-                alert(`Đã ghi nhận biểu quyết: ĐỒNG Ý duyệt "${vid.title}"!`);
+                alert(`Đã ghi nhận biểu quyết: ĐỒNG Ý (+${userVotes} phiếu) cho "${vid.title}"!`);
             } else {
                 const feedback = prompt(`Nhập ý kiến góp ý của bạn cho "${vid.title}":`);
                 if (feedback) {
-                    vid.votesNo = (vid.votesNo || 0) + 1;
+                    vid.votesNo = (vid.votesNo || 0) + userVotes;
                     saveVipVideos();
-                    alert(`Đã gửi góp ý tới Founder: "${feedback}". Cảm ơn đóng góp quý báu của bạn!`);
+                    alert(`Đã gửi góp ý tới Founder (+${userVotes} phiếu): "${feedback}".`);
                 }
             }
         }
