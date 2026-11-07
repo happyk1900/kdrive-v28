@@ -2205,63 +2205,75 @@ async function fetchAndRenderShareholders() {
         }
 
         // =====================================================================
-        // ĐĂNG NHẬP PHÒNG CHIẾU (PHÂN QUYỀN ĐỐI TÁC VIP VS KHÁN GIẢ)
+        // ĐĂNG NHẬP TRUNG TÂM KIỂM DUYỆT (MỞ CỬA TỨC THÌ - KHÔNG BAO GIỜ KẸT)
         // =====================================================================
         async function loginShareholderAccount() {
-            const user = document.getElementById('shUser').value.trim();
-            const pass = document.getElementById('shPass').value.trim();
+            const phoneInput = document.getElementById('shUser') || document.getElementById('shPhoneInput');
+            const passInput = document.getElementById('shPass') || document.getElementById('shPassInput');
+            const loginBtn = document.getElementById('shLoginBtn');
 
-            if (!user || !pass) {
-                alert('Vui lòng nhập đầy đủ Số điện thoại/Tài khoản và Mật khẩu!');
+            const phone = phoneInput ? phoneInput.value.trim() : '';
+            const pass = passInput ? passInput.value.trim() : '';
+
+            if (!phone) {
+                alert('Vui lòng nhập số điện thoại để tiếp tục.');
                 return;
             }
 
+            // 1. ĐẶC CÁCH FOUNDER VÀO THẲNG
+            if (phone === '0382156996' && (pass === '123456' || pass === '')) {
+                localStorage.setItem('kdrive_vip_user', phone);
+                localStorage.setItem('kdrive_role', 'founder');
+                openDashboardDirect('Founder Đỗ Đức Anh • Quản trị tối cao');
+                return;
+            }
+
+            if (loginBtn) loginBtn.textContent = 'ĐANG ĐỒNG BỘ...';
+
+            // 2. MỞ CỬA NGAY TỨC THÌ CHO KHÁN GIẢ (KHÔNG BỊ KẸT CHỜ MÁY CHỦ)
+            localStorage.setItem('kdrive_vip_user', phone);
+            localStorage.setItem('kdrive_role', 'free');
+            openDashboardDirect(`${phone} • Khán giả trải nghiệm`);
+
+            // 3. ĐỒNG BỘ NGẦM VỚI MÁY CHỦ TELEPATHY (NẾU CÓ DỮ LIỆU ĐỐI TÁC SẼ TỰ CẬP NHẬT)
             try {
-                const submitBtn = event ? event.target : null;
-                if (submitBtn && submitBtn.tagName === 'BUTTON') submitBtn.textContent = 'Đang kiểm tra...';
+                if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL) {
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'check_vip_login',
+                            phone: phone,
+                            pass: pass
+                        })
+                    });
+                    const res = await response.json();
 
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'login_vip',
-                        phone: user,
-                        pass: pass
-                    })
-                });
-
-                const res = await response.json();
-                if (submitBtn && submitBtn.tagName === 'BUTTON') submitBtn.textContent = 'Đăng Nhập Phòng Chiếu';
-
-                if (res.status === 'success') {
-                    localStorage.setItem('kdrive_vip_user', user);
-                    localStorage.setItem('kdrive_is_free', res.isFree ? 'true' : 'false');
-
-                    document.getElementById('shDisplayName').textContent = res.partner.name;
-                    document.getElementById('shDisplayAmount').textContent = res.partner.amount;
-                    document.getElementById('shDisplayShare').textContent = res.partner.share;
-
-                    document.getElementById('shLoginForm').classList.add('hidden');
-                    document.getElementById('shAccountDashboard').classList.remove('hidden');
-
-                    renderVipVideos();
-                    alert(`Chào mừng ${res.partner.name} đã đăng nhập thành công!`);
-                } else {
-                    if (typeof masterVipPassList !== 'undefined' && masterVipPassList.includes(pass)) {
-                        localStorage.setItem('kdrive_vip_user', user);
-                        localStorage.setItem('kdrive_is_free', 'false');
-                        document.getElementById('shDisplayName').textContent = `Đối tác VIP (${user.slice(-4)})`;
-                        document.getElementById('shDisplayAmount').textContent = 'Đã hoàn tất góp vốn';
-                        document.getElementById('shDisplayShare').textContent = 'Cổ phần Tiên phong';
-                        document.getElementById('shLoginForm').classList.add('hidden');
-                        document.getElementById('shAccountDashboard').classList.remove('hidden');
-                        renderVipVideos();
-                    } else {
-                        alert(res.message || 'Tài khoản hoặc Mật khẩu không chính xác!');
+                    if (res && res.status === 'success' && res.role === 'partner') {
+                        localStorage.setItem('kdrive_role', 'partner');
+                        const nameEl = document.getElementById('shDisplayName');
+                        if (nameEl) nameEl.textContent = `${res.name || phone} • Đối tác Tiên phong`;
+                        if (typeof renderVipVideos === 'function') renderVipVideos();
                     }
                 }
             } catch (err) {
-                console.error(err);
-                alert('Lỗi kết nối máy chủ Google Sheet! Vui lòng thử lại sau.');
+                console.warn("Chạy kiểm duyệt cục bộ:", err);
+            } finally {
+                if (loginBtn) loginBtn.textContent = 'VÀO TRUNG TÂM KIỂM DUYỆT';
+            }
+        }
+
+        // HÀM MỞ CỬA TRỰC TIẾP VÀ NẠP DANH SÁCH VIDEO
+        function openDashboardDirect(displayName) {
+            const loginForm = document.getElementById('shLoginForm');
+            const dashboard = document.getElementById('shAccountDashboard');
+            const nameEl = document.getElementById('shDisplayName');
+
+            if (loginForm) loginForm.classList.add('hidden');
+            if (dashboard) dashboard.classList.remove('hidden');
+            if (nameEl) nameEl.textContent = displayName;
+
+            if (typeof renderVipVideos === 'function') {
+                renderVipVideos();
             }
         }
 
