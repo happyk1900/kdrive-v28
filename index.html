@@ -2441,66 +2441,176 @@
             return (match && match[2].length === 11) ? 'https://www.youtube.com/embed/' + match[2] : '';
         }
 
-        // HIỂN THỊ VIDEO PLAYER & BẢNG BIỂU QUYẾT VÀO PHÒNG CHIẾU
+        // =====================================================================
+        // TRUNG TÂM KIỂM DUYỆT ĐIỆN ẢNH - CHUNG 1 MẪU CHO TẤT CẢ THÀNH VIÊN
+        // (Khán giả bấm Biểu Quyết dính phễu BCC - Founder có thêm nút Xóa)
+        // =====================================================================
         function renderVipVideos() {
             const container = document.getElementById('vipVideoListContainer');
             if (!container) return;
 
             if (vipVideosData.length === 0) {
-                container.innerHTML = `<div class="p-3 text-center text-slate-400 font-mono-tech text-xs">Hiện chưa có video nào được đăng tải.</div>`;
+                container.innerHTML = `
+                    <div class="p-6 text-center text-slate-400 font-mono-tech text-xs bg-slate-950/60 rounded-2xl border border-slate-800">
+                        🎬 Hiện chưa có thước phim chiến lược nào đang chờ thẩm định.
+                    </div>
+                `;
                 return;
             }
+
+            const currentRole = localStorage.getItem('kdrive_role') || 'free';
 
             container.innerHTML = vipVideosData.map((vid, idx) => {
                 const totalVotes = (vid.votesYes || 0) + (vid.votesNo || 0);
                 const percentYes = totalVotes > 0 ? Math.round((vid.votesYes / totalVotes) * 100) : 0;
                 
-                let playerHtml = '';
+                // MÀN CHIẾU CINEMA RỘNG TRÀN VIỀN CHUẨN RẠP
+                let screenContent = '';
                 const ytEmbed = getYouTubeEmbedUrl(vid.url);
                 if (ytEmbed) {
-                    playerHtml = `
-                        <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-700 bg-black shadow-lg">
+                    screenContent = `
+                        <div class="cinema-viewport aspect-video">
                             <iframe src="${ytEmbed}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                         </div>
                     `;
                 } else if (vid.fileBlobUrl || (vid.url && vid.url.endsWith('.mp4'))) {
-                    playerHtml = `
-                        <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-700 bg-black shadow-lg">
+                    screenContent = `
+                        <div class="cinema-viewport aspect-video">
                             <video src="${vid.fileBlobUrl || vid.url}" controls class="w-full h-full object-contain"></video>
                         </div>
                     `;
                 } else if (vid.url) {
-                    playerHtml = `
-                        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
-                            <a href="${vid.url}" target="_blank" class="text-cyan-300 font-bold text-xs underline">▶ Mở xem video demo tại đây ➔</a>
+                    screenContent = `
+                        <div class="cinema-viewport p-4 flex flex-col items-center justify-center text-center gap-2 aspect-video bg-slate-950">
+                            <span class="text-2xl">📽️</span>
+                            <a href="${vid.url}" target="_blank" class="text-cyan-300 font-bold text-xs underline hover:text-cyan-200">
+                                Mở màn chiếu ngoài (Click để xem) ➔
+                            </a>
                         </div>
                     `;
                 }
 
+                // NÚT XÓA DÀNH RIÊNG CHO FOUNDER
+                const founderDeleteBtn = (currentRole === 'founder') ? `
+                    <button onclick="deleteVipVideo(${idx})" class="py-2.5 px-3 rounded-xl bg-rose-600/20 hover:bg-rose-600 border border-rose-500/50 text-rose-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all" title="Founder gỡ bỏ video">
+                        <span>🗑️</span>
+                    </button>
+                ` : '';
+
                 return `
-                    <div class="p-3 rounded-xl bg-slate-900/90 border border-purple-500/40 space-y-2 font-mono-tech">
-                        <div class="font-bold text-amber-300 text-xs">${vid.title}</div>
-                        ${playerHtml}
-                        <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1">
-                            <span>Tiến độ vote: <b class="text-emerald-300">${vid.votesYes || 0} Đồng ý</b> / <b class="text-rose-400">${vid.votesNo || 0} Góp ý</b></span>
-                            <span class="text-cyan-300 font-bold">${percentYes}% Đồng ý</span>
+                    <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-3 font-mono-tech shadow-2xl">
+                        <!-- Tiêu đề video -->
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-amber-300 text-xs tracking-wide">🎬 ${vid.title}</span>
+                            <span class="text-[9px] px-2 py-0.5 rounded-md bg-slate-800 text-cyan-300 border border-slate-700">Mã: #${idx + 1}</span>
                         </div>
-                        <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-gradient-to-r from-cyan-400 to-emerald-400 h-1.5 rounded-full" style="width: ${percentYes}%"></div>
+
+                        <!-- Màn Chiếu Rộng Tràn Viền -->
+                        ${screenContent}
+
+                        <!-- Thanh Tiến Độ Thẩm Định Chung -->
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[10px] text-slate-400">
+                                <span>Hội đồng phê duyệt: <b class="text-emerald-300">${vid.votesYes || 0} Đồng ý</b> / <b class="text-rose-400">${vid.votesNo || 0} Góp ý</b></span>
+                                <span class="text-cyan-300 font-bold">${percentYes}%</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden p-[1px] border border-slate-800">
+                                <div class="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: ${percentYes}%"></div>
+                            </div>
                         </div>
+
+                        <!-- CỤM NÚT BẤM CHUNG CHO MỌI NGƯỜI (FOUNDER CÓ THÊM NÚT XÓA) -->
                         <div class="flex gap-2 pt-1">
-                            <button onclick="voteVideo(${idx}, 'yes')" class="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all shadow">
-                                <span>👍</span> <span>Đồng Ý</span>
+                            <button onclick="handleVoteAction(${idx})" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md">
+                                <span>🏛️</span> <span>Biểu Quyết Duyệt</span>
                             </button>
-                            <button onclick="voteVideo(${idx}, 'feedback')" class="flex-1 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all shadow">
-                                <span>💬</span> <span>Góp Ý</span>
+                            <button onclick="handleFeedbackAction(${idx})" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md">
+                                <span>💬</span> <span>Gửi Góp Ý</span>
                             </button>
+                            ${founderDeleteBtn}
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
+        // XỬ LÝ BIỂU QUYẾT: KHÁN GIẢ GẶP PHỄU NÂNG CẤP - ĐỐI TÁC/FOUNDER ĐƯỢC DUYỆT
+        function handleVoteAction(index) {
+            const currentRole = localStorage.getItem('kdrive_role') || 'free';
+            const vid = vipVideosData[index];
+            if (!vid) return;
+
+            // NẾU LÀ KHÁN GIẢ: KÍCH HOẠT PHỄU FOMO
+            if (currentRole === 'free') {
+                const upgradeConfirm = confirm(
+                    "🏛️ QUY CHẾ HỘI ĐỒNG THẨM ĐỊNH TELEPATHY:\n\n" +
+                    "Quyền biểu quyết chính thức chỉ dành riêng cho 100 Đối Tác Tiên Phong sở hữu cổ phần K-Drive.\n\n" +
+                    "Bạn có muốn xem Hồ Sơ Ký Hợp Đồng BCC (1.000.000 đ) để nhận ngay 01 phiếu biểu quyết chính thức cùng Founder không?"
+                );
+                if (upgradeConfirm) {
+                    closeShareholderLoginModal();
+                    if (typeof openContractModal === 'function') openContractModal();
+                }
+                return;
+            }
+
+            // NẾU LÀ ĐỐI TÁC HOẶC FOUNDER: GHI NHẬN PHIẾU
+            vid.votesYes = (vid.votesYes || 0) + 1;
+            saveVipVideos();
+            renderVipVideos();
+            alert(`✅ Đã ghi nhận phiếu biểu quyết: ĐỒNG Ý phát hành "${vid.title}"!`);
+        }
+
+        // XỬ LÝ GỬI GÓP Ý: TẤT CẢ MỌI NGƯỜI ĐỀU GỬI ĐƯỢC VỀ TAB GOP_Y_VIDEO
+        async function handleFeedbackAction(index) {
+            const vid = vipVideosData[index];
+            if (!vid) return;
+
+            const feedback = prompt(`Nhập ý kiến đóng góp của bạn cho thước phim "${vid.title}":`);
+            if (feedback && feedback.trim() !== '') {
+                vid.votesNo = (vid.votesNo || 0) + 1;
+                saveVipVideos();
+                renderVipVideos();
+
+                const currentUser = localStorage.getItem('kdrive_vip_user') || 'Khán giả';
+                const currentName = document.getElementById('shDisplayName') ? document.getElementById('shDisplayName').textContent : 'Thành viên thẩm định';
+
+                try {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'save_feedback',
+                            phone: currentUser,
+                            name: currentName,
+                            videoTitle: vid.title,
+                            feedback: feedback.trim()
+                        })
+                    });
+                    alert(`✅ Ý kiến đóng góp của bạn đã được chuyển thẳng về Server Telepathy! Cảm ơn bạn.`);
+                } catch (err) {
+                    console.error(err);
+                    alert(`⚠️ Góp ý đã ghi nhận tại máy nhưng chưa đồng bộ được mạng.`);
+                }
+            }
+        }
+
+        // ĐẶC QUYỀN FOUNDER: XÓA VIDEO
+        function deleteVipVideo(index) {
+            const currentRole = localStorage.getItem('kdrive_role');
+            if (currentRole !== 'founder') {
+                alert('Chỉ Founder mới có quyền xóa video khỏi phòng duyệt!');
+                return;
+            }
+
+            const vid = vipVideosData[index];
+            const confirmDelete = confirm(`⚠️ Xác nhận gỡ bỏ video: "${vid ? vid.title : 'này'}" khỏi danh sách kiểm duyệt?`);
+            if (confirmDelete) {
+                vipVideosData.splice(index, 1);
+                saveVipVideos();
+                renderVipVideos();
+                alert('✅ Đã gỡ bỏ video thành công!');
+            }
+        }
         // HÀM ĐĂNG TẢI VIDEO TỪ FOUNDER DASHBOARD
         function uploadFounderVideo() {
             const titleInput = document.getElementById('founderVideoTitle');
