@@ -1101,7 +1101,7 @@
         }
 
         // =====================================================================
-        // ĐĂNG NHẬP: LẤY 100% DỮ LIỆU TỰ ĐỘNG TỪ SHEET (CỘT M, CỘT N)
+        // ĐĂNG NHẬP BẢO MẬT: KHÓA CHẶT CỬA - SAI SĐT HOẶC PASS LÀ CHẶN NGAY
         // =====================================================================
         async function loginShareholderAccount() {
             const phoneInput = document.getElementById('shUser') || document.getElementById('shPhoneInput');
@@ -1111,20 +1111,21 @@
             const phone = phoneInput ? phoneInput.value.trim() : '';
             const pass = passInput ? passInput.value.trim() : '';
 
-            if (!phone) {
-                alert('Vui lòng nhập số điện thoại.');
+            // 1. BẮT BUỘC NHẬP ĐẦY ĐỦ CẢ HAI Ô
+            if (!phone || !pass) {
+                alert('Vui lòng nhập đầy đủ Số điện thoại và Mật khẩu!');
                 return;
             }
 
-            // Founder vào thẳng
-            if (phone === '0382156996' && (pass === '123456' || pass === '')) {
+            // 2. ĐẶC QUYỀN FOUNDER ĐỖ ĐỨC ANH
+            if (phone === '0382156996' && pass === '123456') {
                 grantFounderAccess('vip_cinema');
                 return;
             }
 
             if (loginBtn) {
                 loginBtn.disabled = true;
-                loginBtn.textContent = 'ĐANG ĐỒNG BỘ DỮ LIỆU...';
+                loginBtn.textContent = 'ĐANG XÁC THỰC MÁY CHỦ...';
             }
 
             try {
@@ -1142,15 +1143,16 @@
                 });
                 const res = await response.json();
 
-                // Nhận trực tiếp dữ liệu thật do Apps Script đọc từ Sheet
-                if (res && (res.status === 'success' || res.partner)) {
-                    const p = res.partner || res.data || res;
+                // 3. ĐĂNG NHẬP THÀNH CÔNG: KHỚP 100% CẢ SĐT VÀ PASS TRÊN GOOGLE SHEET
+                if (res && res.status === 'success' && res.partner) {
+                    const p = res.partner;
                     const hoTen = p.name || phone;
-                    const capBac = p.tier || 'Cyber Silver';
-                    const soPhieu = Number(p.votes !== undefined ? p.votes : 2);
+                    const capBac = p.tier || 'CYBER SILVER';
+                    const soPhieu = Number(p.votes !== undefined ? p.votes : 1);
+                    const role = res.role || 'partner';
 
                     localStorage.setItem('kdrive_vip_user', phone);
-                    localStorage.setItem('kdrive_role', 'partner');
+                    localStorage.setItem('kdrive_role', role);
                     localStorage.setItem('kdrive_vip_name', hoTen);
                     localStorage.setItem('kdrive_vip_tier', capBac);
                     localStorage.setItem('kdrive_vip_votes', soPhieu);
@@ -1159,20 +1161,13 @@
                     return;
                 }
 
-                if (res && res.status === 'wrong_password') {
-                    alert(res.message || 'Mật khẩu không chính xác. Vui lòng thử lại!');
-                    return;
-                }
-
-                // Khán giả chưa ký hợp tác (0 phiếu)
-                localStorage.setItem('kdrive_vip_user', phone);
-                localStorage.setItem('kdrive_role', 'free');
-                localStorage.setItem('kdrive_vip_votes', 0);
-                moDashboardChuan(phone, 'Khán giả trải nghiệm', '0 phiếu (Chỉ xem)');
+                // 4. SAI SĐT HOẶC SAI MẬT KHẨU: BÁO LỖI VÀ CHẶN ĐỨNG Ở NGOÀI CỬA (KHÔNG MỞ DASHBOARD)
+                alert(res.message || 'Số điện thoại hoặc Mật khẩu không chính xác!');
+                return;
 
             } catch (err) {
-                console.error("Lỗi đồng bộ:", err);
-                alert('Máy chủ Telepathy đang đồng bộ dữ liệu. Vui lòng kiểm tra lại kết nối mạng!');
+                console.error("Lỗi xác thực:", err);
+                alert('Không thể kết nối với Máy chủ Telepathy. Vui lòng kiểm tra lại kết nối mạng!');
             } finally {
                 if (loginBtn) {
                     loginBtn.disabled = false;
@@ -1202,7 +1197,6 @@
 
             if (typeof renderVipVideos === 'function') renderVipVideos();
         }
-
         // =====================================================================
         // TRUNG TÂM HOLOGRAPHIC BIỂU QUYẾT & GÓP Ý THẨM ĐỊNH (K-DRIVE VIP)
         // =====================================================================
