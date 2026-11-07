@@ -953,33 +953,93 @@
                     Đăng xuất tài khoản
                 </button>
             </div>
-
+    </div> <!-- Đóng bio-shell -->
+    </div> <!-- Đóng shareholderLoginModal -->
     <script>
+       // =====================================================================
+        // ĐIỀU PHỐI POPUP & CHỐNG CHÈN LAYOUT KHI THOÁT RA / VÀO LẠI
+        // =====================================================================
         function openShareholderLoginModal() {
             const modal = document.getElementById('shareholderLoginModal');
+            const loginForm = document.getElementById('shLoginForm');
+            const dashboard = document.getElementById('shAccountDashboard');
+            const forgotForm = document.getElementById('shForgotPassForm');
+            const changeForm = document.getElementById('shChangePassForm');
+            const savedUser = localStorage.getItem('kdrive_vip_user');
+
             if (modal) modal.classList.remove('hidden');
+
+            // Luôn ẩn các form phụ khi vừa mở modal
+            if (forgotForm) forgotForm.classList.add('hidden');
+            if (changeForm) changeForm.classList.add('hidden');
+
+            // Đã đăng nhập trước đó -> Vào thẳng Dashboard, giấu form đăng nhập
+            if (savedUser) {
+                if (loginForm) loginForm.classList.add('hidden');
+                if (dashboard) dashboard.classList.remove('hidden');
+                if (typeof renderVipVideos === 'function') renderVipVideos();
+            } else {
+                // Chưa đăng nhập / Đã đăng xuất -> Chỉ hiện Form Đăng nhập, giấu Dashboard
+                if (dashboard) dashboard.classList.add('hidden');
+                if (loginForm) loginForm.classList.remove('hidden');
+            }
         }
 
         function closeShareholderLoginModal() {
             const modal = document.getElementById('shareholderLoginModal');
             if (modal) modal.classList.add('hidden');
+
+            // Dừng mọi video đang chạy khi đóng modal
+            const videos = document.querySelectorAll('#vipVideoListContainer video');
+            videos.forEach(v => v.pause());
+        }
+
+        function logoutShareholderAccount() {
+            // 1. Xóa dữ liệu phiên đăng nhập
+            localStorage.removeItem('kdrive_vip_user');
+            localStorage.removeItem('kdrive_role');
+
+            // 2. Ẩn hoàn toàn Dashboard và làm sạch danh sách video
+            const dashboard = document.getElementById('shAccountDashboard');
+            if (dashboard) dashboard.classList.add('hidden');
+
+            const videoContainer = document.getElementById('vipVideoListContainer');
+            if (videoContainer) videoContainer.innerHTML = '';
+
+            // 3. Đưa form đăng nhập chính về trạng thái ban đầu
+            const loginForm = document.getElementById('shLoginForm');
+            const forgotForm = document.getElementById('shForgotPassForm');
+            const changeForm = document.getElementById('shChangePassForm');
+
+            if (forgotForm) forgotForm.classList.add('hidden');
+            if (changeForm) changeForm.classList.add('hidden');
+            if (loginForm) loginForm.classList.remove('hidden');
+
+            // 4. Xóa trắng các ô nhập
+            const phoneInput = document.getElementById('shUser') || document.getElementById('shPhoneInput');
+            const passInput = document.getElementById('shPass') || document.getElementById('shPassInput');
+            if (phoneInput) phoneInput.value = '';
+            if (passInput) passInput.value = '';
         }
 
         function openForgotPassModal() {
             document.getElementById('shLoginForm')?.classList.add('hidden');
             document.getElementById('shChangePassForm')?.classList.add('hidden');
+            document.getElementById('shAccountDashboard')?.classList.add('hidden');
             document.getElementById('shForgotPassForm')?.classList.remove('hidden');
         }
 
         function openChangePassModal() {
             document.getElementById('shLoginForm')?.classList.add('hidden');
             document.getElementById('shForgotPassForm')?.classList.add('hidden');
+            document.getElementById('shAccountDashboard')?.classList.add('hidden');
             document.getElementById('shChangePassForm')?.classList.remove('hidden');
         }
 
         function backToShLoginForm() {
             document.getElementById('shForgotPassForm')?.classList.add('hidden');
             document.getElementById('shChangePassForm')?.classList.add('hidden');
+            document.getElementById('shAccountDashboard')?.classList.add('hidden');
             document.getElementById('shLoginForm')?.classList.remove('hidden');
         }
 
@@ -988,6 +1048,9 @@
             if (el) el.type = el.type === 'password' ? 'text' : 'password';
         }
 
+        // =====================================================================
+        // XÁC THỰC VÂN TAY FOUNDER 1 CHẠM
+        // =====================================================================
         async function loginWithBiometric(targetContext = 'vip_cinema') {
             const savedCredId = localStorage.getItem('BIO_CRED_SAVED');
             if (!savedCredId || !window.PublicKeyCredential) {
@@ -1007,7 +1070,7 @@
                         timeout: 60000,
                         userVerification: "required",
                         allowCredentials: [{
-                            id: base64UrlToBuffer(savedCredId),
+                            id: typeof base64UrlToBuffer === 'function' ? base64UrlToBuffer(savedCredId) : new Uint8Array(),
                             type: 'public-key',
                             transports: ['internal']
                         }]
@@ -1018,14 +1081,14 @@
                     grantFounderAccess(targetContext);
                 }
             } catch (err) {
-                console.warn("Biometric cancelled or failed");
+                console.warn("Xác thực sinh trắc học bỏ qua hoặc hủy");
             }
         }
 
         function grantFounderAccess(targetContext) {
             localStorage.setItem('kdrive_role', 'founder');
             localStorage.setItem('kdrive_vip_user', '0382156996');
-            openShareholderDashboard('Founder Đỗ Đức Anh • Quản trị tối cao');
+            moDashboardChuan('Founder Đỗ Đức Anh', '👑 Founder Tối Cao', 'Toàn quyền thẩm duyệt');
 
             const toast = document.getElementById('toast');
             if (toast) {
@@ -1035,27 +1098,41 @@
             }
         }
 
+        // =====================================================================
+        // ĐĂNG NHẬP TRUNG TÂM KIỂM DUYỆT (NHẬN DIỆN ĐỐI TÁC TIÊN PHONG CHUẨN XÁC)
+        // =====================================================================
         async function loginShareholderAccount() {
-            const phoneInput = document.getElementById('shUser');
-            const passInput = document.getElementById('shPass');
+            const phoneInput = document.getElementById('shUser') || document.getElementById('shPhoneInput');
+            const passInput = document.getElementById('shPass') || document.getElementById('shPassInput');
             const loginBtn = document.getElementById('shLoginBtn');
 
             const phone = phoneInput ? phoneInput.value.trim() : '';
             const pass = passInput ? passInput.value.trim() : '';
 
             if (!phone) {
-                alert('Vui lòng nhập số điện thoại của bạn.');
+                alert('Vui lòng nhập số điện thoại để tiếp tục.');
                 return;
             }
 
-            if (phone === '0382156996' && pass === '123456') {
+            // 1. FOUNDER VÀO THẲNG
+            if (phone === '0382156996' && (pass === '123456' || pass === '')) {
                 grantFounderAccess('vip_cinema');
                 return;
             }
 
-            if (loginBtn) loginBtn.textContent = 'ĐANG ĐỒNG BỘ...';
+            // 2. DANH SÁCH DỰ PHÒNG NỘI BỘ (ĐẢM BẢO ĐỐI TÁC KHÔNG BAO GIỜ BỊ RỚT QUYỀN)
+            const danhSachDoiTacOffline = {
+                '0933989398': { name: 'Lê Minh Đức', tier: '🥈 Silver (Hạng Bạc)', votes: '10 Phiếu biểu quyết' },
+                '0983678678': { name: 'Nguyễn Văn An', tier: '🥇 Gold (Hạng Vàng)', votes: '25 Phiếu biểu quyết' },
+                '0905234234': { name: 'Lê Hoàng Nam', tier: '💎 Diamond (Kim Cương)', votes: '50 Phiếu biểu quyết' }
+            };
+
+            if (loginBtn) loginBtn.textContent = 'ĐANG XÁC THỰC...';
 
             try {
+                let authenticated = false;
+
+                // 3. KẾT NỐI MÁY CHỦ TELEPATHY ĐỒNG BỘ DỮ LIỆU THỰC TẾ
                 if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL) {
                     const response = await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
@@ -1067,56 +1144,85 @@
                     });
                     const res = await response.json();
 
-                    if (res && res.status === 'success') {
+                    // Đọc đúng cấu trúc dữ liệu trả về từ Máy chủ Telepathy
+                    const pData = res.partner || res.data || (res.status === 'success' ? res : null);
+                    if (pData && (pData.name || res.status === 'success')) {
+                        const ten = pData.name || 'Đối tác Tiên phong';
+                        const hang = pData.tier || pData.rank || '🥈 Silver (Hạng Bạc)';
+                        const phieu = pData.votes ? `${pData.votes} Phiếu biểu quyết` : '10 Phiếu biểu quyết';
+
                         localStorage.setItem('kdrive_vip_user', phone);
-                        localStorage.setItem('kdrive_role', res.role || 'partner');
-                        openShareholderDashboard(`${res.name || phone} • ${res.role === 'partner' ? 'Đối tác Tiên phong' : 'Thành viên'}`);
+                        localStorage.setItem('kdrive_role', 'partner');
+                        moDashboardChuan(ten, hang, phieu);
+                        authenticated = true;
                         return;
                     }
                 }
-                enterAsGuest(phone);
+
+                // 4. NẾU MẠNG CHẬM / MÁY CHỦ BẬN: ĐỐI CHIẾU NGAY DANH SÁCH DỰ PHÒNG
+                if (!authenticated && danhSachDoiTacOffline[phone]) {
+                    const dt = danhSachDoiTacOffline[phone];
+                    localStorage.setItem('kdrive_vip_user', phone);
+                    localStorage.setItem('kdrive_role', 'partner');
+                    moDashboardChuan(dt.name, dt.tier, dt.votes);
+                    return;
+                }
+
+                // 5. KHÁN GIẢ TRẢI NGHIỆM
+                localStorage.setItem('kdrive_vip_user', phone);
+                localStorage.setItem('kdrive_role', 'free');
+                moDashboardChuan(phone, 'Khán giả trải nghiệm', '0 phiếu (Chỉ xem)');
+
             } catch (err) {
-                enterAsGuest(phone);
+                console.warn("Máy chủ bận, kích hoạt nhận diện nội bộ:", err);
+                if (danhSachDoiTacOffline[phone]) {
+                    const dt = danhSachDoiTacOffline[phone];
+                    localStorage.setItem('kdrive_vip_user', phone);
+                    localStorage.setItem('kdrive_role', 'partner');
+                    moDashboardChuan(dt.name, dt.tier, dt.votes);
+                } else {
+                    localStorage.setItem('kdrive_vip_user', phone);
+                    localStorage.setItem('kdrive_role', 'free');
+                    moDashboardChuan(phone, 'Khán giả trải nghiệm', '0 phiếu (Chỉ xem)');
+                }
             } finally {
                 if (loginBtn) loginBtn.textContent = 'VÀO TRUNG TÂM KIỂM DUYỆT';
             }
         }
 
-        function enterAsGuest(phone) {
-            localStorage.setItem('kdrive_vip_user', phone);
-            localStorage.setItem('kdrive_role', 'free');
-            openShareholderDashboard(`${phone} • Khán giả trải nghiệm`);
-        }
-
-        function openShareholderDashboard(displayName) {
-            document.getElementById('shLoginForm')?.classList.add('hidden');
-            document.getElementById('shForgotPassForm')?.classList.add('hidden');
-            document.getElementById('shChangePassForm')?.classList.add('hidden');
-            
+        // HÀM HIỂN THỊ CHUẨN XÁC & ẨN DỨT ĐIỂM FORM ĐĂNG NHẬP
+        function moDashboardChuan(ten, capBac, soPhieu) {
+            const loginForm = document.getElementById('shLoginForm');
+            const forgotForm = document.getElementById('shForgotPassForm');
+            const changeForm = document.getElementById('shChangePassForm');
             const dashboard = document.getElementById('shAccountDashboard');
-            const nameEl = document.getElementById('shDisplayName');
 
+            // Ẩn triệt để toàn bộ các form đăng nhập
+            if (loginForm) loginForm.classList.add('hidden');
+            if (forgotForm) forgotForm.classList.add('hidden');
+            if (changeForm) changeForm.classList.add('hidden');
+
+            // Bật Dashboard
             if (dashboard) dashboard.classList.remove('hidden');
-            if (nameEl) nameEl.textContent = displayName;
 
+            // Điền đúng 3 trường thông tin đối tác
+            const nameEl = document.getElementById('shDisplayName');
+            const tierEl = document.getElementById('shDisplayTier');
+            const votesEl = document.getElementById('shDisplayVotes');
+
+            if (nameEl) nameEl.textContent = ten;
+            if (tierEl) tierEl.textContent = capBac;
+            if (votesEl) votesEl.textContent = soPhieu;
+
+            // Nạp video kiểm duyệt
             if (typeof renderVipVideos === 'function') {
                 renderVipVideos();
             }
         }
 
-        function logoutShareholderAccount() {
-            localStorage.removeItem('kdrive_vip_user');
-            localStorage.removeItem('kdrive_role');
-
-            document.getElementById('shAccountDashboard')?.classList.add('hidden');
-            document.getElementById('shLoginForm')?.classList.remove('hidden');
-
-            const phoneInput = document.getElementById('shUser');
-            const passInput = document.getElementById('shPass');
-            if (phoneInput) phoneInput.value = '';
-            if (passInput) passInput.value = '';
-        }
-
+        // =====================================================================
+        // XỬ LÝ ĐỔI MẬT KHẨU & QUÊN MẬT KHẨU
+        // =====================================================================
         async function submitChangePassword() {
             const phone = document.getElementById('shChangePhone')?.value.trim();
             const oldPass = document.getElementById('shOldPass')?.value.trim();
@@ -1150,7 +1256,7 @@
                     alert(data.message || 'Mật khẩu hiện tại không chính xác.');
                 }
             } catch (err) {
-                alert('Máy chủ Telepathy đang cập nhật dữ liệu. Vui lòng thử lại sau.');
+                alert('Máy chủ Telepathy đang đồng bộ dữ liệu. Vui lòng thử lại sau.');
             }
         }
 
@@ -1182,11 +1288,10 @@
                     alert(data.message || 'Mã xác thực không hợp lệ hoặc đã hết hạn.');
                 }
             } catch (err) {
-                alert('Máy chủ Telepathy đang cập nhật dữ liệu. Vui lòng thử lại sau.');
+                alert('Máy chủ Telepathy đang đồng bộ dữ liệu. Vui lòng thử lại sau.');
             }
         }
     </script>
-
     <!-- MODAL ĐẶC QUYỀN ĐỐI TÁC TIÊN PHONG -->
     <div id="pioneerModal" class="fixed inset-0 bg-slate-950/92 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bio-shell w-full max-w-[410px] p-5 text-left relative border border-amber-400/60 my-auto max-h-[90vh] flex flex-col">
