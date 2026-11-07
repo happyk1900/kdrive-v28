@@ -2601,36 +2601,7 @@ async function fetchAndRenderShareholders() {
             document.getElementById('billPreviewModal').classList.remove('flex');
             document.getElementById('billPreviewModal').classList.add('hidden');
         }
-
-        function openShareholderLoginModal() {
-            document.getElementById('shareholderLoginModal').classList.remove('hidden');
-            document.getElementById('shareholderLoginModal').classList.add('flex');
-            backToLogin();
-        }
-        function closeShareholderLoginModal() {
-            document.getElementById('shareholderLoginModal').classList.remove('flex');
-            document.getElementById('shareholderLoginModal').classList.add('hidden');
-        }
-
-        function showForgotPassword() {
-            document.getElementById('shLoginForm').classList.add('hidden');
-            document.getElementById('shForgotForm').classList.remove('hidden');
-            document.getElementById('shChangePassForm').classList.add('hidden');
-        }
-
-        function showChangePassword() {
-            document.getElementById('shLoginForm').classList.add('hidden');
-            document.getElementById('shForgotForm').classList.add('hidden');
-            document.getElementById('shChangePassForm').classList.remove('hidden');
-        }
-
-        function backToLogin() {
-            document.getElementById('shLoginForm').classList.remove('hidden');
-            document.getElementById('shForgotForm').classList.add('hidden');
-            document.getElementById('shChangePassForm').classList.add('hidden');
-            document.getElementById('shAccountDashboard').classList.add('hidden');
-        }
-
+        
        async function sendRecoveryEmail() {
     const emailInput = document.getElementById('shForgotEmail');
     const email = emailInput ? emailInput.value.trim() : '';
@@ -2774,339 +2745,6 @@ async function fetchAndRenderShareholders() {
             if (window.lastFreeUser) document.getElementById('shUser').value = window.lastFreeUser;
             if (window.lastFreePass) document.getElementById('shPass').value = window.lastFreePass;
             loginShareholderAccount();
-        }
-
-        // =====================================================================
-        // ĐĂNG NHẬP TRUNG TÂM KIỂM DUYỆT (NHẬN DIỆN ĐỐI TÁC TIÊN PHONG CHUẨN XÁC)
-        // =====================================================================
-        async function loginShareholderAccount() {
-            const phoneInput = document.getElementById('shUser') || document.getElementById('shPhoneInput');
-            const passInput = document.getElementById('shPass') || document.getElementById('shPassInput');
-            const loginBtn = document.getElementById('shLoginBtn');
-
-            const phone = phoneInput ? phoneInput.value.trim() : '';
-            const pass = passInput ? passInput.value.trim() : '';
-
-            if (!phone) {
-                alert('Vui lòng nhập số điện thoại để tiếp tục.');
-                return;
-            }
-
-            // 1. FOUNDER VÀO THẲNG
-            if (phone === '0382156996' && (pass === '123456' || pass === '')) {
-                localStorage.setItem('kdrive_vip_user', phone);
-                localStorage.setItem('kdrive_role', 'founder');
-                moDashboardChuan('Founder Đỗ Đức Anh', '👑 Founder Tối Cao', 'Toàn quyền thẩm duyệt');
-                return;
-            }
-
-            // 2. DANH SÁCH DỰ PHÒNG NỘI BỘ (KHÔNG BAO GIỜ BỊ RỚT QUYỀN SANG KHÁN GIẢ)
-            const danhSachDoiTacOffline = {
-                '0933989398': { name: 'Lê Minh Đức', tier: '🥈 Silver (Hạng Bạc)', votes: '10 Phiếu biểu quyết' },
-                '0983678678': { name: 'Nguyễn Văn An', tier: '🥇 Gold (Hạng Vàng)', votes: '25 Phiếu biểu quyết' },
-                '0905234234': { name: 'Lê Hoàng Nam', tier: '💎 Diamond (Kim Cương)', votes: '50 Phiếu biểu quyết' }
-            };
-
-            if (loginBtn) loginBtn.textContent = 'ĐANG XÁC THỰC...';
-
-            try {
-                let authenticated = false;
-
-                // 3. KẾT NỐI MÁY CHỦ TELEPATHY ĐỒNG BỘ DỮ LIỆU THỰC TẾ
-                if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL) {
-                    const response = await fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'check_vip_login',
-                            phone: phone,
-                            pass: pass
-                        })
-                    });
-                    const res = await response.json();
-
-                    // Đọc đúng đối tượng partner trả về từ máy chủ
-                    const pData = res.partner || res.data || (res.status === 'success' ? res : null);
-                    if (pData && (pData.name || res.status === 'success')) {
-                        const ten = pData.name || 'Đối tác Tiên phong';
-                        const hang = pData.tier || pData.rank || '🥈 Silver (Hạng Bạc)';
-                        const phieu = pData.votes ? `${pData.votes} Phiếu biểu quyết` : '10 Phiếu biểu quyết';
-
-                        localStorage.setItem('kdrive_vip_user', phone);
-                        localStorage.setItem('kdrive_role', 'partner');
-                        moDashboardChuan(ten, hang, phieu);
-                        authenticated = true;
-                        return;
-                    }
-                }
-
-                // 4. NẾU MÁY CHỦ BẬN / MẠNG CHẬM: ĐỐI CHIẾU NGAY DANH SÁCH DỰ PHÒNG
-                if (!authenticated && danhSachDoiTacOffline[phone]) {
-                    const dt = danhSachDoiTacOffline[phone];
-                    localStorage.setItem('kdrive_vip_user', phone);
-                    localStorage.setItem('kdrive_role', 'partner');
-                    moDashboardChuan(dt.name, dt.tier, dt.votes);
-                    return;
-                }
-
-                // 5. KHÁN GIẢ TRẢI NGHIỆM
-                localStorage.setItem('kdrive_vip_user', phone);
-                localStorage.setItem('kdrive_role', 'free');
-                moDashboardChuan(phone, 'Khán giả trải nghiệm', '0 phiếu (Chỉ xem)');
-
-            } catch (err) {
-                console.warn("Máy chủ bận, kích hoạt nhận diện nội bộ:", err);
-                if (danhSachDoiTacOffline[phone]) {
-                    const dt = danhSachDoiTacOffline[phone];
-                    localStorage.setItem('kdrive_vip_user', phone);
-                    localStorage.setItem('kdrive_role', 'partner');
-                    moDashboardChuan(dt.name, dt.tier, dt.votes);
-                } else {
-                    localStorage.setItem('kdrive_vip_user', phone);
-                    localStorage.setItem('kdrive_role', 'free');
-                    moDashboardChuan(phone, 'Khán giả trải nghiệm', '0 phiếu (Chỉ xem)');
-                }
-            } finally {
-                if (loginBtn) loginBtn.textContent = 'VÀO TRUNG TÂM KIỂM DUYỆT';
-            }
-        }
-
-        // HÀM HIỂN THỊ CHUẨN XÁC & ẨN TRIỆT ĐỂ FORM ĐĂNG NHẬP
-        function moDashboardChuan(ten, capBac, soPhieu) {
-            const loginForm = document.getElementById('shLoginForm');
-            const forgotForm = document.getElementById('shForgotPassForm');
-            const changeForm = document.getElementById('shChangePassForm');
-            const dashboard = document.getElementById('shAccountDashboard');
-
-            // Ẩn dứt điểm form đăng nhập để không bị tình trạng lộ 2 khung
-            if (loginForm) loginForm.classList.add('hidden');
-            if (forgotForm) forgotForm.classList.add('hidden');
-            if (changeForm) changeForm.classList.add('hidden');
-
-            // Mở khung Dashboard
-            if (dashboard) dashboard.classList.remove('hidden');
-
-            // Gán chuẩn 3 trường thông tin hiển thị
-            const nameEl = document.getElementById('shDisplayName');
-            const tierEl = document.getElementById('shDisplayTier');
-            const votesEl = document.getElementById('shDisplayVotes');
-
-            if (nameEl) nameEl.textContent = ten;
-            if (tierEl) tierEl.textContent = capBac;
-            if (votesEl) votesEl.textContent = soPhieu;
-
-            // Nạp video kiểm duyệt
-            if (typeof renderVipVideos === 'function') {
-                renderVipVideos();
-            }
-        }
-
-        // =====================================================================
-        // HIỂN THỊ VIDEO: KHÁN GIẢ KHÔNG CÓ NÚT VOTE, CHỈ CÓ NÚT GÓP Ý
-        // =====================================================================
-        function renderVipVideos() {
-            const container = document.getElementById('vipVideoListContainer');
-            if (!container) return;
-
-            if (vipVideosData.length === 0) {
-                container.innerHTML = `<div class="p-3 text-center text-slate-400 font-mono-tech text-xs">Hiện chưa có video nào được đăng tải.</div>`;
-                return;
-            }
-
-            const isFreeAccount = localStorage.getItem('kdrive_is_free') === 'true';
-
-            container.innerHTML = vipVideosData.map((vid, idx) => {
-                const totalVotes = (vid.votesYes || 0) + (vid.votesNo || 0);
-                const percentYes = totalVotes > 0 ? Math.round((vid.votesYes / totalVotes) * 100) : 0;
-                
-                let playerHtml = '';
-                const ytEmbed = getYouTubeEmbedUrl(vid.url);
-                if (ytEmbed) {
-                    playerHtml = `
-                        <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-700 bg-black shadow-lg">
-                            <iframe src="${ytEmbed}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </div>
-                    `;
-                } else if (vid.fileBlobUrl || (vid.url && vid.url.endsWith('.mp4'))) {
-                    playerHtml = `
-                        <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-700 bg-black shadow-lg">
-                            <video src="${vid.fileBlobUrl || vid.url}" controls class="w-full h-full object-contain"></video>
-                        </div>
-                    `;
-                } else if (vid.url) {
-                    playerHtml = `
-                        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
-                            <a href="${vid.url}" target="_blank" class="text-cyan-300 font-bold text-xs underline">▶ Mở xem video demo tại đây ➔</a>
-                        </div>
-                    `;
-                }
-
-                // PHÂN QUYỀN: KHÁN GIẢ KHÔNG ĐƯỢC BIỂU QUYẾT (VOTE DUYỆT)
-                let buttonsGroup = '';
-                if (isFreeAccount) {
-                    buttonsGroup = `
-                        <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[10.5px] text-amber-300 text-center font-bold">
-                            🎟️ Tài khoản Khán giả: Chỉ có quyền Góp ý để cùng Founder hoàn thiện sản phẩm (Quyền biểu quyết dành riêng cho Đối tác).
-                        </div>
-                        <button onclick="voteVideo(${idx}, 'feedback')" class="w-full py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md">
-                            <span>💬</span> <span>Gửi Góp Ý Cho Founder</span>
-                        </button>
-                    `;
-                } else {
-                    buttonsGroup = `
-                        <div class="flex gap-2 pt-1">
-                            <button onclick="voteVideo(${idx}, 'yes')" class="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all shadow">
-                                <span>👍</span> <span>Đồng Ý</span>
-                            </button>
-                            <button onclick="voteVideo(${idx}, 'feedback')" class="flex-1 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all shadow">
-                                <span>💬</span> <span>Góp Ý</span>
-                            </button>
-                        </div>
-                    `;
-                }
-
-                return `
-                    <div class="p-3 rounded-xl bg-slate-900/90 border border-purple-500/40 space-y-2 font-mono-tech">
-                        <div class="font-bold text-amber-300 text-xs">${vid.title}</div>
-                        ${playerHtml}
-                        <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1">
-                            <span>Tiến độ vote: <b class="text-emerald-300">${vid.votesYes || 0} Đồng ý</b> / <b class="text-rose-400">${vid.votesNo || 0} Góp ý</b></span>
-                            <span class="text-cyan-300 font-bold">${percentYes}% Đồng ý</span>
-                        </div>
-                        <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-gradient-to-r from-cyan-400 to-emerald-400 h-1.5 rounded-full" style="width: ${percentYes}%"></div>
-                        </div>
-                        ${buttonsGroup}
-                    </div>
-                `;
-            }).join('');
-        }
-
-// =====================================================================
-        // HIỂN THỊ MÀN CHIẾU CINEMA RỘNG & PHÂN QUYỀN 3 CẤP ĐỘ
-        // =====================================================================
-        function renderVipVideos() {
-            const container = document.getElementById('vipVideoListContainer');
-            if (!container) return;
-
-            if (vipVideosData.length === 0) {
-                container.innerHTML = `
-                    <div class="p-6 text-center text-slate-400 font-mono-tech text-xs bg-slate-950/60 rounded-2xl border border-slate-800">
-                        🎬 Hiện chưa có thước phim chiến lược nào đang chờ thẩm định.
-                    </div>
-                `;
-                return;
-            }
-
-            const currentRole = localStorage.getItem('kdrive_role') || 'free';
-
-            container.innerHTML = vipVideosData.map((vid, idx) => {
-                const totalVotes = (vid.votesYes || 0) + (vid.votesNo || 0);
-                const percentYes = totalVotes > 0 ? Math.round((vid.votesYes / totalVotes) * 100) : 0;
-                
-                // MÀN CHIẾU CINEMA RỘNG TRÀN KHUNG VIỀN ĐÈN NEON
-                let screenContent = '';
-                const ytEmbed = getYouTubeEmbedUrl(vid.url);
-                if (ytEmbed) {
-                    screenContent = `
-                        <div class="cinema-viewport aspect-video">
-                            <iframe src="${ytEmbed}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </div>
-                    `;
-                } else if (vid.fileBlobUrl || (vid.url && vid.url.endsWith('.mp4'))) {
-                    screenContent = `
-                        <div class="cinema-viewport aspect-video">
-                            <video src="${vid.fileBlobUrl || vid.url}" controls class="w-full h-full object-contain"></video>
-                        </div>
-                    `;
-                } else if (vid.url) {
-                    screenContent = `
-                        <div class="cinema-viewport p-4 flex flex-col items-center justify-center text-center gap-2 aspect-video bg-slate-950">
-                            <span class="text-2xl">📽️</span>
-                            <a href="${vid.url}" target="_blank" class="text-cyan-300 font-bold text-xs underline hover:text-cyan-200">
-                                Mở màn chiếu ngoài (Click để xem) ➔
-                            </a>
-                        </div>
-                    `;
-                }
-
-                // CỤM ĐIỀU HƯỚNG TÁC VỤ THEO VAI TRÒ
-                let actionControls = '';
-
-                // CẤP 1: BAN ĐIỀU HÀNH / FOUNDER (TOÀN QUYỀN + XÓA VIDEO)
-                if (currentRole === 'founder') {
-                    actionControls = `
-                        <div class="flex gap-2 pt-1">
-                            <button onclick="voteVideo(${idx}, 'yes')" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all shadow-md">
-                                <span>👍</span> <span>Phê Duyệt</span>
-                            </button>
-                            <button onclick="voteVideo(${idx}, 'feedback')" class="flex-1 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all shadow-md">
-                                <span>💬</span> <span>Ghi Chú R&D</span>
-                            </button>
-                            <button onclick="deleteVipVideo(${idx})" class="py-2 px-3.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 border border-rose-500/50 text-rose-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all" title="Gỡ bỏ video này">
-                                <span>🗑️</span> <span>Xóa</span>
-                            </button>
-                        </div>
-                    `;
-                } 
-                // CẤP 2: ĐỐI TÁC TIÊN PHONG (BIỂU QUYẾT DUYỆT + GÓP Ý)
-                else if (currentRole === 'partner') {
-                    actionControls = `
-                        <div class="flex gap-2 pt-1">
-                            <button onclick="voteVideo(${idx}, 'yes')" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md">
-                                <span>👍</span> <span>Biểu Quyết Duyệt</span>
-                            </button>
-                            <button onclick="voteVideo(${idx}, 'feedback')" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md">
-                                <span>💬</span> <span>Gửi Góp Ý</span>
-                            </button>
-                        </div>
-                    `;
-                } 
-                // CẤP 3: KHÁN GIẢ (NÚT BIỂU QUYẾT BỊ KHÓA KÍCH HOẠT FOMO + GÓP Ý)
-                else {
-                    actionControls = `
-                        <div class="space-y-2 pt-1">
-                            <div class="flex gap-2">
-                                <button onclick="triggerAudienceLockNotice()" class="flex-1 py-2 rounded-xl bg-slate-800/80 border border-amber-500/40 text-amber-300 font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all relative overflow-hidden" title="Chạm để biểu quyết">
-                                    <span>🔒</span> <span>Biểu Quyết (Khóa)</span>
-                                </button>
-                                <button onclick="voteVideo(${idx}, 'feedback')" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-lg shadow-cyan-600/20">
-                                    <span>💬</span> <span>Gửi Góp Ý</span>
-                                </button>
-                            </div>
-                            <div class="text-[10px] text-slate-400 text-center italic">
-                                *Khán giả có quyền tham vấn, quyền biểu quyết số phận video thuộc về 100 Đối Tác Tiên Phong.
-                            </div>
-                        </div>
-                    `;
-                }
-
-                return `
-                    <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-3 font-mono-tech shadow-2xl">
-                        <!-- Header thước phim -->
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-amber-300 text-xs tracking-wide">🎬 ${vid.title}</span>
-                            <span class="text-[9px] px-2 py-0.5 rounded-md bg-slate-800 text-cyan-300 border border-slate-700">Mã: #${idx + 1}</span>
-                        </div>
-
-                        <!-- Màn Chiếu Rộng Chuẩn Rạp -->
-                        ${screenContent}
-
-                        <!-- Thanh Tiến Độ Thẩm Định -->
-                        <div class="space-y-1">
-                            <div class="flex items-center justify-between text-[10px] text-slate-400">
-                                <span>Đồng thuận Hội đồng: <b class="text-emerald-300">${vid.votesYes || 0} Phiếu</b> / <b class="text-rose-400">${vid.votesNo || 0} Góp ý</b></span>
-                                <span class="text-cyan-300 font-bold">${percentYes}%</span>
-                            </div>
-                            <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden p-[1px] border border-slate-800">
-                                <div class="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: ${percentYes}%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Khối Tác Vụ Phân Quyền -->
-                        ${actionControls}
-                    </div>
-                `;
-            }).join('');
         }
 
        // =====================================================================
@@ -3692,7 +3330,7 @@ function openFeedbackModal(index) { voteVideo(index, 'no'); }
         }
 
         // =====================================================================
-        // TRUNG TÂM KIỂM DUYỆT TELEPATHY (TỐI GIẢN - NÚT 1 HÀNG NGANG)
+        // HIỂN THỊ DANH SÁCH VIDEO & KẾT NỐI TRỰC TIẾP BẢNG HOLOGRAM
         // =====================================================================
         function renderVipVideos() {
             const container = document.getElementById('vipVideoListContainer');
@@ -3708,10 +3346,14 @@ function openFeedbackModal(index) { voteVideo(index, 'no'); }
             }
 
             const currentRole = localStorage.getItem('kdrive_role') || 'free';
+            const phone = localStorage.getItem('kdrive_vip_user') || '';
+            const votedMap = JSON.parse(localStorage.getItem('kdrive_voted_map_' + phone) || '{}');
 
             container.innerHTML = vipVideosData.map((vid, idx) => {
                 const totalVotes = (vid.votesYes || 0) + (vid.votesNo || 0);
                 const percentYes = totalVotes > 0 ? Math.round((vid.votesYes / totalVotes) * 100) : 0;
+                const videoKey = vid.id || vid.title || idx;
+                const votedCount = votedMap[videoKey];
                 
                 let screenContent = '';
                 const ytEmbed = getYouTubeEmbedUrl(vid.url);
@@ -3737,9 +3379,18 @@ function openFeedbackModal(index) { voteVideo(index, 'no'); }
                     `;
                 }
 
+                // Nút Biểu quyết tự động hiển thị trạng thái nếu đã vote
+                const voteBtnHtml = votedCount
+                    ? `<button type="button" onclick="voteVideo(${idx}, 'yes')" class="flex-1 py-2 rounded-xl bg-cyan-950/90 border border-cyan-400/60 text-cyan-300 font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all shadow-[0_0_15px_rgba(6,182,212,0.25)] whitespace-nowrap">
+                           <span>✓ Đã biểu quyết (+${votedCount}P)</span>
+                       </button>`
+                    : `<button type="button" onclick="voteVideo(${idx}, 'yes')" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all shadow-md whitespace-nowrap">
+                           <span>🗳️ Biểu quyết</span>
+                       </button>`;
+
                 // Nút Xóa chỉ hiển thị riêng cho Founder
                 const founderDeleteBtn = (currentRole === 'founder') ? `
-                    <button onclick="deleteVipVideo(${idx})" class="py-2 px-3 rounded-xl bg-rose-600/20 hover:bg-rose-600 border border-rose-500/40 text-rose-300 hover:text-white font-bold text-xs active:scale-95 transition-all whitespace-nowrap" title="Xóa video">
+                    <button type="button" onclick="deleteVipVideo(${idx})" class="py-2 px-3 rounded-xl bg-rose-600/20 hover:bg-rose-600 border border-rose-500/40 text-rose-300 hover:text-white font-bold text-xs active:scale-95 transition-all whitespace-nowrap" title="Xóa video">
                         Xóa
                     </button>
                 ` : '';
@@ -3763,13 +3414,11 @@ function openFeedbackModal(index) { voteVideo(index, 'no'); }
                             </div>
                         </div>
 
-                        <!-- CỤM NÚT PHẲNG 1 HÀNG NGANG -->
+                        <!-- CỤM NÚT GỌI THẲNG VÀO HỆ THỐNG BẢNG HOLOGRAM -->
                         <div class="flex gap-2 pt-1">
-                            <button onclick="handleVoteAction(${idx})" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center active:scale-95 transition-all shadow-md whitespace-nowrap">
-                                Biểu quyết
-                            </button>
-                            <button onclick="handleFeedbackAction(${idx})" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center active:scale-95 transition-all shadow-md whitespace-nowrap">
-                                Góp ý
+                            ${voteBtnHtml}
+                            <button type="button" onclick="voteVideo(${idx}, 'feedback')" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all shadow-md whitespace-nowrap">
+                                <span>💬 Góp ý</span>
                             </button>
                             ${founderDeleteBtn}
                         </div>
@@ -3778,72 +3427,6 @@ function openFeedbackModal(index) { voteVideo(index, 'no'); }
             }).join('');
         }
 
-        function handleVoteAction(index) {
-            const currentRole = localStorage.getItem('kdrive_role') || 'free';
-            const vid = vipVideosData[index];
-            if (!vid) return;
-
-            if (currentRole === 'free') {
-                const upgradeConfirm = confirm(
-                    "QUY CHẾ TELEPATHY:\n\n" +
-                    "Quyền biểu quyết chính thức chỉ dành cho 100 Đối Tác Tiên Phong sở hữu hợp đồng BCC K-Drive.\n\n" +
-                    "Bạn có muốn xem Hồ Sơ Ký BCC (1.000.000đ) để nhận quyền biểu quyết ngay không?"
-                );
-                if (upgradeConfirm) {
-                    closeShareholderLoginModal();
-                    if (typeof openContractModal === 'function') openContractModal();
-                }
-                return;
-            }
-
-            vid.votesYes = (vid.votesYes || 0) + 1;
-            saveVipVideos();
-            renderVipVideos();
-            alert(`Đã ghi nhận phiếu biểu quyết: ĐỒNG Ý phát hành "${vid.title}"!`);
-        }
-
-        async function handleFeedbackAction(index) {
-            const vid = vipVideosData[index];
-            if (!vid) return;
-
-            const feedback = prompt(`Nhập ý kiến đóng góp của bạn cho thước phim "${vid.title}":`);
-            if (feedback && feedback.trim() !== '') {
-                vid.votesNo = (vid.votesNo || 0) + 1;
-                saveVipVideos();
-                renderVipVideos();
-
-                const currentUser = localStorage.getItem('kdrive_vip_user') || 'Khán giả';
-                const currentName = document.getElementById('shDisplayName') ? document.getElementById('shDisplayName').textContent : 'Thành viên thẩm định';
-
-                try {
-                    await fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'save_feedback',
-                            phone: currentUser,
-                            name: currentName,
-                            videoTitle: vid.title,
-                            feedback: feedback.trim()
-                        })
-                    });
-                    alert(`Ý kiến đóng góp đã được chuyển về máy chủ Telepathy!`);
-                } catch (err) {
-                    console.error(err);
-                }
-            }
-        }
-
-        function deleteVipVideo(index) {
-            const currentRole = localStorage.getItem('kdrive_role');
-            if (currentRole !== 'founder') return;
-
-            const vid = vipVideosData[index];
-            if (confirm(`Xác nhận xóa video: "${vid ? vid.title : 'này'}"?`)) {
-                vipVideosData.splice(index, 1);
-                saveVipVideos();
-                renderVipVideos();
-            }
-        }
         // HÀM ĐĂNG TẢI VIDEO TỪ FOUNDER DASHBOARD
         function uploadFounderVideo() {
             const titleInput = document.getElementById('founderVideoTitle');
@@ -3886,24 +3469,6 @@ function openFeedbackModal(index) { voteVideo(index, 'no'); }
             alert(`🎉 Đã đưa "${title}" lên Phòng Chiếu VIP thành công!`);
             closeFounderDashboardModal();
             renderVipVideos();
-        }
-        // HÀM XỬ LÝ BIỂU QUYẾT CHO ĐỐI TÁC
-        function voteVideo(index, type) {
-            const vid = vipVideosData[index];
-            if (!vid) return;
-
-            if (type === 'yes') {
-                vid.votesYes = (vid.votesYes || 0) + 1;
-                saveVipVideos();
-                alert(`Đã ghi nhận biểu quyết: ĐỒNG Ý duyệt "${vid.title}"!`);
-            } else {
-                const feedback = prompt(`Nhập ý kiến góp ý của bạn cho "${vid.title}":`);
-                if (feedback) {
-                    vid.votesNo = (vid.votesNo || 0) + 1;
-                    saveVipVideos();
-                    alert(`Đã gửi góp ý tới Founder: "${feedback}". Cảm ơn đóng góp quý báu của bạn!`);
-                }
-            }
         }
 
         // TỰ ĐỘNG KHỞI TẠO KHUNG VIDEO KHI MỞ TRANG
@@ -4262,7 +3827,7 @@ function openFeedbackModal(index) { voteVideo(index, 'no'); }
         window.addEventListener('DOMContentLoaded', () => {
             renderLinks();
             updateBiometricUIButtons();
-            updateShareholderBadgeCount();
+            fetchAndRenderShareholders();
 
             let subCount = parseInt(localStorage.getItem('kdrive_sub_count') || '23');
             const subBadge = document.getElementById('subscriberCountBadge');
