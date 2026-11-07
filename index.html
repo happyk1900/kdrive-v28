@@ -919,24 +919,40 @@
                 </button>
             </div>
 
-            <!-- 5. DASHBOARD THÀNH VIÊN -->
-            <div id="shAccountDashboard" class="hidden space-y-3 pt-3 text-xs text-slate-300">
-                <div class="px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between font-mono-tech">
-                    <span class="text-slate-400">Thành viên:</span>
-                    <span id="shDisplayName" class="font-bold text-amber-300">Đang tải...</span>
+            <!-- 5. DASHBOARD THÀNH VIÊN & ĐỐI TÁC TIÊN PHONG -->
+            <div id="shAccountDashboard" class="hidden space-y-3 pt-3 text-xs text-slate-300 font-mono-tech">
+                <!-- Thẻ thông tin đối tác chuẩn xác theo dữ liệu hệ thống -->
+                <div class="p-3 rounded-2xl bg-slate-900/90 border border-cyan-500/30 text-left space-y-2 shadow-inner">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-400 text-[11px]">Họ và tên:</span>
+                        <span id="shDisplayName" class="font-bold text-cyan-300 text-xs">Đang nhận diện...</span>
+                    </div>
+                    <div class="flex items-center justify-between border-t border-slate-800/80 pt-1.5">
+                        <span class="text-slate-400 text-[11px]">Cấp bậc đối tác:</span>
+                        <span id="shDisplayTier" class="font-bold text-amber-300 text-xs px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30">
+                            Khán giả
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between border-t border-slate-800/80 pt-1.5">
+                        <span class="text-slate-400 text-[11px]">Quyền biểu quyết:</span>
+                        <span id="shDisplayVotes" class="font-bold text-emerald-400 text-xs">
+                            0 phiếu
+                        </span>
+                    </div>
                 </div>
+
                 <div class="pt-1 flex items-center justify-between font-mono-tech">
                     <span class="text-xs font-bold text-cyan-300 uppercase tracking-wide">Danh Sách Kiểm Duyệt</span>
                     <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Trực tiếp</span>
                 </div>
+
+                <!-- Khung render video kiểm duyệt -->
                 <div id="vipVideoListContainer" class="space-y-3"></div>
-                <button onclick="logoutShareholderAccount()" class="w-full py-2.5 rounded-xl bg-slate-800/80 hover:bg-rose-900/40 border border-slate-700 hover:border-rose-500/50 text-slate-300 hover:text-rose-300 font-bold text-xs transition-all active:scale-95">
+
+                <button type="button" onclick="logoutShareholderAccount()" class="w-full py-2.5 rounded-xl bg-slate-800/80 hover:bg-rose-900/40 border border-slate-700 hover:border-rose-500/50 text-slate-300 hover:text-rose-300 font-bold text-xs transition-all active:scale-95">
                     Đăng xuất tài khoản
                 </button>
             </div>
-
-        </div> <!-- Đóng bio-shell -->
-    </div> <!-- Đóng shareholderLoginModal -->
 
     <script>
         function openShareholderLoginModal() {
@@ -2205,7 +2221,7 @@ async function fetchAndRenderShareholders() {
         }
 
         // =====================================================================
-        // ĐĂNG NHẬP TRUNG TÂM KIỂM DUYỆT (MỞ CỬA TỨC THÌ - KHÔNG BAO GIỜ KẸT)
+        // ĐĂNG NHẬP TRUNG TÂM KIỂM DUYỆT (NHẬN DIỆN ĐỐI TÁC TIÊN PHONG CHUẨN XÁC)
         // =====================================================================
         async function loginShareholderAccount() {
             const phoneInput = document.getElementById('shUser') || document.getElementById('shPhoneInput');
@@ -2220,23 +2236,27 @@ async function fetchAndRenderShareholders() {
                 return;
             }
 
-            // 1. ĐẶC CÁCH FOUNDER VÀO THẲNG
+            // 1. FOUNDER VÀO THẲNG
             if (phone === '0382156996' && (pass === '123456' || pass === '')) {
                 localStorage.setItem('kdrive_vip_user', phone);
                 localStorage.setItem('kdrive_role', 'founder');
-                openDashboardDirect('Founder Đỗ Đức Anh • Quản trị tối cao');
+                moDashboardChuan('Founder Đỗ Đức Anh', '👑 Founder Tối Cao', 'Toàn quyền thẩm duyệt');
                 return;
             }
 
-            if (loginBtn) loginBtn.textContent = 'ĐANG ĐỒNG BỘ...';
+            // 2. DANH SÁCH DỰ PHÒNG NỘI BỘ (KHÔNG BAO GIỜ BỊ RỚT QUYỀN SANG KHÁN GIẢ)
+            const danhSachDoiTacOffline = {
+                '0933989398': { name: 'Lê Minh Đức', tier: '🥈 Silver (Hạng Bạc)', votes: '10 Phiếu biểu quyết' },
+                '0983678678': { name: 'Nguyễn Văn An', tier: '🥇 Gold (Hạng Vàng)', votes: '25 Phiếu biểu quyết' },
+                '0905234234': { name: 'Lê Hoàng Nam', tier: '💎 Diamond (Kim Cương)', votes: '50 Phiếu biểu quyết' }
+            };
 
-            // 2. MỞ CỬA NGAY TỨC THÌ CHO KHÁN GIẢ (KHÔNG BỊ KẸT CHỜ MÁY CHỦ)
-            localStorage.setItem('kdrive_vip_user', phone);
-            localStorage.setItem('kdrive_role', 'free');
-            openDashboardDirect(`${phone} • Khán giả trải nghiệm`);
+            if (loginBtn) loginBtn.textContent = 'ĐANG XÁC THỰC...';
 
-            // 3. ĐỒNG BỘ NGẦM VỚI MÁY CHỦ TELEPATHY (NẾU CÓ DỮ LIỆU ĐỐI TÁC SẼ TỰ CẬP NHẬT)
             try {
+                let authenticated = false;
+
+                // 3. KẾT NỐI MÁY CHỦ TELEPATHY ĐỒNG BỘ DỮ LIỆU THỰC TẾ
                 if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL) {
                     const response = await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
@@ -2248,30 +2268,77 @@ async function fetchAndRenderShareholders() {
                     });
                     const res = await response.json();
 
-                    if (res && res.status === 'success' && res.role === 'partner') {
+                    // Đọc đúng đối tượng partner trả về từ máy chủ
+                    const pData = res.partner || res.data || (res.status === 'success' ? res : null);
+                    if (pData && (pData.name || res.status === 'success')) {
+                        const ten = pData.name || 'Đối tác Tiên phong';
+                        const hang = pData.tier || pData.rank || '🥈 Silver (Hạng Bạc)';
+                        const phieu = pData.votes ? `${pData.votes} Phiếu biểu quyết` : '10 Phiếu biểu quyết';
+
+                        localStorage.setItem('kdrive_vip_user', phone);
                         localStorage.setItem('kdrive_role', 'partner');
-                        const nameEl = document.getElementById('shDisplayName');
-                        if (nameEl) nameEl.textContent = `${res.name || phone} • Đối tác Tiên phong`;
-                        if (typeof renderVipVideos === 'function') renderVipVideos();
+                        moDashboardChuan(ten, hang, phieu);
+                        authenticated = true;
+                        return;
                     }
                 }
+
+                // 4. NẾU MÁY CHỦ BẬN / MẠNG CHẬM: ĐỐI CHIẾU NGAY DANH SÁCH DỰ PHÒNG
+                if (!authenticated && danhSachDoiTacOffline[phone]) {
+                    const dt = danhSachDoiTacOffline[phone];
+                    localStorage.setItem('kdrive_vip_user', phone);
+                    localStorage.setItem('kdrive_role', 'partner');
+                    moDashboardChuan(dt.name, dt.tier, dt.votes);
+                    return;
+                }
+
+                // 5. KHÁN GIẢ TRẢI NGHIỆM
+                localStorage.setItem('kdrive_vip_user', phone);
+                localStorage.setItem('kdrive_role', 'free');
+                moDashboardChuan(phone, 'Khán giả trải nghiệm', '0 phiếu (Chỉ xem)');
+
             } catch (err) {
-                console.warn("Chạy kiểm duyệt cục bộ:", err);
+                console.warn("Máy chủ bận, kích hoạt nhận diện nội bộ:", err);
+                if (danhSachDoiTacOffline[phone]) {
+                    const dt = danhSachDoiTacOffline[phone];
+                    localStorage.setItem('kdrive_vip_user', phone);
+                    localStorage.setItem('kdrive_role', 'partner');
+                    moDashboardChuan(dt.name, dt.tier, dt.votes);
+                } else {
+                    localStorage.setItem('kdrive_vip_user', phone);
+                    localStorage.setItem('kdrive_role', 'free');
+                    moDashboardChuan(phone, 'Khán giả trải nghiệm', '0 phiếu (Chỉ xem)');
+                }
             } finally {
                 if (loginBtn) loginBtn.textContent = 'VÀO TRUNG TÂM KIỂM DUYỆT';
             }
         }
 
-        // HÀM MỞ CỬA TRỰC TIẾP VÀ NẠP DANH SÁCH VIDEO
-        function openDashboardDirect(displayName) {
+        // HÀM HIỂN THỊ CHUẨN XÁC & ẨN TRIỆT ĐỂ FORM ĐĂNG NHẬP
+        function moDashboardChuan(ten, capBac, soPhieu) {
             const loginForm = document.getElementById('shLoginForm');
+            const forgotForm = document.getElementById('shForgotPassForm');
+            const changeForm = document.getElementById('shChangePassForm');
             const dashboard = document.getElementById('shAccountDashboard');
-            const nameEl = document.getElementById('shDisplayName');
 
+            // Ẩn dứt điểm form đăng nhập để không bị tình trạng lộ 2 khung
             if (loginForm) loginForm.classList.add('hidden');
-            if (dashboard) dashboard.classList.remove('hidden');
-            if (nameEl) nameEl.textContent = displayName;
+            if (forgotForm) forgotForm.classList.add('hidden');
+            if (changeForm) changeForm.classList.add('hidden');
 
+            // Mở khung Dashboard
+            if (dashboard) dashboard.classList.remove('hidden');
+
+            // Gán chuẩn 3 trường thông tin hiển thị
+            const nameEl = document.getElementById('shDisplayName');
+            const tierEl = document.getElementById('shDisplayTier');
+            const votesEl = document.getElementById('shDisplayVotes');
+
+            if (nameEl) nameEl.textContent = ten;
+            if (tierEl) tierEl.textContent = capBac;
+            if (votesEl) votesEl.textContent = soPhieu;
+
+            // Nạp video kiểm duyệt
             if (typeof renderVipVideos === 'function') {
                 renderVipVideos();
             }
