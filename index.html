@@ -3201,9 +3201,77 @@ function openFeedbackModal(index) { voteVideo(index, 'no'); }
             if (modal) { modal.classList.remove('flex'); modal.classList.add('hidden'); }
         }
 
+        // =====================================================================
+        // CHẶN 18+ TẬN GỐC TẠI CỬA NGÕ HỢP TÁC PHÁT TRIỂN (HỘP THỨ 3 & CÁC LỐI VÀO)
+        // =====================================================================
         function openDocModal() {
-            document.getElementById('docModal').classList.remove('hidden');
-            document.getElementById('docModal').classList.add('flex');
+            // Kiểm tra xem trong phiên này đối tác đã xác nhận 18+ chưa
+            const isAgeVerified = sessionStorage.getItem('kdrive_18plus_verified') === 'true';
+
+            // Đã bấm xác nhận trong phiên lướt web này thì cho vào thẳng
+            if (isAgeVerified) {
+                hienThiHoSoDocModal();
+                return;
+            }
+
+            // Chưa xác nhận: Bật bảng Holo Glassmorphism cảnh báo pháp lý 18+
+            const holo = ensureHoloModalContainer();
+            holo.innerHTML = `
+                <div class="w-full max-w-[420px] rounded-3xl bg-slate-950/95 border border-amber-500/60 shadow-[0_0_35px_rgba(245,158,11,0.3)] p-5 text-slate-200 font-mono-tech relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <!-- Header Holo -->
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <span class="text-amber-400 text-lg">🔞</span>
+                            <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Xác Thực Năng Lực Pháp Lý</span>
+                        </div>
+                        <button type="button" onclick="closeHoloModal()" class="w-7 h-7 rounded-full bg-slate-900 border border-slate-700 hover:border-rose-500/50 flex items-center justify-center text-slate-400 hover:text-rose-300 transition-all">✕</button>
+                    </div>
+
+                    <!-- Thẻ quy định pháp luật -->
+                    <div class="my-4 p-3.5 rounded-2xl bg-slate-900/90 border border-amber-500/30 text-[11px] leading-relaxed space-y-2">
+                        <div class="flex items-center gap-1.5 text-amber-300 font-bold uppercase">
+                            <span>⚖️</span>
+                            <span>ĐIỀU LỆ HỢP TÁC KINH DOANH (BCC)</span>
+                        </div>
+                        <p class="text-slate-300">
+                            Để tiếp cận Hồ sơ Hợp tác và Ký hợp đồng BCC cùng Công Ty TNHH Telepathy, bạn phải đảm bảo <strong class="text-white">đủ từ 18 tuổi trở lên</strong> và có đầy đủ năng lực hành vi dân sự theo quy định của pháp luật Việt Nam.
+                        </p>
+                    </div>
+
+                    <p class="text-xs text-center text-slate-300 px-2 font-medium">
+                        Bạn xác nhận bản thân đã <strong class="text-amber-400 text-sm">đủ từ 18 tuổi trở lên</strong> để tiếp tục?
+                    </p>
+
+                    <!-- Nút hành động -->
+                    <div class="mt-5 space-y-2">
+                        <button type="button" onclick="confirm18PlusAndProceed()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 hover:brightness-110 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.35)] active:scale-95 transition-all">
+                            <span>⚡</span> TÔI ĐÃ ĐỦ 18 TUỔI & TIẾP TỤC ➔
+                        </button>
+                        <button type="button" onclick="closeHoloModal()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 font-bold text-xs active:scale-95 transition-all">
+                            Tôi chưa đủ 18 tuổi (Quay lại)
+                        </button>
+                    </div>
+                </div>
+            `;
+            holo.classList.remove('hidden');
+        }
+
+        // Bấm "TÔI ĐÃ ĐỦ 18 TUỔI"
+        function confirm18PlusAndProceed() {
+            sessionStorage.setItem('kdrive_18plus_verified', 'true');
+            closeHoloModal();
+            hienThiHoSoDocModal();
+        }
+
+        // Mở tiếp giao diện hồ sơ
+        function hienThiHoSoDocModal() {
+            const modal = document.getElementById('docModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
         }
         function closeDocModal() {
             document.getElementById('docModal').classList.remove('flex');
