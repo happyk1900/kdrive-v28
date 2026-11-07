@@ -1446,64 +1446,116 @@
         }
 
         async function loginWithBiometric(targetContext) {
-            const savedCredId = localStorage.getItem(BIO_CRED_STORAGE_KEY);
-            if (!savedCredId || !window.PublicKeyCredential) {
-                alert('Thiết bị này chưa được liên kết vân tay Founder. Vui lòng vào Dashboard cài đặt vân tay một lần!');
-                return;
-            }
-            try {
-                const challenge = new Uint8Array(32);
-                window.crypto.getRandomValues(challenge);
+    const savedCredId = localStorage.getItem('BIO_CRED_SAVED');
+    if (!window.PublicKeyCredential) {
+        alert('Thiết bị này không hỗ trợ xác thực sinh trắc học.');
+        return;
+    }
 
-                const publicKey = {
-                    challenge: challenge,
-                    allowCredentials: [{
-                        id: base64UrlToBuffer(savedCredId),
-                        type: 'public-key',
-                        transports: ['internal']
-                    }],
-                    userVerification: 'required',
-                    timeout: 60000
-                };
+    try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
 
-                const assertion = await navigator.credentials.get({ publicKey });
-                if (assertion) {
-                    localStorage.setItem('kdrive_founder_logged', 'true');
-                    
-                    if (targetContext === 'shareholders') {
-                        document.getElementById('shAdminAuthBox').classList.add('hidden');
-                        document.getElementById('shManagerFormBox').classList.remove('hidden');
-                        renderShareholdersList();
-                    } else if (targetContext === 'dashboard') {
-                        showFounderPanelDirect();
-                        document.getElementById('logoutFounderBtn').classList.remove('hidden');
-                    } else if (targetContext === 'vip_room') {
-                        // VÀO THẲNG PHÒNG CHIẾU VIP
-                        document.getElementById('shLoginForm').classList.add('hidden');
-                        document.getElementById('shAccountDashboard').classList.remove('hidden');
-                        document.getElementById('shDisplayName').textContent = 'Founder Đỗ Đức Anh';
-                        document.getElementById('shDisplayAmount').textContent = 'Quyền Quản Trị Tối Cao';
-                        document.getElementById('shDisplayShare').textContent = '100%';
-                    } else if (targetContext === 'contract') {
-                        // VÀO THẲNG HỢP ĐỒNG BỎ QUA OTP
-                        closePackagePopup();
-                        document.getElementById('contractModal').classList.remove('hidden');
-                        document.getElementById('contractModal').classList.add('flex');
-                        initSignaturePad();
-                    }
+        const publicKey = {
+            challenge: challenge,
+            timeout: 60000,
+            userVerification: "required"
+        };
 
-                    const toast = document.getElementById('toast');
-                    if(toast) {
-                        toast.textContent = '🫆 Đã xác thực vân tay Founder!';
-                        toast.style.opacity = '1';
-                        setTimeout(() => toast.style.opacity = '0', 2200);
-                    }
-                }
-            } catch (err) {
-                console.error("Biometric login error:", err);
-                alert('Xác thực vân tay bị hủy hoặc không khớp. Vui lòng thử lại!');
-            }
+        if (savedCredId) {
+            publicKey.allowCredentials = [{
+                id: base64UrlToBuffer(savedCredId),
+                type: 'public-key',
+                transports: ['internal']
+            }];
         }
+
+        const assertion = await navigator.credentials.get({ publicKey });
+
+        // CHỈ MỞ CỬA KHI CẢM BIẾN VÂN TAY TRẢ VỀ DỮ LIỆU HỢP LỆ
+        if (assertion && assertion.id) {
+            localStorage.setItem('kdrive_role', 'founder');
+            localStorage.setItem('kdrive_vip_user', '0382156996');
+
+            if (targetContext === 'shareholders') {
+                const modal = document.getElementById('shareholderLoginModal');
+                const dash = document.getElementById('shareholderDashboard');
+                if (modal) modal.classList.add('hidden');
+                if (dash) dash.classList.remove('hidden');
+                if (typeof renderShareholdersList === 'function') renderShareholdersList();
+            } else if (targetContext === 'founder') {
+                if (typeof showFounderPanelDirect === 'function') showFounderPanelDirect();
+            } else if (targetContext === 'vip_cinema' || targetContext === 'cinema') {
+                const loginForm = document.getElementById('shLoginForm');
+                const dashboard = document.getElementById('shAccountDashboard');
+                const nameEl = document.getElementById('shDisplayName');
+
+                if (loginForm) loginForm.classList.add('hidden');
+                if (dashboard) dashboard.classList.remove('hidden');
+                if (nameEl) nameEl.textContent = 'Founder Đỗ Đức Anh • Quản trị tối cao';
+                if (typeof renderVipVideos === 'function') renderVipVideos();
+            } else if (targetContext === 'contract') {
+                if (typeof closePackagePopup === 'function') closePackagePopup();
+                const cModal = document.getElementById('contractModal');
+                if (cModal) cModal.classList.remove('hidden');
+                if (typeof initSignaturePad === 'function') initSignaturePad();
+            }
+
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = '🧬 Đã xác thực vân tay Founder thành công!';
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 2000);
+            }
+        } else {
+            alert('Xác thực vân tay không thành công. Quyền truy cập bị từ chối!');
+            return;
+        }
+    } catch (err) {
+        console.error("Biometric login error:", err);
+        alert('Xác thực vân tay bị hủy hoặc không khớp. Quyền truy cập bị từ chối!');
+        return; // CHẶN ĐỨNG HOÀN TOÀN - KHÔNG CHO MỞ BẤT KỲ GIAO DIỆN NÀO
+    }
+}
+
+// =====================================================================
+// TẢI DANH SÁCH ĐỐI TÁC TỪ MÁY CHỦ TELEPATHY (KHÔNG LỘ GOOGLE SHEET)
+// =====================================================================
+async function fetchAndRenderShareholders() {
+    const container = document.getElementById('shareholderListContainer');
+    const badge = document.getElementById('shareholderCountBadge');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="p-4 text-center text-cyan-300 font-mono-tech text-xs">
+            ⚡ Đang đồng bộ danh sách đối tác từ Máy chủ Telepathy...
+        </div>
+    `;
+
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        const res = await response.json();
+        
+        if (res && res.status === 'success') {
+            if (typeof renderShareholderListUI === 'function') {
+                renderShareholderListUI(res.data);
+            }
+        } else {
+            container.innerHTML = `
+                <div class="p-4 text-center text-slate-400 font-mono-tech text-xs">
+                    Máy chủ Telepathy đang cập nhật dữ liệu.
+                </div>
+            `;
+        }
+    } catch (err) {
+        console.error("Server error:", err);
+        container.innerHTML = `
+            <div class="p-4 text-center text-amber-400 font-mono-tech text-xs">
+                Kết nối Máy chủ Telepathy bị gián đoạn. Đang thử lại...
+            </div>
+        `;
+    }
+}
 
         // ==========================================
         // TẢI DANH SÁCH ĐỐI TÁC THỜI GIAN THỰC TỪ GOOGLE SHEET
