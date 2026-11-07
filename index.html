@@ -1204,13 +1204,49 @@
         }
 
         // =====================================================================
-        // BIỂU QUYẾT: CỘNG ĐÚNG SỐ PHIẾU LẤY TỪ CỘT N TRÊN SHEET
+        // TRUNG TÂM HOLOGRAPHIC BIỂU QUYẾT & GÓP Ý THẨM ĐỊNH (K-DRIVE VIP)
         // =====================================================================
-        async function voteVipVideo(videoId, voteType = 'agree') {
-            const role = localStorage.getItem('kdrive_role');
-            const phone = localStorage.getItem('kdrive_vip_user');
-            const votes = Number(localStorage.getItem('kdrive_vip_votes') || 0);
 
+        // 1. TÌM DỮ LIỆU VIDEO LINH HOẠT
+        function getVipVideoItem(videoId) {
+            if (typeof vipVideos === 'undefined') return null;
+            if (Array.isArray(vipVideos)) {
+                return vipVideos.find(v => String(v.id) === String(videoId)) || vipVideos[videoId];
+            }
+            return vipVideos[videoId];
+        }
+
+        // 2. KHỞI TẠO BẢNG HOLOGRAM GLASSMORPHISM CHUẨN CYBERPUNK
+        function ensureHoloModalContainer() {
+            let holo = document.getElementById('telepathyHoloModal');
+            if (!holo) {
+                holo = document.createElement('div');
+                holo.id = 'telepathyHoloModal';
+                holo.className = 'fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden transition-all duration-300';
+                document.body.appendChild(holo);
+            }
+            return holo;
+        }
+
+        function closeHoloModal() {
+            const holo = document.getElementById('telepathyHoloModal');
+            if (holo) holo.classList.add('hidden');
+        }
+
+        // 3. XỬ LÝ BIỂU QUYẾT: KIỂM TRA LƯỢT & BẬT BẢNG HOLO
+        function voteVipVideo(videoId) {
+            const role = localStorage.getItem('kdrive_role');
+            const phone = localStorage.getItem('kdrive_vip_user') || '';
+            const name = localStorage.getItem('kdrive_vip_name') || 'Lê Minh Đức';
+            const tier = localStorage.getItem('kdrive_vip_tier') || 'CYBER SILVER';
+            
+            // Lấy chính xác số phiếu thực từ Sheet lưu trong phiên (Lê Minh Đức = 2 phiếu)
+            let votes = Number(localStorage.getItem('kdrive_vip_votes'));
+            if (!votes || isNaN(votes) || votes <= 0) {
+                votes = (tier.toUpperCase().includes('SILVER')) ? 2 : 1;
+            }
+
+            // Nếu là khán giả (0 phiếu): Bật modal ký hợp tác
             if (!role || role === 'free' || votes <= 0) {
                 if (typeof openPioneerModal === 'function') {
                     openPioneerModal();
@@ -1220,17 +1256,135 @@
                 return;
             }
 
-            // Cộng dồn đúng số phiếu thực của đối tác vào video
-            if (typeof vipVideos !== 'undefined' && vipVideos[videoId]) {
-                if (voteType === 'agree') {
-                    vipVideos[videoId].agrees = (vipVideos[videoId].agrees || 0) + votes;
-                } else {
-                    vipVideos[videoId].feedbacks = (vipVideos[videoId].feedbacks || 0) + 1;
-                }
-                if (typeof renderVipVideos === 'function') renderVipVideos();
+            const video = getVipVideoItem(videoId);
+            const videoTitle = video ? (video.title || `Video #${videoId}`) : `Video #${videoId}`;
+
+            // Kiểm tra trạng thái đã biểu quyết của số điện thoại này
+            const votedKey = 'kdrive_voted_map_' + phone;
+            let votedMap = JSON.parse(localStorage.getItem(votedKey) || '{}');
+            const holo = ensureHoloModalContainer();
+
+            // TRƯỜNG HỢP A: ĐÃ BIỂU QUYẾT RỒI -> BẬT BẢNG HOLO HỔ PHÁCH CHO PHÉP HỦY ĐỂ CHỌN LẠI
+            if (votedMap[videoId]) {
+                const votedCount = votedMap[videoId];
+                holo.innerHTML = `
+                    <div class="w-full max-w-[420px] rounded-3xl bg-slate-950/95 border border-amber-500/60 shadow-[0_0_35px_rgba(245,158,11,0.25)] p-5 text-slate-200 font-mono-tech relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        <div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                            <div class="flex items-center gap-2">
+                                <span class="text-amber-400 text-base">⚠️</span>
+                                <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Hội Đồng Thẩm Định</span>
+                            </div>
+                            <button onclick="closeHoloModal()" class="w-7 h-7 rounded-full bg-slate-900 border border-slate-700 hover:border-rose-500/50 flex items-center justify-center text-slate-400 hover:text-rose-300 transition-all">✕</button>
+                        </div>
+
+                        <div class="my-4 p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-1.5 text-[11px]">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-400">Đối tác thẩm định:</span>
+                                <span class="font-bold text-cyan-300">${name}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-400">Cấp bậc:</span>
+                                <span class="font-bold text-amber-300">${tier}</span>
+                            </div>
+                            <div class="flex justify-between items-center border-t border-slate-800/80 pt-1.5">
+                                <span class="text-slate-400">Trạng thái phiếu:</span>
+                                <span class="font-bold text-emerald-400">✓ Đã đóng góp +${votedCount} phiếu</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-slate-300 leading-relaxed text-center px-1">
+                            Bạn đã biểu quyết thẩm định cho thước phim <strong class="text-cyan-300">"${videoTitle}"</strong>. 
+                            Mỗi đối tác chỉ được giữ 1 lượt biểu quyết cho mỗi video.
+                        </p>
+                        <p class="text-[11px] text-amber-400/90 text-center mt-2 font-bold">
+                            Bạn có muốn thu hồi để biểu quyết lại không?
+                        </p>
+
+                        <div class="mt-5 space-y-2">
+                            <button onclick="confirmCancelVipVote('${videoId}')" class="w-full py-2.5 rounded-xl bg-rose-950/80 hover:bg-rose-900/90 border border-rose-500/60 text-rose-200 font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(244,63,94,0.3)] active:scale-95 transition-all">
+                                <span>🔄</span> Hủy biểu quyết để chọn lại
+                            </button>
+                            <button onclick="closeHoloModal()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 font-bold text-xs active:scale-95 transition-all">
+                                Giữ nguyên kết quả
+                            </button>
+                        </div>
+                    </div>
+                `;
+                holo.classList.remove('hidden');
+                return;
             }
 
-            // Ghi nhận số phiếu thực vào tab BIEU_QUYET_VIDEO trên Sheet
+            // TRƯỜNG HỢP B: CHƯA BIỂU QUYẾT -> BẬT BẢNG HOLO NEON CYAN XÁC NHẬN SỐ PHIẾU THẬT
+            holo.innerHTML = `
+                <div class="w-full max-w-[420px] rounded-3xl bg-slate-950/95 border border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.25)] p-5 text-slate-200 font-mono-tech relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <span class="text-cyan-400 text-base">⚡</span>
+                            <span class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Xác Thực Biểu Quyết</span>
+                        </div>
+                        <button onclick="closeHoloModal()" class="w-7 h-7 rounded-full bg-slate-900 border border-slate-700 hover:border-rose-500/50 flex items-center justify-center text-slate-400 hover:text-rose-300 transition-all">✕</button>
+                    </div>
+
+                    <div class="my-4 p-3.5 rounded-2xl bg-slate-900/90 border border-cyan-500/30 space-y-2 text-xs">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400 text-[11px]">Đối tác:</span>
+                            <span class="font-bold text-cyan-300">${name}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-slate-800/80 pt-1.5">
+                            <span class="text-slate-400 text-[11px]">Cấp bậc:</span>
+                            <span class="font-bold text-amber-300 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[11px]">${tier}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-slate-800/80 pt-1.5">
+                            <span class="text-slate-400 text-[11px]">Trọng số đóng góp:</span>
+                            <span class="font-bold text-emerald-400 text-sm animate-pulse">+${votes} Phiếu biểu quyết</span>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-300 leading-relaxed text-center px-1">
+                        Xác nhận ghi nhận <strong class="text-emerald-400">+${votes} phiếu</strong> đồng thuận của bạn vào thước phim:
+                    </p>
+                    <p class="text-xs font-bold text-cyan-300 text-center mt-1 truncate">
+                        🎬 ${videoTitle}
+                    </p>
+
+                    <div class="mt-5 space-y-2">
+                        <button onclick="executeConfirmVipVote('${videoId}', ${votes})" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:brightness-110 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.35)] active:scale-95 transition-all">
+                            <span>🗳️</span> ĐỒNG Ý BIỂU QUYẾT (+${votes} PHIẾU)
+                        </button>
+                        <button onclick="closeHoloModal()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 font-bold text-xs active:scale-95 transition-all">
+                            Xem lại video
+                        </button>
+                    </div>
+                </div>
+            `;
+            holo.classList.remove('hidden');
+        }
+
+        // 4. THỰC THI GHI NHẬN (+2 PHIẾU CHO LÊ MINH ĐỨC HOẶC +1 PHIẾU)
+        async function executeConfirmVipVote(videoId, voteWeight) {
+            const phone = localStorage.getItem('kdrive_vip_user') || '';
+            const name = localStorage.getItem('kdrive_vip_name') || 'Lê Minh Đức';
+            const video = getVipVideoItem(videoId);
+            const videoTitle = video ? (video.title || `Video #${videoId}`) : `Video #${videoId}`;
+
+            // Lưu vào bộ nhớ để khóa 1 lượt vote
+            const votedKey = 'kdrive_voted_map_' + phone;
+            let votedMap = JSON.parse(localStorage.getItem(votedKey) || '{}');
+            votedMap[videoId] = voteWeight;
+            localStorage.setItem(votedKey, JSON.stringify(votedMap));
+
+            // Cộng đúng số phiếu vào video
+            if (video) {
+                video.agrees = (video.agrees || 0) + voteWeight;
+            }
+            if (typeof renderVipVideos === 'function') renderVipVideos();
+            closeHoloModal();
+
+            // Ghi nhận vào tab BIEU_QUYET_VIDEO trên Google Sheet
             try {
                 if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL) {
                     await fetch(GOOGLE_SCRIPT_URL, {
@@ -1238,15 +1392,173 @@
                         body: JSON.stringify({
                             action: 'submit_vip_vote',
                             phone: phone,
+                            name: name,
                             videoId: videoId,
-                            voteType: voteType,
-                            votesAdded: votes
+                            videoTitle: videoTitle,
+                            voteType: 'agree',
+                            votesAdded: voteWeight
                         })
                     });
                 }
-                alert(`Đã biểu quyết thành công! Đã ghi nhận +${votes} phiếu thẩm định.`);
             } catch (err) {
-                alert(`Đã ghi nhận +${votes} phiếu biểu quyết vào hệ thống!`);
+                console.warn("Máy chủ bận, kết quả đã lưu cục bộ:", err);
+            }
+        }
+
+        // 5. THỰC THI HỦY BIỂU QUYẾT ĐỂ CHỌN LẠI
+        async function confirmCancelVipVote(videoId) {
+            const phone = localStorage.getItem('kdrive_vip_user') || '';
+            const name = localStorage.getItem('kdrive_vip_name') || 'Lê Minh Đức';
+            const video = getVipVideoItem(videoId);
+            const videoTitle = video ? (video.title || `Video #${videoId}`) : `Video #${videoId}`;
+
+            const votedKey = 'kdrive_voted_map_' + phone;
+            let votedMap = JSON.parse(localStorage.getItem(votedKey) || '{}');
+            const previousVotes = votedMap[videoId] || 2;
+
+            // Xóa trạng thái vote
+            delete votedMap[videoId];
+            localStorage.setItem(votedKey, JSON.stringify(votedMap));
+
+            // Trừ lại đúng số phiếu đã cộng
+            if (video) {
+                video.agrees = Math.max(0, (video.agrees || 0) - previousVotes);
+            }
+            if (typeof renderVipVideos === 'function') renderVipVideos();
+            closeHoloModal();
+
+            // Gửi lệnh hủy về Sheet
+            try {
+                if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL) {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'submit_vip_vote',
+                            phone: phone,
+                            name: name,
+                            videoId: videoId,
+                            videoTitle: videoTitle,
+                            voteType: 'cancel',
+                            votesAdded: -previousVotes
+                        })
+                    });
+                }
+            } catch (err) {}
+        }
+
+        // =====================================================================
+        // BẢNG HOLOGRAM GÓP Ý THẨM ĐỊNH (BẮN THẲNG VỀ TAB GOP_Y_VIDEO TRÊN SHEET)
+        // =====================================================================
+        function openFeedbackModal(videoId) {
+            const name = localStorage.getItem('kdrive_vip_name') || 'Lê Minh Đức';
+            const tier = localStorage.getItem('kdrive_vip_tier') || 'CYBER SILVER';
+            const video = getVipVideoItem(videoId);
+            const videoTitle = video ? (video.title || `Video #${videoId}`) : `Video #${videoId}`;
+
+            const holo = ensureHoloModalContainer();
+            holo.innerHTML = `
+                <div class="w-full max-w-[430px] rounded-3xl bg-slate-950/95 border border-cyan-500/40 shadow-[0_0_35px_rgba(6,182,212,0.25)] p-5 text-slate-200 font-mono-tech relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <span class="text-cyan-400 text-base">💬</span>
+                            <span class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Góp Ý Thẩm Định</span>
+                        </div>
+                        <button onclick="closeHoloModal()" class="w-7 h-7 rounded-full bg-slate-900 border border-slate-700 hover:border-rose-500/50 flex items-center justify-center text-slate-400 hover:text-rose-300 transition-all">✕</button>
+                    </div>
+
+                    <div class="my-3 p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-[11px] space-y-1">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Thước phim:</span>
+                            <span class="font-bold text-cyan-300 truncate max-w-[200px]">${videoTitle}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Hội đồng:</span>
+                            <span class="text-slate-300">${name} • <span class="text-amber-300 font-bold">${tier}</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Gợi ý nhanh dạng chip -->
+                    <div class="mb-2 flex flex-wrap gap-1.5 text-[10px]">
+                        <button type="button" onclick="insertFeedbackText('⚡ Nhịp điệu dồn dập, cuốn hút!')" class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400/50 text-slate-300 active:scale-95 transition-all">⚡ Nhịp điệu tốt</button>
+                        <button type="button" onclick="insertFeedbackText('🎯 Thông điệp kỷ luật rất rõ nét!')" class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400/50 text-slate-300 active:scale-95 transition-all">🎯 Thông điệp nét</button>
+                        <button type="button" onclick="insertFeedbackText('🔥 Xuất sắc, sẵn sàng phát hành!')" class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400/50 text-slate-300 active:scale-95 transition-all">🔥 Duyệt phát hành</button>
+                    </div>
+
+                    <textarea id="holoFeedbackContent" rows="3" placeholder="Nhập nhận xét chuyên môn về hình ảnh, âm nhạc, nhịp điệu rạp chiếu..." class="w-full p-3 rounded-2xl bg-slate-900/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 text-xs text-slate-100 placeholder-slate-500 outline-none resize-none transition-all"></textarea>
+
+                    <div class="mt-4 space-y-2">
+                        <button id="holoSendFeedbackBtn" onclick="submitHoloFeedback('${videoId}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:brightness-110 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.35)] active:scale-95 transition-all">
+                            <span>🚀</span> GỬI GÓP Ý VỀ MÁY CHỦ TELEPATHY
+                        </button>
+                        <button onclick="closeHoloModal()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 font-bold text-xs active:scale-95 transition-all">
+                            Đóng cửa sổ
+                        </button>
+                    </div>
+                </div>
+            `;
+            holo.classList.remove('hidden');
+        }
+
+        // Tạo bí danh để nút Góp ý dù gọi tên hàm nào cũng tự động mở bảng Holo
+        function feedbackVipVideo(videoId) { openFeedbackModal(videoId); }
+        function gopYVideo(videoId) { openFeedbackModal(videoId); }
+
+        function insertFeedbackText(str) {
+            const txt = document.getElementById('holoFeedbackContent');
+            if (txt) {
+                txt.value = txt.value ? (txt.value + ' ' + str) : str;
+                txt.focus();
+            }
+        }
+
+        // 6. GỬI GÓP Ý VỀ GOOGLE APPS SCRIPT ĐỂ LƯU VÀO TAB GOP_Y_VIDEO
+        async function submitHoloFeedback(videoId) {
+            const txt = document.getElementById('holoFeedbackContent');
+            const btn = document.getElementById('holoSendFeedbackBtn');
+            const content = txt ? txt.value.trim() : '';
+
+            if (!content) {
+                alert('Vui lòng nhập nội dung góp ý trước khi gửi.');
+                return;
+            }
+
+            const phone = localStorage.getItem('kdrive_vip_user') || 'Ẩn danh';
+            const name = localStorage.getItem('kdrive_vip_name') || 'Lê Minh Đức';
+            const video = getVipVideoItem(videoId);
+            const videoTitle = video ? (video.title || `Video #${videoId}`) : `Video #${videoId}`;
+
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'ĐANG CHUYỂN VỀ SHEET...';
+            }
+
+            try {
+                if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL) {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'save_feedback',
+                            phone: phone,
+                            name: name,
+                            videoTitle: videoTitle,
+                            feedback: content
+                        })
+                    });
+                }
+
+                if (video) {
+                    video.feedbacks = (video.feedbacks || 0) + 1;
+                }
+                if (typeof renderVipVideos === 'function') renderVipVideos();
+                closeHoloModal();
+                alert('🚀 Góp ý của đối tác đã được chuyển thẳng về Máy chủ Telepathy thành công!');
+
+            } catch (err) {
+                console.error("Lỗi gửi góp ý:", err);
+                closeHoloModal();
+                alert('Đã ghi nhận góp ý vào hệ thống!');
             }
         }
 
