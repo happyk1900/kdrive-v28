@@ -88,11 +88,11 @@
             0% { transform: translate3d(0, 0, 0); }
             100% { transform: translate3d(-100%, 0, 0); }
         }
-         /* NÚT TRÒN KHÁN GIẢ NỔI (BÊN TRÁI MÀN HÌNH) */
+/* NÚT TRÒN KHÁN GIẢ (XEM FREE) - KÉO THẢ TỰ DO & ĐƯA LÊN CAO */
         .floating-audience-btn {
             position: fixed;
             left: 16px;
-            bottom: 90px;
+            bottom: 310px;
             width: 62px;
             height: 62px;
             border-radius: 50%;
@@ -104,17 +104,21 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            cursor: grab;
             user-select: none;
-            touch-action: manipulation;
-            animation: pioneerFloat 3.2s ease-in-out infinite;
+            -webkit-user-select: none;
+            touch-action: none;
+            animation: audienceFloat 3.2s ease-in-out infinite;
         }
-        .floating-audience-btn:active { transform: scale(0.95); }
-        /* NÚT TRÒN TIÊN PHONG NỔI (FLOATING & DRAGGABLE) */
+        .floating-audience-btn:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+        /* NÚT TRÒN TIÊN PHONG NỔI - ĐƯA LÊN CAO ĐỒNG BỘ */
         .floating-pioneer-btn {
             position: fixed;
             right: 16px;
-            bottom: 90px;
+            bottom: 310px;
             width: 62px;
             height: 62px;
             border-radius: 50%;
@@ -136,21 +140,10 @@
             cursor: grabbing;
             transform: scale(0.95);
         }
-        @keyframes pioneerFloat {
-            0%, 100% { transform: translateY(0px); box-shadow: 0 0 20px rgba(251, 191, 36, 0.5), inset 0 0 10px rgba(251, 191, 36, 0.25); }
-            50% { transform: translateY(-7px); box-shadow: 0 0 32px rgba(251, 191, 36, 0.85), inset 0 0 14px rgba(251, 191, 36, 0.4); }
+            @keyframes audienceFloat {
+            0%, 100% { transform: translateY(0px); box-shadow: 0 0 20px rgba(56, 189, 248, 0.5), inset 0 0 10px rgba(56, 189, 248, 0.25); }
+            50% { transform: translateY(-7px); box-shadow: 0 0 32px rgba(56, 189, 248, 0.85), inset 0 0 14px rgba(56, 189, 248, 0.4); }
         }
-
-        /* HIỆU ỨNG NGÓN TAY CHỈ */
-        @keyframes pointingBounce {
-            0%, 100% { transform: translateX(0) scale(1); }
-            50% { transform: translateX(-6px) scale(1.1); }
-        }
-        .pointing-finger {
-            animation: pointingBounce 1.2s ease-in-out infinite;
-            display: inline-block;
-        }
-
         /* HIỆU ỨNG NHẤP NHÁY CHO CHỮ FOUNDER */
         @keyframes founderPulse {
             0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(56, 189, 248, 0.8); }
@@ -2226,7 +2219,76 @@
                 }
             }
         }
+// XỬ LÝ KÉO THẢ TỰ DO VÀ CHẠM CHO NÚT TRÒN XEM FREE
+        (function initFloatingAudienceButton() {
+            const btn = document.getElementById('floatingAudienceBtn');
+            if (!btn) return;
 
+            let isDragging = false;
+            let hasMoved = false;
+            let startX = 0, startY = 0;
+            let initialLeft = 0, initialTop = 0;
+
+            function onPointerDown(e) {
+                isDragging = true;
+                hasMoved = false;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                startX = clientX;
+                startY = clientY;
+
+                const rect = btn.getBoundingClientRect();
+                initialLeft = rect.left;
+                initialTop = rect.top;
+
+                btn.style.animation = 'none';
+                btn.style.left = initialLeft + 'px';
+                btn.style.top = initialTop + 'px';
+            }
+
+            function onPointerMove(e) {
+                if (!isDragging) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const dx = clientX - startX;
+                const dy = clientY - startY;
+
+                if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                    hasMoved = true;
+                }
+
+                if (hasMoved) {
+                    if (e.cancelable) e.preventDefault();
+                    let newLeft = initialLeft + dx;
+                    let newTop = initialTop + dy;
+
+                    const maxLeft = window.innerWidth - btn.offsetWidth - 6;
+                    const maxTop = window.innerHeight - btn.offsetHeight - 6;
+                    newLeft = Math.max(6, Math.min(newLeft, maxLeft));
+                    newTop = Math.max(6, Math.min(newTop, maxTop));
+
+                    btn.style.left = newLeft + 'px';
+                    btn.style.top = newTop + 'px';
+                }
+            }
+
+            function onPointerUp() {
+                if (!isDragging) return;
+                isDragging = false;
+                btn.style.animation = 'audienceFloat 3.2s ease-in-out infinite';
+                if (!hasMoved) {
+                    openFreeAccountModal();
+                }
+            }
+
+            btn.addEventListener('mousedown', onPointerDown);
+            window.addEventListener('mousemove', onPointerMove);
+            window.addEventListener('mouseup', onPointerUp);
+
+            btn.addEventListener('touchstart', onPointerDown, { passive: true });
+            window.addEventListener('touchmove', onPointerMove, { passive: false });
+            window.addEventListener('touchend', onPointerUp);
+        })();
         // HỆ THỐNG BẢO MẬT QUÉT VÂN TAY SINH TRẮC HỌC (WEBAUTHN PASSKEYS)
         const BIO_CRED_STORAGE_KEY = 'kdrive_founder_bio_cred_id';
 
