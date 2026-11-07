@@ -957,7 +957,7 @@
     </div> <!-- Đóng shareholderLoginModal -->
     <script>
        // =====================================================================
-        // ĐIỀU PHỐI POPUP & CHỐNG CHÈN LAYOUT
+        // ĐIỀU PHỐI POPUP & CHỐNG CHÈN LAYOUT KHI THOÁT RA / VÀO LẠI
         // =====================================================================
         function openShareholderLoginModal() {
             const modal = document.getElementById('shareholderLoginModal');
@@ -988,19 +988,32 @@
             videos.forEach(v => v.pause());
         }
 
+        function closeVipPassModal() {
+            const modal = document.getElementById('vipPassModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function gotoViplogin() {
+            closeVipPassModal();
+            openShareholderLoginModal();
+        }
+
         function logoutShareholderAccount() {
+            // 1. Xóa sạch dữ liệu bộ nhớ
             localStorage.removeItem('kdrive_vip_user');
             localStorage.removeItem('kdrive_role');
             localStorage.removeItem('kdrive_vip_name');
             localStorage.removeItem('kdrive_vip_tier');
             localStorage.removeItem('kdrive_vip_votes');
 
+            // 2. Đóng và làm sạch ruột Dashboard
             const dashboard = document.getElementById('shAccountDashboard');
             if (dashboard) dashboard.classList.add('hidden');
 
             const videoContainer = document.getElementById('vipVideoListContainer');
             if (videoContainer) videoContainer.innerHTML = '';
 
+            // 3. Mở lại form đăng nhập ban đầu
             const loginForm = document.getElementById('shLoginForm');
             const forgotForm = document.getElementById('shForgotPassForm');
             const changeForm = document.getElementById('shChangePassForm');
@@ -1009,6 +1022,7 @@
             if (changeForm) changeForm.classList.add('hidden');
             if (loginForm) loginForm.classList.remove('hidden');
 
+            // 4. Xóa trắng các ô nhập
             const phoneInput = document.getElementById('shUser') || document.getElementById('shPhoneInput');
             const passInput = document.getElementById('shPass') || document.getElementById('shPassInput');
             if (phoneInput) phoneInput.value = '';
@@ -1087,7 +1101,7 @@
         }
 
         // =====================================================================
-        // ĐĂNG NHẬP: ĐỒNG BỘ 100% CHỈ SỐ THỰC TỪ MÁY CHỦ
+        // ĐĂNG NHẬP: LẤY 100% DỮ LIỆU TỰ ĐỘNG TỪ SHEET (CỘT M, CỘT N)
         // =====================================================================
         async function loginShareholderAccount() {
             const phoneInput = document.getElementById('shUser') || document.getElementById('shPhoneInput');
@@ -1128,13 +1142,12 @@
                 });
                 const res = await response.json();
 
-                // Nhận diện dữ liệu đối tác trả về từ máy chủ
+                // Nhận trực tiếp dữ liệu thật do Apps Script đọc từ Sheet
                 if (res && (res.status === 'success' || res.partner)) {
-                    const p = res.partner || res.data || res.user || res;
-                    const hoTen = p.name || p.partnerName || p.fullName || res.name || phone;
-                    const capBac = p.tier || p.rank || p.level || res.tier || '🥈 Silver (Hạng Bạc)';
-                    // Lấy chính xác số phiếu thật từ Sheet (1 triệu = 1 phiếu)
-                    const soPhieu = Number(p.votes || p.voteCount || p.votingPower || p.vote || res.votes || 1);
+                    const p = res.partner || res.data || res;
+                    const hoTen = p.name || phone;
+                    const capBac = p.tier || 'Cyber Silver';
+                    const soPhieu = Number(p.votes !== undefined ? p.votes : 2);
 
                     localStorage.setItem('kdrive_vip_user', phone);
                     localStorage.setItem('kdrive_role', 'partner');
@@ -1146,19 +1159,19 @@
                     return;
                 }
 
-                if (res && (res.status === 'wrong_password' || res.status === 'error')) {
+                if (res && res.status === 'wrong_password') {
                     alert(res.message || 'Mật khẩu không chính xác. Vui lòng thử lại!');
                     return;
                 }
 
-                // Số chưa ký hợp tác: Cấp quyền Khán giả trải nghiệm (0 phiếu)
+                // Khán giả chưa ký hợp tác (0 phiếu)
                 localStorage.setItem('kdrive_vip_user', phone);
                 localStorage.setItem('kdrive_role', 'free');
                 localStorage.setItem('kdrive_vip_votes', 0);
                 moDashboardChuan(phone, 'Khán giả trải nghiệm', '0 phiếu (Chỉ xem)');
 
             } catch (err) {
-                console.error("Lỗi đồng bộ Máy chủ:", err);
+                console.error("Lỗi đồng bộ:", err);
                 alert('Máy chủ Telepathy đang đồng bộ dữ liệu. Vui lòng kiểm tra lại kết nối mạng!');
             } finally {
                 if (loginBtn) {
@@ -1191,7 +1204,7 @@
         }
 
         // =====================================================================
-        // BIỂU QUYẾT: CỘNG ĐÚNG SỐ PHIẾU THỰC TỪ HỆ THỐNG
+        // BIỂU QUYẾT: CỘNG ĐÚNG SỐ PHIẾU LẤY TỪ CỘT N TRÊN SHEET
         // =====================================================================
         async function voteVipVideo(videoId, voteType = 'agree') {
             const role = localStorage.getItem('kdrive_role');
@@ -1207,7 +1220,7 @@
                 return;
             }
 
-            // Cộng đúng số phiếu thực của đối tác vào video
+            // Cộng dồn đúng số phiếu thực của đối tác vào video
             if (typeof vipVideos !== 'undefined' && vipVideos[videoId]) {
                 if (voteType === 'agree') {
                     vipVideos[videoId].agrees = (vipVideos[videoId].agrees || 0) + votes;
@@ -1217,7 +1230,7 @@
                 if (typeof renderVipVideos === 'function') renderVipVideos();
             }
 
-            // Gửi số phiếu thực về máy chủ ghi nhận
+            // Ghi nhận số phiếu thực vào tab BIEU_QUYET_VIDEO trên Sheet
             try {
                 if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL) {
                     await fetch(GOOGLE_SCRIPT_URL, {
@@ -1238,7 +1251,7 @@
         }
 
         // =====================================================================
-        // XỬ LÝ ĐỔI & QUÊN MẬT KHẨU
+        // ĐỔI MẬT KHẨU & QUÊN MẬT KHẨU
         // =====================================================================
         async function submitChangePassword() {
             const phone = document.getElementById('shChangePhone')?.value.trim();
