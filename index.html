@@ -2998,29 +2998,34 @@ async function confirmCancelVipVote(index) {
   } catch (err) {}
 }
 
-// 5. MỞ BẢNG HOLOGRAM GÓP Ý THẨM ĐỊNH (CÓ SẴN CHIP GỢI Ý NHANH)
+// 5. MỞ BẢNG HOLOGRAM GÓP Ý THẨM ĐỊNH (CĂN CHUẨN GIAO DIỆN & TÍCH HỢP NÚT XÓA)
 function openFeedbackHoloModal(index, vid, videoTitle, name, tier, phone) {
   const holo = ensureHoloModalContainer();
   holo.innerHTML = `
     <div class="w-full max-w-[430px] rounded-3xl bg-slate-950/95 border border-cyan-500/40 shadow-[0_0_35px_rgba(6,182,212,0.25)] p-5 text-slate-200 font-mono-tech relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
       <div class="absolute -top-12 -right-12 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
+      <!-- Header Holo -->
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center gap-2">
           <span class="text-cyan-400 text-base">💬</span>
           <span class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Góp Ý Thẩm Định</span>
         </div>
-        <button onclick="closeHoloModal()" class="w-7 h-7 rounded-full bg-slate-900 border border-slate-700 hover:border-rose-500/50 flex items-center justify-center text-slate-400 hover:text-rose-300 transition-all">✕</button>
+        <button type="button" onclick="closeHoloModal()" class="w-7 h-7 rounded-full bg-slate-900 border border-slate-700 hover:border-rose-500/50 flex items-center justify-center text-slate-400 hover:text-rose-300 transition-all">✕</button>
       </div>
 
-      <div class="my-3 p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-[11px] space-y-1">
-        <div class="flex justify-between">
-          <span class="text-slate-400">Thước phim:</span>
-          <span class="font-bold text-cyan-300 truncate max-w-[200px]">${videoTitle}</span>
+      <!-- Thẻ thông tin video & đối tác (Căn chỉnh chống vỡ chữ) -->
+      <div class="my-3.5 p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs space-y-2">
+        <div class="flex items-center justify-between gap-3">
+          <span class="text-slate-400 text-[11px] shrink-0 whitespace-nowrap">Thước phim:</span>
+          <span class="font-bold text-cyan-300 truncate text-right text-xs">${videoTitle}</span>
         </div>
-        <div class="flex justify-between">
-          <span class="text-slate-400">Hội đồng:</span>
-          <span class="text-slate-300">${name} • <span class="text-amber-300 font-bold">${tier}</span></span>
+        <div class="flex items-start justify-between gap-3 border-t border-slate-800/80 pt-2">
+          <span class="text-slate-400 text-[11px] shrink-0 whitespace-nowrap">Hội đồng:</span>
+          <div class="text-right leading-snug">
+            <div class="font-bold text-slate-200 text-xs">${name}</div>
+            <div class="text-[10.5px] font-bold text-amber-300 mt-0.5">${tier}</div>
+          </div>
         </div>
       </div>
 
@@ -3031,15 +3036,22 @@ function openFeedbackHoloModal(index, vid, videoTitle, name, tier, phone) {
         <button type="button" onclick="insertFeedbackText('🔥 Xuất sắc, sẵn sàng phát hành!')" class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400/50 text-slate-300 active:scale-95 transition-all">🔥 Duyệt phát hành</button>
       </div>
 
+      <!-- Khung soạn văn bản -->
       <textarea id="holoFeedbackContent" rows="3" placeholder="Nhập nhận xét chuyên môn về hình ảnh, âm nhạc, nhịp điệu rạp chiếu..." class="w-full p-3 rounded-2xl bg-slate-900/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 text-xs text-slate-100 placeholder-slate-500 outline-none resize-none transition-all"></textarea>
 
+      <!-- Các nút tác vụ -->
       <div class="mt-4 space-y-2">
         <button id="holoSendFeedbackBtn" onclick="submitHoloFeedback(${index})" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:brightness-110 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.35)] active:scale-95 transition-all">
           <span>🚀</span> GỬI GÓP Ý VỀ MÁY CHỦ TELEPATHY
         </button>
-        <button onclick="closeHoloModal()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 font-bold text-xs active:scale-95 transition-all">
-          Đóng cửa sổ
-        </button>
+        <div class="flex gap-2">
+          <button type="button" onclick="closeHoloModal()" class="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 font-bold text-xs active:scale-95 transition-all">
+            Đóng cửa sổ
+          </button>
+          <button type="button" onclick="handleDeleteVipVideo(${index})" class="px-3.5 py-2.5 rounded-xl bg-rose-950/60 hover:bg-rose-900/80 border border-rose-500/50 text-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all" title="Xóa video này">
+            <span>🗑️</span> <span>Xóa video</span>
+          </button>
+        </div>
       </div>
     </div>
   `;
@@ -3075,7 +3087,6 @@ async function submitHoloFeedback(index) {
     btn.textContent = 'ĐANG CHUYỂN VỀ SHEET...';
   }
 
-  // Tăng số lượt góp ý
   if (vid) {
     vid.votesNo = (Number(vid.votesNo) || 0) + 1;
     if (typeof saveVipVideos === 'function') saveVipVideos();
@@ -3104,28 +3115,70 @@ async function submitHoloFeedback(index) {
   }
 }
 
-// Tạo bí danh để hỗ trợ mọi vị trí gọi hàm khác nhau
+// Tạo bí danh hỗ trợ các vị trí gọi hàm
 function voteVipVideo(videoId, voteType) { voteVideo(videoId, voteType === 'agree' ? 'yes' : 'no'); }
 function openFeedbackModal(index) { voteVideo(index, 'no'); }
-        // =====================================================================
-        // ĐẶC QUYỀN FOUNDER: XÓA VIDEO KHỎI PHÒNG CHIẾU
-        // =====================================================================
-        function deleteVipVideo(index) {
-            const currentRole = localStorage.getItem('kdrive_role');
-            if (currentRole !== 'founder') {
-                alert('Chỉ Founder mới có quyền xóa video khỏi phòng duyệt!');
-                return;
-            }
 
-            const vid = vipVideosData[index];
-            const confirmDelete = confirm(`⚠️ Xác nhận gỡ bỏ video: "${vid ? vid.title : 'này'}" khỏi danh sách kiểm duyệt?`);
-            if (confirmDelete) {
-                vipVideosData.splice(index, 1);
-                saveVipVideos();
-                renderVipVideos();
-                alert('✅ Đã gỡ bỏ video thành công!');
-            }
-        }
+// =====================================================================
+// PHÂN QUYỀN XÓA VIDEO: CHỈ FOUNDER MỚI ĐƯỢC XÓA - NGƯỜI KHÁC BẬT POPUP
+// =====================================================================
+function handleDeleteVipVideo(index) {
+  const role = localStorage.getItem('kdrive_role');
+  const vid = (typeof vipVideosData !== 'undefined' && vipVideosData[index]) ? vipVideosData[index] : null;
+  const videoTitle = vid ? (vid.title || `Video #${index + 1}`) : `Video #${index + 1}`;
+
+  // 1. Người khác bấm vào: bật bảng Hologram cảnh báo đặc quyền Founder
+  if (role !== 'founder') {
+    const holo = ensureHoloModalContainer();
+    holo.innerHTML = `
+      <div class="w-full max-w-[400px] rounded-3xl bg-slate-950/95 border border-rose-500/60 shadow-[0_0_35px_rgba(244,63,94,0.35)] p-5 text-slate-200 font-mono-tech relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div class="absolute -top-12 -right-12 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="text-rose-400 text-lg">🔒</span>
+            <span class="text-xs font-bold text-rose-300 uppercase tracking-wider">Đặc Quyền Quản Trị</span>
+          </div>
+          <button type="button" onclick="closeHoloModal()" class="w-7 h-7 rounded-full bg-slate-900 border border-slate-700 hover:border-rose-500/50 flex items-center justify-center text-slate-400 hover:text-rose-300 transition-all">✕</button>
+        </div>
+
+        <div class="my-4 p-4 rounded-2xl bg-slate-900/90 border border-rose-500/30 text-xs leading-relaxed space-y-2.5 text-center">
+          <div class="inline-block p-2 rounded-2xl bg-rose-500/10 text-rose-400 text-2xl">
+            👑
+          </div>
+          <div class="font-bold text-rose-300 text-sm tracking-wide">
+            CHỈ DÀNH RIÊNG CHO FOUNDER
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            Thao tác xóa hoặc gỡ bỏ thước phim chiến lược khỏi hệ thống kiểm duyệt chỉ thuộc quyền của <strong class="text-amber-300 font-bold">Founder Đỗ Đức Anh (Kai Ripe)</strong>.
+          </p>
+          <p class="text-[10.5px] text-slate-400 italic">
+            *Thành viên Hội đồng và Khán giả có quyền biểu quyết duyệt hoặc gửi góp ý chuyên môn để cùng hoàn thiện sản phẩm.
+          </p>
+        </div>
+
+        <button type="button" onclick="closeHoloModal()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs active:scale-95 transition-all">
+          Đã hiểu ➔
+        </button>
+      </div>
+    `;
+    holo.classList.remove('hidden');
+    return;
+  }
+
+  // 2. Founder bấm vào: hộp thoại xác nhận xóa video
+  if (confirm(`⚠️ XÁC NHẬN FOUNDER:\nBạn có chắc chắn muốn gỡ bỏ thước phim "${videoTitle}" khỏi hệ thống kiểm duyệt Telepathy không?`)) {
+    vipVideosData.splice(index, 1);
+    if (typeof saveVipVideos === 'function') saveVipVideos();
+    if (typeof renderVipVideos === 'function') renderVipVideos();
+    closeHoloModal();
+    alert(`✅ Đã gỡ bỏ thước phim "${videoTitle}" thành công!`);
+  }
+}
+
+function deleteVipVideo(index) {
+  handleDeleteVipVideo(index);
+}
 
         // =====================================================================
         // KÍCH HOẠT FOMO KHI KHÁN GIẢ BẤM BIỂU QUYẾT BỊ KHÓA
