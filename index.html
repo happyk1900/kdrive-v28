@@ -4730,31 +4730,51 @@ window.verifyOtpAndSign = function() {
             }
         };
     })();
-       // Hàm xử lý ẩn/hiện mật khẩu
-// Hàm xử lý ẩn/hiện mật khẩu
+      // =====================================================================
+// HÀM XỬ LÝ ẨN/HIỆN MẬT KHẨU
+// =====================================================================
 function toggleLoginPassword() {
     const passwordInput = document.getElementById('shPass');
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-    } else {
-        passwordInput.type = 'password';
+    if (passwordInput) {
+        passwordInput.type = (passwordInput.type === 'password') ? 'text' : 'password';
     }
 }
 
 // =====================================================================
-// HỆ THỐNG ĐỐI SOÁT & TÌM KIẾM ĐƠN 5K CHO FOUNDER
+// HỆ THỐNG ĐỐI SOÁT & DUYỆT ĐƠN 5K (KẾT NỐI MÁY CHỦ BCC TELEPATHY)
 // =====================================================================
+const BCC_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzSkG5GKt40xxc7QGj1tucu6J00CfRRdk6QVj2WnN0hmoJoVcXXCkgPLzBhRINxkOa/exec";
+
 let rawPendingList = [];
 let pendingApprovalsCount = 0;
 
-// 1. Quét danh sách chờ duyệt từ Google Sheet
+// Tự động tìm và gắn chấm đỏ vào nút Founder (không cần sửa tay dòng 343)
+function getOrCreateFounderBadge() {
+    let badge = document.getElementById("badgePendingCount");
+    if (!badge) {
+        const allHeadings = Array.from(document.querySelectorAll('h1, button, div'));
+        const founderBtn = allHeadings.find(el => el.textContent && el.textContent.trim().startsWith('Founder'));
+        if (founderBtn) {
+            founderBtn.classList.add('relative');
+            founderBtn.setAttribute('onclick', 'handleFounderBtnClick()');
+            badge = document.createElement('span');
+            badge.id = 'badgePendingCount';
+            badge.className = 'hidden absolute -top-1.5 -right-2 px-2 py-0.5 bg-rose-600 text-white text-[10px] font-black rounded-full shadow-[0_0_12px_rgba(244,63,94,0.9)] animate-pulse border border-white/30 pointer-events-none z-30';
+            badge.textContent = '0';
+            founderBtn.appendChild(badge);
+        }
+    }
+    return badge;
+}
+
+// 1. Quét danh sách chờ duyệt từ máy chủ BCC
 async function checkPendingApprovals() {
     try {
-        if (typeof GOOGLE_SCRIPT_URL === 'undefined' || !GOOGLE_SCRIPT_URL) return;
-        
-        const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_pending_5k`);
+        if (!BCC_SCRIPT_URL) return;
+
+        const res = await fetch(`${BCC_SCRIPT_URL}?action=get_pending_5k`);
         const data = await res.json();
-        const badge = document.getElementById("badgePendingCount");
+        const badge = getOrCreateFounderBadge();
         const titleCount = document.getElementById("auditPendingTitleCount");
 
         rawPendingList = (data && data.pending) ? data.pending : [];
@@ -4781,13 +4801,13 @@ async function checkPendingApprovals() {
     }
 }
 
-// 2. Tìm kiếm nhanh theo chữ cái đầu hoặc số đầu (gõ là lọc tức thì)
+// 2. Tìm kiếm nhanh theo chữ cái đầu hoặc số đầu
 function filterPendingAudit(keyword) {
     renderAuditList(filterData(rawPendingList, keyword));
 }
 
 function filterData(list, keyword) {
-    const cleanKey = keyword.trim().toLowerCase();
+    const cleanKey = (keyword || '').trim().toLowerCase();
     if (!cleanKey) return list;
 
     return list.filter(item => {
@@ -4797,7 +4817,7 @@ function filterData(list, keyword) {
     });
 }
 
-// 3. Hiển thị danh sách ra giao diện
+// 3. Hiển thị danh sách ra modal đối soát
 function renderAuditList(list) {
     const container = document.getElementById("auditListContainer");
     if (!container) return;
@@ -4834,7 +4854,7 @@ function renderAuditList(list) {
     }
 }
 
-// 4. Bấm nút DUYỆT -> Cập nhật Sheet và bắn sang K-Drive Master
+// 4. Bấm DUYỆT -> Cập nhật BCC & Đồng bộ sang Master K-Drive
 async function approveCustomerAction(phone) {
     const btn = document.getElementById(`btn-approve-${phone}`);
     if (btn) {
@@ -4843,7 +4863,7 @@ async function approveCustomerAction(phone) {
     }
 
     try {
-        const res = await fetch(GOOGLE_SCRIPT_URL, {
+        const res = await fetch(BCC_SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify({
                 action: 'founder_approve_from_web',
@@ -4882,7 +4902,9 @@ function handleFounderBtnClick() {
     if (pendingApprovalsCount > 0) {
         openFounderAuditModal();
     } else {
-        openFounderDashboardModal();
+        if (typeof openFounderDashboardModal === 'function') {
+            openFounderDashboardModal();
+        }
     }
 }
 
@@ -4948,7 +4970,7 @@ window.addEventListener('DOMContentLoaded', checkPendingApprovals);
 
         <!-- Footer -->
         <div class="pt-2.5 border-t border-slate-800 flex items-center justify-between shrink-0">
-            <button type="button" onclick="openFounderDashboardModal(); closeFounderAuditModal();" class="text-[11px] text-slate-400 hover:text-amber-300 font-mono-tech transition-colors">
+            <button type="button" onclick="if(typeof openFounderDashboardModal==='function') openFounderDashboardModal(); closeFounderAuditModal();" class="text-[11px] text-slate-400 hover:text-amber-300 font-mono-tech transition-colors">
                 ⚡ Bảng điều khiển Founder
             </button>
             <button type="button" onclick="checkPendingApprovals()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 font-bold text-[11px] font-mono-tech active:scale-95 transition-all">
