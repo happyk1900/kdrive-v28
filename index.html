@@ -340,12 +340,16 @@
 
             <!-- CHỨC DANH FOUNDER & NÚT TIỂU SỬ KAI RIPE -->
             <div class="flex flex-col items-center mb-2">
-                <h1 onclick="openFounderDashboardModal()" class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5 cursor-pointer hover:text-amber-300 transition-all group py-1 px-3 rounded-full border border-cyan-400/40 bg-slate-900/80 founder-pulse mb-2">
-                    <span>Founder</span>
-                    <span class="inline-flex items-center justify-center w-4.5 h-4.5 rounded-full bg-cyan-500/25 border border-cyan-400 text-cyan-300 group-hover:border-amber-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                    </span>
-                </h1>
+                <h1 onclick="handleFounderBtnClick()" class="relative text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5 cursor-pointer hover:text-amber-300 transition-all group py-1 px-3 rounded-full border border-cyan-400/40 bg-slate-900/80 founder-pulse mb-2 select-none">
+    <span>Founder</span>
+    <span class="inline-flex items-center justify-center w-4.5 h-4.5 rounded-full bg-cyan-500/25 border border-cyan-400 text-cyan-300 group-hover:border-amber-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+    </span>
+    <!-- CHẤM ĐỎ BÁO SỐ ĐƠN CHỜ DUYỆT -->
+    <span id="badgePendingCount" class="hidden absolute -top-1.5 -right-2 px-2 py-0.5 bg-rose-600 text-white text-[10px] font-black rounded-full shadow-[0_0_12px_rgba(244,63,94,0.9)] animate-pulse border border-white/30 pointer-events-none">
+        0
+    </span>
+    </h1>
                 
                 <!-- NÚT KẾ HOẠCH & LỘ TRÌNH K-DRIVE (ĐÃ HẠ CỠ CHỮ & NỚI KHOẢNG THỞ 2 ĐẦU BO CONG) -->
                 <div style="display: flex; justify-content: center; width: 100%; margin: 4px 0 6px 0;">
@@ -4723,6 +4727,7 @@ window.verifyOtpAndSign = function() {
         };
     })();
        // Hàm xử lý ẩn/hiện mật khẩu
+// Hàm xử lý ẩn/hiện mật khẩu
 function toggleLoginPassword() {
     const passwordInput = document.getElementById('shPass');
     if (passwordInput.type === 'password') {
@@ -4730,7 +4735,225 @@ function toggleLoginPassword() {
     } else {
         passwordInput.type = 'password';
     }
-} 
-    </script>
+}
+
+// =====================================================================
+// HỆ THỐNG ĐỐI SOÁT & TÌM KIẾM ĐƠN 5K CHO FOUNDER
+// =====================================================================
+let rawPendingList = [];
+let pendingApprovalsCount = 0;
+
+// 1. Quét danh sách chờ duyệt từ Google Sheet
+async function checkPendingApprovals() {
+    try {
+        if (typeof GOOGLE_SCRIPT_URL === 'undefined' || !GOOGLE_SCRIPT_URL) return;
+        
+        const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_pending_5k`);
+        const data = await res.json();
+        const badge = document.getElementById("badgePendingCount");
+        const titleCount = document.getElementById("auditPendingTitleCount");
+
+        rawPendingList = (data && data.pending) ? data.pending : [];
+        pendingApprovalsCount = (data && data.count) ? data.count : 0;
+
+        if (badge) {
+            if (pendingApprovalsCount > 0) {
+                badge.textContent = pendingApprovalsCount;
+                badge.classList.remove("hidden");
+            } else {
+                badge.classList.add("hidden");
+            }
+        }
+
+        if (titleCount) {
+            titleCount.textContent = `${pendingApprovalsCount} hồ sơ`;
+        }
+
+        const searchVal = document.getElementById("auditSearchInput")?.value || "";
+        renderAuditList(filterData(rawPendingList, searchVal));
+
+    } catch (err) {
+        console.warn("Chưa tải được đơn chờ duyệt:", err);
+    }
+}
+
+// 2. Tìm kiếm nhanh theo chữ cái đầu hoặc số đầu (gõ là lọc tức thì)
+function filterPendingAudit(keyword) {
+    renderAuditList(filterData(rawPendingList, keyword));
+}
+
+function filterData(list, keyword) {
+    const cleanKey = keyword.trim().toLowerCase();
+    if (!cleanKey) return list;
+
+    return list.filter(item => {
+        const phone = (item.phone || '').toLowerCase();
+        const name = (item.name || '').toLowerCase();
+        return phone.includes(cleanKey) || name.includes(cleanKey);
+    });
+}
+
+// 3. Hiển thị danh sách ra giao diện
+function renderAuditList(list) {
+    const container = document.getElementById("auditListContainer");
+    if (!container) return;
+
+    if (list && list.length > 0) {
+        container.innerHTML = list.map(item => `
+            <div id="row-${item.phone}" class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2 hover:border-slate-700 transition-all font-mono-tech">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold text-xs">
+                            XT ${item.phone}
+                        </span>
+                        <span class="text-emerald-400 font-bold text-xs">+5.000 đ</span>
+                    </div>
+                    <span class="text-[10px] text-slate-500">${item.time || ''}</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <div class="truncate pr-2">
+                        <span class="font-bold text-slate-200">${item.name}</span>
+                        <span class="text-slate-500 text-[10.5px] block truncate">${item.email || ''}</span>
+                    </div>
+                    <button type="button" onclick="approveCustomerAction('${item.phone}')" id="btn-approve-${item.phone}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs rounded-xl shadow-md transition-all shrink-0 flex items-center gap-1">
+                        ✓ DUYỆT
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        container.innerHTML = `
+            <div class="py-8 text-center text-slate-500 text-xs font-mono-tech">
+                ${rawPendingList.length > 0 ? '❌ Không tìm thấy hồ sơ khớp từ khóa.' : '✨ Hiện tại không có đơn nào đang chờ duyệt.'}
+            </div>
+        `;
+    }
+}
+
+// 4. Bấm nút DUYỆT -> Cập nhật Sheet và bắn sang K-Drive Master
+async function approveCustomerAction(phone) {
+    const btn = document.getElementById(`btn-approve-${phone}`);
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Đang duyệt...';
+    }
+
+    try {
+        const res = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'founder_approve_from_web',
+                phone: phone
+            })
+        });
+        const result = await res.json();
+
+        if (result.status === 'success') {
+            const row = document.getElementById(`row-${phone}`);
+            if (row) {
+                row.className = "p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-center text-emerald-300 text-xs font-bold font-mono-tech";
+                row.innerHTML = `✓ Đã duyệt thành công & Đồng bộ sang K-Drive Master!`;
+                setTimeout(() => {
+                    checkPendingApprovals();
+                }, 1200);
+            }
+        } else {
+            alert('Lỗi: ' + (result.message || 'Không thể duyệt'));
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '✓ DUYỆT';
+            }
+        }
+    } catch (e) {
+        alert('Lỗi kết nối máy chủ: ' + e);
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '✓ DUYỆT';
+        }
+    }
+}
+
+// 5. Điều khiển chạm nút Founder thông minh
+function handleFounderBtnClick() {
+    if (pendingApprovalsCount > 0) {
+        openFounderAuditModal();
+    } else {
+        openFounderDashboardModal();
+    }
+}
+
+function openFounderAuditModal() {
+    const m = document.getElementById('modalFounderAudit');
+    if (m) {
+        m.classList.remove('hidden');
+        const input = document.getElementById('auditSearchInput');
+        if (input) {
+            input.value = '';
+            setTimeout(() => input.focus(), 100);
+        }
+    }
+    checkPendingApprovals();
+}
+
+function closeFounderAuditModal() {
+    const m = document.getElementById('modalFounderAudit');
+    if (m) m.classList.add('hidden');
+}
+
+// Quét ngầm mỗi 15 giây & quét ngay khi mở web
+setInterval(checkPendingApprovals, 15000);
+window.addEventListener('DOMContentLoaded', checkPendingApprovals);
+</script>
+
+<!-- ======================================================== -->
+<!-- MODAL ĐỐI SOÁT DUYỆT ĐƠN 5K KÈM THANH TÌM KIẾM NHANH     -->
+<!-- ======================================================== -->
+<div id="modalFounderAudit" onclick="if(event.target === this) closeFounderAuditModal()" class="fixed inset-0 z-[999999] hidden flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md font-sans">
+    <div class="relative w-full max-w-[430px] bg-slate-950 border-2 border-cyan-500/60 rounded-3xl p-4 sm:p-5 shadow-[0_0_40px_rgba(6,182,212,0.35)] space-y-3 max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-2.5 border-b border-slate-800 shrink-0">
+            <div class="flex items-center gap-2">
+                <span class="text-base text-cyan-400">🛡️</span>
+                <div>
+                    <h3 class="text-xs font-extrabold text-cyan-300 font-mono-tech tracking-wider uppercase">ĐỐI SOÁT & DUYỆT ĐƠN 5K</h3>
+                    <p class="text-[10px] text-slate-400">So khớp với thông báo biến động số dư ACB 8617</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeFounderAuditModal()" class="w-7 h-7 rounded-full bg-slate-900 border border-slate-700 hover:border-rose-500/50 flex items-center justify-center text-slate-400 hover:text-rose-300 transition-all font-bold text-xs">✕</button>
+        </div>
+
+        <!-- Ô TÌM KIẾM NHANH Ở ĐẦU BẢNG -->
+        <div class="relative shrink-0">
+            <input type="text" id="auditSearchInput" oninput="filterPendingAudit(this.value)" placeholder="🔍 Gõ số đầu hoặc chữ đầu (VD: 098, minh, tran)..." class="w-full px-3.5 py-2 pl-9 rounded-xl bg-slate-900 border border-slate-700 focus:border-cyan-400 text-xs text-white placeholder-slate-500 outline-none font-mono-tech transition-all">
+            <span class="absolute left-3 top-2.5 text-slate-500 text-xs">⚡</span>
+        </div>
+
+        <!-- Thống kê số lượng -->
+        <div class="p-2 rounded-xl bg-slate-900/70 border border-slate-800/80 flex items-center justify-between text-xs font-mono-tech shrink-0">
+            <span class="text-slate-400 text-[11px]">Đang chờ đối soát:</span>
+            <span id="auditPendingTitleCount" class="text-amber-300 font-extrabold text-xs">0 hồ sơ</span>
+        </div>
+
+        <!-- Danh sách đơn chờ duyệt -->
+        <div id="auditListContainer" class="space-y-2 overflow-y-auto pr-1 flex-1 font-mono-tech">
+            <div class="py-8 text-center text-slate-500 text-xs">
+                ⚡ Đang đồng bộ danh sách từ máy chủ Telepathy...
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-2.5 border-t border-slate-800 flex items-center justify-between shrink-0">
+            <button type="button" onclick="openFounderDashboardModal(); closeFounderAuditModal();" class="text-[11px] text-slate-400 hover:text-amber-300 font-mono-tech transition-colors">
+                ⚡ Bảng điều khiển Founder
+            </button>
+            <button type="button" onclick="checkPendingApprovals()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 font-bold text-[11px] font-mono-tech active:scale-95 transition-all">
+                Làm mới ↻
+            </button>
+        </div>
+
+    </div>
+</div>
+
 </body>
 </html>
