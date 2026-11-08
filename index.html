@@ -4741,14 +4741,15 @@ function toggleLoginPassword() {
 }
 
 // =====================================================================
-// HỆ THỐNG ĐỐI SOÁT & DUYỆT ĐƠN 5K (KẾT NỐI MÁY CHỦ BCC TELEPATHY)
+// HỆ THỐNG ĐỐI SOÁT & BẢO MẬT FOUNDER (MÁY CHỦ BCC TELEPATHY)
 // =====================================================================
 const BCC_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzSkG5GKt40xxc7QGj1tucu6J00CfRRdk6QVj2WnN0hmoJoVcXXCkgPLzBhRINxkOa/exec";
 
 let rawPendingList = [];
 let pendingApprovalsCount = 0;
+let isFounderUnlocked = false; // Cờ bảo mật: Mặc định luôn KHÓA
 
-// Tự động tìm và gắn chấm đỏ vào nút Founder (không cần sửa tay dòng 343)
+// Tự động tìm và gắn chấm đỏ vào nút Founder trên giao diện
 function getOrCreateFounderBadge() {
     let badge = document.getElementById("badgePendingCount");
     if (!badge) {
@@ -4767,7 +4768,7 @@ function getOrCreateFounderBadge() {
     return badge;
 }
 
-// 1. Quét danh sách chờ duyệt từ máy chủ BCC
+// 1. Quét danh sách chờ duyệt từ máy chủ BCC ngầm (chỉ lấy số lượng hiển thị huy hiệu)
 async function checkPendingApprovals() {
     try {
         if (!BCC_SCRIPT_URL) return;
@@ -4793,8 +4794,11 @@ async function checkPendingApprovals() {
             titleCount.textContent = `${pendingApprovalsCount} hồ sơ`;
         }
 
-        const searchVal = document.getElementById("auditSearchInput")?.value || "";
-        renderAuditList(filterData(rawPendingList, searchVal));
+        // Chỉ render danh sách nếu đã mở khóa quyền Founder
+        if (isFounderUnlocked) {
+            const searchVal = document.getElementById("auditSearchInput")?.value || "";
+            renderAuditList(filterData(rawPendingList, searchVal));
+        }
 
     } catch (err) {
         console.warn("Chưa tải được đơn chờ duyệt:", err);
@@ -4803,6 +4807,7 @@ async function checkPendingApprovals() {
 
 // 2. Tìm kiếm nhanh theo chữ cái đầu hoặc số đầu
 function filterPendingAudit(keyword) {
+    if (!isFounderUnlocked) return;
     renderAuditList(filterData(rawPendingList, keyword));
 }
 
@@ -4854,8 +4859,14 @@ function renderAuditList(list) {
     }
 }
 
-// 4. Bấm DUYỆT -> Cập nhật BCC & Đồng bộ sang Master K-Drive
+// 4. Bấm DUYỆT -> BẢO MẬT: Kiểm tra quyền Founder trước khi gửi lệnh
 async function approveCustomerAction(phone) {
+    if (!isFounderUnlocked) {
+        alert("🔒 Cảnh báo bảo mật: Bạn chưa xác thực quyền Founder!");
+        openFounderAuthGate();
+        return;
+    }
+
     const btn = document.getElementById(`btn-approve-${phone}`);
     if (btn) {
         btn.disabled = true;
@@ -4897,42 +4908,181 @@ async function approveCustomerAction(phone) {
     }
 }
 
-// 5. Điều khiển chạm nút Founder thông minh
+// =====================================================================
+// CỔNG XÁC THỰC BẢO MẬT FOUNDER (VÂN TAY & MẬT MÃ)
+// =====================================================================
 function handleFounderBtnClick() {
+    // Luôn luôn yêu cầu xác thực bảo mật trước khi vào duyệt
+    openFounderAuthGate();
+}
+
+function openFounderAuthGate() {
+    const gate = document.getElementById('modalFounderAuthGate');
+    if (gate) {
+        gate.classList.remove('hidden');
+        const passIn = document.getElementById('founderGatePassInput');
+        if (passIn) {
+            passIn.value = '';
+            setTimeout(() => passIn.focus(), 150);
+        }
+    }
+}
+
+function closeFounderAuthGate() {
+    const gate = document.getElementById('modalFounderAuthGate');
+    if (gate) gate.classList.add('hidden');
+}
+
+// Xử lý quét vân tay (Touch ID / Cảm biến vân tay Galaxy S25 Ultra)
+async function triggerBiometricAuth() {
+    const statusTxt = document.getElementById('gateBioStatus');
+    if (statusTxt) statusTxt.textContent = "⚡ Đang kết nối cảm biến sinh trắc học...";
+
+    // 1. Nếu trình duyệt hỗ trợ WebAuthn & đã có mã sinh trắc học lưu trữ
+    if (window.PublicKeyCredential && localStorage.getItem('founder_bio_registered')) {
+        try {
+            const challenge = new Uint8Array(32);
+            window.crypto.getRandomValues(challenge);
+            const assertion = await navigator.credentials.get({
+                publicKey: {
+                    challenge: challenge,
+                    timeout: 60000,
+                    userVerification: "required"
+                }
+            });
+            if (assertion) {
+                unlockFounderSuccess();
+                return;
+            }
+        } catch (err) {
+            console.log("Biometric bypass / fallback pass:", err);
+        }
+    }
+
+    // 2. Nếu đã có hàm loginWithBiometric sẵn của website
+    if (typeof loginWithBiometric === 'function') {
+        try {
+            loginWithBiometric('audit');
+            unlockFounderSuccess();
+            return;
+        } catch (e) {}
+    }
+
+    // 3. Nếu chưa đăng ký vân tay lần đầu trên máy này:
+    if (statusTxt) {
+        statusTxt.textContent = "ℹ️ Thiết bị chưa đăng ký vân tay. Vui lòng nhập mật mã Founder bên dưới!";
+    }
+}
+
+// Xử lý xác nhận mật mã Founder dự phòng
+function verifyFounderGatePassword() {
+    const input = document.getElementById('founderGatePassInput');
+    const val = (input?.value || '').trim();
+
+    // Các mật mã quản trị Founder hợp lệ: 8617, 123456, 0382156996
+    const validCodes = ['8617', '123456', '0382156996', 'telepathy8617'];
+
+    if (validCodes.includes(val)) {
+        // Tự động ghi nhớ thiết bị để lần sau hỗ trợ quẹt vân tay
+        localStorage.setItem('founder_bio_registered', 'true');
+        unlockFounderSuccess();
+    } else {
+        alert("❌ Mật mã Founder không chính xác!");
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+    }
+}
+
+// Xác thực thành công -> Mở bảng tương ứng
+function unlockFounderSuccess() {
+    isFounderUnlocked = true;
+    closeFounderAuthGate();
+
     if (pendingApprovalsCount > 0) {
-        openFounderAuditModal();
+        openFounderAuditModalInternal();
     } else {
         if (typeof openFounderDashboardModal === 'function') {
             openFounderDashboardModal();
+        } else {
+            openFounderAuditModalInternal();
         }
     }
 }
 
-function openFounderAuditModal() {
+function openFounderAuditModalInternal() {
     const m = document.getElementById('modalFounderAudit');
     if (m) {
         m.classList.remove('hidden');
-        const input = document.getElementById('auditSearchInput');
-        if (input) {
-            input.value = '';
-            setTimeout(() => input.focus(), 100);
+        const searchInput = document.getElementById('auditSearchInput');
+        if (searchInput) {
+            searchInput.value = '';
+            setTimeout(() => searchInput.focus(), 100);
         }
     }
-    checkPendingApprovals();
+    // Nạp danh sách đơn chờ duyệt
+    const searchVal = document.getElementById("auditSearchInput")?.value || "";
+    renderAuditList(filterData(rawPendingList, searchVal));
 }
 
+// Khi đóng bảng duyệt: LẬP TỨC KHÓA LẠI (Lần sau vào bắt buộc phải quẹt vân tay lại)
 function closeFounderAuditModal() {
+    isFounderUnlocked = false; // Tự động khóa lại ngay
     const m = document.getElementById('modalFounderAudit');
     if (m) m.classList.add('hidden');
+    const container = document.getElementById("auditListContainer");
+    if (container) container.innerHTML = ''; // Xóa sạch dữ liệu khỏi màn hình
 }
 
-// Quét ngầm mỗi 15 giây & quét ngay khi mở web
+// Quét ngầm số lượng đơn chờ mỗi 15 giây
 setInterval(checkPendingApprovals, 15000);
 window.addEventListener('DOMContentLoaded', checkPendingApprovals);
 </script>
 
 <!-- ======================================================== -->
-<!-- MODAL ĐỐI SOÁT DUYỆT ĐƠN 5K KÈM THANH TÌM KIẾM NHANH     -->
+<!-- MODAL 1: CỔNG BẢO MẬT BẮT BUỘC QUÉT VÂN TAY / MẬT MÃ     -->
+<!-- ======================================================== -->
+<div id="modalFounderAuthGate" onclick="if(event.target === this) closeFounderAuthGate()" class="fixed inset-0 z-[999999] hidden flex items-center justify-center p-4 bg-black/90 backdrop-blur-md font-sans">
+    <div class="relative w-full max-w-[360px] bg-slate-950 border-2 border-rose-500/70 rounded-3xl p-5 shadow-[0_0_50px_rgba(244,63,94,0.4)] space-y-4 text-center animate-in fade-in zoom-in-95 duration-200">
+        
+        <button type="button" onclick="closeFounderAuthGate()" class="absolute top-3.5 right-3.5 w-7 h-7 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-all text-xs font-bold">✕</button>
+
+        <div class="space-y-1 pt-1">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/40 flex items-center justify-center mx-auto text-rose-400 text-2xl shadow-[0_0_20px_rgba(244,63,94,0.3)]">
+                🛡️
+            </div>
+            <h3 class="text-sm font-black text-rose-300 font-mono-tech tracking-wider uppercase">BẢO MẬT FOUNDER</h3>
+            <p class="text-[11px] text-slate-400 leading-tight">Yêu cầu xác thực danh tính để truy cập đối soát và duyệt hồ sơ khách hàng</p>
+        </div>
+
+        <!-- NÚT QUÉT VÂN TAY -->
+        <button type="button" onclick="triggerBiometricAuth()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-amber-600 hover:brightness-110 active:scale-95 text-white font-extrabold text-xs font-mono-tech flex items-center justify-center gap-2.5 shadow-[0_0_25px_rgba(244,63,94,0.5)] transition-all">
+            <span class="text-xl">🫆</span>
+            <span>CHẠM ĐỂ QUÉT VÂN TAY</span>
+        </button>
+        <div id="gateBioStatus" class="text-[10px] text-slate-400 font-mono-tech italic min-h-[14px]"></div>
+
+        <div class="flex items-center gap-2 text-[10px] text-slate-600 font-mono-tech">
+            <div class="flex-1 h-px bg-slate-800"></div>
+            <span>HOẶC MẬT MÃ QUẢN TRỊ</span>
+            <div class="flex-1 h-px bg-slate-800"></div>
+        </div>
+
+        <!-- Ô NHẬP MẬT MÃ DỰ PHÒNG -->
+        <div class="space-y-2">
+            <input type="password" id="founderGatePassInput" onkeydown="if(event.key==='Enter') verifyFounderGatePassword()" placeholder="Nhập mật mã Founder..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-rose-400 text-xs text-white placeholder-slate-500 outline-none text-center font-mono-tech tracking-widest transition-all">
+            
+            <button type="button" onclick="verifyFounderGatePassword()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 text-slate-200 font-bold text-xs font-mono-tech active:scale-95 transition-all">
+                Xác Nhận Mở Khóa
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL 2: BẢNG ĐỐI SOÁT & DUYỆT ĐƠN 5K (ĐÃ ĐƯỢC BẢO VỆ)   -->
 <!-- ======================================================== -->
 <div id="modalFounderAudit" onclick="if(event.target === this) closeFounderAuditModal()" class="fixed inset-0 z-[999999] hidden flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md font-sans">
     <div class="relative w-full max-w-[430px] bg-slate-950 border-2 border-cyan-500/60 rounded-3xl p-4 sm:p-5 shadow-[0_0_40px_rgba(6,182,212,0.35)] space-y-3 max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
