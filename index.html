@@ -3544,47 +3544,52 @@ function deleteVipVideo(index) {
 
         // HÀM ĐĂNG TẢI VIDEO TỪ FOUNDER DASHBOARD
         function uploadFounderVideo() {
-            const titleInput = document.getElementById('founderVideoTitle');
-            const urlInput = document.getElementById('founderVideoUrl');
-            const fileInput = document.getElementById('founderVideoFile');
+    const titleInput = document.getElementById('founderVideoTitle');
+    const urlInput = document.getElementById('founderVideoUrl');
+    const fileInput = document.getElementById('founderVideoFile');
 
-            const title = (titleInput && titleInput.value.trim()) || `Video #${vipVideosData.length + 1}: K-Drive Demo`;
-            const url = urlInput ? urlInput.value.trim() : '';
-            const file = fileInput && fileInput.files ? fileInput.files[0] : null;
+    const title = (titleInput && titleInput.value.trim()) || `Video #${(vipVideosData ? vipVideosData.length : 0) + 1}: K-Drive Demo`;
+    const url = urlInput ? urlInput.value.trim() : '';
+    const file = fileInput && fileInput.files ? fileInput.files[0] : null;
 
-            if (!url && !file) {
-                alert('Vui lòng dán link video (YouTube/Drive) HOẶC chọn tệp video từ máy!');
-                return;
-            }
+    if (!url && !file) {
+        alert('Vui lòng dán link video HOẶC chọn tệp video từ máy!');
+        return;
+    }
 
-            let fileBlobUrl = '';
-            if (file) {
-                fileBlobUrl = URL.createObjectURL(file);
-            }
+    let fileBlobUrl = '';
+    if (file) {
+        fileBlobUrl = URL.createObjectURL(file);
+    }
 
-            const newVideo = {
-                id: Date.now(),
-                title: title,
-                url: url,
-                fileBlobUrl: fileBlobUrl,
-                votesYes: 1,
-                votesNo: 0
-            };
+    const newVideo = {
+        id: Date.now(),
+        title: title,
+        url: url,
+        fileBlobUrl: fileBlobUrl,
+        votesYes: 1,
+        votesNo: 0
+    };
 
-            vipVideosData.unshift(newVideo);
-            saveVipVideos();
+    if (!Array.isArray(vipVideosData)) vipVideosData = [];
+    vipVideosData.unshift(newVideo);
+    
+    try {
+        saveVipVideos();
+    } catch(e) {
+        console.warn("Lưu bộ nhớ tạm:", e);
+    }
 
-            if (titleInput) titleInput.value = '';
-            if (urlInput) urlInput.value = '';
-            if (fileInput) fileInput.value = '';
+    if (titleInput) titleInput.value = '';
+    if (urlInput) urlInput.value = '';
+    if (fileInput) fileInput.value = '';
 
-            const statusText = document.getElementById('voteStatusText');
-            if (statusText) statusText.textContent = `Trạng thái: Đã đưa "${title}" vào Phòng Chiếu VIP!`;
+    const statusText = document.getElementById('voteStatusText');
+    if (statusText) statusText.textContent = `Trạng thái: Đã đưa "${title}" vào Phòng Chiếu!`;
 
-            alert(`🎉 Đã đưa "${title}" lên Phòng Chiếu VIP thành công!`);
-            closeFounderDashboardModal();
-            renderVipVideos();
-        }
+    alert(`🎉 Đã đưa "${title}" lên Phòng Chiếu thành công!`);
+    if (typeof renderVipVideos === 'function') renderVipVideos();
+}
 
         // TỰ ĐỘNG KHỞI TẠO KHUNG VIDEO KHI MỞ TRANG
         if (document.readyState === 'loading') {
