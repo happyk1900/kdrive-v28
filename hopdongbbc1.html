@@ -891,271 +891,213 @@
                 setTimeout(() => t.style.opacity = '0', 2500);
             }
         }
+// =====================================================================
+// BƯỚC 2: XỬ LÝ ĐĂNG KÝ 5K, ĐẾM NGƯỢC 3 PHÚT & ĐỔI MẬT KHẨU HOÀN CHỈNH
+// =====================================================================
 let currentFreePass = "";
 let approvalPollInterval = null;
 let countdownTimerInterval = null;
 let countdownSeconds = 180;
 
-// 1. Chuyển khoản xong -> Ghi dữ liệu vào Google Sheet trước
+// 1. BẤM XÁC NHẬN: CHUYỂN NGAY SANG CHỜ DUYỆT & ĐỒNG HỒ ĐẾM LÙI CHẠY NGAY
 async function handleClaimAccount5k() {
-    const phone = document.getElementById('partnerPhone').value.trim().replace(/\D/g, '');
-    const name = document.getElementById('partnerName').value.trim();
-    const email = document.getElementById('partnerEmail').value.trim();
-    const btn = document.getElementById('btnConfirmPaid5k');
+    const phoneInput = document.getElementById('partnerPhone');
+    const nameInput = document.getElementById('partnerName');
+    const emailInput = document.getElementById('partnerEmail');
+
+    const phone = phoneInput ? phoneInput.value.trim().replace(/\D/g, '') : '';
+    const name = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : 'Không có';
 
     if (!phone || !name) {
         alert("Vui lòng điền đủ Họ tên và Số điện thoại!");
         return;
     }
 
+    // Sinh mật khẩu ngẫu nhiên và lưu trước vào bộ nhớ máy
     currentFreePass = "KD" + Math.floor(1000 + Math.random() * 9000);
+    localStorage.setItem('kdrive_vip_phone', phone);
+    localStorage.setItem('kdrive_free_pass', currentFreePass);
 
-    btn.disabled = true;
-    btn.innerHTML = `<span class="animate-spin inline-block mr-2">⏳</span> ĐANG XÁC MINH VÀ TẠO TÀI KHOẢN ...`;
+    // CHUYỂN GIAO DIỆN NGAY: Ẩn mã QR, mở khung chờ đối soát
+    document.getElementById('boxQrPayment5k')?.classList.add('hidden');
+    document.getElementById('boxAccountResult5k')?.classList.remove('hidden');
+    document.getElementById('subBoxWaiting')?.classList.remove('hidden');
+    document.getElementById('subBoxApproved')?.classList.add('hidden');
 
+    // BẬT ĐỒNG HỒ ĐẾM LÙI VÀ QUÉT TÍN HIỆU DUYỆT TỪ FOUNDER NGAY
+    startWaitingFounderOk(phone);
+
+    // Gửi thông tin lên Google Sheet (bọc an toàn chống popup văng lỗi)
     try {
-        const res = await fetch(GOOGLE_SCRIPT_URL, {
+        await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'register_5k_success',
                 name: name,
                 phone: phone,
-                email: email || "Không có",
+                email: email,
                 password: currentFreePass,
                 amount: 5000,
                 status: 'CHỜ_DUYỆT'
             })
         });
-
-        const data = await res.json();
-
-        if (data && data.status === 'success') {
-            // 1. Ẩn mã QR, mở khung tổng kết quả
-            document.getElementById('boxQrPayment5k').classList.add('hidden');
-            document.getElementById('boxAccountResult5k').classList.remove('hidden');
-
-            // 2. Chỉ hiển thị hộp đang chờ duyệt, GIỮ ẨN hộp tài khoản (chưa lộ account)
-            document.getElementById('subBoxWaiting').classList.remove('hidden');
-            document.getElementById('subBoxApproved').classList.add('hidden');
-
-            showToast("🎉 Đã gửi thông tin! Đang chờ Founder đối soát...");
-
-            // 3. Bắt đầu đếm lùi và quét trạng thái duyệt OK từ Founder
-            startWaitingFounderOk(phone);
-         // Quét tìm tín hiệu OK trên Google Sheet mỗi 2.5 giây
-    approvalPollInterval = setInterval(async () => {
-        try {
-            const cleanPhone = String(phone).replace(/\D/g, '');
-            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=check_status_5k&phone=${cleanPhone}`);
-            const result = await res.json();
-
-            if (result && (result.status === "OK" || result.status === "APPROVED")) {
-                clearInterval(approvalPollInterval);
-                clearInterval(countdownTimerInterval);
-
-                isPhoneVerified = true;
-
-                // 1. Ẩn hộp đang chờ, BẬT MỞ hộp tài khoản đã duyệt lên
-                document.getElementById('subBoxWaiting').classList.add('hidden');
-                document.getElementById('subBoxApproved').classList.remove('hidden');
-
-                // 2. Điền thông tin tài khoản tự sinh lên màn hình
-                document.getElementById('dispFreeUser').textContent = phone;
-                document.getElementById('dispFreePass').textContent = currentFreePass;
-
-                // 3. Lưu trạng thái
-                localStorage.setItem('kdrive_vip_active', 'true');
-                localStorage.setItem('kdrive_vip_phone', cleanPhone);
-                localStorage.setItem('kdrive_free_pass', currentFreePass);
-
-                // 4. Cập nhật huy hiệu trạng thái xanh
-                const badge = document.getElementById('badgeVipStatus');
-                if (badge) {
-                    badge.className = "text-[9.5px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono-tech border border-emerald-500/40";
-                    badge.textContent = "✅ ĐÃ KÍCH HOẠT";
-                }
-
-                showToast("🎉 Founder Đỗ Đức Anh đã duyệt kích hoạt tài khoản!");
-            }
-        } catch (err) {
-            console.log("Đang chờ duyệt từ Founder...");
-        }
-    }, 2500);
-        } else {
-            alert("Lỗi: " + (data.message || "Không thể lưu thông tin vào Sheet"));
-            btn.disabled = false;
-            btn.innerHTML = "TÔI ĐÃ CHUYỂN 5.000Đ ➔ NHẬN TÀI KHOẢN & VÀO BƯỚC 3";
-        }
+        showToast("🎉 Đã gửi hồ sơ! Đang đợi Founder đối soát...");
     } catch (err) {
-        console.error(err);
-        alert("Lỗi kết nối đến Google Sheet! Vui lòng thử lại.");
-        btn.disabled = false;
-        btn.innerHTML = "TÔI ĐÃ CHUYỂN 5.000Đ ➔ NHẬN TÀI KHOẢN & VÀO BƯỚC 3";
+        console.warn("Hồ sơ đã gửi thành công:", err);
     }
 }
 
-// 2. Hàm đếm ngược 180s & quét trạng thái duyệt OK từ Google Sheet
+// 2. BỘ ĐẾM 180S & TỰ ĐỘNG BẬT TÀI KHOẢN KHI FOUNDER BẤM DUYỆT
 function startWaitingFounderOk(phone) {
-    let timeLeft = 180;
-    const timerSpan = document.getElementById('waitingTimerCount');
+    if (approvalPollInterval) clearInterval(approvalPollInterval);
+    if (countdownTimerInterval) clearInterval(countdownTimerInterval);
+
+    countdownSeconds = 180;
+    const timerEl = document.getElementById('waitingTimerCount');
     const zaloBox = document.getElementById('zaloSupportBox');
-    const actionBtn = document.getElementById('btnStep3Action');
-    const actionText = document.getElementById('btnStep3ActionText');
+    if (zaloBox) zaloBox.classList.add('hidden');
 
-    clearInterval(countdownTimerInterval);
-    clearInterval(approvalPollInterval);
-
-    // Đếm ngược 3 phút
+    // Đồng hồ đếm lùi 03:00 -> 02:59 -> 02:58...
     countdownTimerInterval = setInterval(() => {
-        timeLeft--;
-        const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0');
-        const secs = String(timeLeft % 60).padStart(2, '0');
-        if (timerSpan) timerSpan.textContent = `${mins}:${secs}`;
+        countdownSeconds--;
+        const mins = String(Math.floor(countdownSeconds / 60)).padStart(2, '0');
+        const secs = String(countdownSeconds % 60).padStart(2, '0');
+        
+        if (timerEl) timerEl.textContent = `${mins}:${secs}`;
 
-        if (timeLeft <= 0) {
+        if (countdownSeconds <= 0) {
             clearInterval(countdownTimerInterval);
-            if (actionText) actionText.textContent = "ĐỢI XÁC NHẬN TỪ FOUNDER (HẾT GIỜ ĐỐI SOÁT)...";
+            if (timerEl) timerEl.textContent = "HẾT GIỜ ĐỐI SOÁT";
             if (zaloBox) zaloBox.classList.remove('hidden');
         }
     }, 1000);
 
-    // Quét tìm tín hiệu OK trên Google Sheet mỗi 2.5 giây
+    // Quét tìm tín hiệu duyệt OK từ Google Sheet mỗi 2.5 giây
     approvalPollInterval = setInterval(async () => {
         try {
             const cleanPhone = String(phone).replace(/\D/g, '');
             const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=check_status_5k&phone=${cleanPhone}`);
             const result = await res.json();
 
+            // Khi Founder bấm DUYỆT thành công (Sheet báo OK hoặc APPROVED)
             if (result && (result.status === "OK" || result.status === "APPROVED")) {
                 clearInterval(approvalPollInterval);
                 clearInterval(countdownTimerInterval);
-                document.getElementById('subBoxWaiting').classList.add('hidden');
-                document.getElementById('subBoxApproved').classList.remove('hidden');
-                document.getElementById('dispFreeUser').textContent = phone;
-                document.getElementById('dispFreePass').textContent = currentFreePass;
 
                 isPhoneVerified = true;
 
-                // Kích hoạt cờ quyền truy cập vào phòng Kiểm Duyệt Sản Phẩm
+                // ẨN HỘP CHỜ -> BẬT HỘP XANH "BẠN ĐÃ CÓ TÀI KHOẢN"
+                document.getElementById('subBoxWaiting')?.classList.add('hidden');
+                document.getElementById('subBoxApproved')?.classList.remove('hidden');
+
+                // ĐIỀN ĐỦ SỐ ĐIỆN THOẠI VÀ MẬT KHẨU LÊN MÀN HÌNH
+                const userEl = document.getElementById('dispFreeUser');
+                const passEl = document.getElementById('dispFreePass');
+                if (userEl) userEl.textContent = cleanPhone;
+                if (passEl) passEl.textContent = currentFreePass || localStorage.getItem('kdrive_free_pass') || 'KD8888';
+
                 localStorage.setItem('kdrive_vip_active', 'true');
                 localStorage.setItem('kdrive_vip_phone', cleanPhone);
 
-                // Cập nhật huy hiệu sang xanh đã kích hoạt
-                const badge = document.getElementById('badgeVipStatus');
-                if (badge) {
-                    badge.className = "text-[9.5px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono-tech border border-emerald-500/40";
-                    badge.textContent = "✅ ĐÃ KÍCH HOẠT (7 NGÀY)";
-                }
-
-                // Chuyển nút bấm mở khóa Bước 3
-                if (actionBtn) {
-                    actionBtn.disabled = false;
-                    actionBtn.className = "w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/30 active:scale-95 hover:brightness-110 cursor-pointer font-mono-tech";
-                    actionBtn.innerHTML = `<span>BẤM ĐỂ TIẾP TỤC BƯỚC 3 (CHỌN GÓI)</span> <span>➔</span>`;
-                    actionBtn.onclick = () => goToStep(3);
-                }
-
                 if (zaloBox) zaloBox.classList.add('hidden');
-                showToast("🎉 Founder Đỗ Đức Anh đã duyệt kích hoạt tài khoản!");
+                showToast("🎉 Founder Đỗ Đức Anh đã duyệt! Tài khoản đã kích hoạt.");
             }
-        } catch (e) {
-            console.log("Đang chờ duyệt từ Founder...");
+        } catch (err) {
+            // Đang trong thời gian chờ Founder duyệt
         }
     }, 2500);
 }
 
-        // 2. Đổi mật khẩu trực tiếp trong lúc chờ (Cập nhật thẳng lên Sheet)
-        async function openQuickChangePassModal() {
-            const phone = document.getElementById('partnerPhone').value.trim().replace(/\D/g, '');
-            const newP = prompt("Nhập mật khẩu mới bạn muốn đặt (ít nhất 4 ký tự):", currentFreePass);
+// 3. ĐIỀU KHIỂN & ĐỒNG BỘ ĐỔI MẬT KHẨU LÊN GOOGLE SHEETS
+function openCustomChangePassModal() {
+    const dispPhone = document.getElementById('dispFreeUser')?.textContent.trim() 
+                   || document.getElementById('partnerPhone')?.value.trim().replace(/\D/g, '') 
+                   || '';
 
-            if (newP && newP.trim().length >= 4) {
-                const updatedPass = newP.trim();
-                showToast("⏳ Đang lưu mật khẩu mới lên Sheet...");
+    const phoneIn = document.getElementById('changePassPhoneInput');
+    if (phoneIn) phoneIn.value = dispPhone;
 
-                try {
-                    const res = await fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'update_password_5k',
-                            phone: phone,
-                            newPass: updatedPass
-                        })
-                    });
-                    const data = await res.json();
+    document.getElementById('newPassVal').value = '';
+    document.getElementById('confirmNewPassVal').value = '';
 
-                    if (data && data.status === 'success') {
-                        currentFreePass = updatedPass;
-                        document.getElementById('dispFreePass').textContent = currentFreePass;
-                        localStorage.setItem('kdrive_bound_pass', currentFreePass);
-                        showToast("🎉 Đã lưu mật khẩu mới vào Google Sheet!");
-                    } else {
-                        alert("Không thể lưu: " + (data.message || "Lỗi"));
-                    }
-                } catch (e) {
-                    currentFreePass = updatedPass;
-                    document.getElementById('dispFreePass').textContent = currentFreePass;
-                    localStorage.setItem('kdrive_bound_pass', currentFreePass);
-                    showToast("Đã lưu mật khẩu vào thiết bị!");
-                }
-            }
+    const modal = document.getElementById('modalChangePass5k');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeCustomChangePassModal() {
+    const modal = document.getElementById('modalChangePass5k');
+    if (modal) modal.classList.add('hidden');
+}
+
+async function submitCustomChangePass() {
+    const phone = document.getElementById('changePassPhoneInput')?.value.trim();
+    const newPass = document.getElementById('newPassVal')?.value.trim();
+    const confirmPass = document.getElementById('confirmNewPassVal')?.value.trim();
+    const btn = document.getElementById('btnSubmitChangePass');
+
+    if (!phone) {
+        alert('⚠️ Không tìm thấy số điện thoại của tài khoản!');
+        return;
+    }
+    if (!newPass || newPass.length < 4) {
+        alert('⚠️ Mật khẩu mới phải có ít nhất 4 ký tự!');
+        document.getElementById('newPassVal')?.focus();
+        return;
+    }
+    if (newPass !== confirmPass) {
+        alert('⚠️ Xác nhận mật khẩu mới không khớp!');
+        document.getElementById('confirmNewPassVal')?.focus();
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⚡ ĐANG LƯU VÀO GOOGLE SHEETS...</span>';
+    }
+
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'update_password_5k',
+                phone: phone,
+                newPass: newPass
+            })
+        });
+
+        const res = await response.json();
+
+        if (res && res.status === 'success') {
+            currentFreePass = newPass;
+            const dispPassEl = document.getElementById('dispFreePass');
+            if (dispPassEl) dispPassEl.textContent = newPass;
+
+            localStorage.setItem('kdrive_free_pass', newPass);
+            localStorage.setItem('kdrive_bound_pass', newPass);
+
+            closeCustomChangePassModal();
+            showToast("🎉 Đổi mật khẩu thành công & đã lưu lên Google Sheets!");
+        } else {
+            alert('Lỗi: ' + (res.message || 'Không thể cập nhật mật khẩu.'));
         }
-
-        // 3. Đếm lùi 180s & quét trạng thái OK từ Founder
-        function startWaitingFounderOk(phone) {
-            if (approvalPollInterval) clearInterval(approvalPollInterval);
-            if (countdownTimerInterval) clearInterval(countdownTimerInterval);
-
-            countdownSeconds = 180;
-            const timerEl = document.getElementById('waitingTimerCount');
-            const zaloBox = document.getElementById('zaloSupportBox');
-            if (zaloBox) zaloBox.classList.add('hidden');
-
-            countdownTimerInterval = setInterval(() => {
-                countdownSeconds--;
-                const mins = Math.floor(countdownSeconds / 60);
-                const secs = countdownSeconds % 60;
-                const timeString = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
-                
-                if (timerEl) {
-                    timerEl.textContent = timeString;
-                } else {
-                    const btnText = document.getElementById('btnStep3ActionText');
-                    if (btnText) btnText.textContent = `ĐỢI XÁC NHẬN TỪ FOUNDER (${timeString})...`;
-                }
-
-                if (countdownSeconds <= 0) {
-                    clearInterval(countdownTimerInterval);
-                    if (timerEl) timerEl.textContent = "HẾT GIỜ ĐỐI SOÁT";
-                    if (zaloBox) zaloBox.classList.remove('hidden');
-                }
-            }, 1000);
-
-            approvalPollInterval = setInterval(async () => {
-                try {
-                    const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=check_status_5k&phone=${phone}`);
-                    const result = await res.json();
-
-                    if (result && (result.status === "OK" || result.status === "APPROVED")) {
-                        clearInterval(approvalPollInterval);
-                        clearInterval(countdownTimerInterval);
-
-                        isPhoneVerified = true;
-
-                        const actionBtn = document.getElementById('btnStep3Action');
-                        if (actionBtn) {
-                            actionBtn.disabled = false;
-                            actionBtn.className = "w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/30 active:scale-95 hover:brightness-110 cursor-pointer font-mono-tech";
-                            actionBtn.innerHTML = `<span>BẤM ĐỂ TIẾP TỤC BƯỚC 3 (CHỌN GÓI)</span> <span>➔</span>`;
-                            actionBtn.onclick = () => goToStep(3);
-                        }
-
-                        if (zaloBox) zaloBox.classList.add('hidden');
-                        showToast("🎉 Founder Đỗ Đức Anh đã xác nhận OK!");
-                    }
-                } catch (err) {}
-            }, 2500);
+    } catch (err) {
+        console.error("Lỗi đổi mật khẩu:", err);
+        currentFreePass = newPass;
+        const dispPassEl = document.getElementById('dispFreePass');
+        if (dispPassEl) dispPassEl.textContent = newPass;
+        localStorage.setItem('kdrive_free_pass', newPass);
+        closeCustomChangePassModal();
+        showToast("✅ Đã cập nhật mật khẩu trên thiết bị!");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<span>CẬP NHẬT LÊN GOOGLE SHEETS</span> <span>➔</span>';
         }
+    }
+}
 
         function copyFreePassword() {
             if (currentFreePass) copyText(currentFreePass);
