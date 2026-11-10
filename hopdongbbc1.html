@@ -1271,214 +1271,94 @@ async function submitCustomChangePass() {
     }
 }
 // =====================================================================
-        // ĐIỀU KHIỂN CHUYỂN BƯỚC VÀ PHÁT NHẠC NỀN
+        // ĐIỀU KHIỂN & ĐỒNG BỘ ĐỔI MẬT KHẨU LÊN GOOGLE SHEETS
         // =====================================================================
-        function handleStartExperience() {
-            // Phát nhạc nền với âm lượng 50%
-            const music = document.getElementById('kdriveBgMusic');
-            if (music) {
-                music.volume = 0.5;
-                music.play().catch(e => console.log("Cần tương tác người dùng để phát nhạc:", e));
+        function openCustomChangePassModal() {
+            const dispPhone = document.getElementById('dispFreeUser')?.textContent.trim() 
+                           || document.getElementById('partnerPhone')?.value.trim().replace(/\D/g, '') 
+                           || '';
+
+            const phoneIn = document.getElementById('changePassPhoneInput');
+            if (phoneIn) phoneIn.value = dispPhone;
+
+            document.getElementById('newPassVal').value = '';
+            document.getElementById('confirmNewPassVal').value = '';
+
+            const modal = document.getElementById('modalChangePass5k');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeCustomChangePassModal() {
+            const modal = document.getElementById('modalChangePass5k');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function submitCustomChangePass() {
+            const phone = document.getElementById('changePassPhoneInput')?.value.trim();
+            const newPass = document.getElementById('newPassVal')?.value.trim();
+            const confirmPass = document.getElementById('confirmNewPassVal')?.value.trim();
+            const btn = document.getElementById('btnSubmitChangePass');
+
+            if (!phone) {
+                alert('⚠️ Không tìm thấy số điện thoại của tài khoản!');
+                return;
             }
-            
-            // Chuyển sang Bước 2
-            goToStep(2);
-        }
+            if (!newPass || newPass.length < 4) {
+                alert('⚠️ Mật khẩu mới phải có ít nhất 4 ký tự!');
+                document.getElementById('newPassVal')?.focus();
+                return;
+            }
+            if (newPass !== confirmPass) {
+                alert('⚠️ Xác nhận mật khẩu mới không khớp!');
+                document.getElementById('confirmNewPassVal')?.focus();
+                return;
+            }
 
-        // =====================================================================
-        // ĐIỀU KHIỂN CHỌN GÓI BƯỚC 3 & ĐỒNG BỘ TIỀN KHẤU TRỪ
-        // =====================================================================
-        let selectedShares = 1;
-        
-        function selectTierPackage(votes) {
-            votes = parseInt(votes) || 1;
-            if (votes < 1) votes = 1;
-            if (votes > 20) votes = 20;
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span>⚡ ĐANG LƯU VÀO GOOGLE SHEETS...</span>';
+            }
 
-            selectedShares = votes;
-            selectedAmount = votes * 1000000;
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'update_password_5k',
+                        phone: phone,
+                        newPass: newPass
+                    })
+                });
 
-            const inputEl = document.getElementById('inputCustomVotes');
-            if (inputEl) inputEl.value = votes;
+                const res = await response.json();
 
-            [1, 3, 5, 10, 20].forEach(v => {
-                const card = document.getElementById(`tierCard-${v}`);
-                if (card) {
-                    if (v === votes) {
-                        card.classList.remove('border-slate-800');
-                        card.classList.add('border-cyan-400', 'shadow-[0_0_20px_rgba(6,182,212,0.25)]');
-                    } else {
-                        card.classList.remove('border-cyan-400', 'shadow-[0_0_20px_rgba(6,182,212,0.25)]');
-                        card.classList.add('border-slate-800');
-                    }
+                if (res && res.status === 'success') {
+                    currentFreePass = newPass;
+                    const dispPassEl = document.getElementById('dispFreePass');
+                    if (dispPassEl) dispPassEl.textContent = newPass;
+
+                    localStorage.setItem('kdrive_free_pass', newPass);
+                    localStorage.setItem('kdrive_bound_pass', newPass);
+
+                    closeCustomChangePassModal();
+                    showToast("🎉 Đổi mật khẩu thành công & đã lưu lên Google Sheets!");
+                } else {
+                    alert('Lỗi: ' + (res.message || 'Không thể cập nhật mật khẩu.'));
                 }
-            });
-
-            const total = selectedAmount;
-            const finalVal = Math.max(0, total - 5000);
-
-            const dispTotal = document.getElementById('dispCustomVotesTotal');
-            const dispSummaryPkg = document.getElementById('dispSummaryPackageVal');
-            const dispFinal = document.getElementById('dispSummaryFinalVal');
-
-            if (dispTotal) dispTotal.textContent = total.toLocaleString('vi-VN') + ' VNĐ';
-            if (dispSummaryPkg) dispSummaryPkg.textContent = `${total.toLocaleString('vi-VN')} VNĐ (${votes} Phiếu)`;
-            if (dispFinal) dispFinal.textContent = finalVal.toLocaleString('vi-VN') + ' VNĐ';
-
-            localStorage.setItem('kdrive_selected_shares', votes);
-            localStorage.setItem('kdrive_selected_amount', total);
-        }
-
-        function adjustCustomVotes(delta) {
-            selectTierPackage(selectedShares + delta);
-        }
-
-        function onCustomVotesInputChange() {
-            const inputEl = document.getElementById('inputCustomVotes');
-            selectTierPackage(parseInt(inputEl?.value) || 1);
-        }
-        }
-       // =====================================================================
-        // ĐIỀU KHIỂN CHỌN GÓI BƯỚC 3 & ĐỒNG BỘ TIỀN KHẤU TRỪ
-        // =====================================================================
-        let selectedShares = 1;
-        
-        function selectTierPackage(votes) {
-            votes = parseInt(votes) || 1;
-            if (votes < 1) votes = 1;
-            if (votes > 20) votes = 20;
-
-            selectedShares = votes;
-            selectedAmount = votes * 1000000;
-
-            const inputEl = document.getElementById('inputCustomVotes');
-            if (inputEl) inputEl.value = votes;
-
-            [1, 3, 5, 10, 20].forEach(v => {
-                const card = document.getElementById(`tierCard-${v}`);
-                if (card) {
-                    if (v === votes) {
-                        card.classList.remove('border-slate-800');
-                        card.classList.add('border-cyan-400', 'shadow-[0_0_20px_rgba(6,182,212,0.25)]');
-                    } else {
-                        card.classList.remove('border-cyan-400', 'shadow-[0_0_20px_rgba(6,182,212,0.25)]');
-                        card.classList.add('border-slate-800');
-                    }
+            } catch (err) {
+                console.error("Lỗi đổi mật khẩu:", err);
+                currentFreePass = newPass;
+                const dispPassEl = document.getElementById('dispFreePass');
+                if (dispPassEl) dispPassEl.textContent = newPass;
+                localStorage.setItem('kdrive_free_pass', newPass);
+                closeCustomChangePassModal();
+                showToast("✅ Đã cập nhật mật khẩu trên thiết bị!");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>CẬP NHẬT LÊN GOOGLE SHEETS</span> <span>➔</span>';
                 }
-            });
-
-            const total = selectedAmount;
-            const finalVal = Math.max(0, total - 5000);
-
-            const dispTotal = document.getElementById('dispCustomVotesTotal');
-            const dispSummaryPkg = document.getElementById('dispSummaryPackageVal');
-            const dispFinal = document.getElementById('dispSummaryFinalVal');
-
-            if (dispTotal) dispTotal.textContent = total.toLocaleString('vi-VN') + ' VNĐ';
-            if (dispSummaryPkg) dispSummaryPkg.textContent = `${total.toLocaleString('vi-VN')} VNĐ (${votes} Phiếu)`;
-            if (dispFinal) dispFinal.textContent = finalVal.toLocaleString('vi-VN') + ' VNĐ';
-
-            localStorage.setItem('kdrive_selected_shares', votes);
-            localStorage.setItem('kdrive_selected_amount', total);
+            }
         }
-
-        function adjustCustomVotes(delta) {
-            selectTierPackage(selectedShares + delta);
-        }
-
-        function onCustomVotesInputChange() {
-            const inputEl = document.getElementById('inputCustomVotes');
-            selectTierPackage(parseInt(inputEl?.value) || 1);
-        } 
-        // =====================================================================
-// ĐIỀU KHIỂN & ĐỒNG BỘ ĐỔI MẬT KHẨU LÊN GOOGLE SHEETS
-// =====================================================================
-function openCustomChangePassModal() {
-    const dispPhone = document.getElementById('dispFreeUser')?.textContent.trim() 
-                   || document.getElementById('partnerPhone')?.value.trim().replace(/\D/g, '') 
-                   || '';
-
-    const phoneIn = document.getElementById('changePassPhoneInput');
-    if (phoneIn) phoneIn.value = dispPhone;
-
-    document.getElementById('newPassVal').value = '';
-    document.getElementById('confirmNewPassVal').value = '';
-
-    const modal = document.getElementById('modalChangePass5k');
-    if (modal) modal.classList.remove('hidden');
-}
-
-function closeCustomChangePassModal() {
-    const modal = document.getElementById('modalChangePass5k');
-    if (modal) modal.classList.add('hidden');
-}
-
-async function submitCustomChangePass() {
-    const phone = document.getElementById('changePassPhoneInput')?.value.trim();
-    const newPass = document.getElementById('newPassVal')?.value.trim();
-    const confirmPass = document.getElementById('confirmNewPassVal')?.value.trim();
-    const btn = document.getElementById('btnSubmitChangePass');
-
-    if (!phone) {
-        alert('⚠️ Không tìm thấy số điện thoại của tài khoản!');
-        return;
-    }
-    if (!newPass || newPass.length < 4) {
-        alert('⚠️ Mật khẩu mới phải có ít nhất 4 ký tự!');
-        document.getElementById('newPassVal')?.focus();
-        return;
-    }
-    if (newPass !== confirmPass) {
-        alert('⚠️ Xác nhận mật khẩu mới không khớp!');
-        document.getElementById('confirmNewPassVal')?.focus();
-        return;
-    }
-
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span>⚡ ĐANG LƯU VÀO GOOGLE SHEETS...</span>';
-    }
-
-    try {
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'update_password_5k',
-                phone: phone,
-                newPass: newPass
-            })
-        });
-
-        const res = await response.json();
-
-        if (res && res.status === 'success') {
-            currentFreePass = newPass;
-            const dispPassEl = document.getElementById('dispFreePass');
-            if (dispPassEl) dispPassEl.textContent = newPass;
-
-            localStorage.setItem('kdrive_free_pass', newPass);
-            localStorage.setItem('kdrive_bound_pass', newPass);
-
-            closeCustomChangePassModal();
-            showToast("🎉 Đổi mật khẩu thành công & đã lưu lên Google Sheets!");
-        } else {
-            alert('Lỗi: ' + (res.message || 'Không thể cập nhật mật khẩu.'));
-        }
-    } catch (err) {
-        console.error("Lỗi đổi mật khẩu:", err);
-        currentFreePass = newPass;
-        const dispPassEl = document.getElementById('dispFreePass');
-        if (dispPassEl) dispPassEl.textContent = newPass;
-        localStorage.setItem('kdrive_free_pass', newPass);
-        closeCustomChangePassModal();
-        showToast("✅ Đã cập nhật mật khẩu trên thiết bị!");
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<span>CẬP NHẬT LÊN GOOGLE SHEETS</span> <span>➔</span>';
-        }
-    }
-}
     </script>
 <!-- ======================================================== -->
 <!-- MODAL NHẬP MẬT KHẨU MỚI (POPUP HIỆN ĐẠI CYBERPUNK)       -->
