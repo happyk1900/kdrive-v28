@@ -260,10 +260,14 @@
                     </div>
                 </div>
 
-                <!-- TRẠNG THÁI ĐÃ ĐƯỢC FOUNDER DUYỆT THÀNH CÔNG -->
-                <div id="subBoxApproved" class="hidden space-y-3 text-left">
-                    <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                        <span>✅</span> <span> BẠN ĐÃ CÓ TÀI KHOẢN 🎉</span>
+                <!-- HÀNG TIÊU ĐỀ: BẠN ĐÃ CÓ TÀI KHOẢN (TRÁI) + NÚT ĐỔI MK (PHẢI) -->
+                    <div class="flex items-center justify-between pb-1 border-b border-slate-800/80">
+                        <div class="flex items-center gap-1.5 text-emerald-400 font-bold text-xs sm:text-sm">
+                            <span>✅</span> <span>BẠN ĐÃ CÓ TÀI KHOẢN 🎉</span>
+                        </div>
+                        <button type="button" onclick="openCustomChangePassModal()" class="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/60 text-cyan-300 text-[11px] font-bold active:scale-95 transition-all flex items-center gap-1 cursor-pointer shadow-sm">
+                            <span>🔑</span> <span>Đổi mật khẩu</span>
+                        </button>
                     </div>
 
                     <div class="p-3.5 rounded-2xl bg-slate-900 border border-emerald-500/30 space-y-1.5 font-mono-tech text-xs">
@@ -1158,6 +1162,146 @@ function startWaitingFounderOk(phone) {
         }
 
         // Khởi tạo hiển thị đặc quyền cho gói mặc định 1M ban đầu
-        renderPerksList(1000000);    </script>
+        renderPerksList(1000000);
+        // =====================================================================
+// ĐIỀU KHIỂN & ĐỒNG BỘ ĐỔI MẬT KHẨU LÊN GOOGLE SHEETS
+// =====================================================================
+function openCustomChangePassModal() {
+    const dispPhone = document.getElementById('dispFreeUser')?.textContent.trim() 
+                   || document.getElementById('partnerPhone')?.value.trim().replace(/\D/g, '') 
+                   || '';
+
+    const phoneIn = document.getElementById('changePassPhoneInput');
+    if (phoneIn) phoneIn.value = dispPhone;
+
+    document.getElementById('newPassVal').value = '';
+    document.getElementById('confirmNewPassVal').value = '';
+
+    const modal = document.getElementById('modalChangePass5k');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeCustomChangePassModal() {
+    const modal = document.getElementById('modalChangePass5k');
+    if (modal) modal.classList.add('hidden');
+}
+
+async function submitCustomChangePass() {
+    const phone = document.getElementById('changePassPhoneInput')?.value.trim();
+    const newPass = document.getElementById('newPassVal')?.value.trim();
+    const confirmPass = document.getElementById('confirmNewPassVal')?.value.trim();
+    const btn = document.getElementById('btnSubmitChangePass');
+
+    if (!phone) {
+        alert('⚠️ Không tìm thấy số điện thoại của tài khoản!');
+        return;
+    }
+    if (!newPass || newPass.length < 4) {
+        alert('⚠️ Mật khẩu mới phải có ít nhất 4 ký tự!');
+        document.getElementById('newPassVal')?.focus();
+        return;
+    }
+    if (newPass !== confirmPass) {
+        alert('⚠️ Xác nhận mật khẩu mới không khớp!');
+        document.getElementById('confirmNewPassVal')?.focus();
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⚡ ĐANG LƯU VÀO GOOGLE SHEETS...</span>';
+    }
+
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'update_password_5k',
+                phone: phone,
+                newPass: newPass
+            })
+        });
+
+        const res = await response.json();
+
+        if (res && res.status === 'success') {
+            currentFreePass = newPass;
+            const dispPassEl = document.getElementById('dispFreePass');
+            if (dispPassEl) dispPassEl.textContent = newPass;
+
+            localStorage.setItem('kdrive_free_pass', newPass);
+            localStorage.setItem('kdrive_bound_pass', newPass);
+
+            closeCustomChangePassModal();
+            showToast("🎉 Đổi mật khẩu thành công & đã lưu lên Google Sheets!");
+        } else {
+            alert('Lỗi: ' + (res.message || 'Không thể cập nhật mật khẩu.'));
+        }
+    } catch (err) {
+        console.error("Lỗi đổi mật khẩu:", err);
+        currentFreePass = newPass;
+        const dispPassEl = document.getElementById('dispFreePass');
+        if (dispPassEl) dispPassEl.textContent = newPass;
+        localStorage.setItem('kdrive_free_pass', newPass);
+        closeCustomChangePassModal();
+        showToast("✅ Đã cập nhật mật khẩu trên thiết bị!");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<span>CẬP NHẬT LÊN GOOGLE SHEETS</span> <span>➔</span>';
+        }
+    }
+}
+    </script>
+<!-- ======================================================== -->
+<!-- MODAL NHẬP MẬT KHẨU MỚI (POPUP HIỆN ĐẠI CYBERPUNK)       -->
+<!-- ======================================================== -->
+<div id="modalChangePass5k" class="fixed inset-0 z-[999999] hidden flex items-center justify-center p-4 bg-black/85 backdrop-blur-md font-sans">
+    <div class="relative w-full max-w-[360px] bg-slate-950 border-2 border-cyan-500/70 rounded-3xl p-5 shadow-[0_0_40px_rgba(6,182,212,0.35)] space-y-3.5 text-left">
+        
+        <!-- Tiêu đề modal -->
+        <div class="flex items-center justify-between pb-2.5 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+                <span class="text-cyan-400 text-base">🔑</span>
+                <h3 class="text-xs sm:text-sm font-extrabold text-cyan-300 uppercase tracking-wide">THIẾT LẬP MẬT KHẨU MỚI</h3>
+            </div>
+            <button type="button" onclick="closeCustomChangePassModal()" class="w-7 h-7 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-all text-xs font-bold">✕</button>
+        </div>
+
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+            Mật khẩu mới sẽ được cập nhật tự động lên hệ thống máy chủ Google Sheets.
+        </p>
+
+        <!-- Ô nhập thông tin -->
+        <div class="space-y-2.5 font-mono-tech">
+            <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Số điện thoại tài khoản:</label>
+                <input type="text" id="changePassPhoneInput" readonly class="w-full px-3.5 py-2 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-400 text-xs outline-none cursor-not-allowed">
+            </div>
+
+            <div>
+                <label class="block text-[11px] text-slate-300 font-semibold mb-1">Mật khẩu mới:</label>
+                <input type="password" id="newPassVal" placeholder="Nhập ít nhất 4 ký tự..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-cyan-400 text-xs text-white placeholder-slate-500 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-[11px] text-slate-300 font-semibold mb-1">Xác nhận mật khẩu mới:</label>
+                <input type="password" id="confirmNewPassVal" onkeydown="if(event.key==='Enter') submitCustomChangePass()" placeholder="Nhập lại mật khẩu..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 focus:border-cyan-400 text-xs text-white placeholder-slate-500 outline-none transition-all">
+            </div>
+        </div>
+
+        <!-- Nút gửi lệnh -->
+        <div class="pt-2 space-y-2 font-mono-tech">
+            <button type="button" id="btnSubmitChangePass" onclick="submitCustomChangePass()" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:brightness-110 active:scale-95 text-white font-extrabold text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <span>CẬP NHẬT LÊN GOOGLE SHEETS</span>
+                <span>➔</span>
+            </button>
+            <button type="button" onclick="closeCustomChangePassModal()" class="w-full py-1.5 text-center text-xs text-slate-400 hover:text-white transition-colors">
+                Hủy bỏ
+            </button>
+        </div>
+
+    </div>
+</div>
 </body>
 </html>
